@@ -695,6 +695,44 @@ export type Database = {
           },
         ]
       }
+      invite_scripts: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_active: boolean
+          program_id: string | null
+          sort_order: number
+          tone: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          program_id?: string | null
+          sort_order?: number
+          tone: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          program_id?: string | null
+          sort_order?: number
+          tone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invite_scripts_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "referral_programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_checklist_items: {
         Row: {
           created_at: string
@@ -1033,6 +1071,7 @@ export type Database = {
           created_at: string
           id: string
           label: string
+          launch_status: Database["public"]["Enums"]["zone_launch_status"]
           metadata: Json | null
           status: string
           updated_at: string
@@ -1042,6 +1081,7 @@ export type Database = {
           created_at?: string
           id?: string
           label: string
+          launch_status?: Database["public"]["Enums"]["zone_launch_status"]
           metadata?: Json | null
           status?: string
           updated_at?: string
@@ -1051,6 +1091,7 @@ export type Database = {
           created_at?: string
           id?: string
           label?: string
+          launch_status?: Database["public"]["Enums"]["zone_launch_status"]
           metadata?: Json | null
           status?: string
           updated_at?: string
@@ -1402,6 +1443,79 @@ export type Database = {
           zip_code?: string
         }
         Relationships: []
+      }
+      provider_applications: {
+        Row: {
+          category: string
+          cohort_id: string | null
+          created_at: string
+          founding_partner: boolean
+          id: string
+          launch_path_target: number | null
+          metadata: Json | null
+          program_id: string | null
+          provider_org_id: string | null
+          status: Database["public"]["Enums"]["provider_application_status"]
+          updated_at: string
+          user_id: string
+          waitlist_reason: string | null
+          zip_codes: string[]
+        }
+        Insert: {
+          category: string
+          cohort_id?: string | null
+          created_at?: string
+          founding_partner?: boolean
+          id?: string
+          launch_path_target?: number | null
+          metadata?: Json | null
+          program_id?: string | null
+          provider_org_id?: string | null
+          status?: Database["public"]["Enums"]["provider_application_status"]
+          updated_at?: string
+          user_id: string
+          waitlist_reason?: string | null
+          zip_codes?: string[]
+        }
+        Update: {
+          category?: string
+          cohort_id?: string | null
+          created_at?: string
+          founding_partner?: boolean
+          id?: string
+          launch_path_target?: number | null
+          metadata?: Json | null
+          program_id?: string | null
+          provider_org_id?: string | null
+          status?: Database["public"]["Enums"]["provider_application_status"]
+          updated_at?: string
+          user_id?: string
+          waitlist_reason?: string | null
+          zip_codes?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_applications_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "market_cohorts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_applications_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "referral_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_applications_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       provider_capabilities: {
         Row: {
@@ -3853,6 +3967,10 @@ export type Database = {
         Args: { p_provider_org_id: string; p_sku_id: string; p_zone_id: string }
         Returns: boolean
       }
+      check_zone_readiness: {
+        Args: { p_category: string; p_zip_codes: string[] }
+        Returns: Json
+      }
       cleanup_expired_offers: { Args: never; Returns: Json }
       complete_job: {
         Args: { p_job_id: string; p_provider_summary?: string }
@@ -3951,6 +4069,12 @@ export type Database = {
         | "same_day_preferred"
         | "same_week_allowed"
         | "independent_cadence"
+      provider_application_status:
+        | "draft"
+        | "submitted"
+        | "approved"
+        | "waitlisted"
+        | "rejected"
       referral_milestone_type:
         | "installed"
         | "subscribed"
@@ -4033,6 +4157,7 @@ export type Database = {
         | "routine_change"
         | "provider_promise_mismatch"
         | "general"
+      zone_launch_status: "open" | "soft_launch" | "waitlist" | "not_supported"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -4181,6 +4306,13 @@ export const Constants = {
         "same_week_allowed",
         "independent_cadence",
       ],
+      provider_application_status: [
+        "draft",
+        "submitted",
+        "approved",
+        "waitlisted",
+        "rejected",
+      ],
       referral_milestone_type: [
         "installed",
         "subscribed",
@@ -4271,6 +4403,7 @@ export const Constants = {
         "provider_promise_mismatch",
         "general",
       ],
+      zone_launch_status: ["open", "soft_launch", "waitlist", "not_supported"],
     },
   },
 } as const
