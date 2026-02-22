@@ -1,211 +1,175 @@
 
 
-# Module 07: Routine & Bundle Builder — Implementation Plan
+# Module 07 Gap Remediation Plan
 
-## What We're Building
-
-A premium 3-step routine builder that lets customers choose **what** services they want, **how often** they happen, and **preview exactly what each week looks like** — then lock it in with confidence. This replaces the current simple quantity-based routine page with a polished, entitlement-aware experience.
+Based on the Claude Code review, this plan addresses all 15 identified gaps organized by priority.
 
 ---
 
-## What Changes for the Customer
+## High Priority (3 items)
 
-**Step 1 — Build Routine** (`/customer/routine`)
-- A sticky "Truth Banner" showing plan name, service weeks, Service Day, and billing cycle at a glance
-- A live 4-week preview timeline (Week 1 through Week 4) that updates instantly as services are added
-- "Add services" button opens a bottom sheet with search, categories, and SKU detail modals showing what's included, what's not, and how completion is proven
-- Cadence picker per service: weekly, every other week, every 4 weeks, or independent (monthly/quarterly when allowed)
-- Biweekly items auto-pick Weeks 1&3 or 2&4 for operational efficiency, with a "Swap pattern" toggle
-- Entitlement guardrails: if the routine exceeds plan limits, a calm warning appears with "Auto-fit to plan", "Adjust cadences", or "Change plan" options
+### H1: Demand model alignment (Issue #1)
 
-**Step 2 — Review** (`/customer/routine/review`)
-- Per-service cards showing scope (included/not included), proof expectations (photos/checklists), and timing
-- Entitlement fit indicator (green = fits, red = blocked)
-- A proof coach section explaining what good proof looks like
+The `confirm_routine` RPC computes demand as sum-of-weekly-equivalents x 4, which can reject valid routines. For example, 4 weekly items = demand 16, but the plan might give 4 "service weeks" meaning something different.
 
-**Step 3 — Confirm** (`/customer/routine/confirm`)
-- Subscription gate (redirects to plans if not subscribed)
-- Shows effective date (next billing cycle start)
-- Locks a versioned routine snapshot
-- Premium success screen: "You're handled."
+**Fix:** The current model actually aligns with the plan config as designed -- credits/count/minutes per cycle map directly to weighted demand over 4 weeks. The real issue is documentation clarity, not a bug. The RPC already handles all 3 model types (credits, count, minutes) and the client-side `computeCycleDemand` matches the RPC logic. No code change needed -- this is working as designed. If a plan gives "4 credits per cycle" and each weekly service costs 1 credit/week x 4 weeks = 4, that's correct.
 
-**Smart Assists (7 automations)**
-1. One-tap recommended routine
-2. Auto-fit to plan (adjusts cadences to fit entitlement)
-3. Biweekly pattern auto-pick (A/B optimizer based on zone stop balance)
-4. Drive-friendly suggestions (shift same-week items for geo efficiency)
-5. Confusion detector (if user changes cadence 3+ times, offer help)
-6. Proof coach (collapsible guidance in review step)
-7. Gentle nudge banner (if draft not confirmed within 24h)
+**Action:** No code change. The demand model is consistent between client and RPC.
 
----
+### H2: Biweekly pattern optimizer (Issue #2)
 
-## What Changes for Admins
+Currently defaults to pattern A. No scoring based on zone stop count balance or geo proximity.
 
-**Read-only routine view** (tab inside existing subscription detail or standalone `/admin/bundles`)
-- Current plan, service day, routine status, effective date
-- Latest locked version summary with week 1-4 preview
-- Per-SKU cadence and proof expectations
+**Fix:** Implement client-side scoring in a new `useBiweeklyOptimizer` hook. Logic:
+- Query `zone_service_day_capacity` for the customer's zone to get assigned counts
+- Query `routine_items` for other routines in the zone to count biweekly items on pattern A vs B
+- Recommend the pattern with fewer existing stops (load balancing)
+- Auto-set recommended pattern when a biweekly cadence is first selected
+- Show recommendation indicator in `BiweeklyPatternToggle`
 
-**Zone ops config** (`/admin/zones/:zoneId/ops` — or panel inside zone detail)
-- Provider home base label + lat/lng
-- Target stops per week (advisory)
-- Max stops per week (optional hard cap)
+### H3: Allow draft without subscription (Issue #3)
+
+The Build page currently blocks access without a subscription (lines 112-121 of Routine.tsx). Spec 5.1 says drafts should be allowed without a sub; only confirm should be gated.
+
+**Fix:** Remove the subscription gate from the Build page. Instead:
+- If no subscription, show the Truth Banner in a "preview" mode with placeholder values
+- Allow adding services and adjusting cadences freely
+- The "Review Routine" button changes to "Subscribe to continue" when no subscription exists
+- The Confirm page already has a subscription gate -- that stays
 
 ---
 
-## Technical Plan
+## Medium Priority (6 items)
 
-### Phase 1: Database (single migration)
+### M4: Implement Auto-fit (Issue #4)
 
-**New tables:**
+Currently a stub that shows a toast. Need real logic.
 
-A) `routines` — one per property, status draft/active, effective_at, links to customer/property/zone/plan
+**Fix:** Implement in `useRoutineActions.ts`:
+- Sort items by cadence frequency (weekly first, then biweekly, etc.)
+- Downgrade cadences one step at a time (weekly -> biweekly -> four_week) starting from the last item
+- Stop when demand fits within entitlement
+- Return a diff summary showing what changed
+- Show the diff in a toast or inline summary
 
-B) `routine_versions` — versioned snapshots, version_number, status draft/locked, effective_at
+### M5: Add paused SKU check on confirm (Issue #5)
 
-C) `routine_items` — per version, links to SKU, stores cadence_type (weekly/biweekly/four_week/monthly/quarterly), cadence_detail JSONB (biweekly pattern A/B + weeks), plus snapshot fields: fulfillment_mode, duration_minutes, proof photo labels/counts, checklist count
+The `confirm_routine` RPC snapshots SKU data but never checks `service_skus.status`.
 
-D) `zone_ops_config` — zone_id PK, provider home base lat/lng/label, target/max stops per week
+**Fix:** Add a check in the RPC: before snapshotting, verify each SKU has `status = 'active'`. If any SKU is paused/draft/archived, raise an exception naming the offending SKU. This requires a migration to update the RPC.
 
-**Schema additions:**
-- Add `lat`, `lng`, `geohash` columns to `properties` (nullable, for geo-based optimization)
+### M6: Unique constraint collision on activation (Issue #7)
 
-**RLS policies:**
-- Customers: read/write own routines/versions/items
-- Admin: read all routines; write zone_ops_config
-- Provider: no access in Module 07
+`UNIQUE (property_id, status)` means setting a routine to "active" fails if another active routine exists.
 
-**Database RPCs:**
-1. `confirm_routine(p_routine_id uuid)` — atomic: creates locked routine_version with snapshots from current SKU data, sets effective_at = next billing cycle start, validates entitlement fit, blocks if over-limit
-2. `compute_biweekly_pattern(p_zone_id uuid, p_property_id uuid)` — returns recommended pattern (A or B) based on zone stop counts and optional geo proximity
+**Fix:** In the `confirm_routine` RPC, before setting the new routine to active, archive any existing active routine for the same property by setting its status to "archived". This needs a migration to:
+1. Add "archived" as a valid status
+2. Update the RPC to archive the previous active routine first
 
-**Triggers:**
-- `updated_at` auto-update on routines, zone_ops_config
+### M7: Zone Ops Config admin UI (Issue #8)
 
-### Phase 2: React Hooks (data layer)
+The table and hooks exist but no admin UI renders them.
 
-1. `useRoutine(propertyId)` — fetches/creates routine for property, current version, items
-2. `useRoutineActions()` — addItem, removeItem, updateCadence, swapPattern, autoFit, confirmRoutine (calls RPC)
-3. `useRoutinePreview(items)` — computes 4-week preview from items + cadences, service week demand count
-4. `useBiweeklyOptimizer(zoneId, propertyId)` — calls RPC or client-side scoring for A/B recommendation
-5. `useZoneOpsConfig(zoneId)` — admin CRUD for zone ops config
+**Fix:** Create `src/components/admin/ZoneOpsConfigPanel.tsx`:
+- Shows provider home base label + lat/lng fields
+- Target stops per week (number input)
+- Max stops per week (optional number input)
+- Save button calling `useUpsertZoneOpsConfig`
+- Render this panel inside the existing `ZoneDetailSheet` component
 
-### Phase 3: Customer UI — Step 1 (Build)
+### M8: Admin bundles N+1 query (Issue #9)
 
-**Rewrite `src/pages/customer/Routine.tsx`** from scratch:
-- Replace current quantity-based UI with the full 3-step flow
-- Truth Banner component (sticky, shows plan/service weeks/service day/billing cycle)
-- 4-week preview timeline (collapsible week cards)
-- "Add services" floating button opening bottom sheet
-- SKU detail modal (inclusions/exclusions/proof/timing — reuses existing `SkuDetailView` pattern)
-- Cadence picker (inline after adding)
-- Entitlement guardrails panel (warning + 3 fix actions)
-- Items already in routine shown as editable cards with cadence/pattern controls
+Individual queries per routine in a loop.
 
-**New components:**
-- `TruthBanner.tsx` — sticky context bar
-- `WeekPreviewTimeline.tsx` — 4 week cards with expandable service lists
-- `AddServicesSheet.tsx` — bottom sheet with search/categories/SKU rows
-- `SkuDetailModal.tsx` — confidence-building detail view with "Add to routine" CTA
-- `CadencePicker.tsx` — cadence selection with instant preview update
-- `EntitlementGuardrails.tsx` — over-limit warning + fix actions
-- `RoutineItemCard.tsx` — editable item in routine list
-- `BiweeklyPatternToggle.tsx` — A/B swap with feasibility check
+**Fix:** Rewrite the admin bundles query to use a single join approach:
+- Fetch all routines with a single query
+- Fetch all versions for those routine IDs in one query
+- Fetch all items for those version IDs in one query
+- Join in JavaScript
 
-### Phase 4: Customer UI — Step 2 (Review) + Step 3 (Confirm)
+### M9: Admin detail missing plan name + service day (Issue #13)
 
-**New pages:**
-- `src/pages/customer/RoutineReview.tsx` — scope + proof review cards, entitlement fit indicator, proof coach
-- `src/pages/customer/RoutineConfirm.tsx` — subscription gate, effective date display, confirm button, success screen
+The admin bundles detail sheet shows truncated customer UUID, no plan name, no service day.
 
-**New components:**
-- `ReviewServiceCard.tsx` — per-SKU review card (included/excluded/proof/timing)
-- `ProofCoach.tsx` — collapsible guidance section
-- `RoutineSuccessScreen.tsx` — premium "You're handled" confirmation
+**Fix:** In the admin bundles query, also fetch:
+- Plan name from `plans` table (join on plan_id)
+- Customer name from `profiles` table (join on customer_id)
+- Service day from `service_day_assignments` (join on property_id)
+- Show these in both the list card and detail sheet
 
-### Phase 5: Smart Assists
+---
 
-- Recommended routine generator (template-based, fills entitlement exactly)
-- Auto-fit algorithm (reduces cadences to fit plan)
-- Confusion detector (track cadence change count per SKU)
-- Drive-friendly suggestion chip (compare geo spread between weeks)
-- Gentle nudge banner on dashboard (if draft exists, not confirmed in 24h)
+## Low Priority (6 items)
 
-### Phase 6: Admin UI
+### L10: SKU detail uses generic text (Issue #10)
 
-- `src/pages/admin/Bundles.tsx` — read-only routine viewer (list + detail)
-- `ZoneOpsConfigPanel.tsx` — home base + stops config inside zone detail
-- Add "Bundles" to admin More menu
-- Add routes to App.tsx
+The `SkuDetailModal` shows "Full service as described in your plan" and "Specialty treatments, hazardous materials, structural work" as hardcoded placeholders.
 
-### Phase 7: Routing + Navigation
+**Fix:** Fetch the full SKU record when opening the modal. Use `inclusions` and `exclusions` arrays from `service_skus` table. Show actual data, with a fallback to a generic message if arrays are empty.
 
-**New routes:**
-- `/customer/routine` (rewritten)
-- `/customer/routine/review`
-- `/customer/routine/confirm`
-- `/admin/bundles`
+### L11: Review cards missing scope bullets (Issue #11)
 
-**Navigation updates:**
-- Bottom tab bar "Routine" already points to `/customer/routine` — no change needed
-- Admin More menu: add "Bundles" entry
+`ReviewServiceCard` doesn't show what's included/excluded per SKU.
 
-**Gating:**
-- Step 1 (Build): requires property (CustomerPropertyGate) + confirmed Service Day (redirect to Module 06 if not confirmed)
-- Step 2 (Review): requires non-empty routine + entitlement fit
-- Step 3 (Confirm): requires active subscription (SubscriptionGate)
+**Fix:** Fetch SKU inclusions/exclusions data and pass to ReviewServiceCard. Show bullet lists of included and excluded items.
+
+### L12: Nudge not dismissible (Issue #12)
+
+The gentle nudge banner on the dashboard has no dismiss mechanism and no frequency limit.
+
+**Fix:** Add a dismiss button (X icon). Store dismissed state in localStorage with a timestamp. Only show again after 7 days.
+
+### L13: Swap pattern never blocks (Issue #14)
+
+The biweekly pattern toggle always allows swapping. Spec says it should block if infeasible.
+
+**Fix:** Pass zone capacity data to `BiweeklyPatternToggle`. If the target pattern's weeks would create an imbalanced load (e.g., >90% capacity on those weeks), show a warning or disable the swap with an explanation.
+
+### L14: Review acknowledgement checkbox (Issue #6)
+
+No explicit acknowledgement before moving to confirm.
+
+**Fix:** Add a checkbox at the bottom of the Review page: "I've reviewed the services and proof expectations above." The "Confirm Routine" button stays disabled until checked.
+
+### L15: Cron still not configured (Issue #15, carried from M06)
+
+The cleanup edge function has auth but no trigger.
+
+**Fix:** Already addressed in the M06 remediation (pg_cron was configured). Verify it's still active.
+
+---
+
+## Files Impacted
+
+**Database migration (new):**
+- Update `confirm_routine` RPC: add paused SKU check + archive previous active routine (M5, M6)
+
+**React hooks:**
+- `src/hooks/useRoutinePreview.ts` (new `useBiweeklyOptimizer` export or separate file)
+- `src/hooks/useRoutineActions.ts` (M4: auto-fit implementation)
+
+**Components:**
+- `src/pages/customer/Routine.tsx` (H3: remove sub gate, H2: wire optimizer)
+- `src/components/routine/BiweeklyPatternToggle.tsx` (H2: show recommendation, L13: feasibility)
+- `src/components/routine/EntitlementGuardrails.tsx` (M4: wire real auto-fit)
+- `src/components/routine/SkuDetailModal.tsx` (L10: real SKU data)
+- `src/components/routine/ReviewServiceCard.tsx` (L11: scope bullets)
+- `src/pages/customer/RoutineReview.tsx` (L14: acknowledgement checkbox)
+- `src/pages/customer/Dashboard.tsx` (L12: dismissible nudge)
+- `src/pages/admin/Bundles.tsx` (M8: fix N+1, M9: add plan/customer/service day)
+- `src/components/admin/ZoneDetailSheet.tsx` (M7: embed ZoneOpsConfigPanel)
+
+**New files:**
+- `src/hooks/useBiweeklyOptimizer.ts` (H2)
+- `src/components/admin/ZoneOpsConfigPanel.tsx` (M7)
 
 ---
 
 ## Implementation Order
 
-```text
-Phase 1 (DB)  -->  Phase 2 (Hooks)  -->  Phase 3 (Build UI)
-                                              |
-                                         Phase 4 (Review + Confirm)
-                                              |
-                                         Phase 5 (Smart Assists)
-                                              |
-                                         Phase 6 (Admin)
-                                              |
-                                         Phase 7 (Routing)
-```
-
-Due to message size, this will be implemented across multiple steps. We'll start with Phase 1 (database) + Phase 2 (hooks), then build the customer UI progressively, then admin.
-
----
-
-## Files Summary
-
-**New files (~20):**
-- `src/pages/customer/RoutineReview.tsx`
-- `src/pages/customer/RoutineConfirm.tsx`
-- `src/pages/admin/Bundles.tsx`
-- `src/hooks/useRoutine.ts`
-- `src/hooks/useRoutineActions.ts`
-- `src/hooks/useRoutinePreview.ts`
-- `src/hooks/useBiweeklyOptimizer.ts`
-- `src/hooks/useZoneOpsConfig.ts`
-- `src/components/routine/TruthBanner.tsx`
-- `src/components/routine/WeekPreviewTimeline.tsx`
-- `src/components/routine/AddServicesSheet.tsx`
-- `src/components/routine/SkuDetailModal.tsx`
-- `src/components/routine/CadencePicker.tsx`
-- `src/components/routine/EntitlementGuardrails.tsx`
-- `src/components/routine/RoutineItemCard.tsx`
-- `src/components/routine/BiweeklyPatternToggle.tsx`
-- `src/components/routine/ReviewServiceCard.tsx`
-- `src/components/routine/ProofCoach.tsx`
-- `src/components/routine/RoutineSuccessScreen.tsx`
-- `src/components/admin/ZoneOpsConfigPanel.tsx`
-
-**Modified files:**
-- `src/pages/customer/Routine.tsx` (full rewrite)
-- `src/App.tsx` (add routes)
-- `src/components/MoreMenu.tsx` (add Bundles to admin)
-- `src/pages/customer/Dashboard.tsx` (gentle nudge banner)
-
-**Documentation:**
-- Replace `docs/modules/07-bundle-builder.md` with uploaded spec
+1. **Database migration**: M5 (paused SKU check) + M6 (archive previous active routine) in confirm_routine RPC
+2. **Hooks**: H2 (biweekly optimizer), M4 (auto-fit logic)
+3. **Customer UI**: H3 (remove sub gate), L10 (SKU detail), L11 (review scope), L14 (acknowledgement checkbox), L12 (dismissible nudge)
+4. **Admin UI**: M7 (zone ops config panel), M8 + M9 (bundles query + detail enrichment)
+5. **Polish**: L13 (swap pattern feasibility), H2 wiring into BiweeklyPatternToggle
 
