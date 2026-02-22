@@ -125,6 +125,30 @@
   }
 }
 
+@layer components {
+  /* Typography utilities */
+  .text-h1 {
+    @apply text-[32px] font-bold leading-tight tracking-tight;
+  }
+  .text-h2 {
+    @apply text-2xl font-bold leading-snug;
+  }
+  .text-h3 {
+    @apply text-lg font-semibold leading-snug;
+  }
+  .text-body {
+    @apply text-base font-normal leading-relaxed;
+  }
+  .text-caption {
+    @apply text-[13px] font-medium leading-tight text-muted-foreground;
+  }
+
+  /* Glass utility */
+  .glass {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50;
+  }
+}
+
 @layer utilities {
   /* Page fade-in animation */
   .animate-fade-in {
@@ -139,5 +163,33 @@
   /* Active press feedback for cards/buttons */
   .press-feedback {
     @apply transition-transform duration-100 active:scale-[0.98];
+  }
+
+  /* Shimmer animation for skeletons */
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .animate-shimmer {
+    animation: shimmer 1.5s ease-in-out infinite;
+    background-size: 200% 100%;
+  }
+
+  /* Slide up for bottom sheets / modals */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-slide-up {
+    animation: slideUp 0.25s ease-out;
+  }
+
+  /* Scale in for popovers / dialogs */
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
   }
 }

@@ -6,31 +6,39 @@ interface StatusBadgeProps {
   className?: string;
 }
 
-const statusStyles: Record<string, { label: string; className: string }> = {
-  assigned: { label: "Assigned", className: "bg-primary text-primary-foreground" },
-  confirmed: { label: "Confirmed", className: "bg-success text-success-foreground" },
-  rejected: { label: "Rejected", className: "bg-destructive text-destructive-foreground" },
-  alternate_assigned: { label: "Alternate", className: "bg-warning text-warning-foreground" },
-  en_route: { label: "En Route", className: "bg-primary text-primary-foreground" },
-  in_progress: { label: "In Progress", className: "bg-warning text-warning-foreground" },
-  completed: { label: "Completed", className: "bg-success text-success-foreground" },
-  blocked: { label: "Blocked", className: "bg-destructive text-destructive-foreground" },
-  rescheduled: { label: "Rescheduled", className: "bg-warning text-warning-foreground" },
-  partially_refunded: { label: "Partial Refund", className: "border border-border bg-transparent" },
-  refunded: { label: "Refunded", className: "border border-border bg-transparent" },
-  pending: { label: "Pending", className: "bg-warning text-warning-foreground" },
-  active: { label: "Active", className: "bg-success text-success-foreground" },
-  probation: { label: "Probation", className: "bg-destructive text-destructive-foreground" },
-  suspended: { label: "Suspended", className: "bg-destructive text-destructive-foreground" },
-  scheduled: { label: "Scheduled", className: "bg-primary text-primary-foreground" },
-  alternate_offered: { label: "Alternate Offered", className: "bg-warning text-warning-foreground" },
-  locked: { label: "Locked", className: "bg-secondary text-secondary-foreground" },
+const statusStyles: Record<string, { label: string; className: string; dotColor: string }> = {
+  assigned: { label: "Assigned", className: "bg-primary text-primary-foreground", dotColor: "bg-primary-foreground/70" },
+  confirmed: { label: "Confirmed", className: "bg-success text-success-foreground", dotColor: "bg-success-foreground/70" },
+  rejected: { label: "Rejected", className: "bg-destructive text-destructive-foreground", dotColor: "bg-destructive-foreground/70" },
+  alternate_assigned: { label: "Alternate", className: "bg-warning text-warning-foreground", dotColor: "bg-warning-foreground/70" },
+  en_route: { label: "En Route", className: "bg-primary text-primary-foreground", dotColor: "bg-primary-foreground/70" },
+  in_progress: { label: "In Progress", className: "bg-warning text-warning-foreground", dotColor: "bg-warning-foreground/70" },
+  completed: { label: "Completed", className: "bg-success text-success-foreground", dotColor: "bg-success-foreground/70" },
+  blocked: { label: "Blocked", className: "bg-destructive text-destructive-foreground", dotColor: "bg-destructive-foreground/70" },
+  rescheduled: { label: "Rescheduled", className: "bg-warning text-warning-foreground", dotColor: "bg-warning-foreground/70" },
+  partially_refunded: { label: "Partial Refund", className: "border border-border bg-transparent", dotColor: "bg-muted-foreground" },
+  refunded: { label: "Refunded", className: "border border-border bg-transparent", dotColor: "bg-muted-foreground" },
+  pending: { label: "Pending", className: "bg-warning text-warning-foreground", dotColor: "bg-warning-foreground/70" },
+  active: { label: "Active", className: "bg-success text-success-foreground", dotColor: "bg-success-foreground/70" },
+  probation: { label: "Probation", className: "bg-destructive text-destructive-foreground", dotColor: "bg-destructive-foreground/70" },
+  suspended: { label: "Suspended", className: "bg-destructive text-destructive-foreground", dotColor: "bg-destructive-foreground/70" },
+  scheduled: { label: "Scheduled", className: "bg-primary text-primary-foreground", dotColor: "bg-primary-foreground/70" },
+  alternate_offered: { label: "Alternate Offered", className: "bg-warning text-warning-foreground", dotColor: "bg-warning-foreground/70" },
+  locked: { label: "Locked", className: "bg-secondary text-secondary-foreground", dotColor: "bg-secondary-foreground/50" },
 };
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
-  const config = statusStyles[status] ?? { label: status, className: "" };
+  const config = statusStyles[status] ?? { label: status, className: "", dotColor: "bg-muted-foreground" };
   return (
-    <Badge variant="outline" className={cn(config.className, className)}>
+    <Badge
+      variant="outline"
+      className={cn(
+        "min-h-[28px] rounded-full px-3 py-1 text-xs font-medium gap-1.5 inline-flex items-center",
+        config.className,
+        className
+      )}
+    >
+      <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", config.dotColor)} />
       {config.label}
     </Badge>
   );
