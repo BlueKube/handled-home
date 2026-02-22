@@ -574,3 +574,156 @@ Module 07 delivers a premium routine builder that:
 - quietly optimizes biweekly patterns for ops reliability (stops + drive-time proxy)  
 - produces versioned routine data ready for later job generation + provider execution  
 - reduces confusion and support tickets via Review + guardrails  
+
+---
+
+## 19) Seasonal Services Addendum
+
+### 19.0 Overview
+
+Seasonal Services (e.g., grill cleaning before summer, gutter cleaning in fall) are an additional planning layer on top of the existing routine/bundle system. They can be:
+
+1. **Upsells** — one-time seasonal purchase scheduled into a window
+2. **Included entitlements** — seasonal credits / included seasonal items within bundles
+
+**Non-goals:**
+- No full scheduling calendar UI
+- No breaking existing Module 07 flows
+- No provider date negotiation
+- No complex manual ops steps
+
+### 19.1 Customer-facing UX
+
+#### A) "Seasonal Boosts" section in Bundle Builder
+
+Added as a new section in `/customer/routine`:
+- Shows recommended seasonal items (based on zone + property profile tags if available, otherwise generic list)
+- Each seasonal item shows:
+  - Name, short description, estimated duration range (optional), price (if upsell), or "Included" (if covered by bundle credits)
+  - Recommended service window(s) (e.g., May–Jun, Oct–Nov)
+  - Simple window preference selector: **Early / Mid / Late** (default = Mid)
+  - Toggle ON/OFF
+  - "Definition of done" + proof requirements consistent with SKU rules
+
+#### B) Confirmation / Review step additions
+
+- Routine preview remains the existing "Next 4 weeks"
+- Add a separate **"Next 12 months" strip** for seasonal items:
+  - Month blocks with the chosen windows highlighted
+  - Display as "Planned in Oct (Mid)" — no exact dates
+- Effective-date policy:
+  - Upsell seasonal items → take effect immediately
+  - Included seasonal items tied to subscription entitlements → next cycle
+
+#### C) Customer Dashboard — "Seasonal Plan" card
+
+- Shows upcoming seasonal items and their window preference
+- Allows toggling and changing Early/Mid/Late
+- "Skip this year" option
+- For already-scheduled seasonal jobs, show status: Planned → Scheduled → Completed
+
+### 19.2 Provider-facing (minimal)
+
+- Providers see seasonal jobs as normal jobs in their queue when they become scheduled
+- No provider calendar negotiation UX in this update
+
+### 19.3 Admin/Ops
+
+- Enable/disable seasonal services by zone
+- Configure service windows per zone/region (start month/day, end month/day)
+- Set seasonal capacity reserve by service day / by month (simple % or max count)
+- Override a customer's seasonal plan if support needs it (rare)
+
+### 19.4 Data model (Supabase)
+
+#### A) `seasonal_service_templates`
+- `id` uuid pk
+- `sku_id` uuid fk → service_skus.id
+- `name` text null (optional override)
+- `description` text null
+- `default_windows` jsonb — e.g. `[{"start_mmdd":"05-01", "end_mmdd":"06-15"}, {"start_mmdd":"10-01", "end_mmdd":"11-20"}]`
+- `is_active` boolean default true
+- `created_at` timestamptz default now()
+- `updated_at` timestamptz default now()
+
+#### B) `zone_seasonal_service_rules`
+- `id` uuid pk
+- `zone_id` uuid fk → zones.id
+- `seasonal_template_id` uuid fk → seasonal_service_templates.id
+- `is_enabled` boolean default true
+- `price_override_cents` int null
+- `windows_override` jsonb null
+- `capacity_reserve_rule` jsonb null
+- `created_at` timestamptz default now()
+- `updated_at` timestamptz default now()
+
+#### C) `customer_seasonal_selections`
+- `id` uuid pk
+- `customer_id` uuid not null
+- `property_id` uuid fk → properties.id
+- `zone_id` uuid fk → zones.id
+- `seasonal_template_id` uuid fk → seasonal_service_templates.id
+- `selection_state` text not null — `off` | `included` | `upsell`
+- `window_preference` text not null default `mid` — `early` | `mid` | `late`
+- `year` int not null
+- `source` text not null default `bundle_builder` — `bundle_builder` | `support` | `promo`
+- `created_at` timestamptz default now()
+- `updated_at` timestamptz default now()
+
+#### D) `seasonal_orders`
+- `id` uuid pk
+- `customer_id` uuid not null
+- `property_id` uuid fk → properties.id
+- `zone_id` uuid fk → zones.id
+- `seasonal_template_id` uuid fk → seasonal_service_templates.id
+- `year` int not null
+- `pricing_type` text not null — `included` | `upsell`
+- `price_cents` int not null default 0
+- `status` text not null default `planned` — `planned` | `scheduled` | `completed` | `canceled`
+- `planned_window_start` date null
+- `planned_window_end` date null
+- `scheduled_service_day_id` uuid null (links to service day system once assigned)
+- `created_at` timestamptz default now()
+- `updated_at` timestamptz default now()
+
+### 19.5 Rules engine / Logic
+
+#### A) Window date computation
+- Take zone override windows if present; else template default windows
+- Convert Early/Mid/Late to a sub-window:
+  - Early = first third of the window
+  - Mid = middle third
+  - Late = last third
+- Store computed `planned_window_start` / `planned_window_end` on seasonal_orders
+
+#### B) Conversion triggers
+- **Upsell:** Create/update `seasonal_order` (pricing_type="upsell") immediately, status="planned". Payment aligns with existing billing (one-time charge or add to next invoice).
+- **Included:** Tie to bundle entitlements via "seasonal credits/year" or "included seasonal SKUs". When included selection is ON, create `seasonal_order` (pricing_type="included", price_cents=0, status="planned"). If credits exceeded, convert additional to upsell offers.
+
+#### C) Capacity guardrails
+- When planning seasonal_orders, soft-check zone availability
+- If oversubscribed, show "Not available in your area for that window" and suggest a different window
+- Store `planned_window_start/end` now so Module 06+ can schedule later
+
+### 19.6 UI Copy / Premium Feel
+- "We'll take care of it in your chosen window."
+- "You'll get a heads-up before the visit."
+- Never say "subject to availability" without giving an alternative.
+
+### 19.7 Migration & Backward Compatibility
+- Must not break existing Module 07 routine/bundle flows
+- Seasonal section is optional; default OFF
+- Existing bundles/subscriptions continue to work without seasonal tables populated
+
+### 19.8 Acceptance tests (Seasonal)
+1. Customer toggles ON "Grill Deep Clean" as upsell → sees price, chooses Early/Mid/Late → confirmation shows next-12-month strip → seasonal_order created with planned window dates
+2. Customer has bundle with 2 seasonal credits/year → selects 2 seasonal services as included → both become included seasonal_orders → selecting a 3rd prompts upsell pricing
+3. Zone disables a seasonal template → item hidden/unavailable, existing planned orders remain visible but cannot be newly created
+4. Changing window preference updates planned window dates and audit fields
+5. No calendar UI exists; only window preference and year-based plan
+
+### 19.9 Security + RLS (Seasonal tables)
+- `seasonal_service_templates`: authenticated can read active; admin manages all
+- `zone_seasonal_service_rules`: authenticated can read enabled; admin manages all
+- `customer_seasonal_selections`: customers manage own (auth.uid() = customer_id); admin reads all
+- `seasonal_orders`: customers manage own; admin manages all
