@@ -1,138 +1,164 @@
 
 
-# Handled Home — Skeleton Foundation + Documentation Setup
+# Mobile-First Design System Overhaul + Capacitor Setup
 
 ## Overview
-Save the four uploaded reference documents into the project, create the module-by-module development guide structure, then build the full three-app skeleton with Supabase Auth, role-based routing, and foundational database schema.
+This app will be distributed as a native iOS and Android app. The entire UI needs to shift from a desktop sidebar layout to a mobile-native experience with bottom tab navigation, touch-optimized spacing, safe area handling, and Capacitor integration for app store distribution.
 
 ---
 
-## Phase 1: Documentation Structure
+## 1. Capacitor Setup for Native Builds
 
-### Save Reference Docs
-- `docs/masterplan.md` — Full vision & business model
-- `docs/app-flow-pages-and-roles.md` — Pages, roles, journeys
-- `docs/design-guidelines.md` — Typography, colors, spacing, voice
-- `docs/implementation-plan.md` — MVP sequence & timeline
+Install Capacitor dependencies and configure the project so it can be built and deployed to iOS and Android.
 
-### Create Module Index
-- `docs/modules/README.md` — How to use modules, development workflow, dependency map
-- `docs/modules/01-auth-and-roles.md` — Auth, RBAC, profile creation
-- `docs/modules/02-property-profiles.md` — Address, access info, pets, constraints
-- `docs/modules/03-zones-and-capacity.md` — Regions, zip zones, service day assignment, capacity
-- `docs/modules/04-sku-catalog.md` — Service definitions, fulfillment modes, photos, pricing
-- `docs/modules/05-subscription-engine.md` — Plans, rollover, pause/cancel, Stripe
-- `docs/modules/06-service-day-system.md` — Assignment, rejection, alternates, cutoffs
-- `docs/modules/07-bundle-builder.md` — SKU selection per cycle, eligibility, prep
-- `docs/modules/08-provider-onboarding.md` — Org setup, coverage, insurance, vetting
-- `docs/modules/09-job-execution.md` — Checklists, photos, status transitions, exceptions
-- `docs/modules/10-visit-tracking-photos.md` — Real-time status, before/after, ratings
-- `docs/modules/11-billing-and-payouts.md` — Payments, receipts, provider payouts
-- `docs/modules/12-support-and-disputes.md` — Tickets, redos, refunds, escalation
-- `docs/modules/13-referrals-and-incentives.md` — Referral links, density campaigns, rewards
-- `docs/modules/14-reporting-and-analytics.md` — MRR, churn, utilization, density dashboards
+- Install `@capacitor/core`, `@capacitor/cli`, `@capacitor/ios`, `@capacitor/android`
+- Run `npx cap init` with proper app ID and name
+- Configure `capacitor.config.ts` with the project's preview URL for live reload during development
+- Add mobile viewport meta tags to `index.html` (viewport-fit=cover, status bar config)
 
-Each module doc will contain: scope summary, tables involved, key user stories, dependencies, and acceptance criteria.
+**After setup, you will need to:**
+1. Export to GitHub and clone locally
+2. Run `npx cap add ios` and/or `npx cap add android`
+3. Run `npx cap sync` then `npx cap run ios` or `npx cap run android`
 
 ---
 
-## Phase 2: Design System Setup
+## 2. Navigation Overhaul: Sidebar to Bottom Tabs
 
-### Theme & Typography
-- Apply Handled Home color palette from design guidelines:
-  - Primary: deep navy `#0B1F3B`
-  - Accent: teal `#14B8A6`
-  - Surface: light gray `#F7F8FA`
-  - Semantic colors for success/warning/error
-- Import Inter font
-- Configure 8pt spacing grid
-- Ensure WCAG AA contrast compliance
+Replace the desktop sidebar with a mobile-native bottom tab bar.
 
-### Shared Components
-- Status badges (using global status enums for orders, providers, service days)
-- Role-aware navigation wrapper
-- Placeholder page template (module name + description + "coming soon" state)
+### New component: `BottomTabBar.tsx`
+- Fixed to bottom of screen with safe area padding (for iPhone notch/home indicator)
+- 4-5 primary tabs per role (most important screens)
+- Active tab highlighted with accent color + filled icon
+- Remaining pages accessible via a "More" tab or from within screens
 
----
+### Tab structure per role:
 
-## Phase 3: Authentication & Roles (Supabase)
+**Customer (5 tabs):**
+Home | Service Day | History | Subscription | More
 
-### Database
-- `profiles` table — name, phone, avatar, created_at
-- `user_roles` table — user_id, role (customer/provider/admin), created_at
-- `has_role()` PostgreSQL function (security definer) for RLS
-- Auto-create profile trigger on auth signup
-- RLS policies on both tables
+**Provider (5 tabs):**
+Jobs | Earnings | Performance | Coverage | More
 
-### Auth Pages
-- Login page (email/password)
-- Signup page with initial role selection (dev convenience — later separated)
-- Protected route wrapper that checks role
+**Admin (5 tabs):**
+Dashboard | Zones | SKUs | Providers | More
+
+### "More" screen
+- Simple list/menu of remaining nav items (Settings, Support, Billing, etc.)
+- Clean grouped list with icons
+
+### Remove:
+- `AppSidebar.tsx` — no longer used
+- `SidebarProvider` / `SidebarTrigger` from layout and header
 
 ---
 
-## Phase 4: App Shell & Navigation
+## 3. Header Redesign for Mobile
 
-### Shared Layout
-- Top header with Handled Home logo, role switcher (dev tool), user menu
-- Sidebar navigation that changes based on active role
-- Main content area with breadcrumbs
-
-### Customer App (`/customer/*`)
-- Dashboard — "Your home is handled" hero, next service day countdown
-- Build My Service Day — placeholder
-- Service History — placeholder
-- Subscription & Plan — placeholder
-- Property Profile — placeholder
-- Wallet & Billing — placeholder
-- Referrals — placeholder
-- Support — placeholder
-- Account Settings — placeholder
-
-### Provider App (`/provider/*`)
-- Today's Jobs — placeholder with empty job list
-- Job Detail — placeholder
-- Earnings — placeholder
-- Performance — placeholder
-- Organization Settings — placeholder
-- Coverage & Capacity — placeholder
-- Account Settings — placeholder
-
-### Admin Console (`/admin/*`)
-- Overview Dashboard — placeholder with metric cards
-- Regions & Zones — placeholder
-- Capacity Engine — placeholder
-- SKU Catalog — placeholder
-- Subscription Plans — placeholder
-- Providers — placeholder
-- Scheduling Operations — placeholder
-- Support Console — placeholder
-- Incentives — placeholder
-- Reporting & Analytics — placeholder
-- Audit Logs — placeholder
-- Admin Settings — placeholder
+### Modify `AppHeader.tsx`
+- Compact mobile header: logo centered, height 48px
+- Left: back button (when navigated into sub-page) or hamburger for "More"
+- Right: role switcher (dev only) + avatar/profile icon
+- No email text display (too wide for mobile)
+- Safe area top padding for iOS status bar
 
 ---
 
-## Phase 5: Foundation Database Tables
+## 4. Layout Restructure
 
-### Geography
-- `regions` — name, status
-- `zones` — region_id, name, zip_codes (array), default_service_day, capacity config
-
-### Properties
-- `properties` — user_id, address fields, access_instructions, gate_code, pets, parking, lot_size
-
-### Services
-- `service_skus` — name, description, inclusions, exclusions, duration_minutes, fulfillment_mode (enum: same_day/same_week/independent), weather_sensitive, required_photos, status
-
-### Subscriptions
-- `subscription_plans` — name, service_days_per_month, rollover_max, rollover_expiry_days, price_cents, status
-
-All tables with RLS enabled. Detailed transactional tables (orders, jobs, payouts, etc.) added per module.
+### Modify `AppLayout.tsx`
+- Remove sidebar wrapper entirely
+- Structure: Header (top) + Content (scrollable, flex-1) + BottomTabBar (bottom)
+- Content area gets bottom padding to avoid overlap with tab bar
+- Add safe area insets via CSS `env(safe-area-inset-*)` values
 
 ---
 
-## What This Delivers
-A fully navigable three-app skeleton where you can sign up, log in, switch roles, and see every page that will exist — each with a clear label of which module will build it out. The `/docs/modules/` folder becomes the implementation roadmap: pick a module, read its spec, and build with full context window focus.
+## 5. Touch-Optimized Design Tokens
+
+### Update `index.css` and `tailwind.config.ts`
+- Minimum tap target: 44px (already in design guidelines)
+- Increase `--radius` to `0.75rem` (12px) for rounder, more mobile-native feel
+- Card padding: 16px standard
+- Input heights: 48px minimum
+- Font sizes: body stays 16px (prevents iOS zoom on input focus)
+- Add safe area CSS custom properties
+
+### Add mobile utilities:
+```css
+.safe-top { padding-top: env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+```
+
+---
+
+## 6. Auth Page — Mobile Native Feel
+
+### Redesign `AuthPage.tsx`
+- Full-screen mobile layout (no centered card on white background)
+- Logo at top (larger, ~80px), tagline below
+- Form fields directly on the surface background (no wrapping card)
+- Large 48px-height inputs with 16px font (prevents iOS zoom)
+- Full-width buttons with 48px height
+- Tab switcher (Login / Sign Up) as pill-shaped toggle at top of form
+
+---
+
+## 7. PlaceholderPage — Mobile Optimized
+
+### Update `PlaceholderPage.tsx`
+- Full-width cards (no max-width constraint)
+- 16px horizontal padding
+- Larger touch-friendly elements
+
+---
+
+## 8. Dark Mode Support
+
+### Add `ThemeProvider` using `next-themes`
+- Wrap app in ThemeProvider in `App.tsx`
+- Create `ThemeToggle.tsx` — simple sun/moon icon button
+- Place toggle in Settings pages and/or header
+- Verify all CSS variables render correctly in dark mode
+
+---
+
+## 9. Motion & Polish
+
+- Page transition: subtle fade-in on route change (CSS animation)
+- Tab bar icon: gentle scale bounce on tap
+- Card hover/press: slight scale-down on active (touch feedback)
+- Pull-to-refresh styling prep (for future data pages)
+
+---
+
+## Technical Summary
+
+### New files:
+- `src/components/BottomTabBar.tsx` — Role-aware bottom tab navigation
+- `src/components/MoreMenu.tsx` — Overflow navigation items
+- `src/components/ThemeToggle.tsx` — Dark/light mode switch
+- `capacitor.config.ts` — Capacitor configuration
+
+### Modified files:
+- `index.html` — Mobile viewport meta tags, safe area
+- `src/index.css` — Safe area utilities, touch sizing, mobile animations
+- `tailwind.config.ts` — Radius, spacing adjustments
+- `src/components/AppLayout.tsx` — Remove sidebar, add bottom tabs
+- `src/components/AppHeader.tsx` — Compact mobile header
+- `src/pages/AuthPage.tsx` — Full-screen mobile design
+- `src/components/PlaceholderPage.tsx` — Mobile padding/sizing
+- `src/App.tsx` — Add ThemeProvider wrapper
+- `src/main.tsx` — No changes expected
+- `package.json` — Add Capacitor dependencies
+
+### Files to remove:
+- `src/components/AppSidebar.tsx` — Replaced by BottomTabBar
+
+### Dependencies to install:
+- `@capacitor/core`
+- `@capacitor/cli` (dev)
+- `@capacitor/ios`
+- `@capacitor/android`
 
