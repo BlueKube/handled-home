@@ -1,270 +1,143 @@
 
 
-# Module 06: Service Day Engine — Full Implementation Plan
+# Module 06/06.1 Gap Remediation Plan
 
-## Overview
-This module turns zone capacity governance into a real customer promise: a recurring Service Day that is assigned, confirmed, and tracked. It includes the assignment engine, customer confirm/reject flow, capacity enforcement, admin utilization views, and the 06.1 hardening layer (concurrency safety, offer expiry cleanup, alternative ordering strategy).
-
----
-
-## Phase 1: Database Schema + RPCs
-
-### 1A: New tables (single migration)
-
-**`zone_service_day_capacity`**
-- `id` uuid pk default gen_random_uuid()
-- `zone_id` uuid not null references zones(id)
-- `day_of_week` text not null
-- `service_window` text not null default 'any'
-- `max_homes` int not null
-- `buffer_percent` int not null default 0
-- `assigned_count` int not null default 0
-- `updated_at` timestamptz default now()
-- Unique constraint: `(zone_id, day_of_week, service_window)`
-
-**`service_day_assignments`**
-- `id` uuid pk default gen_random_uuid()
-- `customer_id` uuid not null (references auth user, no FK to auth.users)
-- `property_id` uuid not null references properties(id) (unique — one assignment per property)
-- `zone_id` uuid not null references zones(id)
-- `day_of_week` text not null
-- `service_window` text not null default 'any'
-- `status` text not null default 'offered' (offered, confirmed, superseded)
-- `rejection_used` boolean not null default false
-- `reserved_until` timestamptz null
-- `reason_code` text null
-- `created_at` timestamptz default now()
-- `updated_at` timestamptz default now()
-
-**`service_day_offers`**
-- `id` uuid pk default gen_random_uuid()
-- `assignment_id` uuid not null references service_day_assignments(id)
-- `offered_day_of_week` text not null
-- `offered_window` text not null default 'any'
-- `offer_type` text not null default 'primary' (primary, alternative)
-- `rank` int not null default 1
-- `accepted` boolean not null default false
-- `created_at` timestamptz default now()
-
-**`service_day_override_log`**
-- `id` uuid pk default gen_random_uuid()
-- `actor_admin_id` uuid not null
-- `assignment_id` uuid not null references service_day_assignments(id)
-- `before` jsonb not null
-- `after` jsonb not null
-- `reason` text not null
-- `notes` text null
-- `created_at` timestamptz default now()
-
-**`service_day_preferences`** (optional, from 06.1)
-- `id` uuid pk default gen_random_uuid()
-- `customer_id` uuid not null
-- `property_id` uuid not null references properties(id)
-- `preferred_days` text[] not null default '{}'
-- `created_at` timestamptz default now()
-
-**Schema additions to `zones`** (from 06.1)
-- `alternative_strategy` text not null default 'window_first'
-- `offer_ttl_hours` int not null default 48
-
-### 1B: RLS policies
-
-- **service_day_assignments**: customer reads own (customer_id = auth.uid()), admin all
-- **service_day_offers**: customer reads own (via assignment join), admin all
-- **zone_service_day_capacity**: authenticated read, admin write
-- **service_day_override_log**: admin insert + read only
-- **service_day_preferences**: customer read/write own, admin read all
-
-### 1C: Database RPCs (Postgres functions)
-
-All core operations go through RPCs for atomicity and row-lock safety (06.1 requirement).
-
-1. **`create_or_refresh_service_day_offer(p_property_id uuid)`**
-   - Idempotent: returns existing active offer if valid, or creates new one
-   - Looks up property zone, zone default day/window
-   - SELECT FOR UPDATE on capacity row
-   - If capacity available: increment, create assignment (status=offered, reserved_until = now + zone.offer_ttl_hours), create primary offer row
-   - If default full: try alternatives per zone.alternative_strategy, create assignment with primary + up to 3 alternative offer rows
-   - Returns assignment + offers as JSON
-
-2. **`confirm_service_day(p_assignment_id uuid)`**
-   - Validates caller owns assignment
-   - Updates assignment status to 'confirmed'
-   - Marks the matching offer as accepted=true
-   - Returns success
-
-3. **`reject_service_day_once(p_assignment_id uuid)`**
-   - Validates rejection_used = false
-   - Sets rejection_used = true
-   - Generates 2-3 alternatives (capacity-checked, row-locked)
-   - Inserts alternative offer rows
-   - Returns alternatives
-
-4. **`select_alternative_service_day(p_assignment_id uuid, p_offer_id uuid)`**
-   - Single transaction: lock old capacity row (decrement), lock new capacity row (increment if available), update assignment day/window, mark offer accepted, set status=confirmed
-   - Rollback if new capacity full
-
-5. **`admin_override_service_day(p_assignment_id uuid, p_new_day text, p_new_window text, p_reason text, p_notes text)`**
-   - Admin-only (checked via has_role)
-   - Moves capacity atomically
-   - Logs to service_day_override_log
-   - Allows exceeding capacity with explicit flag
-
-6. **`cleanup_expired_offers()`**
-   - Finds status='offered' AND reserved_until < now()
-   - Releases capacity, marks assignment 'superseded'
-   - Called by scheduled edge function
-
-### 1D: Triggers
-- `updated_at` trigger on `service_day_assignments` and `zone_service_day_capacity`
-
-### 1E: Seed capacity rows
-- When a zone exists, admin needs to manually configure capacity rows per day/window, OR auto-seed from zone defaults (a one-time seed script or on-demand in admin UI)
+Based on the Claude Code review, this plan addresses all 13 identified gaps organized by priority.
 
 ---
 
-## Phase 2: Edge Functions
+## High Priority (3 items)
 
-### 2A: `cleanup-expired-offers` (scheduled, hourly)
-- Calls the `cleanup_expired_offers()` RPC using service role key
-- Runs every hour via cron configuration in config.toml
-- Logs expired count
+### H1: Fix primary offer when default day is full (Issue #1)
 
----
+The `create_or_refresh_service_day_offer` RPC currently creates an assignment on the full default day without reserving capacity. If the customer confirms this primary offer, they confirm a day with no capacity reserved.
 
-## Phase 3: React Hooks + Data Layer
+**Fix:** Modify the RPC so that when the default day is full, the primary offer points to the best available alternative day (with capacity reserved), not the full default day. The default day is still shown as context ("Your zone's default day is full") but the confirmable primary offer is the best-capacity day.
 
-### 3A: `useServiceDayAssignment` hook
-- Fetches current customer's assignment (status in offered/confirmed) for their property
-- Fetches associated offers
-- Provides: assignment, offers, isLoading, refetch
+**Migration SQL change:**
+- In the "default day full" branch: find the first day with capacity, reserve it, use that as the assignment's `day_of_week`. The "primary" offer row points to this available day. Alternatives are generated from remaining days with capacity.
 
-### 3B: `useServiceDayActions` hook
-- `createOrRefreshOffer(propertyId)` — calls RPC
-- `confirmServiceDay(assignmentId)` — calls RPC
-- `rejectServiceDay(assignmentId)` — calls RPC, returns alternatives
-- `selectAlternative(assignmentId, offerId)` — calls RPC
-- `savePreferences(propertyId, days[])` — upserts to service_day_preferences
+### H2: Implement `alternative_strategy` in RPCs (Issue #2)
 
-### 3C: `useServiceDayCapacity` hook (admin)
-- Fetches zone_service_day_capacity rows for a zone
-- CRUD operations for capacity rows
-- Utilization calculations
+The `alternative_strategy` column (`window_first` / `day_first`) exists on zones but is never read. Both `create_or_refresh_service_day_offer` and `reject_service_day_once` iterate Monday-Sunday regardless.
 
-### 3D: `useServiceDayAdmin` hook (admin)
-- Fetches all assignments for a zone (with customer/property joins)
-- Override mutation (calls admin_override RPC)
-- Stats: rejection count, override count, expiry count (last 7/30 days)
+**Fix:** Add a branch in both RPCs that reads `v_zone.alternative_strategy` and orders the day iteration accordingly:
+- `window_first` (default): iterate days in Monday-Sunday order (current behavior, optimizes for route density)
+- `day_first`: iterate days nearest to the default day first (e.g., if default is Wednesday, try Thu, Tue, Fri, Mon, Sat, Sun)
+
+### H3: Configure cron trigger for cleanup (Issue #3)
+
+The `cleanup-expired-offers` edge function exists but nothing triggers it. Expired offers never release capacity automatically.
+
+**Fix:** Set up `pg_cron` + `pg_net` to call the edge function hourly. This requires a one-time SQL insert (not a migration, since it contains project-specific URLs/keys).
 
 ---
 
-## Phase 4: Customer UI
+## Medium Priority (5 items)
 
-### 4A: `/customer/service-day` page (new)
-State machine UI with 4 states:
+### M4: Add expiry detection and calm messaging (Issue #4)
 
-- **State 1 — Loading/No assignment**: "We're matching you to the best route." Auto-calls createOrRefreshOffer on mount if no assignment exists and subscription is active.
-- **State 2 — Offer pending**: Shows assigned day + window + explanation template. "Confirm Service Day" button + "This day won't work" secondary button (if rejection not used).
-- **State 3 — Rejected/Alternatives**: Shows 2-3 alternative cards to pick from. If no alternatives available: "Contact support" CTA + optional preference capture checkboxes.
-- **State 4 — Confirmed**: "You're handled." Shows confirmed day. Teaser for Module 07 (routine builder).
+When a customer's offer expires and they revisit `/customer/service-day`, the page just shows a loading spinner and silently creates a new offer. No explanation is given.
 
-### 4B: Customer dashboard banner update
-Update `src/pages/customer/Dashboard.tsx` to show dynamic Service Day status:
-- No assignment yet: "We're assigning your Service Day" banner
-- Offer pending: "Confirm your Service Day" link to `/customer/service-day`
-- Confirmed: "Your Service Day: Tuesday" badge (real data replacing current hardcoded "Tuesday")
+**Fix:** In `useServiceDayAssignment`, also query for the most recent `superseded` assignment. If one exists and no active assignment exists, pass an `expiredPrevious` flag. In `CustomerServiceDay`, show a brief message: "Your previous offer expired, so we refreshed your options." before the new offer appears.
 
-### 4C: Routing
-- Add `/customer/service-day` route in App.tsx, wrapped with CustomerPropertyGate + SubscriptionGate (service day requires active subscription)
+### M5: Add capacity warning in override modal (Issue #5)
 
----
+The admin override modal doesn't warn when the target day is already at or over capacity.
 
-## Phase 5: Admin UI
+**Fix:** Pass `capacities` data from `useServiceDayCapacity` into the override modal. When the admin selects a new day, check if `assigned_count >= effective_max` for that day and show a yellow warning banner: "This day is at capacity. Override will exceed the limit."
 
-### 5A: `/admin/service-days` page (new)
-A dedicated admin page (or tab under zones) showing:
+### M6: Display override logs in zone detail (Issue #6)
 
-**Zone list view:**
-- Each zone row: name, default day, assigned/limit counts per day, stability indicator (Stable/Tight/Risk based on utilization %)
+`useServiceDayAdmin` fetches `overrideLogs` but `ServiceDayZoneDetail` never renders them.
 
-**Zone detail (sheet/drawer):**
-- Utilization bars per day/window
-- Assignment list (customer name, day, window, status)
-- Capacity configuration (max_homes per day/window, buffer %)
-- Override button per assignment (opens modal with reason dropdown, notes, capacity warning, "Force anyway" typed confirm)
-- Health stats from 06.1: expiry count (7d), reject rate (30d), override count (30d), tightness reason string
+**Fix:** Add a collapsible "Override History" section at the bottom of `ServiceDayZoneDetail` showing recent overrides with timestamp, reason, before/after days, and notes.
 
-### 5B: Admin routing
-- Add `/admin/service-days` route in App.tsx
-- Add "Service Days" to admin MoreMenu or bottom tab bar
+### M7: Add Service Day to customer sidebar (Issue #7)
 
-### 5C: Update ZoneCapacityPanel
-- Replace the "Scheduling starts in Module 06" placeholder with real assigned_count from zone_service_day_capacity
-- Show actual utilization
+Customers can only reach `/customer/service-day` via the dashboard banner. Once confirmed, there's no way to review it.
+
+**Fix:** Add a "Service Day" entry to `customerNav` in `AppSidebar.tsx`, positioned after "Plans" and before "Build Routine". Icon: `CalendarDays` (or a distinct icon like `CalendarCheck`).
+
+### M8: Add Service Days to admin sidebar (Issue #8)
+
+`/admin/service-days` is only in the "More" menu. It's operationally critical and should be prominent.
+
+**Fix:** Add "Service Days" to `adminNav` in `AppSidebar.tsx`, positioned after "Plans" and before "Subscriptions".
 
 ---
 
-## Phase 6: Hardening (06.1 items built inline)
+## Low Priority (5 items)
 
-These are incorporated into the phases above rather than a separate pass:
-- Row locking: built into all RPCs (Phase 1C)
-- Offer TTL + cleanup: built into schema (Phase 1A) and edge function (Phase 2A)
-- Alternative strategy (window-first/day-first): built into create_or_refresh RPC logic + zones column (Phase 1A/1C)
-- Override audit UX: built into admin UI (Phase 5A)
-- Preference capture: built into customer reject flow (Phase 4A)
-- Explainable assignment templates with reason codes: built into RPCs + customer UI
+### L9: Render reason code templates (Issue #9)
+
+The `reason_code` field stores values like `default_day_available` and `default_day_full` but only a generic message is shown.
+
+**Fix:** Create a `REASON_TEMPLATES` map in `ServiceDayOffer.tsx`:
+- `default_day_available`: "We chose {day} because it matches your neighborhood route and keeps service reliable."
+- `default_day_full`: "Your zone's default day is at capacity. We've matched you to the next best route day."
+- fallback: "We've matched you to the best available route."
+
+### L10: Add offer confidence badge (Issue #10)
+
+06.1 section 6.2 suggests "Stable day" / "Popular day" badges on the customer offer card.
+
+**Fix:** In `ServiceDayOfferCard`, fetch or receive capacity utilization for the offered day. If utilization < 70%, show a "Stable day" badge. If 70-90%, show "Popular day". Simple visual cue, no logic change.
+
+### L11: Add Mon-Sun column counts to admin zone list (Issue #11)
+
+The zone list only shows total assigned/limit. Spec says show Mon-Sun counts.
+
+**Fix:** In the `ZoneCard` component within `ServiceDays.tsx`, add a compact row of 7 day abbreviations with their assigned counts beneath the zone name.
+
+### L12: Remove `as any` casts from hooks (Issue #12)
+
+All RPC calls in `useServiceDayActions` and `useServiceDayAdmin` use `as any` casts. The RPCs now exist in generated types.
+
+**Fix:** Remove all `as any` casts and use proper typed RPC calls. This improves type safety and catches errors at build time.
+
+### L13: Add secret-based auth to cleanup edge function (Issue #13)
+
+The cleanup function is callable without authentication by anyone who discovers the URL.
+
+**Fix:** Add a shared secret check. Read a `CRON_SECRET` from environment. The cron job sends it as `Authorization: Bearer <CRON_SECRET>`. The edge function rejects requests without the correct secret.
 
 ---
 
-## Implementation Sequence
+## Files Impacted
 
-The work should be done in this order due to dependencies:
+**Database migrations (new):**
+- Fix `create_or_refresh_service_day_offer` RPC (H1 + H2)
+- Fix `reject_service_day_once` RPC (H2)
 
-```text
-Phase 1 (DB)  -->  Phase 2 (Edge fn)  -->  Phase 3 (Hooks)
-                                               |
-                                        +------+------+
-                                        |             |
-                                   Phase 4         Phase 5
-                                  (Customer)       (Admin)
-```
+**SQL insert (not migration):**
+- pg_cron schedule for cleanup (H3)
 
-1. Phase 1: Migration + RPCs + RLS (foundation, everything depends on this)
-2. Phase 2: Cleanup edge function (can deploy immediately after schema)
-3. Phase 3: React hooks (depends on schema + RPCs existing)
-4. Phase 4 + 5: Customer and Admin UI (can be built in parallel, both depend on hooks)
+**Edge function:**
+- `supabase/functions/cleanup-expired-offers/index.ts` (L13)
+
+**React hooks:**
+- `src/hooks/useServiceDayAssignment.ts` (M4)
+- `src/hooks/useServiceDayActions.ts` (L12)
+- `src/hooks/useServiceDayAdmin.ts` (L12)
+
+**Components:**
+- `src/components/customer/ServiceDayOffer.tsx` (L9, L10)
+- `src/components/admin/ServiceDayZoneDetail.tsx` (M6)
+- `src/components/admin/ServiceDayOverrideModal.tsx` (M5)
+- `src/pages/admin/ServiceDays.tsx` (L11)
+- `src/pages/customer/ServiceDay.tsx` (M4)
+- `src/components/AppSidebar.tsx` (M7, M8)
 
 ---
 
-## Technical Notes
+## Implementation Order
 
-- All capacity mutations use `SELECT ... FOR UPDATE` row locks in Postgres RPCs to prevent race conditions
-- The `create_or_refresh_service_day_offer` RPC is idempotent — safe to call on page load
-- No foreign keys to `auth.users` — customer_id references are enforced via RLS (auth.uid())
-- The existing `admin_audit_log` table can be used alongside `service_day_override_log` for broader audit visibility
-- The `zones.alternative_strategy` column controls whether alternatives are generated window-first or day-first
-- The `zones.offer_ttl_hours` column makes TTL configurable per zone (default 48h)
-- The cleanup edge function should be registered in `supabase/config.toml` with `verify_jwt = false` (called by cron, not users)
-
-## Files Created/Modified Summary
-
-**New files:**
-- `src/pages/customer/ServiceDay.tsx`
-- `src/pages/admin/ServiceDays.tsx`
-- `src/hooks/useServiceDayAssignment.ts`
-- `src/hooks/useServiceDayActions.ts`
-- `src/hooks/useServiceDayCapacity.ts`
-- `src/hooks/useServiceDayAdmin.ts`
-- `src/components/customer/ServiceDayOffer.tsx` (offer card component)
-- `src/components/customer/ServiceDayConfirmed.tsx`
-- `src/components/customer/ServiceDayAlternatives.tsx`
-- `src/components/admin/ServiceDayZoneDetail.tsx`
-- `src/components/admin/ServiceDayOverrideModal.tsx`
-- `supabase/functions/cleanup-expired-offers/index.ts`
-
-**Modified files:**
-- `src/App.tsx` (add routes)
-- `src/components/MoreMenu.tsx` (add Service Days to admin menu)
-- `src/pages/customer/Dashboard.tsx` (dynamic Service Day banner)
-- `src/components/admin/ZoneCapacityPanel.tsx` (replace placeholder with real data)
+1. **Database first**: H1 + H2 in a single migration (RPC rewrites)
+2. **Cron setup**: H3 (pg_cron insert)
+3. **Edge function hardening**: L13 (secret check)
+4. **Hooks**: M4 (expiry detection), L12 (remove `as any`)
+5. **Customer UI**: L9 (reason templates), L10 (confidence badge), M4 (expiry message)
+6. **Admin UI**: M5 (capacity warning), M6 (override logs), L11 (Mon-Sun counts)
+7. **Navigation**: M7 + M8 (sidebar entries)
 
