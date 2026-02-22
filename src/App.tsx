@@ -65,6 +65,9 @@ import ProviderOnboardingReview from "@/pages/provider/OnboardingReview";
 import ProviderSupport from "@/pages/provider/Support";
 import ProviderSupportTicketDetail from "@/pages/provider/SupportTicketDetail";
 import ProviderReferrals from "@/pages/provider/Referrals";
+import ProviderInviteCustomers from "@/pages/provider/InviteCustomers";
+import ProviderApply from "@/pages/provider/Apply";
+import InviteLanding from "@/pages/InviteLanding";
 
 // Admin pages
 import AdminDashboard from "@/pages/admin/Dashboard";
@@ -114,6 +117,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<RootRedirect />} />
               <Route path="/auth" element={<AuthPage />} />
+              <Route path="/invite/:code" element={<InviteLanding />} />
 
               {/* Customer App */}
               <Route element={<ProtectedRoute requiredRole="customer"><AppLayout /></ProtectedRoute>}>
@@ -172,6 +176,8 @@ const App = () => (
                 <Route path="/provider/support" element={<ProviderSupport />} />
                 <Route path="/provider/support/tickets/:ticketId" element={<ProviderSupportTicketDetail />} />
                 <Route path="/provider/referrals" element={<ProviderReferrals />} />
+                <Route path="/provider/referrals/invite-customers" element={<ProviderInviteCustomers />} />
+                <Route path="/provider/apply" element={<ProviderApply />} />
                 <Route path="/provider/more" element={<MoreMenuPage />} />
               </Route>
 
