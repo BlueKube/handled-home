@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.create-portal-session]
 verify_jwt = false
+
+[functions.cleanup-expired-offers]
+verify_jwt = false
