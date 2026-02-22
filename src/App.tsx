@@ -62,6 +62,8 @@ import ProviderOnboardingCoverage from "@/pages/provider/OnboardingCoverage";
 import ProviderOnboardingCapabilities from "@/pages/provider/OnboardingCapabilities";
 import ProviderOnboardingCompliance from "@/pages/provider/OnboardingCompliance";
 import ProviderOnboardingReview from "@/pages/provider/OnboardingReview";
+import ProviderSupport from "@/pages/provider/Support";
+import ProviderSupportTicketDetail from "@/pages/provider/SupportTicketDetail";
 
 // Admin pages
 import AdminDashboard from "@/pages/admin/Dashboard";
@@ -74,6 +76,7 @@ import AdminProviders from "@/pages/admin/Providers";
 import AdminProviderDetail from "@/pages/admin/ProviderDetail";
 import AdminScheduling from "@/pages/admin/Scheduling";
 import AdminSupport from "@/pages/admin/Support";
+import AdminSupportTicketDetail from "@/pages/admin/SupportTicketDetail";
 import AdminIncentives from "@/pages/admin/Incentives";
 import AdminReports from "@/pages/admin/Reports";
 import AdminAudit from "@/pages/admin/Audit";
@@ -163,6 +166,8 @@ const App = () => (
                 <Route path="/provider/organization" element={<ProviderOrganization />} />
                 <Route path="/provider/coverage" element={<ProviderCoverage />} />
                 <Route path="/provider/settings" element={<ProviderSettings />} />
+                <Route path="/provider/support" element={<ProviderSupport />} />
+                <Route path="/provider/support/tickets/:ticketId" element={<ProviderSupportTicketDetail />} />
                 <Route path="/provider/more" element={<MoreMenuPage />} />
               </Route>
 
@@ -182,6 +187,7 @@ const App = () => (
                 <Route path="/admin/service-days" element={<AdminServiceDays />} />
                 <Route path="/admin/bundles" element={<AdminBundles />} />
                 <Route path="/admin/support" element={<AdminSupport />} />
+                <Route path="/admin/support/tickets/:ticketId" element={<AdminSupportTicketDetail />} />
                 <Route path="/admin/incentives" element={<AdminIncentives />} />
                 <Route path="/admin/reports" element={<AdminReports />} />
                 <Route path="/admin/audit" element={<AdminAudit />} />
