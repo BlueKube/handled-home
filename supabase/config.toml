@@ -11,3 +11,15 @@ verify_jwt = false
 
 [functions.cleanup-expired-offers]
 verify_jwt = false
+
+[functions.create-setup-intent]
+verify_jwt = false
+
+[functions.create-connect-account]
+verify_jwt = false
+
+[functions.create-connect-account-link]
+verify_jwt = false
+
+[functions.process-payout]
+verify_jwt = false

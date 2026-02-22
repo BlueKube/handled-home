@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_adjustments: {
+        Row: {
+          adjustment_type: string
+          admin_user_id: string
+          amount_cents: number
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          metadata: Json | null
+          reason: string
+        }
+        Insert: {
+          adjustment_type: string
+          admin_user_id: string
+          amount_cents?: number
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          metadata?: Json | null
+          reason: string
+        }
+        Update: {
+          adjustment_type?: string
+          admin_user_id?: string
+          amount_cents?: number
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          metadata?: Json | null
+          reason?: string
+        }
+        Relationships: []
+      }
       admin_audit_log: {
         Row: {
           action: string
@@ -49,6 +85,231 @@ export type Database = {
           reason?: string | null
         }
         Relationships: []
+      }
+      billing_exceptions: {
+        Row: {
+          created_at: string
+          customer_id: string | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+          next_action: string | null
+          provider_org_id: string | null
+          resolved_at: string | null
+          resolved_by_admin_user_id: string | null
+          severity: string
+          status: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id?: string | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          next_action?: string | null
+          provider_org_id?: string | null
+          resolved_at?: string | null
+          resolved_by_admin_user_id?: string | null
+          severity?: string
+          status?: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          next_action?: string | null
+          provider_org_id?: string | null
+          resolved_at?: string | null
+          resolved_by_admin_user_id?: string | null
+          severity?: string
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      billing_runs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          run_type: string
+          started_at: string | null
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          run_type: string
+          started_at?: string | null
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          run_type?: string
+          started_at?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      customer_credits: {
+        Row: {
+          amount_cents: number
+          applied_to_invoice_id: string | null
+          created_at: string
+          customer_id: string
+          id: string
+          issued_by_admin_user_id: string | null
+          reason: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents?: number
+          applied_to_invoice_id?: string | null
+          created_at?: string
+          customer_id: string
+          id?: string
+          issued_by_admin_user_id?: string | null
+          reason?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          applied_to_invoice_id?: string | null
+          created_at?: string
+          customer_id?: string
+          id?: string
+          issued_by_admin_user_id?: string | null
+          reason?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_credits_applied_to_invoice_id_fkey"
+            columns: ["applied_to_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "customer_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_invoice_line_items: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          id: string
+          invoice_id: string
+          label: string
+          metadata: Json | null
+          type: string
+        }
+        Insert: {
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          invoice_id: string
+          label: string
+          metadata?: Json | null
+          type?: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          invoice_id?: string
+          label?: string
+          metadata?: Json | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_invoice_line_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "customer_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_invoices: {
+        Row: {
+          created_at: string
+          credits_applied_cents: number
+          customer_id: string
+          cycle_end_at: string | null
+          cycle_start_at: string | null
+          due_at: string | null
+          id: string
+          idempotency_key: string | null
+          invoice_type: string
+          paid_at: string | null
+          processor_invoice_id: string | null
+          status: string
+          subscription_id: string | null
+          subtotal_cents: number
+          total_cents: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          credits_applied_cents?: number
+          customer_id: string
+          cycle_end_at?: string | null
+          cycle_start_at?: string | null
+          due_at?: string | null
+          id?: string
+          idempotency_key?: string | null
+          invoice_type?: string
+          paid_at?: string | null
+          processor_invoice_id?: string | null
+          status?: string
+          subscription_id?: string | null
+          subtotal_cents?: number
+          total_cents?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          credits_applied_cents?: number
+          customer_id?: string
+          cycle_end_at?: string | null
+          cycle_start_at?: string | null
+          due_at?: string | null
+          id?: string
+          idempotency_key?: string | null
+          invoice_type?: string
+          paid_at?: string | null
+          processor_invoice_id?: string | null
+          status?: string
+          subscription_id?: string | null
+          subtotal_cents?: number
+          total_cents?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_invoices_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       customer_issues: {
         Row: {
@@ -102,6 +363,133 @@ export type Database = {
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_ledger_events: {
+        Row: {
+          amount_cents: number
+          balance_after_cents: number
+          created_at: string
+          customer_id: string
+          event_type: string
+          id: string
+          invoice_id: string | null
+          metadata: Json | null
+        }
+        Insert: {
+          amount_cents?: number
+          balance_after_cents?: number
+          created_at?: string
+          customer_id: string
+          event_type: string
+          id?: string
+          invoice_id?: string | null
+          metadata?: Json | null
+        }
+        Update: {
+          amount_cents?: number
+          balance_after_cents?: number
+          created_at?: string
+          customer_id?: string
+          event_type?: string
+          id?: string
+          invoice_id?: string | null
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_ledger_events_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "customer_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_payment_methods: {
+        Row: {
+          brand: string | null
+          created_at: string
+          customer_id: string
+          exp_month: number | null
+          exp_year: number | null
+          id: string
+          is_default: boolean
+          last4: string | null
+          processor_ref: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          brand?: string | null
+          created_at?: string
+          customer_id: string
+          exp_month?: number | null
+          exp_year?: number | null
+          id?: string
+          is_default?: boolean
+          last4?: string | null
+          processor_ref: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          brand?: string | null
+          created_at?: string
+          customer_id?: string
+          exp_month?: number | null
+          exp_year?: number | null
+          id?: string
+          is_default?: boolean
+          last4?: string | null
+          processor_ref?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      customer_payments: {
+        Row: {
+          amount_cents: number
+          attempt_number: number
+          created_at: string
+          customer_id: string
+          id: string
+          idempotency_key: string | null
+          invoice_id: string
+          processor_payment_id: string | null
+          status: string
+        }
+        Insert: {
+          amount_cents?: number
+          attempt_number?: number
+          created_at?: string
+          customer_id: string
+          id?: string
+          idempotency_key?: string | null
+          invoice_id: string
+          processor_payment_id?: string | null
+          status?: string
+        }
+        Update: {
+          amount_cents?: number
+          attempt_number?: number
+          created_at?: string
+          customer_id?: string
+          id?: string
+          idempotency_key?: string | null
+          invoice_id?: string
+          processor_payment_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "customer_invoices"
             referencedColumns: ["id"]
           },
         ]
@@ -583,6 +971,66 @@ export type Database = {
           },
         ]
       }
+      payment_webhook_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          payload: Json
+          processed: boolean
+          processed_at: string | null
+          processor_event_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          payload?: Json
+          processed?: boolean
+          processed_at?: string | null
+          processor_event_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          processed?: boolean
+          processed_at?: string | null
+          processor_event_id?: string
+        }
+        Relationships: []
+      }
+      payout_runs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          earnings_count: number
+          id: string
+          started_at: string | null
+          status: string
+          total_cents: number
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          earnings_count?: number
+          id?: string
+          started_at?: string | null
+          status?: string
+          total_cents?: number
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          earnings_count?: number
+          id?: string
+          started_at?: string | null
+          status?: string
+          total_cents?: number
+        }
+        Relationships: []
+      }
       plan_entitlement_sku_rules: {
         Row: {
           entitlement_version_id: string
@@ -1012,6 +1460,76 @@ export type Database = {
           },
         ]
       }
+      provider_earnings: {
+        Row: {
+          base_amount_cents: number
+          created_at: string
+          hold_reason: string | null
+          hold_until: string | null
+          id: string
+          idempotency_key: string | null
+          job_id: string
+          modifier_cents: number
+          payout_id: string | null
+          provider_org_id: string
+          status: string
+          total_cents: number
+          updated_at: string
+        }
+        Insert: {
+          base_amount_cents?: number
+          created_at?: string
+          hold_reason?: string | null
+          hold_until?: string | null
+          id?: string
+          idempotency_key?: string | null
+          job_id: string
+          modifier_cents?: number
+          payout_id?: string | null
+          provider_org_id: string
+          status?: string
+          total_cents?: number
+          updated_at?: string
+        }
+        Update: {
+          base_amount_cents?: number
+          created_at?: string
+          hold_reason?: string | null
+          hold_until?: string | null
+          id?: string
+          idempotency_key?: string | null
+          job_id?: string
+          modifier_cents?: number
+          payout_id?: string | null
+          provider_org_id?: string
+          status?: string
+          total_cents?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_earnings_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_earnings_payout_id_fkey"
+            columns: ["payout_id"]
+            isOneToOne: false
+            referencedRelation: "provider_payouts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_earnings_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       provider_enforcement_actions: {
         Row: {
           action_type: string
@@ -1043,6 +1561,108 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "provider_enforcement_actions_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_hold_context: {
+        Row: {
+          created_at: string
+          hold_id: string
+          id: string
+          note: string | null
+          photo_storage_path: string | null
+          provider_org_id: string
+          reason_category: string | null
+        }
+        Insert: {
+          created_at?: string
+          hold_id: string
+          id?: string
+          note?: string | null
+          photo_storage_path?: string | null
+          provider_org_id: string
+          reason_category?: string | null
+        }
+        Update: {
+          created_at?: string
+          hold_id?: string
+          id?: string
+          note?: string | null
+          photo_storage_path?: string | null
+          provider_org_id?: string
+          reason_category?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_hold_context_hold_id_fkey"
+            columns: ["hold_id"]
+            isOneToOne: false
+            referencedRelation: "provider_holds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_hold_context_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_holds: {
+        Row: {
+          created_at: string
+          earning_id: string
+          hold_type: string
+          id: string
+          provider_org_id: string
+          reason_category: string | null
+          released_at: string | null
+          released_by_admin_user_id: string | null
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          earning_id: string
+          hold_type?: string
+          id?: string
+          provider_org_id: string
+          reason_category?: string | null
+          released_at?: string | null
+          released_by_admin_user_id?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          earning_id?: string
+          hold_type?: string
+          id?: string
+          provider_org_id?: string
+          reason_category?: string | null
+          released_at?: string | null
+          released_by_admin_user_id?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_holds_earning_id_fkey"
+            columns: ["earning_id"]
+            isOneToOne: false
+            referencedRelation: "provider_earnings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_holds_provider_org_id_fkey"
             columns: ["provider_org_id"]
             isOneToOne: false
             referencedRelation: "provider_orgs"
@@ -1185,6 +1805,134 @@ export type Database = {
             columns: ["invite_id"]
             isOneToOne: false
             referencedRelation: "provider_invites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_payout_accounts: {
+        Row: {
+          created_at: string
+          id: string
+          onboarding_url: string | null
+          processor_account_id: string | null
+          provider_org_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          onboarding_url?: string | null
+          processor_account_id?: string | null
+          provider_org_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          onboarding_url?: string | null
+          processor_account_id?: string | null
+          provider_org_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_payout_accounts_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: true
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_payout_line_items: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          earning_id: string
+          id: string
+          payout_id: string
+        }
+        Insert: {
+          amount_cents?: number
+          created_at?: string
+          earning_id: string
+          id?: string
+          payout_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          earning_id?: string
+          id?: string
+          payout_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_payout_line_items_earning_id_fkey"
+            columns: ["earning_id"]
+            isOneToOne: true
+            referencedRelation: "provider_earnings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_payout_line_items_payout_id_fkey"
+            columns: ["payout_id"]
+            isOneToOne: false
+            referencedRelation: "provider_payouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_payouts: {
+        Row: {
+          created_at: string
+          id: string
+          paid_at: string | null
+          payout_run_id: string | null
+          processor_payout_id: string | null
+          provider_org_id: string
+          status: string
+          total_cents: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          payout_run_id?: string | null
+          processor_payout_id?: string | null
+          provider_org_id: string
+          status?: string
+          total_cents?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          payout_run_id?: string | null
+          processor_payout_id?: string | null
+          provider_org_id?: string
+          status?: string
+          total_cents?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_payouts_payout_run_id_fkey"
+            columns: ["payout_run_id"]
+            isOneToOne: false
+            referencedRelation: "payout_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_payouts_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
             referencedColumns: ["id"]
           },
         ]
@@ -2217,6 +2965,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_apply_credit: {
+        Args: {
+          p_amount_cents: number
+          p_customer_id: string
+          p_reason: string
+        }
+        Returns: Json
+      }
+      admin_issue_refund: {
+        Args: { p_amount_cents: number; p_invoice_id: string; p_reason: string }
+        Returns: Json
+      }
       admin_override_complete_job: {
         Args: { p_job_id: string; p_note?: string; p_reason: string }
         Returns: Json
@@ -2240,12 +3000,20 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_release_hold: {
+        Args: { p_hold_id: string; p_reason: string }
+        Returns: Json
+      }
       admin_resolve_customer_issue: {
         Args: { p_issue_id: string; p_resolution_note: string }
         Returns: Json
       }
       admin_update_coverage_status: {
         Args: { p_coverage_id: string; p_new_status: string; p_reason?: string }
+        Returns: Json
+      }
+      admin_void_invoice: {
+        Args: { p_invoice_id: string; p_reason: string }
         Returns: Json
       }
       bootstrap_new_user: { Args: { _full_name: string }; Returns: undefined }
@@ -2262,6 +3030,11 @@ export type Database = {
       confirm_service_day: { Args: { p_assignment_id: string }; Returns: Json }
       create_or_refresh_service_day_offer: {
         Args: { p_property_id: string }
+        Returns: Json
+      }
+      create_provider_earning: { Args: { p_job_id: string }; Returns: Json }
+      generate_subscription_invoice: {
+        Args: { p_subscription_id: string }
         Returns: Json
       }
       get_day_order: {
@@ -2289,12 +3062,14 @@ export type Database = {
         }
         Returns: Json
       }
+      run_payout_batch: { Args: { p_payout_run_id: string }; Returns: Json }
       select_alternative_service_day: {
         Args: { p_assignment_id: string; p_offer_id: string }
         Returns: Json
       }
       start_job: { Args: { p_job_id: string }; Returns: Json }
       submit_provider_onboarding: { Args: { p_org_id: string }; Returns: Json }
+      transition_eligible_earnings: { Args: never; Returns: Json }
       validate_provider_invite: { Args: { p_code: string }; Returns: Json }
     }
     Enums: {
