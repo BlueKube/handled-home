@@ -48,6 +48,24 @@ export function useServiceDayAssignment(propertyId: string | null | undefined) {
     },
   });
 
+  // M4: Check for most recent superseded assignment (expired offer)
+  const expiredQuery = useQuery({
+    queryKey: ["service-day-expired", propertyId],
+    enabled: !!user && !!propertyId && !assignmentQuery.data,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_day_assignments")
+        .select("*")
+        .eq("property_id", propertyId!)
+        .eq("status", "superseded")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data as ServiceDayAssignment | null;
+    },
+  });
+
   const offersQuery = useQuery({
     queryKey: ["service-day-offers", assignmentQuery.data?.id],
     enabled: !!assignmentQuery.data?.id,
@@ -66,9 +84,11 @@ export function useServiceDayAssignment(propertyId: string | null | undefined) {
     assignment: assignmentQuery.data,
     offers: offersQuery.data ?? [],
     isLoading: assignmentQuery.isLoading,
+    expiredPrevious: !!expiredQuery.data && !assignmentQuery.data,
     refetch: () => {
       assignmentQuery.refetch();
       offersQuery.refetch();
+      expiredQuery.refetch();
     },
   };
 }

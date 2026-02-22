@@ -1,7 +1,7 @@
 import {
-  Home, CalendarDays, History, CreditCard, MapPin, Wallet, Users, HelpCircle, Settings,
+  Home, CalendarDays, CalendarCheck, History, CreditCard, MapPin, Wallet, Users, HelpCircle, Settings,
   Briefcase, DollarSign, BarChart3, Building2, Map,
-  LayoutDashboard, Globe, Gauge, Package, ListChecks, Shield, Megaphone, FileText, Lock
+  LayoutDashboard, Globe, Gauge, Package, ListChecks, Shield, Megaphone, FileText, Lock, CalendarClock
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,6 +14,7 @@ import logo from "@/assets/handled-home-logo.png";
 const customerNav = [
   { title: "Dashboard", url: "/customer", icon: Home },
   { title: "Plans", url: "/customer/plans", icon: CreditCard },
+  { title: "Service Day", url: "/customer/service-day", icon: CalendarCheck },
   { title: "Build Routine", url: "/customer/routine", icon: CalendarDays },
   { title: "Services", url: "/customer/services", icon: Package },
   { title: "Service History", url: "/customer/history", icon: History },
@@ -41,6 +42,7 @@ const adminNav = [
   { title: "Regions & Zones", url: "/admin/zones", icon: Globe },
   { title: "SKU Catalog", url: "/admin/skus", icon: Package },
   { title: "Plans", url: "/admin/plans", icon: CreditCard },
+  { title: "Service Days", url: "/admin/service-days", icon: CalendarClock },
   { title: "Subscriptions", url: "/admin/subscriptions", icon: Wallet },
   { title: "Providers", url: "/admin/providers", icon: Shield },
   { title: "Scheduling", url: "/admin/scheduling", icon: CalendarDays },

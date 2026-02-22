@@ -8,16 +8,17 @@ export function useServiceDayActions() {
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["service-day-assignment"] });
     qc.invalidateQueries({ queryKey: ["service-day-offers"] });
+    qc.invalidateQueries({ queryKey: ["service-day-expired"] });
   };
 
   const createOrRefreshOffer = useMutation({
     mutationFn: async (propertyId: string) => {
       const { data, error } = await supabase.rpc(
-        "create_or_refresh_service_day_offer" as any,
+        "create_or_refresh_service_day_offer",
         { p_property_id: propertyId }
       );
       if (error) throw error;
-      return data as any;
+      return data;
     },
     onSuccess: invalidate,
     onError: (err: any) => toast.error(err.message),
@@ -26,11 +27,11 @@ export function useServiceDayActions() {
   const confirmServiceDay = useMutation({
     mutationFn: async (assignmentId: string) => {
       const { data, error } = await supabase.rpc(
-        "confirm_service_day" as any,
+        "confirm_service_day",
         { p_assignment_id: assignmentId }
       );
       if (error) throw error;
-      return data as any;
+      return data;
     },
     onSuccess: () => {
       invalidate();
@@ -42,11 +43,11 @@ export function useServiceDayActions() {
   const rejectServiceDay = useMutation({
     mutationFn: async (assignmentId: string) => {
       const { data, error } = await supabase.rpc(
-        "reject_service_day_once" as any,
+        "reject_service_day_once",
         { p_assignment_id: assignmentId }
       );
       if (error) throw error;
-      return data as any;
+      return data;
     },
     onSuccess: invalidate,
     onError: (err: any) => toast.error(err.message),
@@ -61,11 +62,11 @@ export function useServiceDayActions() {
       offerId: string;
     }) => {
       const { data, error } = await supabase.rpc(
-        "select_alternative_service_day" as any,
+        "select_alternative_service_day",
         { p_assignment_id: assignmentId, p_offer_id: offerId }
       );
       if (error) throw error;
-      return data as any;
+      return data;
     },
     onSuccess: () => {
       invalidate();
@@ -86,7 +87,7 @@ export function useServiceDayActions() {
       if (!user) throw new Error("Not authenticated");
 
       const { error } = await supabase
-        .from("service_day_preferences" as any)
+        .from("service_day_preferences")
         .upsert(
           {
             customer_id: user.id,
