@@ -1,133 +1,43 @@
 
 
-# Documentation Alignment Update
+# Fix: Auth Login/Signup Hanging
 
-The codebase has built through Module 11, but most docs still say "Current Focus: Module 06." This update brings everything current and incorporates the strategic framing from your ChatGPT analysis.
+## Root Cause
 
----
+The Supabase JS client holds an internal session lock when firing `onAuthStateChange`. The current code uses `async`/`await` inside that callback (line 70-80 of `AuthContext.tsx`), which causes a deadlock -- the PostgREST requests in `fetchUserData` need the same lock to read the auth token, but it's already held.
 
-## 1. Update `docs/implementation-plan.md`
+The same issue affects the `bootstrap_new_user` RPC call in `AuthPage.tsx` (line 69) -- it runs while the session lock is still held from `signUp()`.
 
-Move Modules 06-11 into the "Completed" table. Update "Current Focus" to Module 12 (Support and Disputes). Add notes reflecting what was actually built in each module:
+## Changes
 
-| Module | Name | Notes |
-|--------|------|-------|
-| 06 | Service Day System | Zone-based assignment, offer/accept/reject, TTL cleanup, capacity checks |
-| 07 | Bundle Builder | SKU stacking per service week, cadence picker, 4-week preview, seasonal boosts |
-| 08 | Provider Onboarding | Org creation, invite flow, zone coverage, capability matching, compliance |
-| 09 | Job Execution | Checklist enforcement, photo capture, server-validated completion, exception handling |
-| 10 | Customer Dashboard and Proof | Visit timeline, photo gallery, structured issue reporting, 4-week preview |
-| 11 | Billing and Payouts | Ledger-first billing, Stripe Connect payouts, webhook processing, admin exception queue |
+### 1. `src/contexts/AuthContext.tsx`
 
-Remaining MVP becomes empty (all 01-09 done). Post-MVP updates 10-11 to completed.
+- Remove `async` from `onAuthStateChange` callback
+- Replace `await fetchUserData(...)` with `setTimeout(() => fetchUserData(...), 0)` to defer execution outside the lock
+- Move `setLoading(false)` into `fetchUserData` (at the end, in a `finally` block) so loading clears only after data is loaded
+- Add self-healing bootstrap: if `fetchUserData` finds zero roles, call `bootstrap_new_user` RPC and re-fetch. This handles partial signups automatically.
+- Keep the `getSession().then(...)` path unchanged except also using the updated `fetchUserData` (which now handles its own loading state)
 
----
+### 2. `src/pages/AuthPage.tsx`
 
-## 2. Update `docs/masterplan.md` Roadmap section
+- Remove the `bootstrap_new_user` RPC call from `handleSignup` (lines 67-75). The bootstrap is now handled inside `fetchUserData` when it detects missing roles.
+- Keep `navigate("/")` after signup -- the `onAuthStateChange` flow will handle everything else.
 
-Replace the Roadmap section to reflect actual progress:
+### 3. Manual data fix for existing test user
 
-- **Completed:** Modules 01-11
-- **Current focus:** Module 12 (Support and Disputes)
-- **Remaining:** Modules 13-14 (Referrals, Reporting)
+The user `test@handled.home` (id: `7cfa1714-bf93-441f-99c0-4bc3e24a284c`) exists in auth but has no profile or role. Run a SQL migration to insert their profile and customer role so they can log in after the fix.
 
-Add a new "Launch Scoreboard" section (from ChatGPT's strategic analysis) under the Roadmap, capturing the weekly metrics that prove the flywheel:
+## Technical Detail
 
-- Service Day offer acceptance rate
-- Offer expiry rate (target: near zero)
-- Photo compliance % (target: 95%+)
-- On-time completion % (target: 90%+)
-- Redo rate baseline
-- Support minutes per job (target: under 3 min)
-- Zone density: stops/day + minutes/stop
+```text
+BEFORE (deadlock):
+  signIn() --[holds lock]--> onAuthStateChange(async cb)
+    --> await fetchUserData()
+      --> supabase.from("user_roles")... --[needs lock]--> HANG
 
-These already align with the existing Launch Readiness Criteria in `implementation-plan.md` but frame them as ongoing operational metrics rather than one-time gates.
-
----
-
-## 3. Update `docs/app-flow-pages-and-roles.md`
-
-This file is significantly outdated. Update to reflect all pages that now exist:
-
-**Customer pages** -- add:
-- Billing Overview, Payment Methods, Billing History, Receipt Detail
-- Service Day (assignment/offer flow)
-- Routine Builder, Routine Review, Routine Confirm
-- Visit Detail
-
-**Provider pages** -- replace "Earnings" with:
-- Payouts Overview, Payout History
-- Onboarding (org, coverage, capabilities, compliance, review)
-- Job Checklist, Job Photos, Job Complete
-- SKUs (authorized services)
-
-**Admin pages** -- add:
-- Service Days, Capacity
-- Billing, Payouts, Exceptions
-- Customer Ledger, Provider Ledger
-- Subscriptions, Bundles, Scheduling
-- Provider Detail, Job Detail
-
-**Primary Journeys** -- add:
-- Customer billing fix flow (failed payment CTA)
-- Provider payout onboarding (Stripe Connect)
-- Admin exception triage (billing exceptions queue)
-
----
-
-## 4. Update `docs/global-system-architecture.md`
-
-### Section 5: Add billing/payout state machines
-
-- **Invoice status:** UPCOMING -> DUE -> PAID / FAILED / VOID
-- **Payment status:** INITIATED -> SUCCEEDED / FAILED
-- **Earning status:** EARNED -> ELIGIBLE -> IN_PAYOUT -> PAID (with HELD / HELD_UNTIL_READY branches)
-- **Payout status:** INITIATED -> PAID / FAILED
-- **Hold status:** ACTIVE -> RELEASED / EXPIRED
-
-### Section 6: Update Financial schema spine
-
-Replace the minimal 4-table list with the actual Module 11 tables:
-- customer_payment_methods, customer_invoices, customer_invoice_line_items, customer_payments, customer_ledger_events, customer_credits
-- provider_payout_accounts, provider_earnings, provider_payouts, provider_payout_line_items, provider_holds, provider_hold_context, provider_ledger_events
-- payment_webhook_events, billing_runs, payout_runs, admin_adjustments, billing_exceptions
-
-### Section 7: Add billing rules to rules engine
-
-- Invoice generation (cycle-based, idempotent)
-- Dunning retry schedule
-- Earning hold/release logic
-- Payout threshold + eligibility transition
-- Credit application (capped to invoice total)
-
----
-
-## 5. Remove duplicate Module 10 spec
-
-`docs/modules/10-visit-tracking-photos.md` was already replaced with a redirect note (previous fix). Confirm it still just contains the redirect. No action needed if so.
-
----
-
-## 6. Add strategic notes to masterplan
-
-Under "What We Optimize For," add the three strategic bets as explicit decisions (from the ChatGPT analysis):
-
-1. **Launch SKU count:** 3-5 per zone until density + proof compliance is stable
-2. **Default routine is primary path:** Recommended routine and auto-fit are the main flow, not a side feature
-3. **Seasonal complexity boundary:** Window preference (early/mid/late month) only, no date-level scheduling
-
-These are already implied by the specs but making them explicit prevents drift.
-
----
-
-## Summary of file changes
-
-| File | Change |
-|------|--------|
-| `docs/implementation-plan.md` | Move modules 06-11 to completed, update current focus to 12 |
-| `docs/masterplan.md` | Update roadmap progress, add Launch Scoreboard section, add 3 strategic bets |
-| `docs/app-flow-pages-and-roles.md` | Full rewrite reflecting all implemented pages and journeys |
-| `docs/global-system-architecture.md` | Add billing state machines, update financial schema spine, expand rules engine |
-| `docs/modules/10-visit-tracking-photos.md` | Verify redirect note is in place (no change expected) |
-
-No code changes. Documentation only.
+AFTER (fixed):
+  signIn() --[holds lock]--> onAuthStateChange(cb)
+    --> setTimeout(fetchUserData, 0)  // queued, returns immediately
+    --> lock released
+  --> fetchUserData() runs freely, lock available
+```
