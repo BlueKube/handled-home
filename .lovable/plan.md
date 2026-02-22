@@ -1,236 +1,300 @@
 
 
-# Module 04: SKU Catalog — Implementation Plan
+# Module 05: Subscription Engine + Soft Onboarding
 
 ## Overview
-Build the full SKU Catalog: admin CRUD with structured scope/photos/checklist, customer browse page, provider reference view. Extends the existing `service_skus` table with new columns.
+This is the largest module so far. It introduces plan browsing, draft routines, subscription checkout (Stripe), entitlement resolution, admin plan management, and subscription gating. The existing empty `subscription_plans` table will be dropped and replaced with 9 new tables.
 
 ---
 
-## Current State
-- `service_skus` table exists with: `id`, `name`, `description` (nullable), `inclusions` (nullable text[]), `exclusions` (nullable text[]), `duration_minutes`, `fulfillment_mode` (enum), `weather_sensitive`, `required_photos` (nullable jsonb), `base_price_cents` (NOT NULL, default 0), `status` (default 'active'), `created_at`
-- RLS: all authenticated can read all SKUs; admins can manage
-- `/admin/skus` is a placeholder page
-- No customer or provider SKU pages exist
-- `fulfillment_mode` enum already has: `same_day_preferred`, `same_week_allowed`, `independent_cadence`
-- StatusBadge already handles `draft`, `active`, `paused`, `archived`
+## Phase 1: Documentation + Database Schema
+
+### 1a. Replace docs
+Replace `docs/modules/05-subscription-engine.md` with the uploaded PRD.
+
+### 1b. Drop old table
+The existing `subscription_plans` table is empty and doesn't match the new schema. Drop it.
+
+### 1c. Create 9 new tables
+
+**1) `plans`** — replaces `subscription_plans`
+- id, name, tagline, status (draft/active/hidden/retired), display_price_text, recommended_rank, current_entitlement_version_id, stripe_product_id, stripe_price_id, created_at, updated_at + trigger
+
+**2) `plan_zone_availability`**
+- id, plan_id (FK plans), zone_id (FK zones), is_enabled (boolean), created_at
+- Unique: (plan_id, zone_id)
+
+**3) `plan_entitlement_versions`**
+- id, plan_id (FK plans), version (int), status (draft/published/retired), model_type (credits_per_cycle/count_per_cycle/minutes_per_cycle), included_credits, included_count, included_minutes, extra_allowed, max_extra_credits, max_extra_count, max_extra_minutes, created_at
+
+**4) `plan_entitlement_sku_rules`**
+- id, entitlement_version_id (FK plan_entitlement_versions), sku_id (FK service_skus), rule_type (included/extra_allowed/blocked/provider_only), reason (nullable)
+- Unique: (entitlement_version_id, sku_id, rule_type)
+
+**5) `customer_plan_selections`** (draft routine storage)
+- id, customer_id, property_id, zone_id (nullable), selected_plan_id (FK plans), entitlement_version_id (FK plan_entitlement_versions), status (draft/locked), draft_routine (jsonb, default '[]'), created_at, updated_at
+- Unique: (customer_id, property_id)
+
+**6) `subscriptions`**
+- id, customer_id, property_id, zone_id (nullable), plan_id (FK plans), entitlement_version_id (FK plan_entitlement_versions), status (trialing/active/past_due/incomplete/canceling/canceled), current_period_start, current_period_end, cancel_at_period_end, pending_plan_id, pending_effective_at, stripe_customer_id, stripe_subscription_id, created_at, updated_at
+
+**7) `subscription_events`**
+- id, subscription_id (FK subscriptions), source, event_type, payload (jsonb), created_at
+
+**8) `admin_audit_log`**
+- id, admin_user_id, action, entity_type, entity_id, before (jsonb), after (jsonb), reason, created_at
+
+**9) `stripe_mappings`** -- deferred, Stripe IDs will live directly on `plans` and `subscriptions` tables instead (simpler for MVP)
+
+### 1d. RLS Policies
+
+- **plans**: All authenticated can SELECT active/hidden plans; admins can manage all
+- **plan_zone_availability**: All authenticated can SELECT; admins can manage
+- **plan_entitlement_versions**: All authenticated can SELECT published versions; admins can manage all
+- **plan_entitlement_sku_rules**: All authenticated can SELECT; admins can manage
+- **customer_plan_selections**: Customers own their rows (customer_id = auth.uid()); admins can read all
+- **subscriptions**: Customers own their rows; admins can manage all
+- **subscription_events**: Customers can read own subscription events; admins can read all
+- **admin_audit_log**: Admins only (read + insert)
+
+### 1e. Indexes
+- plan_zone_availability(plan_id, zone_id)
+- customer_plan_selections(customer_id, property_id)
+- subscriptions(customer_id, status)
+
+### 1f. updated_at triggers
+On plans, customer_plan_selections, subscriptions (reuse existing trigger function).
 
 ---
 
-## Step 1: Replace Documentation
-Replace `docs/modules/04-sku-catalog.md` with the uploaded PRD.
+## Phase 2: Enable Stripe
 
-## Step 2: Database Migration
-
-### 2a. Add new columns to `service_skus`
-- `category TEXT NULL` -- optional grouping (e.g., Exterior, Kitchen, Utilities)
-- `checklist JSONB NOT NULL DEFAULT '[]'` -- structured task verification items
-- `price_hint_cents INT NULL` -- optional, non-binding pricing hint
-- `pricing_notes TEXT NULL` -- optional internal notes
-- `edge_case_notes TEXT NULL` -- optional edge-case instructions
-- `updated_at TIMESTAMPTZ NOT NULL DEFAULT now()` -- with auto-update trigger
-
-### 2b. Alter existing columns
-- `description`: SET NOT NULL, SET DEFAULT '' (PRD requires it)
-- `inclusions`: SET NOT NULL (already has DEFAULT '{}')
-- `exclusions`: SET NOT NULL (already has DEFAULT '{}')
-- `required_photos`: SET NOT NULL (already has DEFAULT '[]')
-- `status`: change DEFAULT from 'active' to 'draft'
-
-### 2c. Handle `base_price_cents`
-The PRD uses `price_hint_cents` (nullable) instead of `base_price_cents` (NOT NULL, default 0). Strategy:
-- Keep `base_price_cents` for backward compatibility (no data loss)
-- Add `price_hint_cents` as the new nullable column
-- Admin UI uses `price_hint_cents` going forward
-- `base_price_cents` can be deprecated/removed in a future cleanup
-
-### 2d. Add `updated_at` trigger
-Reuse existing `update_updated_at_column()` function.
-
-### 2e. Update RLS policies
-Current policy lets all authenticated users read all SKUs. PRD says non-admins should only see `active` SKUs.
-
-Replace the SELECT policy:
-```sql
-DROP POLICY "Anyone authenticated can read SKUs" ON service_skus;
-CREATE POLICY "Non-admins can read active SKUs"
-  ON service_skus FOR SELECT
-  USING (
-    status = 'active'
-    OR has_role(auth.uid(), 'admin')
-  );
-```
-
-This ensures customers/providers only see active SKUs, while admins see all.
+Use the Stripe integration tool to enable Stripe on the project. This is required for subscription checkout.
 
 ---
 
-## Step 3: Create Data Hook
+## Phase 3: Entitlement Resolution Layer
 
-### `src/hooks/useSkus.ts`
-- `useSkus(filters?)` -- fetch SKUs with optional status/category filters. Admin sees all; customer/provider filtered to active by RLS.
-- `useSkuDetail(skuId)` -- fetch single SKU
-- `useCreateSku()` -- insert mutation
-- `useUpdateSku()` -- update mutation
-- `useDuplicateSku()` -- fetch existing, insert copy with "(Copy)" name and status = 'draft'
+### `src/hooks/useEntitlements.ts`
 
----
+Core function: `resolveEntitlements(planId, zoneId, entitlementVersionId?)`
 
-## Step 4: Build Admin SKU Catalog Page
+Fetches:
+1. Plan details
+2. Plan-zone availability for the customer's zone
+3. Entitlement version (provided or plan's current)
+4. SKU rules for that version
+5. All active SKUs (from Module 04)
 
-### `src/pages/admin/SKUs.tsx` (replace placeholder)
-Layout:
-- Search bar + category filter dropdown
-- Status tabs: All | Active | Draft | Paused/Archived
-- "New SKU" CTA button
-
-### `src/components/admin/SkuListCard.tsx`
-Each row shows:
-- Name
-- Status pill
-- Duration (e.g., "30 min")
-- Fulfillment mode label
-- Photo count (e.g., "3 photos")
-- Price hint badge if set (e.g., "$29 est.")
-- Tap opens detail sheet
-
-### `src/components/admin/SkuFormSheet.tsx`
-Single-column form in a sheet modal. Collapsible sections:
-
-**A) Basics**: Name (required), Description (required), Category (optional text), Status (draft/active/paused/archived)
-
-**B) Scope**: Inclusions (list input with add/remove), Exclusions (list input), Edge-case notes (textarea)
-
-**C) Execution Rules**: Duration minutes (number), Fulfillment mode (select), Weather sensitive (toggle)
-
-**D) Proof Requirements (Photos)**: Structured list -- each item has label, when (before/after/both), count (number), notes (optional). Add/remove items.
-
-**E) Checklist**: Structured list -- each item has label, required (toggle). Add/remove items.
-
-**F) Pricing Metadata**: Price hint cents (optional number input, displayed as dollars), Pricing notes (optional textarea). Clear helper text: "For internal reference only."
-
-### `src/components/admin/SkuDetailSheet.tsx`
-Read-only detail view with Edit and Duplicate actions. Shows all fields in a clean layout. Archive action with confirmation.
-
-Validation rules:
-- Name required
-- Description required
-- At least 1 inclusion and 1 exclusion
-- Duration must be set (> 0)
-- Confirm dialog when changing fulfillment mode, photo count, or checklist count on an active SKU
-
----
-
-## Step 5: Customer Services Page
-
-### New route: `/customer/services`
-Add to App.tsx inside customer routes (wrapped in CustomerPropertyGate).
-
-### `src/pages/customer/Services.tsx`
-- List of active SKUs (RLS handles filtering)
-- Optional category filter
-- Each card: name, short description, duration, fulfillment mode in plain English, weather badge
-- Tap opens detail
-
-### `src/pages/customer/ServiceDetail.tsx` (or inline sheet)
-- Name + description
-- "What's included" bullets (inclusions)
-- "What's not included" bullets (exclusions)
-- Timing: duration + fulfillment mode in plain English
-- "How we confirm it's done": photo summary
-- Price hint if exists (labeled "Estimated")
-
-### Plain-English fulfillment mode map
+Returns the stable payload from PRD section 9.3:
 ```typescript
-const modeLabels = {
-  same_day_preferred: "Performed on your Service Day",
-  same_week_allowed: "Completed within your service week",
-  independent_cadence: "Scheduled on its own cycle",
-};
+interface EntitlementPayload {
+  plan: { plan_id, entitlement_version_id, model_type, included, extras }
+  zone: { zone_id, is_covered, plan_enabled, blocks }
+  skus: Array<{ sku_id, status, provider_only, reason, ui_badge, ui_explainer }>
+  messages: { included_explainer, extra_explainer, change_policy }
+}
 ```
 
----
-
-## Step 6: Provider SKU Reference
-
-No new page needed for now -- the PRD says "reusable detail view component." Create:
-
-### `src/components/SkuDetailView.tsx`
-Shared read-only component showing:
-- Scope (inclusions/exclusions)
-- Checklist items
-- Required photos list
-- Weather sensitivity
-- Edge-case notes
-
-Used by both admin detail sheet and provider reference. Provider page (`/provider/jobs`) will use this component in Module 09.
+This hook is the single source of truth used by all plan/routine/subscribe pages.
 
 ---
 
-## Step 7: Navigation Updates
+## Phase 4: Data Hooks
 
-### Customer nav
-Add "Services" entry to `customerNav` in AppSidebar.tsx and optionally to BottomTabBar (or accessible from "More" menu).
+### `src/hooks/usePlans.ts`
+- `usePlans()` -- fetch active/hidden plans with zone availability for customer's zone
+- `usePlanDetail(planId)` -- single plan with entitlement data
+- `useCreatePlan()` / `useUpdatePlan()` / `useDuplicatePlan()` -- admin mutations
+- `usePlanZoneAvailability(planId)` -- zone toggle data for admin
 
-Route: `/customer/services`
+### `src/hooks/useSubscription.ts`
+- `useCustomerSubscription()` -- fetch current user's subscription
+- `useCreateSubscription()` -- create internal subscription record post-checkout
+- `useCancelSubscription()` -- cancel flow
+- `useChangePlan()` -- pending plan change (next cycle)
+
+### `src/hooks/useDraftRoutine.ts`
+- `useDraftRoutine()` -- fetch/save customer_plan_selections
+- `useAddToRoutine()` / `useRemoveFromRoutine()` -- mutations
+- Enforces entitlement caps client-side
+
+### `src/hooks/useAdminSubscriptions.ts`
+- `useAdminSubscriptions(filters)` -- list all subscriptions with search
+- `useAdminSubscriptionDetail(id)` -- detail with events timeline
+
+---
+
+## Phase 5: Customer Pages
+
+### 5a. Plans Browse (`/customer/plans`)
+- Route: `/customer/plans` (accessible without subscription)
+- Shows 2-3 plans as cards
+- Recommended badge based on zone + property flags
+- Zone availability label per plan
+- CTAs: "Preview plan" and "Build a routine"
+
+### 5b. Plan Detail (`/customer/plans/:planId`)
+- What's included (SKU groups via entitlement resolution)
+- What's extra
+- What's not available (with reasons)
+- "How changes work" section
+- CTAs: "Build routine" / "Subscribe"
+
+### 5c. Build Routine (`/customer/routine`)
+- Plan selector (switch among available plans)
+- Sticky summary bar (credits used / included / extras)
+- SKU catalog list with entitlement badges (Included / Extra / Blocked)
+- Bottom drawer with selected items grouped
+- Save draft routine (persisted to customer_plan_selections)
+- "Activate plan" CTA (leads to subscribe)
+- No operational obligation until subscription active
+
+### 5d. Subscribe (`/customer/subscribe`)
+- Confirm plan + billing summary
+- Stripe Checkout (webview)
+- On success: create internal subscription record, show success screen
+- "What happens next" messaging
+
+### 5e. Subscription Management (`/customer/subscription`)
+- Replace existing placeholder
+- Current plan + status pill + renewal date
+- "Change plan" (effective next cycle)
+- "Cancel subscription" with confirmation
+- "Fix payment" (only if past_due)
+
+### 5f. Navigation Updates
+- Add "Plans" to customer sidebar and bottom tab bar
+- Update "Subscription" link to point to management page
+- `/customer/plans`, `/customer/plans/:planId`, `/customer/routine`, `/customer/subscribe` routes -- accessible WITHOUT CustomerPropertyGate for browsing, but subscribe CTA requires property
+
+---
+
+## Phase 6: Admin Pages
+
+### 6a. Plan Builder (`/admin/plans`)
+- Replace existing placeholder
+- Plan list with status, zone count, entitlement version, updated date
+- Create/edit plan form (sheet):
+  - Basics: name, tagline, status, display_price_text, recommended_rank
+  - Zone availability: multi-toggle zone list
+  - Entitlements: model type, credits/count/minutes, extra rules, SKU picklist rules
+  - Stripe fields: product_id, price_id (optional)
+  - Publishing validation: at least 1 zone, valid entitlements
+- Duplicate plan action
+- Retire (soft) action
+- Entitlement versioning: "Create new version?" prompt on edit
+
+### 6b. Subscriptions Admin (`/admin/subscriptions`)
+- New route + sidebar entry
+- List with search (customer, plan, status)
+- Detail view: customer info, plan, zone, status timeline, Stripe IDs
+- Guarded admin actions: "Mark as comped", "Force cancel" (with reason + audit log)
+
+---
+
+## Phase 7: Gating
+
+### Subscription-aware route protection
+- New `SubscriptionGate` component (similar to CustomerPropertyGate)
+- Wraps routes that require active subscription (future modules)
+- If no active subscription: redirect to `/customer/plans` with context banner
+- For Module 05: only used as infrastructure -- no routes gated yet since obligation modules come later
+
+---
+
+## Phase 8: Stripe Integration
+
+### Edge function: `create-checkout-session`
+- Receives plan_id, customer info
+- Creates Stripe Checkout Session
+- Returns checkout URL
+
+### Edge function: `stripe-webhook`
+- Handles: checkout.session.completed, customer.subscription.updated/deleted, invoice.payment_failed/succeeded
+- Updates subscription status + period dates
+- Writes subscription_events
+- Never computes entitlements from Stripe
+
+### Edge function: `create-portal-session` (for payment method updates)
+- Creates Stripe Customer Portal session for "Fix payment" flow
+
+---
+
+## Reusable Components
+- `PlanCard` -- plan preview card with badges
+- `EntitlementBadge` -- Included / Extra / Blocked pills
+- `RoutineSummaryBar` -- sticky caps + usage display
+- `FixPaymentPanel` -- past_due payment update UI
+- `SubscriptionStatusPanel` -- current plan + status display
 
 ---
 
 ## Files Impact
 
-### New files
-- `src/hooks/useSkus.ts` -- SKU CRUD hooks
-- `src/components/admin/SkuListCard.tsx` -- SKU list row component
-- `src/components/admin/SkuFormSheet.tsx` -- Create/edit form sheet
-- `src/components/admin/SkuDetailSheet.tsx` -- Read-only detail sheet
-- `src/components/SkuDetailView.tsx` -- Shared read-only SKU detail (reusable)
-- `src/pages/customer/Services.tsx` -- Customer catalog browse
-- `src/pages/customer/ServiceDetail.tsx` -- Customer SKU detail view
+### New files (~20+)
+- `src/hooks/useEntitlements.ts`
+- `src/hooks/usePlans.ts`
+- `src/hooks/useSubscription.ts`
+- `src/hooks/useDraftRoutine.ts`
+- `src/hooks/useAdminSubscriptions.ts`
+- `src/components/plans/PlanCard.tsx`
+- `src/components/plans/EntitlementBadge.tsx`
+- `src/components/plans/RoutineSummaryBar.tsx`
+- `src/components/plans/FixPaymentPanel.tsx`
+- `src/components/plans/SubscriptionStatusPanel.tsx`
+- `src/components/SubscriptionGate.tsx`
+- `src/pages/customer/Plans.tsx`
+- `src/pages/customer/PlanDetail.tsx`
+- `src/pages/customer/Routine.tsx`
+- `src/pages/customer/Subscribe.tsx`
+- `src/pages/admin/Plans.tsx` (replace placeholder)
+- `src/pages/admin/Subscriptions.tsx`
+- `src/components/admin/PlanFormSheet.tsx`
+- `src/components/admin/PlanDetailSheet.tsx`
+- `src/components/admin/EntitlementEditor.tsx`
+- `src/components/admin/ZoneAvailabilityPanel.tsx`
+- `src/components/admin/SubscriptionDetailSheet.tsx`
+- `supabase/functions/create-checkout-session/index.ts`
+- `supabase/functions/stripe-webhook/index.ts`
+- `supabase/functions/create-portal-session/index.ts`
 
 ### Modified files
-- `docs/modules/04-sku-catalog.md` -- Replace with new PRD
-- `src/pages/admin/SKUs.tsx` -- Full implementation replacing placeholder
-- `src/App.tsx` -- Add `/customer/services` and `/customer/services/:skuId` routes
-- `src/components/AppSidebar.tsx` -- Add "Services" to customer nav
+- `docs/modules/05-subscription-engine.md`
+- `src/App.tsx` -- new routes
+- `src/components/AppSidebar.tsx` -- nav updates
+- `src/components/BottomTabBar.tsx` -- add Plans tab
+- `src/pages/customer/Subscription.tsx` -- replace placeholder
+- `supabase/config.toml` -- edge function JWT config
 
 ### Database changes
-- Migration: add columns (`category`, `checklist`, `price_hint_cents`, `pricing_notes`, `edge_case_notes`, `updated_at`), alter nullability on existing columns, change default status, add trigger, update RLS
+- Drop `subscription_plans` table
+- Create 8 new tables with RLS, indexes, triggers
 
 ---
 
-## Technical Notes
+## Implementation Order
 
-### Structured list input pattern (photos + checklist)
-Reusable component pattern for adding/removing structured items within a form. Each item renders as a mini-form row with a remove button. "Add" button appends a new empty item.
+Due to the size of this module, implementation will proceed in this sequence:
 
-### Photo requirement shape
-```typescript
-interface PhotoRequirement {
-  label: string;
-  when: "before" | "after" | "both";
-  count: number;
-  notes?: string;
-}
-```
+1. Documentation + database migration (all tables at once)
+2. Enable Stripe
+3. Entitlement resolution hook
+4. Plan data hooks + admin plan builder page
+5. Customer plans browse + plan detail pages
+6. Draft routine page
+7. Subscribe flow + Stripe edge functions
+8. Subscription management page
+9. Admin subscriptions page
+10. Subscription gating infrastructure
+11. Navigation updates across all roles
 
-### Checklist item shape
-```typescript
-interface ChecklistItem {
-  label: string;
-  required: boolean;
-}
-```
+---
 
-### Duplicate SKU logic
-```typescript
-// Fetch existing SKU, spread all fields, override:
-// - Remove id (let DB generate)
-// - name: `${original.name} (Copy)`
-// - status: 'draft'
-// - created_at/updated_at: let DB default
-```
+## Scope Decisions
 
-### Validation
-- Block save if: no name, no description, empty inclusions, empty exclusions, duration <= 0
-- Confirmation dialog if editing active SKU and changing: fulfillment_mode, required_photos count, checklist count
+- **AI features** (section 11 of PRD): Deferred to a follow-up. The plan recommender uses simple deterministic rules for now. Auto-builder, FAQ concierge, and churn warning are out of scope for initial implementation.
+- **stripe_mappings table**: Skipped -- Stripe IDs stored directly on `plans` and `subscriptions` tables for simplicity.
+- **Pause flow**: UI designed now (cancel only); pause implementation deferred per PRD section 5.5.
+- **Proration**: Not implemented per PRD non-goals. Changes default to next cycle.
 
