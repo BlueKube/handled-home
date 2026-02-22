@@ -122,44 +122,62 @@ export type Database = {
       service_skus: {
         Row: {
           base_price_cents: number
+          category: string | null
+          checklist: Json
           created_at: string
-          description: string | null
+          description: string
           duration_minutes: number
-          exclusions: string[] | null
+          edge_case_notes: string | null
+          exclusions: string[]
           fulfillment_mode: Database["public"]["Enums"]["fulfillment_mode"]
           id: string
-          inclusions: string[] | null
+          inclusions: string[]
           name: string
-          required_photos: Json | null
+          price_hint_cents: number | null
+          pricing_notes: string | null
+          required_photos: Json
           status: string
+          updated_at: string
           weather_sensitive: boolean
         }
         Insert: {
           base_price_cents?: number
+          category?: string | null
+          checklist?: Json
           created_at?: string
-          description?: string | null
+          description?: string
           duration_minutes?: number
-          exclusions?: string[] | null
+          edge_case_notes?: string | null
+          exclusions?: string[]
           fulfillment_mode?: Database["public"]["Enums"]["fulfillment_mode"]
           id?: string
-          inclusions?: string[] | null
+          inclusions?: string[]
           name: string
-          required_photos?: Json | null
+          price_hint_cents?: number | null
+          pricing_notes?: string | null
+          required_photos?: Json
           status?: string
+          updated_at?: string
           weather_sensitive?: boolean
         }
         Update: {
           base_price_cents?: number
+          category?: string | null
+          checklist?: Json
           created_at?: string
-          description?: string | null
+          description?: string
           duration_minutes?: number
-          exclusions?: string[] | null
+          edge_case_notes?: string | null
+          exclusions?: string[]
           fulfillment_mode?: Database["public"]["Enums"]["fulfillment_mode"]
           id?: string
-          inclusions?: string[] | null
+          inclusions?: string[]
           name?: string
-          required_photos?: Json | null
+          price_hint_cents?: number | null
+          pricing_notes?: string | null
+          required_photos?: Json
           status?: string
+          updated_at?: string
           weather_sensitive?: boolean
         }
         Relationships: []

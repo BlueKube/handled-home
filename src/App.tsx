@@ -23,6 +23,7 @@ import CustomerBilling from "@/pages/customer/Billing";
 import CustomerReferrals from "@/pages/customer/Referrals";
 import CustomerSupport from "@/pages/customer/Support";
 import CustomerSettings from "@/pages/customer/Settings";
+import CustomerServices from "@/pages/customer/Services";
 
 // Provider pages
 import ProviderDashboard from "@/pages/provider/Dashboard";
@@ -79,6 +80,7 @@ const App = () => (
                 <Route path="/customer/referrals" element={<CustomerPropertyGate><CustomerReferrals /></CustomerPropertyGate>} />
                 <Route path="/customer/support" element={<CustomerPropertyGate><CustomerSupport /></CustomerPropertyGate>} />
                 <Route path="/customer/settings" element={<CustomerPropertyGate><CustomerSettings /></CustomerPropertyGate>} />
+                <Route path="/customer/services" element={<CustomerPropertyGate><CustomerServices /></CustomerPropertyGate>} />
                 <Route path="/customer/more" element={<CustomerPropertyGate><MoreMenuPage /></CustomerPropertyGate>} />
               </Route>
 
