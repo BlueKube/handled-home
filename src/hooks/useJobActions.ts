@@ -21,6 +21,7 @@ export function useJobActions(jobId: string | undefined) {
     onSuccess: invalidate,
   });
 
+  // S4: Write checklist events after update
   const updateChecklistItem = useMutation({
     mutationFn: async (params: { itemId: string; status: string; reason_code?: string; note?: string }) => {
       const { itemId, status, reason_code, note } = params;
@@ -29,6 +30,18 @@ export function useJobActions(jobId: string | undefined) {
         .update({ status, reason_code: reason_code ?? null, note: note ?? null })
         .eq("id", itemId);
       if (error) throw error;
+
+      // Write checklist event
+      if (jobId && user) {
+        const eventType = status === "DONE" ? "CHECKLIST_ITEM_DONE" : "CHECKLIST_ITEM_NOT_DONE";
+        await supabase.from("job_events").insert({
+          job_id: jobId,
+          actor_user_id: user.id,
+          actor_role: "provider",
+          event_type: eventType,
+          metadata: { item_id: itemId, status, reason_code },
+        });
+      }
     },
     onSuccess: invalidate,
   });
@@ -133,6 +146,7 @@ export function useJobActions(jobId: string | undefined) {
     onSuccess: invalidate,
   });
 
+  // S5: Use spec event type names with source suffix
   const recordArrival = useMutation({
     mutationFn: async (source: "auto" | "manual" = "manual") => {
       if (!jobId || !user) throw new Error("Missing context");
@@ -143,7 +157,8 @@ export function useJobActions(jobId: string | undefined) {
       if (error) throw error;
       await supabase.from("job_events").insert({
         job_id: jobId, actor_user_id: user.id, actor_role: "provider",
-        event_type: "ARRIVED", metadata: { source },
+        event_type: source === "auto" ? "ARRIVED_AUTO" : "ARRIVED_MANUAL",
+        metadata: { source },
       });
     },
     onSuccess: invalidate,
@@ -159,7 +174,8 @@ export function useJobActions(jobId: string | undefined) {
       if (error) throw error;
       await supabase.from("job_events").insert({
         job_id: jobId, actor_user_id: user.id, actor_role: "provider",
-        event_type: "DEPARTED", metadata: { source },
+        event_type: source === "auto" ? "DEPARTED_AUTO" : "DEPARTED_MANUAL",
+        metadata: { source },
       });
     },
     onSuccess: invalidate,

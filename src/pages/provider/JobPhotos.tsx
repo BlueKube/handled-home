@@ -4,10 +4,9 @@ import { useJobActions } from "@/hooks/useJobActions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, Camera, Upload, RotateCcw, Plus, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function ProviderJobPhotos() {
@@ -16,7 +15,28 @@ export default function ProviderJobPhotos() {
   const { data, isLoading } = useJobDetail(jobId);
   const actions = useJobActions(jobId);
   const fileRef = useRef<HTMLInputElement>(null);
-  const [uploadingSlot, setUploadingSlot] = useState<string | null>(null);
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+
+  // A3: Generate signed URLs for uploaded photos
+  useEffect(() => {
+    if (!data?.photos) return;
+    const uploaded = data.photos.filter((p) => p.upload_status === "UPLOADED");
+    if (uploaded.length === 0) return;
+
+    const fetchSignedUrls = async () => {
+      const urls: Record<string, string> = {};
+      await Promise.all(
+        uploaded.map(async (p) => {
+          const { data: urlData } = await supabase.storage
+            .from("job-photos")
+            .createSignedUrl(p.storage_path, 3600);
+          if (urlData?.signedUrl) urls[p.id] = urlData.signedUrl;
+        })
+      );
+      setSignedUrls(urls);
+    };
+    fetchSignedUrls();
+  }, [data?.photos]);
 
   if (isLoading || !data) {
     return (
@@ -27,28 +47,26 @@ export default function ProviderJobPhotos() {
     );
   }
 
-  const { photos, job, skus } = data;
+  const { photos, job } = data;
   const isReadOnly = !["IN_PROGRESS", "ISSUE_REPORTED", "PARTIAL_COMPLETE"].includes(job.status);
   const requiredPhotos = photos.filter((p) => p.slot_key);
   const extraPhotos = photos.filter((p) => !p.slot_key);
   const pendingCount = photos.filter((p) => p.upload_status === "PENDING").length;
 
-  const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>, slotKey?: string, skuId?: string) => {
+  const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     try {
-      await actions.uploadPhoto.mutateAsync({ file, slotKey, skuId });
+      await actions.uploadPhoto.mutateAsync({ file });
       toast({ title: "Photo uploaded" });
     } catch (err: any) {
       toast({ title: "Upload failed", description: err.message, variant: "destructive" });
     }
-    // Reset input
     if (fileRef.current) fileRef.current.value = "";
   };
 
   const handleRetry = async (photoId: string) => {
-    // Trigger file picker for retry
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
@@ -74,14 +92,36 @@ export default function ProviderJobPhotos() {
     }
   };
 
-  const getPhotoUrl = (storagePath: string) => {
-    const { data } = supabase.storage.from("job-photos").getPublicUrl(storagePath);
-    return data?.publicUrl;
-  };
+  const PhotoCard = ({ photo, label }: { photo: any; label: string }) => (
+    <Card key={photo.id} className="p-3 space-y-2">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          {statusIcon(photo.upload_status)}
+          <div>
+            <p className="text-sm font-medium capitalize">{label}</p>
+            <p className="text-xs text-muted-foreground">{photo.upload_status.toLowerCase()}</p>
+          </div>
+        </div>
+        {photo.upload_status === "FAILED" && !isReadOnly && (
+          <Button size="sm" variant="outline" onClick={() => handleRetry(photo.id)}>
+            <RotateCcw className="h-3.5 w-3.5 mr-1" />
+            Retry
+          </Button>
+        )}
+      </div>
+      {/* A3: Show thumbnail for uploaded photos */}
+      {signedUrls[photo.id] && (
+        <img
+          src={signedUrls[photo.id]}
+          alt={label}
+          className="w-full h-32 object-cover rounded-lg"
+        />
+      )}
+    </Card>
+  );
 
   return (
     <div className="animate-fade-in p-4 pb-24 space-y-4">
-      {/* Header */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => navigate(`/provider/jobs/${jobId}`)}>
           <ChevronLeft className="h-5 w-5" />
@@ -103,54 +143,24 @@ export default function ProviderJobPhotos() {
         </Card>
       )}
 
-      {/* Required photo slots */}
       {requiredPhotos.length > 0 && (
         <div className="space-y-2">
           <h2 className="text-sm font-semibold">Required Photos</h2>
           {requiredPhotos.map((photo) => (
-            <Card key={photo.id} className="p-3">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  {statusIcon(photo.upload_status)}
-                  <div>
-                    <p className="text-sm font-medium capitalize">{photo.slot_key?.replace(/_/g, " ")}</p>
-                    <p className="text-xs text-muted-foreground">{photo.upload_status.toLowerCase()}</p>
-                  </div>
-                </div>
-                {photo.upload_status === "FAILED" && !isReadOnly && (
-                  <Button size="sm" variant="outline" onClick={() => handleRetry(photo.id)}>
-                    <RotateCcw className="h-3.5 w-3.5 mr-1" />
-                    Retry
-                  </Button>
-                )}
-              </div>
-            </Card>
+            <PhotoCard key={photo.id} photo={photo} label={photo.slot_key?.replace(/_/g, " ") ?? "Required"} />
           ))}
         </div>
       )}
 
-      {/* Extra photos */}
       {extraPhotos.length > 0 && (
         <div className="space-y-2">
           <h2 className="text-sm font-semibold">Additional Photos</h2>
           {extraPhotos.map((photo) => (
-            <Card key={photo.id} className="p-3">
-              <div className="flex items-center gap-2">
-                {statusIcon(photo.upload_status)}
-                <p className="text-sm">Extra photo</p>
-                <p className="text-xs text-muted-foreground">{photo.upload_status.toLowerCase()}</p>
-                {photo.upload_status === "FAILED" && !isReadOnly && (
-                  <Button size="sm" variant="ghost" className="ml-auto" onClick={() => handleRetry(photo.id)}>
-                    <RotateCcw className="h-3.5 w-3.5" />
-                  </Button>
-                )}
-              </div>
-            </Card>
+            <PhotoCard key={photo.id} photo={photo} label="Extra photo" />
           ))}
         </div>
       )}
 
-      {/* Add extra photo */}
       {!isReadOnly && (
         <div>
           <input
@@ -159,7 +169,7 @@ export default function ProviderJobPhotos() {
             accept="image/*"
             capture="environment"
             className="hidden"
-            onChange={(e) => handleFileSelected(e)}
+            onChange={handleFileSelected}
           />
           <Button
             variant="outline"

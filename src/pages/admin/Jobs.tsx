@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useAdminJobs } from "@/hooks/useAdminJobs";
+import { useZones } from "@/hooks/useZones";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,9 +17,15 @@ export default function AdminJobs() {
   const [status, setStatus] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [zoneId, setZoneId] = useState("");
+
+  // A1: Fetch zones for filter dropdown
+  const zonesQuery = useZones();
+  const zones = zonesQuery.data ?? [];
 
   const { jobs, loading } = useAdminJobs({
     status: status || undefined,
+    zone_id: zoneId || undefined,
     date_from: dateFrom || undefined,
     date_to: dateTo || undefined,
   });
@@ -38,6 +45,18 @@ export default function AdminJobs() {
             ))}
           </SelectContent>
         </Select>
+
+        {/* A1: Zone filter */}
+        <Select value={zoneId} onValueChange={setZoneId}>
+          <SelectTrigger className="w-40"><SelectValue placeholder="All zones" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All zones</SelectItem>
+            {(zones ?? []).map((z: any) => (
+              <SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
         <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-36" placeholder="From" />
         <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-36" placeholder="To" />
       </div>
