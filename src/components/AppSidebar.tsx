@@ -36,7 +36,7 @@ const providerNav = [
 const adminNav = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
   { title: "Regions & Zones", url: "/admin/zones", icon: Globe },
-  { title: "Capacity", url: "/admin/capacity", icon: Gauge },
+  
   { title: "SKU Catalog", url: "/admin/skus", icon: Package },
   { title: "Plans", url: "/admin/plans", icon: CreditCard },
   { title: "Providers", url: "/admin/providers", icon: Shield },

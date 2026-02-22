@@ -100,18 +100,21 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          state: string
           status: string
         }
         Insert: {
           created_at?: string
           id?: string
           name: string
+          state?: string
           status?: string
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
+          state?: string
           status?: string
         }
         Relationships: []
@@ -215,38 +218,79 @@ export type Database = {
         }
         Relationships: []
       }
+      zone_provider_assignments: {
+        Row: {
+          assignment_type: string
+          created_at: string
+          id: string
+          provider_user_id: string
+          zone_id: string
+        }
+        Insert: {
+          assignment_type: string
+          created_at?: string
+          id?: string
+          provider_user_id: string
+          zone_id: string
+        }
+        Update: {
+          assignment_type?: string
+          created_at?: string
+          id?: string
+          provider_user_id?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zone_provider_assignments_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       zones: {
         Row: {
+          buffer_percent: number
           created_at: string
           default_service_day: Database["public"]["Enums"]["day_of_week"]
+          default_service_window: string | null
           id: string
           max_minutes_per_day: number
           max_stops_per_day: number
           name: string
           region_id: string
           status: string
+          updated_at: string
           zip_codes: string[]
         }
         Insert: {
+          buffer_percent?: number
           created_at?: string
           default_service_day?: Database["public"]["Enums"]["day_of_week"]
+          default_service_window?: string | null
           id?: string
           max_minutes_per_day?: number
           max_stops_per_day?: number
           name: string
           region_id: string
           status?: string
+          updated_at?: string
           zip_codes?: string[]
         }
         Update: {
+          buffer_percent?: number
           created_at?: string
           default_service_day?: Database["public"]["Enums"]["day_of_week"]
+          default_service_window?: string | null
           id?: string
           max_minutes_per_day?: number
           max_stops_per_day?: number
           name?: string
           region_id?: string
           status?: string
+          updated_at?: string
           zip_codes?: string[]
         }
         Relationships: [
