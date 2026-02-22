@@ -9,9 +9,10 @@ interface RoutineItemCardProps {
   onRemove: (itemId: string) => void;
   onCadenceChange: (itemId: string, cadence: CadenceType, detail?: Record<string, any>) => void;
   allowIndependent?: boolean;
+  biweeklyRecommendation?: "A" | "B";
 }
 
-export function RoutineItemCard({ item, onRemove, onCadenceChange, allowIndependent }: RoutineItemCardProps) {
+export function RoutineItemCard({ item, onRemove, onCadenceChange, allowIndependent, biweeklyRecommendation }: RoutineItemCardProps) {
   return (
     <div className="rounded-xl border border-border bg-card p-3 space-y-2 press-feedback">
       <div className="flex items-center gap-3">
@@ -39,6 +40,7 @@ export function RoutineItemCard({ item, onRemove, onCadenceChange, allowIndepend
         <BiweeklyPatternToggle
           pattern={((item.cadence_detail as any)?.pattern ?? "A") as "A" | "B"}
           onChange={(pattern) => onCadenceChange(item.id, "biweekly", { pattern })}
+          recommended={biweeklyRecommendation}
         />
       )}
     </div>

@@ -9,6 +9,7 @@ import { useZoneServiceWeekConfig, useUpsertZoneServiceWeekConfig } from "@/hook
 import { ZoneFormSheet } from "./ZoneFormSheet";
 import { ZoneCapacityPanel } from "./ZoneCapacityPanel";
 import { ZoneProvidersPanel } from "./ZoneProvidersPanel";
+import { ZoneOpsConfigPanel } from "./ZoneOpsConfigPanel";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect } from "react";
@@ -66,10 +67,11 @@ export function ZoneDetailSheet({ zoneId, onClose }: ZoneDetailSheetProps) {
 
               <Tabs defaultValue="details" className="mt-4">
                 <TabsList className="w-full">
-                  <TabsTrigger value="details" className="flex-1">Details</TabsTrigger>
-                  <TabsTrigger value="capacity" className="flex-1">Capacity</TabsTrigger>
-                  <TabsTrigger value="service-week" className="flex-1">Service Week</TabsTrigger>
-                  <TabsTrigger value="providers" className="flex-1">Providers</TabsTrigger>
+                  <TabsTrigger value="details" className="flex-1 text-xs">Details</TabsTrigger>
+                  <TabsTrigger value="capacity" className="flex-1 text-xs">Capacity</TabsTrigger>
+                  <TabsTrigger value="ops" className="flex-1 text-xs">Ops</TabsTrigger>
+                  <TabsTrigger value="service-week" className="flex-1 text-xs">Week</TabsTrigger>
+                  <TabsTrigger value="providers" className="flex-1 text-xs">Providers</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="details" className="space-y-4 pt-4">
@@ -93,6 +95,10 @@ export function ZoneDetailSheet({ zoneId, onClose }: ZoneDetailSheetProps) {
 
                 <TabsContent value="capacity" className="pt-4">
                   <ZoneCapacityPanel zone={zone} />
+                </TabsContent>
+
+                <TabsContent value="ops" className="pt-4">
+                  <ZoneOpsConfigPanel zoneId={zone.id} />
                 </TabsContent>
 
                 <TabsContent value="service-week" className="pt-4">

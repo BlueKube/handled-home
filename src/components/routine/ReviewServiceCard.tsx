@@ -1,4 +1,4 @@
-import { Camera, ListChecks } from "lucide-react";
+import { Camera, ListChecks, CheckCircle2, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CADENCE_LABELS } from "@/hooks/useRoutinePreview";
 import type { RoutineItem } from "@/hooks/useRoutine";
@@ -6,9 +6,11 @@ import type { RoutineItem } from "@/hooks/useRoutine";
 interface ReviewServiceCardProps {
   item: RoutineItem;
   entitlementStatus?: string;
+  inclusions?: string[];
+  exclusions?: string[];
 }
 
-export function ReviewServiceCard({ item, entitlementStatus }: ReviewServiceCardProps) {
+export function ReviewServiceCard({ item, entitlementStatus, inclusions, exclusions }: ReviewServiceCardProps) {
   const statusColor = entitlementStatus === "blocked"
     ? "text-destructive"
     : entitlementStatus === "extra_allowed"
@@ -32,6 +34,26 @@ export function ReviewServiceCard({ item, entitlementStatus }: ReviewServiceCard
           {entitlementStatus === "included" ? "✓ Included" : entitlementStatus === "extra_allowed" ? "⊕ Extra" : "Available"}
         </span>
       </div>
+
+      {/* L11: Scope bullets */}
+      {inclusions && inclusions.length > 0 && (
+        <div className="flex items-start gap-2 text-xs">
+          <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0 mt-0.5" />
+          <div>
+            <span className="font-medium text-foreground">Included: </span>
+            <span className="text-muted-foreground">{inclusions.join(", ")}</span>
+          </div>
+        </div>
+      )}
+      {exclusions && exclusions.length > 0 && (
+        <div className="flex items-start gap-2 text-xs">
+          <XCircle className="h-3.5 w-3.5 text-destructive shrink-0 mt-0.5" />
+          <div>
+            <span className="font-medium text-foreground">Not included: </span>
+            <span className="text-muted-foreground">{exclusions.join(", ")}</span>
+          </div>
+        </div>
+      )}
 
       {/* Proof expectations */}
       <div className="flex items-center gap-4 text-xs text-muted-foreground">
