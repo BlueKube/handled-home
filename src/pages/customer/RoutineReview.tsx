@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useProperty } from "@/hooks/useProperty";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
 import { useEntitlements } from "@/hooks/useEntitlements";
@@ -8,8 +10,10 @@ import { ReviewServiceCard } from "@/components/routine/ReviewServiceCard";
 import { ProofCoach } from "@/components/routine/ProofCoach";
 import { WeekPreviewTimeline } from "@/components/routine/WeekPreviewTimeline";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, ArrowRight, CheckCircle2, AlertTriangle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const MODEL_LABELS: Record<string, string> = {
   credits_per_cycle: "credits",
@@ -25,9 +29,29 @@ export default function RoutineReview() {
   const zoneId = subscription?.zone_id ?? null;
   const { data: entitlements } = useEntitlements(planId, zoneId);
   const { data: routineData, isLoading } = useRoutine(property?.id, planId);
+  const [acknowledged, setAcknowledged] = useState(false);
 
   const items = routineData?.items ?? [];
   const weeks = useRoutinePreview(items);
+
+  // L11: Fetch inclusions/exclusions for all SKUs in the routine
+  const skuIds = items.map((i) => i.sku_id);
+  const { data: skuDetails } = useQuery({
+    queryKey: ["sku-scope", skuIds],
+    enabled: skuIds.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_skus")
+        .select("id, inclusions, exclusions")
+        .in("id", skuIds);
+      if (error) throw error;
+      const map = new Map<string, { inclusions: string[]; exclusions: string[] }>();
+      for (const s of data ?? []) {
+        map.set(s.id, { inclusions: s.inclusions ?? [], exclusions: s.exclusions ?? [] });
+      }
+      return map;
+    },
+  });
 
   const modelType = entitlements?.plan.model_type ?? "credits_per_cycle";
   const modelLabel = MODEL_LABELS[modelType] ?? "credits";
@@ -96,13 +120,18 @@ export default function RoutineReview() {
 
         {/* Service cards */}
         <div className="space-y-3">
-          {items.map((item) => (
-            <ReviewServiceCard
-              key={item.id}
-              item={item}
-              entitlementStatus={skuStatusMap.get(item.sku_id)}
-            />
-          ))}
+          {items.map((item) => {
+            const scope = skuDetails?.get(item.sku_id);
+            return (
+              <ReviewServiceCard
+                key={item.id}
+                item={item}
+                entitlementStatus={skuStatusMap.get(item.sku_id)}
+                inclusions={scope?.inclusions}
+                exclusions={scope?.exclusions}
+              />
+            );
+          })}
         </div>
 
         {/* 4-week preview */}
@@ -110,6 +139,18 @@ export default function RoutineReview() {
 
         {/* Proof coach */}
         <ProofCoach />
+
+        {/* L14: Acknowledgement checkbox */}
+        <div className="flex items-start gap-3 pt-2">
+          <Checkbox
+            id="review-ack"
+            checked={acknowledged}
+            onCheckedChange={(checked) => setAcknowledged(checked === true)}
+          />
+          <label htmlFor="review-ack" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
+            I've reviewed the services and proof expectations above.
+          </label>
+        </div>
       </div>
 
       {/* Bottom CTA */}
@@ -117,7 +158,7 @@ export default function RoutineReview() {
         <Button
           className="w-full gap-2"
           size="lg"
-          disabled={!fits}
+          disabled={!fits || !acknowledged}
           onClick={() => navigate("/customer/routine/confirm")}
         >
           Confirm Routine

@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { CadenceType } from "./useRoutine";
+import type { CadenceType, RoutineItem } from "./useRoutine";
+import { cadenceToWeeklyEquivalent, computeCycleDemand } from "./useRoutinePreview";
 
 export function useAddRoutineItem() {
   const qc = useQueryClient();
@@ -89,5 +90,77 @@ export function useConfirmRoutine() {
       qc.invalidateQueries({ queryKey: ["routine"] });
       qc.invalidateQueries({ queryKey: ["subscription"] });
     },
+  });
+}
+
+// M4: Auto-fit algorithm
+const CADENCE_ORDER: CadenceType[] = ["weekly", "biweekly", "four_week"];
+
+export interface AutoFitResult {
+  changes: Array<{ itemId: string; skuName: string; from: CadenceType; to: CadenceType }>;
+  newDemand: number;
+}
+
+/**
+ * Downgrades cadences starting from the last item until demand fits within the limit.
+ * Returns the list of changes to apply.
+ */
+export function computeAutoFit(items: RoutineItem[], limit: number): AutoFitResult | null {
+  if (items.length === 0) return null;
+
+  // Work on a mutable copy
+  const working = items.map((item) => ({
+    id: item.id,
+    skuName: item.sku_name ?? "Service",
+    cadence: item.cadence_type as CadenceType,
+    originalCadence: item.cadence_type as CadenceType,
+  }));
+
+  let demand = computeCycleDemand(items);
+  if (demand <= limit) return null; // already fits
+
+  const changes: AutoFitResult["changes"] = [];
+
+  // Iterate from last to first, downgrading cadences
+  for (let i = working.length - 1; i >= 0 && demand > limit; i--) {
+    const item = working[i];
+    const currentIdx = CADENCE_ORDER.indexOf(item.cadence);
+    if (currentIdx < 0 || currentIdx >= CADENCE_ORDER.length - 1) continue;
+
+    // Try each downgrade step
+    for (let step = currentIdx + 1; step < CADENCE_ORDER.length && demand > limit; step++) {
+      const oldEquiv = cadenceToWeeklyEquivalent(item.cadence) * 4;
+      const newCadence = CADENCE_ORDER[step];
+      const newEquiv = cadenceToWeeklyEquivalent(newCadence) * 4;
+      demand = demand - oldEquiv + newEquiv;
+      item.cadence = newCadence;
+    }
+
+    if (item.cadence !== item.originalCadence) {
+      changes.push({
+        itemId: item.id,
+        skuName: item.skuName,
+        from: item.originalCadence,
+        to: item.cadence,
+      });
+    }
+  }
+
+  return { changes, newDemand: demand };
+}
+
+export function useAutoFitRoutine() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (changes: AutoFitResult["changes"]) => {
+      for (const change of changes) {
+        const { error } = await supabase
+          .from("routine_items")
+          .update({ cadence_type: change.to, cadence_detail: {} })
+          .eq("id", change.itemId);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["routine"] }),
   });
 }

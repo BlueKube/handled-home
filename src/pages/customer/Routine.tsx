@@ -4,9 +4,10 @@ import { useProperty } from "@/hooks/useProperty";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { useRoutine, useCreateRoutine } from "@/hooks/useRoutine";
-import { useAddRoutineItem, useRemoveRoutineItem, useUpdateRoutineItemCadence } from "@/hooks/useRoutineActions";
+import { useAddRoutineItem, useRemoveRoutineItem, useUpdateRoutineItemCadence, computeAutoFit, useAutoFitRoutine } from "@/hooks/useRoutineActions";
 import { useRoutinePreview, computeCycleDemand } from "@/hooks/useRoutinePreview";
 import { useServiceDayAssignment } from "@/hooks/useServiceDayAssignment";
+import { useBiweeklyOptimizer } from "@/hooks/useBiweeklyOptimizer";
 import { TruthBanner } from "@/components/routine/TruthBanner";
 import { WeekPreviewTimeline } from "@/components/routine/WeekPreviewTimeline";
 import { AddServicesSheet } from "@/components/routine/AddServicesSheet";
@@ -30,6 +31,7 @@ export default function CustomerRoutine() {
   const { data: subscription, isLoading: subLoading } = useCustomerSubscription();
   const { assignment } = useServiceDayAssignment(property?.id);
 
+  const hasSub = !!subscription;
   const planId = subscription?.plan_id ?? null;
   const zoneId = subscription?.zone_id ?? null;
   const { data: entitlements, isLoading: entLoading } = useEntitlements(planId, zoneId);
@@ -38,6 +40,8 @@ export default function CustomerRoutine() {
   const addItem = useAddRoutineItem();
   const removeItem = useRemoveRoutineItem();
   const updateCadence = useUpdateRoutineItemCadence();
+  const autoFitMutation = useAutoFitRoutine();
+  const { data: biweeklyRec } = useBiweeklyOptimizer(zoneId);
 
   const items = routineData?.items ?? [];
   const weeks = useRoutinePreview(items);
@@ -60,7 +64,7 @@ export default function CustomerRoutine() {
   const cycleDemand = computeCycleDemand(items);
   const isOverLimit = cycleDemand > included + maxExtras;
 
-  // Auto-create routine if none exists
+  // Auto-create routine if none exists (only when subscribed)
   const [autoCreating, setAutoCreating] = useState(false);
   useEffect(() => {
     if (property?.id && planId && !routineData && !routineLoading && !autoCreating) {
@@ -101,27 +105,27 @@ export default function CustomerRoutine() {
     }
   };
 
-  const handleAutoFit = () => {
-    // Auto-fit: reduce cadences starting from the least frequent items
-    // Simple heuristic: change weekly → biweekly → four_week until under limit
-    toast.info("Auto-fit coming soon — adjust cadences manually for now");
+  // M4: Real auto-fit implementation
+  const handleAutoFit = async () => {
+    const limit = included + maxExtras;
+    const result = computeAutoFit(items, limit);
+    if (!result || result.changes.length === 0) {
+      toast.info("Routine already fits your plan");
+      return;
+    }
+    try {
+      await autoFitMutation.mutateAsync(result.changes);
+      const summary = result.changes.map((c) => `${c.skuName}: ${c.from} → ${c.to}`).join(", ");
+      toast.success(`Auto-fit applied: ${summary}`);
+    } catch {
+      toast.error("Couldn't auto-fit routine");
+    }
   };
 
-  const isLoading = propLoading || subLoading || entLoading || routineLoading || autoCreating;
+  const isLoading = propLoading || subLoading || (hasSub && (entLoading || routineLoading)) || autoCreating;
 
-  // Gate: need property + subscription
-  if (!isLoading && !subscription) {
-    return (
-      <div className="p-6 text-center space-y-4 animate-fade-in">
-        <h2 className="text-h2">Choose a plan first</h2>
-        <p className="text-sm text-muted-foreground">You need an active subscription to build your routine.</p>
-        <Button onClick={() => navigate("/customer/plans")}>View Plans</Button>
-      </div>
-    );
-  }
-
-  // Gate: need confirmed service day
-  if (!isLoading && assignment?.status !== "confirmed" && subscription) {
+  // H3: Service day gate only when subscribed
+  if (!isLoading && hasSub && assignment?.status !== "confirmed") {
     return (
       <div className="p-6 text-center space-y-4 animate-fade-in">
         <h2 className="text-h2">Confirm your Service Day</h2>
@@ -144,7 +148,7 @@ export default function CustomerRoutine() {
   }
 
   const existingSkuIds = new Set(items.map((i) => i.sku_id));
-  const planName = subscription?.plan_id ? "Your Plan" : "—";
+  const planName = hasSub ? "Your Plan" : "—";
 
   return (
     <div className="pb-32 animate-fade-in">
@@ -163,13 +167,16 @@ export default function CustomerRoutine() {
           <p className="text-caption">Choose services and how often they happen.</p>
         </div>
 
-        <EntitlementGuardrails
-          cycleDemand={cycleDemand}
-          included={included}
-          maxExtras={maxExtras}
-          modelLabel={modelLabel}
-          onAutoFit={handleAutoFit}
-        />
+        {hasSub && (
+          <EntitlementGuardrails
+            cycleDemand={cycleDemand}
+            included={included}
+            maxExtras={maxExtras}
+            modelLabel={modelLabel}
+            onAutoFit={handleAutoFit}
+            isAutoFitting={autoFitMutation.isPending}
+          />
+        )}
 
         {/* Routine Items */}
         {items.length > 0 ? (
@@ -182,13 +189,16 @@ export default function CustomerRoutine() {
                 onRemove={handleRemoveItem}
                 onCadenceChange={handleCadenceChange}
                 allowIndependent={item.fulfillment_mode === "independent_cadence"}
+                biweeklyRecommendation={biweeklyRec?.recommended}
               />
             ))}
           </div>
         ) : (
           <div className="text-center py-10 space-y-3">
             <Sparkles className="h-8 w-8 mx-auto text-accent" />
-            <p className="text-sm text-muted-foreground">No services yet. Tap below to add your first.</p>
+            <p className="text-sm text-muted-foreground">
+              {hasSub ? "No services yet. Tap below to add your first." : "Browse available services — subscribe when you're ready."}
+            </p>
           </div>
         )}
 
@@ -204,23 +214,42 @@ export default function CustomerRoutine() {
               onAdd={handleAddItem}
             />
           )}
+          {/* H3: When no subscription, still allow browsing SKUs if entitlements not loaded */}
+          {!hasSub && !entitlements && (
+            <Button variant="outline" className="gap-2" onClick={() => navigate("/customer/plans")}>
+              Subscribe to browse services
+            </Button>
+          )}
         </div>
       </div>
 
       {/* Bottom CTA */}
       {items.length > 0 && (
         <div className="fixed bottom-16 left-0 right-0 z-40 p-4 bg-card/95 backdrop-blur border-t border-border max-w-lg mx-auto">
-          <Button
-            className="w-full gap-2"
-            size="lg"
-            disabled={isOverLimit}
-            onClick={() => navigate("/customer/routine/review")}
-          >
-            Review Routine
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-          {isOverLimit && (
-            <p className="text-xs text-destructive text-center mt-1">Reduce services to fit your plan first</p>
+          {hasSub ? (
+            <>
+              <Button
+                className="w-full gap-2"
+                size="lg"
+                disabled={isOverLimit}
+                onClick={() => navigate("/customer/routine/review")}
+              >
+                Review Routine
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+              {isOverLimit && (
+                <p className="text-xs text-destructive text-center mt-1">Reduce services to fit your plan first</p>
+              )}
+            </>
+          ) : (
+            <Button
+              className="w-full gap-2"
+              size="lg"
+              onClick={() => navigate("/customer/plans")}
+            >
+              Subscribe to continue
+              <ArrowRight className="h-4 w-4" />
+            </Button>
           )}
         </div>
       )}
