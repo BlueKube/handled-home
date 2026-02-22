@@ -198,7 +198,7 @@ Rules engine owns:
 - controlled alternatives (2–3)
 - capacity checks (minutes + stops)
 - bundle lock/cutoff
-- rollover caps/expiry
+- no-rollover enforcement (unused service weeks expire at billing cycle end)
 - reschedule cutoffs/fees
 - weather mode
 - SLA enforcement ladders
