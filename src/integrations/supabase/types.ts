@@ -194,6 +194,339 @@ export type Database = {
           },
         ]
       }
+      job_checklist_items: {
+        Row: {
+          created_at: string
+          id: string
+          is_required: boolean
+          job_id: string
+          label: string
+          note: string | null
+          reason_code: string | null
+          sku_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          job_id: string
+          label: string
+          note?: string | null
+          reason_code?: string | null
+          sku_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          job_id?: string
+          label?: string
+          note?: string | null
+          reason_code?: string | null
+          sku_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_checklist_items_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_checklist_items_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_events: {
+        Row: {
+          actor_role: string
+          actor_user_id: string
+          created_at: string
+          event_type: string
+          id: string
+          job_id: string
+          metadata: Json
+        }
+        Insert: {
+          actor_role: string
+          actor_user_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+          job_id: string
+          metadata?: Json
+        }
+        Update: {
+          actor_role?: string
+          actor_user_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          job_id?: string
+          metadata?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_events_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_issues: {
+        Row: {
+          created_at: string
+          created_by_role: string
+          created_by_user_id: string
+          description: string | null
+          id: string
+          issue_type: string
+          job_id: string
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by_admin_user_id: string | null
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by_role: string
+          created_by_user_id: string
+          description?: string | null
+          id?: string
+          issue_type: string
+          job_id: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by_admin_user_id?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by_role?: string
+          created_by_user_id?: string
+          description?: string | null
+          id?: string
+          issue_type?: string
+          job_id?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by_admin_user_id?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_issues_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_photos: {
+        Row: {
+          captured_at: string | null
+          created_at: string
+          id: string
+          job_id: string
+          sku_id: string | null
+          slot_key: string | null
+          storage_path: string
+          upload_status: string
+        }
+        Insert: {
+          captured_at?: string | null
+          created_at?: string
+          id?: string
+          job_id: string
+          sku_id?: string | null
+          slot_key?: string | null
+          storage_path: string
+          upload_status?: string
+        }
+        Update: {
+          captured_at?: string | null
+          created_at?: string
+          id?: string
+          job_id?: string
+          sku_id?: string | null
+          slot_key?: string | null
+          storage_path?: string
+          upload_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_photos_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_photos_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_skus: {
+        Row: {
+          duration_minutes_snapshot: number | null
+          id: string
+          job_id: string
+          sku_id: string
+          sku_name_snapshot: string | null
+        }
+        Insert: {
+          duration_minutes_snapshot?: number | null
+          id?: string
+          job_id: string
+          sku_id: string
+          sku_name_snapshot?: string | null
+        }
+        Update: {
+          duration_minutes_snapshot?: number | null
+          id?: string
+          job_id?: string
+          sku_id?: string
+          sku_name_snapshot?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_skus_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_skus_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jobs: {
+        Row: {
+          access_notes_snapshot: string | null
+          arrived_at: string | null
+          arrived_source: string | null
+          assigned_member_id: string | null
+          completed_at: string | null
+          created_at: string
+          customer_id: string
+          departed_at: string | null
+          departed_source: string | null
+          id: string
+          property_id: string
+          provider_org_id: string
+          provider_summary: string | null
+          routine_version_id: string | null
+          scheduled_date: string | null
+          service_day_instance_id: string | null
+          started_at: string | null
+          status: string
+          updated_at: string
+          zone_id: string
+        }
+        Insert: {
+          access_notes_snapshot?: string | null
+          arrived_at?: string | null
+          arrived_source?: string | null
+          assigned_member_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          customer_id: string
+          departed_at?: string | null
+          departed_source?: string | null
+          id?: string
+          property_id: string
+          provider_org_id: string
+          provider_summary?: string | null
+          routine_version_id?: string | null
+          scheduled_date?: string | null
+          service_day_instance_id?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          zone_id: string
+        }
+        Update: {
+          access_notes_snapshot?: string | null
+          arrived_at?: string | null
+          arrived_source?: string | null
+          assigned_member_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          customer_id?: string
+          departed_at?: string | null
+          departed_source?: string | null
+          id?: string
+          property_id?: string
+          provider_org_id?: string
+          provider_summary?: string | null
+          routine_version_id?: string | null
+          scheduled_date?: string | null
+          service_day_instance_id?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jobs_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jobs_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jobs_routine_version_id_fkey"
+            columns: ["routine_version_id"]
+            isOneToOne: false
+            referencedRelation: "routine_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jobs_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plan_entitlement_sku_rules: {
         Row: {
           entitlement_version_id: string
@@ -1828,6 +2161,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_override_complete_job: {
+        Args: { p_job_id: string; p_note?: string; p_reason: string }
+        Returns: Json
+      }
       admin_override_service_day: {
         Args: {
           p_assignment_id: string
@@ -1857,6 +2194,10 @@ export type Database = {
         Returns: boolean
       }
       cleanup_expired_offers: { Args: never; Returns: Json }
+      complete_job: {
+        Args: { p_job_id: string; p_provider_summary?: string }
+        Returns: Json
+      }
       confirm_routine: { Args: { p_routine_id: string }; Returns: Json }
       confirm_service_day: { Args: { p_assignment_id: string }; Returns: Json }
       create_or_refresh_service_day_offer: {
@@ -1874,14 +2215,25 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_provider_org_member: { Args: { p_org_id: string }; Returns: boolean }
       reject_service_day_once: {
         Args: { p_assignment_id: string }
+        Returns: Json
+      }
+      report_job_issue: {
+        Args: {
+          p_description?: string
+          p_issue_type: string
+          p_job_id: string
+          p_severity?: string
+        }
         Returns: Json
       }
       select_alternative_service_day: {
         Args: { p_assignment_id: string; p_offer_id: string }
         Returns: Json
       }
+      start_job: { Args: { p_job_id: string }; Returns: Json }
       submit_provider_onboarding: { Args: { p_org_id: string }; Returns: Json }
       validate_provider_invite: { Args: { p_code: string }; Returns: Json }
     }
