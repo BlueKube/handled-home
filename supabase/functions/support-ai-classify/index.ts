@@ -25,6 +25,36 @@ serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
 
+    // E1: Auth check — verify caller owns the ticket or is admin
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader) {
+      const userClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY") ?? "", {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data: { user } } = await userClient.auth.getUser();
+      if (user) {
+        // Verify ownership or admin role
+        const adminSupabase = createClient(supabaseUrl, serviceKey);
+        const { data: ticketCheck } = await adminSupabase
+          .from("support_tickets")
+          .select("customer_id")
+          .eq("id", ticket_id)
+          .single();
+        if (ticketCheck && ticketCheck.customer_id !== user.id) {
+          const { data: isAdmin } = await adminSupabase.rpc("has_role", {
+            _user_id: user.id,
+            _role: "admin",
+          });
+          if (!isAdmin) {
+            return new Response(JSON.stringify({ error: "Not authorized" }), {
+              status: 403,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+        }
+      }
+    }
+
     if (!lovableApiKey) {
       return new Response(JSON.stringify({ error: "LOVABLE_API_KEY not configured" }), {
         status: 500,
@@ -191,13 +221,14 @@ Customer note: "${ticket.customer_note || "none"}"${jobContext}${historyContext}
 
     const result = JSON.parse(toolCall.function.arguments);
 
-    // Update ticket with AI results
+    // Update ticket with AI results (E2: also write ai_classification)
     await supabase
       .from("support_tickets")
       .update({
         ai_summary: result.ai_summary?.slice(0, 200),
         ai_evidence_score: result.evidence_score,
         ai_risk_score: result.risk_score,
+        ai_classification: result.classification ?? null,
       })
       .eq("id", ticket_id);
 

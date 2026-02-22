@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCreateTicket } from "@/hooks/useCreateTicket";
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { SupportCategoryTile, getAllCategories, type SupportCategory } from "@/components/support/SupportCategoryTile";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Camera, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 type Step = "category" | "details" | "submitted";
@@ -19,16 +20,18 @@ export default function CustomerSupportNew() {
   const [category, setCategory] = useState<SupportCategory | null>(null);
   const [note, setNote] = useState("");
   const [createdTicketId, setCreatedTicketId] = useState<string | null>(null);
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const createTicket = useCreateTicket();
 
   const ticketTypeMap: Record<SupportCategory, string> = {
     quality: "quality",
-    missed: "missed_service",
+    missed: "missed_item",
     damage: "damage",
     billing: "billing",
     safety: "safety",
-    routine_change: "other",
+    routine_change: "routine_change",
   };
 
   const severityMap: Record<SupportCategory, string> = {
@@ -57,6 +60,24 @@ export default function CustomerSupportNew() {
         severity: severityMap[category],
       });
       setCreatedTicketId(ticket.id);
+
+      // Upload photos if any
+      for (const file of photoFiles) {
+        const path = `tickets/${ticket.id}/${Date.now()}_${file.name}`;
+        const { error: uploadErr } = await supabase.storage
+          .from("support-attachments")
+          .upload(path, file);
+        if (!uploadErr) {
+          await supabase.from("support_attachments").insert({
+            ticket_id: ticket.id,
+            storage_path: path,
+            file_type: file.type.startsWith("image/") ? "image" : "document",
+            uploaded_by_user_id: (await supabase.auth.getUser()).data.user?.id,
+            uploaded_by_role: "customer",
+          });
+        }
+      }
+
       setStep("submitted");
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -128,6 +149,53 @@ export default function CustomerSupportNew() {
           />
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">{note.length}/500</span>
+          </div>
+
+          {/* P3: Photo upload */}
+          <div className="space-y-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                const files = Array.from(e.target.files ?? []);
+                setPhotoFiles((prev) => [...prev, ...files].slice(0, 5));
+                e.target.value = "";
+              }}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-1"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={photoFiles.length >= 5}
+            >
+              <Camera className="h-4 w-4" />
+              {photoFiles.length > 0 ? `${photoFiles.length} photo(s)` : "Add photos"}
+            </Button>
+            {photoFiles.length > 0 && (
+              <div className="flex gap-2 flex-wrap">
+                {photoFiles.map((f, i) => (
+                  <div key={i} className="relative">
+                    <img
+                      src={URL.createObjectURL(f)}
+                      alt=""
+                      className="h-16 w-16 rounded-lg object-cover border"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setPhotoFiles((prev) => prev.filter((_, j) => j !== i))}
+                      className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <Button

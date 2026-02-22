@@ -61,7 +61,7 @@ export function useSupportTickets(filters?: TicketFilters) {
             query = query.eq("status", "awaiting_provider");
             break;
           case "sla_breach":
-            query = query.not("sla_due_at", "is", null);
+            query = query.not("sla_due_at", "is", null).lt("sla_due_at", new Date().toISOString());
             break;
         }
       }

@@ -2,26 +2,58 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSupportTicketDetail } from "@/hooks/useSupportTicketDetail";
 import { useTicketActions } from "@/hooks/useTicketActions";
+import { useSupportMacros } from "@/hooks/useSupportMacros";
+import { useSupportAiClassify } from "@/hooks/useSupportAiClassify";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TicketStatusChip } from "@/components/support/TicketStatusChip";
 import { ResolutionOfferCard } from "@/components/support/ResolutionOfferCard";
-import { ArrowLeft, Clock, CheckCircle2, AlertTriangle, Shield } from "lucide-react";
+import { ArrowLeft, Clock, CheckCircle2, AlertTriangle, Shield, Send, Wand2, RefreshCw, ArrowRightLeft } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
+
+const OFFER_TYPES = [
+  { value: "credit", label: "Credit" },
+  { value: "redo_intent", label: "Redo service" },
+  { value: "addon", label: "Add-on" },
+  { value: "refund", label: "Refund" },
+  { value: "plan_change", label: "Plan change" },
+  { value: "review_by_time", label: "Review by time" },
+  { value: "no_action", label: "No action needed" },
+];
+
+const STATUS_OPTIONS = [
+  { value: "open", label: "Open" },
+  { value: "awaiting_provider", label: "Awaiting provider" },
+  { value: "awaiting_customer", label: "Awaiting customer" },
+  { value: "in_review", label: "In review" },
+  { value: "escalated", label: "Escalated" },
+];
 
 export default function AdminSupportTicketDetail() {
   const { ticketId } = useParams<{ ticketId: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { ticket, offers, events, attachments, isLoading } = useSupportTicketDetail(ticketId);
   const actions = useTicketActions(ticketId ?? "");
+  const { macros } = useSupportMacros();
+  const aiClassify = useSupportAiClassify();
 
   const [resolveSummary, setResolveSummary] = useState("");
   const [resolveReason, setResolveReason] = useState("");
   const [escalateReason, setEscalateReason] = useState("");
   const [showResolve, setShowResolve] = useState(false);
   const [showEscalate, setShowEscalate] = useState(false);
+
+  // P8: Present offer state
+  const [showOffer, setShowOffer] = useState(false);
+  const [offerType, setOfferType] = useState("");
+  const [offerAmount, setOfferAmount] = useState("");
+  const [offerDescription, setOfferDescription] = useState("");
 
   if (isLoading) {
     return (
@@ -69,6 +101,67 @@ export default function AdminSupportTicketDetail() {
     }
   };
 
+  // P8: Present offer
+  const handlePresentOffer = async () => {
+    if (!offerType) return;
+    try {
+      await actions.adminPresentOffer.mutateAsync({
+        offer_type: offerType,
+        amount_cents: offerAmount ? Math.round(parseFloat(offerAmount) * 100) : undefined,
+        description: offerDescription.trim() || undefined,
+      });
+      toast({ title: "Offer presented to customer" });
+      setShowOffer(false);
+      setOfferType("");
+      setOfferAmount("");
+      setOfferDescription("");
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+  };
+
+  // P9: Apply macro
+  const handleApplyMacro = async (macroId: string) => {
+    const macro = macros.find((m) => m.id === macroId);
+    if (!macro) return;
+    try {
+      const patch = macro.patch as Record<string, any>;
+      await actions.adminPresentOffer.mutateAsync({
+        offer_type: patch.offer_type ?? "credit",
+        amount_cents: patch.amount_cents,
+        description: patch.description ?? macro.name,
+      });
+      toast({ title: `Macro "${macro.name}" applied` });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+  };
+
+  // P10: Re-classify
+  const handleReclassify = async () => {
+    if (!ticketId) return;
+    try {
+      await aiClassify.mutateAsync(ticketId);
+      queryClient.invalidateQueries({ queryKey: ["support-ticket", ticketId] });
+      toast({ title: "AI re-classification complete" });
+    } catch (err: any) {
+      toast({ title: "AI classification failed", description: err.message, variant: "destructive" });
+    }
+  };
+
+  // P11: Change status
+  const handleStatusChange = async (newStatus: string) => {
+    try {
+      await actions.adminChangeStatus.mutateAsync(newStatus);
+      toast({ title: `Status changed to ${newStatus.replace(/_/g, " ")}` });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const showAmountField = ["credit", "refund"].includes(offerType);
+  const activeMacros = macros.filter((m) => m.is_active);
+
   return (
     <div className="p-6 max-w-3xl space-y-4 animate-fade-in">
       <Button variant="ghost" size="sm" className="gap-1 -ml-2" onClick={() => navigate("/admin/support")}>
@@ -101,12 +194,44 @@ export default function AdminSupportTicketDetail() {
           <p className="text-sm font-medium capitalize">{ticket.severity as string}</p>
         </Card>
         {ticket.sla_due_at && (
-          <Card className="p-3 col-span-2">
+          <Card className={`p-3 col-span-2 ${new Date(ticket.sla_due_at) < new Date() ? "border-destructive/50 bg-destructive/5" : ""}`}>
             <p className="text-xs text-muted-foreground">SLA Due</p>
-            <p className="text-sm font-medium">{format(new Date(ticket.sla_due_at), "MMM d, h:mm a")}</p>
+            <p className="text-sm font-medium">
+              {format(new Date(ticket.sla_due_at), "MMM d, h:mm a")}
+              {new Date(ticket.sla_due_at) < new Date() && <span className="text-destructive ml-2 text-xs font-semibold">BREACHED</span>}
+            </p>
           </Card>
         )}
       </div>
+
+      {/* P11: Status change dropdown */}
+      {!isResolved && (
+        <div className="flex items-center gap-2">
+          <ArrowRightLeft className="h-4 w-4 text-muted-foreground" />
+          <Select onValueChange={handleStatusChange} value="">
+            <SelectTrigger className="w-48 h-8 text-xs">
+              <SelectValue placeholder="Change status…" />
+            </SelectTrigger>
+            <SelectContent>
+              {STATUS_OPTIONS.filter((s) => s.value !== ticket.status).map((s) => (
+                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* P10: Re-classify button */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1 text-xs"
+            onClick={handleReclassify}
+            disabled={aiClassify.isPending}
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${aiClassify.isPending ? "animate-spin" : ""}`} />
+            {aiClassify.isPending ? "Classifying…" : "Re-classify AI"}
+          </Button>
+        </div>
+      )}
 
       {/* Customer note */}
       <Card className="p-4 space-y-2">
@@ -150,6 +275,73 @@ export default function AdminSupportTicketDetail() {
       {!isResolved && (
         <section className="space-y-3">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Actions</h3>
+
+          {/* P8: Present offer */}
+          {showOffer ? (
+            <Card className="p-4 space-y-3">
+              <p className="text-sm font-medium">Present resolution offer</p>
+              <Select value={offerType} onValueChange={setOfferType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Offer type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {OFFER_TYPES.map((t) => (
+                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {showAmountField && (
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={offerAmount}
+                  onChange={(e) => setOfferAmount(e.target.value)}
+                  placeholder="Amount ($)"
+                />
+              )}
+              <Textarea
+                value={offerDescription}
+                onChange={(e) => setOfferDescription(e.target.value)}
+                placeholder="Description (visible to customer)…"
+                rows={2}
+              />
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="flex-1" onClick={() => setShowOffer(false)}>Cancel</Button>
+                <Button
+                  size="sm"
+                  className="flex-1"
+                  disabled={!offerType || actions.adminPresentOffer.isPending}
+                  onClick={handlePresentOffer}
+                >
+                  <Send className="h-3.5 w-3.5 mr-1" />
+                  {actions.adminPresentOffer.isPending ? "Sending…" : "Present offer"}
+                </Button>
+              </div>
+            </Card>
+          ) : (
+            <Button variant="outline" className="w-full" onClick={() => setShowOffer(true)}>
+              <Send className="h-4 w-4 mr-2" />
+              Present offer
+            </Button>
+          )}
+
+          {/* P9: Apply macro */}
+          {activeMacros.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Wand2 className="h-4 w-4 text-muted-foreground" />
+              <Select onValueChange={handleApplyMacro} value="">
+                <SelectTrigger className="flex-1 h-9">
+                  <SelectValue placeholder="Apply macro…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {activeMacros.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Resolve */}
           {showResolve ? (
@@ -240,6 +432,7 @@ export default function AdminSupportTicketDetail() {
                     {meta?.note && <p className="text-xs text-muted-foreground mt-0.5">{meta.note}</p>}
                     {meta?.statement && <p className="text-xs text-muted-foreground mt-0.5">"{meta.statement}"</p>}
                     {meta?.reason && <p className="text-xs text-muted-foreground mt-0.5">Reason: {meta.reason}</p>}
+                    {meta?.new_status && <p className="text-xs text-muted-foreground mt-0.5">→ {meta.new_status.replace(/_/g, " ")}</p>}
                     <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1">
                       <Clock className="h-3 w-3" />
                       {format(new Date(e.created_at), "MMM d, h:mm a")}
@@ -268,6 +461,7 @@ function formatAdminEvent(type: string): string {
     admin_escalated: "Admin escalated",
     attachment_added: "Attachment added",
     status_changed: "Status changed",
+    macro_applied: "Macro applied",
   };
   return map[type] ?? type.replace(/_/g, " ");
 }
