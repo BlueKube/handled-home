@@ -184,7 +184,7 @@ serve(async (req) => {
                     exp_year: pm.card?.exp_year || null,
                     is_default: true,
                     status: "active",
-                  }, { onConflict: "customer_id,processor_ref", ignoreDuplicates: true });
+                  }, { onConflict: "customer_id,processor_ref" });
                 }
               } catch (e) {
                 logStep("Failed to save payment method", { error: (e as Error).message });
@@ -260,7 +260,6 @@ serve(async (req) => {
             .update({ status: "past_due" })
             .eq("stripe_subscription_id", stripeSubId);
 
-          // Find internal subscription and create billing exception
           const { data: internalSub } = await supabase
             .from("subscriptions")
             .select("id, customer_id")
@@ -268,17 +267,40 @@ serve(async (req) => {
             .single();
 
           if (internalSub) {
-            // Record payment attempt
-            await supabase.from("customer_payments").insert({
-              invoice_id: null as any, // May not have internal invoice yet
-              customer_id: internalSub.customer_id,
-              amount_cents: invoice.amount_due || 0,
-              processor_payment_id: invoice.payment_intent || null,
-              status: "FAILED",
-              attempt_number: (invoice.attempt_count || 1),
-            }).then(() => {});
+            // E2 FIX: Look up internal invoice instead of inserting null
+            const { data: internalInvoice } = await supabase
+              .from("customer_invoices")
+              .select("id")
+              .eq("processor_invoice_id", invoice.id)
+              .maybeSingle();
 
-            // Create billing exception
+            // Try by subscription + status if no processor match
+            let invoiceId = internalInvoice?.id;
+            if (!invoiceId) {
+              const { data: fallbackInvoice } = await supabase
+                .from("customer_invoices")
+                .select("id")
+                .eq("subscription_id", internalSub.id)
+                .eq("status", "DUE")
+                .order("created_at", { ascending: false })
+                .limit(1)
+                .maybeSingle();
+              invoiceId = fallbackInvoice?.id;
+            }
+
+            // Only insert payment record if we have a matching invoice
+            if (invoiceId) {
+              await supabase.from("customer_payments").insert({
+                invoice_id: invoiceId,
+                customer_id: internalSub.customer_id,
+                amount_cents: invoice.amount_due || 0,
+                processor_payment_id: invoice.payment_intent || null,
+                status: "FAILED",
+                attempt_number: (invoice.attempt_count || 1),
+              });
+            }
+
+            // Create billing exception regardless
             await supabase.from("billing_exceptions").insert({
               type: "PAYMENT_FAILED",
               severity: "HIGH",
@@ -301,7 +323,6 @@ serve(async (req) => {
             .update({ status: "active" })
             .eq("stripe_subscription_id", stripeSubId);
 
-          // Update internal invoice if exists
           const { data: internalSub } = await supabase
             .from("subscriptions")
             .select("id, customer_id")
@@ -309,20 +330,48 @@ serve(async (req) => {
             .single();
 
           if (internalSub) {
-            // Mark matching invoices as paid
-            await supabase
+            // E3 FIX: Match by processor_invoice_id first, then fall back to most recent DUE
+            const { data: matchedInvoice } = await supabase
               .from("customer_invoices")
-              .update({ status: "PAID", paid_at: new Date().toISOString(), processor_invoice_id: invoice.id })
-              .eq("customer_id", internalSub.customer_id)
-              .eq("status", "DUE");
+              .select("id")
+              .eq("processor_invoice_id", invoice.id)
+              .maybeSingle();
 
-            // Record successful payment
-            await supabase.from("customer_payments").insert({
-              customer_id: internalSub.customer_id,
-              amount_cents: invoice.amount_paid || 0,
-              processor_payment_id: invoice.payment_intent || null,
-              status: "SUCCEEDED",
-            }).then(() => {});
+            if (matchedInvoice) {
+              await supabase
+                .from("customer_invoices")
+                .update({ status: "PAID", paid_at: new Date().toISOString() })
+                .eq("id", matchedInvoice.id);
+            } else {
+              // Fall back to most recent DUE invoice for this subscription (not ALL)
+              const { data: fallbackInvoice } = await supabase
+                .from("customer_invoices")
+                .select("id")
+                .eq("subscription_id", internalSub.id)
+                .eq("status", "DUE")
+                .order("created_at", { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+              if (fallbackInvoice) {
+                await supabase
+                  .from("customer_invoices")
+                  .update({ status: "PAID", paid_at: new Date().toISOString(), processor_invoice_id: invoice.id })
+                  .eq("id", fallbackInvoice.id);
+              }
+            }
+
+            // Record successful payment (find invoice for FK)
+            const invoiceId = matchedInvoice?.id;
+            if (invoiceId) {
+              await supabase.from("customer_payments").insert({
+                invoice_id: invoiceId,
+                customer_id: internalSub.customer_id,
+                amount_cents: invoice.amount_paid || 0,
+                processor_payment_id: invoice.payment_intent || null,
+                status: "SUCCEEDED",
+              });
+            }
 
             // Resolve related billing exceptions
             await supabase
@@ -340,12 +389,29 @@ serve(async (req) => {
         const dispute = event.data.object as any;
         const chargeId = dispute.charge;
 
-        // Create billing exception for dispute
+        // Try to find the customer via charge
+        let customerId: string | null = null;
+        if (chargeId) {
+          try {
+            const charge = await stripe.charges.retrieve(chargeId as string);
+            if (charge.customer) {
+              const { data: sub } = await supabase
+                .from("subscriptions")
+                .select("customer_id")
+                .eq("stripe_customer_id", charge.customer as string)
+                .limit(1)
+                .maybeSingle();
+              customerId = sub?.customer_id || null;
+            }
+          } catch (_e) { /* best effort */ }
+        }
+
         await supabase.from("billing_exceptions").insert({
           type: "DISPUTE",
           severity: "HIGH",
           entity_type: "charge",
-          entity_id: null,
+          entity_id: chargeId || null,
+          customer_id: customerId,
           next_action: "Review dispute and provide evidence",
         });
 
@@ -355,11 +421,26 @@ serve(async (req) => {
 
       case "transfer.paid": {
         const transfer = event.data.object as any;
-        // Update provider payout
+        // Update provider payout status
         await supabase
           .from("provider_payouts")
           .update({ status: "PAID", paid_at: new Date().toISOString() })
           .eq("processor_payout_id", transfer.id);
+
+        // S1 FIX: Transition earnings from IN_PAYOUT to PAID
+        const { data: payout } = await supabase
+          .from("provider_payouts")
+          .select("id")
+          .eq("processor_payout_id", transfer.id)
+          .maybeSingle();
+
+        if (payout) {
+          await supabase
+            .from("provider_earnings")
+            .update({ status: "PAID" })
+            .eq("payout_id", payout.id)
+            .eq("status", "IN_PAYOUT");
+        }
 
         logStep("Transfer paid", { transferId: transfer.id });
         break;
@@ -372,7 +453,7 @@ serve(async (req) => {
           .update({ status: "FAILED" })
           .eq("processor_payout_id", transfer.id);
 
-        // Get payout to create exception
+        // S1 FIX: Revert earnings from IN_PAYOUT back to ELIGIBLE
         const { data: payout } = await supabase
           .from("provider_payouts")
           .select("id, provider_org_id")
@@ -380,6 +461,12 @@ serve(async (req) => {
           .single();
 
         if (payout) {
+          await supabase
+            .from("provider_earnings")
+            .update({ status: "ELIGIBLE", payout_id: null })
+            .eq("payout_id", payout.id)
+            .eq("status", "IN_PAYOUT");
+
           await supabase.from("billing_exceptions").insert({
             type: "PAYOUT_FAILED",
             severity: "HIGH",
@@ -391,6 +478,50 @@ serve(async (req) => {
         }
 
         logStep("Transfer failed", { transferId: transfer.id });
+        break;
+      }
+
+      // E4 FIX: Handle account.updated for Stripe Connect onboarding
+      case "account.updated": {
+        const account = event.data.object as any;
+        const accountId = account.id;
+
+        let newStatus = "PENDING_VERIFICATION";
+        if (account.charges_enabled && account.payouts_enabled) {
+          newStatus = "READY";
+        } else if (account.requirements?.currently_due?.length > 0) {
+          newStatus = "RESTRICTED";
+        }
+
+        const { data: payoutAccount } = await supabase
+          .from("provider_payout_accounts")
+          .select("id, provider_org_id, status")
+          .eq("processor_account_id", accountId)
+          .maybeSingle();
+
+        if (payoutAccount) {
+          await supabase
+            .from("provider_payout_accounts")
+            .update({ status: newStatus })
+            .eq("id", payoutAccount.id);
+
+          // When becoming READY, transition HELD_UNTIL_READY earnings to EARNED
+          if (newStatus === "READY" && payoutAccount.status !== "READY") {
+            await supabase
+              .from("provider_earnings")
+              .update({
+                status: "EARNED",
+                hold_until: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                hold_reason: null,
+              })
+              .eq("provider_org_id", payoutAccount.provider_org_id)
+              .eq("status", "HELD_UNTIL_READY");
+          }
+
+          logStep("Account updated", { accountId, newStatus, oldStatus: payoutAccount.status });
+        } else {
+          logStep("Account not found in DB", { accountId });
+        }
         break;
       }
     }

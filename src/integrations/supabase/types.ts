@@ -1709,6 +1709,64 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_ledger_events: {
+        Row: {
+          amount_cents: number
+          balance_after_cents: number
+          created_at: string
+          earning_id: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          payout_id: string | null
+          provider_org_id: string
+        }
+        Insert: {
+          amount_cents?: number
+          balance_after_cents?: number
+          created_at?: string
+          earning_id?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          payout_id?: string | null
+          provider_org_id: string
+        }
+        Update: {
+          amount_cents?: number
+          balance_after_cents?: number
+          created_at?: string
+          earning_id?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          payout_id?: string | null
+          provider_org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_ledger_events_earning_id_fkey"
+            columns: ["earning_id"]
+            isOneToOne: false
+            referencedRelation: "provider_earnings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_ledger_events_payout_id_fkey"
+            columns: ["payout_id"]
+            isOneToOne: false
+            referencedRelation: "provider_payouts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_ledger_events_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       provider_members: {
         Row: {
           created_at: string
