@@ -39,6 +39,11 @@ const statusStyles: Record<string, { label: string; className: string; dotColor:
   incomplete: { label: "Incomplete", className: "bg-warning text-warning-foreground", dotColor: "bg-warning-foreground/70" },
   canceling: { label: "Canceling", className: "bg-warning text-warning-foreground", dotColor: "bg-warning-foreground/70" },
   canceled: { label: "Canceled", className: "border border-border bg-transparent text-muted-foreground", dotColor: "bg-muted-foreground" },
+  submitted: { label: "Submitted", className: "bg-primary text-primary-foreground", dotColor: "bg-primary-foreground/70" },
+  under_review: { label: "Under Review", className: "bg-warning text-warning-foreground", dotColor: "bg-warning-foreground/70" },
+  resolved: { label: "Resolved", className: "bg-success text-success-foreground", dotColor: "bg-success-foreground/70" },
+  planned: { label: "Planned", className: "bg-secondary text-secondary-foreground", dotColor: "bg-muted-foreground" },
+  issue: { label: "Issue", className: "bg-destructive text-destructive-foreground", dotColor: "bg-destructive-foreground/70" },
 };
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {

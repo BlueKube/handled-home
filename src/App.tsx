@@ -17,6 +17,8 @@ import MoreMenuPage from "@/components/MoreMenu";
 import CustomerDashboard from "@/pages/customer/Dashboard";
 import CustomerBuild from "@/pages/customer/Build";
 import CustomerHistory from "@/pages/customer/History";
+import CustomerVisitDetail from "@/pages/customer/VisitDetail";
+import CustomerIssues from "@/pages/customer/Issues";
 import CustomerSubscription from "@/pages/customer/Subscription";
 import CustomerProperty from "@/pages/customer/Property";
 import CustomerBilling from "@/pages/customer/Billing";
@@ -107,6 +109,9 @@ const App = () => (
                 <Route path="/customer" element={<CustomerPropertyGate><CustomerDashboard /></CustomerPropertyGate>} />
                 <Route path="/customer/build" element={<CustomerPropertyGate><CustomerBuild /></CustomerPropertyGate>} />
                 <Route path="/customer/history" element={<CustomerPropertyGate><CustomerHistory /></CustomerPropertyGate>} />
+                <Route path="/customer/visits" element={<CustomerPropertyGate><CustomerHistory /></CustomerPropertyGate>} />
+                <Route path="/customer/visits/:jobId" element={<CustomerPropertyGate><CustomerVisitDetail /></CustomerPropertyGate>} />
+                <Route path="/customer/issues" element={<CustomerPropertyGate><CustomerIssues /></CustomerPropertyGate>} />
                 <Route path="/customer/subscription" element={<CustomerPropertyGate><CustomerSubscription /></CustomerPropertyGate>} />
                 <Route path="/customer/billing" element={<CustomerPropertyGate><CustomerBilling /></CustomerPropertyGate>} />
                 <Route path="/customer/referrals" element={<CustomerPropertyGate><CustomerReferrals /></CustomerPropertyGate>} />
