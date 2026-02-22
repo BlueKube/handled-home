@@ -36,6 +36,7 @@ const providerNav = [
   { title: "Organization", url: "/provider/organization", icon: Building2 },
   { title: "Coverage", url: "/provider/coverage", icon: Map },
   { title: "Support", url: "/provider/support", icon: HelpCircle },
+  { title: "Referrals", url: "/provider/referrals", icon: Users },
   { title: "Settings", url: "/provider/settings", icon: Settings },
 ];
 

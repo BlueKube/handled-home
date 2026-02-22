@@ -1,25 +1,14 @@
-# Module 13: Referrals & Incentives
+# Module 13: Referrals & Incentives (Index)
 
-## Scope
-Referral links, reward tracking, neighborhood density campaigns, fraud controls.
+Module 13 is the growth engine, split into three sub-modules:
 
-## Tables
-- `referral_codes` — user_id, code, reward_type, reward_value, uses, max_uses, created_at
-- `referral_redemptions` — code_id, referred_user_id, status, rewarded_at
-- `density_campaigns` — zone_id, discount_percent, threshold_homes, current_homes, status
-
-## Key User Stories
-- As a customer, I can share my referral link
-- As a customer, I earn rewards when friends sign up
-- As an admin, I can configure density campaigns
-- As the system, I prevent referral fraud
+| Sub-module | Focus | Doc |
+|------------|-------|-----|
+| **13.1** | Referral & Attribution Core | [13.1-referral-attribution-core.md](./13.1-referral-attribution-core.md) |
+| **13.2** | Founding Partner + Provider Self-Serve Growth Hub | [13.2-founding-partner-provider-growth.md](./13.2-founding-partner-provider-growth.md) |
+| **13.3** | Growth Autopilot: Market Launch OS | [13.3-growth-autopilot-market-launch-os.md](./13.3-growth-autopilot-market-launch-os.md) |
 
 ## Dependencies
 - Module 01 (auth & roles)
 - Module 05 (subscription engine)
-
-## Acceptance Criteria
-- [ ] Referral link generation and sharing
-- [ ] Reward tracking and fulfillment
-- [ ] Density campaign configuration
-- [ ] Fraud detection basics
+- Module 11 (billing & payouts — ledger integration)
