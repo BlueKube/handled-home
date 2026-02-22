@@ -64,8 +64,14 @@ export function NextVisitCard({ job, isLoading }: NextVisitCardProps) {
         size="sm"
         className="w-full justify-between text-accent hover:text-accent"
         onClick={() => {
-          if (job.status === "COMPLETED" || job.status === "PARTIAL_COMPLETE") {
+          if (job.status === "COMPLETED" || job.status === "PARTIAL_COMPLETE" || job.status === "IN_PROGRESS" || job.status === "ISSUE_REPORTED") {
             navigate(`/customer/visits/${job.id}`);
+          } else {
+            // Planned/NOT_STARTED: scroll to the 4-week preview timeline
+            const timeline = document.getElementById("four-week-preview");
+            if (timeline) {
+              timeline.scrollIntoView({ behavior: "smooth" });
+            }
           }
         }}
       >
