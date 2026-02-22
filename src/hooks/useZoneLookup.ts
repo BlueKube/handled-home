@@ -23,9 +23,10 @@ export function useZoneLookup(zipCode: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("zones")
-        .select("name")
+        .select("name, regions!inner(status)")
         .contains("zip_codes", [debouncedZip])
         .eq("status", "active")
+        .eq("regions.status", "active")
         .limit(1)
         .maybeSingle();
       if (error) throw error;

@@ -6,9 +6,6 @@ type ZoneRow = Database["public"]["Tables"]["zones"]["Row"];
 type DayOfWeek = Database["public"]["Enums"]["day_of_week"];
 
 export interface ZoneWithRegion extends ZoneRow {
-  buffer_percent: number;
-  default_service_window: string | null;
-  updated_at: string;
   regions: { name: string; state: string } | null;
 }
 
@@ -23,7 +20,7 @@ export function useZones(regionId?: string) {
       if (regionId) query = query.eq("region_id", regionId);
       const { data, error } = await query;
       if (error) throw error;
-      return data as unknown as ZoneWithRegion[];
+      return (data ?? []) as ZoneWithRegion[];
     },
   });
 }
@@ -39,7 +36,7 @@ export function useZoneDetail(zoneId: string | null) {
         .eq("id", zoneId!)
         .single();
       if (error) throw error;
-      return data as unknown as ZoneWithRegion;
+      return data as ZoneWithRegion;
     },
   });
 }
@@ -60,7 +57,7 @@ export function useCreateZone() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (zone: CreateZoneInput) => {
-      const { data, error } = await supabase.from("zones").insert(zone as any).select().single();
+      const { data, error } = await supabase.from("zones").insert(zone).select().single();
       if (error) throw error;
       return data;
     },
@@ -72,7 +69,7 @@ export function useUpdateZone() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: { id: string } & Partial<CreateZoneInput>) => {
-      const { data, error } = await supabase.from("zones").update(updates as any).eq("id", id).select().single();
+      const { data, error } = await supabase.from("zones").update(updates).eq("id", id).select().single();
       if (error) throw error;
       return data;
     },
