@@ -10,8 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ChevronLeft, CheckCircle2, Camera, AlertTriangle, Clock, Shield, XCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function AdminJobDetail() {
   const { jobId } = useParams<{ jobId: string }>();
@@ -23,6 +24,28 @@ export default function AdminJobDetail() {
   const [overrideNote, setOverrideNote] = useState("");
   const [resolveId, setResolveId] = useState<string | null>(null);
   const [resolveNote, setResolveNote] = useState("");
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+
+  // A3: Generate signed URLs for photos
+  useEffect(() => {
+    if (!data?.photos) return;
+    const uploaded = data.photos.filter((p) => p.upload_status === "UPLOADED");
+    if (uploaded.length === 0) return;
+
+    const fetchSignedUrls = async () => {
+      const urls: Record<string, string> = {};
+      await Promise.all(
+        uploaded.map(async (p) => {
+          const { data: urlData } = await supabase.storage
+            .from("job-photos")
+            .createSignedUrl(p.storage_path, 3600);
+          if (urlData?.signedUrl) urls[p.id] = urlData.signedUrl;
+        })
+      );
+      setSignedUrls(urls);
+    };
+    fetchSignedUrls();
+  }, [data?.photos]);
 
   if (isLoading || !data) {
     return <div className="p-4 space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-40 w-full rounded-xl" /></div>;
@@ -96,11 +119,17 @@ export default function AdminJobDetail() {
           ))}
         </TabsContent>
 
+        {/* A3: Photos with signed URL thumbnails */}
         <TabsContent value="photos" className="mt-4 space-y-2">
           {photos.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">No photos</p> : photos.map((p) => (
-            <Card key={p.id} className="p-3 flex items-center gap-2">
-              <Camera className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1"><p className="text-sm">{p.slot_key ?? "Extra"}</p><p className="text-xs text-muted-foreground">{p.upload_status}</p></div>
+            <Card key={p.id} className="p-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <Camera className="h-4 w-4 text-muted-foreground" />
+                <div className="flex-1"><p className="text-sm capitalize">{p.slot_key?.replace(/_/g, " ") ?? "Extra"}</p><p className="text-xs text-muted-foreground">{p.upload_status}</p></div>
+              </div>
+              {signedUrls[p.id] && (
+                <img src={signedUrls[p.id]} alt={p.slot_key ?? "Photo"} className="w-full h-40 object-cover rounded-lg" />
+              )}
             </Card>
           ))}
         </TabsContent>

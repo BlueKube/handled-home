@@ -55,6 +55,7 @@ export function useAdminJobs(filters: AdminJobFilters = {}) {
     },
   });
 
+  // A6: Add admin_audit_log entry when resolving issues
   const resolveIssue = useMutation({
     mutationFn: async (params: { issueId: string; jobId: string; note: string }) => {
       if (!user) throw new Error("Not authenticated");
@@ -75,6 +76,16 @@ export function useAdminJobs(filters: AdminJobFilters = {}) {
         actor_role: "admin",
         event_type: "ISSUE_RESOLVED",
         metadata: { issue_id: params.issueId, note: params.note },
+      });
+
+      // A6: Write admin audit log
+      await supabase.from("admin_audit_log").insert({
+        admin_user_id: user.id,
+        entity_type: "job_issue",
+        entity_id: params.issueId,
+        action: "resolve_issue",
+        after: { status: "RESOLVED", resolution_note: params.note },
+        reason: params.note,
       });
     },
     onSuccess: () => {

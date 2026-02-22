@@ -5,18 +5,20 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
+import { ReportIssueSheet } from "@/components/provider/ReportIssueSheet";
 import {
   Play, CheckSquare, Camera, Send, AlertTriangle, MapPin, Clock,
   ChevronLeft, Dog, Key, Car, ShieldAlert, LogIn, LogOut
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 export default function ProviderJobDetail() {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
   const { data, isLoading } = useJobDetail(jobId);
   const actions = useJobActions(jobId);
+  const [issueSheetOpen, setIssueSheetOpen] = useState(false);
 
   if (isLoading || !data) {
     return (
@@ -69,8 +71,46 @@ export default function ProviderJobDetail() {
     }
   };
 
+  const handleIssueSubmit = async (params: { issue_type: string; severity: string; description?: string }) => {
+    try {
+      await actions.reportIssue.mutateAsync(params);
+      toast({ title: "Issue reported" });
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    }
+  };
+
   const pets = property?.pets;
   const hasPets = Array.isArray(pets) && pets.length > 0;
+
+  // P3: Determine secondary button count for grid layout
+  const secondaryButtons: React.ReactNode[] = [];
+  if (isActive && !job.arrived_at) {
+    secondaryButtons.push(
+      <Button key="arrive" variant="outline" size="sm" onClick={handleArrival} disabled={actions.recordArrival.isPending}>
+        <LogIn className="h-3.5 w-3.5 mr-1.5" />Arrived
+      </Button>
+    );
+  }
+  if (isActive && job.arrived_at && !job.departed_at) {
+    secondaryButtons.push(
+      <Button key="depart" variant="outline" size="sm" onClick={handleDeparture} disabled={actions.recordDeparture.isPending}>
+        <LogOut className="h-3.5 w-3.5 mr-1.5" />Departed
+      </Button>
+    );
+  }
+  if (isActive) {
+    secondaryButtons.push(
+      <Button key="checklist" variant="outline" size="sm" onClick={() => navigate(`/provider/jobs/${jobId}/checklist`)}>
+        <CheckSquare className="h-3.5 w-3.5 mr-1.5" />Checklist
+      </Button>
+    );
+    secondaryButtons.push(
+      <Button key="photos" variant="outline" size="sm" onClick={() => navigate(`/provider/jobs/${jobId}/photos`)}>
+        <Camera className="h-3.5 w-3.5 mr-1.5" />Photos
+      </Button>
+    );
+  }
 
   return (
     <div className="animate-fade-in p-4 pb-24 space-y-4">
@@ -222,35 +262,9 @@ export default function ProviderJobDetail() {
               <Send className="h-4 w-4 mr-2" />
               Complete Job
             </Button>
-            <div className="grid grid-cols-2 gap-2">
-              {!job.arrived_at && (
-                <Button variant="outline" size="sm" onClick={handleArrival} disabled={actions.recordArrival.isPending}>
-                  <LogIn className="h-3.5 w-3.5 mr-1.5" />
-                  Arrived
-                </Button>
-              )}
-              {job.arrived_at && !job.departed_at && (
-                <Button variant="outline" size="sm" onClick={handleDeparture} disabled={actions.recordDeparture.isPending}>
-                  <LogOut className="h-3.5 w-3.5 mr-1.5" />
-                  Departed
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate(`/provider/jobs/${jobId}/checklist`)}
-              >
-                <CheckSquare className="h-3.5 w-3.5 mr-1.5" />
-                Checklist
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate(`/provider/jobs/${jobId}/photos`)}
-              >
-                <Camera className="h-3.5 w-3.5 mr-1.5" />
-                Photos
-              </Button>
+            {/* P3: Dynamic grid based on button count */}
+            <div className={`grid gap-2 ${secondaryButtons.length % 2 === 0 ? 'grid-cols-2' : secondaryButtons.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+              {secondaryButtons}
             </div>
           </>
         )}
@@ -259,22 +273,21 @@ export default function ProviderJobDetail() {
             variant="ghost"
             size="sm"
             className="w-full text-warning"
-            onClick={() => {
-              // Simple inline issue report — navigating to a dialog approach
-              const type = prompt("Issue type:\nCOULD_NOT_ACCESS, SAFETY_CONCERN, MISSING_SUPPLIES, EXCESSIVE_SCOPE, CUSTOMER_REQUESTED_CHANGE, WEATHER_RELATED, OTHER");
-              if (type) {
-                const desc = prompt("Description (optional)") ?? undefined;
-                actions.reportIssue.mutateAsync({ issue_type: type, description: desc })
-                  .then(() => toast({ title: "Issue reported" }))
-                  .catch((e: any) => toast({ title: "Error", description: e.message, variant: "destructive" }));
-              }
-            }}
+            onClick={() => setIssueSheetOpen(true)}
           >
             <AlertTriangle className="h-3.5 w-3.5 mr-1.5" />
             Report an Issue
           </Button>
         )}
       </div>
+
+      {/* P1: Structured issue reporting sheet */}
+      <ReportIssueSheet
+        open={issueSheetOpen}
+        onOpenChange={setIssueSheetOpen}
+        onSubmit={handleIssueSubmit}
+        isPending={actions.reportIssue.isPending}
+      />
     </div>
   );
 }

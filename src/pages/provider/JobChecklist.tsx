@@ -6,7 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { ChevronLeft, Check, X, AlertCircle } from "lucide-react";
+import { ReportIssueSheet } from "@/components/provider/ReportIssueSheet";
+import { ChevronLeft, Check, X, AlertCircle, AlertTriangle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useState } from "react";
 import {
@@ -33,6 +34,7 @@ export default function ProviderJobChecklist() {
   const [skipDialog, setSkipDialog] = useState<string | null>(null);
   const [skipReason, setSkipReason] = useState("");
   const [skipNote, setSkipNote] = useState("");
+  const [issueSheetOpen, setIssueSheetOpen] = useState(false);
 
   if (isLoading || !data) {
     return (
@@ -44,7 +46,8 @@ export default function ProviderJobChecklist() {
   }
 
   const { checklist, job } = data;
-  const isReadOnly = !["IN_PROGRESS", "ISSUE_REPORTED", "PARTIAL_COMPLETE"].includes(job.status);
+  const isActive = ["IN_PROGRESS", "ISSUE_REPORTED", "PARTIAL_COMPLETE"].includes(job.status);
+  const isReadOnly = !isActive;
   const required = checklist.filter((c) => c.is_required);
   const done = required.filter((c) => c.status !== "PENDING");
   const progress = required.length > 0 ? Math.round((done.length / required.length) * 100) : 100;
@@ -69,6 +72,15 @@ export default function ProviderJobChecklist() {
       setSkipDialog(null);
       setSkipReason("");
       setSkipNote("");
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    }
+  };
+
+  const handleIssueSubmit = async (params: { issue_type: string; severity: string; description?: string }) => {
+    try {
+      await actions.reportIssue.mutateAsync(params);
+      toast({ title: "Issue reported" });
     } catch (e: any) {
       toast({ title: "Error", description: e.message, variant: "destructive" });
     }
@@ -144,6 +156,19 @@ export default function ProviderJobChecklist() {
         ))}
       </div>
 
+      {/* P2: Report an Issue button */}
+      {isActive && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full text-warning"
+          onClick={() => setIssueSheetOpen(true)}
+        >
+          <AlertTriangle className="h-3.5 w-3.5 mr-1.5" />
+          Report an Issue
+        </Button>
+      )}
+
       {/* Skip reason dialog */}
       <Dialog open={!!skipDialog} onOpenChange={(open) => !open && setSkipDialog(null)}>
         <DialogContent>
@@ -177,6 +202,14 @@ export default function ProviderJobChecklist() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* P2: Issue reporting sheet */}
+      <ReportIssueSheet
+        open={issueSheetOpen}
+        onOpenChange={setIssueSheetOpen}
+        onSubmit={handleIssueSubmit}
+        isPending={actions.reportIssue.isPending}
+      />
     </div>
   );
 }
