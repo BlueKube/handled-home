@@ -79,20 +79,31 @@ export function useFourWeekPreview(
       }
     }
 
-    // Overlay actual jobs: if a job exists for a week, update the status
+    // Overlay actual jobs: place in the correct week based on scheduled_date
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0=Sun, 1=Mon...
+    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + mondayOffset);
+
     for (const job of upcomingJobs) {
       const jobStatus = mapJobStatus(job.status);
       const skuSummary = job.skus.map((s) => s.sku_name_snapshot ?? "Service").join(", ");
 
-      // Try to match to a week's routine visit and update status
-      // For MVP: completed/in-progress jobs overlay on week 1
-      if (jobStatus === "completed" || jobStatus === "in_progress" || jobStatus === "issue") {
-        const targetWeek = weeks[0];
-        if (targetWeek && targetWeek.visits.length > 0) {
-          targetWeek.visits[0].status = jobStatus;
-          targetWeek.visits[0].jobId = job.id;
-          if (skuSummary) targetWeek.visits[0].serviceSummary = skuSummary;
-        }
+      let weekIndex = 0;
+      if (job.scheduled_date) {
+        const jobDate = new Date(job.scheduled_date + "T00:00:00");
+        const diffDays = Math.floor((jobDate.getTime() - monday.getTime()) / (1000 * 60 * 60 * 24));
+        weekIndex = Math.floor(diffDays / 7);
+      }
+
+      // Only overlay if within the 4-week window
+      if (weekIndex < 0 || weekIndex > 3) continue;
+
+      const targetWeek = weeks[weekIndex];
+      if (targetWeek && targetWeek.visits.length > 0) {
+        targetWeek.visits[0].status = jobStatus;
+        targetWeek.visits[0].jobId = job.id;
+        if (skuSummary) targetWeek.visits[0].serviceSummary = skuSummary;
       }
     }
 
