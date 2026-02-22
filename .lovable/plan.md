@@ -1,196 +1,133 @@
 
 
-# Module 11 — Code Review Fixes
+# Documentation Alignment Update
 
-Addressing all issues from the code review, organized by priority.
-
----
-
-## MUST FIX (6 issues)
-
-### S1: run_payout_batch marks earnings PAID before webhook confirmation
-
-**Problem**: Lines 188-189 of the RPC immediately set earnings to `PAID` when the batch is created, before the Stripe transfer succeeds. If the transfer fails, earnings are incorrectly marked PAID.
-
-**Fix**: Change the RPC to set earnings to `IN_PAYOUT` (new intermediate status) instead of `PAID`. Only the `transfer.paid` webhook handler should transition earnings from `IN_PAYOUT` to `PAID`. The `transfer.failed` webhook should revert them to `ELIGIBLE`.
-
-**Changes**:
-- Migration: `ALTER` the `run_payout_batch` RPC to use `IN_PAYOUT` status
-- `stripe-webhook/index.ts`: In `transfer.paid` handler, also update `provider_earnings` linked to the payout from `IN_PAYOUT` to `PAID`. In `transfer.failed`, revert them to `ELIGIBLE`.
+The codebase has built through Module 11, but most docs still say "Current Focus: Module 06." This update brings everything current and incorporates the strategic framing from your ChatGPT analysis.
 
 ---
 
-### S2: generate_subscription_invoice always creates $0 invoices
+## 1. Update `docs/implementation-plan.md`
 
-**Problem**: Line 396 hardcodes `v_total_cents := 0`. Every invoice has zero amount.
+Move Modules 06-11 into the "Completed" table. Update "Current Focus" to Module 12 (Support and Disputes). Add notes reflecting what was actually built in each module:
 
-**Fix**: Parse the plan's `display_price_text` (e.g., "$49/mo") to extract cents, or look up the Stripe price via `stripe_price_id` on the `plans` table. Since we can't call Stripe from a PL/pgSQL function, we'll parse `display_price_text`:
-- Extract numeric value from `display_price_text` using regex
-- Multiply by 100 for cents
-- Fall back to 0 if unparsable (with a warning in the result)
+| Module | Name | Notes |
+|--------|------|-------|
+| 06 | Service Day System | Zone-based assignment, offer/accept/reject, TTL cleanup, capacity checks |
+| 07 | Bundle Builder | SKU stacking per service week, cadence picker, 4-week preview, seasonal boosts |
+| 08 | Provider Onboarding | Org creation, invite flow, zone coverage, capability matching, compliance |
+| 09 | Job Execution | Checklist enforcement, photo capture, server-validated completion, exception handling |
+| 10 | Customer Dashboard and Proof | Visit timeline, photo gallery, structured issue reporting, 4-week preview |
+| 11 | Billing and Payouts | Ledger-first billing, Stripe Connect payouts, webhook processing, admin exception queue |
 
-**Changes**: Migration to replace `generate_subscription_invoice` RPC.
-
----
-
-### E1: process-payout join query will fail at runtime
-
-**Problem**: Line 53 tries `.select("*, provider_payout_accounts!inner(processor_account_id)")` but there's no FK from `provider_payouts` to `provider_payout_accounts`. Both reference `provider_orgs` independently.
-
-**Fix**: Query in two steps:
-1. Fetch the payout by ID
-2. Separately query `provider_payout_accounts` by `provider_org_id` from the payout
-
-**Changes**: `supabase/functions/process-payout/index.ts`
+Remaining MVP becomes empty (all 01-09 done). Post-MVP updates 10-11 to completed.
 
 ---
 
-### E2: invoice.payment_failed inserts null invoice_id into NOT NULL column
+## 2. Update `docs/masterplan.md` Roadmap section
 
-**Problem**: Line 273 uses `invoice_id: null as any` but `customer_payments.invoice_id` is `NOT NULL`.
+Replace the Roadmap section to reflect actual progress:
 
-**Fix**: Look up the internal invoice by `processor_invoice_id` or `subscription_id + status`. If no matching internal invoice exists, skip the payment record insertion (the exception is still created).
+- **Completed:** Modules 01-11
+- **Current focus:** Module 12 (Support and Disputes)
+- **Remaining:** Modules 13-14 (Referrals, Reporting)
 
-**Changes**: `supabase/functions/stripe-webhook/index.ts` — `invoice.payment_failed` case
+Add a new "Launch Scoreboard" section (from ChatGPT's strategic analysis) under the Roadmap, capturing the weekly metrics that prove the flywheel:
 
----
+- Service Day offer acceptance rate
+- Offer expiry rate (target: near zero)
+- Photo compliance % (target: 95%+)
+- On-time completion % (target: 90%+)
+- Redo rate baseline
+- Support minutes per job (target: under 3 min)
+- Zone density: stops/day + minutes/stop
 
-### A1: No automatic earning creation on job completion
-
-**Problem**: `create_provider_earning` RPC exists but is never called from `complete_job` or `admin_override_complete_job`.
-
-**Fix**: Add `PERFORM create_provider_earning(p_job_id)` at the end of both `complete_job` (after the COMPLETED update) and `admin_override_complete_job`. Wrap in a BEGIN/EXCEPTION block so earning creation failure doesn't block job completion.
-
-**Changes**: Migration to replace both RPCs with the earning call added.
-
----
-
-### E4: No account.updated webhook handler
-
-**Problem**: When providers complete Stripe Connect onboarding, the `account.updated` event fires. Without handling it, `provider_payout_accounts.status` is never updated to `READY`.
-
-**Fix**: Add `account.updated` case to the webhook handler:
-- Check `account.charges_enabled` and `account.payouts_enabled`
-- If both true: update status to `READY`
-- If `account.requirements.currently_due` has items: `RESTRICTED`
-- Otherwise: `PENDING_VERIFICATION`
-- Also transition any `HELD_UNTIL_READY` earnings to `EARNED` (with hold_until set) when status becomes READY
-
-**Changes**: `supabase/functions/stripe-webhook/index.ts`
+These already align with the existing Launch Readiness Criteria in `implementation-plan.md` but frame them as ongoing operational metrics rather than one-time gates.
 
 ---
 
-## SHOULD FIX (8 issues)
+## 3. Update `docs/app-flow-pages-and-roles.md`
 
-### D1: Missing provider_ledger_events table
+This file is significantly outdated. Update to reflect all pages that now exist:
 
-**Fix**: Create `provider_ledger_events` table mirroring `customer_ledger_events` structure with `provider_org_id`, `event_type`, `earning_id`, `payout_id`, `amount_cents`, `balance_after_cents`, `metadata`, `created_at`. RLS: providers read own, admins read all, no direct inserts (RPCs only). Then update `run_payout_batch` and `admin_release_hold` RPCs to write ledger events.
+**Customer pages** -- add:
+- Billing Overview, Payment Methods, Billing History, Receipt Detail
+- Service Day (assignment/offer flow)
+- Routine Builder, Routine Review, Routine Confirm
+- Visit Detail
 
-**Changes**: New migration for table + RLS + RPC updates.
+**Provider pages** -- replace "Earnings" with:
+- Payouts Overview, Payout History
+- Onboarding (org, coverage, capabilities, compliance, review)
+- Job Checklist, Job Photos, Job Complete
+- SKUs (authorized services)
 
----
+**Admin pages** -- add:
+- Service Days, Capacity
+- Billing, Payouts, Exceptions
+- Customer Ledger, Provider Ledger
+- Subscriptions, Bundles, Scheduling
+- Provider Detail, Job Detail
 
-### D4: Missing UNIQUE(customer_id, processor_ref) on customer_payment_methods
-
-**Fix**: Add unique constraint so the webhook upsert on `onConflict: "customer_id,processor_ref"` works.
-
-**Changes**: Migration: `ALTER TABLE public.customer_payment_methods ADD CONSTRAINT customer_payment_methods_customer_processor_unique UNIQUE (customer_id, processor_ref);`
-
----
-
-### S3: create_provider_earning not called from complete_job
-
-Covered by A1 fix above.
-
----
-
-### E3: invoice.payment_succeeded marks ALL DUE invoices as PAID
-
-**Fix**: Match by `processor_invoice_id` instead of just `customer_id + status`. First try to find invoice by `processor_invoice_id`, then fall back to most recent DUE invoice for the customer (not all of them).
-
-**Changes**: `supabase/functions/stripe-webhook/index.ts` — `invoice.payment_succeeded` case
+**Primary Journeys** -- add:
+- Customer billing fix flow (failed payment CTA)
+- Provider payout onboarding (Stripe Connect)
+- Admin exception triage (billing exceptions queue)
 
 ---
 
-### S4: generate_subscription_invoice burns all credits regardless of need
+## 4. Update `docs/global-system-architecture.md`
 
-**Fix**: In the RPC, accumulate credits only up to the invoice total. Stop the loop once `v_credits_cents >= v_total_cents`. Only mark credits as APPLIED that were actually consumed.
+### Section 5: Add billing/payout state machines
 
-**Changes**: Part of the `generate_subscription_invoice` RPC rewrite.
+- **Invoice status:** UPCOMING -> DUE -> PAID / FAILED / VOID
+- **Payment status:** INITIATED -> SUCCEEDED / FAILED
+- **Earning status:** EARNED -> ELIGIBLE -> IN_PAYOUT -> PAID (with HELD / HELD_UNTIL_READY branches)
+- **Payout status:** INITIATED -> PAID / FAILED
+- **Hold status:** ACTIVE -> RELEASED / EXPIRED
 
----
+### Section 6: Update Financial schema spine
 
-### P11: No admin customer billing ledger page
+Replace the minimal 4-table list with the actual Module 11 tables:
+- customer_payment_methods, customer_invoices, customer_invoice_line_items, customer_payments, customer_ledger_events, customer_credits
+- provider_payout_accounts, provider_earnings, provider_payouts, provider_payout_line_items, provider_holds, provider_hold_context, provider_ledger_events
+- payment_webhook_events, billing_runs, payout_runs, admin_adjustments, billing_exceptions
 
-**Fix**: Create `/admin/billing/customers/:customerId` page showing:
-- Customer name, subscription status
-- Invoice history with line items
-- Credits and refunds
-- Admin action buttons: Apply Credit, Issue Refund, Void Invoice, Retry Payment
+### Section 7: Add billing rules to rules engine
 
-**Changes**: New file `src/pages/admin/CustomerLedger.tsx`, route in `App.tsx`, hook `useAdminCustomerLedger`.
-
----
-
-### P12: No admin provider ledger page
-
-**Fix**: Create `/admin/payouts/providers/:providerOrgId` page showing:
-- Provider org name, payout account status
-- Earnings list with job links
-- Holds with provider context
-- Admin actions: Release Hold
-
-**Changes**: New file `src/pages/admin/ProviderLedger.tsx`, route in `App.tsx`, hook `useAdminProviderLedger`.
+- Invoice generation (cycle-based, idempotent)
+- Dunning retry schedule
+- Earning hold/release logic
+- Payout threshold + eligibility transition
+- Credit application (capped to invoice total)
 
 ---
 
-### A2-A4: No scheduling/automation
+## 5. Remove duplicate Module 10 spec
 
-These require cron jobs. We'll create a single `run-billing-automation` edge function that handles:
-- `transition_eligible_earnings()` — move EARNED to ELIGIBLE
-- Invoice generation for subscriptions approaching cycle end
-
-And wire it up with a `pg_cron` SQL insert (via the insert tool, not migration).
-
-**Changes**: New edge function `supabase/functions/run-billing-automation/index.ts`, `supabase/config.toml` update, cron SQL.
+`docs/modules/10-visit-tracking-photos.md` was already replaced with a redirect note (previous fix). Confirm it still just contains the redirect. No action needed if so.
 
 ---
 
-## NICE TO HAVE (deferred)
+## 6. Add strategic notes to masterplan
 
-The following are acknowledged but deferred to keep this fix focused:
-- D2/D3: CHECK constraints on status columns (low risk, text works)
-- P1/P2: Remove payment method + guard (stub exists)
-- P3/P4: Receipt payment method display + retry timing
-- P5/P6: Provider payout date display + RESTRICTED handling
-- P7-P9: Earnings property label, eligible date, payout detail route
-- P10: Admin stats for credits/disputes
-- P13-P15: Exception queue action CTAs
-- A5: Add-on billing flow
-- E5: Dispute handler entity linking
-- E6: Webhook signature enforcement (deployment config concern)
+Under "What We Optimize For," add the three strategic bets as explicit decisions (from the ChatGPT analysis):
+
+1. **Launch SKU count:** 3-5 per zone until density + proof compliance is stable
+2. **Default routine is primary path:** Recommended routine and auto-fit are the main flow, not a side feature
+3. **Seasonal complexity boundary:** Window preference (early/mid/late month) only, no date-level scheduling
+
+These are already implied by the specs but making them explicit prevents drift.
 
 ---
 
-## Summary of All Changes
+## Summary of file changes
 
 | File | Change |
 |------|--------|
-| New migration SQL | S1: `run_payout_batch` uses `IN_PAYOUT` instead of `PAID` |
-| New migration SQL | S2+S4: `generate_subscription_invoice` parses price, caps credits |
-| New migration SQL | A1+S3: `complete_job` and `admin_override_complete_job` call `create_provider_earning` |
-| New migration SQL | D1: Create `provider_ledger_events` table + RLS |
-| New migration SQL | D4: Add UNIQUE(customer_id, processor_ref) on payment methods |
-| `supabase/functions/process-payout/index.ts` | E1: Two-step query instead of broken join |
-| `supabase/functions/stripe-webhook/index.ts` | E2: Skip payment record if no matching invoice |
-| `supabase/functions/stripe-webhook/index.ts` | E3: Match by processor_invoice_id |
-| `supabase/functions/stripe-webhook/index.ts` | E4: Add `account.updated` handler |
-| `supabase/functions/stripe-webhook/index.ts` | S1: `transfer.paid`/`failed` update earnings status |
-| `src/pages/admin/CustomerLedger.tsx` | P11: Admin customer billing detail page |
-| `src/pages/admin/ProviderLedger.tsx` | P12: Admin provider ledger detail page |
-| `src/hooks/useAdminCustomerLedger.ts` | Hook for customer ledger data |
-| `src/hooks/useAdminProviderLedger.ts` | Hook for provider ledger data |
-| `src/App.tsx` | New routes for customer + provider ledger pages |
-| `supabase/functions/run-billing-automation/index.ts` | A2-A4: Scheduled automation function |
-| `supabase/config.toml` | Register new edge function |
+| `docs/implementation-plan.md` | Move modules 06-11 to completed, update current focus to 12 |
+| `docs/masterplan.md` | Update roadmap progress, add Launch Scoreboard section, add 3 strategic bets |
+| `docs/app-flow-pages-and-roles.md` | Full rewrite reflecting all implemented pages and journeys |
+| `docs/global-system-architecture.md` | Add billing state machines, update financial schema spine, expand rules engine |
+| `docs/modules/10-visit-tracking-photos.md` | Verify redirect note is in place (no change expected) |
 
+No code changes. Documentation only.
