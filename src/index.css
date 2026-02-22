@@ -7,16 +7,16 @@
 @layer base {
   :root {
     /* Handled Home Design System */
-    --background: 220 20% 97%;       /* #F7F8FA surface */
-    --foreground: 214 65% 14%;       /* #0B1F3B navy */
+    --background: 220 20% 97%;
+    --foreground: 214 65% 14%;
 
-    --card: 0 0% 100%;               /* white */
+    --card: 0 0% 100%;
     --card-foreground: 214 65% 14%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 214 65% 14%;
 
-    --primary: 214 65% 14%;          /* deep navy #0B1F3B */
+    --primary: 214 65% 14%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 220 20% 95%;
@@ -25,27 +25,27 @@
     --muted: 220 14% 93%;
     --muted-foreground: 215 16% 47%;
 
-    --accent: 170 77% 40%;           /* teal #14B8A6 */
+    --accent: 170 77% 40%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 51%;        /* #DC2626 */
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 72% 37%;          /* #16A34A */
+    --success: 142 72% 37%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;           /* #F59E0B */
+    --warning: 38 92% 50%;
     --warning-foreground: 214 65% 14%;
 
-    --border: 225 14% 91%;           /* #E6E8EE */
+    --border: 225 14% 91%;
     --input: 225 14% 91%;
-    --ring: 170 77% 40%;             /* teal ring */
+    --ring: 170 77% 40%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 214 65% 14%;      /* navy sidebar */
+    --sidebar-background: 214 65% 14%;
     --sidebar-foreground: 220 20% 90%;
-    --sidebar-primary: 170 77% 40%;          /* teal accent */
+    --sidebar-primary: 170 77% 40%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 214 55% 20%;
     --sidebar-accent-foreground: 220 20% 95%;
@@ -107,5 +107,37 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Safe area utilities for iOS notch / home indicator */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Touch-optimized inputs */
+  input, select, textarea {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
+}
+
+@layer utilities {
+  /* Page fade-in animation */
+  .animate-fade-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Active press feedback for cards/buttons */
+  .press-feedback {
+    @apply transition-transform duration-100 active:scale-[0.98];
   }
 }

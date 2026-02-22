@@ -4,12 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import logo from "@/assets/handled-home-logo.png";
 
 export default function AuthPage() {
+  const [tab, setTab] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -51,75 +51,89 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Handled Home</h1>
-          <p className="text-muted-foreground mt-1">Your home is handled.</p>
-        </div>
-
-        <Card>
-          <Tabs defaultValue="login">
-            <CardHeader>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Log In</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
-              </TabsList>
-            </CardHeader>
-
-            <CardContent>
-              <TabsContent value="login">
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div>
-                    <Label htmlFor="login-email">Email</Label>
-                    <Input id="login-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                  </div>
-                  <div>
-                    <Label htmlFor="login-password">Password</Label>
-                    <Input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                  </div>
-                  <Button type="submit" className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={loading}>
-                    {loading ? "Signing in..." : "Sign In"}
-                  </Button>
-                </form>
-              </TabsContent>
-
-              <TabsContent value="signup">
-                <form onSubmit={handleSignup} className="space-y-4">
-                  <div>
-                    <Label htmlFor="signup-name">Full Name</Label>
-                    <Input id="signup-name" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
-                  </div>
-                  <div>
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input id="signup-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                  </div>
-                  <div>
-                    <Label htmlFor="signup-password">Password</Label>
-                    <Input id="signup-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
-                  </div>
-                  <div>
-                    <Label htmlFor="signup-role">Role (dev)</Label>
-                    <Select value={role} onValueChange={setRole}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="customer">Customer</SelectItem>
-                        <SelectItem value="provider">Provider</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button type="submit" className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={loading}>
-                    {loading ? "Creating account..." : "Create Account"}
-                  </Button>
-                </form>
-              </TabsContent>
-            </CardContent>
-          </Tabs>
-        </Card>
+    <div className="min-h-screen flex flex-col bg-background px-6 safe-top animate-fade-in">
+      {/* Logo & tagline */}
+      <div className="pt-16 pb-10 flex flex-col items-center">
+        <img src={logo} alt="Handled Home" className="h-16 w-auto mb-4" />
+        <p className="text-muted-foreground text-sm">Your home is handled.</p>
       </div>
+
+      {/* Tab switcher */}
+      <div className="flex bg-secondary rounded-full p-1 mb-8 mx-auto w-full max-w-xs">
+        <button
+          onClick={() => setTab("login")}
+          className={`flex-1 py-2.5 text-sm font-semibold rounded-full transition-colors ${
+            tab === "login"
+              ? "bg-card text-foreground shadow-sm"
+              : "text-muted-foreground"
+          }`}
+        >
+          Log In
+        </button>
+        <button
+          onClick={() => setTab("signup")}
+          className={`flex-1 py-2.5 text-sm font-semibold rounded-full transition-colors ${
+            tab === "signup"
+              ? "bg-card text-foreground shadow-sm"
+              : "text-muted-foreground"
+          }`}
+        >
+          Sign Up
+        </button>
+      </div>
+
+      {/* Forms */}
+      {tab === "login" ? (
+        <form onSubmit={handleLogin} className="space-y-4 w-full max-w-sm mx-auto">
+          <div>
+            <Label htmlFor="login-email" className="text-sm font-medium">Email</Label>
+            <Input id="login-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
+              className="h-12 mt-1.5 rounded-xl" />
+          </div>
+          <div>
+            <Label htmlFor="login-password" className="text-sm font-medium">Password</Label>
+            <Input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
+              className="h-12 mt-1.5 rounded-xl" />
+          </div>
+          <Button type="submit" className="w-full h-12 rounded-xl bg-accent text-accent-foreground hover:bg-accent/90 font-semibold text-base" disabled={loading}>
+            {loading ? "Signing in..." : "Sign In"}
+          </Button>
+        </form>
+      ) : (
+        <form onSubmit={handleSignup} className="space-y-4 w-full max-w-sm mx-auto">
+          <div>
+            <Label htmlFor="signup-name" className="text-sm font-medium">Full Name</Label>
+            <Input id="signup-name" value={fullName} onChange={(e) => setFullName(e.target.value)} required
+              className="h-12 mt-1.5 rounded-xl" />
+          </div>
+          <div>
+            <Label htmlFor="signup-email" className="text-sm font-medium">Email</Label>
+            <Input id="signup-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
+              className="h-12 mt-1.5 rounded-xl" />
+          </div>
+          <div>
+            <Label htmlFor="signup-password" className="text-sm font-medium">Password</Label>
+            <Input id="signup-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6}
+              className="h-12 mt-1.5 rounded-xl" />
+          </div>
+          <div>
+            <Label htmlFor="signup-role" className="text-sm font-medium">Role (dev)</Label>
+            <Select value={role} onValueChange={setRole}>
+              <SelectTrigger className="h-12 mt-1.5 rounded-xl">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="customer">Customer</SelectItem>
+                <SelectItem value="provider">Provider</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Button type="submit" className="w-full h-12 rounded-xl bg-accent text-accent-foreground hover:bg-accent/90 font-semibold text-base" disabled={loading}>
+            {loading ? "Creating account..." : "Create Account"}
+          </Button>
+        </form>
+      )}
     </div>
   );
 }

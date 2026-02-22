@@ -4,11 +4,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { ThemeProvider } from "next-themes";
 
 import AuthPage from "@/pages/AuthPage";
 import NotFound from "@/pages/NotFound";
 import { AppLayout } from "@/components/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import MoreMenuPage from "@/components/MoreMenu";
 
 // Customer pages
 import CustomerDashboard from "@/pages/customer/Dashboard";
@@ -54,62 +56,67 @@ function RootRedirect() {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<RootRedirect />} />
-            <Route path="/auth" element={<AuthPage />} />
+  <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<RootRedirect />} />
+              <Route path="/auth" element={<AuthPage />} />
 
-            {/* Customer App */}
-            <Route element={<ProtectedRoute requiredRole="customer"><AppLayout /></ProtectedRoute>}>
-              <Route path="/customer" element={<CustomerDashboard />} />
-              <Route path="/customer/build" element={<CustomerBuild />} />
-              <Route path="/customer/history" element={<CustomerHistory />} />
-              <Route path="/customer/subscription" element={<CustomerSubscription />} />
-              <Route path="/customer/property" element={<CustomerProperty />} />
-              <Route path="/customer/billing" element={<CustomerBilling />} />
-              <Route path="/customer/referrals" element={<CustomerReferrals />} />
-              <Route path="/customer/support" element={<CustomerSupport />} />
-              <Route path="/customer/settings" element={<CustomerSettings />} />
-            </Route>
+              {/* Customer App */}
+              <Route element={<ProtectedRoute requiredRole="customer"><AppLayout /></ProtectedRoute>}>
+                <Route path="/customer" element={<CustomerDashboard />} />
+                <Route path="/customer/build" element={<CustomerBuild />} />
+                <Route path="/customer/history" element={<CustomerHistory />} />
+                <Route path="/customer/subscription" element={<CustomerSubscription />} />
+                <Route path="/customer/property" element={<CustomerProperty />} />
+                <Route path="/customer/billing" element={<CustomerBilling />} />
+                <Route path="/customer/referrals" element={<CustomerReferrals />} />
+                <Route path="/customer/support" element={<CustomerSupport />} />
+                <Route path="/customer/settings" element={<CustomerSettings />} />
+                <Route path="/customer/more" element={<MoreMenuPage />} />
+              </Route>
 
-            {/* Provider App */}
-            <Route element={<ProtectedRoute requiredRole="provider"><AppLayout /></ProtectedRoute>}>
-              <Route path="/provider" element={<ProviderDashboard />} />
-              <Route path="/provider/jobs" element={<ProviderJobs />} />
-              <Route path="/provider/earnings" element={<ProviderEarnings />} />
-              <Route path="/provider/performance" element={<ProviderPerformance />} />
-              <Route path="/provider/organization" element={<ProviderOrganization />} />
-              <Route path="/provider/coverage" element={<ProviderCoverage />} />
-              <Route path="/provider/settings" element={<ProviderSettings />} />
-            </Route>
+              {/* Provider App */}
+              <Route element={<ProtectedRoute requiredRole="provider"><AppLayout /></ProtectedRoute>}>
+                <Route path="/provider" element={<ProviderDashboard />} />
+                <Route path="/provider/jobs" element={<ProviderJobs />} />
+                <Route path="/provider/earnings" element={<ProviderEarnings />} />
+                <Route path="/provider/performance" element={<ProviderPerformance />} />
+                <Route path="/provider/organization" element={<ProviderOrganization />} />
+                <Route path="/provider/coverage" element={<ProviderCoverage />} />
+                <Route path="/provider/settings" element={<ProviderSettings />} />
+                <Route path="/provider/more" element={<MoreMenuPage />} />
+              </Route>
 
-            {/* Admin Console */}
-            <Route element={<ProtectedRoute requiredRole="admin"><AppLayout /></ProtectedRoute>}>
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/zones" element={<AdminZones />} />
-              <Route path="/admin/capacity" element={<AdminCapacity />} />
-              <Route path="/admin/skus" element={<AdminSKUs />} />
-              <Route path="/admin/plans" element={<AdminPlans />} />
-              <Route path="/admin/providers" element={<AdminProviders />} />
-              <Route path="/admin/scheduling" element={<AdminScheduling />} />
-              <Route path="/admin/support" element={<AdminSupport />} />
-              <Route path="/admin/incentives" element={<AdminIncentives />} />
-              <Route path="/admin/reports" element={<AdminReports />} />
-              <Route path="/admin/audit" element={<AdminAudit />} />
-              <Route path="/admin/settings" element={<AdminSettings />} />
-            </Route>
+              {/* Admin Console */}
+              <Route element={<ProtectedRoute requiredRole="admin"><AppLayout /></ProtectedRoute>}>
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/zones" element={<AdminZones />} />
+                <Route path="/admin/capacity" element={<AdminCapacity />} />
+                <Route path="/admin/skus" element={<AdminSKUs />} />
+                <Route path="/admin/plans" element={<AdminPlans />} />
+                <Route path="/admin/providers" element={<AdminProviders />} />
+                <Route path="/admin/scheduling" element={<AdminScheduling />} />
+                <Route path="/admin/support" element={<AdminSupport />} />
+                <Route path="/admin/incentives" element={<AdminIncentives />} />
+                <Route path="/admin/reports" element={<AdminReports />} />
+                <Route path="/admin/audit" element={<AdminAudit />} />
+                <Route path="/admin/settings" element={<AdminSettings />} />
+                <Route path="/admin/more" element={<MoreMenuPage />} />
+              </Route>
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ThemeProvider>
 );
 
 export default App;
