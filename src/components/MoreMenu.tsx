@@ -29,6 +29,9 @@ const providerMore: MenuItem[] = [
 ];
 
 const adminMore: MenuItem[] = [
+  { label: "Billing", icon: CreditCard, path: "/admin/billing" },
+  { label: "Payouts", icon: Gauge, path: "/admin/payouts" },
+  { label: "Exceptions", icon: Gauge, path: "/admin/exceptions" },
   { label: "Capacity", icon: Gauge, path: "/admin/capacity" },
   { label: "Plans", icon: CreditCard, path: "/admin/plans" },
   { label: "Bundles", icon: Package, path: "/admin/bundles" },

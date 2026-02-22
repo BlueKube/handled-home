@@ -17,8 +17,8 @@ export default function AdminBillingPage() {
       <h1 className="text-2xl font-bold">Billing</h1>
 
       <div className="grid grid-cols-2 gap-3">
-        <StatCard title="Collected today" value={formatCents(paidToday)} icon={DollarSign} />
-        <StatCard title="Failed payments" value={String(failedCount)} icon={AlertTriangle} variant={failedCount > 0 ? "warning" : "default"} />
+        <StatCard label="Collected today" value={formatCents(paidToday)} icon={DollarSign} />
+        <StatCard label="Failed payments" value={String(failedCount)} icon={AlertTriangle} />
       </div>
 
       <Card>

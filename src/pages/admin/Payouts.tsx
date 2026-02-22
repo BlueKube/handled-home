@@ -20,8 +20,8 @@ export default function AdminPayoutsPage() {
       <h1 className="text-2xl font-bold">Payouts</h1>
 
       <div className="grid grid-cols-2 gap-3">
-        <StatCard title="Total paid out" value={formatCents(paidTotal)} icon={DollarSign} />
-        <StatCard title="Pending" value={String(pendingCount)} icon={Clock} />
+        <StatCard label="Total paid out" value={formatCents(paidTotal)} icon={DollarSign} />
+        <StatCard label="Pending" value={String(pendingCount)} icon={Clock} />
       </div>
 
       <Card>

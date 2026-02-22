@@ -22,7 +22,7 @@ const customerTabs: TabItem[] = [
 
 const providerTabs: TabItem[] = [
   { label: "Jobs", icon: Briefcase, path: "/provider/jobs" },
-  { label: "Earnings", icon: DollarSign, path: "/provider/earnings" },
+  { label: "Payouts", icon: DollarSign, path: "/provider/payouts" },
   { label: "Performance", icon: BarChart3, path: "/provider/performance" },
   { label: "Coverage", icon: Map, path: "/provider/coverage" },
   { label: "More", icon: MoreHorizontal, path: "/provider/more" },
