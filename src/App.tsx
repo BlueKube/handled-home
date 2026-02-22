@@ -41,6 +41,12 @@ import ProviderPerformance from "@/pages/provider/Performance";
 import ProviderOrganization from "@/pages/provider/Organization";
 import ProviderCoverage from "@/pages/provider/Coverage";
 import ProviderSettings from "@/pages/provider/Settings";
+import ProviderOnboarding from "@/pages/provider/Onboarding";
+import ProviderOnboardingOrg from "@/pages/provider/OnboardingOrg";
+import ProviderOnboardingCoverage from "@/pages/provider/OnboardingCoverage";
+import ProviderOnboardingCapabilities from "@/pages/provider/OnboardingCapabilities";
+import ProviderOnboardingCompliance from "@/pages/provider/OnboardingCompliance";
+import ProviderOnboardingReview from "@/pages/provider/OnboardingReview";
 
 // Admin pages
 import AdminDashboard from "@/pages/admin/Dashboard";
@@ -50,6 +56,7 @@ import AdminSKUs from "@/pages/admin/SKUs";
 import AdminPlans from "@/pages/admin/Plans";
 import AdminSubscriptions from "@/pages/admin/Subscriptions";
 import AdminProviders from "@/pages/admin/Providers";
+import AdminProviderDetail from "@/pages/admin/ProviderDetail";
 import AdminScheduling from "@/pages/admin/Scheduling";
 import AdminSupport from "@/pages/admin/Support";
 import AdminIncentives from "@/pages/admin/Incentives";
@@ -105,6 +112,12 @@ const App = () => (
               {/* Provider App */}
               <Route element={<ProtectedRoute requiredRole="provider"><AppLayout /></ProtectedRoute>}>
                 <Route path="/provider" element={<ProviderDashboard />} />
+                <Route path="/provider/onboarding" element={<ProviderOnboarding />} />
+                <Route path="/provider/onboarding/org" element={<ProviderOnboardingOrg />} />
+                <Route path="/provider/onboarding/coverage" element={<ProviderOnboardingCoverage />} />
+                <Route path="/provider/onboarding/capabilities" element={<ProviderOnboardingCapabilities />} />
+                <Route path="/provider/onboarding/compliance" element={<ProviderOnboardingCompliance />} />
+                <Route path="/provider/onboarding/review" element={<ProviderOnboardingReview />} />
                 <Route path="/provider/jobs" element={<ProviderJobs />} />
                 <Route path="/provider/skus" element={<ProviderSKUs />} />
                 <Route path="/provider/earnings" element={<ProviderEarnings />} />
@@ -124,6 +137,7 @@ const App = () => (
                 <Route path="/admin/plans" element={<AdminPlans />} />
                 <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
                 <Route path="/admin/providers" element={<AdminProviders />} />
+                <Route path="/admin/providers/:id" element={<AdminProviderDetail />} />
                 <Route path="/admin/scheduling" element={<AdminScheduling />} />
                 <Route path="/admin/service-days" element={<AdminServiceDays />} />
                 <Route path="/admin/bundles" element={<AdminBundles />} />
