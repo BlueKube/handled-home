@@ -1,39 +1,25 @@
 
 
-# Module 02 Update: Non-Serviced Area Handling
+# Module 02 Cleanup: Drop Redundant RLS Policy
 
-## Summary
-Allow customers with non-serviced zip codes to complete property onboarding without being blocked. After saving, show an informational dialog about service expansion. Update the coverage indicator copy to be optimistic.
+## Context
+Claude Code's review identified that the `properties` table has two overlapping policies:
+- `"Users can manage their own properties"` — FOR ALL (covers SELECT, INSERT, UPDATE, DELETE)
+- `"Users can view their own properties"` — FOR SELECT only
 
-## Changes
+The SELECT-only policy is redundant since the FOR ALL policy already covers SELECT. Not a bug, but unnecessary clutter.
 
-### 1. Update zip coverage copy in Property.tsx (line 219)
-Replace:
-> "Not currently serviced in this area"
+## Regarding the other findings
 
-With:
-> "Service is not yet available in your area. We'll notify you when we launch here."
+- **Issue 4 (placeholder page)**: Already fully implemented — property form with address fields, access/logistics section, zone coverage indicator, sticky save button, validation, prefill, onboarding gate, and non-serviced area dialog are all live.
+- **Issues 2 and 3 (provider access, delete protection)**: Correctly deferred — both require the `jobs` table which will be built in a future module.
 
-### 2. Add post-save "Not In Your Area Yet" dialog in Property.tsx
-After a successful property save, if the zip is not covered:
-- Show a Dialog (using the existing Radix dialog component) with:
-  - **Title**: "We're Not in Your Area Yet"
-  - **Body**: "Handled Home is expanding. We'll notify you as soon as we launch in your neighborhood."
-  - **Primary CTA**: "Notify Me" -- closes the dialog, shows a toast confirmation ("We'll let you know!"), navigates to `/customer`
-  - **Secondary CTA**: "Continue Exploring" -- closes the dialog, navigates to `/customer`
-- If zip IS covered, the current behavior (toast + stay on page) remains unchanged
+## Change
 
-### 3. No changes to CustomerPropertyGate
-The gate already only checks for property existence, not zone coverage. It will let non-serviced users through once they save their property. No modification needed.
+**Single database migration** to drop the redundant policy:
 
-### 4. No database changes
-No new tables, columns, or migrations required. "Notify Me" is a placeholder action (just a toast for now).
+```sql
+DROP POLICY IF EXISTS "Users can view their own properties" ON public.properties;
+```
 
-## Files Modified
-- `src/pages/customer/Property.tsx` -- Update coverage copy + add post-save dialog
-
-## Technical Notes
-- Import `Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter` from existing `@/components/ui/dialog`
-- Import `useNavigate` from react-router-dom (already available via `useSearchParams`)
-- Add a `showExpansionDialog` boolean state, set to `true` after successful save when `isNotCovered` is true
-- On save success: check zone coverage status, if not covered show dialog instead of just the toast
+No code changes needed. No other files affected.
