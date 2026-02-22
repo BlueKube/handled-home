@@ -22,6 +22,9 @@ import CustomerIssues from "@/pages/customer/Issues";
 import CustomerSubscription from "@/pages/customer/Subscription";
 import CustomerProperty from "@/pages/customer/Property";
 import CustomerBilling from "@/pages/customer/Billing";
+import CustomerBillingMethods from "@/pages/customer/BillingMethods";
+import CustomerBillingHistory from "@/pages/customer/BillingHistory";
+import CustomerBillingReceipt from "@/pages/customer/BillingReceipt";
 import CustomerReferrals from "@/pages/customer/Referrals";
 import CustomerSupport from "@/pages/customer/Support";
 import CustomerSettings from "@/pages/customer/Settings";
@@ -39,6 +42,8 @@ import ProviderDashboard from "@/pages/provider/Dashboard";
 import ProviderJobs from "@/pages/provider/Jobs";
 import ProviderSKUs from "@/pages/provider/SKUs";
 import ProviderEarnings from "@/pages/provider/Earnings";
+import ProviderPayouts from "@/pages/provider/Payouts";
+import ProviderPayoutHistory from "@/pages/provider/PayoutHistory";
 import ProviderPerformance from "@/pages/provider/Performance";
 import ProviderOrganization from "@/pages/provider/Organization";
 import ProviderCoverage from "@/pages/provider/Coverage";
@@ -74,6 +79,9 @@ import AdminServiceDays from "@/pages/admin/ServiceDays";
 import AdminBundles from "@/pages/admin/Bundles";
 import AdminJobs from "@/pages/admin/Jobs";
 import AdminJobDetail from "@/pages/admin/JobDetail";
+import AdminBilling from "@/pages/admin/Billing";
+import AdminPayouts from "@/pages/admin/Payouts";
+import AdminExceptions from "@/pages/admin/Exceptions";
 
 const queryClient = new QueryClient();
 
@@ -114,6 +122,9 @@ const App = () => (
                 <Route path="/customer/issues" element={<CustomerPropertyGate><CustomerIssues /></CustomerPropertyGate>} />
                 <Route path="/customer/subscription" element={<CustomerPropertyGate><CustomerSubscription /></CustomerPropertyGate>} />
                 <Route path="/customer/billing" element={<CustomerPropertyGate><CustomerBilling /></CustomerPropertyGate>} />
+                <Route path="/customer/billing/methods" element={<CustomerPropertyGate><CustomerBillingMethods /></CustomerPropertyGate>} />
+                <Route path="/customer/billing/history" element={<CustomerPropertyGate><CustomerBillingHistory /></CustomerPropertyGate>} />
+                <Route path="/customer/billing/receipts/:invoiceId" element={<CustomerPropertyGate><CustomerBillingReceipt /></CustomerPropertyGate>} />
                 <Route path="/customer/referrals" element={<CustomerPropertyGate><CustomerReferrals /></CustomerPropertyGate>} />
                 <Route path="/customer/support" element={<CustomerPropertyGate><CustomerSupport /></CustomerPropertyGate>} />
                 <Route path="/customer/settings" element={<CustomerPropertyGate><CustomerSettings /></CustomerPropertyGate>} />
@@ -138,6 +149,8 @@ const App = () => (
                 <Route path="/provider/history" element={<ProviderHistory />} />
                 <Route path="/provider/skus" element={<ProviderSKUs />} />
                 <Route path="/provider/earnings" element={<ProviderEarnings />} />
+                <Route path="/provider/payouts" element={<ProviderPayouts />} />
+                <Route path="/provider/payouts/history" element={<ProviderPayoutHistory />} />
                 <Route path="/provider/performance" element={<ProviderPerformance />} />
                 <Route path="/provider/organization" element={<ProviderOrganization />} />
                 <Route path="/provider/coverage" element={<ProviderCoverage />} />
@@ -164,6 +177,9 @@ const App = () => (
                 <Route path="/admin/incentives" element={<AdminIncentives />} />
                 <Route path="/admin/reports" element={<AdminReports />} />
                 <Route path="/admin/audit" element={<AdminAudit />} />
+                <Route path="/admin/billing" element={<AdminBilling />} />
+                <Route path="/admin/payouts" element={<AdminPayouts />} />
+                <Route path="/admin/exceptions" element={<AdminExceptions />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
                 <Route path="/admin/more" element={<MoreMenuPage />} />
               </Route>

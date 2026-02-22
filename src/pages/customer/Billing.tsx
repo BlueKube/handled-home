@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { useSubscription } from "@/hooks/useSubscription";
+import { useCustomerSubscription } from "@/hooks/useSubscription";
 import { useCustomerBilling } from "@/hooks/useCustomerBilling";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +14,7 @@ function formatCents(cents: number) {
 
 export default function CustomerBillingPage() {
   const navigate = useNavigate();
-  const { subscription, plan, isLoading: subLoading } = useSubscription();
+  const { data: subscription, isLoading: subLoading } = useCustomerSubscription();
   const { defaultMethod, availableCredits, latestInvoice, hasFailedPayment, isLoading } = useCustomerBilling();
 
   if (isLoading || subLoading) return <PageSkeleton />;
@@ -32,7 +32,7 @@ export default function CustomerBillingPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Current plan</p>
-              <p className="text-lg font-semibold">{plan?.name ?? "No plan"}</p>
+              <p className="text-lg font-semibold">{subscription?.plan_id ? "Active plan" : "No plan"}</p>
             </div>
             <Badge variant={statusColor as any}>{statusLabel}</Badge>
           </div>
