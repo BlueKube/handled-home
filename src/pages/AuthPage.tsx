@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/handled-home-logo.png";
 
@@ -12,8 +11,8 @@ export default function AuthPage() {
   const [tab, setTab] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [role, setRole] = useState("customer");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -24,7 +23,7 @@ export default function AuthPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Error", description: "Invalid email or password.", variant: "destructive" });
     } else {
       navigate("/");
     }
@@ -32,22 +31,51 @@ export default function AuthPage() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (fullName.trim().length === 0) {
+      toast({ title: "Error", description: "Full name is required.", variant: "destructive" });
+      return;
+    }
+    if (password.length < 8) {
+      toast({ title: "Error", description: "Password must be at least 8 characters.", variant: "destructive" });
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast({ title: "Error", description: "Passwords do not match.", variant: "destructive" });
+      return;
+    }
+
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { full_name: fullName, role },
+        data: { full_name: fullName.trim() },
         emailRedirectTo: window.location.origin,
       },
     });
-    setLoading(false);
     if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Success", description: "Account created! Redirecting..." });
-      navigate("/");
+      setLoading(false);
+      const msg = error.message.toLowerCase().includes("already")
+        ? "An account with this email already exists. Try logging in."
+        : error.message;
+      toast({ title: "Error", description: msg, variant: "destructive" });
+      return;
     }
+
+    // Bootstrap profile + customer role
+    if (data.user) {
+      const { error: rpcError } = await supabase.rpc("bootstrap_new_user", {
+        _full_name: fullName.trim(),
+      });
+      if (rpcError) {
+        console.error("Bootstrap error:", rpcError);
+      }
+    }
+
+    setLoading(false);
+    toast({ title: "Success", description: "Account created! Redirecting..." });
+    navigate("/");
   };
 
   return (
@@ -88,49 +116,46 @@ export default function AuthPage() {
           <div>
             <Label htmlFor="login-email" className="text-sm font-medium">Email</Label>
             <Input id="login-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-              className="h-12 mt-1.5 rounded-xl" />
+              disabled={loading} className="mt-1.5" />
           </div>
           <div>
             <Label htmlFor="login-password" className="text-sm font-medium">Password</Label>
             <Input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
-              className="h-12 mt-1.5 rounded-xl" />
+              disabled={loading} className="mt-1.5" />
           </div>
-          <Button type="submit" className="w-full h-12 rounded-xl bg-accent text-accent-foreground hover:bg-accent/90 font-semibold text-base" disabled={loading}>
-            {loading ? "Signing in..." : "Sign In"}
+          <Button type="submit" variant="accent" size="xl" className="w-full" loading={loading}>
+            Sign In
           </Button>
+          <p className="text-center text-sm text-muted-foreground">
+            <button type="button" className="underline" onClick={() => toast({ title: "Coming soon", description: "Password reset is not yet available." })}>
+              Forgot password?
+            </button>
+          </p>
         </form>
       ) : (
         <form onSubmit={handleSignup} className="space-y-4 w-full max-w-sm mx-auto">
           <div>
             <Label htmlFor="signup-name" className="text-sm font-medium">Full Name</Label>
             <Input id="signup-name" value={fullName} onChange={(e) => setFullName(e.target.value)} required
-              className="h-12 mt-1.5 rounded-xl" />
+              disabled={loading} className="mt-1.5" />
           </div>
           <div>
             <Label htmlFor="signup-email" className="text-sm font-medium">Email</Label>
             <Input id="signup-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-              className="h-12 mt-1.5 rounded-xl" />
+              disabled={loading} className="mt-1.5" />
           </div>
           <div>
             <Label htmlFor="signup-password" className="text-sm font-medium">Password</Label>
-            <Input id="signup-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6}
-              className="h-12 mt-1.5 rounded-xl" />
+            <Input id="signup-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
+              minLength={8} disabled={loading} className="mt-1.5" placeholder="Min. 8 characters" />
           </div>
           <div>
-            <Label htmlFor="signup-role" className="text-sm font-medium">Role (dev)</Label>
-            <Select value={role} onValueChange={setRole}>
-              <SelectTrigger className="h-12 mt-1.5 rounded-xl">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="customer">Customer</SelectItem>
-                <SelectItem value="provider">Provider</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label htmlFor="signup-confirm" className="text-sm font-medium">Confirm Password</Label>
+            <Input id="signup-confirm" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required
+              minLength={8} disabled={loading} className="mt-1.5" />
           </div>
-          <Button type="submit" className="w-full h-12 rounded-xl bg-accent text-accent-foreground hover:bg-accent/90 font-semibold text-base" disabled={loading}>
-            {loading ? "Creating account..." : "Create Account"}
+          <Button type="submit" variant="accent" size="xl" className="w-full" loading={loading}>
+            Create Account
           </Button>
         </form>
       )}
