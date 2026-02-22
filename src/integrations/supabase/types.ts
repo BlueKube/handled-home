@@ -471,6 +471,373 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_capabilities: {
+        Row: {
+          capability_key: string
+          capability_type: string
+          created_at: string
+          id: string
+          is_enabled: boolean
+          provider_org_id: string
+          sku_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          capability_key: string
+          capability_type?: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          provider_org_id: string
+          sku_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          capability_key?: string
+          capability_type?: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          provider_org_id?: string
+          sku_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_capabilities_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_capabilities_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_compliance: {
+        Row: {
+          background_check_consented: boolean
+          business_type: string | null
+          created_at: string
+          id: string
+          insurance_attested: boolean
+          insurance_doc_url: string | null
+          notes: string | null
+          other_doc_url: string | null
+          provider_org_id: string
+          tax_doc_url: string | null
+          tax_form_attested: boolean
+          terms_accepted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          background_check_consented?: boolean
+          business_type?: string | null
+          created_at?: string
+          id?: string
+          insurance_attested?: boolean
+          insurance_doc_url?: string | null
+          notes?: string | null
+          other_doc_url?: string | null
+          provider_org_id: string
+          tax_doc_url?: string | null
+          tax_form_attested?: boolean
+          terms_accepted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          background_check_consented?: boolean
+          business_type?: string | null
+          created_at?: string
+          id?: string
+          insurance_attested?: boolean
+          insurance_doc_url?: string | null
+          notes?: string | null
+          other_doc_url?: string | null
+          provider_org_id?: string
+          tax_doc_url?: string | null
+          tax_form_attested?: boolean
+          terms_accepted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_compliance_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: true
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_coverage: {
+        Row: {
+          coverage_type: string | null
+          created_at: string
+          id: string
+          max_travel_miles: number | null
+          provider_org_id: string
+          request_status: string
+          updated_at: string
+          zone_id: string
+        }
+        Insert: {
+          coverage_type?: string | null
+          created_at?: string
+          id?: string
+          max_travel_miles?: number | null
+          provider_org_id: string
+          request_status?: string
+          updated_at?: string
+          zone_id: string
+        }
+        Update: {
+          coverage_type?: string | null
+          created_at?: string
+          id?: string
+          max_travel_miles?: number | null
+          provider_org_id?: string
+          request_status?: string
+          updated_at?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_coverage_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_coverage_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_enforcement_actions: {
+        Row: {
+          action_type: string
+          created_at: string
+          created_by_admin_user_id: string
+          id: string
+          metadata: Json | null
+          provider_org_id: string
+          reason: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          created_by_admin_user_id: string
+          id?: string
+          metadata?: Json | null
+          provider_org_id: string
+          reason?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          created_by_admin_user_id?: string
+          id?: string
+          metadata?: Json | null
+          provider_org_id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_enforcement_actions_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_invites: {
+        Row: {
+          allowed_zone_ids: string[]
+          code: string
+          created_at: string
+          created_by_admin_user_id: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          updated_at: string
+          uses_count: number
+        }
+        Insert: {
+          allowed_zone_ids?: string[]
+          code: string
+          created_at?: string
+          created_by_admin_user_id: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          updated_at?: string
+          uses_count?: number
+        }
+        Update: {
+          allowed_zone_ids?: string[]
+          code?: string
+          created_at?: string
+          created_by_admin_user_id?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          updated_at?: string
+          uses_count?: number
+        }
+        Relationships: []
+      }
+      provider_members: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          phone: string | null
+          provider_org_id: string
+          role_in_org: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          phone?: string | null
+          provider_org_id: string
+          role_in_org?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          phone?: string | null
+          provider_org_id?: string
+          role_in_org?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_members_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_orgs: {
+        Row: {
+          accountable_owner_user_id: string
+          contact_phone: string | null
+          created_at: string
+          created_by_user_id: string
+          home_base_zip: string | null
+          id: string
+          invite_id: string | null
+          logo_url: string | null
+          name: string
+          needs_review: boolean
+          status: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          accountable_owner_user_id: string
+          contact_phone?: string | null
+          created_at?: string
+          created_by_user_id: string
+          home_base_zip?: string | null
+          id?: string
+          invite_id?: string | null
+          logo_url?: string | null
+          name?: string
+          needs_review?: boolean
+          status?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          accountable_owner_user_id?: string
+          contact_phone?: string | null
+          created_at?: string
+          created_by_user_id?: string
+          home_base_zip?: string | null
+          id?: string
+          invite_id?: string | null
+          logo_url?: string | null
+          name?: string
+          needs_review?: boolean
+          status?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_orgs_invite_id_fkey"
+            columns: ["invite_id"]
+            isOneToOne: false
+            referencedRelation: "provider_invites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_risk_flags: {
+        Row: {
+          created_at: string
+          flag_type: string
+          id: string
+          is_active: boolean
+          provider_org_id: string
+          severity: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          flag_type: string
+          id?: string
+          is_active?: boolean
+          provider_org_id: string
+          severity?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          flag_type?: string
+          id?: string
+          is_active?: boolean
+          provider_org_id?: string
+          severity?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_risk_flags_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       regions: {
         Row: {
           created_at: string
@@ -1471,7 +1838,20 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_provider_action: {
+        Args: {
+          p_action: string
+          p_metadata?: Json
+          p_org_id: string
+          p_reason?: string
+        }
+        Returns: Json
+      }
       bootstrap_new_user: { Args: { _full_name: string }; Returns: undefined }
+      check_provider_sku_zone_eligibility: {
+        Args: { p_provider_org_id: string; p_sku_id: string; p_zone_id: string }
+        Returns: boolean
+      }
       cleanup_expired_offers: { Args: never; Returns: Json }
       confirm_routine: { Args: { p_routine_id: string }; Returns: Json }
       confirm_service_day: { Args: { p_assignment_id: string }; Returns: Json }
@@ -1498,6 +1878,8 @@ export type Database = {
         Args: { p_assignment_id: string; p_offer_id: string }
         Returns: Json
       }
+      submit_provider_onboarding: { Args: { p_org_id: string }; Returns: Json }
+      validate_provider_invite: { Args: { p_code: string }; Returns: Json }
     }
     Enums: {
       app_role: "customer" | "provider" | "admin"
