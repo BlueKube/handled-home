@@ -1,177 +1,134 @@
 
 
-# Module 07 Seasonal Services Implementation Plan
+# Module 08 — Code Review Fixes
 
-Based on the Module 07 Addendum (Section 19), this plan implements Seasonal Services as a clean layer on top of the existing routine/bundle system.
-
----
-
-## Phase 1: Database Schema (Migration)
-
-### Tables to create
-
-**1) `seasonal_service_templates`**
-- id, sku_id (FK → service_skus), name, description, default_windows (jsonb), is_active, created_at, updated_at
-- RLS: authenticated can read active templates; admin manages all
-
-**2) `zone_seasonal_service_rules`**
-- id, zone_id (FK → zones), seasonal_template_id (FK → seasonal_service_templates), is_enabled, price_override_cents, windows_override (jsonb), capacity_reserve_rule (jsonb), created_at, updated_at
-- RLS: authenticated can read enabled rules; admin manages all
-
-**3) `customer_seasonal_selections`**
-- id, customer_id, property_id (FK → properties), zone_id (FK → zones), seasonal_template_id (FK → seasonal_service_templates), selection_state (off/included/upsell), window_preference (early/mid/late), year, source (bundle_builder/support/promo), created_at, updated_at
-- RLS: customers manage own (customer_id = auth.uid()); admin reads all
-
-**4) `seasonal_orders`**
-- id, customer_id, property_id (FK → properties), zone_id (FK → zones), seasonal_template_id (FK → seasonal_service_templates), year, pricing_type (included/upsell), price_cents, status (planned/scheduled/completed/canceled), planned_window_start (date), planned_window_end (date), scheduled_service_day_id (uuid nullable), created_at, updated_at
-- RLS: customers manage own; admin manages all
-
-### updated_at triggers
-- On all 4 tables
+This plan addresses all issues identified in the code review, organized by priority.
 
 ---
 
-## Phase 2: Hooks & Logic
+## MUST FIX
 
-### New hooks
+### 1. R1 — Provider can bypass admin approval via direct UPDATE (CRITICAL SECURITY)
 
-**`src/hooks/useSeasonalTemplates.ts`**
-- Fetch active seasonal templates for a zone (joined with zone_seasonal_service_rules)
-- Returns template list with zone-specific pricing, windows, and enabled status
+The `provider_orgs` UPDATE policy allows providers to change any column, including `status`. A malicious client could call `supabase.from('provider_orgs').update({ status: 'ACTIVE' })` directly.
 
-**`src/hooks/useSeasonalSelections.ts`**
-- CRUD for customer_seasonal_selections for a property/year
-- Toggle selection state, update window preference
-- Manage "skip this year" (set selection_state = 'off')
+**Fix:** Add a database trigger that prevents non-admin users from modifying the `status`, `needs_review`, and `accountable_owner_user_id` columns. The trigger fires BEFORE UPDATE and raises an exception if a non-admin attempts to change these protected fields. This is more reliable than column-level RLS (which Postgres does not natively support).
 
-**`src/hooks/useSeasonalOrders.ts`**
-- Read seasonal_orders for a customer/property/year
-- Create/update orders when selections change
-- Compute planned window dates from template windows + preference (early/mid/late)
+### 2. D1 — `provider_members` missing UNIQUE constraint
 
-### Window date computation utility
+The `useProviderMembers` hook calls `.upsert(..., { onConflict: "provider_org_id,user_id" })` but no unique constraint exists on those columns. This will fail at runtime.
 
-**`src/lib/seasonal.ts`**
-- `computeWindowDates(windows, preference, year)` → { start: Date, end: Date }
-  - Early = first third, Mid = middle third, Late = last third
-- `getEffectiveWindows(template, zoneRule)` → use zone override if present, else template defaults
-
-### Entitlement extension
-
-- Check if plan includes seasonal credits (future: add `seasonal_credits_per_year` to plan_entitlement_versions)
-- For now: seasonal items are upsell-only unless plan has seasonal credits configured
-- If credits exceeded, flag remaining as upsell
+**Fix:** Add `UNIQUE(provider_org_id, user_id)` constraint to `provider_members`.
 
 ---
 
-## Phase 3: Customer UI
+## SHOULD FIX
 
-### A) "Seasonal Boosts" section in Build Routine (`/customer/routine`)
+### 3. D2/S2 — Risk flag deduplication broken
 
-**New component: `src/components/routine/SeasonalBoostsSection.tsx`**
-- Rendered below the existing routine items section
-- Fetches seasonal templates for the customer's zone
-- Each item shows:
-  - Name, description, duration range, price or "Included"
-  - Recommended windows (e.g., "May–Jun")
-  - Window preference picker: Early / Mid / Late toggle
-  - ON/OFF toggle
-  - Proof requirements badge
-- Toggling ON creates a customer_seasonal_selection + seasonal_order
-- Toggling OFF updates selection_state to 'off' and cancels the order
+`ON CONFLICT DO NOTHING` in `submit_provider_onboarding` has no conflict target because there is no unique constraint on `(provider_org_id, flag_type)`.
 
-### B) Review step additions (`/customer/routine/review`)
+**Fix:** Add `UNIQUE(provider_org_id, flag_type)` constraint to `provider_risk_flags`, then update the RPC to use `ON CONFLICT (provider_org_id, flag_type) DO NOTHING`.
 
-**New component: `src/components/routine/SeasonalYearStrip.tsx`**
-- 12-month horizontal strip showing planned seasonal windows
-- Each month block highlights if a seasonal item is planned in that window
-- Labels like "Planned in Oct (Mid)"
-- Rendered below the existing 4-week preview
+### 4. P1 — `location.state` lost on page refresh
 
-### C) Customer Dashboard — "Seasonal Plan" card
+All onboarding steps pass `orgId` and `allowedZoneIds` via `navigate(..., { state })`. If the user refreshes, state is lost and hooks have no `orgId`.
 
-**New component: `src/components/customer/SeasonalPlanCard.tsx`**
-- Shows upcoming seasonal items for the current year
-- Window preference can be changed inline
-- "Skip this year" button
-- Status badges: Planned → Scheduled → Completed
+**Fix:** In each onboarding step page, fall back to reading `orgId` from `useProviderOrg()` when `location.state?.orgId` is absent. For `allowedZoneIds`, query the invite's `allowed_zone_ids` via the org's `invite_id` if state is missing.
 
-Add to `src/pages/customer/Dashboard.tsx`
+### 5. P2 — Org form fields don't sync when async data loads
+
+`OnboardingOrg.tsx` initializes `useState(org?.name || "")` but `org` is likely `undefined` on first render. When the query resolves, the state doesn't update.
+
+**Fix:** Add a `useEffect` that syncs form state when `org` data loads (same pattern already used in `OnboardingCompliance.tsx`).
+
+### 6. S1 — Audit log uses `admin_user_id` for provider action
+
+The `submit_provider_onboarding` RPC inserts into `admin_audit_log` using `auth.uid()` (a provider) in the `admin_user_id` column. While technically functional (column has no FK constraint), it's semantically wrong.
+
+**Fix:** This is a known modeling shortcut. For now, add a comment in the RPC clarifying the actor may be a provider. A proper generic `audit_log` table can be introduced in a future refactor without blocking MVP.
 
 ---
 
-## Phase 4: Admin UI
+## NICE TO HAVE
 
-### A) Admin seasonal management
+### 7. P3 — `DraftResumeScreen` `allowedZoneIds` always empty
 
-**New component: `src/components/admin/ZoneSeasonalPanel.tsx`**
-- Embedded in ZoneDetailSheet as a new "Seasonal" tab
-- Lists seasonal templates with toggle to enable/disable per zone
-- Price override input
-- Window override inputs (start/end month-day)
-- Capacity reserve rule (simple % or max count)
+Both branches of the ternary produce `[]`. 
 
-### B) Admin seasonal templates management
+**Fix:** Query `provider_invites` to get `allowed_zone_ids` when `org.invite_id` exists, or pass them along from the org query.
 
-**New page or section in `/admin/skus`**
-- Create/edit seasonal_service_templates
-- Link to existing SKU catalog
-- Set default windows
-- Toggle active/inactive
+### 8. P4 — Pending screen doesn't show missing upload warnings
+
+All checklist items show green checkmarks regardless of upload status.
+
+**Fix:** Query compliance data in `PendingReviewScreen` and show a warning icon for missing document uploads.
+
+### 9. P6 — No document upload UI in compliance step
+
+The storage bucket and compliance table support document URLs, but the UI has no file picker.
+
+**Fix:** Add file upload inputs (insurance doc, tax doc, other doc) in `OnboardingCompliance.tsx` using Supabase Storage upload.
+
+### 10. A1 — Coverage approve/deny not audit-logged
+
+`updateCoverageStatus` in `useProviderAdmin` directly updates the table with no audit trail.
+
+**Fix:** Create an `admin_update_coverage_status` RPC that updates the coverage, creates an enforcement action, and writes an audit log entry.
+
+### 11. D3/D4/D5 — Missing CHECK constraints on status columns
+
+`provider_orgs.status`, `provider_coverage.request_status`, and `provider_coverage.coverage_type` accept any text.
+
+**Fix:** Add CHECK constraints to these columns via the migration.
+
+### 12. S3 — NOTE and REASSIGN_OWNER actions not handled in RPC
+
+The `admin_provider_action` RPC only handles APPROVE/PROBATION/SUSPEND/REINSTATE.
+
+**Fix:** Add NOTE (no status change, just logs enforcement action) and REASSIGN_OWNER (updates `accountable_owner_user_id` with metadata containing new owner user_id) cases.
+
+### 13. S4 — No unique constraint on `accountable_owner_user_id`
+
+Spec says one org per owner. No server-side enforcement.
+
+**Fix:** Add `UNIQUE(accountable_owner_user_id)` constraint to `provider_orgs`.
 
 ---
 
-## Phase 5: Capacity & Billing Integration
+## Technical Details
 
-### Capacity soft check
-- When creating a seasonal_order, check zone capacity for the planned window
-- If oversubscribed, show warning and suggest alternative window
-- Simple implementation: count existing planned orders in the same window period
+### New Migration
 
-### Billing (minimal)
-- Upsell seasonal items: store price_cents on seasonal_order
-- Actual payment integration deferred to Module 11 (billing)
-- For now: create the order record with pricing info for future billing
+A single migration will handle all schema changes:
 
----
+```text
+1. ALTER TABLE provider_members ADD CONSTRAINT ... UNIQUE(provider_org_id, user_id)
+2. ALTER TABLE provider_risk_flags ADD CONSTRAINT ... UNIQUE(provider_org_id, flag_type)
+3. ALTER TABLE provider_orgs ADD CONSTRAINT ... UNIQUE(accountable_owner_user_id)
+4. ADD CHECK constraints on provider_orgs.status, provider_coverage.request_status, provider_coverage.coverage_type
+5. CREATE trigger protect_provider_org_admin_fields (prevents non-admin status/needs_review/owner changes)
+6. CREATE OR REPLACE submit_provider_onboarding (fix ON CONFLICT target)
+7. CREATE OR REPLACE admin_provider_action (add NOTE + REASSIGN_OWNER)
+8. CREATE OR REPLACE admin_update_coverage_status RPC (audit-logged coverage approval)
+```
 
-## Files to Create
+### Frontend Changes
 
-| File | Purpose |
+| File | Changes |
 |------|---------|
-| `src/lib/seasonal.ts` | Window date computation utilities |
-| `src/hooks/useSeasonalTemplates.ts` | Fetch seasonal templates for a zone |
-| `src/hooks/useSeasonalSelections.ts` | CRUD customer seasonal selections |
-| `src/hooks/useSeasonalOrders.ts` | Manage seasonal orders |
-| `src/components/routine/SeasonalBoostsSection.tsx` | Seasonal section in routine builder |
-| `src/components/routine/SeasonalYearStrip.tsx` | 12-month visual strip for review |
-| `src/components/customer/SeasonalPlanCard.tsx` | Dashboard seasonal plan card |
-| `src/components/admin/ZoneSeasonalPanel.tsx` | Admin zone seasonal config |
+| `src/pages/provider/OnboardingOrg.tsx` | Add useEffect to sync form state when org loads; fall back to useProviderOrg for orgId |
+| `src/pages/provider/OnboardingCoverage.tsx` | Fall back to useProviderOrg for orgId on refresh |
+| `src/pages/provider/OnboardingCapabilities.tsx` | Fall back to useProviderOrg for orgId on refresh |
+| `src/pages/provider/OnboardingCompliance.tsx` | Fall back to useProviderOrg for orgId on refresh; add file upload inputs |
+| `src/pages/provider/OnboardingReview.tsx` | Fall back to useProviderOrg for orgId on refresh |
+| `src/pages/provider/Onboarding.tsx` | Fix DraftResumeScreen allowedZoneIds; add compliance warning in PendingReviewScreen |
+| `src/hooks/useProviderAdmin.ts` | Replace direct coverage update with RPC call |
 
-## Files to Modify
+### Implementation Order
 
-| File | Change |
-|------|--------|
-| `src/pages/customer/Routine.tsx` | Add SeasonalBoostsSection below routine items |
-| `src/pages/customer/RoutineReview.tsx` | Add SeasonalYearStrip below 4-week preview |
-| `src/pages/customer/Dashboard.tsx` | Add SeasonalPlanCard |
-| `src/components/admin/ZoneDetailSheet.tsx` | Add "Seasonal" tab with ZoneSeasonalPanel |
-
----
-
-## Implementation Order
-
-1. **Database migration** — Create all 4 tables with RLS + triggers
-2. **Utility + hooks** — seasonal.ts, useSeasonalTemplates, useSeasonalSelections, useSeasonalOrders
-3. **Customer UI** — SeasonalBoostsSection, SeasonalYearStrip, SeasonalPlanCard
-4. **Admin UI** — ZoneSeasonalPanel in ZoneDetailSheet
-5. **Integration** — Wire into existing Routine.tsx, RoutineReview.tsx, Dashboard.tsx
-
----
-
-## Backward Compatibility
-
-- All seasonal sections render only if seasonal templates exist for the zone
-- Default state is OFF — no seasonal items selected
-- Existing routine/bundle flows are completely unaffected
-- No changes to existing tables or RPCs
+1. Database migration (all schema + RPC changes)
+2. Frontend refresh-resilience fixes (P1, P2, P3)
+3. Pending screen compliance warnings (P4)
+4. Document upload UI (P6)
+5. Admin coverage audit logging (A1)
