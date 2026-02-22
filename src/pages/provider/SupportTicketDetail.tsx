@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSupportTicketDetail } from "@/hooks/useSupportTicketDetail";
 import { useTicketActions } from "@/hooks/useTicketActions";
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TicketStatusChip } from "@/components/support/TicketStatusChip";
-import { ArrowLeft, CheckCircle2, Clock, FileText, Send } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Clock, FileText, Send, Camera, X } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
 
@@ -30,6 +31,9 @@ export default function ProviderSupportTicketDetail() {
   const [reviewReason, setReviewReason] = useState("");
   const [showStatement, setShowStatement] = useState(false);
   const [showReview, setShowReview] = useState(false);
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (isLoading) {
     return (
@@ -118,6 +122,96 @@ export default function ProviderSupportTicketDetail() {
       </Card>
 
       {/* Resolution summary */}
+      {ticket.resolution_summary && (
+        <Card className="p-4 bg-success/5 border-success/20">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-success mb-1">Resolution</h3>
+          <p className="text-sm">{ticket.resolution_summary}</p>
+        </Card>
+      )}
+
+      {/* P5: Photo upload for provider evidence */}
+      {!isResolved && (
+        <Card className="p-4 space-y-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Evidence photos</h3>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={(e) => {
+              const files = Array.from(e.target.files ?? []);
+              setPhotoFiles((prev) => [...prev, ...files].slice(0, 5));
+              e.target.value = "";
+            }}
+          />
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-1"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={photoFiles.length >= 5 || isUploading}
+            >
+              <Camera className="h-4 w-4" />
+              Add photos
+            </Button>
+            {photoFiles.length > 0 && (
+              <Button
+                size="sm"
+                disabled={isUploading}
+                onClick={async () => {
+                  if (!ticketId) return;
+                  setIsUploading(true);
+                  try {
+                    const user = (await supabase.auth.getUser()).data.user;
+                    for (const file of photoFiles) {
+                      const path = `tickets/${ticketId}/${Date.now()}_${file.name}`;
+                      const { error: uploadErr } = await supabase.storage
+                        .from("support-attachments")
+                        .upload(path, file);
+                      if (!uploadErr) {
+                        await supabase.from("support_attachments").insert({
+                          ticket_id: ticketId,
+                          storage_path: path,
+                          file_type: "image",
+                          uploaded_by_user_id: user?.id,
+                          uploaded_by_role: "provider",
+                        });
+                      }
+                    }
+                    toast({ title: `${photoFiles.length} photo(s) uploaded` });
+                    setPhotoFiles([]);
+                  } catch (err: any) {
+                    toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+                  } finally {
+                    setIsUploading(false);
+                  }
+                }}
+              >
+                {isUploading ? "Uploading…" : `Upload ${photoFiles.length}`}
+              </Button>
+            )}
+          </div>
+          {photoFiles.length > 0 && (
+            <div className="flex gap-2 flex-wrap">
+              {photoFiles.map((f, i) => (
+                <div key={i} className="relative">
+                  <img src={URL.createObjectURL(f)} alt="" className="h-16 w-16 rounded-lg object-cover border" />
+                  <button
+                    type="button"
+                    onClick={() => setPhotoFiles((prev) => prev.filter((_, j) => j !== i))}
+                    className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      )}
       {ticket.resolution_summary && (
         <Card className="p-4 bg-success/5 border-success/20">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-success mb-1">Resolution</h3>

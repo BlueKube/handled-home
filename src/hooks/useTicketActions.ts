@@ -23,34 +23,14 @@ export function useTicketActions(ticketId: string) {
     }]);
   };
 
-  // Customer: accept an offer
+  // Customer: accept an offer via SECURITY DEFINER RPC (R2 fix)
   const acceptOffer = useMutation({
     mutationFn: async (offerId: string) => {
-      const { error } = await supabase
-        .from("support_ticket_offers")
-        .update({ status: "accepted" as any, accepted_at: new Date().toISOString() })
-        .eq("id", offerId);
+      const { data, error } = await supabase.rpc("accept_support_offer", {
+        p_offer_id: offerId,
+      });
       if (error) throw error;
-
-      // Mark other pending offers as expired
-      await supabase
-        .from("support_ticket_offers")
-        .update({ status: "expired" as any })
-        .eq("ticket_id", ticketId)
-        .eq("status", "pending")
-        .neq("id", offerId);
-
-      // Resolve ticket
-      await supabase
-        .from("support_tickets")
-        .update({
-          status: "resolved" as any,
-          resolved_at: new Date().toISOString(),
-          resolved_by_user_id: user?.id,
-        })
-        .eq("id", ticketId);
-
-      await logEvent("offer_accepted", { offer_id: offerId });
+      return data;
     },
     onSuccess: invalidate,
   });
@@ -120,6 +100,50 @@ export function useTicketActions(ticketId: string) {
     onSuccess: invalidate,
   });
 
+  // Admin: present resolution offer (P8)
+  const adminPresentOffer = useMutation({
+    mutationFn: async (input: {
+      offer_type: string;
+      amount_cents?: number;
+      description?: string;
+    }) => {
+      const { error } = await supabase
+        .from("support_ticket_offers")
+        .insert({
+          ticket_id: ticketId,
+          offer_type: input.offer_type as any,
+          amount_cents: input.amount_cents ?? 0,
+          description: input.description,
+          status: "pending" as any,
+        });
+      if (error) throw error;
+
+      // Update ticket status to awaiting_customer
+      await supabase
+        .from("support_tickets")
+        .update({ status: "awaiting_customer" as any })
+        .eq("id", ticketId);
+
+      await logEvent("offer_presented", {
+        offer_type: input.offer_type,
+        amount_cents: input.amount_cents,
+      });
+    },
+    onSuccess: invalidate,
+  });
+
+  // Admin: change ticket status (P11)
+  const adminChangeStatus = useMutation({
+    mutationFn: async (newStatus: string) => {
+      await supabase
+        .from("support_tickets")
+        .update({ status: newStatus as any })
+        .eq("id", ticketId);
+      await logEvent("status_changed", { new_status: newStatus });
+    },
+    onSuccess: invalidate,
+  });
+
   return {
     acceptOffer,
     addCustomerInfo,
@@ -128,5 +152,7 @@ export function useTicketActions(ticketId: string) {
     providerRequestReview,
     adminResolve,
     adminEscalate,
+    adminPresentOffer,
+    adminChangeStatus,
   };
 }

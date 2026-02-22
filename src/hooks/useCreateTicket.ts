@@ -55,6 +55,14 @@ export function useCreateTicket() {
 
       if (error) throw error;
 
+      // P7: Compute SLA based on severity
+      const slaHours = ["high", "critical"].includes(input.severity ?? "medium") ? 24 : 48;
+      const slaDueAt = new Date(Date.now() + slaHours * 60 * 60 * 1000).toISOString();
+      await supabase
+        .from("support_tickets")
+        .update({ sla_due_at: slaDueAt } as any)
+        .eq("id", ticket.id);
+
       // Log creation event
       await supabase.from("support_ticket_events").insert({
         ticket_id: ticket.id,

@@ -25,6 +25,7 @@ const customerMore: MenuItem[] = [
 const providerMore: MenuItem[] = [
   { label: "Dashboard", icon: Building2, path: "/provider" },
   { label: "Organization", icon: Building2, path: "/provider/organization" },
+  { label: "Support", icon: HelpCircle, path: "/provider/support" },
   { label: "Settings", icon: Settings, path: "/provider/settings" },
 ];
 

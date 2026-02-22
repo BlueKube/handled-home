@@ -3456,6 +3456,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_support_offer: { Args: { p_offer_id: string }; Returns: Json }
       admin_apply_credit: {
         Args: {
           p_amount_cents: number
