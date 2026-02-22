@@ -27,6 +27,9 @@ import CustomerBillingHistory from "@/pages/customer/BillingHistory";
 import CustomerBillingReceipt from "@/pages/customer/BillingReceipt";
 import CustomerReferrals from "@/pages/customer/Referrals";
 import CustomerSupport from "@/pages/customer/Support";
+import CustomerSupportNew from "@/pages/customer/SupportNew";
+import CustomerSupportTickets from "@/pages/customer/SupportTickets";
+import CustomerSupportTicketDetail from "@/pages/customer/SupportTicketDetail";
 import CustomerSettings from "@/pages/customer/Settings";
 import CustomerServices from "@/pages/customer/Services";
 import CustomerPlans from "@/pages/customer/Plans";
@@ -129,6 +132,9 @@ const App = () => (
                 <Route path="/customer/billing/receipts/:invoiceId" element={<CustomerPropertyGate><CustomerBillingReceipt /></CustomerPropertyGate>} />
                 <Route path="/customer/referrals" element={<CustomerPropertyGate><CustomerReferrals /></CustomerPropertyGate>} />
                 <Route path="/customer/support" element={<CustomerPropertyGate><CustomerSupport /></CustomerPropertyGate>} />
+                <Route path="/customer/support/new" element={<CustomerPropertyGate><CustomerSupportNew /></CustomerPropertyGate>} />
+                <Route path="/customer/support/tickets" element={<CustomerPropertyGate><CustomerSupportTickets /></CustomerPropertyGate>} />
+                <Route path="/customer/support/tickets/:ticketId" element={<CustomerPropertyGate><CustomerSupportTicketDetail /></CustomerPropertyGate>} />
                 <Route path="/customer/settings" element={<CustomerPropertyGate><CustomerSettings /></CustomerPropertyGate>} />
                 <Route path="/customer/services" element={<CustomerPropertyGate><CustomerServices /></CustomerPropertyGate>} />
                 <Route path="/customer/more" element={<CustomerPropertyGate><MoreMenuPage /></CustomerPropertyGate>} />
