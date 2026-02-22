@@ -7,6 +7,9 @@ import { ServiceDayZoneDetail } from "@/components/admin/ServiceDayZoneDetail";
 import { useServiceDayCapacity } from "@/hooks/useServiceDayCapacity";
 import { Skeleton } from "@/components/ui/skeleton";
 
+const DAY_ABBR = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const DAY_KEYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+
 function ZoneCard({ zone, onClick }: { zone: any; onClick: () => void }) {
   const { capacities } = useServiceDayCapacity(zone.id);
   const totalAssigned = capacities.reduce((s, c) => s + c.assigned_count, 0);
@@ -20,6 +23,12 @@ function ZoneCard({ zone, onClick }: { zone: any; onClick: () => void }) {
     else if (pct < 90) { statusLabel = "Tight"; variant = "secondary"; }
     else { statusLabel = "Risk"; variant = "destructive"; }
   }
+
+  // L11: Build Mon-Sun counts
+  const dayCounts = DAY_KEYS.map((dk) => {
+    const cap = capacities.find((c) => c.day_of_week === dk);
+    return cap ? cap.assigned_count : 0;
+  });
 
   return (
     <Card className="p-4 cursor-pointer hover:bg-secondary/50 transition-colors" onClick={onClick}>
@@ -35,6 +44,17 @@ function ZoneCard({ zone, onClick }: { zone: any; onClick: () => void }) {
           )}
         </div>
       </div>
+      {/* L11: Mon-Sun column counts */}
+      {capacities.length > 0 && (
+        <div className="flex gap-1 mt-3 text-xs">
+          {DAY_ABBR.map((abbr, i) => (
+            <div key={abbr} className="flex-1 text-center">
+              <span className="text-muted-foreground block">{abbr}</span>
+              <span className="font-medium">{dayCounts[i]}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </Card>
   );
 }

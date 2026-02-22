@@ -1033,6 +1033,10 @@ export type Database = {
         Args: { p_property_id: string }
         Returns: Json
       }
+      get_day_order: {
+        Args: { p_default_day: string; p_strategy: string }
+        Returns: string[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

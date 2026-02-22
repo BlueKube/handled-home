@@ -3,10 +3,12 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useServiceDayCapacity } from "@/hooks/useServiceDayCapacity";
 import { useServiceDayAdmin } from "@/hooks/useServiceDayAdmin";
 import { ServiceDayOverrideModal } from "./ServiceDayOverrideModal";
-import { ArrowLeftRight } from "lucide-react";
+import { ArrowLeftRight, ChevronDown, History } from "lucide-react";
+import { format } from "date-fns";
 
 interface ServiceDayZoneDetailProps {
   zoneId: string;
@@ -25,7 +27,7 @@ function stabilityLabel(pct: number): { label: string; variant: "default" | "sec
 
 export function ServiceDayZoneDetail({ zoneId, zoneName }: ServiceDayZoneDetailProps) {
   const { capacities, isLoading: capLoading } = useServiceDayCapacity(zoneId);
-  const { assignments, overrideAssignment, isLoading: assignLoading } = useServiceDayAdmin(zoneId);
+  const { assignments, overrideLogs, overrideAssignment, isLoading: assignLoading } = useServiceDayAdmin(zoneId);
   const [overrideTarget, setOverrideTarget] = useState<{ id: string; day: string } | null>(null);
 
   return (
@@ -92,6 +94,41 @@ export function ServiceDayZoneDetail({ zoneId, zoneName }: ServiceDayZoneDetailP
         </div>
       </div>
 
+      {/* M6: Override History */}
+      {overrideLogs.length > 0 && (
+        <Collapsible>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" className="w-full justify-between">
+              <span className="flex items-center gap-2">
+                <History className="h-4 w-4" />
+                Override History ({overrideLogs.length})
+              </span>
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-2 mt-2">
+            {overrideLogs.map((log) => (
+              <Card key={log.id} className="p-3 text-sm space-y-1">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium capitalize">
+                    {(log.before as any)?.day_of_week ?? "?"} → {(log.after as any)?.day_of_week ?? "?"}
+                  </span>
+                  <span className="text-caption text-xs">
+                    {format(new Date(log.created_at), "MMM d, h:mm a")}
+                  </span>
+                </div>
+                <p className="text-muted-foreground text-xs capitalize">
+                  {log.reason.replace(/_/g, " ")}
+                </p>
+                {log.notes && (
+                  <p className="text-xs text-muted-foreground italic">{log.notes}</p>
+                )}
+              </Card>
+            ))}
+          </CollapsibleContent>
+        </Collapsible>
+      )}
+
       {overrideTarget && (
         <ServiceDayOverrideModal
           open={!!overrideTarget}
@@ -102,6 +139,7 @@ export function ServiceDayZoneDetail({ zoneId, zoneName }: ServiceDayZoneDetailP
             overrideAssignment.mutate(data, { onSuccess: () => setOverrideTarget(null) })
           }
           isPending={overrideAssignment.isPending}
+          capacities={capacities}
         />
       )}
     </div>

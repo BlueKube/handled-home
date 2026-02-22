@@ -4,10 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 const REASONS = ["customer_request", "capacity_rebalance", "weather_event", "route_optimization", "other"];
+
+interface CapacityInfo {
+  day_of_week: string;
+  max_homes: number;
+  buffer_percent: number;
+  assigned_count: number;
+}
 
 interface ServiceDayOverrideModalProps {
   open: boolean;
@@ -16,6 +25,7 @@ interface ServiceDayOverrideModalProps {
   currentDay: string;
   onOverride: (data: { assignmentId: string; newDay: string; newWindow: string; reason: string; notes?: string }) => void;
   isPending: boolean;
+  capacities?: CapacityInfo[]; // M5: capacity data for warning
 }
 
 export function ServiceDayOverrideModal({
@@ -25,6 +35,7 @@ export function ServiceDayOverrideModal({
   currentDay,
   onOverride,
   isPending,
+  capacities,
 }: ServiceDayOverrideModalProps) {
   const [newDay, setNewDay] = useState("");
   const [reason, setReason] = useState("");
@@ -32,6 +43,12 @@ export function ServiceDayOverrideModal({
   const [confirmText, setConfirmText] = useState("");
 
   const canSubmit = newDay && reason && confirmText === "OVERRIDE";
+
+  // M5: Check if selected day exceeds capacity
+  const selectedCap = capacities?.find((c) => c.day_of_week === newDay);
+  const isOverCapacity = selectedCap
+    ? selectedCap.assigned_count >= (selectedCap.max_homes + Math.floor(selectedCap.max_homes * selectedCap.buffer_percent / 100))
+    : false;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -59,6 +76,17 @@ export function ServiceDayOverrideModal({
               </SelectContent>
             </Select>
           </div>
+
+          {/* M5: Capacity warning */}
+          {newDay && isOverCapacity && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                This day is at capacity ({selectedCap!.assigned_count}/{selectedCap!.max_homes + Math.floor(selectedCap!.max_homes * selectedCap!.buffer_percent / 100)}).
+                Override will exceed the limit.
+              </AlertDescription>
+            </Alert>
+          )}
 
           <div className="space-y-2">
             <Label>Reason</Label>

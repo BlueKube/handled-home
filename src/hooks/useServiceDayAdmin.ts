@@ -17,6 +17,17 @@ export interface ServiceDayAssignmentAdmin {
   updated_at: string;
 }
 
+export interface OverrideLogEntry {
+  id: string;
+  actor_admin_id: string;
+  assignment_id: string;
+  before: Record<string, string>;
+  after: Record<string, string>;
+  reason: string;
+  notes: string | null;
+  created_at: string;
+}
+
 export function useServiceDayAdmin(zoneId: string | null) {
   const qc = useQueryClient();
 
@@ -45,7 +56,7 @@ export function useServiceDayAdmin(zoneId: string | null) {
         .order("created_at", { ascending: false })
         .limit(50);
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as OverrideLogEntry[];
     },
   });
 
@@ -64,7 +75,7 @@ export function useServiceDayAdmin(zoneId: string | null) {
       notes?: string;
     }) => {
       const { data, error } = await supabase.rpc(
-        "admin_override_service_day" as any,
+        "admin_override_service_day",
         {
           p_assignment_id: assignmentId,
           p_new_day: newDay,
