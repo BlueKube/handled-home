@@ -29,6 +29,8 @@ import CustomerPlanDetail from "@/pages/customer/PlanDetail";
 import CustomerRoutine from "@/pages/customer/Routine";
 import CustomerSubscribe from "@/pages/customer/Subscribe";
 import CustomerServiceDay from "@/pages/customer/ServiceDay";
+import CustomerRoutineReview from "@/pages/customer/RoutineReview";
+import CustomerRoutineConfirm from "@/pages/customer/RoutineConfirm";
 
 // Provider pages
 import ProviderDashboard from "@/pages/provider/Dashboard";
@@ -55,6 +57,7 @@ import AdminReports from "@/pages/admin/Reports";
 import AdminAudit from "@/pages/admin/Audit";
 import AdminSettings from "@/pages/admin/Settings";
 import AdminServiceDays from "@/pages/admin/ServiceDays";
+import AdminBundles from "@/pages/admin/Bundles";
 
 const queryClient = new QueryClient();
 
@@ -82,7 +85,9 @@ const App = () => (
                 <Route path="/customer/property" element={<CustomerProperty />} />
                 <Route path="/customer/plans" element={<CustomerPlans />} />
                 <Route path="/customer/plans/:planId" element={<CustomerPlanDetail />} />
-                <Route path="/customer/routine" element={<CustomerRoutine />} />
+                <Route path="/customer/routine" element={<CustomerPropertyGate><CustomerRoutine /></CustomerPropertyGate>} />
+                <Route path="/customer/routine/review" element={<CustomerPropertyGate><CustomerRoutineReview /></CustomerPropertyGate>} />
+                <Route path="/customer/routine/confirm" element={<CustomerPropertyGate><CustomerRoutineConfirm /></CustomerPropertyGate>} />
                 <Route path="/customer/subscribe" element={<CustomerSubscribe />} />
                 <Route path="/customer/service-day" element={<CustomerPropertyGate><CustomerServiceDay /></CustomerPropertyGate>} />
                 <Route path="/customer" element={<CustomerPropertyGate><CustomerDashboard /></CustomerPropertyGate>} />
@@ -121,6 +126,7 @@ const App = () => (
                 <Route path="/admin/providers" element={<AdminProviders />} />
                 <Route path="/admin/scheduling" element={<AdminScheduling />} />
                 <Route path="/admin/service-days" element={<AdminServiceDays />} />
+                <Route path="/admin/bundles" element={<AdminBundles />} />
                 <Route path="/admin/support" element={<AdminSupport />} />
                 <Route path="/admin/incentives" element={<AdminIncentives />} />
                 <Route path="/admin/reports" element={<AdminReports />} />
