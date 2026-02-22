@@ -50,7 +50,6 @@ export function BottomTabBar() {
 
   const isActive = (tab: TabItem) => {
     if (tab.path.endsWith("/more")) {
-      // "More" is active if current path doesn't match any other tab
       const otherPaths = tabs.filter((t) => !t.path.endsWith("/more")).map((t) => t.path);
       return !otherPaths.some(
         (p) => location.pathname === p || (p !== `/${activeRole}` && location.pathname.startsWith(p))
@@ -63,7 +62,7 @@ export function BottomTabBar() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border safe-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-lg border-t border-border/50 shadow-[0_-1px_3px_rgba(0,0,0,0.05)] safe-bottom">
       <div className="flex items-stretch justify-around h-14">
         {tabs.map((tab) => {
           const active = isActive(tab);
@@ -71,12 +70,15 @@ export function BottomTabBar() {
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
-              className={`flex flex-col items-center justify-center flex-1 gap-0.5 transition-colors duration-150 active:scale-95 ${
+              className={`flex flex-col items-center justify-center flex-1 gap-0.5 transition-all duration-150 active:scale-90 ${
                 active ? "text-accent" : "text-muted-foreground"
               }`}
             >
-              <tab.icon className={`h-5 w-5 ${active ? "stroke-[2.5]" : ""}`} />
+              <tab.icon className={`h-5 w-5 transition-transform duration-150 ${active ? "stroke-[2.5] scale-110" : ""}`} />
               <span className="text-[10px] font-medium leading-tight">{tab.label}</span>
+              {active && (
+                <span className="absolute bottom-1.5 h-1 w-1 rounded-full bg-accent" />
+              )}
             </button>
           );
         })}
