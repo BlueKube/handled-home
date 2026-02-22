@@ -1,47 +1,217 @@
 
 
-# UI Polish Pass — Pre-Module 06
+# Module 05 Upgrade: 28-Day Billing + Weekly Service Weeks (No Rollover)
 
-## What and Why
-Three targeted fixes from the design review that improve the first-impression screens without throwaway work. Everything else in the review is either already done (dark mode toggle exists in More menu) or better addressed when each module is built (placeholder pages, empty states, celebrations).
-
----
-
-## Change 1: Delete App.css
-
-Remove `src/App.css` entirely. It contains only Vite scaffold CSS (`.logo`, `.read-the-docs`, `logo-spin` animation) that is never used. Remove any import of it from `src/App.tsx` or `src/main.tsx`.
-
-**Files**: Delete `src/App.css`, edit import in `src/App.tsx` if present.
+## Overview
+Upgrade the existing subscription engine to support a dual-clock model: 28-day billing cycles and zone-anchored weekly service weeks. No rollover of unused weeks. Stripe remains payment rail only; entitlements live in the database.
 
 ---
 
-## Change 2: Upgrade Dashboard Pages to Use StatCard
+## Phase 1: Database Migration
 
-### Customer Dashboard (`src/pages/customer/Dashboard.tsx`)
-Replace the raw `Card` + `CardContent` blocks with `StatCard` components. Keep the same data (Next Service Day = "Tuesday", Recent Visits = 0) but rendered through the design system component with the accent-tinted icon circles and proper typography hierarchy.
+### 1a. New table: `zone_service_week_config`
+- id (uuid, pk, default gen_random_uuid())
+- zone_id (uuid, FK to zones, unique)
+- anchor_day (int, default 1 -- Monday)
+- anchor_time_local (time, default '00:00')
+- cutoff_day_offset (int, default -1)
+- cutoff_time_local (time, default '18:00')
+- is_active (boolean, default true)
+- created_at, updated_at + trigger
 
-### Admin Dashboard (`src/pages/admin/Dashboard.tsx`)
-Same treatment: swap the 4 raw Card blocks (Customers, MRR, Active Zones, Utilization) for `StatCard` components. This gives them the consistent icon treatment, tracking-tight values, and interactive card variant.
+RLS: Admins can manage all; authenticated can read.
 
-Both dashboards will also get the design system typography classes (`text-h2`, `text-caption`) instead of raw Tailwind (`text-2xl font-bold`, `text-muted-foreground`).
+### 1b. Add columns to `subscriptions`
+- access_activated_at (timestamptz, nullable)
+- billing_cycle_start_at (timestamptz, nullable)
+- billing_cycle_end_at (timestamptz, nullable)
+- next_billing_at (timestamptz, nullable)
+- billing_cycle_length_days (int, default 28)
+- current_service_week_start_at (timestamptz, nullable)
+- current_service_week_end_at (timestamptz, nullable)
+- next_service_week_start_at (timestamptz, nullable)
+- next_service_week_end_at (timestamptz, nullable)
 
-**Files**: `src/pages/customer/Dashboard.tsx`, `src/pages/admin/Dashboard.tsx`
+### 1c. Add column to `plan_entitlement_versions`
+- included_service_weeks_per_billing_cycle (int, default 4)
+
+### 1d. Add columns to `customer_plan_selections`
+- effective_billing_cycle_start_at (timestamptz, nullable)
+- effective_service_week_start_at (timestamptz, nullable)
+- is_locked_for_service_week (boolean, default false)
+- locked_at (timestamptz, nullable)
 
 ---
 
-## Change 3: Auth Page Tab Switcher Consistency
+## Phase 2: Utility Functions (Client-Side)
 
-Replace the hand-rolled `rounded-full` pill switcher on the auth page with the `Tabs` / `TabsList` / `TabsTrigger` components from the UI library. This ensures the first screen a user sees uses the same component patterns as the rest of the app.
+### `src/lib/billing.ts` (new file)
+Two pure utility functions:
 
-The visual appearance will be very similar (pill-style toggle) since the Tabs component already supports that styling, but it'll use the standardized component API with proper accessibility attributes.
+```
+computeBillingCycle(startUtc: Date, lengthDays = 28)
+  -> { start, end, nextBillingAt }
+```
 
-**Files**: `src/pages/AuthPage.tsx`
+```
+computeServiceWeek(anchorDay: number, anchorTimeLocal: string, nowUtc: Date)
+  -> { currentStart, currentEnd, nextStart, nextEnd }
+```
+
+These are used by the webhook (on activation) and by UI components to display dates.
+
+---
+
+## Phase 3: Update Entitlement Resolution
+
+### `src/hooks/useEntitlements.ts`
+Add to `EntitlementPayload`:
+- `service_weeks.included_per_billing_cycle` (from version)
+- `service_weeks.consumed_in_current_cycle` (init 0 -- future modules increment)
+- `service_weeks.remaining_in_current_cycle` (included - consumed, min 0)
+
+Update `messages.included_explainer` to say "X service weeks per billing cycle" when using service week model.
+Update `messages.change_policy` to reference "next billing cycle (every 4 weeks)".
+
+---
+
+## Phase 4: Update Hooks
+
+### `src/hooks/useSubscription.ts`
+- Extend `Subscription` interface with the new billing/service week fields
+- `useChangePlan` sets `pending_effective_billing_cycle_start_at` = current `billing_cycle_end_at`
+
+### `src/hooks/usePlans.ts`
+- Extend `PlanEntitlementVersion` interface with `included_service_weeks_per_billing_cycle`
+
+### `src/hooks/useZoneServiceWeekConfig.ts` (new)
+- `useZoneServiceWeekConfig(zoneId)` -- fetch config
+- `useUpsertZoneServiceWeekConfig()` -- admin mutation
+
+---
+
+## Phase 5: Stripe Webhook Update
+
+### `supabase/functions/stripe-webhook/index.ts`
+On `checkout.session.completed`:
+- Set `access_activated_at = now()`
+- Set `billing_cycle_start_at = now()`, `billing_cycle_end_at = now + 28 days`, `next_billing_at = now + 28 days`
+- Fetch zone service week config for the subscription's zone
+- Compute and set service week fields using anchor day
+- Change existing `current_period_end` from 30-day to 28-day calculation
+
+### `supabase/functions/create-checkout-session/index.ts`
+- When creating Stripe checkout, pass `subscription_data.billing_cycle_anchor` or use `recurring` interval config. Actually, Stripe natively supports day-based intervals via price configuration. The 28-day cycle should be set on the Stripe Price object (interval: "day", interval_count: 28). This is a Stripe Price configuration concern -- document it for the admin but no code change needed in the edge function itself.
+
+---
+
+## Phase 6: UI Updates
+
+### 6a. Billing Language (Multiple Files)
+
+**`src/components/plans/PlanCard.tsx`**
+- Below price text, add: "Billed every 4 weeks"
+
+**`src/pages/customer/Subscribe.tsx`**
+- Change "Billed monthly. Cancel anytime." to "Billed every 4 weeks. Cancel anytime."
+- On success screen: replace bullet points with:
+  - "Access is active now."
+  - "Next billing date: [computed date] (every 4 weeks)"
+  - "Your service weeks follow a predictable weekly rhythm."
+  - CTA: "Build / Confirm Routine"
+
+### 6b. Subscription Management (`src/pages/customer/Subscription.tsx`)
+- Show billing cycle range: "Billing cycle: [start] -- [end]"
+- Show next billing date
+- Show current service week: "[start] -- [end]"
+- Show next service week
+- Pending plan change shows: "Effective [billing_cycle_end_at]"
+
+### 6c. `src/components/plans/SubscriptionStatusPanel.tsx`
+- Add billing cycle + service week date displays
+- Show "Billed every 4 weeks" instead of generic renewal date
+
+### 6d. Routine Builder Header (`src/pages/customer/Routine.tsx`)
+- Add header text: "Includes X service weeks per billing cycle"
+- Add: "Remaining this cycle: Y" (using entitlement data)
+- No rollover messaging
+
+### 6e. `src/components/plans/RoutineSummaryBar.tsx`
+- Add optional `serviceWeeksIncluded` / `serviceWeeksRemaining` props
+- Show service week info when provided
+
+---
+
+## Phase 7: Admin Updates
+
+### 7a. Zone Service Week Config
+Add a "Service Week" section to the zone detail/edit sheet (`src/components/admin/ZoneFormSheet.tsx` or `ZoneDetailSheet.tsx`):
+- Anchor day dropdown (Mon-Sun)
+- Anchor time input
+- Active toggle
+
+This is simpler than a separate route -- it fits naturally in the existing zone editing UI.
+
+### 7b. Plan Builder Entitlement Field (`src/pages/admin/Plans.tsx`)
+In `EntitlementEditor` and `CreateFirstVersion`:
+- Add "Service Weeks per Billing Cycle" number input (1/2/4)
+- This is saved to `included_service_weeks_per_billing_cycle` on the entitlement version
+
+---
+
+## Phase 8: Documentation
+
+Update `docs/modules/05-subscription-engine.md` to document:
+- Dual-clock model (28-day billing + weekly ops)
+- No rollover policy
+- Service week anchoring per zone
+- Billing language requirements
+
+---
+
+## Files Impact
+
+### New files (2)
+- `src/lib/billing.ts` -- pure utility functions
+- `src/hooks/useZoneServiceWeekConfig.ts` -- zone config hook
+
+### Modified files (~10)
+- `src/hooks/useEntitlements.ts` -- service week fields in payload
+- `src/hooks/useSubscription.ts` -- extended interface + change plan logic
+- `src/hooks/usePlans.ts` -- extended PlanEntitlementVersion interface
+- `src/components/plans/PlanCard.tsx` -- billing language
+- `src/components/plans/SubscriptionStatusPanel.tsx` -- cycle dates display
+- `src/components/plans/RoutineSummaryBar.tsx` -- service week info
+- `src/pages/customer/Subscribe.tsx` -- billing language + success screen
+- `src/pages/customer/Subscription.tsx` -- cycle dates + service week display
+- `src/pages/customer/Routine.tsx` -- service week header
+- `src/pages/admin/Plans.tsx` -- service weeks field in entitlement editor
+- `src/components/admin/ZoneFormSheet.tsx` or `ZoneDetailSheet.tsx` -- anchor config
+- `supabase/functions/stripe-webhook/index.ts` -- billing cycle + service week init
+- `docs/modules/05-subscription-engine.md` -- updated spec
+
+### Database changes
+- 1 new table (`zone_service_week_config`)
+- 3 tables altered (add columns to `subscriptions`, `plan_entitlement_versions`, `customer_plan_selections`)
 
 ---
 
 ## Implementation Order
-1. Delete App.css (instant)
-2. Upgrade dashboards (customer, then admin)
-3. Auth page tabs swap
 
-Total scope: 4 files modified, 1 file deleted.
+1. Database migration (all schema changes in one migration)
+2. `src/lib/billing.ts` utility functions
+3. `src/hooks/useZoneServiceWeekConfig.ts`
+4. Update hooks (useSubscription, usePlans, useEntitlements)
+5. Stripe webhook update
+6. Admin UI (zone service week config + plan entitlement field)
+7. Customer UI updates (billing language, subscription page, routine header, success screen)
+8. Documentation update
+
+---
+
+## What This Does NOT Do (Per Spec)
+- No scheduling/dispatch/service execution
+- No proration
+- No rollover logic
+- No consumption tracking (service_weeks_consumed stays 0 until future modules)
+- Stripe Price interval configuration (28-day) is an admin setup step, not automated
