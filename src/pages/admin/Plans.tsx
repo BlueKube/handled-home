@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { usePlans, useCreatePlan, useUpdatePlan, useDuplicatePlan, usePlanZoneAvailability, usePlanEntitlementVersions, useUpdateZoneAvailability, useCreateEntitlementVersion, useManageSkuRules, Plan } from "@/hooks/usePlans";
+import { usePlans, useCreatePlan, useUpdatePlan, useDuplicatePlan, usePlanZoneAvailability, usePlanEntitlementVersions, useUpdateZoneAvailability, useCreateEntitlementVersion, useUpdateEntitlementVersion, useManageSkuRules, useSkuRulesForVersion, Plan, PlanEntitlementVersion } from "@/hooks/usePlans";
 import { useZones } from "@/hooks/useZones";
 import { useSkus } from "@/hooks/useSkus";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -7,10 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -150,7 +149,6 @@ export default function AdminPlans() {
         </div>
       )}
 
-      {/* Plan Form Sheet */}
       <Sheet open={formOpen} onOpenChange={setFormOpen}>
         <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
           <SheetHeader>
@@ -164,6 +162,20 @@ export default function AdminPlans() {
     </div>
   );
 }
+
+const MODEL_LABELS: Record<string, string> = {
+  credits_per_cycle: "Credits per Cycle",
+  count_per_cycle: "Count per Cycle",
+  minutes_per_cycle: "Minutes per Cycle",
+};
+
+const RULE_OPTIONS = [
+  { value: "none", label: "No rule" },
+  { value: "included", label: "Included" },
+  { value: "extra_allowed", label: "Extra allowed" },
+  { value: "blocked", label: "Blocked" },
+  { value: "provider_only", label: "Provider only" },
+];
 
 function PlanForm({ plan, onChange, onSave, saving, planId }: {
   plan: Partial<Plan>;
@@ -179,6 +191,7 @@ function PlanForm({ plan, onChange, onSave, saving, planId }: {
   const { data: skus } = useSkus({ status: "active" });
   const updateZone = useUpdateZoneAvailability();
   const createVersion = useCreateEntitlementVersion();
+  const updateVersion = useUpdateEntitlementVersion();
   const manageSkuRule = useManageSkuRules();
 
   const currentVersion = versions?.[0];
@@ -230,7 +243,7 @@ function PlanForm({ plan, onChange, onSave, saving, planId }: {
         </div>
       </div>
 
-      {/* Zone Availability (only for saved plans) */}
+      {/* Zone Availability */}
       {planId && zones && (
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
@@ -251,35 +264,22 @@ function PlanForm({ plan, onChange, onSave, saving, planId }: {
         </div>
       )}
 
-      {/* Entitlements (only for saved plans) */}
+      {/* Entitlements */}
       {planId && (
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
             <Package className="h-4 w-4" /> Entitlements
           </h3>
           {currentVersion ? (
-            <div className="space-y-2 text-sm">
-              <p>Version {currentVersion.version} ({currentVersion.status})</p>
-              <p>Model: {currentVersion.model_type}</p>
-              <p>Credits: {currentVersion.included_credits} | Count: {currentVersion.included_count} | Minutes: {currentVersion.included_minutes}</p>
-              <p>Extras: {currentVersion.extra_allowed ? "Yes" : "No"}</p>
-            </div>
+            <EntitlementEditor
+              version={currentVersion}
+              planId={planId}
+              skus={skus ?? []}
+              onUpdateVersion={updateVersion}
+              onCreateVersion={createVersion}
+            />
           ) : (
-            <Button variant="outline" size="sm" onClick={async () => {
-              try {
-                const v = await createVersion.mutateAsync({
-                  plan_id: planId,
-                  version: 1,
-                  status: "published",
-                  model_type: "credits_per_cycle" as any,
-                  included_credits: 4,
-                });
-                await updatePlanVersion(planId, v.id);
-                toast.success("Entitlement version created");
-              } catch { toast.error("Failed"); }
-            }}>
-              Create First Version
-            </Button>
+            <CreateFirstVersion planId={planId} createVersion={createVersion} />
           )}
         </div>
       )}
@@ -287,6 +287,230 @@ function PlanForm({ plan, onChange, onSave, saving, planId }: {
       <Button className="w-full" onClick={onSave} disabled={saving}>
         {saving ? "Saving…" : isEditing ? "Update Plan" : "Create Plan"}
       </Button>
+    </div>
+  );
+}
+
+function CreateFirstVersion({ planId, createVersion }: { planId: string; createVersion: ReturnType<typeof useCreateEntitlementVersion> }) {
+  const [modelType, setModelType] = useState("credits_per_cycle");
+  const [included, setIncluded] = useState(4);
+  const [extraAllowed, setExtraAllowed] = useState(false);
+  const [maxExtra, setMaxExtra] = useState(2);
+
+  const includedField = modelType === "credits_per_cycle" ? "included_credits" : modelType === "count_per_cycle" ? "included_count" : "included_minutes";
+  const maxExtraField = modelType === "credits_per_cycle" ? "max_extra_credits" : modelType === "count_per_cycle" ? "max_extra_count" : "max_extra_minutes";
+
+  return (
+    <div className="space-y-3 p-3 rounded-lg border border-border">
+      <div className="space-y-2">
+        <Label>Model Type</Label>
+        <Select value={modelType} onValueChange={setModelType}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {Object.entries(MODEL_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label>Included {MODEL_LABELS[modelType]?.split(" ")[0]}</Label>
+        <Input type="number" min={0} value={included} onChange={(e) => setIncluded(parseInt(e.target.value) || 0)} />
+      </div>
+      <div className="flex items-center justify-between">
+        <Label>Allow Extras</Label>
+        <Switch checked={extraAllowed} onCheckedChange={setExtraAllowed} />
+      </div>
+      {extraAllowed && (
+        <div className="space-y-2">
+          <Label>Max Extra</Label>
+          <Input type="number" min={0} value={maxExtra} onChange={(e) => setMaxExtra(parseInt(e.target.value) || 0)} />
+        </div>
+      )}
+      <Button variant="outline" size="sm" className="w-full" disabled={createVersion.isPending} onClick={async () => {
+        try {
+          const v = await createVersion.mutateAsync({
+            plan_id: planId,
+            version: 1,
+            status: "published",
+            model_type: modelType as any,
+            [includedField]: included,
+            extra_allowed: extraAllowed,
+            ...(extraAllowed ? { [maxExtraField]: maxExtra } : {}),
+          });
+          await updatePlanVersion(planId, v.id);
+          toast.success("Entitlement version created");
+        } catch { toast.error("Failed to create version"); }
+      }}>
+        {createVersion.isPending ? "Creating…" : "Create First Version"}
+      </Button>
+    </div>
+  );
+}
+
+function EntitlementEditor({ version, planId, skus, onUpdateVersion, onCreateVersion }: {
+  version: PlanEntitlementVersion;
+  planId: string;
+  skus: Array<{ id: string; name: string }>;
+  onUpdateVersion: ReturnType<typeof useUpdateEntitlementVersion>;
+  onCreateVersion: ReturnType<typeof useCreateEntitlementVersion>;
+}) {
+  const [modelType, setModelType] = useState(version.model_type);
+  const [includedCredits, setIncludedCredits] = useState(version.included_credits ?? 0);
+  const [includedCount, setIncludedCount] = useState(version.included_count ?? 0);
+  const [includedMinutes, setIncludedMinutes] = useState(version.included_minutes ?? 0);
+  const [extraAllowed, setExtraAllowed] = useState(version.extra_allowed);
+  const [maxExtraCredits, setMaxExtraCredits] = useState(version.max_extra_credits ?? 0);
+  const [maxExtraCount, setMaxExtraCount] = useState(version.max_extra_count ?? 0);
+  const [maxExtraMinutes, setMaxExtraMinutes] = useState(version.max_extra_minutes ?? 0);
+  const [showVersionPrompt, setShowVersionPrompt] = useState(false);
+  const [editLiveConfirm, setEditLiveConfirm] = useState("");
+  const { data: skuRules } = useSkuRulesForVersion(version.id);
+  const manageSkuRule = useManageSkuRules();
+
+  const isPublished = version.status === "published";
+
+  const getUpdates = () => ({
+    model_type: modelType as any,
+    included_credits: includedCredits,
+    included_count: includedCount,
+    included_minutes: includedMinutes,
+    extra_allowed: extraAllowed,
+    max_extra_credits: maxExtraCredits,
+    max_extra_count: maxExtraCount,
+    max_extra_minutes: maxExtraMinutes,
+  });
+
+  const handleSave = () => {
+    if (isPublished) {
+      setShowVersionPrompt(true);
+    } else {
+      doUpdateInPlace();
+    }
+  };
+
+  const doUpdateInPlace = async () => {
+    try {
+      await onUpdateVersion.mutateAsync({ id: version.id, updates: getUpdates() });
+      toast.success("Entitlements updated");
+      setShowVersionPrompt(false);
+      setEditLiveConfirm("");
+    } catch { toast.error("Failed to update"); }
+  };
+
+  const doCreateNewVersion = async () => {
+    try {
+      // Retire old version
+      await onUpdateVersion.mutateAsync({ id: version.id, updates: { status: "retired" } });
+      // Create new version
+      const v = await onCreateVersion.mutateAsync({
+        plan_id: planId,
+        version: version.version + 1,
+        status: "published",
+        ...getUpdates(),
+      });
+      await updatePlanVersion(planId, v.id);
+      toast.success("New entitlement version created");
+      setShowVersionPrompt(false);
+    } catch { toast.error("Failed to create new version"); }
+  };
+
+  const includedLabel = modelType === "credits_per_cycle" ? "Credits" : modelType === "count_per_cycle" ? "Count" : "Minutes";
+  const includedValue = modelType === "credits_per_cycle" ? includedCredits : modelType === "count_per_cycle" ? includedCount : includedMinutes;
+  const setIncludedValue = modelType === "credits_per_cycle" ? setIncludedCredits : modelType === "count_per_cycle" ? setIncludedCount : setIncludedMinutes;
+  const maxExtraValue = modelType === "credits_per_cycle" ? maxExtraCredits : modelType === "count_per_cycle" ? maxExtraCount : maxExtraMinutes;
+  const setMaxExtraValue = modelType === "credits_per_cycle" ? setMaxExtraCredits : modelType === "count_per_cycle" ? setMaxExtraCount : setMaxExtraMinutes;
+
+  return (
+    <div className="space-y-3 p-3 rounded-lg border border-border">
+      <p className="text-xs text-muted-foreground">Version {version.version} ({version.status})</p>
+
+      <div className="space-y-2">
+        <Label>Model Type</Label>
+        <Select value={modelType} onValueChange={setModelType}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {Object.entries(MODEL_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Included {includedLabel}</Label>
+        <Input type="number" min={0} value={includedValue} onChange={(e) => setIncludedValue(parseInt(e.target.value) || 0)} />
+      </div>
+
+      <div className="flex items-center justify-between">
+        <Label>Allow Extras</Label>
+        <Switch checked={extraAllowed} onCheckedChange={setExtraAllowed} />
+      </div>
+
+      {extraAllowed && (
+        <div className="space-y-2">
+          <Label>Max Extra {includedLabel}</Label>
+          <Input type="number" min={0} value={maxExtraValue} onChange={(e) => setMaxExtraValue(parseInt(e.target.value) || 0)} />
+        </div>
+      )}
+
+      {/* SKU Rules */}
+      {skus.length > 0 && (
+        <div className="space-y-2 pt-2 border-t border-border">
+          <Label className="text-xs uppercase tracking-wider text-muted-foreground">SKU Rules</Label>
+          {skus.map((sku) => {
+            const rule = skuRules?.find((r) => r.sku_id === sku.id);
+            return (
+              <div key={sku.id} className="flex items-center justify-between gap-2">
+                <span className="text-sm truncate flex-1">{sku.name}</span>
+                <Select
+                  value={rule?.rule_type ?? "none"}
+                  onValueChange={(val) => manageSkuRule.mutate({ entitlementVersionId: version.id, skuId: sku.id, ruleType: val })}
+                >
+                  <SelectTrigger className="w-36 h-8 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {RULE_OPTIONS.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <Button variant="outline" size="sm" className="w-full" onClick={handleSave}
+        disabled={onUpdateVersion.isPending || onCreateVersion.isPending}>
+        Save Entitlements
+      </Button>
+
+      {/* Version prompt for published versions */}
+      <AlertDialog open={showVersionPrompt} onOpenChange={setShowVersionPrompt}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>This version is live</AlertDialogTitle>
+            <AlertDialogDescription>
+              Existing subscribers are pinned to this version. Create a new version (recommended) or edit the live version.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2 px-1">
+            <Input
+              placeholder='Type "EDIT LIVE" to edit in place'
+              value={editLiveConfirm}
+              onChange={(e) => setEditLiveConfirm(e.target.value)}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={editLiveConfirm !== "EDIT LIVE"}
+              onClick={doUpdateInPlace}
+            >
+              Edit Live
+            </Button>
+            <AlertDialogAction onClick={doCreateNewVersion}>
+              Create New Version
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

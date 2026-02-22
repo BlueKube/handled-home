@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAdminSubscriptions, useAdminSubscriptionDetail, useAdminForceCancel, useAdminMarkComped } from "@/hooks/useAdminSubscriptions";
+import { useAdminSubscriptions, useAdminSubscriptionDetail, useAdminForceCancel, useAdminMarkComped, AdminSubscriptionRow } from "@/hooks/useAdminSubscriptions";
 import { usePlanDetail } from "@/hooks/usePlans";
 import { useAuth } from "@/contexts/AuthContext";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -14,7 +14,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Search } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import type { Subscription } from "@/hooks/useSubscription";
 
 const STATUSES = ["all", "active", "trialing", "past_due", "canceled"];
 
@@ -30,7 +29,7 @@ export default function AdminSubscriptions() {
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Search…" className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <Input placeholder="Search by name or plan…" className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
 
       <Tabs value={statusFilter} onValueChange={setStatusFilter}>
@@ -57,13 +56,14 @@ export default function AdminSubscriptions() {
   );
 }
 
-function SubscriptionRow({ subscription, onClick }: { subscription: Subscription; onClick: () => void }) {
+function SubscriptionRow({ subscription, onClick }: { subscription: AdminSubscriptionRow; onClick: () => void }) {
   return (
     <Card className="press-feedback cursor-pointer" onClick={onClick}>
       <CardContent className="p-4 flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium">Customer: {subscription.customer_id.slice(0, 8)}…</p>
+          <p className="text-sm font-medium">{subscription.customer_name || `Customer ${subscription.customer_id.slice(0, 8)}…`}</p>
           <p className="text-xs text-muted-foreground">
+            {subscription.plan_name && <span>{subscription.plan_name} · </span>}
             {subscription.current_period_end && `Renews ${format(new Date(subscription.current_period_end), "MMM d")}`}
           </p>
         </div>
@@ -96,7 +96,7 @@ function SubscriptionDetailSheet({ subscriptionId, onClose }: { subscriptionId: 
               <StatusBadge status={data.subscription.status} />
             </div>
             <div className="text-sm space-y-1">
-              <p>Customer: {data.subscription.customer_id}</p>
+              <p>Customer: {data.customer_name || data.subscription.customer_id}</p>
               {data.subscription.stripe_subscription_id && <p>Stripe: {data.subscription.stripe_subscription_id}</p>}
               {data.subscription.current_period_end && (
                 <p>Period end: {format(new Date(data.subscription.current_period_end), "MMM d, yyyy")}</p>
