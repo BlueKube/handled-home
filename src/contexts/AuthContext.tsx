@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useRef, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { ROLE_PRIORITY, STORAGE_KEYS } from "@/constants/roles";
@@ -28,7 +28,6 @@ function resolveActiveRole(roles: AppRole[], stored: string | null): AppRole {
   if (stored && roles.includes(stored as AppRole)) {
     return stored as AppRole;
   }
-  // Deterministic: customer > provider > admin
   for (const r of ROLE_PRIORITY) {
     if (roles.includes(r)) return r;
   }
@@ -42,51 +41,78 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [activeRole, setActiveRole] = useState<AppRole>("customer");
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const bootstrapAttempted = useRef(false);
 
-  const fetchUserData = async (userId: string) => {
-    const [rolesResult, profileResult] = await Promise.all([
-      supabase.from("user_roles").select("role").eq("user_id", userId),
-      supabase.from("profiles").select("full_name, phone, avatar_url").eq("user_id", userId).single(),
-    ]);
+  const fetchUserData = async (userId: string, userEmail?: string) => {
+    try {
+      const [rolesResult, profileResult] = await Promise.all([
+        supabase.from("user_roles").select("role").eq("user_id", userId),
+        supabase.from("profiles").select("full_name, phone, avatar_url").eq("user_id", userId).single(),
+      ]);
 
-    if (rolesResult.data && rolesResult.data.length > 0) {
-      const userRoles = rolesResult.data.map((r) => r.role as AppRole);
-      setRoles(userRoles);
-      const stored = localStorage.getItem(STORAGE_KEYS.ACTIVE_ROLE);
-      const resolved = resolveActiveRole(userRoles, stored);
-      setActiveRole(resolved);
-      localStorage.setItem(STORAGE_KEYS.ACTIVE_ROLE, resolved);
-    } else {
-      setRoles([]);
-    }
+      let userRoles = rolesResult.data?.map((r) => r.role as AppRole) ?? [];
 
-    if (profileResult.data) {
-      setProfile(profileResult.data);
+      // Self-healing bootstrap: if no roles found, attempt bootstrap once
+      if (userRoles.length === 0 && !bootstrapAttempted.current) {
+        bootstrapAttempted.current = true;
+        const displayName = profileResult.data?.full_name || userEmail || "User";
+        await supabase.rpc("bootstrap_new_user", { _full_name: displayName });
+
+        // Re-fetch after bootstrap
+        const [rolesRetry, profileRetry] = await Promise.all([
+          supabase.from("user_roles").select("role").eq("user_id", userId),
+          supabase.from("profiles").select("full_name, phone, avatar_url").eq("user_id", userId).single(),
+        ]);
+        userRoles = rolesRetry.data?.map((r) => r.role as AppRole) ?? [];
+        if (profileRetry.data) {
+          setProfile(profileRetry.data);
+        }
+      } else if (profileResult.data) {
+        setProfile(profileResult.data);
+      }
+
+      if (userRoles.length > 0) {
+        setRoles(userRoles);
+        const stored = localStorage.getItem(STORAGE_KEYS.ACTIVE_ROLE);
+        const resolved = resolveActiveRole(userRoles, stored);
+        setActiveRole(resolved);
+        localStorage.setItem(STORAGE_KEYS.ACTIVE_ROLE, resolved);
+      } else {
+        setRoles([]);
+      }
+    } catch (err) {
+      console.error("fetchUserData error:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
+    // Set up listener FIRST (non-async to avoid session lock deadlock)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          await fetchUserData(session.user.id);
+          // Defer fetchUserData outside the session lock via setTimeout
+          setTimeout(() => fetchUserData(session.user.id, session.user.email ?? undefined), 0);
         } else {
           setRoles([]);
           setProfile(null);
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    // Then check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        await fetchUserData(session.user.id);
+        fetchUserData(session.user.id, session.user.email ?? undefined);
+      } else {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -104,6 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRoles([]);
     setProfile(null);
     setActiveRole("customer");
+    bootstrapAttempted.current = false;
     localStorage.removeItem(STORAGE_KEYS.ACTIVE_ROLE);
   };
 
