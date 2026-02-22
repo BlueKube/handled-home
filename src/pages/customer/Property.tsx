@@ -83,7 +83,8 @@ export default function CustomerProperty() {
   const { zoneName, isLoading: zoneLoading, isNotCovered, isCovered } = useZoneLookup(form.zip_code);
 
   const updateField = (field: keyof PropertyFormData, value: string) => {
-    const newForm = { ...form, [field]: value };
+    const finalValue = field === "state" ? value.toUpperCase().slice(0, 2) : value;
+    const newForm = { ...form, [field]: finalValue };
     setForm(newForm);
     if (touched) {
       const newErrors = validate(newForm);
@@ -192,7 +193,10 @@ export default function CustomerProperty() {
               id="state"
               value={form.state}
               onChange={(e) => updateField("state", e.target.value)}
-              placeholder="CA"
+              onFocus={(e) => e.target.select()}
+              placeholder="TX"
+              maxLength={2}
+              className="uppercase"
               aria-describedby={errors.state ? "err-state" : undefined}
             />
             {errors.state && (
