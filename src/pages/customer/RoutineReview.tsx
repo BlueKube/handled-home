@@ -7,6 +7,7 @@ import { useEntitlements } from "@/hooks/useEntitlements";
 import { useRoutine } from "@/hooks/useRoutine";
 import { useRoutinePreview, computeCycleDemand } from "@/hooks/useRoutinePreview";
 import { ReviewServiceCard } from "@/components/routine/ReviewServiceCard";
+import { SeasonalYearStrip } from "@/components/routine/SeasonalYearStrip";
 import { ProofCoach } from "@/components/routine/ProofCoach";
 import { WeekPreviewTimeline } from "@/components/routine/WeekPreviewTimeline";
 import { Button } from "@/components/ui/button";
@@ -136,6 +137,9 @@ export default function RoutineReview() {
 
         {/* 4-week preview */}
         <WeekPreviewTimeline weeks={weeks} />
+
+        {/* Seasonal 12-month strip */}
+        <SeasonalYearStrip propertyId={property?.id} zoneId={zoneId} />
 
         {/* Proof coach */}
         <ProofCoach />

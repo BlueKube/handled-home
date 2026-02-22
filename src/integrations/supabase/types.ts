@@ -130,6 +130,70 @@ export type Database = {
           },
         ]
       }
+      customer_seasonal_selections: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          property_id: string
+          seasonal_template_id: string
+          selection_state: string
+          source: string
+          updated_at: string
+          window_preference: string
+          year: number
+          zone_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          property_id: string
+          seasonal_template_id: string
+          selection_state?: string
+          source?: string
+          updated_at?: string
+          window_preference?: string
+          year: number
+          zone_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          property_id?: string
+          seasonal_template_id?: string
+          selection_state?: string
+          source?: string
+          updated_at?: string
+          window_preference?: string
+          year?: number
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_seasonal_selections_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_seasonal_selections_seasonal_template_id_fkey"
+            columns: ["seasonal_template_id"]
+            isOneToOne: false
+            referencedRelation: "seasonal_service_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_seasonal_selections_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plan_entitlement_sku_rules: {
         Row: {
           entitlement_version_id: string
@@ -593,6 +657,120 @@ export type Database = {
             columns: ["zone_id"]
             isOneToOne: false
             referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seasonal_orders: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          planned_window_end: string | null
+          planned_window_start: string | null
+          price_cents: number
+          pricing_type: string
+          property_id: string
+          scheduled_service_day_id: string | null
+          seasonal_template_id: string
+          status: string
+          updated_at: string
+          year: number
+          zone_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          planned_window_end?: string | null
+          planned_window_start?: string | null
+          price_cents?: number
+          pricing_type?: string
+          property_id: string
+          scheduled_service_day_id?: string | null
+          seasonal_template_id: string
+          status?: string
+          updated_at?: string
+          year: number
+          zone_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          planned_window_end?: string | null
+          planned_window_start?: string | null
+          price_cents?: number
+          pricing_type?: string
+          property_id?: string
+          scheduled_service_day_id?: string | null
+          seasonal_template_id?: string
+          status?: string
+          updated_at?: string
+          year?: number
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seasonal_orders_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seasonal_orders_seasonal_template_id_fkey"
+            columns: ["seasonal_template_id"]
+            isOneToOne: false
+            referencedRelation: "seasonal_service_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seasonal_orders_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seasonal_service_templates: {
+        Row: {
+          created_at: string
+          default_windows: Json
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string | null
+          sku_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          default_windows?: Json
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string | null
+          sku_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          default_windows?: Json
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string | null
+          sku_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seasonal_service_templates_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
             referencedColumns: ["id"]
           },
         ]
@@ -1076,6 +1254,57 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "zone_provider_assignments_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zone_seasonal_service_rules: {
+        Row: {
+          capacity_reserve_rule: Json | null
+          created_at: string
+          id: string
+          is_enabled: boolean
+          price_override_cents: number | null
+          seasonal_template_id: string
+          updated_at: string
+          windows_override: Json | null
+          zone_id: string
+        }
+        Insert: {
+          capacity_reserve_rule?: Json | null
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          price_override_cents?: number | null
+          seasonal_template_id: string
+          updated_at?: string
+          windows_override?: Json | null
+          zone_id: string
+        }
+        Update: {
+          capacity_reserve_rule?: Json | null
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          price_override_cents?: number | null
+          seasonal_template_id?: string
+          updated_at?: string
+          windows_override?: Json | null
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zone_seasonal_service_rules_seasonal_template_id_fkey"
+            columns: ["seasonal_template_id"]
+            isOneToOne: false
+            referencedRelation: "seasonal_service_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zone_seasonal_service_rules_zone_id_fkey"
             columns: ["zone_id"]
             isOneToOne: false
             referencedRelation: "zones"
