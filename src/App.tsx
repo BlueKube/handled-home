@@ -10,6 +10,7 @@ import AuthPage from "@/pages/AuthPage";
 import NotFound from "@/pages/NotFound";
 import { AppLayout } from "@/components/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { CustomerPropertyGate } from "@/components/CustomerPropertyGate";
 import MoreMenuPage from "@/components/MoreMenu";
 
 // Customer pages
@@ -69,16 +70,16 @@ const App = () => (
 
               {/* Customer App */}
               <Route element={<ProtectedRoute requiredRole="customer"><AppLayout /></ProtectedRoute>}>
-                <Route path="/customer" element={<CustomerDashboard />} />
-                <Route path="/customer/build" element={<CustomerBuild />} />
-                <Route path="/customer/history" element={<CustomerHistory />} />
-                <Route path="/customer/subscription" element={<CustomerSubscription />} />
                 <Route path="/customer/property" element={<CustomerProperty />} />
-                <Route path="/customer/billing" element={<CustomerBilling />} />
-                <Route path="/customer/referrals" element={<CustomerReferrals />} />
-                <Route path="/customer/support" element={<CustomerSupport />} />
-                <Route path="/customer/settings" element={<CustomerSettings />} />
-                <Route path="/customer/more" element={<MoreMenuPage />} />
+                <Route path="/customer" element={<CustomerPropertyGate><CustomerDashboard /></CustomerPropertyGate>} />
+                <Route path="/customer/build" element={<CustomerPropertyGate><CustomerBuild /></CustomerPropertyGate>} />
+                <Route path="/customer/history" element={<CustomerPropertyGate><CustomerHistory /></CustomerPropertyGate>} />
+                <Route path="/customer/subscription" element={<CustomerPropertyGate><CustomerSubscription /></CustomerPropertyGate>} />
+                <Route path="/customer/billing" element={<CustomerPropertyGate><CustomerBilling /></CustomerPropertyGate>} />
+                <Route path="/customer/referrals" element={<CustomerPropertyGate><CustomerReferrals /></CustomerPropertyGate>} />
+                <Route path="/customer/support" element={<CustomerPropertyGate><CustomerSupport /></CustomerPropertyGate>} />
+                <Route path="/customer/settings" element={<CustomerPropertyGate><CustomerSettings /></CustomerPropertyGate>} />
+                <Route path="/customer/more" element={<CustomerPropertyGate><MoreMenuPage /></CustomerPropertyGate>} />
               </Route>
 
               {/* Provider App */}
