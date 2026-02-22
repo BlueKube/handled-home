@@ -47,7 +47,7 @@ export default function AuthPage() {
     }
 
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -64,16 +64,7 @@ export default function AuthPage() {
       return;
     }
 
-    // Bootstrap profile + customer role
-    if (data.user) {
-      const { error: rpcError } = await supabase.rpc("bootstrap_new_user", {
-        _full_name: fullName.trim(),
-      });
-      if (rpcError) {
-        console.error("Bootstrap error:", rpcError);
-      }
-    }
-
+    // Bootstrap is now handled automatically by AuthContext when it detects missing roles
     setLoading(false);
     toast({ title: "Success", description: "Account created! Redirecting..." });
     navigate("/");
