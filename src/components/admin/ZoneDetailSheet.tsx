@@ -1,13 +1,17 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useZoneDetail, type ZoneWithRegion } from "@/hooks/useZones";
+import { useZoneServiceWeekConfig, useUpsertZoneServiceWeekConfig } from "@/hooks/useZoneServiceWeekConfig";
 import { ZoneFormSheet } from "./ZoneFormSheet";
 import { ZoneCapacityPanel } from "./ZoneCapacityPanel";
 import { ZoneProvidersPanel } from "./ZoneProvidersPanel";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Archive, Pencil } from "lucide-react";
 import { useUpdateZone } from "@/hooks/useZones";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -64,6 +68,7 @@ export function ZoneDetailSheet({ zoneId, onClose }: ZoneDetailSheetProps) {
                 <TabsList className="w-full">
                   <TabsTrigger value="details" className="flex-1">Details</TabsTrigger>
                   <TabsTrigger value="capacity" className="flex-1">Capacity</TabsTrigger>
+                  <TabsTrigger value="service-week" className="flex-1">Service Week</TabsTrigger>
                   <TabsTrigger value="providers" className="flex-1">Providers</TabsTrigger>
                 </TabsList>
 
@@ -88,6 +93,10 @@ export function ZoneDetailSheet({ zoneId, onClose }: ZoneDetailSheetProps) {
 
                 <TabsContent value="capacity" className="pt-4">
                   <ZoneCapacityPanel zone={zone} />
+                </TabsContent>
+
+                <TabsContent value="service-week" className="pt-4">
+                  <ZoneServiceWeekPanel zoneId={zone.id} />
                 </TabsContent>
 
                 <TabsContent value="providers" className="pt-4">
@@ -116,5 +125,61 @@ export function ZoneDetailSheet({ zoneId, onClose }: ZoneDetailSheetProps) {
         </AlertDialogContent>
       </AlertDialog>
     </>
+  );
+}
+
+const DAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+function ZoneServiceWeekPanel({ zoneId }: { zoneId: string }) {
+  const { data: config, isLoading } = useZoneServiceWeekConfig(zoneId);
+  const upsert = useUpsertZoneServiceWeekConfig();
+  const [anchorDay, setAnchorDay] = useState(1);
+  const [isActive, setIsActive] = useState(true);
+
+  useEffect(() => {
+    if (config) {
+      setAnchorDay(config.anchor_day);
+      setIsActive(config.is_active);
+    }
+  }, [config]);
+
+  const handleSave = async () => {
+    try {
+      await upsert.mutateAsync({ zone_id: zoneId, anchor_day: anchorDay, is_active: isActive });
+      toast.success("Service week config saved");
+    } catch {
+      toast.error("Could not save config");
+    }
+  };
+
+  if (isLoading) return <Skeleton className="h-32 w-full" />;
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-muted-foreground">
+        Define the weekly operational anchor for this zone. Service weeks run 7 days from the anchor day.
+      </p>
+
+      <div className="space-y-2">
+        <Label>Anchor Day</Label>
+        <Select value={String(anchorDay)} onValueChange={(v) => setAnchorDay(parseInt(v))}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {DAY_LABELS.map((label, i) => (
+              <SelectItem key={i} value={String(i)}>{label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <Label>Active</Label>
+        <Switch checked={isActive} onCheckedChange={setIsActive} />
+      </div>
+
+      <Button size="sm" className="w-full" onClick={handleSave} disabled={upsert.isPending}>
+        {upsert.isPending ? "Saving…" : config ? "Update Config" : "Create Config"}
+      </Button>
+    </div>
   );
 }

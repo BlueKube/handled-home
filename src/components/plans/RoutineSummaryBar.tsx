@@ -5,9 +5,11 @@ interface RoutineSummaryBarProps {
   included: number;
   extras: number;
   label: string;
+  serviceWeeksIncluded?: number;
+  serviceWeeksRemaining?: number;
 }
 
-export function RoutineSummaryBar({ used, included, extras, label }: RoutineSummaryBarProps) {
+export function RoutineSummaryBar({ used, included, extras, label, serviceWeeksIncluded, serviceWeeksRemaining }: RoutineSummaryBarProps) {
   const total = included + extras;
   const pct = total > 0 ? Math.min((used / total) * 100, 100) : 0;
   const overIncluded = used > included;
@@ -30,6 +32,12 @@ export function RoutineSummaryBar({ used, included, extras, label }: RoutineSumm
         )}
       </div>
       <Progress value={pct} className="h-2" />
+      {serviceWeeksIncluded != null && (
+        <p className="text-xs text-muted-foreground">
+          {serviceWeeksIncluded} service week{serviceWeeksIncluded !== 1 ? "s" : ""} per billing cycle
+          {serviceWeeksRemaining != null && ` · ${serviceWeeksRemaining} remaining`}
+        </p>
+      )}
     </div>
   );
 }

@@ -30,6 +30,7 @@ export function PlanCard({ plan, isRecommended, zoneEnabled = true, onPreview, o
         {plan.display_price_text && (
           <p className="text-2xl font-bold">{plan.display_price_text}</p>
         )}
+        <p className="text-xs text-muted-foreground">Billed every 4 weeks</p>
         {!zoneEnabled && (
           <Badge variant="secondary" className="text-xs">Not available in your area</Badge>
         )}

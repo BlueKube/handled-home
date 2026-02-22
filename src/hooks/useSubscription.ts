@@ -19,6 +19,17 @@ export interface Subscription {
   stripe_subscription_id: string | null;
   created_at: string;
   updated_at: string;
+  // 28-day billing cycle fields
+  access_activated_at: string | null;
+  billing_cycle_start_at: string | null;
+  billing_cycle_end_at: string | null;
+  next_billing_at: string | null;
+  billing_cycle_length_days: number;
+  // Weekly service week fields
+  current_service_week_start_at: string | null;
+  current_service_week_end_at: string | null;
+  next_service_week_start_at: string | null;
+  next_service_week_end_at: string | null;
 }
 
 export function useCustomerSubscription() {
@@ -58,12 +69,12 @@ export function useCancelSubscription() {
 export function useChangePlan() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ subscriptionId, newPlanId }: { subscriptionId: string; newPlanId: string }) => {
+    mutationFn: async ({ subscriptionId, newPlanId, billingCycleEndAt }: { subscriptionId: string; newPlanId: string; billingCycleEndAt?: string | null }) => {
       const { error } = await supabase
         .from("subscriptions")
         .update({
           pending_plan_id: newPlanId,
-          pending_effective_at: null, // will be set by next billing cycle
+          pending_effective_at: billingCycleEndAt ?? null,
         } as any)
         .eq("id", subscriptionId);
       if (error) throw error;

@@ -121,7 +121,14 @@ export default function CustomerRoutine() {
         )}
       </div>
 
-      <RoutineSummaryBar used={used} included={included} extras={maxExtras} label={label} />
+      <RoutineSummaryBar
+        used={used}
+        included={included}
+        extras={maxExtras}
+        label={label}
+        serviceWeeksIncluded={entitlements?.service_weeks.included_per_billing_cycle}
+        serviceWeeksRemaining={entitlements?.service_weeks.remaining_in_current_cycle}
+      />
 
       <div className="p-4 space-y-3">
         {entLoading ? (
