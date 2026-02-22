@@ -1,164 +1,158 @@
 
 
-# Mobile-First Design System Overhaul + Capacitor Setup
+# Core UI Component Upgrade — Mobile-Native Polish
 
-## Overview
-This app will be distributed as a native iOS and Android app. The entire UI needs to shift from a desktop sidebar layout to a mobile-native experience with bottom tab navigation, touch-optimized spacing, safe area handling, and Capacitor integration for app store distribution.
-
----
-
-## 1. Capacitor Setup for Native Builds
-
-Install Capacitor dependencies and configure the project so it can be built and deployed to iOS and Android.
-
-- Install `@capacitor/core`, `@capacitor/cli`, `@capacitor/ios`, `@capacitor/android`
-- Run `npx cap init` with proper app ID and name
-- Configure `capacitor.config.ts` with the project's preview URL for live reload during development
-- Add mobile viewport meta tags to `index.html` (viewport-fit=cover, status bar config)
-
-**After setup, you will need to:**
-1. Export to GitHub and clone locally
-2. Run `npx cap add ios` and/or `npx cap add android`
-3. Run `npx cap sync` then `npx cap run ios` or `npx cap run android`
+## Goal
+Upgrade all foundational UI components with modern mobile-native design patterns: elevated cards with subtle glass effects, touch-optimized buttons with active states, refined inputs with floating labels, animated loading skeletons, and polished status indicators. Update the design guidelines doc to match.
 
 ---
 
-## 2. Navigation Overhaul: Sidebar to Bottom Tabs
+## 1. Button Component Upgrade (`src/components/ui/button.tsx`)
 
-Replace the desktop sidebar with a mobile-native bottom tab bar.
-
-### New component: `BottomTabBar.tsx`
-- Fixed to bottom of screen with safe area padding (for iPhone notch/home indicator)
-- 4-5 primary tabs per role (most important screens)
-- Active tab highlighted with accent color + filled icon
-- Remaining pages accessible via a "More" tab or from within screens
-
-### Tab structure per role:
-
-**Customer (5 tabs):**
-Home | Service Day | History | Subscription | More
-
-**Provider (5 tabs):**
-Jobs | Earnings | Performance | Coverage | More
-
-**Admin (5 tabs):**
-Dashboard | Zones | SKUs | Providers | More
-
-### "More" screen
-- Simple list/menu of remaining nav items (Settings, Support, Billing, etc.)
-- Clean grouped list with icons
-
-### Remove:
-- `AppSidebar.tsx` — no longer used
-- `SidebarProvider` / `SidebarTrigger` from layout and header
+Enhance with mobile-native sizing and touch feedback:
+- Default height increased to 44px (matching iOS HIG minimum tap target)
+- New `xl` size at 52px for primary CTAs
+- Active press state: `active:scale-[0.97]` with 100ms transition
+- `accent` variant added: teal background for primary actions
+- `soft` variant: subtle background tints for secondary actions (e.g., soft-destructive, soft-accent)
+- Loading spinner support: optional `loading` prop that shows a spinner and disables the button
+- All variants get `rounded-xl` (14px) for a softer, more modern feel
 
 ---
 
-## 3. Header Redesign for Mobile
+## 2. Card Component Upgrade (`src/components/ui/card.tsx`)
 
-### Modify `AppHeader.tsx`
-- Compact mobile header: logo centered, height 48px
-- Left: back button (when navigated into sub-page) or hamburger for "More"
-- Right: role switcher (dev only) + avatar/profile icon
-- No email text display (too wide for mobile)
-- Safe area top padding for iOS status bar
-
----
-
-## 4. Layout Restructure
-
-### Modify `AppLayout.tsx`
-- Remove sidebar wrapper entirely
-- Structure: Header (top) + Content (scrollable, flex-1) + BottomTabBar (bottom)
-- Content area gets bottom padding to avoid overlap with tab bar
-- Add safe area insets via CSS `env(safe-area-inset-*)` values
+Modern card with subtle depth and touch interaction:
+- Default card gets a softer shadow (`shadow-sm` to `shadow-[0_1px_3px_rgba(0,0,0,0.06)]`) and `rounded-2xl`
+- New `interactive` variant: adds `active:scale-[0.98]` press feedback + slightly elevated shadow on press
+- New `glass` variant: translucent background with backdrop-blur for overlays/modals (light: `bg-white/80 backdrop-blur-xl`, dark: `bg-card/80 backdrop-blur-xl`)
+- New `elevated` variant: stronger shadow for floating cards
+- Card padding adjusted to 16px (mobile-optimized, down from 24px)
+- `CardHeader` padding adjusted to `p-4 pb-2` and `CardContent` to `px-4 pb-4`
+- Subtle border-radius gradient effect option via className
 
 ---
 
-## 5. Touch-Optimized Design Tokens
+## 3. Input Component Upgrade (`src/components/ui/input.tsx`)
 
-### Update `index.css` and `tailwind.config.ts`
-- Minimum tap target: 44px (already in design guidelines)
-- Increase `--radius` to `0.75rem` (12px) for rounder, more mobile-native feel
-- Card padding: 16px standard
-- Input heights: 48px minimum
-- Font sizes: body stays 16px (prevents iOS zoom on input focus)
-- Add safe area CSS custom properties
-
-### Add mobile utilities:
-```css
-.safe-top { padding-top: env(safe-area-inset-top); }
-.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
-```
+Touch-optimized inputs:
+- Height increased to 48px (`h-12`) as default
+- Border radius to `rounded-xl` (14px)
+- Focus state: accent-colored ring (`ring-accent`) instead of default ring
+- Subtle background shift on focus (`bg-background` to `bg-card`)
+- Transition on all interactive states (150ms)
+- Placeholder styling: lighter weight, slightly larger
 
 ---
 
-## 6. Auth Page — Mobile Native Feel
+## 4. New StatCard Component (`src/components/StatCard.tsx`)
 
-### Redesign `AuthPage.tsx`
-- Full-screen mobile layout (no centered card on white background)
-- Logo at top (larger, ~80px), tagline below
-- Form fields directly on the surface background (no wrapping card)
-- Large 48px-height inputs with 16px font (prevents iOS zoom)
-- Full-width buttons with 48px height
-- Tab switcher (Login / Sign Up) as pill-shaped toggle at top of form
-
----
-
-## 7. PlaceholderPage — Mobile Optimized
-
-### Update `PlaceholderPage.tsx`
-- Full-width cards (no max-width constraint)
-- 16px horizontal padding
-- Larger touch-friendly elements
+Dashboard metric card used across all roles:
+- Icon with tinted background circle (e.g., teal icon on teal/10 bg)
+- Large numeric value with optional animated counter
+- Label text below
+- Optional trend indicator (up/down arrow with green/red color + percentage)
+- Touch-interactive with press feedback
+- Compact variant for inline stat rows
 
 ---
 
-## 8. Dark Mode Support
+## 5. New PageSkeleton Component (`src/components/PageSkeleton.tsx`)
 
-### Add `ThemeProvider` using `next-themes`
-- Wrap app in ThemeProvider in `App.tsx`
-- Create `ThemeToggle.tsx` — simple sun/moon icon button
-- Place toggle in Settings pages and/or header
-- Verify all CSS variables render correctly in dark mode
+Branded loading states:
+- Skeleton variant for stat cards (row of 2 rounded rectangles)
+- Skeleton variant for list items (icon + two text lines)
+- Skeleton variant for full page (header + stat row + list)
+- Uses existing `Skeleton` primitive with shimmer animation upgrade
+- Shimmer animation: gradient sweep from left to right (replaces plain pulse)
 
 ---
 
-## 9. Motion & Polish
+## 6. Skeleton Shimmer Animation (`src/components/ui/skeleton.tsx` + `src/index.css`)
 
-- Page transition: subtle fade-in on route change (CSS animation)
-- Tab bar icon: gentle scale bounce on tap
-- Card hover/press: slight scale-down on active (touch feedback)
-- Pull-to-refresh styling prep (for future data pages)
+Upgrade the plain pulse to a shimmer sweep:
+- Add `@keyframes shimmer` in `index.css`: linear gradient that moves across
+- Update Skeleton component to use `animate-shimmer` class
+- Background: `bg-gradient-to-r from-muted via-muted-foreground/5 to-muted`
+
+---
+
+## 7. Badge / StatusBadge Polish (`src/components/StatusBadge.tsx`)
+
+- Add a subtle dot indicator before the label text (colored circle matching status)
+- Slightly larger padding for mobile touch (min-height 28px)
+- Pill shape consistent across all variants
+
+---
+
+## 8. Bottom Tab Bar Polish (`src/components/BottomTabBar.tsx`)
+
+- Add subtle top shadow/border for depth separation
+- Active tab: teal dot indicator below the icon (instead of just color change)
+- Slight icon scale animation on tap (`active:scale-90` with spring-like timing)
+- Glass effect background: `bg-card/90 backdrop-blur-lg` for a modern floating feel
+
+---
+
+## 9. Toast / Notification Upgrade (`src/components/ui/toast.tsx`)
+
+- Rounded corners increased to `rounded-2xl`
+- Add success variant (green border/icon)
+- Position moved to top-center for mobile (no bottom overlap with tab bar)
+- Compact padding for mobile: `p-4` instead of `p-6`
+- Swipe-to-dismiss already supported by Radix
+
+---
+
+## 10. CSS Design Tokens & Animations (`src/index.css`)
+
+Add new animation utilities:
+- `@keyframes shimmer` for skeleton loading
+- `@keyframes slideUp` for bottom sheets and modals
+- `@keyframes scaleIn` for popover/dialog entry
+- `.animate-shimmer`, `.animate-slide-up`, `.animate-scale-in` utility classes
+- Typography utility classes: `.text-h1`, `.text-h2`, `.text-h3`, `.text-body`, `.text-caption`
+- `.glass` utility: `bg-card/80 backdrop-blur-xl border-white/20`
+
+---
+
+## 11. Tailwind Config Updates (`tailwind.config.ts`)
+
+- Add shimmer, slideUp, scaleIn keyframes and animations
+- Remove sidebar-specific color tokens (no longer used)
+- Remove container/screens config (mobile-only, no breakpoint containers)
+
+---
+
+## 12. Design Guidelines Update (`docs/design-guidelines.md`)
+
+Replace the existing document with updated mobile-native guidelines reflecting all changes:
+- Mobile-only platform specification
+- Updated component specs (card radius, button heights, input heights)
+- New component inventory (StatCard, PageSkeleton, glass variants)
+- Animation/motion spec with keyframe names
+- Removed: desktop/keyboard navigation references, sidebar references
+- Added: safe area handling, bottom tab bar spec, touch target requirements
 
 ---
 
 ## Technical Summary
 
-### New files:
-- `src/components/BottomTabBar.tsx` — Role-aware bottom tab navigation
-- `src/components/MoreMenu.tsx` — Overflow navigation items
-- `src/components/ThemeToggle.tsx` — Dark/light mode switch
-- `capacitor.config.ts` — Capacitor configuration
+### Files to create:
+- `src/components/StatCard.tsx` — Metric card with icon, value, trend
+- `src/components/PageSkeleton.tsx` — Loading skeleton layouts
 
-### Modified files:
-- `index.html` — Mobile viewport meta tags, safe area
-- `src/index.css` — Safe area utilities, touch sizing, mobile animations
-- `tailwind.config.ts` — Radius, spacing adjustments
-- `src/components/AppLayout.tsx` — Remove sidebar, add bottom tabs
-- `src/components/AppHeader.tsx` — Compact mobile header
-- `src/pages/AuthPage.tsx` — Full-screen mobile design
-- `src/components/PlaceholderPage.tsx` — Mobile padding/sizing
-- `src/App.tsx` — Add ThemeProvider wrapper
-- `src/main.tsx` — No changes expected
-- `package.json` — Add Capacitor dependencies
+### Files to modify:
+- `src/components/ui/button.tsx` — New sizes, variants, loading prop, touch feedback
+- `src/components/ui/card.tsx` — Glass/elevated/interactive variants, mobile padding
+- `src/components/ui/input.tsx` — 48px height, accent ring, rounded-xl
+- `src/components/ui/skeleton.tsx` — Shimmer animation
+- `src/components/ui/toast.tsx` — Mobile positioning, rounded-2xl, compact padding
+- `src/components/StatusBadge.tsx` — Dot indicator, larger touch target
+- `src/components/BottomTabBar.tsx` — Glass background, active dot, tap animation
+- `src/index.css` — Shimmer/slideUp/scaleIn keyframes, typography utilities, glass utility
+- `tailwind.config.ts` — New animations, remove sidebar tokens and container config
+- `docs/design-guidelines.md` — Full rewrite for mobile-native specs
 
-### Files to remove:
-- `src/components/AppSidebar.tsx` — Replaced by BottomTabBar
-
-### Dependencies to install:
-- `@capacitor/core`
-- `@capacitor/cli` (dev)
-- `@capacitor/ios`
-- `@capacitor/android`
-
+### No new dependencies needed
+All enhancements use Tailwind CSS, CSS keyframes, and existing Radix primitives.
