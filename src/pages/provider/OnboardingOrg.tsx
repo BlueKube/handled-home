@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProviderOrg } from "@/hooks/useProviderOrg";
@@ -15,27 +15,50 @@ export default function OnboardingOrg() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, profile } = useAuth();
-  const { org, createOrg, updateOrg } = useProviderOrg();
-  const { upsertOwnerMember } = useProviderMembers(org?.id);
+  const { org, loading: orgLoading } = useProviderOrg();
+  const effectiveOrgId = location.state?.orgId || org?.id;
+  const { upsertOwnerMember } = useProviderMembers(effectiveOrgId);
+  const { createOrg, updateOrg } = useProviderOrg();
 
   const inviteId = location.state?.inviteId || org?.invite_id;
   const allowedZoneIds = location.state?.allowedZoneIds || [];
 
-  const [name, setName] = useState(org?.name || "");
-  const [phone, setPhone] = useState(org?.contact_phone || profile?.phone || "");
-  const [zip, setZip] = useState(org?.home_base_zip || "");
-  const [website, setWebsite] = useState(org?.website || "");
+  // P2: Initialize with empty, sync when org loads
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [zip, setZip] = useState("");
+  const [website, setWebsite] = useState("");
   const [ownerName, setOwnerName] = useState(profile?.full_name || "");
   const [ownerPhone, setOwnerPhone] = useState(profile?.phone || "");
   const [accountable, setAccountable] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [synced, setSynced] = useState(false);
+
+  // P2: Sync form state when org data loads
+  useEffect(() => {
+    if (org && !synced) {
+      setName(org.name || "");
+      setPhone(org.contact_phone || "");
+      setZip(org.home_base_zip || "");
+      setWebsite(org.website || "");
+      setSynced(true);
+    }
+  }, [org, synced]);
+
+  // Also sync profile data
+  useEffect(() => {
+    if (profile) {
+      setOwnerName((prev) => prev || profile.full_name || "");
+      setOwnerPhone((prev) => prev || profile.phone || "");
+    }
+  }, [profile]);
 
   const handleContinue = async () => {
     if (!name.trim()) { toast.error("Organization name is required"); return; }
     if (!accountable) { toast.error("You must acknowledge accountability"); return; }
     setSaving(true);
     try {
-      let orgId = org?.id;
+      let orgId = effectiveOrgId;
       if (!orgId) {
         const created = await createOrg.mutateAsync({
           name: name.trim(),
@@ -55,7 +78,6 @@ export default function OnboardingOrg() {
         });
       }
 
-      // Upsert owner member
       if (user) {
         await upsertOwnerMember.mutateAsync({
           orgId: orgId!,
@@ -73,6 +95,10 @@ export default function OnboardingOrg() {
       setSaving(false);
     }
   };
+
+  if (orgLoading) {
+    return <div className="p-4 flex items-center justify-center min-h-[60vh]"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+  }
 
   return (
     <div className="p-4 max-w-lg mx-auto animate-fade-in">

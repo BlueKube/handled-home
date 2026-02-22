@@ -5,11 +5,12 @@ import { useProviderInvite } from "@/hooks/useProviderInvite";
 import { useProviderCoverage } from "@/hooks/useProviderCoverage";
 import { useProviderCapabilities } from "@/hooks/useProviderCapabilities";
 import { useProviderCompliance } from "@/hooks/useProviderCompliance";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Clock, AlertTriangle, Shield, ArrowRight, Loader2 } from "lucide-react";
+import { CheckCircle, Clock, AlertTriangle, Shield, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ProviderOnboarding() {
@@ -26,28 +27,16 @@ export default function ProviderOnboarding() {
     );
   }
 
-  // Status-based routing
   if (org) {
-    if (org.status === "ACTIVE") {
+    if (org.status === "ACTIVE" || org.status === "PROBATION") {
       navigate("/provider", { replace: true });
       return null;
     }
-    if (org.status === "PROBATION") {
-      navigate("/provider", { replace: true });
-      return null;
-    }
-    if (org.status === "SUSPENDED") {
-      return <SuspendedScreen />;
-    }
-    if (org.status === "PENDING") {
-      return <PendingReviewScreen org={org} />;
-    }
-    if (org.status === "DRAFT") {
-      return <DraftResumeScreen org={org} />;
-    }
+    if (org.status === "SUSPENDED") return <SuspendedScreen />;
+    if (org.status === "PENDING") return <PendingReviewScreen org={org} />;
+    if (org.status === "DRAFT") return <DraftResumeScreen org={org} />;
   }
 
-  // No org — show invite code entry
   return (
     <div className="p-4 max-w-lg mx-auto animate-fade-in">
       <div className="text-center mb-8 mt-8">
@@ -104,7 +93,13 @@ function SuspendedScreen() {
   );
 }
 
+// P4: Show compliance warnings for missing uploads
 function PendingReviewScreen({ org }: { org: any }) {
+  const { compliance } = useProviderCompliance(org.id);
+
+  const missingInsuranceDoc = compliance?.insurance_attested && !compliance?.insurance_doc_url;
+  const missingTaxDoc = compliance?.tax_form_attested && !compliance?.tax_doc_url;
+
   return (
     <div className="p-4 max-w-lg mx-auto animate-fade-in">
       <div className="text-center mt-8 mb-8">
@@ -115,22 +110,16 @@ function PendingReviewScreen({ org }: { org: any }) {
 
       <Card>
         <CardContent className="pt-6 space-y-3">
-          <div className="flex items-center gap-2">
-            <CheckCircle className="h-4 w-4 text-success" />
-            <span className="text-sm">Organization details submitted</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <CheckCircle className="h-4 w-4 text-success" />
-            <span className="text-sm">Coverage zones requested</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <CheckCircle className="h-4 w-4 text-success" />
-            <span className="text-sm">Capabilities selected</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <CheckCircle className="h-4 w-4 text-success" />
-            <span className="text-sm">Compliance completed</span>
-          </div>
+          <StatusRow ok={true} text="Organization details submitted" />
+          <StatusRow ok={true} text="Coverage zones requested" />
+          <StatusRow ok={true} text="Capabilities selected" />
+          <StatusRow ok={true} text="Compliance completed" />
+          {missingInsuranceDoc && (
+            <StatusRow ok={false} text="⚠ Insurance document not uploaded — uploading may speed up review" />
+          )}
+          {missingTaxDoc && (
+            <StatusRow ok={false} text="⚠ Tax document not uploaded — uploading may speed up review" />
+          )}
         </CardContent>
       </Card>
 
@@ -139,16 +128,46 @@ function PendingReviewScreen({ org }: { org: any }) {
   );
 }
 
+function StatusRow({ ok, text }: { ok: boolean; text: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      {ok ? (
+        <CheckCircle className="h-4 w-4 text-success shrink-0" />
+      ) : (
+        <AlertCircle className="h-4 w-4 text-warning shrink-0" />
+      )}
+      <span className="text-sm">{text}</span>
+    </div>
+  );
+}
+
+// P3: Fix allowedZoneIds by querying invite
 function DraftResumeScreen({ org }: { org: any }) {
   const navigate = useNavigate();
   const { coverage } = useProviderCoverage(org.id);
   const { capabilities } = useProviderCapabilities(org.id);
   const { compliance } = useProviderCompliance(org.id);
 
-  // Determine next incomplete step
+  // P3: Query invite's allowed_zone_ids
+  const { data: allowedZoneIds } = useQuery({
+    queryKey: ["invite_zone_ids_draft", org.invite_id],
+    queryFn: async () => {
+      if (!org.invite_id) return [];
+      const { data, error } = await supabase
+        .from("provider_invites")
+        .select("allowed_zone_ids")
+        .eq("id", org.invite_id)
+        .single();
+      if (error) return [];
+      return data?.allowed_zone_ids ?? [];
+    },
+    enabled: !!org.invite_id,
+    initialData: [],
+  });
+
   const hasOrg = org.name && org.name.length > 0;
   const hasCoverage = coverage.length > 0;
-  const hasCapabilities = capabilities.filter(c => c.is_enabled).length > 0;
+  const hasCapabilities = capabilities.filter((c: any) => c.is_enabled).length > 0;
   const hasCompliance = compliance?.terms_accepted_at;
 
   let nextStep = "/provider/onboarding/org";
@@ -165,7 +184,7 @@ function DraftResumeScreen({ org }: { org: any }) {
         <p className="text-caption">You have an application in progress.</p>
       </div>
 
-      <Button className="w-full" onClick={() => navigate(nextStep, { state: { orgId: org.id, allowedZoneIds: org.invite_id ? [] : [] } })}>
+      <Button className="w-full" onClick={() => navigate(nextStep, { state: { orgId: org.id, allowedZoneIds } })}>
         Continue Application
         <ArrowRight className="h-4 w-4 ml-2" />
       </Button>

@@ -5,29 +5,28 @@ import { useProviderCoverage } from "@/hooks/useProviderCoverage";
 import { useProviderCapabilities } from "@/hooks/useProviderCapabilities";
 import { useProviderCompliance } from "@/hooks/useProviderCompliance";
 import { useProviderMembers } from "@/hooks/useProviderMembers";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { CheckCircle, AlertCircle, Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
 
 export default function OnboardingReview() {
   const navigate = useNavigate();
   const location = useLocation();
-  const orgId = location.state?.orgId;
-  const { org, submitOnboarding } = useProviderOrg();
-  const { members } = useProviderMembers(orgId || org?.id);
-  const { coverage } = useProviderCoverage(orgId || org?.id);
-  const { capabilities } = useProviderCapabilities(orgId || org?.id);
-  const { compliance } = useProviderCompliance(orgId || org?.id);
+  const { org, loading: orgLoading, submitOnboarding } = useProviderOrg();
+
+  // P1: Fall back to useProviderOrg
+  const effectiveOrgId = location.state?.orgId || org?.id;
+
+  const { members } = useProviderMembers(effectiveOrgId);
+  const { coverage } = useProviderCoverage(effectiveOrgId);
+  const { capabilities } = useProviderCapabilities(effectiveOrgId);
+  const { compliance } = useProviderCompliance(effectiveOrgId);
   const [submitting, setSubmitting] = useState(false);
 
-  const effectiveOrgId = orgId || org?.id;
   const effectiveOrg = org;
-
   const enabledCaps = capabilities.filter((c: any) => c.is_enabled);
   const hasCompliance = compliance?.terms_accepted_at;
-
   const isReady = effectiveOrg?.name && coverage.length > 0 && enabledCaps.length > 0 && hasCompliance;
 
   const handleSubmit = async () => {
@@ -43,6 +42,10 @@ export default function OnboardingReview() {
       setSubmitting(false);
     }
   };
+
+  if (orgLoading) {
+    return <div className="p-4 flex items-center justify-center min-h-[60vh]"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+  }
 
   return (
     <div className="p-4 max-w-lg mx-auto animate-fade-in">
@@ -77,7 +80,10 @@ export default function OnboardingReview() {
           details={[
             hasCompliance ? "Terms accepted ✓" : "Terms not accepted",
             compliance?.insurance_attested ? "Insurance attested ✓" : "Insurance not attested",
-          ]}
+            compliance?.insurance_doc_url ? "Insurance doc uploaded ✓" : "⚠ Insurance doc not uploaded",
+            compliance?.tax_form_attested ? "Tax form attested ✓" : null,
+            compliance?.tax_doc_url ? "Tax doc uploaded ✓" : compliance?.tax_form_attested ? "⚠ Tax doc not uploaded" : null,
+          ].filter(Boolean)}
         />
       </div>
 
@@ -108,7 +114,7 @@ function SummaryCard({ title, ok, details }: { title: string; ok: boolean; detai
         <div>
           <p className="font-medium text-sm">{title}</p>
           {details.map((d, i) => (
-            <p key={i} className="text-xs text-muted-foreground">{d}</p>
+            <p key={i} className={`text-xs ${d.startsWith("⚠") ? "text-warning" : "text-muted-foreground"}`}>{d}</p>
           ))}
         </div>
       </CardContent>

@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useProviderOrg } from "@/hooks/useProviderOrg";
 import { useProviderCoverage } from "@/hooks/useProviderCoverage";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,23 +14,46 @@ import { toast } from "sonner";
 export default function OnboardingCoverage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const orgId = location.state?.orgId;
-  const allowedZoneIds = location.state?.allowedZoneIds || [];
+  const { org, loading: orgLoading } = useProviderOrg();
+
+  // P1: Fall back to useProviderOrg when location.state is lost
+  const orgId = location.state?.orgId || org?.id;
+  const stateZoneIds = location.state?.allowedZoneIds;
+
   const { coverage, addCoverage, removeCoverage, loading } = useProviderCoverage(orgId);
   const [saving, setSaving] = useState(false);
+
+  // P3/P7: If allowedZoneIds not in state, query from invite
+  const { data: allowedZoneIds } = useQuery({
+    queryKey: ["invite_zone_ids", org?.invite_id],
+    queryFn: async () => {
+      if (stateZoneIds) return stateZoneIds;
+      if (!org?.invite_id) return [];
+      const { data, error } = await supabase
+        .from("provider_invites")
+        .select("allowed_zone_ids")
+        .eq("id", org.invite_id)
+        .single();
+      if (error) return [];
+      return data?.allowed_zone_ids ?? [];
+    },
+    enabled: !!orgId,
+    initialData: stateZoneIds,
+  });
 
   // Fetch available zones
   const { data: zones } = useQuery({
     queryKey: ["zones_for_coverage", allowedZoneIds],
     queryFn: async () => {
       let q = supabase.from("zones").select("id, name, zip_codes, status").eq("status", "active");
-      if (allowedZoneIds.length > 0) {
+      if (allowedZoneIds && allowedZoneIds.length > 0) {
         q = q.in("id", allowedZoneIds);
       }
       const { data, error } = await q;
       if (error) throw error;
       return data ?? [];
     },
+    enabled: !!allowedZoneIds,
   });
 
   const selectedZoneIds = coverage.map((c: any) => c.zone_id);
@@ -49,6 +73,10 @@ export default function OnboardingCoverage() {
       setSaving(false);
     }
   };
+
+  if (orgLoading) {
+    return <div className="p-4 flex items-center justify-center min-h-[60vh]"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+  }
 
   return (
     <div className="p-4 max-w-lg mx-auto animate-fade-in">

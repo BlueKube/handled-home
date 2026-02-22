@@ -1,21 +1,25 @@
 import { useNavigate, useLocation } from "react-router-dom";
+import { useProviderOrg } from "@/hooks/useProviderOrg";
 import { useProviderCapabilities } from "@/hooks/useProviderCapabilities";
 import { useSkus } from "@/hooks/useSkus";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Camera, ListChecks, Clock } from "lucide-react";
+import { ArrowRight, Camera, ListChecks, Clock, Loader2 } from "lucide-react";
 
 export default function OnboardingCapabilities() {
   const navigate = useNavigate();
   const location = useLocation();
-  const orgId = location.state?.orgId;
+  const { org, loading: orgLoading } = useProviderOrg();
+
+  // P1: Fall back to useProviderOrg
+  const orgId = location.state?.orgId || org?.id;
   const allowedZoneIds = location.state?.allowedZoneIds || [];
+
   const { capabilities, toggleCapability } = useProviderCapabilities(orgId);
   const skusQuery = useSkus();
 
-  // Group SKUs by category
   const activeSkus = (skusQuery.data ?? []).filter((s) => s.status === "active");
   const categories = Array.from(new Set(activeSkus.map((s) => s.category || "General")));
 
@@ -31,6 +35,10 @@ export default function OnboardingCapabilities() {
       enabled: !isEnabled(sku.id),
     });
   };
+
+  if (orgLoading) {
+    return <div className="p-4 flex items-center justify-center min-h-[60vh]"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+  }
 
   return (
     <div className="p-4 max-w-lg mx-auto animate-fade-in">

@@ -56,13 +56,16 @@ export function useProviderAdmin() {
     },
   });
 
+  // A1: Use RPC for audit-logged coverage status updates
   const updateCoverageStatus = useMutation({
-    mutationFn: async (params: { coverageId: string; status: string }) => {
-      const { error } = await supabase
-        .from("provider_coverage")
-        .update({ request_status: params.status })
-        .eq("id", params.coverageId);
+    mutationFn: async (params: { coverageId: string; status: string; reason?: string }) => {
+      const { data, error } = await supabase.rpc("admin_update_coverage_status", {
+        p_coverage_id: params.coverageId,
+        p_new_status: params.status,
+        p_reason: params.reason || null,
+      });
       if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin_provider_org_detail"] });

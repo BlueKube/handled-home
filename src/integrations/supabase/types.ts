@@ -1847,6 +1847,10 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_update_coverage_status: {
+        Args: { p_coverage_id: string; p_new_status: string; p_reason?: string }
+        Returns: Json
+      }
       bootstrap_new_user: { Args: { _full_name: string }; Returns: undefined }
       check_provider_sku_zone_eligibility: {
         Args: { p_provider_org_id: string; p_sku_id: string; p_zone_id: string }
