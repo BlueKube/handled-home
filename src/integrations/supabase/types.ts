@@ -55,8 +55,12 @@ export type Database = {
           created_at: string
           customer_id: string
           draft_routine: Json
+          effective_billing_cycle_start_at: string | null
+          effective_service_week_start_at: string | null
           entitlement_version_id: string | null
           id: string
+          is_locked_for_service_week: boolean
+          locked_at: string | null
           property_id: string | null
           selected_plan_id: string
           status: string
@@ -67,8 +71,12 @@ export type Database = {
           created_at?: string
           customer_id: string
           draft_routine?: Json
+          effective_billing_cycle_start_at?: string | null
+          effective_service_week_start_at?: string | null
           entitlement_version_id?: string | null
           id?: string
+          is_locked_for_service_week?: boolean
+          locked_at?: string | null
           property_id?: string | null
           selected_plan_id: string
           status?: string
@@ -79,8 +87,12 @@ export type Database = {
           created_at?: string
           customer_id?: string
           draft_routine?: Json
+          effective_billing_cycle_start_at?: string | null
+          effective_service_week_start_at?: string | null
           entitlement_version_id?: string | null
           id?: string
+          is_locked_for_service_week?: boolean
+          locked_at?: string | null
           property_id?: string | null
           selected_plan_id?: string
           status?: string
@@ -165,6 +177,7 @@ export type Database = {
           included_count: number | null
           included_credits: number | null
           included_minutes: number | null
+          included_service_weeks_per_billing_cycle: number
           max_extra_count: number | null
           max_extra_credits: number | null
           max_extra_minutes: number | null
@@ -180,6 +193,7 @@ export type Database = {
           included_count?: number | null
           included_credits?: number | null
           included_minutes?: number | null
+          included_service_weeks_per_billing_cycle?: number
           max_extra_count?: number | null
           max_extra_credits?: number | null
           max_extra_minutes?: number | null
@@ -195,6 +209,7 @@ export type Database = {
           included_count?: number | null
           included_credits?: number | null
           included_minutes?: number | null
+          included_service_weeks_per_billing_cycle?: number
           max_extra_count?: number | null
           max_extra_credits?: number | null
           max_extra_minutes?: number | null
@@ -507,13 +522,22 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          access_activated_at: string | null
+          billing_cycle_end_at: string | null
+          billing_cycle_length_days: number
+          billing_cycle_start_at: string | null
           cancel_at_period_end: boolean
           created_at: string
           current_period_end: string | null
           current_period_start: string | null
+          current_service_week_end_at: string | null
+          current_service_week_start_at: string | null
           customer_id: string
           entitlement_version_id: string | null
           id: string
+          next_billing_at: string | null
+          next_service_week_end_at: string | null
+          next_service_week_start_at: string | null
           pending_effective_at: string | null
           pending_plan_id: string | null
           plan_id: string
@@ -525,13 +549,22 @@ export type Database = {
           zone_id: string | null
         }
         Insert: {
+          access_activated_at?: string | null
+          billing_cycle_end_at?: string | null
+          billing_cycle_length_days?: number
+          billing_cycle_start_at?: string | null
           cancel_at_period_end?: boolean
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string | null
+          current_service_week_end_at?: string | null
+          current_service_week_start_at?: string | null
           customer_id: string
           entitlement_version_id?: string | null
           id?: string
+          next_billing_at?: string | null
+          next_service_week_end_at?: string | null
+          next_service_week_start_at?: string | null
           pending_effective_at?: string | null
           pending_plan_id?: string | null
           plan_id: string
@@ -543,13 +576,22 @@ export type Database = {
           zone_id?: string | null
         }
         Update: {
+          access_activated_at?: string | null
+          billing_cycle_end_at?: string | null
+          billing_cycle_length_days?: number
+          billing_cycle_start_at?: string | null
           cancel_at_period_end?: boolean
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string | null
+          current_service_week_end_at?: string | null
+          current_service_week_start_at?: string | null
           customer_id?: string
           entitlement_version_id?: string | null
           id?: string
+          next_billing_at?: string | null
+          next_service_week_end_at?: string | null
+          next_service_week_start_at?: string | null
           pending_effective_at?: string | null
           pending_plan_id?: string | null
           plan_id?: string
@@ -646,6 +688,50 @@ export type Database = {
             foreignKeyName: "zone_provider_assignments_zone_id_fkey"
             columns: ["zone_id"]
             isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zone_service_week_config: {
+        Row: {
+          anchor_day: number
+          anchor_time_local: string
+          created_at: string
+          cutoff_day_offset: number
+          cutoff_time_local: string
+          id: string
+          is_active: boolean
+          updated_at: string
+          zone_id: string
+        }
+        Insert: {
+          anchor_day?: number
+          anchor_time_local?: string
+          created_at?: string
+          cutoff_day_offset?: number
+          cutoff_time_local?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          zone_id: string
+        }
+        Update: {
+          anchor_day?: number
+          anchor_time_local?: string
+          created_at?: string
+          cutoff_day_offset?: number
+          cutoff_time_local?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zone_service_week_config_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: true
             referencedRelation: "zones"
             referencedColumns: ["id"]
           },

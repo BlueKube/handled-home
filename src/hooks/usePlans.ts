@@ -28,6 +28,7 @@ export interface PlanEntitlementVersion {
   max_extra_credits: number;
   max_extra_count: number;
   max_extra_minutes: number;
+  included_service_weeks_per_billing_cycle: number;
   created_at: string;
 }
 

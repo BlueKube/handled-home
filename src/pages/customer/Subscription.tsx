@@ -60,7 +60,7 @@ export default function CustomerSubscription() {
             <CardTitle className="text-base">Change Plan</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <p className="text-xs text-muted-foreground">Changes take effect at the start of your next billing cycle.</p>
+            <p className="text-xs text-muted-foreground">Changes take effect at the start of your next billing cycle (every 4 weeks).</p>
             <Select value={changePlanId} onValueChange={setChangePlanId}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a new plan" />
@@ -74,7 +74,7 @@ export default function CustomerSubscription() {
             {changePlanId && (
               <Button size="sm" disabled={changePlan.isPending} onClick={async () => {
                 try {
-                  await changePlan.mutateAsync({ subscriptionId: subscription.id, newPlanId: changePlanId });
+                  await changePlan.mutateAsync({ subscriptionId: subscription.id, newPlanId: changePlanId, billingCycleEndAt: subscription.billing_cycle_end_at });
                   toast.success("Plan change scheduled for next billing cycle.");
                   setChangePlanId("");
                 } catch {

@@ -25,10 +25,17 @@ export interface EntitlementSku {
   ui_explainer: string;
 }
 
+export interface ServiceWeekEntitlement {
+  included_per_billing_cycle: number;
+  consumed_in_current_cycle: number;
+  remaining_in_current_cycle: number;
+}
+
 export interface EntitlementPayload {
   plan: EntitlementPlan;
   zone: EntitlementZone;
   skus: EntitlementSku[];
+  service_weeks: ServiceWeekEntitlement;
   messages: {
     included_explainer: string;
     extra_explainer: string;
@@ -151,6 +158,8 @@ export function useEntitlements(planId: string | null, zoneId: string | null, en
       const includedVal = modelType === "credits_per_cycle" ? included.credits
         : modelType === "count_per_cycle" ? included.count : included.minutes;
 
+      const serviceWeeksPerCycle = version?.included_service_weeks_per_billing_cycle ?? 4;
+
       return {
         plan: {
           plan_id: planId,
@@ -165,10 +174,15 @@ export function useEntitlements(planId: string | null, zoneId: string | null, en
           plan_enabled: zoneAvail?.is_enabled ?? false,
         },
         skus,
+        service_weeks: {
+          included_per_billing_cycle: serviceWeeksPerCycle,
+          consumed_in_current_cycle: 0, // future modules increment this
+          remaining_in_current_cycle: serviceWeeksPerCycle,
+        },
         messages: {
-          included_explainer: `${includedVal} ${modelLabel} included per cycle`,
+          included_explainer: `${includedVal} ${modelLabel} included per cycle · ${serviceWeeksPerCycle} service week${serviceWeeksPerCycle !== 1 ? "s" : ""} per billing cycle`,
           extra_explainer: extras.allowed ? `Up to ${extras.max_credits || extras.max_count || extras.max_minutes} extra ${modelLabel} available` : "No extras available on this plan",
-          change_policy: "Plan changes take effect at the start of your next billing cycle.",
+          change_policy: "Plan changes take effect at the start of your next billing cycle (every 4 weeks).",
         },
       };
     },

@@ -55,16 +55,18 @@ export default function CustomerSubscribe() {
       <div className="p-4 pb-24 space-y-6 animate-fade-in max-w-lg mx-auto text-center">
         <CheckCircle className="h-16 w-16 text-accent mx-auto" />
         <h1 className="text-h2">You're All Set!</h1>
-        <p className="text-muted-foreground">Your subscription is now active. Welcome to {plan?.name ?? "your plan"}!</p>
+        <p className="text-muted-foreground">Access is active now. Welcome to {plan?.name ?? "your plan"}!</p>
         <div className="space-y-3">
-          <p className="text-sm font-medium">What happens next:</p>
           <ul className="text-sm text-muted-foreground space-y-1 text-left max-w-xs mx-auto">
-            <li>• Your first service day will be scheduled</li>
-            <li>• You can manage your routine anytime</li>
-            <li>• Check your subscription details in Settings</li>
+            <li>• Next billing date: every 4 weeks from today</li>
+            <li>• Your service weeks follow a predictable weekly rhythm</li>
+            <li>• Manage your subscription anytime in Settings</li>
           </ul>
         </div>
-        <Button onClick={() => navigate("/customer")} className="w-full">
+        <Button onClick={() => navigate("/customer/routine")} className="w-full">
+          Build / Confirm Routine
+        </Button>
+        <Button variant="outline" onClick={() => navigate("/customer")} className="w-full">
           Go to Dashboard
         </Button>
       </div>
@@ -111,7 +113,7 @@ export default function CustomerSubscribe() {
             <span>{plan.name}</span>
             <span>{plan.display_price_text ?? "—"}</span>
           </div>
-          <p className="text-xs text-muted-foreground">Billed monthly. Cancel anytime.</p>
+          <p className="text-xs text-muted-foreground">Billed every 4 weeks. Cancel anytime.</p>
         </CardContent>
       </Card>
 
