@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth, AppRole } from "@/contexts/AuthContext";
+import { AccountNotConfigured } from "@/components/AccountNotConfigured";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -20,6 +21,10 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
 
   if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  if (roles.length === 0) {
+    return <AccountNotConfigured />;
   }
 
   if (requiredRole && !roles.includes(requiredRole)) {
