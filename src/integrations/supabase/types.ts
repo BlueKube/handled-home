@@ -86,6 +86,63 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_inference_runs: {
+        Row: {
+          classification: Json | null
+          created_at: string
+          duplicate_ticket_id: string | null
+          evidence_score: number | null
+          id: string
+          input_summary: string | null
+          latency_ms: number | null
+          model_name: string
+          output: Json | null
+          risk_score: number | null
+          ticket_id: string
+        }
+        Insert: {
+          classification?: Json | null
+          created_at?: string
+          duplicate_ticket_id?: string | null
+          evidence_score?: number | null
+          id?: string
+          input_summary?: string | null
+          latency_ms?: number | null
+          model_name: string
+          output?: Json | null
+          risk_score?: number | null
+          ticket_id: string
+        }
+        Update: {
+          classification?: Json | null
+          created_at?: string
+          duplicate_ticket_id?: string | null
+          evidence_score?: number | null
+          id?: string
+          input_summary?: string | null
+          latency_ms?: number | null
+          model_name?: string
+          output?: Json | null
+          risk_score?: number | null
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_inference_runs_duplicate_ticket_id_fkey"
+            columns: ["duplicate_ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_inference_runs_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_exceptions: {
         Row: {
           created_at: string
@@ -2729,6 +2786,382 @@ export type Database = {
           },
         ]
       }
+      support_attachments: {
+        Row: {
+          created_at: string
+          description: string | null
+          file_type: string | null
+          id: string
+          storage_path: string
+          ticket_id: string
+          uploaded_by_role: string
+          uploaded_by_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          file_type?: string | null
+          id?: string
+          storage_path: string
+          ticket_id: string
+          uploaded_by_role: string
+          uploaded_by_user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          file_type?: string | null
+          id?: string
+          storage_path?: string
+          ticket_id?: string
+          uploaded_by_role?: string
+          uploaded_by_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_attachments_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_macros: {
+        Row: {
+          created_at: string
+          created_by_user_id: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          patch: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by_user_id?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          patch?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by_user_id?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          patch?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      support_policies: {
+        Row: {
+          change_reason: string | null
+          created_at: string
+          created_by_user_id: string | null
+          description: string | null
+          dials: Json
+          id: string
+          name: string
+          published_at: string | null
+          status: string
+          version: number
+        }
+        Insert: {
+          change_reason?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          description?: string | null
+          dials?: Json
+          id?: string
+          name: string
+          published_at?: string | null
+          status?: string
+          version: number
+        }
+        Update: {
+          change_reason?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          description?: string | null
+          dials?: Json
+          id?: string
+          name?: string
+          published_at?: string | null
+          status?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      support_policy_scopes: {
+        Row: {
+          active_policy_id: string
+          created_at: string
+          id: string
+          scope_ref_id: string | null
+          scope_ref_key: string | null
+          scope_type: Database["public"]["Enums"]["support_policy_scope_type"]
+          updated_at: string
+        }
+        Insert: {
+          active_policy_id: string
+          created_at?: string
+          id?: string
+          scope_ref_id?: string | null
+          scope_ref_key?: string | null
+          scope_type: Database["public"]["Enums"]["support_policy_scope_type"]
+          updated_at?: string
+        }
+        Update: {
+          active_policy_id?: string
+          created_at?: string
+          id?: string
+          scope_ref_id?: string | null
+          scope_ref_key?: string | null
+          scope_type?: Database["public"]["Enums"]["support_policy_scope_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_policy_scopes_active_policy_id_fkey"
+            columns: ["active_policy_id"]
+            isOneToOne: false
+            referencedRelation: "support_policies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_ticket_events: {
+        Row: {
+          actor_role: string | null
+          actor_user_id: string | null
+          created_at: string
+          event_type: Database["public"]["Enums"]["support_event_type"]
+          id: string
+          metadata: Json | null
+          ticket_id: string
+        }
+        Insert: {
+          actor_role?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          event_type: Database["public"]["Enums"]["support_event_type"]
+          id?: string
+          metadata?: Json | null
+          ticket_id: string
+        }
+        Update: {
+          actor_role?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          event_type?: Database["public"]["Enums"]["support_event_type"]
+          id?: string
+          metadata?: Json | null
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_ticket_events_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_ticket_offers: {
+        Row: {
+          accepted_at: string | null
+          amount_cents: number | null
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          offer_type: Database["public"]["Enums"]["support_offer_type"]
+          status: Database["public"]["Enums"]["support_offer_status"]
+          ticket_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          amount_cents?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          offer_type: Database["public"]["Enums"]["support_offer_type"]
+          status?: Database["public"]["Enums"]["support_offer_status"]
+          ticket_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          amount_cents?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          offer_type?: Database["public"]["Enums"]["support_offer_type"]
+          status?: Database["public"]["Enums"]["support_offer_status"]
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_ticket_offers_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          acquisition_source: string | null
+          ai_classification: Json | null
+          ai_evidence_score: number | null
+          ai_risk_score: number | null
+          ai_summary: string | null
+          category: string | null
+          created_at: string
+          customer_id: string
+          customer_note: string | null
+          duplicate_of_ticket_id: string | null
+          id: string
+          invoice_id: string | null
+          job_id: string | null
+          partner_tier: string | null
+          policy_scope_chain: Json | null
+          policy_version_id: string | null
+          provider_org_id: string | null
+          referring_provider_org_id: string | null
+          resolution_summary: string | null
+          resolved_at: string | null
+          resolved_by_user_id: string | null
+          severity: Database["public"]["Enums"]["support_ticket_severity"]
+          sku_id: string | null
+          sla_due_at: string | null
+          status: Database["public"]["Enums"]["support_ticket_status"]
+          ticket_type: Database["public"]["Enums"]["support_ticket_type"]
+          updated_at: string
+          zone_id: string | null
+        }
+        Insert: {
+          acquisition_source?: string | null
+          ai_classification?: Json | null
+          ai_evidence_score?: number | null
+          ai_risk_score?: number | null
+          ai_summary?: string | null
+          category?: string | null
+          created_at?: string
+          customer_id: string
+          customer_note?: string | null
+          duplicate_of_ticket_id?: string | null
+          id?: string
+          invoice_id?: string | null
+          job_id?: string | null
+          partner_tier?: string | null
+          policy_scope_chain?: Json | null
+          policy_version_id?: string | null
+          provider_org_id?: string | null
+          referring_provider_org_id?: string | null
+          resolution_summary?: string | null
+          resolved_at?: string | null
+          resolved_by_user_id?: string | null
+          severity?: Database["public"]["Enums"]["support_ticket_severity"]
+          sku_id?: string | null
+          sla_due_at?: string | null
+          status?: Database["public"]["Enums"]["support_ticket_status"]
+          ticket_type?: Database["public"]["Enums"]["support_ticket_type"]
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Update: {
+          acquisition_source?: string | null
+          ai_classification?: Json | null
+          ai_evidence_score?: number | null
+          ai_risk_score?: number | null
+          ai_summary?: string | null
+          category?: string | null
+          created_at?: string
+          customer_id?: string
+          customer_note?: string | null
+          duplicate_of_ticket_id?: string | null
+          id?: string
+          invoice_id?: string | null
+          job_id?: string | null
+          partner_tier?: string | null
+          policy_scope_chain?: Json | null
+          policy_version_id?: string | null
+          provider_org_id?: string | null
+          referring_provider_org_id?: string | null
+          resolution_summary?: string | null
+          resolved_at?: string | null
+          resolved_by_user_id?: string | null
+          severity?: Database["public"]["Enums"]["support_ticket_severity"]
+          sku_id?: string | null
+          sla_due_at?: string | null
+          status?: Database["public"]["Enums"]["support_ticket_status"]
+          ticket_type?: Database["public"]["Enums"]["support_ticket_type"]
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_duplicate_of_ticket_id_fkey"
+            columns: ["duplicate_of_ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "customer_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_referring_provider_org_id_fkey"
+            columns: ["referring_provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -3155,6 +3588,70 @@ export type Database = {
         | "same_week_allowed"
         | "independent_cadence"
       sku_rule_type: "included" | "extra_allowed" | "blocked" | "provider_only"
+      support_event_type:
+        | "ticket_created"
+        | "offer_shown"
+        | "offer_accepted"
+        | "offer_rejected"
+        | "customer_added_info"
+        | "provider_acknowledged"
+        | "provider_evidence_uploaded"
+        | "provider_review_requested"
+        | "provider_statement_added"
+        | "admin_resolved"
+        | "admin_escalated"
+        | "admin_hold_applied"
+        | "admin_hold_released"
+        | "admin_credit_issued"
+        | "admin_refund_issued"
+        | "admin_redo_created"
+        | "admin_risk_flagged"
+        | "admin_macro_applied"
+        | "ai_classified"
+        | "ai_scored"
+        | "sla_breached"
+        | "auto_closed"
+        | "duplicate_linked"
+        | "status_changed"
+      support_offer_status:
+        | "pending"
+        | "accepted"
+        | "rejected"
+        | "expired"
+        | "applied"
+      support_offer_type:
+        | "credit"
+        | "redo_intent"
+        | "addon"
+        | "refund"
+        | "plan_change"
+        | "review_by_time"
+        | "no_action"
+      support_policy_scope_type:
+        | "global"
+        | "zone"
+        | "category"
+        | "sku"
+        | "provider"
+      support_ticket_severity: "low" | "medium" | "high" | "critical"
+      support_ticket_status:
+        | "open"
+        | "awaiting_customer"
+        | "awaiting_provider"
+        | "in_review"
+        | "resolved"
+        | "escalated"
+        | "closed"
+        | "duplicate"
+      support_ticket_type:
+        | "quality"
+        | "missed_item"
+        | "damage"
+        | "billing"
+        | "safety"
+        | "routine_change"
+        | "provider_promise_mismatch"
+        | "general"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3304,6 +3801,76 @@ export const Constants = {
         "independent_cadence",
       ],
       sku_rule_type: ["included", "extra_allowed", "blocked", "provider_only"],
+      support_event_type: [
+        "ticket_created",
+        "offer_shown",
+        "offer_accepted",
+        "offer_rejected",
+        "customer_added_info",
+        "provider_acknowledged",
+        "provider_evidence_uploaded",
+        "provider_review_requested",
+        "provider_statement_added",
+        "admin_resolved",
+        "admin_escalated",
+        "admin_hold_applied",
+        "admin_hold_released",
+        "admin_credit_issued",
+        "admin_refund_issued",
+        "admin_redo_created",
+        "admin_risk_flagged",
+        "admin_macro_applied",
+        "ai_classified",
+        "ai_scored",
+        "sla_breached",
+        "auto_closed",
+        "duplicate_linked",
+        "status_changed",
+      ],
+      support_offer_status: [
+        "pending",
+        "accepted",
+        "rejected",
+        "expired",
+        "applied",
+      ],
+      support_offer_type: [
+        "credit",
+        "redo_intent",
+        "addon",
+        "refund",
+        "plan_change",
+        "review_by_time",
+        "no_action",
+      ],
+      support_policy_scope_type: [
+        "global",
+        "zone",
+        "category",
+        "sku",
+        "provider",
+      ],
+      support_ticket_severity: ["low", "medium", "high", "critical"],
+      support_ticket_status: [
+        "open",
+        "awaiting_customer",
+        "awaiting_provider",
+        "in_review",
+        "resolved",
+        "escalated",
+        "closed",
+        "duplicate",
+      ],
+      support_ticket_type: [
+        "quality",
+        "missed_item",
+        "damage",
+        "billing",
+        "safety",
+        "routine_change",
+        "provider_promise_mismatch",
+        "general",
+      ],
     },
   },
 } as const
