@@ -28,6 +28,7 @@ import CustomerServices from "@/pages/customer/Services";
 // Provider pages
 import ProviderDashboard from "@/pages/provider/Dashboard";
 import ProviderJobs from "@/pages/provider/Jobs";
+import ProviderSKUs from "@/pages/provider/SKUs";
 import ProviderEarnings from "@/pages/provider/Earnings";
 import ProviderPerformance from "@/pages/provider/Performance";
 import ProviderOrganization from "@/pages/provider/Organization";
@@ -88,6 +89,7 @@ const App = () => (
               <Route element={<ProtectedRoute requiredRole="provider"><AppLayout /></ProtectedRoute>}>
                 <Route path="/provider" element={<ProviderDashboard />} />
                 <Route path="/provider/jobs" element={<ProviderJobs />} />
+                <Route path="/provider/skus" element={<ProviderSKUs />} />
                 <Route path="/provider/earnings" element={<ProviderEarnings />} />
                 <Route path="/provider/performance" element={<ProviderPerformance />} />
                 <Route path="/provider/organization" element={<ProviderOrganization />} />

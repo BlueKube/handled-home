@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useCreateSku, useUpdateSku } from "@/hooks/useSkus";
@@ -79,30 +80,41 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
     return null;
   };
 
-  const handleSave = () => {
-    const err = validate();
-    if (err) { toast.error(err); return; }
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const pendingPayload = useRef<ServiceSkuInsert | null>(null);
 
-    const payload: ServiceSkuInsert = {
-      name: name.trim(),
-      description: description.trim(),
-      category: category.trim() || null,
-      status,
-      inclusions: inclusions.filter(s => s.trim()),
-      exclusions: exclusions.filter(s => s.trim()),
-      edge_case_notes: edgeCaseNotes.trim() || null,
-      duration_minutes: durationMinutes,
-      fulfillment_mode: fulfillmentMode as ServiceSkuInsert["fulfillment_mode"],
-      weather_sensitive: weatherSensitive,
-      required_photos: photos.filter(p => p.label.trim()) as unknown as ServiceSkuInsert["required_photos"],
-      checklist: checklist.filter(c => c.label.trim()) as unknown as ServiceSkuInsert["checklist"],
-      price_hint_cents: priceHintCents,
-      pricing_notes: pricingNotes.trim() || null,
-    };
+  const buildPayload = (): ServiceSkuInsert => ({
+    name: name.trim(),
+    description: description.trim(),
+    category: category.trim() || null,
+    status,
+    inclusions: inclusions.filter(s => s.trim()),
+    exclusions: exclusions.filter(s => s.trim()),
+    edge_case_notes: edgeCaseNotes.trim() || null,
+    duration_minutes: durationMinutes,
+    fulfillment_mode: fulfillmentMode as ServiceSkuInsert["fulfillment_mode"],
+    weather_sensitive: weatherSensitive,
+    required_photos: photos.filter(p => p.label.trim()) as unknown as ServiceSkuInsert["required_photos"],
+    checklist: checklist.filter(c => c.label.trim()) as unknown as ServiceSkuInsert["checklist"],
+    price_hint_cents: priceHintCents,
+    pricing_notes: pricingNotes.trim() || null,
+  });
 
+  const needsConfirmation = (payload: ServiceSkuInsert): boolean => {
+    if (!isEdit || sku?.status !== "active") return false;
+    const origPhotos = (sku.required_photos ?? []) as unknown as PhotoRequirement[];
+    const origChecklist = (sku.checklist ?? []) as unknown as ChecklistItem[];
+    const newPhotos = payload.required_photos as unknown as PhotoRequirement[];
+    const newChecklist = payload.checklist as unknown as ChecklistItem[];
+    if (sku.fulfillment_mode !== payload.fulfillment_mode) return true;
+    if (origPhotos.length !== newPhotos.length) return true;
+    if (origChecklist.length !== newChecklist.length) return true;
+    return false;
+  };
+
+  const executeSave = (payload: ServiceSkuInsert) => {
     if (isEdit) {
-      const { ...updates } = payload;
-      updateSku.mutate({ id: sku!.id, updates }, {
+      updateSku.mutate({ id: sku!.id, updates: payload }, {
         onSuccess: () => { toast.success("SKU updated"); onOpenChange(false); },
         onError: (e) => toast.error(e.message),
       });
@@ -114,6 +126,18 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
     }
   };
 
+  const handleSave = () => {
+    const err = validate();
+    if (err) { toast.error(err); return; }
+    const payload = buildPayload();
+    if (needsConfirmation(payload)) {
+      pendingPayload.current = payload;
+      setConfirmOpen(true);
+    } else {
+      executeSave(payload);
+    }
+  };
+
   const updateListItem = <T,>(list: T[], idx: number, val: T, setter: (v: T[]) => void) => {
     const copy = [...list]; copy[idx] = val; setter(copy);
   };
@@ -122,6 +146,7 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
   };
 
   return (
+    <>
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="sm:max-w-lg overflow-y-auto">
         <SheetHeader>
@@ -203,21 +228,27 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
           <CollapsibleSection title="Proof Requirements (Photos)">
             <div className="space-y-2">
               {photos.map((p, i) => (
-                <div key={i} className="grid grid-cols-[1fr_auto_auto_auto] gap-2 items-end">
-                  <div><Label className="text-xs">Label</Label><Input value={p.label} onChange={e => updateListItem(photos, i, { ...p, label: e.target.value }, setPhotos)} placeholder="e.g. Front yard" /></div>
-                  <div>
-                    <Label className="text-xs">When</Label>
-                    <Select value={p.when} onValueChange={v => updateListItem(photos, i, { ...p, when: v as PhotoRequirement["when"] }, setPhotos)}>
-                      <SelectTrigger className="w-[90px]"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="before">Before</SelectItem>
-                        <SelectItem value="after">After</SelectItem>
-                        <SelectItem value="both">Both</SelectItem>
-                      </SelectContent>
-                    </Select>
+                <div key={i} className="space-y-1.5 p-2 rounded-lg border border-border/50">
+                  <div className="grid grid-cols-[1fr_auto_auto_auto] gap-2 items-end">
+                    <div><Label className="text-xs">Label</Label><Input value={p.label} onChange={e => updateListItem(photos, i, { ...p, label: e.target.value }, setPhotos)} placeholder="e.g. Front yard" /></div>
+                    <div>
+                      <Label className="text-xs">When</Label>
+                      <Select value={p.when} onValueChange={v => updateListItem(photos, i, { ...p, when: v as PhotoRequirement["when"] }, setPhotos)}>
+                        <SelectTrigger className="w-[90px]"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="before">Before</SelectItem>
+                          <SelectItem value="after">After</SelectItem>
+                          <SelectItem value="both">Both</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div><Label className="text-xs">#</Label><Input type="number" min={1} className="w-14" value={p.count} onChange={e => updateListItem(photos, i, { ...p, count: Number(e.target.value) }, setPhotos)} /></div>
+                    <Button variant="ghost" size="icon" onClick={() => removeListItem(photos, i, setPhotos)}><Trash2 className="h-4 w-4" /></Button>
                   </div>
-                  <div><Label className="text-xs">#</Label><Input type="number" min={1} className="w-14" value={p.count} onChange={e => updateListItem(photos, i, { ...p, count: Number(e.target.value) }, setPhotos)} /></div>
-                  <Button variant="ghost" size="icon" onClick={() => removeListItem(photos, i, setPhotos)}><Trash2 className="h-4 w-4" /></Button>
+                  <div>
+                    <Label className="text-xs">Notes</Label>
+                    <Input value={p.notes ?? ""} onChange={e => updateListItem(photos, i, { ...p, notes: e.target.value || undefined }, setPhotos)} placeholder="Optional photo instructions" className="h-9 text-sm" />
+                  </div>
                 </div>
               ))}
               <Button variant="ghost" size="sm" className="gap-1" onClick={() => setPhotos([...photos, { ...defaultPhoto }])}><Plus className="h-3.5 w-3.5" /> Add Photo Requirement</Button>
@@ -272,6 +303,24 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
         </SheetFooter>
       </SheetContent>
     </Sheet>
+
+    <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Confirm changes to active SKU</AlertDialogTitle>
+          <AlertDialogDescription>
+            You're changing the fulfillment mode, required photos, or checklist on an active SKU. This may affect in-progress jobs. Continue?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={() => { if (pendingPayload.current) executeSave(pendingPayload.current); setConfirmOpen(false); }}>
+            Save Changes
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }
 

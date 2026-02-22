@@ -30,7 +30,11 @@ export function useSkus(filters?: { status?: string; category?: string; search?:
     queryFn: async () => {
       let query = supabase.from("service_skus").select("*").order("name");
       if (filters?.status && filters.status !== "all") {
-        query = query.eq("status", filters.status);
+        if (filters.status === "paused_archived") {
+          query = query.in("status", ["paused", "archived"]);
+        } else {
+          query = query.eq("status", filters.status);
+        }
       }
       if (filters?.category) {
         query = query.eq("category", filters.category);

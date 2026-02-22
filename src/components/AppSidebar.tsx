@@ -27,6 +27,7 @@ const customerNav = [
 const providerNav = [
   { title: "Dashboard", url: "/provider", icon: Briefcase },
   { title: "My Jobs", url: "/provider/jobs", icon: ListChecks },
+  { title: "Service Catalog", url: "/provider/skus", icon: Package },
   { title: "Earnings", url: "/provider/earnings", icon: DollarSign },
   { title: "Performance", url: "/provider/performance", icon: BarChart3 },
   { title: "Organization", url: "/provider/organization", icon: Building2 },

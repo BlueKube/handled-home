@@ -57,7 +57,7 @@ export default function AdminSKUs() {
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="active">Active</TabsTrigger>
           <TabsTrigger value="draft">Draft</TabsTrigger>
-          <TabsTrigger value="paused">Paused</TabsTrigger>
+          <TabsTrigger value="paused_archived">Paused / Archived</TabsTrigger>
         </TabsList>
 
         <TabsContent value={statusTab} className="mt-4">

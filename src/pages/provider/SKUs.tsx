@@ -1,48 +1,26 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Clock, CloudRain } from "lucide-react";
 import { useSkus, FULFILLMENT_MODE_LABELS } from "@/hooks/useSkus";
 import type { ServiceSku } from "@/hooks/useSkus";
 import { SkuDetailView } from "@/components/SkuDetailView";
 
-export default function CustomerServices() {
+export default function ProviderSKUs() {
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
   const [selectedSku, setSelectedSku] = useState<ServiceSku | null>(null);
 
-  const { data: skus = [], isLoading } = useSkus({
-    search: search || undefined,
-    category: category !== "all" ? category : undefined,
-  });
-
-  const categories = useMemo(() => {
-    const cats = new Set<string>();
-    skus.forEach(s => { if (s.category) cats.add(s.category); });
-    return Array.from(cats).sort();
-  }, [skus]);
+  const { data: skus = [], isLoading } = useSkus({ search: search || undefined });
 
   return (
     <div className="p-4 md:p-6 space-y-4 animate-fade-in">
-      <h1 className="text-h2">Our Services</h1>
+      <h1 className="text-h2">Service Catalog</h1>
 
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search services..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
-        </div>
-        {categories.length > 0 && (
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger className="w-[140px]"><SelectValue placeholder="Category" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        )}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input placeholder="Search services..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
       </div>
 
       {isLoading ? (
