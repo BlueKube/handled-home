@@ -90,6 +90,8 @@ import AdminPayouts from "@/pages/admin/Payouts";
 import AdminExceptions from "@/pages/admin/Exceptions";
 import AdminCustomerLedger from "@/pages/admin/CustomerLedger";
 import AdminProviderLedger from "@/pages/admin/ProviderLedger";
+import AdminSupportPolicies from "@/pages/admin/SupportPolicies";
+import AdminSupportMacros from "@/pages/admin/SupportMacros";
 
 const queryClient = new QueryClient();
 
@@ -188,6 +190,8 @@ const App = () => (
                 <Route path="/admin/bundles" element={<AdminBundles />} />
                 <Route path="/admin/support" element={<AdminSupport />} />
                 <Route path="/admin/support/tickets/:ticketId" element={<AdminSupportTicketDetail />} />
+                <Route path="/admin/support/policies" element={<AdminSupportPolicies />} />
+                <Route path="/admin/support/macros" element={<AdminSupportMacros />} />
                 <Route path="/admin/incentives" element={<AdminIncentives />} />
                 <Route path="/admin/reports" element={<AdminReports />} />
                 <Route path="/admin/audit" element={<AdminAudit />} />
