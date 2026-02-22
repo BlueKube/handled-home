@@ -14,6 +14,294 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          admin_user_id: string
+          after: Json | null
+          before: Json | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          action: string
+          admin_user_id: string
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
+      customer_plan_selections: {
+        Row: {
+          created_at: string
+          customer_id: string
+          draft_routine: Json
+          entitlement_version_id: string | null
+          id: string
+          property_id: string | null
+          selected_plan_id: string
+          status: string
+          updated_at: string
+          zone_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          draft_routine?: Json
+          entitlement_version_id?: string | null
+          id?: string
+          property_id?: string | null
+          selected_plan_id: string
+          status?: string
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          draft_routine?: Json
+          entitlement_version_id?: string | null
+          id?: string
+          property_id?: string | null
+          selected_plan_id?: string
+          status?: string
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_plan_selections_entitlement_version_id_fkey"
+            columns: ["entitlement_version_id"]
+            isOneToOne: false
+            referencedRelation: "plan_entitlement_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_plan_selections_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_plan_selections_selected_plan_id_fkey"
+            columns: ["selected_plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_plan_selections_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_entitlement_sku_rules: {
+        Row: {
+          entitlement_version_id: string
+          id: string
+          reason: string | null
+          rule_type: Database["public"]["Enums"]["sku_rule_type"]
+          sku_id: string
+        }
+        Insert: {
+          entitlement_version_id: string
+          id?: string
+          reason?: string | null
+          rule_type?: Database["public"]["Enums"]["sku_rule_type"]
+          sku_id: string
+        }
+        Update: {
+          entitlement_version_id?: string
+          id?: string
+          reason?: string | null
+          rule_type?: Database["public"]["Enums"]["sku_rule_type"]
+          sku_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_entitlement_sku_rules_entitlement_version_id_fkey"
+            columns: ["entitlement_version_id"]
+            isOneToOne: false
+            referencedRelation: "plan_entitlement_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_entitlement_sku_rules_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_entitlement_versions: {
+        Row: {
+          created_at: string
+          extra_allowed: boolean
+          id: string
+          included_count: number | null
+          included_credits: number | null
+          included_minutes: number | null
+          max_extra_count: number | null
+          max_extra_credits: number | null
+          max_extra_minutes: number | null
+          model_type: Database["public"]["Enums"]["entitlement_model"]
+          plan_id: string
+          status: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          extra_allowed?: boolean
+          id?: string
+          included_count?: number | null
+          included_credits?: number | null
+          included_minutes?: number | null
+          max_extra_count?: number | null
+          max_extra_credits?: number | null
+          max_extra_minutes?: number | null
+          model_type?: Database["public"]["Enums"]["entitlement_model"]
+          plan_id: string
+          status?: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          extra_allowed?: boolean
+          id?: string
+          included_count?: number | null
+          included_credits?: number | null
+          included_minutes?: number | null
+          max_extra_count?: number | null
+          max_extra_credits?: number | null
+          max_extra_minutes?: number | null
+          model_type?: Database["public"]["Enums"]["entitlement_model"]
+          plan_id?: string
+          status?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_entitlement_versions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_zone_availability: {
+        Row: {
+          created_at: string
+          id: string
+          is_enabled: boolean
+          plan_id: string
+          zone_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          plan_id: string
+          zone_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          plan_id?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_zone_availability_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_zone_availability_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          created_at: string
+          current_entitlement_version_id: string | null
+          display_price_text: string | null
+          id: string
+          name: string
+          recommended_rank: number | null
+          status: string
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          tagline: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_entitlement_version_id?: string | null
+          display_price_text?: string | null
+          id?: string
+          name: string
+          recommended_rank?: number | null
+          status?: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          tagline?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_entitlement_version_id?: string | null
+          display_price_text?: string | null
+          id?: string
+          name?: string
+          recommended_rank?: number | null
+          status?: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          tagline?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plans_current_entitlement_version_fk"
+            columns: ["current_entitlement_version_id"]
+            isOneToOne: false
+            referencedRelation: "plan_entitlement_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -182,38 +470,133 @@ export type Database = {
         }
         Relationships: []
       }
-      subscription_plans: {
+      subscription_events: {
         Row: {
           created_at: string
+          event_type: string
           id: string
-          name: string
-          price_cents: number
-          rollover_expiry_days: number
-          rollover_max: number
-          service_days_per_month: number
-          status: string
+          payload: Json | null
+          source: string
+          subscription_id: string
         }
         Insert: {
           created_at?: string
+          event_type: string
           id?: string
-          name: string
-          price_cents?: number
-          rollover_expiry_days?: number
-          rollover_max?: number
-          service_days_per_month?: number
-          status?: string
+          payload?: Json | null
+          source?: string
+          subscription_id: string
         }
         Update: {
           created_at?: string
+          event_type?: string
           id?: string
-          name?: string
-          price_cents?: number
-          rollover_expiry_days?: number
-          rollover_max?: number
-          service_days_per_month?: number
-          status?: string
+          payload?: Json | null
+          source?: string
+          subscription_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "subscription_events_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          customer_id: string
+          entitlement_version_id: string | null
+          id: string
+          pending_effective_at: string | null
+          pending_plan_id: string | null
+          plan_id: string
+          property_id: string | null
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          zone_id: string | null
+        }
+        Insert: {
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          customer_id: string
+          entitlement_version_id?: string | null
+          id?: string
+          pending_effective_at?: string | null
+          pending_plan_id?: string | null
+          plan_id: string
+          property_id?: string | null
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Update: {
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          customer_id?: string
+          entitlement_version_id?: string | null
+          id?: string
+          pending_effective_at?: string | null
+          pending_plan_id?: string | null
+          plan_id?: string
+          property_id?: string | null
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_entitlement_version_id_fkey"
+            columns: ["entitlement_version_id"]
+            isOneToOne: false
+            referencedRelation: "plan_entitlement_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_pending_plan_id_fkey"
+            columns: ["pending_plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -345,10 +728,15 @@ export type Database = {
         | "friday"
         | "saturday"
         | "sunday"
+      entitlement_model:
+        | "credits_per_cycle"
+        | "count_per_cycle"
+        | "minutes_per_cycle"
       fulfillment_mode:
         | "same_day_preferred"
         | "same_week_allowed"
         | "independent_cadence"
+      sku_rule_type: "included" | "extra_allowed" | "blocked" | "provider_only"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -486,11 +874,17 @@ export const Constants = {
         "saturday",
         "sunday",
       ],
+      entitlement_model: [
+        "credits_per_cycle",
+        "count_per_cycle",
+        "minutes_per_cycle",
+      ],
       fulfillment_mode: [
         "same_day_preferred",
         "same_week_allowed",
         "independent_cadence",
       ],
+      sku_rule_type: ["included", "extra_allowed", "blocked", "provider_only"],
     },
   },
 } as const
