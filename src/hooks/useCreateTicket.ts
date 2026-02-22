@@ -64,6 +64,11 @@ export function useCreateTicket() {
         metadata: { ticket_type: input.ticket_type, category: input.category },
       });
 
+      // Fire-and-forget AI classification
+      supabase.functions.invoke("support-ai-classify", {
+        body: { ticket_id: ticket.id },
+      }).catch((err) => console.warn("AI classify failed (non-blocking):", err));
+
       return ticket;
     },
     onSuccess: () => {

@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.run-billing-automation]
 verify_jwt = false
+
+[functions.support-ai-classify]
+verify_jwt = false
