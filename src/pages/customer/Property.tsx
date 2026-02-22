@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useProperty, formatPetsForDisplay, PropertyFormData } from "@/hooks/useProperty";
 import { useZoneLookup } from "@/hooks/useZoneLookup";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2, MapPin, AlertTriangle, CheckCircle2, X } from "lucide-react";
+import { Loader2, MapPin, AlertTriangle, CheckCircle2, X, Bell } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 interface FieldErrors {
   street_address?: string;
@@ -34,8 +43,10 @@ function stripNonDigits(val: string): string {
 export default function CustomerProperty() {
   const { property, isLoading, save, isSaving } = useProperty();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const isGated = searchParams.get("gated") === "1";
   const [showGatedBanner, setShowGatedBanner] = useState(isGated);
+  const [showExpansionDialog, setShowExpansionDialog] = useState(false);
 
   const [form, setForm] = useState<PropertyFormData>({
     street_address: "",
@@ -94,6 +105,10 @@ export default function CustomerProperty() {
         searchParams.delete("gated");
         setSearchParams(searchParams, { replace: true });
         setShowGatedBanner(false);
+      }
+      // Show expansion dialog if zip is not covered
+      if (isNotCovered) {
+        setShowExpansionDialog(true);
       }
     } catch {
       // Error handled in hook
@@ -216,7 +231,7 @@ export default function CustomerProperty() {
             {isNotCovered && (
               <>
                 <AlertTriangle className="h-3.5 w-3.5 text-warning" />
-                <span className="text-xs text-warning font-medium">Not currently serviced in this area</span>
+                <span className="text-xs text-warning font-medium">Service is not yet available in your area. We'll notify you when we launch here.</span>
               </>
             )}
           </div>
@@ -299,6 +314,41 @@ export default function CustomerProperty() {
           )}
         </Button>
       </div>
+
+      {/* Non-serviced area dialog */}
+      <Dialog open={showExpansionDialog} onOpenChange={setShowExpansionDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>We're Not in Your Area Yet</DialogTitle>
+            <DialogDescription>
+              Handled Home is expanding. We'll notify you as soon as we launch in your neighborhood.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-col gap-2 sm:flex-col">
+            <Button
+              onClick={() => {
+                toast.success("We'll let you know!");
+                setShowExpansionDialog(false);
+                navigate("/customer");
+              }}
+              className="w-full"
+            >
+              <Bell className="h-4 w-4 mr-2" />
+              Notify Me
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowExpansionDialog(false);
+                navigate("/customer");
+              }}
+              className="w-full"
+            >
+              Continue Exploring
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
