@@ -7,8 +7,9 @@ import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
-  SidebarMenu, SidebarMenuButton, SidebarMenuItem,
+  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader,
 } from "@/components/ui/sidebar";
+import logo from "@/assets/handled-home-logo.png";
 
 const customerNav = [
   { title: "Dashboard", url: "/customer", icon: Home },
@@ -57,6 +58,9 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="border-r-0">
+      <SidebarHeader className="px-4 py-4 flex items-center justify-center">
+        <img src={logo} alt="Handled Home" className="h-10 w-auto" />
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="text-sidebar-foreground/60 uppercase text-xs tracking-wider">

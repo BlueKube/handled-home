@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import logo from "@/assets/handled-home-logo.png";
 
 export function AppHeader() {
   const { user, roles, activeRole, setActiveRole, signOut } = useAuth();
@@ -22,7 +23,7 @@ export function AppHeader() {
   return (
     <header className="h-14 border-b border-border bg-card flex items-center px-4 gap-4">
       <SidebarTrigger className="text-foreground" />
-      <h2 className="text-lg font-bold text-foreground">Handled Home</h2>
+      <img src={logo} alt="Handled Home" className="h-8 w-auto" />
 
       <div className="ml-auto flex items-center gap-3">
         {roles.length > 1 && (
