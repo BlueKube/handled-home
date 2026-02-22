@@ -1,56 +1,63 @@
 
 
-# Module 13.1 — Referral & Attribution Core
+# Module 13.2 — Founding Partner + Provider Self-Serve Growth Hub
 
 ## Overview
 
-Build the "accounting-grade" referral rails: programs, codes, attribution, milestones, rewards, fraud holds, and ledger hooks. UI is intentionally thin (13.2 adds the polish). Also create the doc files for the 3-part split.
+Transform the existing thin `/provider/referrals` page into a full **Growth Hub** with Founding Partner status, invite-customers tooling (magic link + SMS scripts), zone/category eligibility messaging, launch path progress, and minimal admin partner-management surfaces.
+
+Builds on top of Module 13.1's referral_programs, referral_codes, referrals, referral_milestones, and referral_rewards tables.
 
 ---
 
-## Phase 1: Documentation + Database Migration
+## Phase 1: Database Migration
 
-### 1A. Create doc files
+### 1A. New table: `provider_applications`
 
-Create three new files in `docs/modules/`:
-- `13.1-referral-attribution-core.md` (from uploaded spec)
-- `13.2-founding-partner-provider-growth.md` (from uploaded spec)
-- `13.3-growth-autopilot-market-launch-os.md` (from uploaded spec)
+Tracks the self-serve application funnel (separate from the existing invite-code flow which is more admin-controlled).
 
-Update `docs/modules/13-referrals-and-incentives.md` to become a lightweight index pointing to the three sub-modules.
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid PK | |
+| user_id | uuid NOT NULL | applicant |
+| provider_org_id | uuid FK nullable | linked after approval |
+| category | text NOT NULL | e.g. lawn_care, cleaning |
+| zip_codes | text[] NOT NULL | requested service area |
+| status | enum | draft, submitted, approved, waitlisted, rejected |
+| waitlist_reason | text nullable | calm explanation |
+| founding_partner | boolean DEFAULT false | badge flag |
+| cohort_id | uuid FK nullable | links to market_cohorts |
+| program_id | uuid FK nullable | links to referral_programs |
+| launch_path_target | int nullable | e.g. "invite 10 to unlock" |
+| metadata | jsonb | |
+| created_at, updated_at | timestamptz | |
 
-### 1B. Database migration (single file)
+### 1B. New table: `invite_scripts`
 
-**Enums:**
-- `referral_program_status` (draft, active, paused, archived)
-- `referral_milestone_type` (installed, subscribed, first_visit, paid_cycle, provider_ready, provider_first_job)
-- `referral_reward_type` (customer_credit, provider_bonus)
-- `referral_reward_status` (pending, on_hold, earned, applied, paid, voided)
-- `referral_risk_flag_status` (open, reviewed, dismissed)
+Admin-managed SMS script templates for providers to copy.
 
-**Tables (7):**
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid PK | |
+| program_id | uuid FK nullable | scoped to a program or global |
+| tone | text NOT NULL | short, friendly, professional |
+| body | text NOT NULL | template with {provider_name}, {link} vars |
+| is_active | boolean DEFAULT true | |
+| sort_order | int DEFAULT 0 | |
+| created_at | timestamptz | |
 
-| Table | Purpose |
-|-------|---------|
-| `referral_programs` | Rules: who can refer, milestones, reward amounts, caps, hold policy, status |
-| `referral_codes` | Per-user code/link. FK to program + user. Unique code. Usage counter. |
-| `referrals` | Referrer-to-referred relationship. FK to program, code, referrer, referred user. First-touch enforced via UNIQUE on (program_id, referred_user_id). |
-| `referral_milestones` | Milestone events. UNIQUE on (referral_id, milestone) for idempotency. |
-| `referral_rewards` | Reward lifecycle. UNIQUE on (program_id, referred_user_id, milestone, reward_type) for idempotency. Holds, amounts, ledger refs. |
-| `referral_risk_flags` | Fraud flags tied to referral or reward. Admin review queue. |
-| `market_cohorts` | Lightweight cohort reference (zone, label, status). Used more in 13.3 but referenced here. |
+### 1C. Add columns to `market_cohorts`
 
-**RLS policies:**
-- Customers: SELECT own codes, referrals, rewards
-- Providers: SELECT rewards tied to their org
-- Admins: full access on all tables
+- `launch_status` enum: `open`, `soft_launch`, `waitlist`, `not_supported` (DEFAULT `waitlist`)
 
-**RPC functions (SECURITY DEFINER):**
-- `record_referral_milestone(p_referral_id, p_milestone)` -- idempotent milestone + reward creation
-- `apply_referral_reward(p_reward_id)` -- moves reward to applied/paid, writes to customer_ledger_events or provider_ledger_events
-- `void_referral_reward(p_reward_id, p_reason)` -- admin void with audit
-- `release_referral_hold(p_reward_id, p_reason)` -- admin release hold
-- `override_referral_attribution(p_referral_id, p_new_referrer_id, p_reason)` -- admin override with audit
+### 1D. RLS policies
+
+- `provider_applications`: customers/providers SELECT own, admins FOR ALL
+- `invite_scripts`: authenticated SELECT active scripts, admins FOR ALL
+
+### 1E. RPC: `check_zone_readiness(p_zip_codes text[], p_category text)`
+
+Returns zone eligibility status (open/soft_launch/waitlist/not_supported) by checking zones matching provided zips and market_cohorts launch_status. Returns the best available status across matched zones.
 
 ---
 
@@ -58,87 +65,127 @@ Update `docs/modules/13-referrals-and-incentives.md` to become a lightweight ind
 
 | Hook | Purpose |
 |------|---------|
-| `useReferralPrograms` | Admin CRUD for programs |
-| `useReferralCodes` | Generate/fetch codes for current user |
-| `useReferrals` | List referrals (customer: own, admin: all) |
-| `useReferralRewards` | List rewards with status filters |
-| `useReferralAdmin` | Admin actions: void, release hold, override attribution |
+| `useProviderApplication` | Submit/fetch application, check status |
+| `useZoneReadiness` | Call `check_zone_readiness` RPC |
+| `useInviteScripts` | Fetch active scripts for provider invite flow |
+| `useProviderGrowthStats` | Aggregate referral stats: invites sent, installs, subs, first visits, bonuses |
 
 ---
 
-## Phase 3: Customer UI
+## Phase 3: Provider Growth Hub (main deliverable)
 
-**`/customer/referrals`** (replace placeholder):
-- Share link/code section (copy button)
-- Referral statuses list (who signed up, milestone progress)
-- Earned/pending credits summary card
+### 3A. Restructure `/provider/referrals` into Growth Hub
+
+Replace the current simple bonus-list page with a multi-section Growth Hub:
+
+**Header area:**
+- Founding Partner badge (if applicable)
+- Application status banner (if pending/waitlisted)
+
+**Section 1: Invite Customers** (core loop)
+- "Copy invite link" primary button
+- SMS scripts (tap-to-copy cards) with tone labels (Short / Friendly / Professional)
+- Variable substitution: `{provider_name}` from org, `{link}` from referral code
+- Progress stats row: Invites | Installs | Subs | Visits | Bonuses
+
+**Section 2: Bonus Summary** (existing, keep)
+- Earned / On Hold / Paid cards
+
+**Section 3: Reward History** (existing, keep)
+
+**Section 4: Launch Path** (shown when waitlisted)
+- Progress bar toward launch_path_target
+- "Invite X more customers to unlock priority activation"
+
+### 3B. New page: `/provider/referrals/invite-customers`
+
+Dedicated invite page (also accessible inline from growth hub):
+- Copy link button
+- Script cards with tap-to-copy
+- QR code display (using a simple inline SVG/canvas QR generator -- no external dependency)
 
 ---
 
-## Phase 4: Provider UI
+## Phase 4: Provider Application Flow
 
-**`/provider/referrals`** (new page + route):
-- Bonus summary (earned, on hold, paid)
-- Reward list with hold reasons
-- Minimal -- 13.2 adds the full growth hub
+### 4A. New page: `/provider/apply`
+
+Lightweight 3-step form:
+1. **Category** -- select from known categories (lawn_care, cleaning, etc.)
+2. **Service area** -- enter zip codes
+3. **Submit** -- calls `check_zone_readiness` to show eligibility, then submits application
+
+Post-submit states:
+- **Open**: "You're eligible! Complete onboarding to start earning."  Link to `/provider/onboarding`
+- **Soft launch**: "Limited spots available. Apply now for priority access."
+- **Waitlist**: "Not open yet. Invite customers to accelerate your launch." Shows launch path.
+- **Not supported**: "We don't serve this area yet. We'll notify you when we expand."
+
+### 4B. Customer invite landing page: `/invite/:code`
+
+Simple public page (no auth required):
+- "Your pro is moving updates to Handled Home."
+- "Welcome credit when you activate."
+- "Proof after each visit."
+- CTA: "Get Started" -> `/auth?ref={code}`
 
 ---
 
-## Phase 5: Admin UI
+## Phase 5: Admin Partner Management
 
-**`/admin/incentives`** (replace placeholder):
-- Tabs: Programs | Rewards | Risk Flags
-- **Programs tab**: list/create/edit programs with milestone config, reward amounts, caps, hold policy
-- **Rewards tab**: filterable list (status, program), click-through audit view showing: program, referral, milestones, reward status, hold reason, ledger reference
-- **Risk flags tab**: queue with review/dismiss actions
+### 5A. Add "Partners" tab to `/admin/incentives`
 
-Admin actions on reward detail:
-- Release hold (with reason)
-- Void reward (with reason)
-- Override attribution (with reason)
+Extend existing Incentives page with a 4th tab:
+- **Partners**: List of provider_applications with status filters
+- Assign to cohort/program
+- Approve / Waitlist / Reject actions
+- Toggle founding_partner badge
+- View linked referral stats
+
+### 5B. Invite Scripts management
+
+Add to admin incentives or as sub-section:
+- CRUD for invite_scripts (tone, body, active toggle)
 
 ---
 
 ## Technical Details
 
-### Migration SQL structure
+### Database migration (single file)
 
 ```text
-1. Create 5 enums
-2. Create 7 tables with proper FKs, indexes, UNIQUE constraints
-3. Enable RLS on all tables
-4. Create RLS policies (customer/provider/admin)
-5. Create 5 SECURITY DEFINER RPCs
-6. Grant EXECUTE on RPCs to authenticated
+1. Create provider_application_status enum (draft, submitted, approved, waitlisted, rejected)
+2. Create zone_launch_status enum (open, soft_launch, waitlist, not_supported)
+3. Create provider_applications table
+4. Create invite_scripts table
+5. Add launch_status column to market_cohorts
+6. RLS policies for both new tables
+7. Create check_zone_readiness RPC (SECURITY DEFINER)
+8. Indexes on provider_applications(user_id, status)
 ```
-
-### Key design decisions
-
-- First-touch attribution enforced by UNIQUE(program_id, referred_user_id) on `referrals`
-- Milestone idempotency via UNIQUE(referral_id, milestone) on `referral_milestones`
-- Reward idempotency via UNIQUE(program_id, referred_user_id, milestone, reward_type) on `referral_rewards`
-- All reward mutations are server-side RPCs (no direct client UPDATE)
-- Ledger integration: `apply_referral_reward` inserts into `customer_ledger_events` or `provider_ledger_events`
-- `referral_codes.code` has a UNIQUE constraint for lookup
 
 ### Files created/modified
 
 | File | Action |
-|------|--------|
-| `docs/modules/13.1-referral-attribution-core.md` | Create (from upload) |
-| `docs/modules/13.2-founding-partner-provider-growth.md` | Create (from upload) |
-| `docs/modules/13.3-growth-autopilot-market-launch-os.md` | Create (from upload) |
-| `docs/modules/13-referrals-and-incentives.md` | Update to index |
-| Migration SQL | Create (7 tables, 5 enums, RLS, 5 RPCs) |
-| `src/hooks/useReferralPrograms.ts` | Create |
-| `src/hooks/useReferralCodes.ts` | Create |
-| `src/hooks/useReferrals.ts` | Create |
-| `src/hooks/useReferralRewards.ts` | Create |
-| `src/hooks/useReferralAdmin.ts` | Create |
-| `src/pages/customer/Referrals.tsx` | Replace placeholder |
-| `src/pages/provider/Referrals.tsx` | Create |
-| `src/pages/admin/Incentives.tsx` | Replace placeholder |
-| `src/App.tsx` | Add provider referrals route |
-| `src/components/AppSidebar.tsx` | Add provider Referrals nav |
-| `src/components/MoreMenu.tsx` | Add provider Referrals entry |
+|------|---------|
+| Migration SQL | Create (2 tables, 2 enums, RLS, 1 RPC) |
+| `src/hooks/useProviderApplication.ts` | Create |
+| `src/hooks/useZoneReadiness.ts` | Create |
+| `src/hooks/useInviteScripts.ts` | Create |
+| `src/hooks/useProviderGrowthStats.ts` | Create |
+| `src/pages/provider/Referrals.tsx` | Rewrite into Growth Hub |
+| `src/pages/provider/InviteCustomers.tsx` | Create |
+| `src/pages/provider/Apply.tsx` | Create |
+| `src/pages/InviteLanding.tsx` | Create (public route) |
+| `src/pages/admin/Incentives.tsx` | Add Partners tab + Scripts sub-section |
+| `src/App.tsx` | Add routes: `/provider/referrals/invite-customers`, `/provider/apply`, `/invite/:code` |
+
+### Key design decisions
+
+- `provider_applications` is separate from `provider_orgs` -- applications can exist before an org is created
+- Zone readiness is derived from `market_cohorts.launch_status` joined through zone zip_code overlap
+- Launch path progress is computed client-side from referral counts vs `launch_path_target`
+- SMS scripts use simple variable substitution (`{provider_name}`, `{link}`) -- no complex templating
+- QR code rendered client-side with a lightweight canvas function (no npm dependency)
+- Invite landing page is a public route (no auth gate)
 
