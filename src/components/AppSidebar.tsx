@@ -29,6 +29,7 @@ const customerNav = [
 const providerNav = [
   { title: "Dashboard", url: "/provider", icon: Briefcase },
   { title: "My Jobs", url: "/provider/jobs", icon: ListChecks },
+  { title: "History", url: "/provider/history", icon: History },
   { title: "Service Catalog", url: "/provider/skus", icon: Package },
   { title: "Earnings", url: "/provider/earnings", icon: DollarSign },
   { title: "Performance", url: "/provider/performance", icon: BarChart3 },
@@ -45,6 +46,7 @@ const adminNav = [
   { title: "Service Days", url: "/admin/service-days", icon: CalendarClock },
   { title: "Subscriptions", url: "/admin/subscriptions", icon: Wallet },
   { title: "Providers", url: "/admin/providers", icon: Shield },
+  { title: "Jobs", url: "/admin/jobs", icon: ListChecks },
   { title: "Scheduling", url: "/admin/scheduling", icon: CalendarDays },
   { title: "Support", url: "/admin/support", icon: HelpCircle },
   { title: "Incentives", url: "/admin/incentives", icon: Megaphone },

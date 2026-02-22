@@ -41,6 +41,11 @@ import ProviderPerformance from "@/pages/provider/Performance";
 import ProviderOrganization from "@/pages/provider/Organization";
 import ProviderCoverage from "@/pages/provider/Coverage";
 import ProviderSettings from "@/pages/provider/Settings";
+import ProviderHistory from "@/pages/provider/History";
+import ProviderJobDetail from "@/pages/provider/JobDetail";
+import ProviderJobChecklist from "@/pages/provider/JobChecklist";
+import ProviderJobPhotos from "@/pages/provider/JobPhotos";
+import ProviderJobComplete from "@/pages/provider/JobComplete";
 import ProviderOnboarding from "@/pages/provider/Onboarding";
 import ProviderOnboardingOrg from "@/pages/provider/OnboardingOrg";
 import ProviderOnboardingCoverage from "@/pages/provider/OnboardingCoverage";
@@ -65,6 +70,8 @@ import AdminAudit from "@/pages/admin/Audit";
 import AdminSettings from "@/pages/admin/Settings";
 import AdminServiceDays from "@/pages/admin/ServiceDays";
 import AdminBundles from "@/pages/admin/Bundles";
+import AdminJobs from "@/pages/admin/Jobs";
+import AdminJobDetail from "@/pages/admin/JobDetail";
 
 const queryClient = new QueryClient();
 
@@ -119,6 +126,11 @@ const App = () => (
                 <Route path="/provider/onboarding/compliance" element={<ProviderOnboardingCompliance />} />
                 <Route path="/provider/onboarding/review" element={<ProviderOnboardingReview />} />
                 <Route path="/provider/jobs" element={<ProviderJobs />} />
+                <Route path="/provider/jobs/:jobId" element={<ProviderJobDetail />} />
+                <Route path="/provider/jobs/:jobId/checklist" element={<ProviderJobChecklist />} />
+                <Route path="/provider/jobs/:jobId/photos" element={<ProviderJobPhotos />} />
+                <Route path="/provider/jobs/:jobId/complete" element={<ProviderJobComplete />} />
+                <Route path="/provider/history" element={<ProviderHistory />} />
                 <Route path="/provider/skus" element={<ProviderSKUs />} />
                 <Route path="/provider/earnings" element={<ProviderEarnings />} />
                 <Route path="/provider/performance" element={<ProviderPerformance />} />
@@ -138,6 +150,8 @@ const App = () => (
                 <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
                 <Route path="/admin/providers" element={<AdminProviders />} />
                 <Route path="/admin/providers/:id" element={<AdminProviderDetail />} />
+                <Route path="/admin/jobs" element={<AdminJobs />} />
+                <Route path="/admin/jobs/:jobId" element={<AdminJobDetail />} />
                 <Route path="/admin/scheduling" element={<AdminScheduling />} />
                 <Route path="/admin/service-days" element={<AdminServiceDays />} />
                 <Route path="/admin/bundles" element={<AdminBundles />} />
