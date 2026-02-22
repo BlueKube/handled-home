@@ -10,6 +10,7 @@ import { ZoneFormSheet } from "./ZoneFormSheet";
 import { ZoneCapacityPanel } from "./ZoneCapacityPanel";
 import { ZoneProvidersPanel } from "./ZoneProvidersPanel";
 import { ZoneOpsConfigPanel } from "./ZoneOpsConfigPanel";
+import { ZoneSeasonalPanel } from "./ZoneSeasonalPanel";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect } from "react";
@@ -72,6 +73,7 @@ export function ZoneDetailSheet({ zoneId, onClose }: ZoneDetailSheetProps) {
                   <TabsTrigger value="ops" className="flex-1 text-xs">Ops</TabsTrigger>
                   <TabsTrigger value="service-week" className="flex-1 text-xs">Week</TabsTrigger>
                   <TabsTrigger value="providers" className="flex-1 text-xs">Providers</TabsTrigger>
+                  <TabsTrigger value="seasonal" className="flex-1 text-xs">Seasonal</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="details" className="space-y-4 pt-4">
@@ -107,6 +109,10 @@ export function ZoneDetailSheet({ zoneId, onClose }: ZoneDetailSheetProps) {
 
                 <TabsContent value="providers" className="pt-4">
                   <ZoneProvidersPanel zoneId={zone.id} />
+                </TabsContent>
+
+                <TabsContent value="seasonal" className="pt-4">
+                  <ZoneSeasonalPanel zoneId={zone.id} />
                 </TabsContent>
               </Tabs>
             </>

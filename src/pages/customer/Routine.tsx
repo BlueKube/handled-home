@@ -13,6 +13,7 @@ import { WeekPreviewTimeline } from "@/components/routine/WeekPreviewTimeline";
 import { AddServicesSheet } from "@/components/routine/AddServicesSheet";
 import { RoutineItemCard } from "@/components/routine/RoutineItemCard";
 import { EntitlementGuardrails } from "@/components/routine/EntitlementGuardrails";
+import { SeasonalBoostsSection } from "@/components/routine/SeasonalBoostsSection";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowRight, Sparkles, Loader2 } from "lucide-react";
@@ -201,6 +202,9 @@ export default function CustomerRoutine() {
             </p>
           </div>
         )}
+
+        {/* Seasonal Boosts */}
+        <SeasonalBoostsSection propertyId={property?.id} zoneId={zoneId} />
 
         {/* 4-Week Preview */}
         {items.length > 0 && <WeekPreviewTimeline weeks={weeks} />}

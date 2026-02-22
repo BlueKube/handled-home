@@ -9,6 +9,7 @@ import { useCustomerSubscription } from "@/hooks/useSubscription";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { SeasonalPlanCard } from "@/components/customer/SeasonalPlanCard";
 
 function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -104,6 +105,11 @@ export default function CustomerDashboard() {
       <div className="grid gap-4 md:grid-cols-2">
         <StatCard icon={CalendarDays} label="Service Day" value={serviceDayValue} />
         <StatCard icon={CheckCircle2} label="Recent Visits" value="0" />
+      </div>
+
+      {/* Seasonal Plan Card */}
+      <div className="mt-4">
+        <SeasonalPlanCard propertyId={property?.id} zoneId={subscription?.zone_id} />
       </div>
     </div>
   );
