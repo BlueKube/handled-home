@@ -1,173 +1,75 @@
 
+# Module 01 Fixes — Claude Code Review Remediation
 
-# Module 01: Auth & Roles — Full Implementation Plan
+## CRITICAL Fixes
 
-## Overview
-Implement production-ready authentication and role-based access control per the expanded Module 01 PRD. This covers the signup flow with automatic profile + role creation, session restoration, "Account Not Configured" handling, hardened RLS, and route protection. Two new documentation files will also be created.
+### 1. Privilege Escalation in `handle_new_user()` trigger
+The trigger reads `role` from `raw_user_meta_data`, allowing a malicious client to pass `role: 'admin'` during signup. Fix: hard-code `'customer'` and ignore user-supplied metadata.
 
----
-
-## Current State Assessment
-
-**What exists and works:**
-- `profiles` table with `user_id` column (not `id = auth.uid()` as spec suggests, but functionally equivalent)
-- `user_roles` table with `app_role` enum (`customer | provider | admin`)
-- `has_role()` security definer function
-- RLS policies on both tables
-- `AuthContext` with session restore, role fetching, and active role persistence
-- `ProtectedRoute` component with role gating
-- Basic auth page with login/signup tabs
-
-**Gaps to close:**
-1. Signup does NOT create `profiles` or `user_roles` rows — it only stores metadata on the auth user
-2. No `bootstrap_new_user` RPC function to safely create profile + default role
-3. No "Account Not Configured" screen for users with 0 roles
-4. Signup allows role selection (should be customer-only per spec)
-5. No confirm password field on signup
-6. No password minimum 8 chars enforcement (currently 6)
-7. `ProtectedRoute` doesn't handle the empty-roles case
-8. `AuthContext` doesn't expose profile data
-9. Logout doesn't clear `activeRole` from localStorage
-10. RLS on `user_roles` allows arbitrary client inserts (should be restricted)
-
----
-
-## Implementation Steps
-
-### Step 1: Database Migration — `bootstrap_new_user` RPC
-
-Create an idempotent Postgres RPC function that:
-- Accepts `_full_name text` parameter
-- Uses `auth.uid()` to identify the caller
-- Inserts a `profiles` row if none exists for this user
-- Inserts a `user_roles` row with `role = 'customer'` if user has 0 roles
-- Returns void (or the profile row)
-- Is `SECURITY DEFINER` so it bypasses RLS for the insert
-
+**Database migration** to replace the function:
 ```sql
-CREATE OR REPLACE FUNCTION public.bootstrap_new_user(_full_name text)
-RETURNS void
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  -- Ensure profile exists
   INSERT INTO public.profiles (user_id, full_name)
-  VALUES (auth.uid(), _full_name)
-  ON CONFLICT (user_id) DO NOTHING;
+  VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'full_name', ''));
 
-  -- Assign customer role if no roles exist
-  IF NOT EXISTS (
-    SELECT 1 FROM public.user_roles WHERE user_id = auth.uid()
-  ) THEN
-    INSERT INTO public.user_roles (user_id, role)
-    VALUES (auth.uid(), 'customer');
-  END IF;
+  INSERT INTO public.user_roles (user_id, role)
+  VALUES (NEW.id, 'customer');
+
+  RETURN NEW;
 END;
 $$;
 ```
 
-Also add a unique constraint on `profiles.user_id` if not already present, and ensure `unique(user_id, role)` on `user_roles`.
+### 2. ProtectedRoute checks `roles.includes()` instead of `activeRole`
+A multi-role user with `activeRole=customer` can access `/admin/*` routes. Fix line 30 in `src/components/ProtectedRoute.tsx`:
 
-### Step 2: Tighten RLS on `user_roles`
-
-Remove the current client-side INSERT policy ("Service role can insert roles") and replace with a more restrictive one, or rely entirely on the `bootstrap_new_user` SECURITY DEFINER function for role assignment. This prevents privilege escalation (a user inserting `admin` role for themselves).
-
-### Step 3: AuthContext Upgrade (`src/contexts/AuthContext.tsx`)
-
-- Add `profile` state (full_name, phone, avatar_url) to context
-- Fetch profile alongside roles in a combined `fetchUserData()` function
-- Implement deterministic active role resolution per spec: customer > provider > admin
-- Clear localStorage `handled_active_role` on sign out
-- Expose `profile` in context value
-
-### Step 4: ProtectedRoute Upgrade (`src/components/ProtectedRoute.tsx`)
-
-Add the "Account Not Configured" case:
-1. If loading -> full-screen loader (with branded spinner)
-2. If no user -> redirect to `/auth`
-3. If user exists but `roles.length === 0` -> render "Account Not Configured" screen
-4. If `requiredRole` and role mismatch -> redirect to active role root
-5. Else render children
-
-### Step 5: New "Account Not Configured" Component
-
-Create `src/components/AccountNotConfigured.tsx`:
-- Title: "Account Not Configured"
-- Body: "Your account hasn't been assigned a role yet. Please contact support."
-- CTA: "Sign Out" button
-- No back navigation, no sidebar, no tab bar
-- Full-screen, centered, mobile-friendly
-
-### Step 6: Auth Page Overhaul (`src/pages/AuthPage.tsx`)
-
-**Login tab:**
-- Email + Password fields (unchanged)
-- Loading state disables inputs and shows spinner on button
-- Error displayed via toast (no account enumeration)
-- On success: navigate to `/` (RootRedirect handles routing)
-
-**Signup tab:**
-- Fields: Full Name, Email, Password, Confirm Password
-- Remove role selector (customer-only by spec)
-- Validations: full name required, email format, password min 8 chars, confirm match
-- On success:
-  1. `supabase.auth.signUp({ email, password })`
-  2. Call `supabase.rpc('bootstrap_new_user', { _full_name: fullName })`
-  3. Navigate to `/`
-- Error handling: friendly message for "email already in use"
-
-**Forgot password link:** Show as a text link below login form (stub — navigates nowhere or shows toast "Coming soon")
-
-### Step 7: Logout Cleanup
-
-In `AuthContext.signOut()`:
-- Call `supabase.auth.signOut()`
-- Clear `handled_active_role` from localStorage
-- Reset all state (user, session, roles, profile)
-
-### Step 8: RootRedirect Enhancement (`src/App.tsx`)
-
-Update `RootRedirect` to handle empty roles:
-- If loading -> null
-- If no user -> `/auth`
-- If roles empty -> `/account-not-configured` or let ProtectedRoute handle it
-- Else -> `/${activeRole}`
-
-### Step 9: Documentation Files
-
-**Replace** `docs/modules/01-auth-and-roles.md` with the uploaded expanded PRD content.
-
-**Create** `docs/global-system-architecture.md` with the uploaded architecture spec.
-
-### Step 10: Constants File
-
-Create `src/constants/roles.ts`:
-- Export `ROLE_PRIORITY` array: `['customer', 'provider', 'admin']`
-- Export `STORAGE_KEYS` object: `{ ACTIVE_ROLE: 'handled_active_role' }`
-- Used by AuthContext for deterministic resolution
+Change `!roles.includes(requiredRole)` to `activeRole !== requiredRole`.
 
 ---
 
-## Files Impact
+## MODERATE Fixes
 
-### New files:
-- `src/components/AccountNotConfigured.tsx` — No-role fallback screen
-- `src/constants/roles.ts` — Role constants and storage keys
-- `docs/global-system-architecture.md` — Global architecture spec
+### 3. `profiles.full_name` should be NOT NULL
+Database migration to add the constraint:
+```sql
+ALTER TABLE public.profiles ALTER COLUMN full_name SET NOT NULL;
+ALTER TABLE public.profiles ALTER COLUMN full_name SET DEFAULT '';
+```
 
-### Modified files:
-- `src/contexts/AuthContext.tsx` — Profile state, deterministic role resolution, logout cleanup
-- `src/components/ProtectedRoute.tsx` — Empty-roles handling with AccountNotConfigured
-- `src/pages/AuthPage.tsx` — Remove role selector, add confirm password, call bootstrap RPC, validation
-- `src/App.tsx` — Minor RootRedirect adjustment
+### 4. Remove redundant `handle_new_user()` trigger
+Both the trigger and `bootstrap_new_user()` RPC do the same work. Since the RPC is called explicitly from signup and is more controlled, drop the trigger and keep only the RPC. This also fully eliminates the privilege escalation vector.
 
-### Replaced files:
-- `docs/modules/01-auth-and-roles.md` — Full replacement with expanded PRD
+**Database migration:**
+```sql
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+DROP FUNCTION IF EXISTS public.handle_new_user();
+```
 
-### Database changes:
-- New RPC function: `bootstrap_new_user(_full_name text)`
-- Add unique constraint on `profiles(user_id)` if missing
-- Tighten `user_roles` INSERT RLS policy (remove client-side insert, rely on SECURITY DEFINER RPC)
+### 5. Add explicit DELETE deny policy on `profiles`
+```sql
+CREATE POLICY "No one can delete profiles"
+ON public.profiles FOR DELETE
+TO authenticated
+USING (false);
+```
 
+---
+
+## Files to modify
+
+- **New migration file** — Contains all SQL changes (fix trigger/drop it, NOT NULL on full_name, DELETE deny policy)
+- **`src/components/ProtectedRoute.tsx`** — Line 30: change `roles.includes(requiredRole)` to `activeRole !== requiredRole`
+
+## Items intentionally deferred
+
+- **Settings role switcher** (items 5 from review) — Already works via MoreMenu; Settings pages will be built out in a future iteration
+- **Inline form errors** (item 9) — UX polish, not a security or correctness issue
+- **Analytics events** (item 10) — Spec says "recommended", will add when analytics infra is built
+- **Automated tests** (item 11) — Will be addressed in a dedicated testing pass
+- **Profiles PK schema** (item 4) — Current `id` + `user_id` pattern works correctly with all RLS policies; changing it now would require migrating existing data and updating all queries for marginal benefit
