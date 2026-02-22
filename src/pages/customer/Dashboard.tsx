@@ -1,15 +1,19 @@
 import { useState } from "react";
-import { CalendarDays, CheckCircle2, Loader2, Sparkles, X } from "lucide-react";
+import { CalendarDays, CheckCircle2, Loader2, Sparkles, X, Settings2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { StatCard } from "@/components/StatCard";
 import { useProperty } from "@/hooks/useProperty";
 import { useServiceDayAssignment } from "@/hooks/useServiceDayAssignment";
 import { useRoutine } from "@/hooks/useRoutine";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
+import { useCustomerJobs } from "@/hooks/useCustomerJobs";
+import { useFourWeekPreview } from "@/hooks/useFourWeekPreview";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SeasonalPlanCard } from "@/components/customer/SeasonalPlanCard";
+import { NextVisitCard } from "@/components/customer/NextVisitCard";
+import { WeekTimeline } from "@/components/customer/WeekTimeline";
 
 function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -21,7 +25,6 @@ function isNudgeDismissed(): boolean {
   const val = localStorage.getItem(NUDGE_DISMISS_KEY);
   if (!val) return false;
   const dismissedAt = parseInt(val, 10);
-  // Show again after 7 days
   return Date.now() - dismissedAt < 7 * 24 * 60 * 60 * 1000;
 }
 
@@ -31,8 +34,22 @@ export default function CustomerDashboard() {
   const { assignment, isLoading } = useServiceDayAssignment(property?.id);
   const { data: subscription } = useCustomerSubscription();
   const { data: routineData } = useRoutine(property?.id, subscription?.plan_id);
+  const { data: upcomingJobs, isLoading: jobsLoading } = useCustomerJobs("upcoming");
+  const { data: completedJobs } = useCustomerJobs("completed");
   const navigate = useNavigate();
   const [nudgeDismissed, setNudgeDismissed] = useState(isNudgeDismissed);
+
+  const serviceDayConfirmed = assignment?.status === "confirmed";
+  const routineItems = routineData?.items ?? [];
+
+  const previewWeeks = useFourWeekPreview(
+    routineItems,
+    serviceDayConfirmed,
+    upcomingJobs ?? []
+  );
+
+  // Find next visit (first upcoming job or first planned visit from preview)
+  const nextJob = upcomingJobs?.[0] ?? null;
 
   const serviceDayValue = (() => {
     if (isLoading) return "…";
@@ -40,6 +57,13 @@ export default function CustomerDashboard() {
     if (assignment.status === "confirmed") return capitalize(assignment.day_of_week);
     return "Pending";
   })();
+
+  const recentVisitCount = completedJobs?.length ?? 0;
+
+  // Truth banners
+  const showServiceDayBanner = !isLoading && !assignment;
+  const showServiceDayOffer = !isLoading && assignment?.status === "offered";
+  const showRoutineNotEffective = routineData?.routine.status === "active" && routineData?.version?.status === "locked" && routineData?.version?.effective_at && new Date(routineData.version.effective_at) > new Date();
 
   // Gentle nudge: draft routine exists but not confirmed for 24h+
   const showRoutineNudge = !nudgeDismissed
@@ -52,38 +76,46 @@ export default function CustomerDashboard() {
     setNudgeDismissed(true);
   };
 
-  return (
-    <div className="p-6 max-w-4xl">
-      <h1 className="text-h2 mb-1">Your home is handled.</h1>
-      <p className="text-caption mb-6">Welcome back{user?.user_metadata?.full_name ? `, ${user.user_metadata.full_name}` : ""}.</p>
+  const hasPreviewContent = previewWeeks.some((w) => w.visits.length > 0);
 
-      {/* Service Day Banner */}
-      {!isLoading && !assignment && (
-        <Card className="p-4 mb-4 flex items-center gap-3 bg-muted/50">
+  return (
+    <div className="p-6 max-w-4xl space-y-4">
+      <div>
+        <h1 className="text-h2 mb-1">Your home is handled.</h1>
+        <p className="text-caption">Welcome back{user?.user_metadata?.full_name ? `, ${user.user_metadata.full_name}` : ""}.</p>
+      </div>
+
+      {/* Truth Banners */}
+      {showServiceDayBanner && (
+        <Card className="p-4 flex items-center gap-3 bg-muted/50">
           <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
           <p className="text-sm">We're assigning your Service Day…</p>
         </Card>
       )}
-      {!isLoading && assignment?.status === "offered" && (
+
+      {showServiceDayOffer && (
         <Card
-          className="p-4 mb-4 flex items-center justify-between cursor-pointer hover:bg-secondary/50 transition-colors"
+          className="p-4 flex items-center justify-between cursor-pointer hover:bg-secondary/50 transition-colors"
           onClick={() => navigate("/customer/service-day")}
         >
           <div className="flex items-center gap-3">
             <CalendarDays className="h-5 w-5 text-accent" />
-            <p className="text-sm font-medium">Confirm your Service Day</p>
+            <p className="text-sm font-medium">Confirm your Service Day to activate your plan.</p>
           </div>
           <Button variant="ghost" size="sm">View →</Button>
         </Card>
       )}
 
-      {/* L12: Dismissible gentle nudge for unconfirmed routine */}
+      {showRoutineNotEffective && (
+        <Card className="p-4 flex items-center gap-3 bg-accent/5 border-accent/20">
+          <Settings2 className="h-4 w-4 text-accent" />
+          <p className="text-sm text-muted-foreground">Your routine updates take effect next cycle.</p>
+        </Card>
+      )}
+
       {showRoutineNudge && (
-        <Card className="p-4 mb-4 flex items-center justify-between cursor-pointer hover:bg-accent/5 transition-colors border-accent/30">
-          <div
-            className="flex items-center gap-3 flex-1"
-            onClick={() => navigate("/customer/routine")}
-          >
+        <Card className="p-4 flex items-center justify-between cursor-pointer hover:bg-accent/5 transition-colors border-accent/30">
+          <div className="flex items-center gap-3 flex-1" onClick={() => navigate("/customer/routine")}>
             <Sparkles className="h-5 w-5 text-accent" />
             <div>
               <p className="text-sm font-medium">Finish your routine</p>
@@ -102,15 +134,40 @@ export default function CustomerDashboard() {
         </Card>
       )}
 
+      {/* Next Visit Card */}
+      <NextVisitCard job={nextJob} isLoading={jobsLoading} />
+
+      {/* Stats Row */}
       <div className="grid gap-4 md:grid-cols-2">
         <StatCard icon={CalendarDays} label="Service Day" value={serviceDayValue} />
-        <StatCard icon={CheckCircle2} label="Recent Visits" value="0" />
+        <StatCard icon={CheckCircle2} label="Recent Visits" value={String(recentVisitCount)} />
       </div>
 
+      {/* 4-Week Preview Timeline */}
+      {hasPreviewContent && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">4-Week Preview</h2>
+            <Button
+              variant="link"
+              size="sm"
+              className="text-accent text-xs h-auto p-0"
+              onClick={() => navigate("/customer/routine")}
+            >
+              Adjust routine →
+            </Button>
+          </div>
+          <div className="space-y-0">
+            {previewWeeks.map((week) => (
+              <WeekTimeline key={week.weekNumber} week={week} defaultOpen={week.weekNumber === 1} />
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">Changes take effect next cycle.</p>
+        </div>
+      )}
+
       {/* Seasonal Plan Card */}
-      <div className="mt-4">
-        <SeasonalPlanCard propertyId={property?.id} zoneId={subscription?.zone_id} />
-      </div>
+      <SeasonalPlanCard propertyId={property?.id} zoneId={subscription?.zone_id} />
     </div>
   );
 }

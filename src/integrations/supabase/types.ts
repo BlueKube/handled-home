@@ -50,6 +50,62 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_issues: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          job_id: string
+          note: string
+          photo_storage_path: string | null
+          photo_upload_status: string | null
+          reason: string
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by_admin_user_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          job_id: string
+          note: string
+          photo_storage_path?: string | null
+          photo_upload_status?: string | null
+          reason: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by_admin_user_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          job_id?: string
+          note?: string
+          photo_storage_path?: string | null
+          photo_upload_status?: string | null
+          reason?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by_admin_user_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_issues_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_plan_selections: {
         Row: {
           created_at: string
@@ -2182,6 +2238,10 @@ export type Database = {
           p_org_id: string
           p_reason?: string
         }
+        Returns: Json
+      }
+      admin_resolve_customer_issue: {
+        Args: { p_issue_id: string; p_resolution_note: string }
         Returns: Json
       }
       admin_update_coverage_status: {

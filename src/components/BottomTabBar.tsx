@@ -16,7 +16,7 @@ const customerTabs: TabItem[] = [
   { label: "Home", icon: Home, path: "/customer" },
   { label: "Plans", icon: CreditCard, path: "/customer/plans" },
   { label: "Routine", icon: CalendarDays, path: "/customer/routine" },
-  { label: "History", icon: History, path: "/customer/history" },
+  { label: "Visits", icon: History, path: "/customer/visits" },
   { label: "More", icon: MoreHorizontal, path: "/customer/more" },
 ];
 

@@ -17,7 +17,7 @@ const customerNav = [
   { title: "Service Day", url: "/customer/service-day", icon: CalendarCheck },
   { title: "Build Routine", url: "/customer/routine", icon: CalendarDays },
   { title: "Services", url: "/customer/services", icon: Package },
-  { title: "Service History", url: "/customer/history", icon: History },
+  { title: "Visits", url: "/customer/visits", icon: History },
   { title: "Subscription", url: "/customer/subscription", icon: Wallet },
   { title: "Property", url: "/customer/property", icon: MapPin },
   { title: "Billing", url: "/customer/billing", icon: DollarSign },
