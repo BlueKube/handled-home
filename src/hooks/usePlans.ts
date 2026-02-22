@@ -205,6 +205,41 @@ export function useUpdateZoneAvailability() {
   });
 }
 
+export function useUpdateEntitlementVersion() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<PlanEntitlementVersion> }) => {
+      const { data, error } = await supabase
+        .from("plan_entitlement_versions")
+        .update(updates as any)
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as PlanEntitlementVersion;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["plan_entitlement_versions"] });
+      qc.invalidateQueries({ queryKey: ["entitlements"] });
+    },
+  });
+}
+
+export function useSkuRulesForVersion(entitlementVersionId: string | null) {
+  return useQuery({
+    queryKey: ["plan_entitlement_sku_rules", entitlementVersionId],
+    enabled: !!entitlementVersionId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("plan_entitlement_sku_rules")
+        .select("*")
+        .eq("entitlement_version_id", entitlementVersionId!);
+      if (error) throw error;
+      return data as Array<{ id: string; entitlement_version_id: string; sku_id: string; rule_type: string; reason: string | null }>;
+    },
+  });
+}
+
 export function useManageSkuRules() {
   const qc = useQueryClient();
   return useMutation({

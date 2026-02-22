@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCustomerSubscription, useCancelSubscription } from "@/hooks/useSubscription";
+import { useCustomerSubscription, useCancelSubscription, useChangePlan } from "@/hooks/useSubscription";
 import { usePlanDetail, usePlans } from "@/hooks/usePlans";
 import { SubscriptionStatusPanel } from "@/components/plans/SubscriptionStatusPanel";
 import { FixPaymentPanel } from "@/components/plans/FixPaymentPanel";
@@ -17,6 +17,7 @@ export default function CustomerSubscription() {
   const { data: plan } = usePlanDetail(subscription?.plan_id ?? null);
   const { data: allPlans } = usePlans("active");
   const cancelSub = useCancelSubscription();
+  const changePlan = useChangePlan();
   const [changePlanId, setChangePlanId] = useState("");
 
   if (isLoading) {
@@ -71,11 +72,16 @@ export default function CustomerSubscription() {
               </SelectContent>
             </Select>
             {changePlanId && (
-              <Button size="sm" onClick={() => {
-                toast.success("Plan change scheduled for next billing cycle.");
-                setChangePlanId("");
+              <Button size="sm" disabled={changePlan.isPending} onClick={async () => {
+                try {
+                  await changePlan.mutateAsync({ subscriptionId: subscription.id, newPlanId: changePlanId });
+                  toast.success("Plan change scheduled for next billing cycle.");
+                  setChangePlanId("");
+                } catch {
+                  toast.error("Could not schedule plan change.");
+                }
               }}>
-                Confirm Change
+                {changePlan.isPending ? "Saving…" : "Confirm Change"}
               </Button>
             )}
           </CardContent>
