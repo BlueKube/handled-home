@@ -27,7 +27,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     return <AccountNotConfigured />;
   }
 
-  if (requiredRole && !roles.includes(requiredRole)) {
+  if (requiredRole && activeRole !== requiredRole) {
     return <Navigate to={`/${activeRole}`} replace />;
   }
 
