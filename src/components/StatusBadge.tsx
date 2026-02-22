@@ -25,6 +25,7 @@ const statusStyles: Record<string, { label: string; className: string; dotColor:
   scheduled: { label: "Scheduled", className: "bg-primary text-primary-foreground", dotColor: "bg-primary-foreground/70" },
   alternate_offered: { label: "Alternate Offered", className: "bg-warning text-warning-foreground", dotColor: "bg-warning-foreground/70" },
   locked: { label: "Locked", className: "bg-secondary text-secondary-foreground", dotColor: "bg-secondary-foreground/50" },
+  draft: { label: "Draft", className: "bg-secondary text-secondary-foreground", dotColor: "bg-muted-foreground" },
   paused: { label: "Paused", className: "bg-warning text-warning-foreground", dotColor: "bg-warning-foreground/70" },
   expansion_planned: { label: "Expansion Planned", className: "bg-primary text-primary-foreground", dotColor: "bg-primary-foreground/70" },
   archived: { label: "Archived", className: "border border-border bg-transparent text-muted-foreground", dotColor: "bg-muted-foreground" },

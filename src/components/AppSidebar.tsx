@@ -14,6 +14,7 @@ import logo from "@/assets/handled-home-logo.png";
 const customerNav = [
   { title: "Dashboard", url: "/customer", icon: Home },
   { title: "Build Service Day", url: "/customer/build", icon: CalendarDays },
+  { title: "Services", url: "/customer/services", icon: Package },
   { title: "Service History", url: "/customer/history", icon: History },
   { title: "Subscription", url: "/customer/subscription", icon: CreditCard },
   { title: "Property", url: "/customer/property", icon: MapPin },
