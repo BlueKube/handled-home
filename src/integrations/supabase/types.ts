@@ -1028,6 +1028,44 @@ export type Database = {
           },
         ]
       }
+      market_cohorts: {
+        Row: {
+          created_at: string
+          id: string
+          label: string
+          metadata: Json | null
+          status: string
+          updated_at: string
+          zone_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label: string
+          metadata?: Json | null
+          status?: string
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string
+          metadata?: Json | null
+          status?: string
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_cohorts_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_webhook_events: {
         Row: {
           created_at: string
@@ -2086,6 +2124,307 @@ export type Database = {
             columns: ["provider_org_id"]
             isOneToOne: false
             referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          program_id: string
+          user_id: string
+          uses_count: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          program_id: string
+          user_id: string
+          uses_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          program_id?: string
+          user_id?: string
+          uses_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_codes_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "referral_programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referral_milestones: {
+        Row: {
+          created_at: string
+          id: string
+          metadata: Json | null
+          milestone: Database["public"]["Enums"]["referral_milestone_type"]
+          occurred_at: string
+          referral_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          milestone: Database["public"]["Enums"]["referral_milestone_type"]
+          occurred_at?: string
+          referral_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          milestone?: Database["public"]["Enums"]["referral_milestone_type"]
+          occurred_at?: string
+          referral_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_milestones_referral_id_fkey"
+            columns: ["referral_id"]
+            isOneToOne: false
+            referencedRelation: "referrals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referral_programs: {
+        Row: {
+          created_at: string
+          description: string | null
+          hold_days: number
+          id: string
+          max_reward_dollars_per_referrer_per_4weeks: number | null
+          max_rewards_per_referrer_per_week: number | null
+          milestone_triggers: Database["public"]["Enums"]["referral_milestone_type"][]
+          name: string
+          referred_reward_amount_cents: number
+          referred_reward_type: Database["public"]["Enums"]["referral_reward_type"]
+          referrer_reward_amount_cents: number
+          referrer_reward_type: Database["public"]["Enums"]["referral_reward_type"]
+          referrer_type: string
+          status: Database["public"]["Enums"]["referral_program_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          hold_days?: number
+          id?: string
+          max_reward_dollars_per_referrer_per_4weeks?: number | null
+          max_rewards_per_referrer_per_week?: number | null
+          milestone_triggers?: Database["public"]["Enums"]["referral_milestone_type"][]
+          name: string
+          referred_reward_amount_cents?: number
+          referred_reward_type?: Database["public"]["Enums"]["referral_reward_type"]
+          referrer_reward_amount_cents?: number
+          referrer_reward_type?: Database["public"]["Enums"]["referral_reward_type"]
+          referrer_type?: string
+          status?: Database["public"]["Enums"]["referral_program_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          hold_days?: number
+          id?: string
+          max_reward_dollars_per_referrer_per_4weeks?: number | null
+          max_rewards_per_referrer_per_week?: number | null
+          milestone_triggers?: Database["public"]["Enums"]["referral_milestone_type"][]
+          name?: string
+          referred_reward_amount_cents?: number
+          referred_reward_type?: Database["public"]["Enums"]["referral_reward_type"]
+          referrer_reward_amount_cents?: number
+          referrer_reward_type?: Database["public"]["Enums"]["referral_reward_type"]
+          referrer_type?: string
+          status?: Database["public"]["Enums"]["referral_program_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      referral_rewards: {
+        Row: {
+          amount_cents: number
+          applied_at: string | null
+          created_at: string
+          hold_reason: string | null
+          hold_until: string | null
+          id: string
+          ledger_event_id: string | null
+          milestone: Database["public"]["Enums"]["referral_milestone_type"]
+          program_id: string
+          recipient_user_id: string
+          referral_id: string
+          referred_user_id: string
+          reward_type: Database["public"]["Enums"]["referral_reward_type"]
+          status: Database["public"]["Enums"]["referral_reward_status"]
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+        }
+        Insert: {
+          amount_cents?: number
+          applied_at?: string | null
+          created_at?: string
+          hold_reason?: string | null
+          hold_until?: string | null
+          id?: string
+          ledger_event_id?: string | null
+          milestone: Database["public"]["Enums"]["referral_milestone_type"]
+          program_id: string
+          recipient_user_id: string
+          referral_id: string
+          referred_user_id: string
+          reward_type: Database["public"]["Enums"]["referral_reward_type"]
+          status?: Database["public"]["Enums"]["referral_reward_status"]
+          updated_at?: string
+          void_reason?: string | null
+          voided_at?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          applied_at?: string | null
+          created_at?: string
+          hold_reason?: string | null
+          hold_until?: string | null
+          id?: string
+          ledger_event_id?: string | null
+          milestone?: Database["public"]["Enums"]["referral_milestone_type"]
+          program_id?: string
+          recipient_user_id?: string
+          referral_id?: string
+          referred_user_id?: string
+          reward_type?: Database["public"]["Enums"]["referral_reward_type"]
+          status?: Database["public"]["Enums"]["referral_reward_status"]
+          updated_at?: string
+          void_reason?: string | null
+          voided_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_rewards_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "referral_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_rewards_referral_id_fkey"
+            columns: ["referral_id"]
+            isOneToOne: false
+            referencedRelation: "referrals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referral_risk_flags: {
+        Row: {
+          created_at: string
+          flag_type: string
+          id: string
+          reason: string | null
+          referral_id: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by_admin_user_id: string | null
+          reward_id: string | null
+          status: Database["public"]["Enums"]["referral_risk_flag_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          flag_type: string
+          id?: string
+          reason?: string | null
+          referral_id?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by_admin_user_id?: string | null
+          reward_id?: string | null
+          status?: Database["public"]["Enums"]["referral_risk_flag_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          flag_type?: string
+          id?: string
+          reason?: string | null
+          referral_id?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by_admin_user_id?: string | null
+          reward_id?: string | null
+          status?: Database["public"]["Enums"]["referral_risk_flag_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_risk_flags_referral_id_fkey"
+            columns: ["referral_id"]
+            isOneToOne: false
+            referencedRelation: "referrals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_risk_flags_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "referral_rewards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referrals: {
+        Row: {
+          attributed_at: string
+          code_id: string
+          created_at: string
+          id: string
+          program_id: string
+          referred_user_id: string
+          referrer_user_id: string
+        }
+        Insert: {
+          attributed_at?: string
+          code_id: string
+          created_at?: string
+          id?: string
+          program_id: string
+          referred_user_id: string
+          referrer_user_id: string
+        }
+        Update: {
+          attributed_at?: string
+          code_id?: string
+          created_at?: string
+          id?: string
+          program_id?: string
+          referred_user_id?: string
+          referrer_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "referral_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "referral_programs"
             referencedColumns: ["id"]
           },
         ]
@@ -3508,6 +3847,7 @@ export type Database = {
         Args: { p_invoice_id: string; p_reason: string }
         Returns: Json
       }
+      apply_referral_reward: { Args: { p_reward_id: string }; Returns: Json }
       bootstrap_new_user: { Args: { _full_name: string }; Returns: undefined }
       check_provider_sku_zone_eligibility: {
         Args: { p_provider_org_id: string; p_sku_id: string; p_zone_id: string }
@@ -3541,8 +3881,27 @@ export type Database = {
         Returns: boolean
       }
       is_provider_org_member: { Args: { p_org_id: string }; Returns: boolean }
+      override_referral_attribution: {
+        Args: {
+          p_new_referrer_id: string
+          p_reason: string
+          p_referral_id: string
+        }
+        Returns: Json
+      }
+      record_referral_milestone: {
+        Args: {
+          p_milestone: Database["public"]["Enums"]["referral_milestone_type"]
+          p_referral_id: string
+        }
+        Returns: Json
+      }
       reject_service_day_once: {
         Args: { p_assignment_id: string }
+        Returns: Json
+      }
+      release_referral_hold: {
+        Args: { p_reason: string; p_reward_id: string }
         Returns: Json
       }
       report_job_issue: {
@@ -3563,6 +3922,10 @@ export type Database = {
       submit_provider_onboarding: { Args: { p_org_id: string }; Returns: Json }
       transition_eligible_earnings: { Args: never; Returns: Json }
       validate_provider_invite: { Args: { p_code: string }; Returns: Json }
+      void_referral_reward: {
+        Args: { p_reason: string; p_reward_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "customer" | "provider" | "admin"
@@ -3588,6 +3951,23 @@ export type Database = {
         | "same_day_preferred"
         | "same_week_allowed"
         | "independent_cadence"
+      referral_milestone_type:
+        | "installed"
+        | "subscribed"
+        | "first_visit"
+        | "paid_cycle"
+        | "provider_ready"
+        | "provider_first_job"
+      referral_program_status: "draft" | "active" | "paused" | "archived"
+      referral_reward_status:
+        | "pending"
+        | "on_hold"
+        | "earned"
+        | "applied"
+        | "paid"
+        | "voided"
+      referral_reward_type: "customer_credit" | "provider_bonus"
+      referral_risk_flag_status: "open" | "reviewed" | "dismissed"
       sku_rule_type: "included" | "extra_allowed" | "blocked" | "provider_only"
       support_event_type:
         | "ticket_created"
@@ -3801,6 +4181,25 @@ export const Constants = {
         "same_week_allowed",
         "independent_cadence",
       ],
+      referral_milestone_type: [
+        "installed",
+        "subscribed",
+        "first_visit",
+        "paid_cycle",
+        "provider_ready",
+        "provider_first_job",
+      ],
+      referral_program_status: ["draft", "active", "paused", "archived"],
+      referral_reward_status: [
+        "pending",
+        "on_hold",
+        "earned",
+        "applied",
+        "paid",
+        "voided",
+      ],
+      referral_reward_type: ["customer_credit", "provider_bonus"],
+      referral_risk_flag_status: ["open", "reviewed", "dismissed"],
       sku_rule_type: ["included", "extra_allowed", "blocked", "provider_only"],
       support_event_type: [
         "ticket_created",

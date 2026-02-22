@@ -64,6 +64,7 @@ import ProviderOnboardingCompliance from "@/pages/provider/OnboardingCompliance"
 import ProviderOnboardingReview from "@/pages/provider/OnboardingReview";
 import ProviderSupport from "@/pages/provider/Support";
 import ProviderSupportTicketDetail from "@/pages/provider/SupportTicketDetail";
+import ProviderReferrals from "@/pages/provider/Referrals";
 
 // Admin pages
 import AdminDashboard from "@/pages/admin/Dashboard";
@@ -170,6 +171,7 @@ const App = () => (
                 <Route path="/provider/settings" element={<ProviderSettings />} />
                 <Route path="/provider/support" element={<ProviderSupport />} />
                 <Route path="/provider/support/tickets/:ticketId" element={<ProviderSupportTicketDetail />} />
+                <Route path="/provider/referrals" element={<ProviderReferrals />} />
                 <Route path="/provider/more" element={<MoreMenuPage />} />
               </Route>
 
