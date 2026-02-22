@@ -1,218 +1,196 @@
 
 
-# Module 11 — Billing and Payouts: Full Implementation Plan
+# Module 11 — Code Review Fixes
 
-This is a large module spanning customer billing, provider payouts, admin operations, and Stripe integration. It will be implemented in 8 phases.
-
----
-
-## Phase 1: Replace spec document and create database schema
-
-**Spec file:** Replace `docs/modules/11-billing-and-payouts.md` with the full PRD.
-
-**Database migration** creating all tables from section 16 of the PRD:
-
-### Customer tables
-- `customer_payment_methods` — customer_id, processor_ref, brand, last4, exp_month, exp_year, is_default, status, created_at
-- `customer_invoices` — customer_id, subscription_id, invoice_type (SUBSCRIPTION / ADD_ON / ADJUSTMENT), cycle_start_at, cycle_end_at, subtotal_cents, credits_applied_cents, total_cents, status (UPCOMING / DUE / PAID / FAILED / VOID), processor_invoice_id, idempotency_key (UNIQUE), due_at, paid_at, created_at
-- `customer_invoice_line_items` — invoice_id, label, type (PLAN / ADD_ON / CREDIT / TAX), amount_cents, metadata (jsonb)
-- `customer_payments` — invoice_id, customer_id, amount_cents, processor_payment_id, status (INITIATED / SUCCEEDED / FAILED), attempt_number, idempotency_key, created_at
-- `customer_ledger_events` — customer_id, event_type, invoice_id, amount_cents, balance_after_cents, metadata, created_at (append-only)
-- `customer_credits` — customer_id, amount_cents, reason, issued_by_admin_user_id, applied_to_invoice_id, status (AVAILABLE / APPLIED / EXPIRED), created_at
-
-### Provider tables
-- `provider_payout_accounts` — provider_org_id, processor_account_id, status (NOT_READY / PENDING_VERIFICATION / READY / RESTRICTED), onboarding_url, created_at, updated_at
-- `provider_earnings` — provider_org_id, job_id, base_amount_cents, modifier_cents, total_cents, hold_until, status (EARNED / ELIGIBLE / HELD / HELD_UNTIL_READY / PAID), payout_id, hold_reason, idempotency_key (UNIQUE on provider_org_id + job_id), created_at
-- `provider_payouts` — provider_org_id, payout_run_id, total_cents, status (INITIATED / PAID / FAILED), processor_payout_id, paid_at, created_at
-- `provider_payout_line_items` — payout_id, earning_id (UNIQUE), amount_cents
-- `provider_holds` — provider_org_id, earning_id, hold_type (AUTO / MANUAL), severity, reason_category, status (ACTIVE / RELEASED / EXPIRED), released_by_admin_user_id, released_at, created_at
-- `provider_hold_context` — hold_id, provider_org_id, reason_category, note (max 200 chars), photo_storage_path, created_at
-
-### System tables
-- `payment_webhook_events` — processor_event_id (UNIQUE), event_type, payload (jsonb), processed, processed_at, created_at
-- `billing_runs` — id, run_type, status, started_at, completed_at, metadata
-- `payout_runs` — id, status, started_at, completed_at, earnings_count, total_cents
-- `admin_adjustments` — admin_user_id, entity_type, entity_id, adjustment_type, amount_cents, reason, metadata, created_at
-- `billing_exceptions` — type, severity, entity_type, entity_id, customer_id, provider_org_id, status (OPEN / RESOLVED / DISMISSED), next_action, resolved_by_admin_user_id, resolved_at, created_at
-
-### RLS policies
-- Customers: read own invoices, payments, credits, payment methods; insert/update own payment methods
-- Providers: read own earnings, payouts, holds; insert hold_context for own org
-- Admins: full access to all billing/payout tables
-- webhook_events: no direct user access (service role only)
+Addressing all issues from the code review, organized by priority.
 
 ---
 
-## Phase 2: Database functions (RPCs)
+## MUST FIX (6 issues)
 
-- `create_provider_earning(p_job_id uuid)` — SECURITY DEFINER; called after job completion; computes base + modifiers, sets hold_until based on policy, creates earning with idempotency key
-- `transition_eligible_earnings()` — marks EARNED earnings as ELIGIBLE when hold_until has passed and no active holds
-- `run_payout_batch(p_payout_run_id uuid)` — aggregates ELIGIBLE earnings per provider, checks threshold, creates payout + line items, returns summary
-- `admin_release_hold(p_hold_id uuid, p_reason text)` — releases a hold and re-evaluates earning status
-- `admin_apply_credit(p_customer_id uuid, p_tier text, p_reason text)` — creates credit record, auto-applies to next open invoice
-- `admin_issue_refund(p_invoice_id uuid, p_amount_cents int, p_reason text)` — creates refund ledger event
-- `admin_void_invoice(p_invoice_id uuid, p_reason text)` — voids an invoice (UPCOMING/DUE only)
-- `admin_retry_payment(p_invoice_id uuid)` — creates a new payment attempt
-- `generate_subscription_invoice(p_subscription_id uuid)` — generates cycle invoice with idempotency
+### S1: run_payout_batch marks earnings PAID before webhook confirmation
 
----
+**Problem**: Lines 188-189 of the RPC immediately set earnings to `PAID` when the batch is created, before the Stripe transfer succeeds. If the transfer fails, earnings are incorrectly marked PAID.
 
-## Phase 3: Edge functions (Stripe integration)
+**Fix**: Change the RPC to set earnings to `IN_PAYOUT` (new intermediate status) instead of `PAID`. Only the `transfer.paid` webhook handler should transition earnings from `IN_PAYOUT` to `PAID`. The `transfer.failed` webhook should revert them to `ELIGIBLE`.
 
-### Update existing `stripe-webhook` function
-- Store raw payload in `payment_webhook_events` with deduplication by `processor_event_id`
-- Handle new event types:
-  - `invoice.created`, `invoice.paid`, `invoice.payment_failed` -- update `customer_invoices` and `customer_payments`
-  - `transfer.paid`, `transfer.failed` -- update `provider_payouts`
-  - `charge.dispute.created` -- create billing exception
-
-### New: `create-setup-intent` edge function
-- Creates a Stripe SetupIntent for adding payment methods
-- Returns client_secret for frontend to collect card details
-
-### New: `create-connect-account` edge function
-- Creates a Stripe Connect account for provider orgs
-- Generates onboarding link
-- Stores account info in `provider_payout_accounts`
-
-### New: `create-connect-account-link` edge function
-- Generates a new Stripe Connect onboarding/dashboard link for providers
-
-### New: `process-payout` edge function
-- Called by admin or scheduled run
-- Creates Stripe Transfer to connected account
-- Records payout in database
+**Changes**:
+- Migration: `ALTER` the `run_payout_batch` RPC to use `IN_PAYOUT` status
+- `stripe-webhook/index.ts`: In `transfer.paid` handler, also update `provider_earnings` linked to the payout from `IN_PAYOUT` to `PAID`. In `transfer.failed`, revert them to `ELIGIBLE`.
 
 ---
 
-## Phase 4: React hooks
+### S2: generate_subscription_invoice always creates $0 invoices
 
-- `useCustomerBilling()` — fetches invoices, payment methods, credits, billing health state
-- `useCustomerPaymentMethods()` — CRUD for payment methods via setup intents
-- `useCustomerInvoices()` — list invoices with filters
-- `useProviderEarnings()` — list earnings with status filters
-- `useProviderPayouts()` — list payouts
-- `useProviderPayoutAccount()` — payout account status + onboarding
-- `useAdminBilling()` — overview stats, customer ledgers
-- `useAdminPayouts()` — overview stats, provider ledgers, exception queue
-- `useBillingExceptions()` — fetch and manage exceptions
-- `useAdminBillingActions()` — mutations for credit, refund, void, retry, hold release
+**Problem**: Line 396 hardcodes `v_total_cents := 0`. Every invoice has zero amount.
+
+**Fix**: Parse the plan's `display_price_text` (e.g., "$49/mo") to extract cents, or look up the Stripe price via `stripe_price_id` on the `plans` table. Since we can't call Stripe from a PL/pgSQL function, we'll parse `display_price_text`:
+- Extract numeric value from `display_price_text` using regex
+- Multiply by 100 for cents
+- Fall back to 0 if unparsable (with a warning in the result)
+
+**Changes**: Migration to replace `generate_subscription_invoice` RPC.
 
 ---
 
-## Phase 5: Customer billing UI
+### E1: process-payout join query will fail at runtime
 
-### `/customer/billing` (overview page)
-- Current plan name + next bill date
-- Cycle status badge (Paid / Due / Action needed)
-- Default payment method (masked card)
-- Credits available
-- "Fix payment method" CTA when action needed
-- Links to methods and history
+**Problem**: Line 53 tries `.select("*, provider_payout_accounts!inner(processor_account_id)")` but there's no FK from `provider_payouts` to `provider_payout_accounts`. Both reference `provider_orgs` independently.
 
-### `/customer/billing/methods` (payment methods page)
-- List saved payment methods with default badge
-- Add new method (Stripe SetupIntent flow)
-- Remove method (guarded: cannot remove last if active subscription)
-- Set default
+**Fix**: Query in two steps:
+1. Fetch the payout by ID
+2. Separately query `provider_payout_accounts` by `provider_org_id` from the payout
 
-### `/customer/billing/history` (invoice list)
-- List of invoices: date range, type badge, status pill, amount
-- Tap to view receipt
-
-### `/customer/billing/receipts/:invoiceId` (receipt detail)
-- Plan + cycle period
-- Line items grouped: Plan, Add-ons, Credits, Taxes
-- Total, payment status, masked method
-- If failed: next retry + "Fix payment" CTA
+**Changes**: `supabase/functions/process-payout/index.ts`
 
 ---
 
-## Phase 6: Provider payouts UI
+### E2: invoice.payment_failed inserts null invoice_id into NOT NULL column
 
-### `/provider/payouts` (overview page -- replaces Earnings placeholder)
-- Next payout date (if READY)
-- Available balance (eligible)
-- On hold balance
-- CTA if NOT_READY: "Set up payouts"
-- "You're all set" when healthy
+**Problem**: Line 273 uses `invoice_id: null as any` but `customer_payments.invoice_id` is `NOT NULL`.
 
-### `/provider/payouts/onboarding`
-- Processor-hosted onboarding redirect
-- Status display: NOT_READY / PENDING_VERIFICATION / READY / RESTRICTED
-- If RESTRICTED: "Action required" with processor link
+**Fix**: Look up the internal invoice by `processor_invoice_id` or `subscription_id + status`. If no matching internal invoice exists, skip the payment record insertion (the exception is still created).
 
-### `/provider/payouts/history` (earnings + payouts list)
-- Earnings by job: date, property label, amount, status
-- Payouts list: date, total, status
-
-### `/provider/payouts/payouts/:payoutId` (payout detail)
-- Total, date, included earnings, status
-
-### Hold context submission
-- "Under review" indicator on held earnings
-- One-time "Add context" form: reason category, 200-char note, optional photo
+**Changes**: `supabase/functions/stripe-webhook/index.ts` — `invoice.payment_failed` case
 
 ---
 
-## Phase 7: Admin billing and payouts UI
+### A1: No automatic earning creation on job completion
 
-### `/admin/billing` (overview dashboard)
-- Collected today/week, failed payments count, credits/refunds issued, disputes count
+**Problem**: `create_provider_earning` RPC exists but is never called from `complete_job` or `admin_override_complete_job`.
 
-### `/admin/billing/customers/:customerId` (customer ledger)
-- Subscription status, cycle boundaries
-- Invoice list with line items
-- Credits/refunds with reasons
-- Dunning attempts, next retry
-- Admin actions: retry payment, apply credit, issue refund, pause/cancel subscription
+**Fix**: Add `PERFORM create_provider_earning(p_job_id)` at the end of both `complete_job` (after the COMPLETED update) and `admin_override_complete_job`. Wrap in a BEGIN/EXCEPTION block so earning creation failure doesn't block job completion.
 
-### `/admin/payouts` (overview + provider list)
-- Payout stats, pending payouts, held earnings count
-
-### `/admin/payouts/providers/:providerOrgId` (provider ledger)
-- Onboarding status
-- Earnings ledger per job
-- Holds + provider context
-- Admin actions: release hold, apply adjustment, suspend payouts
-
-### `/admin/exceptions` (unified exception queue)
-- Failed payments, disputes, payout failures, holds
-- Each card: type, severity, impacted entity, "next best action" CTA
-- Suggested resolutions: credit tiers, release hold, escalate
-
-### `/admin/settings/payments` (policy configuration -- optional/placeholder)
-- Retry cadence, thresholds, hold rules, credit tiers
+**Changes**: Migration to replace both RPCs with the earning call added.
 
 ---
 
-## Phase 8: Routing, navigation, and wiring
+### E4: No account.updated webhook handler
 
-### App.tsx routing updates
-- Add customer routes: `/customer/billing/methods`, `/customer/billing/history`, `/customer/billing/receipts/:invoiceId`
-- Replace provider earnings route with payouts routes: `/provider/payouts`, `/provider/payouts/onboarding`, `/provider/payouts/history`, `/provider/payouts/payouts/:payoutId`
-- Add admin routes: `/admin/billing`, `/admin/billing/customers/:customerId`, `/admin/payouts`, `/admin/payouts/providers/:providerOrgId`, `/admin/exceptions`
+**Problem**: When providers complete Stripe Connect onboarding, the `account.updated` event fires. Without handling it, `provider_payout_accounts.status` is never updated to `READY`.
 
-### Sidebar updates
-- Customer: "Billing" link already present (keep as-is, points to `/customer/billing`)
-- Provider: Change "Earnings" to "Payouts" pointing to `/provider/payouts`
-- Admin: Add "Billing", "Payouts", "Exceptions" nav items
+**Fix**: Add `account.updated` case to the webhook handler:
+- Check `account.charges_enabled` and `account.payouts_enabled`
+- If both true: update status to `READY`
+- If `account.requirements.currently_due` has items: `RESTRICTED`
+- Otherwise: `PENDING_VERIFICATION`
+- Also transition any `HELD_UNTIL_READY` earnings to `EARNED` (with hold_until set) when status becomes READY
 
-### Bottom tab bar / More menu updates
-- Provider: update "Earnings" tab label to "Payouts" with updated path
-- Admin More menu: add Billing, Payouts, Exceptions
+**Changes**: `supabase/functions/stripe-webhook/index.ts`
 
 ---
 
-## Technical notes
+## SHOULD FIX (8 issues)
 
-- All amounts in cents (integer) -- no floating point
-- Idempotency keys on all financial operations (UNIQUE constraints)
-- Append-only ledger_events tables -- never update/delete rows
-- Webhook deduplication by processor_event_id
-- Stripe API version: `2025-08-27.basil` for new edge functions
-- Provider payouts use Stripe Connect (Express accounts)
-- Payment methods use Stripe SetupIntents (not raw card data)
-- RLS strictly scoped: customers see only own data, providers see only own org data
-- All admin actions require reason and produce audit log entries
+### D1: Missing provider_ledger_events table
+
+**Fix**: Create `provider_ledger_events` table mirroring `customer_ledger_events` structure with `provider_org_id`, `event_type`, `earning_id`, `payout_id`, `amount_cents`, `balance_after_cents`, `metadata`, `created_at`. RLS: providers read own, admins read all, no direct inserts (RPCs only). Then update `run_payout_batch` and `admin_release_hold` RPCs to write ledger events.
+
+**Changes**: New migration for table + RLS + RPC updates.
+
+---
+
+### D4: Missing UNIQUE(customer_id, processor_ref) on customer_payment_methods
+
+**Fix**: Add unique constraint so the webhook upsert on `onConflict: "customer_id,processor_ref"` works.
+
+**Changes**: Migration: `ALTER TABLE public.customer_payment_methods ADD CONSTRAINT customer_payment_methods_customer_processor_unique UNIQUE (customer_id, processor_ref);`
+
+---
+
+### S3: create_provider_earning not called from complete_job
+
+Covered by A1 fix above.
+
+---
+
+### E3: invoice.payment_succeeded marks ALL DUE invoices as PAID
+
+**Fix**: Match by `processor_invoice_id` instead of just `customer_id + status`. First try to find invoice by `processor_invoice_id`, then fall back to most recent DUE invoice for the customer (not all of them).
+
+**Changes**: `supabase/functions/stripe-webhook/index.ts` — `invoice.payment_succeeded` case
+
+---
+
+### S4: generate_subscription_invoice burns all credits regardless of need
+
+**Fix**: In the RPC, accumulate credits only up to the invoice total. Stop the loop once `v_credits_cents >= v_total_cents`. Only mark credits as APPLIED that were actually consumed.
+
+**Changes**: Part of the `generate_subscription_invoice` RPC rewrite.
+
+---
+
+### P11: No admin customer billing ledger page
+
+**Fix**: Create `/admin/billing/customers/:customerId` page showing:
+- Customer name, subscription status
+- Invoice history with line items
+- Credits and refunds
+- Admin action buttons: Apply Credit, Issue Refund, Void Invoice, Retry Payment
+
+**Changes**: New file `src/pages/admin/CustomerLedger.tsx`, route in `App.tsx`, hook `useAdminCustomerLedger`.
+
+---
+
+### P12: No admin provider ledger page
+
+**Fix**: Create `/admin/payouts/providers/:providerOrgId` page showing:
+- Provider org name, payout account status
+- Earnings list with job links
+- Holds with provider context
+- Admin actions: Release Hold
+
+**Changes**: New file `src/pages/admin/ProviderLedger.tsx`, route in `App.tsx`, hook `useAdminProviderLedger`.
+
+---
+
+### A2-A4: No scheduling/automation
+
+These require cron jobs. We'll create a single `run-billing-automation` edge function that handles:
+- `transition_eligible_earnings()` — move EARNED to ELIGIBLE
+- Invoice generation for subscriptions approaching cycle end
+
+And wire it up with a `pg_cron` SQL insert (via the insert tool, not migration).
+
+**Changes**: New edge function `supabase/functions/run-billing-automation/index.ts`, `supabase/config.toml` update, cron SQL.
+
+---
+
+## NICE TO HAVE (deferred)
+
+The following are acknowledged but deferred to keep this fix focused:
+- D2/D3: CHECK constraints on status columns (low risk, text works)
+- P1/P2: Remove payment method + guard (stub exists)
+- P3/P4: Receipt payment method display + retry timing
+- P5/P6: Provider payout date display + RESTRICTED handling
+- P7-P9: Earnings property label, eligible date, payout detail route
+- P10: Admin stats for credits/disputes
+- P13-P15: Exception queue action CTAs
+- A5: Add-on billing flow
+- E5: Dispute handler entity linking
+- E6: Webhook signature enforcement (deployment config concern)
+
+---
+
+## Summary of All Changes
+
+| File | Change |
+|------|--------|
+| New migration SQL | S1: `run_payout_batch` uses `IN_PAYOUT` instead of `PAID` |
+| New migration SQL | S2+S4: `generate_subscription_invoice` parses price, caps credits |
+| New migration SQL | A1+S3: `complete_job` and `admin_override_complete_job` call `create_provider_earning` |
+| New migration SQL | D1: Create `provider_ledger_events` table + RLS |
+| New migration SQL | D4: Add UNIQUE(customer_id, processor_ref) on payment methods |
+| `supabase/functions/process-payout/index.ts` | E1: Two-step query instead of broken join |
+| `supabase/functions/stripe-webhook/index.ts` | E2: Skip payment record if no matching invoice |
+| `supabase/functions/stripe-webhook/index.ts` | E3: Match by processor_invoice_id |
+| `supabase/functions/stripe-webhook/index.ts` | E4: Add `account.updated` handler |
+| `supabase/functions/stripe-webhook/index.ts` | S1: `transfer.paid`/`failed` update earnings status |
+| `src/pages/admin/CustomerLedger.tsx` | P11: Admin customer billing detail page |
+| `src/pages/admin/ProviderLedger.tsx` | P12: Admin provider ledger detail page |
+| `src/hooks/useAdminCustomerLedger.ts` | Hook for customer ledger data |
+| `src/hooks/useAdminProviderLedger.ts` | Hook for provider ledger data |
+| `src/App.tsx` | New routes for customer + provider ledger pages |
+| `supabase/functions/run-billing-automation/index.ts` | A2-A4: Scheduled automation function |
+| `supabase/config.toml` | Register new edge function |
 
