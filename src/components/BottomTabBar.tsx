@@ -14,9 +14,9 @@ interface TabItem {
 
 const customerTabs: TabItem[] = [
   { label: "Home", icon: Home, path: "/customer" },
-  { label: "Service Day", icon: CalendarDays, path: "/customer/build" },
+  { label: "Plans", icon: CreditCard, path: "/customer/plans" },
+  { label: "Routine", icon: CalendarDays, path: "/customer/routine" },
   { label: "History", icon: History, path: "/customer/history" },
-  { label: "Subscription", icon: CreditCard, path: "/customer/subscription" },
   { label: "More", icon: MoreHorizontal, path: "/customer/more" },
 ];
 

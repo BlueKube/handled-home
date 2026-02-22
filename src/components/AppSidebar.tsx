@@ -13,12 +13,13 @@ import logo from "@/assets/handled-home-logo.png";
 
 const customerNav = [
   { title: "Dashboard", url: "/customer", icon: Home },
-  { title: "Build Service Day", url: "/customer/build", icon: CalendarDays },
+  { title: "Plans", url: "/customer/plans", icon: CreditCard },
+  { title: "Build Routine", url: "/customer/routine", icon: CalendarDays },
   { title: "Services", url: "/customer/services", icon: Package },
   { title: "Service History", url: "/customer/history", icon: History },
-  { title: "Subscription", url: "/customer/subscription", icon: CreditCard },
+  { title: "Subscription", url: "/customer/subscription", icon: Wallet },
   { title: "Property", url: "/customer/property", icon: MapPin },
-  { title: "Billing", url: "/customer/billing", icon: Wallet },
+  { title: "Billing", url: "/customer/billing", icon: DollarSign },
   { title: "Referrals", url: "/customer/referrals", icon: Users },
   { title: "Support", url: "/customer/support", icon: HelpCircle },
   { title: "Settings", url: "/customer/settings", icon: Settings },
@@ -38,9 +39,9 @@ const providerNav = [
 const adminNav = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
   { title: "Regions & Zones", url: "/admin/zones", icon: Globe },
-  
   { title: "SKU Catalog", url: "/admin/skus", icon: Package },
   { title: "Plans", url: "/admin/plans", icon: CreditCard },
+  { title: "Subscriptions", url: "/admin/subscriptions", icon: Wallet },
   { title: "Providers", url: "/admin/providers", icon: Shield },
   { title: "Scheduling", url: "/admin/scheduling", icon: CalendarDays },
   { title: "Support", url: "/admin/support", icon: HelpCircle },

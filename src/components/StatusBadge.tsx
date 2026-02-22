@@ -29,6 +29,13 @@ const statusStyles: Record<string, { label: string; className: string; dotColor:
   paused: { label: "Paused", className: "bg-warning text-warning-foreground", dotColor: "bg-warning-foreground/70" },
   expansion_planned: { label: "Expansion Planned", className: "bg-primary text-primary-foreground", dotColor: "bg-primary-foreground/70" },
   archived: { label: "Archived", className: "border border-border bg-transparent text-muted-foreground", dotColor: "bg-muted-foreground" },
+  hidden: { label: "Hidden", className: "bg-secondary text-secondary-foreground", dotColor: "bg-muted-foreground" },
+  retired: { label: "Retired", className: "border border-border bg-transparent text-muted-foreground", dotColor: "bg-muted-foreground" },
+  trialing: { label: "Trialing", className: "bg-primary text-primary-foreground", dotColor: "bg-primary-foreground/70" },
+  past_due: { label: "Past Due", className: "bg-destructive text-destructive-foreground", dotColor: "bg-destructive-foreground/70" },
+  incomplete: { label: "Incomplete", className: "bg-warning text-warning-foreground", dotColor: "bg-warning-foreground/70" },
+  canceling: { label: "Canceling", className: "bg-warning text-warning-foreground", dotColor: "bg-warning-foreground/70" },
+  canceled: { label: "Canceled", className: "border border-border bg-transparent text-muted-foreground", dotColor: "bg-muted-foreground" },
 };
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {

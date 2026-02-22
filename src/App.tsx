@@ -24,6 +24,10 @@ import CustomerReferrals from "@/pages/customer/Referrals";
 import CustomerSupport from "@/pages/customer/Support";
 import CustomerSettings from "@/pages/customer/Settings";
 import CustomerServices from "@/pages/customer/Services";
+import CustomerPlans from "@/pages/customer/Plans";
+import CustomerPlanDetail from "@/pages/customer/PlanDetail";
+import CustomerRoutine from "@/pages/customer/Routine";
+import CustomerSubscribe from "@/pages/customer/Subscribe";
 
 // Provider pages
 import ProviderDashboard from "@/pages/provider/Dashboard";
@@ -41,6 +45,7 @@ import AdminZones from "@/pages/admin/Zones";
 import AdminCapacity from "@/pages/admin/Capacity";
 import AdminSKUs from "@/pages/admin/SKUs";
 import AdminPlans from "@/pages/admin/Plans";
+import AdminSubscriptions from "@/pages/admin/Subscriptions";
 import AdminProviders from "@/pages/admin/Providers";
 import AdminScheduling from "@/pages/admin/Scheduling";
 import AdminSupport from "@/pages/admin/Support";
@@ -73,6 +78,10 @@ const App = () => (
               {/* Customer App */}
               <Route element={<ProtectedRoute requiredRole="customer"><AppLayout /></ProtectedRoute>}>
                 <Route path="/customer/property" element={<CustomerProperty />} />
+                <Route path="/customer/plans" element={<CustomerPlans />} />
+                <Route path="/customer/plans/:planId" element={<CustomerPlanDetail />} />
+                <Route path="/customer/routine" element={<CustomerRoutine />} />
+                <Route path="/customer/subscribe" element={<CustomerSubscribe />} />
                 <Route path="/customer" element={<CustomerPropertyGate><CustomerDashboard /></CustomerPropertyGate>} />
                 <Route path="/customer/build" element={<CustomerPropertyGate><CustomerBuild /></CustomerPropertyGate>} />
                 <Route path="/customer/history" element={<CustomerPropertyGate><CustomerHistory /></CustomerPropertyGate>} />
@@ -105,6 +114,7 @@ const App = () => (
                 <Route path="/admin/capacity" element={<AdminCapacity />} />
                 <Route path="/admin/skus" element={<AdminSKUs />} />
                 <Route path="/admin/plans" element={<AdminPlans />} />
+                <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
                 <Route path="/admin/providers" element={<AdminProviders />} />
                 <Route path="/admin/scheduling" element={<AdminScheduling />} />
                 <Route path="/admin/support" element={<AdminSupport />} />
