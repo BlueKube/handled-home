@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/handled-home-logo.png";
 
@@ -87,28 +88,12 @@ export default function AuthPage() {
       </div>
 
       {/* Tab switcher */}
-      <div className="flex bg-secondary rounded-full p-1 mb-8 mx-auto w-full max-w-xs">
-        <button
-          onClick={() => setTab("login")}
-          className={`flex-1 py-2.5 text-sm font-semibold rounded-full transition-colors ${
-            tab === "login"
-              ? "bg-card text-foreground shadow-sm"
-              : "text-muted-foreground"
-          }`}
-        >
-          Log In
-        </button>
-        <button
-          onClick={() => setTab("signup")}
-          className={`flex-1 py-2.5 text-sm font-semibold rounded-full transition-colors ${
-            tab === "signup"
-              ? "bg-card text-foreground shadow-sm"
-              : "text-muted-foreground"
-          }`}
-        >
-          Sign Up
-        </button>
-      </div>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as "login" | "signup")} className="mb-8 mx-auto w-full max-w-xs">
+        <TabsList className="w-full rounded-full">
+          <TabsTrigger value="login" className="flex-1 rounded-full">Log In</TabsTrigger>
+          <TabsTrigger value="signup" className="flex-1 rounded-full">Sign Up</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       {/* Forms */}
       {tab === "login" ? (
