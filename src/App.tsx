@@ -28,6 +28,7 @@ import CustomerPlans from "@/pages/customer/Plans";
 import CustomerPlanDetail from "@/pages/customer/PlanDetail";
 import CustomerRoutine from "@/pages/customer/Routine";
 import CustomerSubscribe from "@/pages/customer/Subscribe";
+import CustomerServiceDay from "@/pages/customer/ServiceDay";
 
 // Provider pages
 import ProviderDashboard from "@/pages/provider/Dashboard";
@@ -53,6 +54,7 @@ import AdminIncentives from "@/pages/admin/Incentives";
 import AdminReports from "@/pages/admin/Reports";
 import AdminAudit from "@/pages/admin/Audit";
 import AdminSettings from "@/pages/admin/Settings";
+import AdminServiceDays from "@/pages/admin/ServiceDays";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +84,7 @@ const App = () => (
                 <Route path="/customer/plans/:planId" element={<CustomerPlanDetail />} />
                 <Route path="/customer/routine" element={<CustomerRoutine />} />
                 <Route path="/customer/subscribe" element={<CustomerSubscribe />} />
+                <Route path="/customer/service-day" element={<CustomerPropertyGate><CustomerServiceDay /></CustomerPropertyGate>} />
                 <Route path="/customer" element={<CustomerPropertyGate><CustomerDashboard /></CustomerPropertyGate>} />
                 <Route path="/customer/build" element={<CustomerPropertyGate><CustomerBuild /></CustomerPropertyGate>} />
                 <Route path="/customer/history" element={<CustomerPropertyGate><CustomerHistory /></CustomerPropertyGate>} />
@@ -117,6 +120,7 @@ const App = () => (
                 <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
                 <Route path="/admin/providers" element={<AdminProviders />} />
                 <Route path="/admin/scheduling" element={<AdminScheduling />} />
+                <Route path="/admin/service-days" element={<AdminServiceDays />} />
                 <Route path="/admin/support" element={<AdminSupport />} />
                 <Route path="/admin/incentives" element={<AdminIncentives />} />
                 <Route path="/admin/reports" element={<AdminReports />} />

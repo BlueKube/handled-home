@@ -422,6 +422,180 @@ export type Database = {
         }
         Relationships: []
       }
+      service_day_assignments: {
+        Row: {
+          created_at: string
+          customer_id: string
+          day_of_week: string
+          id: string
+          property_id: string
+          reason_code: string | null
+          rejection_used: boolean
+          reserved_until: string | null
+          service_window: string
+          status: string
+          updated_at: string
+          zone_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          day_of_week: string
+          id?: string
+          property_id: string
+          reason_code?: string | null
+          rejection_used?: boolean
+          reserved_until?: string | null
+          service_window?: string
+          status?: string
+          updated_at?: string
+          zone_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          day_of_week?: string
+          id?: string
+          property_id?: string
+          reason_code?: string | null
+          rejection_used?: boolean
+          reserved_until?: string | null
+          service_window?: string
+          status?: string
+          updated_at?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_day_assignments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_day_assignments_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_day_offers: {
+        Row: {
+          accepted: boolean
+          assignment_id: string
+          created_at: string
+          id: string
+          offer_type: string
+          offered_day_of_week: string
+          offered_window: string
+          rank: number
+        }
+        Insert: {
+          accepted?: boolean
+          assignment_id: string
+          created_at?: string
+          id?: string
+          offer_type?: string
+          offered_day_of_week: string
+          offered_window?: string
+          rank?: number
+        }
+        Update: {
+          accepted?: boolean
+          assignment_id?: string
+          created_at?: string
+          id?: string
+          offer_type?: string
+          offered_day_of_week?: string
+          offered_window?: string
+          rank?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_day_offers_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "service_day_assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_day_override_log: {
+        Row: {
+          actor_admin_id: string
+          after: Json
+          assignment_id: string
+          before: Json
+          created_at: string
+          id: string
+          notes: string | null
+          reason: string
+        }
+        Insert: {
+          actor_admin_id: string
+          after: Json
+          assignment_id: string
+          before: Json
+          created_at?: string
+          id?: string
+          notes?: string | null
+          reason: string
+        }
+        Update: {
+          actor_admin_id?: string
+          after?: Json
+          assignment_id?: string
+          before?: Json
+          created_at?: string
+          id?: string
+          notes?: string | null
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_day_override_log_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "service_day_assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_day_preferences: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          preferred_days: string[]
+          property_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          preferred_days?: string[]
+          property_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          preferred_days?: string[]
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_day_preferences_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_skus: {
         Row: {
           base_price_cents: number
@@ -693,6 +867,47 @@ export type Database = {
           },
         ]
       }
+      zone_service_day_capacity: {
+        Row: {
+          assigned_count: number
+          buffer_percent: number
+          day_of_week: string
+          id: string
+          max_homes: number
+          service_window: string
+          updated_at: string
+          zone_id: string
+        }
+        Insert: {
+          assigned_count?: number
+          buffer_percent?: number
+          day_of_week: string
+          id?: string
+          max_homes: number
+          service_window?: string
+          updated_at?: string
+          zone_id: string
+        }
+        Update: {
+          assigned_count?: number
+          buffer_percent?: number
+          day_of_week?: string
+          id?: string
+          max_homes?: number
+          service_window?: string
+          updated_at?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zone_service_day_capacity_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       zone_service_week_config: {
         Row: {
           anchor_day: number
@@ -739,6 +954,7 @@ export type Database = {
       }
       zones: {
         Row: {
+          alternative_strategy: string
           buffer_percent: number
           created_at: string
           default_service_day: Database["public"]["Enums"]["day_of_week"]
@@ -747,12 +963,14 @@ export type Database = {
           max_minutes_per_day: number
           max_stops_per_day: number
           name: string
+          offer_ttl_hours: number
           region_id: string
           status: string
           updated_at: string
           zip_codes: string[]
         }
         Insert: {
+          alternative_strategy?: string
           buffer_percent?: number
           created_at?: string
           default_service_day?: Database["public"]["Enums"]["day_of_week"]
@@ -761,12 +979,14 @@ export type Database = {
           max_minutes_per_day?: number
           max_stops_per_day?: number
           name: string
+          offer_ttl_hours?: number
           region_id: string
           status?: string
           updated_at?: string
           zip_codes?: string[]
         }
         Update: {
+          alternative_strategy?: string
           buffer_percent?: number
           created_at?: string
           default_service_day?: Database["public"]["Enums"]["day_of_week"]
@@ -775,6 +995,7 @@ export type Database = {
           max_minutes_per_day?: number
           max_stops_per_day?: number
           name?: string
+          offer_ttl_hours?: number
           region_id?: string
           status?: string
           updated_at?: string
@@ -795,13 +1016,37 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_override_service_day: {
+        Args: {
+          p_assignment_id: string
+          p_new_day: string
+          p_new_window: string
+          p_notes?: string
+          p_reason: string
+        }
+        Returns: Json
+      }
       bootstrap_new_user: { Args: { _full_name: string }; Returns: undefined }
+      cleanup_expired_offers: { Args: never; Returns: Json }
+      confirm_service_day: { Args: { p_assignment_id: string }; Returns: Json }
+      create_or_refresh_service_day_offer: {
+        Args: { p_property_id: string }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      reject_service_day_once: {
+        Args: { p_assignment_id: string }
+        Returns: Json
+      }
+      select_alternative_service_day: {
+        Args: { p_assignment_id: string; p_offer_id: string }
+        Returns: Json
       }
     }
     Enums: {
