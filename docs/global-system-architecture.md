@@ -11,7 +11,7 @@ This document is the **single source of truth** for how modules 01–14 stay con
 
 It defines:
 - canonical domain language
-- shared schema “spine”
+- shared schema "spine"
 - global enums + state machines
 - routing + role gating
 - rules engine boundaries
@@ -106,7 +106,23 @@ Values (canonical):
 - RESOLVED
 - CLOSED
 
-Rule: every state change writes an immutable event row (e.g., `job_events`, `ticket_events`).
+### Invoice status
+UPCOMING → DUE → PAID / FAILED / VOID
+
+### Payment status
+INITIATED → SUCCEEDED / FAILED
+
+### Earning status
+EARNED → ELIGIBLE → IN_PAYOUT → PAID  
+Hold branches: HELD (manual hold) / HELD_UNTIL_READY (payout account not ready)
+
+### Payout status
+INITIATED → PAID / FAILED
+
+### Hold status
+ACTIVE → RELEASED / EXPIRED
+
+Rule: every state change writes an immutable event row (e.g., `job_events`, `ticket_events`, `customer_ledger_events`, `provider_ledger_events`).
 
 ---
 
@@ -115,68 +131,92 @@ Rule: every state change writes an immutable event row (e.g., `job_events`, `tic
 ### Identity & access
 - profiles
 - user_roles
-- audit_logs
+- admin_audit_log
 
 ### Customer
-- households
-- household_members
 - properties
 
 ### Ops
 - regions
 - zones
-- zone_service_days
-- capacity_limits
-- capacity_usage
+- zone_zip_codes
+- zone_service_week_configs
+- zone_ops_configs
+- service_day_assignments
+- service_day_offers
+- seasonal_service_templates
 
 ### Catalog
-- skus
-- sku_requirements
-- sku_pricing_rules
+- service_skus
+- sku_checklist_templates
 - plans
-- plan_rules
+- plan_entitlement_versions
+- plan_entitlement_sku_rules
+- plan_zone_availability
 
 ### Subscription & scheduling
 - subscriptions
-- service_day_assignments
-- service_day_instances
-- bundle_cycles
-- bundles
-- bundle_items
+- customer_plan_selections
+- customer_seasonal_selections
+- routines
+- routine_versions
+- routine_items
 
 ### Execution
 - jobs
+- job_skus
 - job_events
-- checklist_templates
-- checklist_responses
-- photo_evidence
+- job_checklist_items
+- job_photos
+- job_issues
 
 ### Provider
 - provider_orgs
 - provider_members
+- provider_invites
 - provider_coverage
-- provider_performance_snapshots
+- provider_capabilities
+- provider_compliance
+- provider_risk_flags
 - provider_enforcement_actions
 
-### Financial
-- payments
-- refunds
+### Financial — Customer
+- customer_payment_methods
+- customer_invoices
+- customer_invoice_line_items
+- customer_payments
+- customer_ledger_events
+- customer_credits
+
+### Financial — Provider
+- provider_payout_accounts
+- provider_earnings
 - provider_payouts
-- payout_line_items
+- provider_payout_line_items
+- provider_holds
+- provider_hold_context
+- provider_ledger_events
+
+### Financial — System
+- payment_webhook_events
+- billing_runs
+- payout_runs
+- admin_adjustments
+- billing_exceptions
 
 ### Support
-- support_tickets
-- ticket_events
-- dispute_records
+- customer_issues
+- support_tickets (Module 12)
+- ticket_events (Module 12)
+- dispute_records (Module 12)
 
 ### Growth
-- referrals
-- incentive_campaigns
-- fraud_flags
+- referrals (Module 13)
+- incentive_campaigns (Module 13)
 
 ### Analytics
-- event_log
-- daily_metrics_rollups
+- event_log (Module 14)
+- daily_metrics_rollups (Module 14)
 
 Rule: modules may extend schema, but must not rename these concepts.
 
@@ -192,6 +232,9 @@ UI must never compute:
 - weather rescheduling outcomes
 - provider reassignment outcomes
 - SLA enforcement triggers
+- invoice amounts or credit application
+- earning eligibility or hold transitions
+- payout thresholds
 
 Rules engine owns:
 - Service Day assignment
@@ -202,11 +245,16 @@ Rules engine owns:
 - reschedule cutoffs/fees
 - weather mode
 - SLA enforcement ladders
+- Invoice generation (cycle-based, idempotent via idempotency_key)
+- Dunning retry schedule (+1d, +3d, +5d; pause after N failures)
+- Earning hold/release logic (severity-based, admin-releasable)
+- Payout threshold + eligibility transition (EARNED → ELIGIBLE after hold window)
+- Credit application (capped to invoice total, oldest-first)
 
 Implementation options:
 - Postgres RPC functions
 - Supabase Edge Functions
-- scheduled jobs
+- scheduled jobs (pg_cron or edge function cron)
 
 Rule: one interface, used by all modules.
 
@@ -220,13 +268,15 @@ Rule: one interface, used by all modules.
 - consistent ownership keys
 - providers see only assigned jobs
 - admin actions are auditable
+- customers never see raw payment data — only masked references
 
 ### Audit logging (required)
 Log any change affecting:
-- money (refunds, fee overrides, payouts)
+- money (refunds, fee overrides, payouts, credits, adjustments)
 - access (roles, impersonation)
 - scheduling (overrides, reschedules, capacity edits)
 - governance (SKU/plan rules, provider enforcement)
+- billing (invoice voids, manual retries, hold releases)
 
 Rule: if it changes money, access, or scheduling → audit log row.
 
@@ -234,7 +284,7 @@ Rule: if it changes money, access, or scheduling → audit log row.
 
 ## 9) Media (photo proof) standards
 - Store photos in Supabase Storage
-- Create DB rows in `photo_evidence` for each required slot
+- Create DB rows in `job_photos` for each required slot
 - Use signed URLs
 - Required proof blocks completion
 - Define retention policy globally and follow it
@@ -250,6 +300,11 @@ Examples:
 - bundle_confirmed
 - job_completed
 - ticket_created
+- invoice_generated
+- payment_failed
+- earning_created
+- payout_initiated
+- hold_released
 
 ### Canonical KPIs
 - Service Day acceptance
@@ -261,8 +316,10 @@ Examples:
 - Density (stops per zone/day)
 - Churn + retention cohorts
 - Gross margin per zone/day
+- Support minutes per job
+- Offer expiry rate
 
-Rule: don’t invent new names for existing KPIs/events.
+Rule: don't invent new names for existing KPIs/events.
 
 ---
 
@@ -291,7 +348,7 @@ Every module must include (same order):
 
 ---
 
-## 13) Global “don’t break this” list
+## 13) Global "don't break this" list
 - No free-form calendar scheduling anywhere.
 - No SKU scope outside SKU catalog.
 - No bypass of capacity validation.
@@ -299,3 +356,5 @@ Every module must include (same order):
 - No cross-role route bleed.
 - No provider access to non-assigned customer data.
 - No optional proof-of-work on governed SKUs.
+- No direct status changes — all transitions go through RPCs or edge functions.
+- No client-side invoice/earning calculations — server computes, client displays.

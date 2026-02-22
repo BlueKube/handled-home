@@ -3,11 +3,22 @@
 ## Customer App Pages
 
 - Dashboard
-- Build My Service Day
-- Service History
-- Subscription & Plan
+- Service Day (assignment/offer/accept/reject flow)
+- Build My Routine (SKU selection + cadence picker)
+- Routine Review (4-week preview + confirmation)
+- Routine Confirm (success + next steps)
+- Service History (visit timeline)
+- Visit Detail (photos, checklist, issue reporting)
+- Plans (browse available plans)
+- Plan Detail
+- Subscribe (checkout flow)
+- Subscription (current plan + status)
 - Property Profile
-- Wallet & Billing
+- Billing Overview (current cycle, payment status, credits)
+- Payment Methods (add/manage cards via Stripe)
+- Billing History (invoice list)
+- Receipt Detail (line items, status, fix payment CTA)
+- Issues (submitted issue list)
 - Referrals
 - Support
 - Account Settings
@@ -16,12 +27,23 @@
 
 ## Provider App Pages
 
-- Today’s Jobs
-- Job Detail
-- Earnings
-- Performance
+- Dashboard (today's jobs, upcoming)
+- Jobs List (assigned jobs)
+- Job Detail (scope, property, checklist)
+- Job Checklist (item-by-item completion)
+- Job Photos (proof-of-work capture)
+- Job Complete (summary + submit)
+- Onboarding — Org Setup
+- Onboarding — Coverage (zone selection)
+- Onboarding — Capabilities (SKU authorization)
+- Onboarding — Compliance (insurance, tax, background)
+- Onboarding — Review (final submission)
 - Organization Settings
 - Coverage & Capacity
+- SKUs (authorized services)
+- Payouts Overview (account status, balances)
+- Payout History (earnings + payouts)
+- Performance
 - Account Settings
 
 ---
@@ -29,12 +51,23 @@
 ## Admin Console Pages
 
 - Overview Dashboard
-- Regions & Zones
-- Capacity Engine
-- SKU Catalog
-- Subscription Plans
-- Providers
+- Regions & Zones (region CRUD, zone CRUD, zip management)
+- Service Days (zone service day config, overrides)
+- Capacity (zone capacity panel)
+- SKU Catalog (CRUD, checklists, photo requirements)
+- Subscription Plans (plan + entitlement management)
+- Subscriptions (active subscription list)
+- Bundles (routine management)
+- Providers (list, detail, enforcement)
+- Provider Detail (org info, coverage, capabilities, compliance, risk)
 - Scheduling Operations
+- Jobs (job list, filters)
+- Job Detail (timeline, photos, issues, admin actions)
+- Billing (collected today, failed payments, overview)
+- Customer Ledger (per-customer invoice/credit/refund history)
+- Payouts (provider payout overview)
+- Provider Ledger (per-provider earnings/holds/payout history)
+- Exceptions (billing + payout exception queue)
 - Support Console
 - Incentives
 - Reporting & Analytics
@@ -55,21 +88,42 @@ Admin: Super Admin / Operations / Support / Finance
 
 Customer Signup:
 1. Create account
-2. Assigned Service Day
-3. Confirm
+2. Add property
+3. Select plan + subscribe
+4. Assigned Service Day → accept or pick alternative
+5. Build routine (select SKUs + cadences)
+6. Confirm → first service week scheduled
 
-Build Service Day:
-1. Select SKUs
-2. Review scope
-3. Confirm
+Build Routine:
+1. Select SKUs from catalog
+2. Set cadence per SKU (weekly, biweekly, monthly)
+3. Add seasonal boosts (optional)
+4. Review 4-week preview
+5. Confirm routine
 
-Provider Completion:
-1. Checklist
-2. Upload photos
-3. Mark complete
+Provider Job Completion:
+1. View today's jobs
+2. Open job → review checklist + property notes
+3. Complete checklist items
+4. Upload required photos (before/after per SKU)
+5. Submit completion → server validates
+6. Earning created automatically
 
-Admin Weather Mode:
-1. Activate zone weather
-2. Reschedule jobs
-3. Notify customers
+Customer Billing Fix:
+1. Dashboard shows "Payment failed" alert
+2. Tap → Billing Overview with "Fix" CTA
+3. Fix → Payment Methods → add/update card
+4. Retry payment
 
+Provider Payout Onboarding:
+1. Payouts page shows "Set up payouts"
+2. Tap → Stripe Connect Express onboarding (external)
+3. Return → account.updated webhook fires
+4. Status transitions to READY
+5. Next payout run includes eligible earnings
+
+Admin Exception Triage:
+1. Exceptions page shows queue (severity-sorted)
+2. Review exception type + entity context
+3. Take action (retry payment, release hold, void invoice, apply credit)
+4. Exception resolved + audit logged
