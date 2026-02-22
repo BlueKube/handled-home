@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth, AppRole } from "@/contexts/AuthContext";
 import {
   MapPin, Wallet, Users, HelpCircle, Settings,
-  Building2,
+  Building2, Package,
   Gauge, CreditCard, CalendarDays, Megaphone, FileText, Lock,
   LogOut, Moon, Sun,
 } from "lucide-react";
@@ -31,6 +31,7 @@ const providerMore: MenuItem[] = [
 const adminMore: MenuItem[] = [
   { label: "Capacity", icon: Gauge, path: "/admin/capacity" },
   { label: "Plans", icon: CreditCard, path: "/admin/plans" },
+  { label: "Bundles", icon: Package, path: "/admin/bundles" },
   { label: "Service Days", icon: CalendarDays, path: "/admin/service-days" },
   { label: "Scheduling", icon: CalendarDays, path: "/admin/scheduling" },
   { label: "Support", icon: HelpCircle, path: "/admin/support" },

@@ -353,7 +353,10 @@ export type Database = {
           city: string
           created_at: string
           gate_code: string | null
+          geohash: string | null
           id: string
+          lat: number | null
+          lng: number | null
           lot_size: string | null
           notes: string | null
           parking_instructions: string | null
@@ -369,7 +372,10 @@ export type Database = {
           city: string
           created_at?: string
           gate_code?: string | null
+          geohash?: string | null
           id?: string
+          lat?: number | null
+          lng?: number | null
           lot_size?: string | null
           notes?: string | null
           parking_instructions?: string | null
@@ -385,7 +391,10 @@ export type Database = {
           city?: string
           created_at?: string
           gate_code?: string | null
+          geohash?: string | null
           id?: string
+          lat?: number | null
+          lng?: number | null
           lot_size?: string | null
           notes?: string | null
           parking_instructions?: string | null
@@ -421,6 +430,172 @@ export type Database = {
           status?: string
         }
         Relationships: []
+      }
+      routine_items: {
+        Row: {
+          cadence_detail: Json
+          cadence_type: Database["public"]["Enums"]["cadence_type"]
+          checklist_count: number | null
+          created_at: string
+          duration_minutes: number | null
+          fulfillment_mode: string | null
+          id: string
+          proof_photo_count: number | null
+          proof_photo_labels: Json | null
+          routine_version_id: string
+          sku_id: string
+          sku_name: string | null
+        }
+        Insert: {
+          cadence_detail?: Json
+          cadence_type?: Database["public"]["Enums"]["cadence_type"]
+          checklist_count?: number | null
+          created_at?: string
+          duration_minutes?: number | null
+          fulfillment_mode?: string | null
+          id?: string
+          proof_photo_count?: number | null
+          proof_photo_labels?: Json | null
+          routine_version_id: string
+          sku_id: string
+          sku_name?: string | null
+        }
+        Update: {
+          cadence_detail?: Json
+          cadence_type?: Database["public"]["Enums"]["cadence_type"]
+          checklist_count?: number | null
+          created_at?: string
+          duration_minutes?: number | null
+          fulfillment_mode?: string | null
+          id?: string
+          proof_photo_count?: number | null
+          proof_photo_labels?: Json | null
+          routine_version_id?: string
+          sku_id?: string
+          sku_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "routine_items_routine_version_id_fkey"
+            columns: ["routine_version_id"]
+            isOneToOne: false
+            referencedRelation: "routine_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "routine_items_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routine_versions: {
+        Row: {
+          created_at: string
+          effective_at: string | null
+          id: string
+          locked_at: string | null
+          routine_id: string
+          status: string
+          version_number: number
+        }
+        Insert: {
+          created_at?: string
+          effective_at?: string | null
+          id?: string
+          locked_at?: string | null
+          routine_id: string
+          status?: string
+          version_number?: number
+        }
+        Update: {
+          created_at?: string
+          effective_at?: string | null
+          id?: string
+          locked_at?: string | null
+          routine_id?: string
+          status?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "routine_versions_routine_id_fkey"
+            columns: ["routine_id"]
+            isOneToOne: false
+            referencedRelation: "routines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routines: {
+        Row: {
+          created_at: string
+          customer_id: string
+          effective_at: string | null
+          entitlement_version_id: string | null
+          id: string
+          plan_id: string
+          property_id: string
+          status: string
+          updated_at: string
+          zone_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          effective_at?: string | null
+          entitlement_version_id?: string | null
+          id?: string
+          plan_id: string
+          property_id: string
+          status?: string
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          effective_at?: string | null
+          entitlement_version_id?: string | null
+          id?: string
+          plan_id?: string
+          property_id?: string
+          status?: string
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "routines_entitlement_version_id_fkey"
+            columns: ["entitlement_version_id"]
+            isOneToOne: false
+            referencedRelation: "plan_entitlement_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "routines_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "routines_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "routines_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       service_day_assignments: {
         Row: {
@@ -835,6 +1010,47 @@ export type Database = {
         }
         Relationships: []
       }
+      zone_ops_config: {
+        Row: {
+          created_at: string
+          max_stops_per_week: number | null
+          provider_home_label: string | null
+          provider_home_lat: number | null
+          provider_home_lng: number | null
+          target_stops_per_week: number | null
+          updated_at: string
+          zone_id: string
+        }
+        Insert: {
+          created_at?: string
+          max_stops_per_week?: number | null
+          provider_home_label?: string | null
+          provider_home_lat?: number | null
+          provider_home_lng?: number | null
+          target_stops_per_week?: number | null
+          updated_at?: string
+          zone_id: string
+        }
+        Update: {
+          created_at?: string
+          max_stops_per_week?: number | null
+          provider_home_label?: string | null
+          provider_home_lat?: number | null
+          provider_home_lng?: number | null
+          target_stops_per_week?: number | null
+          updated_at?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zone_ops_config_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: true
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       zone_provider_assignments: {
         Row: {
           assignment_type: string
@@ -1028,6 +1244,7 @@ export type Database = {
       }
       bootstrap_new_user: { Args: { _full_name: string }; Returns: undefined }
       cleanup_expired_offers: { Args: never; Returns: Json }
+      confirm_routine: { Args: { p_routine_id: string }; Returns: Json }
       confirm_service_day: { Args: { p_assignment_id: string }; Returns: Json }
       create_or_refresh_service_day_offer: {
         Args: { p_property_id: string }
@@ -1055,6 +1272,12 @@ export type Database = {
     }
     Enums: {
       app_role: "customer" | "provider" | "admin"
+      cadence_type:
+        | "weekly"
+        | "biweekly"
+        | "four_week"
+        | "monthly"
+        | "quarterly"
       day_of_week:
         | "monday"
         | "tuesday"
@@ -1200,6 +1423,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["customer", "provider", "admin"],
+      cadence_type: ["weekly", "biweekly", "four_week", "monthly", "quarterly"],
       day_of_week: [
         "monday",
         "tuesday",
