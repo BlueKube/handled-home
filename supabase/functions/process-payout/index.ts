@@ -47,27 +47,37 @@ serve(async (req) => {
     const { payout_id } = await req.json();
     if (!payout_id) throw new Error("payout_id required");
 
-    // Get payout details
+    // E1 FIX: Two-step query instead of broken join
+    // Step 1: Get payout details
     const { data: payout, error: payoutErr } = await supabase
       .from("provider_payouts")
-      .select("*, provider_payout_accounts!inner(processor_account_id)")
+      .select("*")
       .eq("id", payout_id)
       .eq("status", "INITIATED")
       .single();
 
     if (payoutErr || !payout) throw new Error("Payout not found or not in INITIATED status");
 
-    const connectedAccountId = (payout as any).provider_payout_accounts?.processor_account_id;
-    if (!connectedAccountId) throw new Error("Provider has no connected account");
+    // Step 2: Get payout account separately by provider_org_id
+    const { data: payoutAccount, error: accountErr } = await supabase
+      .from("provider_payout_accounts")
+      .select("processor_account_id")
+      .eq("provider_org_id", payout.provider_org_id)
+      .eq("status", "READY")
+      .single();
+
+    if (accountErr || !payoutAccount?.processor_account_id) {
+      throw new Error("Provider has no connected account or account not READY");
+    }
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
-    logStep("Creating transfer", { amount: payout.total_cents, destination: connectedAccountId });
+    logStep("Creating transfer", { amount: payout.total_cents, destination: payoutAccount.processor_account_id });
 
     const transfer = await stripe.transfers.create({
       amount: payout.total_cents,
       currency: "usd",
-      destination: connectedAccountId,
+      destination: payoutAccount.processor_account_id,
       metadata: {
         payout_id: payout.id,
         provider_org_id: payout.provider_org_id,

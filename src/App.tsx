@@ -82,6 +82,8 @@ import AdminJobDetail from "@/pages/admin/JobDetail";
 import AdminBilling from "@/pages/admin/Billing";
 import AdminPayouts from "@/pages/admin/Payouts";
 import AdminExceptions from "@/pages/admin/Exceptions";
+import AdminCustomerLedger from "@/pages/admin/CustomerLedger";
+import AdminProviderLedger from "@/pages/admin/ProviderLedger";
 
 const queryClient = new QueryClient();
 
@@ -178,7 +180,9 @@ const App = () => (
                 <Route path="/admin/reports" element={<AdminReports />} />
                 <Route path="/admin/audit" element={<AdminAudit />} />
                 <Route path="/admin/billing" element={<AdminBilling />} />
+                <Route path="/admin/billing/customers/:customerId" element={<AdminCustomerLedger />} />
                 <Route path="/admin/payouts" element={<AdminPayouts />} />
+                <Route path="/admin/payouts/providers/:providerOrgId" element={<AdminProviderLedger />} />
                 <Route path="/admin/exceptions" element={<AdminExceptions />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
                 <Route path="/admin/more" element={<MoreMenuPage />} />
