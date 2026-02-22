@@ -15,6 +15,12 @@ The build follows a module-by-module sequence. Each module has a dedicated spec 
 | 03 | Zones and Capacity | Regions, zones, zip codes, stop/minute caps |
 | 04 | SKU Catalog | Governed service definitions, checklists, photo requirements |
 | 05 | Subscription Engine | 28-day billing cycles + weekly service weeks, no rollover, Stripe integration |
+| 06 | Service Day System | Zone-based assignment, offer/accept/reject, TTL cleanup, capacity checks |
+| 07 | Bundle Builder | SKU stacking per service week, cadence picker, 4-week preview, seasonal boosts |
+| 08 | Provider Onboarding | Org creation, invite flow, zone coverage, capability matching, compliance |
+| 09 | Job Execution | Checklist enforcement, photo capture, server-validated completion, exception handling |
+| 10 | Customer Dashboard and Proof | Visit timeline, photo gallery, structured issue reporting, 4-week preview |
+| 11 | Billing and Payouts | Ledger-first billing, Stripe Connect payouts, webhook processing, admin exception queue |
 
 ---
 
@@ -22,28 +28,15 @@ The build follows a module-by-module sequence. Each module has a dedicated spec 
 
 | Module | Name | Notes |
 |--------|------|-------|
-| 06 | Service Day System | Zone-based service day assignment, cutoff logic, service week config |
-
----
-
-## Remaining MVP Modules (in order)
-
-| Module | Name | Notes |
-|--------|------|-------|
-| 07 | Bundle Builder | Customer-controlled SKU stacking per service week |
-| 08 | Provider Onboarding | Org creation, zone assignment, capability matching |
-| 09 | Job Execution | Checklist enforcement, photo capture, exception handling |
-
----
-
-## Post-MVP Modules
-
-| Module | Name | Notes |
-|--------|------|-------|
-| 10 | Visit Tracking and Photos | Before/after proof, photo compliance scoring |
-| 11 | Billing and Payouts | Provider payouts, take rate calculations, invoicing |
 | 12 | Support and Disputes | Deflection-first design critical for unit economics |
-| 13 | Referrals and Incentives | Growth lever, not MVP — activate after retention is proven |
+
+---
+
+## Remaining Modules
+
+| Module | Name | Notes |
+|--------|------|-------|
+| 13 | Referrals and Incentives | Growth lever — activate after retention is proven |
 | 14 | Reporting and Analytics | Proves unit economics for scaling decisions |
 
 ---

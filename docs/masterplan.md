@@ -64,6 +64,12 @@ Core promise:
 - Subscription retention
 - Support cost per job (must stay low — if support cost explodes, model dies)
 
+### Strategic Bets (Explicit Decisions)
+
+1. **Launch SKU count: 3–5 per zone** until density + proof compliance is stable. Every SKU adds edge cases + disputes.
+2. **Default routine is the primary path.** Recommended routine and auto-fit are the main flow, not a side feature. Fastest path to density is not asking customers to design everything from scratch.
+3. **Seasonal complexity boundary:** Window preference (early/mid/late month) only, no date-level scheduling. Seasonal is an ARPU lever, not a scheduling trap.
+
 ### What We Are NOT
 - Not a gig marketplace
 - Not a lead gen platform
@@ -181,11 +187,16 @@ Raising before proof puts you on a growth treadmill. Proving first gives leverag
 
 ## Roadmap
 
-### MVP (Current)
-- **Completed:** Modules 01–05 (Auth & Roles, Property Profiles, Zones & Capacity, SKU Catalog, Subscription Engine with dual-clock billing)
-- **Current focus:** Module 06 (Service Day System)
-- **Remaining MVP:** Modules 07–09 (Bundle Builder, Provider Onboarding, Job Execution)
+### MVP — Completed
+- **Modules 01–11:** Auth & Roles, Property Profiles, Zones & Capacity, SKU Catalog, Subscription Engine, Service Day System, Bundle Builder, Provider Onboarding, Job Execution, Customer Dashboard & Proof, Billing & Payouts
 - 1 city, 3–5 SKUs, zone density proof, manual admin oversight
+
+### Current Focus
+- **Module 12:** Support and Disputes — deflection-first design, structured resolution, admin triage
+
+### Remaining
+- **Module 13:** Referrals and Incentives — growth lever, activate after retention is proven
+- **Module 14:** Reporting and Analytics — proves unit economics for scaling decisions
 
 ### V1
 - Utilization dashboards
@@ -198,6 +209,24 @@ Raising before proof puts you on a growth treadmill. Proving first gives leverag
 - Polygon zones
 - Additional verticals (pest, pool)
 - Managed crews in dense zones (hybrid model)
+
+---
+
+## Launch Scoreboard (Weekly Metrics)
+
+These metrics prove the flywheel is working. Track weekly from day one:
+
+| Metric | Target | Why It Matters |
+|--------|--------|----------------|
+| Service Day offer acceptance rate | >90% | Validates the assignment algorithm works |
+| Offer expiry rate | Near zero | TTL cleanup should rarely fire if alternatives are good |
+| Photo compliance % | ≥95% | Quality moat — proof-of-work must be non-negotiable |
+| On-time completion % | ≥90% | Operational promise to customers |
+| Redo rate | Baseline TBD | Leading indicator of provider quality issues |
+| Support minutes per job | <3 min | If this rises, unit economics collapse |
+| Zone density: stops/day | Trending up | Core operational efficiency metric |
+| Zone density: minutes/stop | Trending down | Drive time efficiency improving with density |
+| Gross margin per Service Day | Positive | Must be positive in launch zone before expanding |
 
 ---
 
