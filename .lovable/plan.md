@@ -1,136 +1,144 @@
 
 
-# Module 12 Code Review Fixes
+# Module 13.1 — Referral & Attribution Core
 
-Comprehensive fix plan addressing all 17 issues identified in the code review, organized by priority.
+## Overview
 
----
-
-## MUST FIX (5 issues)
-
-### P1 + P2: Enum mismatches in SupportNew.tsx
-
-**File:** `src/pages/customer/SupportNew.tsx`
-
-Fix the `ticketTypeMap` at lines 25-32:
-- Change `missed: "missed_service"` to `missed: "missed_item"` (matches DB enum `missed_item`)
-- Change `routine_change: "other"` to `routine_change: "routine_change"` (matches DB enum `routine_change`)
-
-### R1: Customer can UPDATE admin-controlled ticket fields
-
-**Database migration** — Add a `BEFORE UPDATE` trigger on `support_tickets` that, for non-admin users, prevents changes to protected columns: `status`, `resolution_summary`, `resolved_at`, `resolved_by_user_id`, `ai_summary`, `ai_evidence_score`, `ai_risk_score`, `ai_classification`, `sla_due_at`, `policy_version_id`, `policy_scope_chain`. If `OLD.value != NEW.value` for any of these columns and the caller is not an admin, raise an exception.
-
-### R2: Customer acceptOffer fails — no UPDATE RLS on offers
-
-**Database migration** — Create a `SECURITY DEFINER` RPC function `accept_support_offer(p_offer_id uuid)` that:
-1. Verifies the caller owns the ticket (via offer -> ticket -> customer_id = auth.uid())
-2. Verifies the offer is in `pending` status
-3. Updates the offer to `accepted`, sets `accepted_at`
-4. Expires all other pending offers on the same ticket
-5. Updates the ticket status to `resolved`, sets `resolved_at` and `resolved_by_user_id`
-6. Inserts an `offer_accepted` event
-
-**File:** `src/hooks/useTicketActions.ts` — Replace the `acceptOffer` mutation body with a single `supabase.rpc("accept_support_offer", { p_offer_id: offerId })` call.
-
-### P8: Admin cannot create/present resolution offers
-
-**File:** `src/pages/admin/SupportTicketDetail.tsx` — Add a "Present Offer" UI section with:
-- Offer type selector (credit, redo_intent, addon, refund, plan_change, review_by_time, no_action)
-- Amount field (for credit/refund types)
-- Description textarea
-- Submit button
-
-**File:** `src/hooks/useTicketActions.ts` — Add an `adminPresentOffer` mutation that inserts into `support_ticket_offers` and logs an `offer_presented` event. Also update ticket status to `awaiting_customer`.
+Build the "accounting-grade" referral rails: programs, codes, attribution, milestones, rewards, fraud holds, and ledger hooks. UI is intentionally thin (13.2 adds the polish). Also create the doc files for the 3-part split.
 
 ---
 
-## SHOULD FIX (6 issues)
+## Phase 1: Documentation + Database Migration
 
-### D1: No storage bucket for support attachments
+### 1A. Create doc files
 
-**Database migration** — Create `support-attachments` storage bucket (private). Add RLS policies on `storage.objects`:
-- Customers can upload to their own ticket paths
-- Providers can upload to their org's ticket paths
-- Admins have full access
+Create three new files in `docs/modules/`:
+- `13.1-referral-attribution-core.md` (from uploaded spec)
+- `13.2-founding-partner-provider-growth.md` (from uploaded spec)
+- `13.3-growth-autopilot-market-launch-os.md` (from uploaded spec)
 
-### P4: Provider support not in sidebar or bottom tabs
+Update `docs/modules/13-referrals-and-incentives.md` to become a lightweight index pointing to the three sub-modules.
 
-**File:** `src/components/AppSidebar.tsx` — Add `{ title: "Support", url: "/provider/support", icon: HelpCircle }` to `providerNav` array (before Settings).
+### 1B. Database migration (single file)
 
-**File:** `src/components/BottomTabBar.tsx` — No change needed (provider already has "More" tab which covers overflow items).
+**Enums:**
+- `referral_program_status` (draft, active, paused, archived)
+- `referral_milestone_type` (installed, subscribed, first_visit, paid_cycle, provider_ready, provider_first_job)
+- `referral_reward_type` (customer_credit, provider_bonus)
+- `referral_reward_status` (pending, on_hold, earned, applied, paid, voided)
+- `referral_risk_flag_status` (open, reviewed, dismissed)
 
-**File:** `src/components/MoreMenu.tsx` — Add a Support entry for provider role if not already present.
+**Tables (7):**
 
-### P6: SLA breach queue filter is wrong
+| Table | Purpose |
+|-------|---------|
+| `referral_programs` | Rules: who can refer, milestones, reward amounts, caps, hold policy, status |
+| `referral_codes` | Per-user code/link. FK to program + user. Unique code. Usage counter. |
+| `referrals` | Referrer-to-referred relationship. FK to program, code, referrer, referred user. First-touch enforced via UNIQUE on (program_id, referred_user_id). |
+| `referral_milestones` | Milestone events. UNIQUE on (referral_id, milestone) for idempotency. |
+| `referral_rewards` | Reward lifecycle. UNIQUE on (program_id, referred_user_id, milestone, reward_type) for idempotency. Holds, amounts, ledger refs. |
+| `referral_risk_flags` | Fraud flags tied to referral or reward. Admin review queue. |
+| `market_cohorts` | Lightweight cohort reference (zone, label, status). Used more in 13.3 but referenced here. |
 
-**File:** `src/hooks/useSupportTickets.ts` — Change line 64 from:
-```
-query = query.not("sla_due_at", "is", null);
-```
-to:
-```
-query = query.not("sla_due_at", "is", null).lt("sla_due_at", new Date().toISOString());
-```
+**RLS policies:**
+- Customers: SELECT own codes, referrals, rewards
+- Providers: SELECT rewards tied to their org
+- Admins: full access on all tables
 
-### P7: SLA never computed on ticket creation
-
-**File:** `src/hooks/useCreateTicket.ts` — After ticket insertion, compute `sla_due_at` based on a default SLA (48 hours for standard, 24 hours for high/critical severity). Update the ticket with the computed value. This is a simple default until the full policy engine wires SLA dials.
-
-### P9: Admin cannot apply macros from ticket detail
-
-**File:** `src/pages/admin/SupportTicketDetail.tsx` — Add an "Apply Macro" dropdown that:
-1. Fetches active macros via `useSupportMacros`
-2. On selection, creates an offer from the macro's patch data and logs a `macro_applied` event
-
-### P11: Admin cannot change ticket status
-
-**File:** `src/pages/admin/SupportTicketDetail.tsx` — Add a status transition dropdown/select allowing admin to move between: `open`, `awaiting_provider`, `awaiting_customer`, `in_review`, `escalated`. Each transition logs a `status_changed` event with the old and new status.
+**RPC functions (SECURITY DEFINER):**
+- `record_referral_milestone(p_referral_id, p_milestone)` -- idempotent milestone + reward creation
+- `apply_referral_reward(p_reward_id)` -- moves reward to applied/paid, writes to customer_ledger_events or provider_ledger_events
+- `void_referral_reward(p_reward_id, p_reason)` -- admin void with audit
+- `release_referral_hold(p_reward_id, p_reason)` -- admin release hold
+- `override_referral_attribution(p_referral_id, p_new_referrer_id, p_reason)` -- admin override with audit
 
 ---
 
-## NICE TO HAVE (5 issues)
+## Phase 2: Hooks
 
-### E1: support-ai-classify has no auth check
+| Hook | Purpose |
+|------|---------|
+| `useReferralPrograms` | Admin CRUD for programs |
+| `useReferralCodes` | Generate/fetch codes for current user |
+| `useReferrals` | List referrals (customer: own, admin: all) |
+| `useReferralRewards` | List rewards with status filters |
+| `useReferralAdmin` | Admin actions: void, release hold, override attribution |
 
-**File:** `supabase/functions/support-ai-classify/index.ts` — Add auth verification: extract the JWT from the Authorization header, verify the user owns the ticket or is an admin. Return 403 otherwise.
+---
 
-### E2: AI doesn't write ai_classification to ticket
+## Phase 3: Customer UI
 
-**File:** `supabase/functions/support-ai-classify/index.ts` — Add `ai_classification: result.classification` to the ticket update call (line 197-202).
+**`/customer/referrals`** (replace placeholder):
+- Share link/code section (copy button)
+- Referral statuses list (who signed up, milestone progress)
+- Earned/pending credits summary card
 
-### P3 + P5: No photo upload for customer or provider
+---
 
-**Files:** `src/pages/customer/SupportNew.tsx`, `src/pages/provider/SupportTicketDetail.tsx` — Add a simple file input that uploads to the `support-attachments` bucket and inserts a row into `support_attachments`. Gated behind D1 (bucket must exist first).
+## Phase 4: Provider UI
 
-### P10: No manual "Run AI" button for admin
+**`/provider/referrals`** (new page + route):
+- Bonus summary (earned, on hold, paid)
+- Reward list with hold reasons
+- Minimal -- 13.2 adds the full growth hub
 
-**File:** `src/pages/admin/SupportTicketDetail.tsx` — Add a "Re-classify" button that calls `useSupportAiClassify` and invalidates the ticket query on success.
+---
+
+## Phase 5: Admin UI
+
+**`/admin/incentives`** (replace placeholder):
+- Tabs: Programs | Rewards | Risk Flags
+- **Programs tab**: list/create/edit programs with milestone config, reward amounts, caps, hold policy
+- **Rewards tab**: filterable list (status, program), click-through audit view showing: program, referral, milestones, reward status, hold reason, ledger reference
+- **Risk flags tab**: queue with review/dismiss actions
+
+Admin actions on reward detail:
+- Release hold (with reason)
+- Void reward (with reason)
+- Override attribution (with reason)
 
 ---
 
 ## Technical Details
 
-### Database Migration (single migration file)
+### Migration SQL structure
 
 ```text
-1. BEFORE UPDATE trigger on support_tickets to protect admin fields (R1)
-2. SECURITY DEFINER function accept_support_offer (R2)
-3. Storage bucket support-attachments with RLS (D1)
-4. Grant EXECUTE on accept_support_offer to authenticated
+1. Create 5 enums
+2. Create 7 tables with proper FKs, indexes, UNIQUE constraints
+3. Enable RLS on all tables
+4. Create RLS policies (customer/provider/admin)
+5. Create 5 SECURITY DEFINER RPCs
+6. Grant EXECUTE on RPCs to authenticated
 ```
 
-### Files Modified
+### Key design decisions
 
-| File | Changes |
-|------|---------|
-| `src/pages/customer/SupportNew.tsx` | Fix 2 enum values (P1, P2) |
-| `src/hooks/useTicketActions.ts` | Replace acceptOffer with RPC call (R2), add adminPresentOffer + adminChangeStatus mutations |
-| `src/hooks/useSupportTickets.ts` | Fix SLA breach filter (P6) |
-| `src/hooks/useCreateTicket.ts` | Add SLA computation (P7) |
-| `src/pages/admin/SupportTicketDetail.tsx` | Add offer creation UI (P8), macro apply (P9), status change (P11), re-classify button (P10) |
-| `src/components/AppSidebar.tsx` | Add provider Support nav (P4) |
-| `src/components/MoreMenu.tsx` | Add provider Support entry (P4) |
-| `supabase/functions/support-ai-classify/index.ts` | Auth check (E1), write ai_classification (E2) |
-| `src/pages/customer/SupportNew.tsx` | Photo upload UI (P3) |
-| `src/pages/provider/SupportTicketDetail.tsx` | Photo upload UI (P5) |
+- First-touch attribution enforced by UNIQUE(program_id, referred_user_id) on `referrals`
+- Milestone idempotency via UNIQUE(referral_id, milestone) on `referral_milestones`
+- Reward idempotency via UNIQUE(program_id, referred_user_id, milestone, reward_type) on `referral_rewards`
+- All reward mutations are server-side RPCs (no direct client UPDATE)
+- Ledger integration: `apply_referral_reward` inserts into `customer_ledger_events` or `provider_ledger_events`
+- `referral_codes.code` has a UNIQUE constraint for lookup
+
+### Files created/modified
+
+| File | Action |
+|------|--------|
+| `docs/modules/13.1-referral-attribution-core.md` | Create (from upload) |
+| `docs/modules/13.2-founding-partner-provider-growth.md` | Create (from upload) |
+| `docs/modules/13.3-growth-autopilot-market-launch-os.md` | Create (from upload) |
+| `docs/modules/13-referrals-and-incentives.md` | Update to index |
+| Migration SQL | Create (7 tables, 5 enums, RLS, 5 RPCs) |
+| `src/hooks/useReferralPrograms.ts` | Create |
+| `src/hooks/useReferralCodes.ts` | Create |
+| `src/hooks/useReferrals.ts` | Create |
+| `src/hooks/useReferralRewards.ts` | Create |
+| `src/hooks/useReferralAdmin.ts` | Create |
+| `src/pages/customer/Referrals.tsx` | Replace placeholder |
+| `src/pages/provider/Referrals.tsx` | Create |
+| `src/pages/admin/Incentives.tsx` | Replace placeholder |
+| `src/App.tsx` | Add provider referrals route |
+| `src/components/AppSidebar.tsx` | Add provider Referrals nav |
+| `src/components/MoreMenu.tsx` | Add provider Referrals entry |
 
