@@ -1,268 +1,130 @@
 
 
-# Module 13.4 — Viral Surfaces + Growth Event Bus
+# Module 13 Integration Sweep — Self-Check + Fixes
 
-## Overview
+## Current State Summary
 
-Add the "automatic virality" layer on top of 13.1-13.3: shareable receipt cards, a growth event bus for funnel instrumentation, autopilot surface controls, and provider milestone share prompts. This module makes growth measurable and organic-first.
-
----
-
-## Phase 1: Documentation
-
-Create `docs/modules/13.4-viral-surfaces-and-growth-event-bus.md` from the uploaded spec.
-
-Update `docs/modules/13-referrals-and-incentives.md` index to add the 13.4 row.
+The schema, RPCs, and UI for Modules 13.1-13.4 are structurally solid. The critical attribution (A1) and milestone automation (S1) gaps from the earlier review have been fixed. However, there are several integration wiring gaps, missing event emissions, unenforced client-side controls, and copy issues that need attention before moving to Module 14.
 
 ---
 
-## Phase 2: Database Migration
+## Issues Found (ordered by priority)
 
-### 2A. New table: `growth_events` (append-only event bus)
+### MUST FIX
 
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid PK | |
-| created_at | timestamptz DEFAULT now() | |
-| event_type | text NOT NULL | prompt_shown, share_initiated, share_completed, landing_viewed, etc. |
-| actor_role | text NOT NULL | customer, provider, system, admin |
-| actor_id | uuid NOT NULL | |
-| zone_id | uuid nullable | |
-| category | text nullable | |
-| sku_id | uuid nullable | |
-| cohort_id | uuid nullable | |
-| source_surface | text NOT NULL | receipt_share_card, provider_milestone_share, cross_pollination_invite, etc. |
-| context | jsonb DEFAULT '{}' | job_id, share_id, channel, variant, etc. |
-| idempotency_key | text UNIQUE NOT NULL | deduplication |
+**1. `signup_completed` growth event never emitted**
+The funnel dashboard tracks `signup_completed` but no code ever records this event. After successful signup in `AuthPage.tsx`, no growth event is fired. This breaks the conversion funnel from `landing_viewed` to `signup_completed`.
+- **Fix:** After successful signup + attribution in `AuthPage.tsx`, emit a `signup_completed` growth event via `record_growth_event` RPC.
 
-Indexes: `(event_type, created_at DESC)`, `(actor_id)`, `(zone_id, category)`.
+**2. `InviteLanding.tsx` says "Welcome credit when you activate" even when incentives are OFF**
+This is exactly the "incentives creep" concern ChatGPT raised. The copy unconditionally promises a credit. If `incentive_visibility` is false in `growth_surface_config`, this copy should not mention credits.
+- **Fix:** Make the invite landing page fetch surface config (or accept a simpler approach: change copy to a neutral value prop like "Track every visit with proof photos" since we can't easily fetch config on a public no-auth page). The simplest safe fix is to remove the credit mention entirely and replace with a non-incentive benefit.
 
-### 2B. New table: `share_cards`
+**3. Surface weights not enforced client-side anywhere**
+`growth_surface_config.surface_weights` are configurable by admins but no consumer component checks them. `CrossPollinationCard` doesn't check `cross_pollination` weight. `ShareCardSheet` doesn't check `receipt_share` weight. Provider milestone prompts don't check `provider_share` weight.
+- **Fix:** In each surface component, fetch `growth_surface_config` for the relevant zone/category and hide the component if its weight is 0.
 
-Tracks individual shareable artifacts generated from completed jobs.
+**4. Frequency caps not enforced client-side**
+`prompt_frequency_caps` (e.g., `share_per_job`, `reminder_per_week`) exist in config but no component checks recent growth events to decide whether to suppress a prompt.
+- **Fix:** Add a lightweight check: before showing share CTA or cross-pollination card, query recent `growth_events` for the current user and surface to see if caps are exceeded. Suppress if so.
 
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid PK | |
-| job_id | uuid NOT NULL FK jobs | |
-| customer_id | uuid NOT NULL | |
-| zone_id | uuid nullable | |
-| category | text nullable | |
-| share_code | text UNIQUE NOT NULL | short code for URL |
-| hero_photo_path | text nullable | best after photo storage path |
-| asset_mode | text DEFAULT 'after_only' | after_only or before_after |
-| brand_mode | text DEFAULT 'minimal' | minimal or full |
-| show_first_name | boolean DEFAULT false | |
-| show_neighborhood | boolean DEFAULT false | |
-| checklist_bullets | jsonb DEFAULT '[]' | 1-3 text items |
-| expires_at | timestamptz NOT NULL | default now + 30 days |
-| expiry_mode | text DEFAULT 'default_30d' | default_30d, user_permanent, hard_cap_12m |
-| is_revoked | boolean DEFAULT false | |
-| revoked_at | timestamptz nullable | |
-| created_at | timestamptz DEFAULT now() | |
+### SHOULD FIX
 
-### 2C. New table: `growth_surface_config`
+**5. `InviteCustomers.tsx` generate link button still broken when no codes exist**
+Line 117: `codes.data?.[0]?.program_id` will be undefined when there are zero codes. The fallback logic that exists in `Referrals.tsx` (querying for active programs) was not replicated here.
+- **Fix:** Copy the same fallback pattern from `Referrals.tsx` lines 160-175 into `InviteCustomers.tsx`.
 
-Per zone/category autopilot surface controls (linked to 13.3).
+**6. Share landing page doesn't record `signup_completed` conversion**
+When a user clicks "Get Handled Home" on `/share/:shareCode` and completes signup, the share_code context is lost. There's no way to attribute the signup back to the specific share card.
+- **Fix:** Pass `share_code` as a query parameter to `/auth` (e.g., `/auth?share={shareCode}`). In `AuthPage.tsx`, capture this and include it in the `signup_completed` event context.
 
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid PK | |
-| zone_id | uuid NOT NULL | |
-| category | text NOT NULL | |
-| surface_weights | jsonb DEFAULT '{"receipt_share":1,"provider_share":1,"cross_pollination":0.5}' | |
-| prompt_frequency_caps | jsonb DEFAULT '{"share_per_job":1,"reminder_per_week":1}' | |
-| incentive_visibility | boolean DEFAULT false | |
-| share_brand_default | text DEFAULT 'minimal' | |
-| share_link_expiry_days | int DEFAULT 30 | |
-| share_link_hard_cap_days | int DEFAULT 365 | |
-| updated_at | timestamptz DEFAULT now() | |
-| created_at | timestamptz DEFAULT now() | |
+**7. QR code is a random noise placeholder**
+`InviteCustomers.tsx` draws random pixels instead of a real QR code. This will confuse providers.
+- **Fix:** Either install a lightweight QR library (`qrcode.react` or similar), or hide the QR section entirely with a "Coming soon" note until a real implementation is added.
 
-UNIQUE constraint on `(zone_id, category)`.
+**8. Admin Growth Events tab is limited to last 500 events**
+The `useGrowthEventStats` hook queries only the last 500 events with no time filtering. For a real ops dashboard, this makes the funnel numbers unreliable as volume grows.
+- **Fix:** Add a date range filter (last 7 days, last 30 days) to the Events tab query.
 
-### 2D. RLS policies
+### NICE TO HAVE
 
-- `growth_events`: users INSERT own events, admins FOR ALL, authenticated SELECT own
-- `share_cards`: customers manage own (SELECT, INSERT, UPDATE for revoke), admins FOR ALL
-- `growth_surface_config`: authenticated SELECT, admins FOR ALL
+**9. Cross-pollination category detection is naive**
+`CrossPollinationCard` uses plan name string matching (`s.plans?.name?.toLowerCase().includes(...)`) to detect subscribed categories. This is fragile.
+- **Fix:** Query `service_skus.category` via `routine_items` or `job_skus` for a more reliable signal, or add a `category` column to subscriptions.
 
-### 2E. RPC: `create_share_card`
-
-SECURITY DEFINER. Called after job completion when customer taps "Share." Picks best photo (latest `job_photos` with `slot_key = 'after'` or last uploaded), generates short `share_code`, sets expiry, pulls 1-3 checklist bullet labels. Returns the share card. Checks: no open dispute on job (`customer_issues` with status != resolved).
-
-### 2F. RPC: `revoke_share_card`
-
-SECURITY DEFINER. Sets `is_revoked = true`, `revoked_at = now()`. Owner-only check.
-
-### 2G. RPC: `record_growth_event`
-
-SECURITY DEFINER. Inserts into `growth_events` with ON CONFLICT (idempotency_key) DO NOTHING. Returns the event or null if duplicate. Validates event_type against a known set.
+**10. No `landing_viewed` event on `/invite/:code`**
+The invite landing page (provider referral link) doesn't emit any growth event. Only the share landing page (`/share/:shareCode`) records `landing_viewed`.
+- **Fix:** Add a `landing_viewed` event with `source_surface = 'provider_invite'` to `InviteLanding.tsx`.
 
 ---
 
-## Phase 3: Hooks
+## Implementation Plan
 
-| Hook | File | Purpose |
-|------|------|---------|
-| `useShareCard` | `src/hooks/useShareCard.ts` | Create, fetch, revoke share cards for a job |
-| `useGrowthEvents` | `src/hooks/useGrowthEvents.ts` | Record events (client-side wrapper for `record_growth_event` RPC) |
-| `useGrowthSurfaceConfig` | `src/hooks/useGrowthSurfaceConfig.ts` | Admin: fetch/update surface configs per zone/category |
+### Phase 1: Database Migration
+- No schema changes needed. All tables and RPCs exist.
 
----
+### Phase 2: Fix AuthPage attribution + growth event (Issues 1, 6)
+- After successful signup in `AuthPage.tsx`:
+  - Emit `signup_completed` growth event
+  - Include `share_code` from query params in event context if present
+- Read `share` query param and pass to growth event
 
-## Phase 4: Surface A -- Customer Receipt Share Card
+### Phase 3: Remove incentive copy from InviteLanding (Issue 2)
+- Replace "Welcome credit when you activate" with "Track and manage every service visit"
+- This avoids promising incentives when they may be disabled
 
-### 4A. Share CTA on Visit Detail page
+### Phase 4: Enforce surface weights (Issue 3)
+- Create a small utility hook `useIsSurfaceEnabled(zoneId, category, surfaceKey)` that:
+  - Fetches `growth_surface_config` for zone/category
+  - Returns false if weight is 0
+- Use in `ShareCardSheet`, `CrossPollinationCard`, and provider milestone prompt
 
-Add a "Share the after photo" button to `src/pages/customer/VisitDetail.tsx`:
-- Only shown when job status is COMPLETED
-- Hidden if an unresolved dispute exists for the job
-- Tapping opens a sheet/modal with share card preview
+### Phase 5: Enforce frequency caps (Issue 4)
+- Add a hook `useFrequencyCapCheck(userId, surface, capKey)` that:
+  - Queries recent `growth_events` for the user and surface
+  - Compares count against `prompt_frequency_caps` from config
+  - Returns whether the prompt should be suppressed
+- Integrate into share CTA and cross-pollination card
 
-### 4B. New component: `ShareCardSheet`
+### Phase 6: Fix InviteCustomers generate link fallback (Issue 5)
+- Copy the active program fallback pattern from `Referrals.tsx` into `InviteCustomers.tsx`
 
-`src/components/customer/ShareCardSheet.tsx`
+### Phase 7: Add landing_viewed to InviteLanding (Issue 10)
+- Import `useGrowthEvents` and emit `landing_viewed` with `source_surface = 'provider_invite'`
 
-- Creates share card via `create_share_card` RPC (if not already created for this job)
-- Shows hero after photo with "Handled" stamp overlay (CSS-based)
-- Toggle: "Add before/after" (changes asset_mode)
-- Toggle: "Show my first name" (off by default)
-- Toggle: "Show neighborhood" (off by default)
-- Share actions: Copy link, Native share (via `navigator.share` API)
-- Each action emits a `share_initiated` / `share_completed` growth event
-- "Disable shared link" revoke button
+### Phase 8: Hide QR placeholder (Issue 7)
+- Replace random noise QR with a "Coming soon" note or remove the section
 
-### 4C. Public share landing page
-
-New route: `/share/:shareCode`
-New page: `src/pages/ShareLanding.tsx`
-
-- Public (no auth required)
-- Fetches share card by `share_code` via a public RPC or anon-safe query
-- Shows: full-width after photo, "Handled." + category + date, 1-3 checklist bullets
-- Primary CTA: "Get Handled Home" -> app store or `/auth`
-- Secondary CTA: "I'm a provider" -> `/provider/apply`
-- If expired or revoked: "This share has expired."
-- Emits `landing_viewed` growth event (server-side via RPC, using share_code as idempotency prefix)
+### Phase 9: Add date filter to Events tab (Issue 8)
+- Add a date range selector to `EventsTab` in `Growth.tsx`
+- Pass date filter to `useGrowthEventStats`
 
 ---
 
-## Phase 5: Surface B -- Provider Milestone/Payout Share Prompt
+## Files Modified
 
-### 5A. Growth event on payout/bonus moments
+| File | Changes |
+|------|---------|
+| `src/pages/AuthPage.tsx` | Emit `signup_completed` event, capture `share` param |
+| `src/pages/InviteLanding.tsx` | Remove credit copy, add `landing_viewed` event |
+| `src/pages/ShareLanding.tsx` | Pass share_code to auth CTA URL |
+| `src/components/customer/ShareCardSheet.tsx` | Check surface weight before rendering |
+| `src/components/customer/CrossPollinationCard.tsx` | Check surface weight + frequency cap |
+| `src/pages/provider/Referrals.tsx` | Check surface weight for milestone prompt |
+| `src/pages/provider/InviteCustomers.tsx` | Fix generate link fallback, hide QR placeholder |
+| `src/hooks/useGrowthSurfaceConfig.ts` | Add `useIsSurfaceEnabled` utility |
+| `src/hooks/useGrowthEvents.ts` | Add `useFrequencyCapCheck` utility |
+| `src/pages/admin/Growth.tsx` | Add date range filter to Events tab |
 
-Update `src/pages/provider/Referrals.tsx` (Growth Hub):
-- When bonus summary shows new earned rewards, display a dismissible "Invite more customers" prompt card
-- State-aware copy based on `market_zone_category_state`:
-  - OPEN: "We're live -- invite customers now"
-  - SOFT_LAUNCH: "Limited early spots available"
-  - WAITLIST/CLOSED: "Launching soon -- build your waitlist"
-- One-tap link to `/provider/referrals/invite-customers`
-- Emit `prompt_shown` growth event on render
+## Cross-Module Contract Verification
 
-### 5B. Update InviteCustomers page
-
-- Emit `share_initiated` and `share_completed` events when link is copied or scripts are used
-
----
-
-## Phase 6: Surface C -- Cross-Pollination (Customer)
-
-### 6A. "Invite your other pro" prompt
-
-New component: `src/components/customer/CrossPollinationCard.tsx`
-
-- Shown on customer dashboard after first completed visit or active subscription
-- Lists other categories not yet subscribed (e.g., "Have a pool cleaner? Invite them to Handled Home")
-- Tap generates a pre-filled SMS text with invite link
-- Emits `prompt_shown` + `share_initiated` events
-- Respects `growth_surface_config` weights (hidden if weight = 0)
-
-### 6B. Add to customer dashboard
-
-Add `CrossPollinationCard` to `src/pages/customer/Dashboard.tsx` conditionally.
-
----
-
-## Phase 7: Admin Surface Controls
-
-### 7A. Add "Surfaces" tab to Admin Growth Console
-
-Extend `src/pages/admin/Growth.tsx` with a 4th tab: **Surfaces**
-
-- Per zone/category config editor:
-  - Surface weights (receipt_share, provider_share, cross_pollination) -- sliders 0-1
-  - Prompt frequency caps
-  - Incentive visibility toggle
-  - Brand default (minimal/full)
-  - Link expiry defaults
-- Save updates to `growth_surface_config`
-
-### 7B. Growth events analytics view
-
-Add a simple "Events" sub-section in the Actions tab or as a 5th tab:
-- Event counts by type, surface, and time period
-- Conversion funnel: prompt_shown -> share_initiated -> share_completed -> landing_viewed -> signup_completed
-
----
-
-## Phase 8: Fraud Controls
-
-### 8A. Share card dispute check
-
-The `create_share_card` RPC will refuse to create a card if the job has an unresolved `customer_issues` record. The UI also hides the share button in this case.
-
-### 8B. Rate limiting via config
-
-`growth_surface_config.prompt_frequency_caps` enforced client-side (check last event timestamps before showing prompts). Server-side idempotency prevents duplicate event recording.
-
----
-
-## Technical Details
-
-### Migration SQL structure
-
-```text
-1. Create growth_events table with idempotency_key UNIQUE
-2. Create share_cards table with share_code UNIQUE
-3. Create growth_surface_config table with UNIQUE(zone_id, category)
-4. Enable RLS on all 3 tables
-5. Create RLS policies
-6. Create create_share_card RPC (SECURITY DEFINER)
-7. Create revoke_share_card RPC (SECURITY DEFINER)
-8. Create record_growth_event RPC (SECURITY DEFINER)
-9. Indexes on growth_events, share_cards
-```
-
-### Files created/modified
-
-| File | Action |
-|------|--------|
-| `docs/modules/13.4-viral-surfaces-and-growth-event-bus.md` | Create (from upload) |
-| `docs/modules/13-referrals-and-incentives.md` | Update (add 13.4 row) |
-| Migration SQL | Create (3 tables, RLS, 3 RPCs) |
-| `src/hooks/useShareCard.ts` | Create |
-| `src/hooks/useGrowthEvents.ts` | Create |
-| `src/hooks/useGrowthSurfaceConfig.ts` | Create |
-| `src/components/customer/ShareCardSheet.tsx` | Create |
-| `src/components/customer/CrossPollinationCard.tsx` | Create |
-| `src/pages/ShareLanding.tsx` | Create (public route) |
-| `src/pages/customer/VisitDetail.tsx` | Add share CTA button |
-| `src/pages/customer/Dashboard.tsx` | Add cross-pollination card |
-| `src/pages/provider/Referrals.tsx` | Add milestone share prompt |
-| `src/pages/provider/InviteCustomers.tsx` | Add growth event emissions |
-| `src/pages/admin/Growth.tsx` | Add Surfaces tab |
-| `src/App.tsx` | Add `/share/:shareCode` route |
-
-### Key design decisions
-
-- Growth events are append-only with idempotency_key UNIQUE -- safe for retries and offline sync
-- Share cards are owned by customers; providers cannot share customer cards (spec section 7)
-- Default share is after-only with minimal branding -- organic-first posture
-- Share landing page is a public route inside the app (not a separate site per spec section 2.1, since we're in a single Vite app; the page is lightweight and loads fast)
-- Expiry/revocation enforced at query time (WHERE expires_at > now() AND is_revoked = false)
-- Photo for share card uses signed URL generated on demand (respects revocation)
-- Surface weights and caps are advisory/client-enforced; the config table provides the data
-- No external QR or image generation libraries; share card uses CSS overlay for "Handled" stamp
-
+| Question | Answer | Status |
+|----------|--------|--------|
+| Who owns market state truth? | `market_zone_category_state` (13.3) | Confirmed -- single source |
+| Who owns share link creation + expiry + revocation? | `share_cards` table + `create_share_card` / `revoke_share_card` RPCs (13.4) | Confirmed |
+| Who is source of truth for attribution payouts? | `referrals` + `referral_milestones` + `referral_rewards` (13.1) | Confirmed |
+| Who consumes cohort risk to tighten support policies? | Not yet wired (12 reads `support_policies` but doesn't reference market state) | Noted for future |
+| Does `record_autopilot_action` respect locks? | Yes -- fixed in migration `20260223010554` | Confirmed |
+| Does `compute_zone_health_score` filter by category? | Yes -- fixed in migration `20260223010731` | Confirmed |
+| Are milestones fired from canonical sources? | `subscribed` from webhook, `first_visit` from `complete_job`, `paid_cycle` from webhook | Confirmed |
+| Is attribution wired on signup? | Yes -- `AuthPage.tsx` calls `attribute_referral_signup` | Confirmed |
