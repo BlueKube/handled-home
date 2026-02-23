@@ -7,6 +7,25 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, Users, AlertTriangle, TrendingUp } from "lucide-react";
 
+function Sparkline({ data, className = "" }: { data: number[]; className?: string }) {
+  if (!data || data.length < 2) return null;
+  const max = Math.max(...data, 1);
+  const min = Math.min(...data, 0);
+  const range = max - min || 1;
+  const w = 48;
+  const h = 16;
+  const points = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * w;
+    const y = h - ((v - min) / range) * h;
+    return `${x},${y}`;
+  }).join(" ");
+  return (
+    <svg width={w} height={h} className={`inline-block ${className}`} viewBox={`0 0 ${w} ${h}`}>
+      <polyline points={points} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export default function OpsZones() {
   const { data: zones, isLoading } = useZoneHealth();
   const nav = useNavigate();
@@ -75,7 +94,7 @@ export default function OpsZones() {
                 </div>
               )}
 
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground items-center">
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3.5 w-3.5" /> {z.defaultServiceDay}
                 </span>
@@ -85,6 +104,10 @@ export default function OpsZones() {
                 <span className="flex items-center gap-1">
                   <AlertTriangle className="h-3.5 w-3.5" />
                   {z.issueRate7d}% issue rate
+                  <Sparkline data={z.trendIssueRate} className="text-destructive" />
+                </span>
+                <span className="flex items-center gap-1">
+                  Cap trend <Sparkline data={z.trendCapacity} className="text-primary" />
                 </span>
                 <span>+{z.newSignups7d} new (7d)</span>
                 {z.growthPressure > 0 && (
