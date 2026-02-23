@@ -22,8 +22,11 @@ export interface ZoneHealthRow {
   activeSubscriptions: number;
   newSignups7d: number;
   newSignups30d: number;
-  growthPressure: number; // waitlist/uncovered demand signal
+  growthPressure: number;
   weekLoadBars: { day: string; pct: number }[];
+  // Trend data from snapshots
+  trendCapacity: number[];
+  trendIssueRate: number[];
 }
 
 export function useZoneHealth() {
@@ -33,14 +36,17 @@ export function useZoneHealth() {
       const sevenDaysAgo = daysAgoStr(7);
       const thirtyDaysAgo = daysAgoStr(30);
 
-      const [zonesRes, capsRes, issuesRes, jobsRes, subsRes, waitlistRes] = await Promise.all([
+      const [zonesRes, capsRes, issuesRes, jobsRes, subsRes, waitlistRes, snapshotsRes] = await Promise.all([
         supabase.from("zones").select("id, name, status, region_id, default_service_day, max_stops_per_day, regions(name)").neq("status", "archived"),
         supabase.from("zone_service_day_capacity").select("zone_id, day_of_week, max_homes, assigned_count"),
         supabase.from("job_issues").select("id, jobs(zone_id)").gte("created_at", sevenDaysAgo),
         supabase.from("jobs").select("id, zone_id, status, completed_at, created_at").gte("created_at", thirtyDaysAgo),
         supabase.from("subscriptions").select("id, customer_id, zone_id, status, created_at").eq("status", "active"),
-        // Growth pressure: pending service day assignments (waitlist proxy)
         supabase.from("service_day_assignments").select("id, zone_id, status").eq("status", "offered" as any),
+        // Read zone health snapshots for trends (last 7 days)
+        supabase.from("zone_health_snapshots").select("zone_id, snapshot_date, capacity_pct, completed_jobs_7d, issue_rate_7d")
+          .gte("snapshot_date", daysAgoStr(7).split("T")[0])
+          .order("snapshot_date", { ascending: true }),
       ]);
 
       const zones = zonesRes.data ?? [];
@@ -49,15 +55,23 @@ export function useZoneHealth() {
       const jobs = jobsRes.data ?? [];
       const subs = subsRes.data ?? [];
       const waitlist = waitlistRes.data ?? [];
+      const snapshots = snapshotsRes.data ?? [];
 
-      // Aggregate capacity by zone (total + per-day)
+      // Build snapshot trends by zone
+      const snapshotsByZone: Record<string, { capacity: number[]; issueRate: number[] }> = {};
+      snapshots.forEach((s: any) => {
+        if (!snapshotsByZone[s.zone_id]) snapshotsByZone[s.zone_id] = { capacity: [], issueRate: [] };
+        snapshotsByZone[s.zone_id].capacity.push(s.capacity_pct ?? 0);
+        snapshotsByZone[s.zone_id].issueRate.push(s.issue_rate_7d ?? 0);
+      });
+
+      // Aggregate capacity by zone
       const capByZone: Record<string, { max: number; assigned: number }> = {};
       const capByZoneDay: Record<string, { day: string; max: number; assigned: number }[]> = {};
       caps.forEach((c: any) => {
         if (!capByZone[c.zone_id]) capByZone[c.zone_id] = { max: 0, assigned: 0 };
         capByZone[c.zone_id].max += c.max_homes || 0;
         capByZone[c.zone_id].assigned += c.assigned_count || 0;
-
         if (!capByZoneDay[c.zone_id]) capByZoneDay[c.zone_id] = [];
         capByZoneDay[c.zone_id].push({
           day: c.day_of_week || "—",
@@ -66,14 +80,12 @@ export function useZoneHealth() {
         });
       });
 
-      // Issues by zone (7d)
       const issuesByZone: Record<string, number> = {};
       issues.forEach((i: any) => {
         const zoneId = i.jobs?.zone_id;
         if (zoneId) issuesByZone[zoneId] = (issuesByZone[zoneId] || 0) + 1;
       });
 
-      // Completed jobs by zone (7d)
       const completedByZone: Record<string, number> = {};
       jobs.forEach((j: any) => {
         if (j.status === "COMPLETED" && j.completed_at && j.completed_at >= sevenDaysAgo) {
@@ -81,7 +93,6 @@ export function useZoneHealth() {
         }
       });
 
-      // Active subs by zone
       const subsByZone: Record<string, number> = {};
       const newSubs7d: Record<string, number> = {};
       const newSubs30d: Record<string, number> = {};
@@ -93,7 +104,6 @@ export function useZoneHealth() {
         }
       });
 
-      // Growth pressure by zone (pending offers = unconfirmed demand)
       const waitlistByZone: Record<string, number> = {};
       waitlist.forEach((w: any) => {
         if (w.zone_id) waitlistByZone[w.zone_id] = (waitlistByZone[w.zone_id] || 0) + 1;
@@ -104,13 +114,12 @@ export function useZoneHealth() {
         const maxTotal = cap.max || z.max_stops_per_day || 1;
         const completed = completedByZone[z.id] || 0;
         const issueCount = issuesByZone[z.id] || 0;
-
-        // Per-day load bars
         const dayEntries = capByZoneDay[z.id] || [];
         const weekLoadBars = dayEntries.map((d) => ({
           day: d.day,
           pct: d.max > 0 ? Math.round((d.assigned / d.max) * 100) : 0,
         }));
+        const zoneTrends = snapshotsByZone[z.id] ?? { capacity: [], issueRate: [] };
 
         return {
           id: z.id,
@@ -129,6 +138,8 @@ export function useZoneHealth() {
           newSignups30d: newSubs30d[z.id] || 0,
           growthPressure: waitlistByZone[z.id] || 0,
           weekLoadBars,
+          trendCapacity: zoneTrends.capacity,
+          trendIssueRate: zoneTrends.issueRate,
         };
       });
     },
@@ -142,20 +153,17 @@ export function useZoneHealthDetail(zoneId: string | null) {
     queryFn: async () => {
       const sevenDaysAgo = daysAgoStr(7);
 
-      const [capsRes, providersRes, jobsRes, issuesRes, photosRes, checklistRes] = await Promise.all([
+      const [capsRes, providersRes, jobsRes, issuesRes] = await Promise.all([
         supabase.from("zone_service_day_capacity").select("*").eq("zone_id", zoneId!),
         supabase.from("zone_provider_assignments").select("*, provider_orgs(business_name)").eq("zone_id", zoneId!),
         supabase.from("jobs").select("id, provider_org_id, status, completed_at, scheduled_date, arrived_at, departed_at").eq("zone_id", zoneId!).gte("scheduled_date", sevenDaysAgo),
         supabase.from("job_issues").select("id, job_id, issue_type, status").eq("status", "OPEN"),
-        supabase.from("job_photos").select("job_id").in("job_id", []),  // will be populated below
-        supabase.from("job_checklist_items").select("job_id, is_required"),
       ]);
 
       const allJobs = jobsRes.data ?? [];
       const completedJobs = allJobs.filter((j: any) => j.status === "COMPLETED");
       const completedIds = completedJobs.map((j: any) => j.id);
 
-      // Fetch photos for completed jobs (separate query since we need IDs)
       let proofCompliance = 100;
       let redoIntents = 0;
       let avgTimeOnSiteMinutes = 0;
@@ -173,7 +181,6 @@ export function useZoneHealthDetail(zoneId: string | null) {
           if (ci.is_required) requiredSet.add(ci.job_id);
         });
 
-        // Jobs with required items that have photos = compliant
         let compliant = 0;
         let total = 0;
         completedIds.forEach((id: string) => {
@@ -186,13 +193,11 @@ export function useZoneHealthDetail(zoneId: string | null) {
         redoIntents = redoRes.count ?? 0;
       }
 
-      // Average time on site
       const timesOnSite = completedJobs
         .filter((j: any) => j.arrived_at && j.departed_at)
         .map((j: any) => (new Date(j.departed_at).getTime() - new Date(j.arrived_at).getTime()) / 60000);
       avgTimeOnSiteMinutes = timesOnSite.length > 0 ? Math.round(timesOnSite.reduce((a: number, b: number) => a + b, 0) / timesOnSite.length) : 0;
 
-      // Jobs per provider
       const jobsByProvider: Record<string, number> = {};
       allJobs.forEach((j: any) => {
         if (j.provider_org_id) jobsByProvider[j.provider_org_id] = (jobsByProvider[j.provider_org_id] || 0) + 1;

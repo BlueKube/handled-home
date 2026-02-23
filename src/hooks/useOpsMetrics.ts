@@ -35,6 +35,8 @@ export interface OpsMetrics {
   providerApplications: number;
   providerInvitesSent: number;
   hotZones: { zone_name: string; demand: number }[];
+  // Trends from rollup
+  trends: Record<string, number[]>;
   // meta
   updatedAt: Date;
 }
@@ -46,14 +48,12 @@ export function useOpsMetrics() {
       const today = todayStr();
       const sevenDaysAgo = daysAgoStr(7);
 
-      // Parallelize ALL queries with Promise.all
+      // ── Phase 1: All queries EXCEPT checklist/photos (which need completed job IDs) ──
       const [
         jobsTodayRes,
         jobsCompletedRes,
         jobIssuesRes,
         completedJobs7dRes,
-        checklistItemsRes,
-        jobPhotosRes,
         zonesRes,
         capacityRes,
         issues7dRes,
@@ -67,16 +67,13 @@ export function useOpsMetrics() {
         providerInvitesRes,
         subsRes,
         redoIssuesRes,
+        // Trend data from rollup tables
+        trendsRes,
       ] = await Promise.all([
         supabase.from("jobs").select("id", { count: "exact", head: true }).eq("scheduled_date", today),
         supabase.from("jobs").select("id", { count: "exact", head: true }).eq("scheduled_date", today).eq("status", "COMPLETED" as any),
         supabase.from("job_issues").select("id", { count: "exact", head: true }).eq("status", "OPEN"),
-        // Completed jobs in last 7d for proof exception + issue rate
         supabase.from("jobs").select("id").eq("status", "COMPLETED" as any).gte("completed_at", sevenDaysAgo),
-        // Checklist items for completed jobs (required items)
-        supabase.from("job_checklist_items").select("job_id, is_required, status"),
-        // Job photos for proof compliance
-        supabase.from("job_photos").select("job_id"),
         supabase.from("zones").select("id, name, max_stops_per_day, default_service_day, status").eq("status", "active"),
         supabase.from("zone_service_day_capacity").select("zone_id, max_homes, assigned_count") as any,
         supabase.from("job_issues").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
@@ -84,37 +81,38 @@ export function useOpsMetrics() {
         supabase.from("customer_invoices").select("id", { count: "exact", head: true }).eq("status", "PAST_DUE" as any),
         supabase.from("customer_invoices").select("total_cents").eq("status", "PAID").gte("paid_at", today + "T00:00:00Z") as any,
         supabase.from("customer_invoices").select("id", { count: "exact", head: true }).eq("status", "FAILED").gte("updated_at", today + "T00:00:00Z") as any,
-        // Add-on revenue (7d) - invoices with type ADD_ON
         supabase.from("customer_invoices").select("total_cents").eq("invoice_type", "ADD_ON" as any).eq("status", "PAID").gte("paid_at", sevenDaysAgo) as any,
         (supabase.from("referrals") as any).select("id", { count: "exact", head: true }).eq("status", "ACTIVATED").gte("created_at", sevenDaysAgo),
         supabase.from("provider_applications").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
-        // Provider invites sent (growth_events with event_type = invite_sent)
         supabase.from("growth_events").select("id", { count: "exact", head: true }).eq("event_type", "invite_sent" as any).gte("created_at", sevenDaysAgo),
-        // Active subs per zone for hot zones
         supabase.from("subscriptions").select("zone_id, created_at").eq("status", "active").gte("created_at", sevenDaysAgo),
-        // Redo intents - issues with type REDO
         supabase.from("job_issues").select("id", { count: "exact", head: true }).eq("issue_type", "REDO" as any).gte("created_at", sevenDaysAgo),
+        // Last 7 days of daily snapshots for sparkline trends
+        supabase.from("ops_kpi_snapshots_daily").select("metric_key, metric_value, snapshot_date").gte("snapshot_date", daysAgoStr(7).split("T")[0]).order("snapshot_date", { ascending: true }),
       ]);
 
-      // Proof exceptions: completed jobs (7d) missing required proof photos
-      const completedJobIds = new Set((completedJobs7dRes.data ?? []).map((j: any) => j.id));
-      const checklistItems = checklistItemsRes.data ?? [];
-      const photos = jobPhotosRes.data ?? [];
-      const photosJobIds = new Set(photos.map((p: any) => p.job_id));
+      const completedJobIds = (completedJobs7dRes.data ?? []).map((j: any) => j.id);
 
-      // A job has a proof exception if it has required checklist items but no photos
-      const jobsWithRequiredChecklist = new Set<string>();
-      checklistItems.forEach((ci: any) => {
-        if (ci.is_required && completedJobIds.has(ci.job_id)) {
-          jobsWithRequiredChecklist.add(ci.job_id);
-        }
-      });
+      // ── Phase 2: Scoped checklist + photo queries ──
       let proofExceptions = 0;
-      jobsWithRequiredChecklist.forEach((jobId) => {
-        if (!photosJobIds.has(jobId)) {
-          proofExceptions++;
-        }
-      });
+      if (completedJobIds.length > 0) {
+        const [checklistItemsRes, jobPhotosRes] = await Promise.all([
+          supabase.from("job_checklist_items").select("job_id, is_required, status").in("job_id", completedJobIds),
+          supabase.from("job_photos").select("job_id").in("job_id", completedJobIds),
+        ]);
+
+        const completedSet = new Set(completedJobIds);
+        const photosJobIds = new Set((jobPhotosRes.data ?? []).map((p: any) => p.job_id));
+        const jobsWithRequiredChecklist = new Set<string>();
+        (checklistItemsRes.data ?? []).forEach((ci: any) => {
+          if (ci.is_required && completedSet.has(ci.job_id)) {
+            jobsWithRequiredChecklist.add(ci.job_id);
+          }
+        });
+        jobsWithRequiredChecklist.forEach((jobId) => {
+          if (!photosJobIds.has(jobId)) proofExceptions++;
+        });
+      }
 
       // Capacity pressure
       const zones = zonesRes.data ?? [];
@@ -140,26 +138,19 @@ export function useOpsMetrics() {
       });
       tightDays.sort((a, b) => b.pct - a.pct);
 
-      // Credits sum
       const creditsCents = (creditsRes.data ?? []).reduce((s: number, c: any) => s + (c.amount_cents || 0), 0);
-
-      // Paid today sum
       const paidCents = (invoicesPaidRes.data ?? []).reduce((s: number, i: any) => s + (i.total_cents || 0), 0);
-
-      // Add-on revenue
       const addOnCents = (addOnInvoicesRes.data ?? []).reduce((s: number, i: any) => s + (i.total_cents || 0), 0);
 
-      // Issue rate
-      const completed7d = completedJobIds.size;
+      const completed7d = completedJobIds.length;
       const issues7d = issues7dRes.count ?? 0;
       const issueRate = completed7d > 0 ? Math.round((issues7d / completed7d) * 100) : 0;
 
-      // Completion %
       const scheduled = jobsTodayRes.count ?? 0;
       const completed = jobsCompletedRes.count ?? 0;
       const completionPct = scheduled > 0 ? Math.round((completed / scheduled) * 100) : 0;
 
-      // Hot zones: zones with most new subs in 7d
+      // Hot zones
       const newSubsByZone: Record<string, number> = {};
       (subsRes.data ?? []).forEach((s: any) => {
         if (s.zone_id) newSubsByZone[s.zone_id] = (newSubsByZone[s.zone_id] || 0) + 1;
@@ -169,6 +160,13 @@ export function useOpsMetrics() {
         .filter((h: any) => h.demand > 0)
         .sort((a: any, b: any) => b.demand - a.demand)
         .slice(0, 3);
+
+      // Parse trend data from rollup snapshots
+      const trends: Record<string, number[]> = {};
+      (trendsRes.data ?? []).forEach((row: any) => {
+        if (!trends[row.metric_key]) trends[row.metric_key] = [];
+        trends[row.metric_key].push(row.metric_value);
+      });
 
       return {
         jobsScheduledToday: scheduled,
@@ -189,6 +187,7 @@ export function useOpsMetrics() {
         providerApplications: applicationsRes.count ?? 0,
         providerInvitesSent: providerInvitesRes.count ?? 0,
         hotZones,
+        trends,
         updatedAt: new Date(),
       };
     },
