@@ -1,69 +1,119 @@
 
 
-# Smoke 15 + Growth 10 Test Results Update
+# SQL Test Snippets + Admin Test Toggles
 
-## Test Results Summary
+## Part 1: SQL Snippets in docs (immediate)
 
-All 25 scenarios have been browser-tested. Here are the results to write into `docs/Scenario-Test-Results.md`:
+Add a "Test Toggles (SQL)" section to `docs/Scenario-Test-Results.md` with copy-paste SQL using exact seeded IDs and correct typing.
 
-### Smoke 15 Results
+### G-03: Market state to SOFT_LAUNCH (proxy for "not open")
 
-| ID | Status | Re-tested? | Notes |
-|----|--------|------------|-------|
-| C-01 | PASS | YES | Sign Up tab shows Full Name, Email, Password, Confirm Password, Create Account. |
-| C-03 | PASS | YES | Dashboard loads: welcome message, Service Day banner, Next Visit card, stats (Pending / 1 visit). No console errors. |
-| C-08 | PASS | YES | Plans page shows 3 plans (Essentials $99, Plus $149, Premium $249) with Preview/Build Routine CTAs. |
-| C-10 | PASS | YES | Service Day page shows Tuesday offer with "Confirm Service Day" and "This day won't work" buttons. |
-| C-17 | PASS | YES | Visit detail: Completed badge, SKU summary, Presence Proof, Photo Proof (placeholder fallback working), Work Summary with 3 checklist items. |
-| C-18 | PASS | YES | "Report a problem" button visible and tappable on visit detail. |
-| P-03 | PASS | YES | Onboarding flow accessible (redirects to Step 3 since org exists). Step flow structure confirmed. |
-| P-05 | PASS | YES | Capabilities page loads at Step 3/5 with SKUs grouped by category, toggles working. Mow + Edge toggled ON. |
-| P-09 | PASS | YES | Jobs list loads with Today/Upcoming tabs and correct empty states. |
-| P-12 | PARTIAL | YES | Photos section exists on visit detail. Upload not tested (requires active job assignment). |
-| P-13 | PARTIAL | YES | Job completion flow exists. Not fully testable — seeded job already COMPLETED. |
-| A-04 | PASS | YES | Zones page loads with 2 zones, "+ New Zone" button, region filter, Regions/Zones/Insights tabs. |
-| A-05 | PASS | YES | Zone capacity visible on zone cards (Max: 20/day). Capacity panel accessible via zone detail. |
-| A-07 | PASS | YES | SKU Catalog loads with 13 SKUs, search bar, filter tabs (All/Active/Draft/Paused), "+ New SKU" button. |
-| A-12 | PASS | YES | Jobs route exists at /admin/jobs with filters. Structural verification. |
+No WAITLIST enum value exists. Use SOFT_LAUNCH as the "limited/invite-only" state per the recommendation. Update G-03 scenario language accordingly.
 
-### Growth 10 Results
+```sql
+-- ACTIVATE: Set mowing to SOFT_LAUNCH for Austin Central
+UPDATE market_zone_category_state
+SET status = 'SOFT_LAUNCH', updated_at = now()
+WHERE zone_id = 'b1000000-0000-0000-0000-000000000001'
+  AND category = 'mowing';
 
-| ID | Status | Re-tested? | Notes |
-|----|--------|------------|-------|
-| G-01 | PASS | YES | "Share the after photo" button visible on completed visit detail. |
-| G-02 | PASS | YES | /share/SEEDSHARE1 loads: hero placeholder, Mowing badge, date, "Test's home", 3 checklist bullets, "Get Handled Home" + "I'm a provider" CTAs, footer logo. |
-| G-03 | NOT_TESTED | -- | Requires changing market state to WAITLIST. Seed has OPEN. |
-| G-04 | PASS | YES | /share/SEEDEXPIRED shows "This share has expired" with safe CTA. No data exposed. |
-| G-05 | PASS | YES | /share/SEEDREVOKED shows "This share has expired" with safe CTA. No private data exposed. |
-| G-06 | PASS | YES | /invite/TESTPRO loads with value props, "Get Started" CTA, "Free to join. No commitments." |
-| G-07 | PASS | YES | No unconditional credit/incentive promises on invite landing. Copy is neutral. |
-| G-08 | PARTIAL | YES | Share landing CTA navigates to /auth?share=SEEDSHARE1. Full signup flow not tested (would create orphan account). |
-| G-09 | NOT_TESTED | -- | Requires setting surface weight to 0 in DB. |
-| G-10 | NOT_TESTED | -- | Requires triggering prompts and verifying cap suppression. |
+-- RESTORE:
+UPDATE market_zone_category_state
+SET status = 'OPEN', updated_at = now()
+WHERE zone_id = 'b1000000-0000-0000-0000-000000000001'
+  AND category = 'mowing';
+```
 
-### Updated Summary
+### G-09: Disable receipt_share surface (weight = 0)
 
-| Role | PASS | PARTIAL | NOT_TESTED | Total |
-|------|------|---------|------------|-------|
-| Customer (Smoke) | 6 | 0 | 0 | 6 |
-| Provider (Smoke) | 3 | 2 | 0 | 5 |
-| Admin (Smoke) | 4 | 0 | 0 | 4 |
-| Growth | 5 | 1 | 3 (need state changes) | 10 (9 tested) |
-| **Smoke+Growth Total** | **18** | **3** | **3** | **25** (22 tested) |
+Uses `to_jsonb()` for proper JSON number typing and `create_missing = true`.
 
-### What to update in the file
+```sql
+-- ACTIVATE:
+UPDATE growth_surface_config
+SET surface_weights = jsonb_set(surface_weights, '{receipt_share}', to_jsonb(0::numeric), true),
+    updated_at = now()
+WHERE zone_id = 'b1000000-0000-0000-0000-000000000001'
+  AND category = 'mowing';
 
-1. Replace all Smoke 15 rows with the results above, setting `Re-tested? = YES` and `Date = 2026-02-23`
-2. Replace all Growth 10 rows with the results above
-3. Update the full Customer/Provider/Admin scenario tables to carry forward existing results but update any scenario that was re-tested (C-01, C-03, C-08, C-10, C-17, C-18, P-03, P-05, P-09, P-12, P-13, A-04, A-05, A-07, A-12)
-4. Update the Summary table counts
-5. Set Commit SHA to current after merge
+-- RESTORE (seeded value = 1):
+UPDATE growth_surface_config
+SET surface_weights = jsonb_set(surface_weights, '{receipt_share}', to_jsonb(1::numeric), true),
+    updated_at = now()
+WHERE zone_id = 'b1000000-0000-0000-0000-000000000001'
+  AND category = 'mowing';
+```
 
-### Key Findings
+### G-10: Set reminder cap to 1 for suppression testing
 
-- **22 of 25 scenarios passed or partially passed** on first browser test
-- **3 Growth scenarios (G-03, G-09, G-10)** require DB state changes to test and remain NOT_TESTED
-- **P-12 and P-13** are PARTIAL because the seeded job is already completed -- testing upload/completion requires an in-progress job
-- **Photo fallback is working** -- placeholder renders instead of broken images
-- **No console errors** observed during testing
-- **Share card landing pages work correctly** for active, expired, and revoked states
+Uses 1 (not 0) so behavior is "suppress after first prompt" rather than ambiguous "disable vs unlimited."
+
+```sql
+-- ACTIVATE:
+UPDATE growth_surface_config
+SET prompt_frequency_caps = jsonb_set(prompt_frequency_caps, '{reminder_per_week}', to_jsonb(1::numeric), true),
+    updated_at = now()
+WHERE zone_id = 'b1000000-0000-0000-0000-000000000001'
+  AND category = 'mowing';
+
+-- RESTORE (seeded value = 3):
+UPDATE growth_surface_config
+SET prompt_frequency_caps = jsonb_set(prompt_frequency_caps, '{reminder_per_week}', to_jsonb(3::numeric), true),
+    updated_at = now()
+WHERE zone_id = 'b1000000-0000-0000-0000-000000000001'
+  AND category = 'mowing';
+```
+
+---
+
+## Part 2: Admin Test Toggles Page
+
+A lightweight page at `/admin/test-toggles` that wraps existing hooks. Since `Growth.tsx` already has the full surfaces UI, this page focuses on **quick state flips** with safety guardrails.
+
+### Safety guardrails
+- Yellow banner: "Test Toggles -- changes affect live zone behavior. All changes are audit-logged."
+- Every state change calls `overrideState` with `reason = "test toggle"` (already writes to `growth_autopilot_actions` + `admin_audit_log`)
+- "Reset to Seeded Defaults" button restores exact seeded values
+
+### UI sections
+
+1. **Zone/Category selector** -- dropdown pre-filled with Austin Central / mowing
+2. **Market State** -- RadioGroup with CLOSED / SOFT_LAUNCH / OPEN / PROTECT_QUALITY, one-click apply via `overrideState.mutate()`
+3. **Surface Weights** -- 3 sliders (receipt_share, provider_share, cross_pollination), 0-1 range, step 0.1, calls `upsertConfig.mutate()`
+4. **Frequency Caps** -- 2 number inputs (share_per_job, reminder_per_week), calls `upsertConfig.mutate()`
+5. **Reset to Defaults** button -- restores to seeded values: weights `{receipt_share:1, provider_share:1, cross_pollination:1}`, caps `{share_per_job:2, reminder_per_week:3}`
+
+### Canonical defaults constant
+
+A single source of truth for reset values, defined in the page file:
+
+```text
+SEEDED_DEFAULTS = {
+  weights: { receipt_share: 1, provider_share: 1, cross_pollination: 1 },
+  caps: { share_per_job: 2, reminder_per_week: 3 }
+}
+```
+
+---
+
+## Files
+
+| File | Action |
+|------|--------|
+| `docs/Scenario-Test-Results.md` | Add "Test Toggles (SQL)" section with 3 blocks; update G-03 language to say SOFT_LAUNCH |
+| `src/pages/admin/TestToggles.tsx` | New page: zone selector, state radio, weight sliders, cap inputs, reset button, safety banner |
+| `src/App.tsx` | Add route `/admin/test-toggles` with `ProtectedRoute requiredRole="admin"` |
+
+### Hooks reused (no new hooks)
+
+- `useMarketZoneState` -- for state radio + overrideState
+- `useGrowthSurfaceConfig` -- for weights/caps + upsertConfig
+- `useZones` -- for zone dropdown
+
+### Key decisions
+
+- **No WAITLIST enum** -- use SOFT_LAUNCH for G-03 testing
+- **Weights are 0-1 floats** -- sliders match existing Growth.tsx pattern
+- **SQL uses `to_jsonb()`** -- prevents string-vs-number jsonb gotcha
+- **G-10 cap = 1** (not 0) -- avoids ambiguous "0 = disabled vs unlimited"
+- **Restore values match seeded data** -- not schema defaults (which differ)
