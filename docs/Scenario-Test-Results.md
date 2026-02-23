@@ -66,7 +66,7 @@
 |----|----------|--------|------------|-------|------|
 | G-01 | Share card creation from completed receipt | PASS | YES | "Share the after photo" button visible on completed visit detail. | 2026-02-23 |
 | G-02 | Share landing "wow" page loads | PASS | YES | /share/SEEDSHARE1 loads: hero placeholder, Mowing badge, date, "Test's home", 3 checklist bullets, "Get Handled Home" + "I'm a provider" CTAs, footer logo. | 2026-02-23 |
-| G-03 | Share link routes to WAITLIST when market closed | NOT_TESTED | -- | Requires changing market state to WAITLIST. Seed has OPEN. | |
+| G-03 | Share link routes to SOFT_LAUNCH when market not fully open | NOT_TESTED | -- | Use SOFT_LAUNCH (no WAITLIST enum). See "Test Toggles (SQL)" section below. | |
 | G-04 | Share link expiry behavior (30 days) | PASS | YES | /share/SEEDEXPIRED shows "This share has expired" with safe CTA. No data exposed. | 2026-02-23 |
 | G-05 | Share link revoke behavior | PASS | YES | /share/SEEDREVOKED shows "This share has expired" with safe CTA. No private data exposed. | 2026-02-23 |
 | G-06 | Invite landing /invite/:code records landing_viewed | PASS | YES | /invite/TESTPRO loads with value props, "Get Started" CTA, "Free to join. No commitments." | 2026-02-23 |
@@ -180,3 +180,81 @@
 12. **Admin Pages**: All routes exist with components built. 4 scenarios now browser-verified (A-04, A-05, A-07, A-12).
 13. **Provider Onboarding**: Steps 3 and 5 browser-verified. Full flow requires fresh provider account.
 14. **Security Linter**: Pre-existing warnings (RLS no-policy, always-true policies, leaked password protection) — not related to seed data.
+
+---
+
+## Test Toggles (SQL)
+
+> Copy-paste SQL for testing Growth scenarios that require DB state changes.  
+> All snippets target **Austin Central** (`zone_id = 'b1000000-0000-0000-0000-000000000001'`), category **mowing**.  
+> Always run the **RESTORE** block after testing.
+
+### G-03: Market state → SOFT_LAUNCH (proxy for "not open")
+
+The `market_zone_category_status` enum has: `CLOSED`, `SOFT_LAUNCH`, `OPEN`, `PROTECT_QUALITY`.  
+No `WAITLIST` value exists. Use `SOFT_LAUNCH` as the "limited / invite-only" state.
+
+```sql
+-- ACTIVATE: Set mowing to SOFT_LAUNCH for Austin Central
+UPDATE market_zone_category_state
+SET status = 'SOFT_LAUNCH', updated_at = now()
+WHERE zone_id = 'b1000000-0000-0000-0000-000000000001'
+  AND category = 'mowing';
+
+-- RESTORE:
+UPDATE market_zone_category_state
+SET status = 'OPEN', updated_at = now()
+WHERE zone_id = 'b1000000-0000-0000-0000-000000000001'
+  AND category = 'mowing';
+```
+
+### G-09: Disable receipt_share surface (weight = 0)
+
+Uses `to_jsonb()` for proper JSON number typing and `create_missing = true`.
+
+```sql
+-- ACTIVATE: Disable receipt_share
+UPDATE growth_surface_config
+SET surface_weights = jsonb_set(surface_weights, '{receipt_share}', to_jsonb(0::numeric), true),
+    updated_at = now()
+WHERE zone_id = 'b1000000-0000-0000-0000-000000000001'
+  AND category = 'mowing';
+
+-- RESTORE (seeded default = 1):
+UPDATE growth_surface_config
+SET surface_weights = jsonb_set(surface_weights, '{receipt_share}', to_jsonb(1::numeric), true),
+    updated_at = now()
+WHERE zone_id = 'b1000000-0000-0000-0000-000000000001'
+  AND category = 'mowing';
+```
+
+### G-10: Set reminder cap to 1 for suppression testing
+
+Uses `1` (not `0`) so behavior is "suppress after first prompt" — avoids ambiguity where `0` could mean "no limit."
+
+```sql
+-- ACTIVATE: Set reminder_per_week cap to 1
+UPDATE growth_surface_config
+SET prompt_frequency_caps = jsonb_set(prompt_frequency_caps, '{reminder_per_week}', to_jsonb(1::numeric), true),
+    updated_at = now()
+WHERE zone_id = 'b1000000-0000-0000-0000-000000000001'
+  AND category = 'mowing';
+
+-- RESTORE (seeded default = 3):
+UPDATE growth_surface_config
+SET prompt_frequency_caps = jsonb_set(prompt_frequency_caps, '{reminder_per_week}', to_jsonb(3::numeric), true),
+    updated_at = now()
+WHERE zone_id = 'b1000000-0000-0000-0000-000000000001'
+  AND category = 'mowing';
+```
+
+### Canonical Seeded Defaults (Austin Central / mowing)
+
+| Config | Key | Seeded Value |
+|--------|-----|-------------|
+| `surface_weights` | `receipt_share` | `1` |
+| `surface_weights` | `provider_share` | `1` |
+| `surface_weights` | `cross_pollination` | `1` |
+| `prompt_frequency_caps` | `share_per_job` | `2` |
+| `prompt_frequency_caps` | `reminder_per_week` | `3` |
+| `market_zone_category_state` | `status` | `OPEN` |
