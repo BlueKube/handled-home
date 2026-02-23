@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Activity, Shield, TrendingUp, AlertTriangle, Lock, RefreshCw, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Activity, Shield, TrendingUp, AlertTriangle, Lock, RefreshCw, ChevronRight, Sliders, BarChart3 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,11 +10,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useZones } from "@/hooks/useZones";
 import { useMarketZoneState, type ZoneCategoryState } from "@/hooks/useMarketZoneState";
 import { useMarketHealth, type HealthSnapshot } from "@/hooks/useMarketHealth";
 import { useAutopilotActions } from "@/hooks/useAutopilotActions";
+import { useGrowthSurfaceConfig } from "@/hooks/useGrowthSurfaceConfig";
+import { useGrowthEventStats } from "@/hooks/useGrowthEvents";
 
 const STATES = ["CLOSED", "SOFT_LAUNCH", "OPEN", "PROTECT_QUALITY"] as const;
 const CATEGORIES = ["lawn_care", "cleaning", "landscaping", "pest_control", "pool_care"];
@@ -48,11 +53,15 @@ export default function AdminGrowth() {
         <TabsList className="w-full">
           <TabsTrigger value="matrix" className="flex-1">Zone Matrix</TabsTrigger>
           <TabsTrigger value="health" className="flex-1">Health</TabsTrigger>
-          <TabsTrigger value="actions" className="flex-1">Actions Log</TabsTrigger>
+          <TabsTrigger value="actions" className="flex-1">Actions</TabsTrigger>
+          <TabsTrigger value="surfaces" className="flex-1">Surfaces</TabsTrigger>
+          <TabsTrigger value="events" className="flex-1">Events</TabsTrigger>
         </TabsList>
         <TabsContent value="matrix"><ZoneMatrixTab selectedZone={selectedZone} setSelectedZone={setSelectedZone} /></TabsContent>
         <TabsContent value="health"><HealthTab selectedZone={selectedZone} setSelectedZone={setSelectedZone} /></TabsContent>
         <TabsContent value="actions"><ActionsTab selectedZone={selectedZone} setSelectedZone={setSelectedZone} /></TabsContent>
+        <TabsContent value="surfaces"><SurfacesTab selectedZone={selectedZone} setSelectedZone={setSelectedZone} /></TabsContent>
+        <TabsContent value="events"><EventsTab selectedZone={selectedZone} setSelectedZone={setSelectedZone} /></TabsContent>
       </Tabs>
     </div>
   );
@@ -317,6 +326,222 @@ function ActionsTab({ selectedZone, setSelectedZone }: { selectedZone: string; s
           </CardContent>
         </Card>
       ))}
+    </div>
+  );
+}
+
+function SurfacesTab({ selectedZone, setSelectedZone }: { selectedZone: string; setSelectedZone: (v: string) => void }) {
+  const zonesQuery = useZones();
+  const zones = zonesQuery.data ?? [];
+  const { configs, upsertConfig } = useGrowthSurfaceConfig(selectedZone || undefined);
+
+  const displayZones = zones.filter((z: any) => !selectedZone || z.id === selectedZone);
+
+  const configMap = new Map<string, any>();
+  configs.data?.forEach((c: any) => configMap.set(`${c.zone_id}:${c.category}`, c));
+
+  const handleWeightChange = (zoneId: string, category: string, surface: string, value: number) => {
+    const existing = configMap.get(`${zoneId}:${category}`);
+    const weights = { receipt_share: 1, provider_share: 1, cross_pollination: 0.5, ...(existing?.surface_weights ?? {}) };
+    weights[surface] = value;
+    upsertConfig.mutate(
+      { zone_id: zoneId, category, surface_weights: weights },
+      { onError: (e: any) => toast.error(e.message) }
+    );
+  };
+
+  const handleToggle = (zoneId: string, category: string, field: string, value: any) => {
+    upsertConfig.mutate(
+      { zone_id: zoneId, category, [field]: value } as any,
+      { onError: (e: any) => toast.error(e.message) }
+    );
+  };
+
+  if (configs.isLoading) return <Skeleton className="h-48 mt-4" />;
+
+  return (
+    <div className="space-y-4 mt-4">
+      <ZoneFilter selectedZone={selectedZone} setSelectedZone={setSelectedZone} />
+
+      {displayZones.length === 0 && (
+        <p className="text-sm text-muted-foreground text-center py-8">No zones found.</p>
+      )}
+
+      {displayZones.map((zone: any) => (
+        <Card key={zone.id}>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Sliders className="h-4 w-4" />
+              {zone.name}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {CATEGORIES.map((cat) => {
+              const cfg = configMap.get(`${zone.id}:${cat}`);
+              const weights = { receipt_share: 1, provider_share: 1, cross_pollination: 0.5, ...(cfg?.surface_weights ?? {}) };
+              const caps = { share_per_job: 1, reminder_per_week: 1, ...(cfg?.prompt_frequency_caps ?? {}) };
+
+              return (
+                <div key={cat} className="border border-border rounded-lg p-3 space-y-3">
+                  <p className="text-sm font-medium capitalize">{cat.replace(/_/g, " ")}</p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {(["receipt_share", "provider_share", "cross_pollination"] as const).map((surface) => (
+                      <div key={surface} className="space-y-1">
+                        <Label className="text-xs capitalize">{surface.replace(/_/g, " ")}</Label>
+                        <div className="flex items-center gap-2">
+                          <Slider
+                            min={0} max={1} step={0.1}
+                            value={[weights[surface] ?? 0]}
+                            onValueCommit={([v]) => handleWeightChange(zone.id, cat, surface, v)}
+                            className="flex-1"
+                          />
+                          <span className="text-xs w-8 text-muted-foreground text-right">{(weights[surface] ?? 0).toFixed(1)}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-4 pt-1">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={cfg?.incentive_visibility ?? false}
+                        onCheckedChange={(v) => handleToggle(zone.id, cat, "incentive_visibility", v)}
+                      />
+                      <Label className="text-xs">Show incentives</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs">Brand</Label>
+                      <Select
+                        value={cfg?.share_brand_default ?? "minimal"}
+                        onValueChange={(v) => handleToggle(zone.id, cat, "share_brand_default", v)}
+                      >
+                        <SelectTrigger className="h-7 w-24 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="minimal">Minimal</SelectItem>
+                          <SelectItem value="full">Full</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs">Expiry</Label>
+                      <Input
+                        type="number" className="h-7 w-16 text-xs"
+                        value={cfg?.share_link_expiry_days ?? 30}
+                        onChange={(e) => handleToggle(zone.id, cat, "share_link_expiry_days", parseInt(e.target.value) || 30)}
+                      />
+                      <span className="text-xs text-muted-foreground">days</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+const FUNNEL_STEPS = [
+  { key: "prompt_shown", label: "Prompted" },
+  { key: "share_initiated", label: "Initiated" },
+  { key: "share_completed", label: "Shared" },
+  { key: "landing_viewed", label: "Viewed" },
+  { key: "signup_completed", label: "Signed up" },
+];
+
+function EventsTab({ selectedZone, setSelectedZone }: { selectedZone: string; setSelectedZone: (v: string) => void }) {
+  const stats = useGrowthEventStats(selectedZone || undefined);
+
+  if (stats.isLoading) return <Skeleton className="h-48 mt-4" />;
+
+  const { byType = {}, bySurface = {}, total = 0 } = stats.data ?? {};
+
+  // Build funnel data
+  const funnelData = FUNNEL_STEPS.map((step) => ({
+    ...step,
+    count: byType[step.key] ?? 0,
+  }));
+  const maxFunnel = Math.max(1, ...funnelData.map((f) => f.count));
+
+  // Sort surfaces by count desc
+  const surfaceEntries = Object.entries(bySurface).sort(([, a], [, b]) => (b as number) - (a as number));
+  const maxSurface = Math.max(1, ...surfaceEntries.map(([, v]) => v as number));
+
+  return (
+    <div className="space-y-4 mt-4">
+      <ZoneFilter selectedZone={selectedZone} setSelectedZone={setSelectedZone} />
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Conversion Funnel
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">{total} total events (last 500)</p>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {funnelData.map((step, i) => (
+            <div key={step.key} className="flex items-center gap-3">
+              <span className="text-xs w-20 text-muted-foreground">{step.label}</span>
+              <div className="flex-1 h-6 bg-muted rounded-sm overflow-hidden">
+                <div
+                  className="h-full bg-primary/70 rounded-sm transition-all"
+                  style={{ width: `${(step.count / maxFunnel) * 100}%` }}
+                />
+              </div>
+              <span className="text-xs font-medium w-10 text-right">{step.count}</span>
+              {i > 0 && funnelData[i - 1].count > 0 && (
+                <span className="text-xs text-muted-foreground w-12 text-right">
+                  {Math.round((step.count / funnelData[i - 1].count) * 100)}%
+                </span>
+              )}
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">By Surface</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {surfaceEntries.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-4">No events recorded yet.</p>
+          )}
+          {surfaceEntries.map(([surface, count]) => (
+            <div key={surface} className="flex items-center gap-3">
+              <span className="text-xs w-40 capitalize text-muted-foreground">{surface.replace(/_/g, " ")}</span>
+              <div className="flex-1 h-5 bg-muted rounded-sm overflow-hidden">
+                <div
+                  className="h-full bg-accent rounded-sm transition-all"
+                  style={{ width: `${((count as number) / maxSurface) * 100}%` }}
+                />
+              </div>
+              <span className="text-xs font-medium w-8 text-right">{count as number}</span>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">All Event Types</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(byType).sort(([, a], [, b]) => (b as number) - (a as number)).map(([type, count]) => (
+              <Badge key={type} variant="outline" className="text-xs">
+                {type.replace(/_/g, " ")}: {count as number}
+              </Badge>
+            ))}
+            {Object.keys(byType).length === 0 && (
+              <p className="text-sm text-muted-foreground">No events yet.</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
