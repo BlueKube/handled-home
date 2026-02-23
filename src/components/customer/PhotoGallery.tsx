@@ -66,10 +66,14 @@ export function PhotoGallery({ photos }: PhotoGalleryProps) {
           </SheetHeader>
           {selectedPhoto?.signedUrl && (
             <div className="flex-1 flex items-center justify-center p-4 overflow-auto">
-              <img
+      <img
                 src={selectedPhoto.signedUrl}
                 alt={selectedPhoto.slot_key ?? "Visit photo"}
                 className="max-w-full max-h-full object-contain rounded-lg"
+                onError={(e) => {
+                  e.currentTarget.src = '/placeholder.svg';
+                  if (import.meta.env.DEV) console.warn('[PhotoGallery] Failed to load photo:', selectedPhoto.id);
+                }}
               />
             </div>
           )}
@@ -92,6 +96,10 @@ function PhotoThumbnail({ photo, onSelect }: { photo: VisitPhoto; onSelect: () =
         alt={photo.slot_key ?? "Visit photo"}
         className="w-full h-full object-cover"
         loading="lazy"
+        onError={(e) => {
+          e.currentTarget.src = '/placeholder.svg';
+          if (import.meta.env.DEV) console.warn('[PhotoGallery] Failed to load thumbnail:', photo.id);
+        }}
       />
       <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors flex items-center justify-center">
         <ZoomIn className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
