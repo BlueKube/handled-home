@@ -128,7 +128,15 @@ export default function AdminJobDetail() {
                 <div className="flex-1"><p className="text-sm capitalize">{p.slot_key?.replace(/_/g, " ") ?? "Extra"}</p><p className="text-xs text-muted-foreground">{p.upload_status}</p></div>
               </div>
               {signedUrls[p.id] && (
-                <img src={signedUrls[p.id]} alt={p.slot_key ?? "Photo"} className="w-full h-40 object-cover rounded-lg" />
+                <img
+                  src={signedUrls[p.id]}
+                  alt={p.slot_key ?? "Photo"}
+                  className="w-full h-40 object-cover rounded-lg"
+                  onError={(e) => {
+                    e.currentTarget.src = '/placeholder.svg';
+                    if (import.meta.env.DEV) console.warn('[AdminJobDetail] Failed to load photo:', p.storage_path);
+                  }}
+                />
               )}
             </Card>
           ))}

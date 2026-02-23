@@ -115,6 +115,10 @@ export default function ProviderJobPhotos() {
           src={signedUrls[photo.id]}
           alt={label}
           className="w-full h-32 object-cover rounded-lg"
+          onError={(e) => {
+            e.currentTarget.src = '/placeholder.svg';
+            if (import.meta.env.DEV) console.warn('[ProviderJobPhotos] Failed to load photo:', photo.storage_path);
+          }}
         />
       )}
     </Card>
