@@ -96,6 +96,7 @@ import AdminCustomerLedger from "@/pages/admin/CustomerLedger";
 import AdminProviderLedger from "@/pages/admin/ProviderLedger";
 import AdminSupportPolicies from "@/pages/admin/SupportPolicies";
 import AdminSupportMacros from "@/pages/admin/SupportMacros";
+import AdminGrowth from "@/pages/admin/Growth";
 
 const queryClient = new QueryClient();
 
@@ -201,6 +202,7 @@ const App = () => (
                 <Route path="/admin/support/policies" element={<AdminSupportPolicies />} />
                 <Route path="/admin/support/macros" element={<AdminSupportMacros />} />
                 <Route path="/admin/incentives" element={<AdminIncentives />} />
+                <Route path="/admin/growth" element={<AdminGrowth />} />
                 <Route path="/admin/reports" element={<AdminReports />} />
                 <Route path="/admin/audit" element={<AdminAudit />} />
                 <Route path="/admin/billing" element={<AdminBilling />} />

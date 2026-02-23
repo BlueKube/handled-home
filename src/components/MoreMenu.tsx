@@ -4,7 +4,7 @@ import {
   MapPin, Wallet, Users, HelpCircle, Settings,
   Building2, Package,
   Gauge, CreditCard, CalendarDays, Megaphone, FileText, Lock,
-  LogOut, Moon, Sun,
+  LogOut, Moon, Sun, TrendingUp,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -41,6 +41,7 @@ const adminMore: MenuItem[] = [
   { label: "Scheduling", icon: CalendarDays, path: "/admin/scheduling" },
   { label: "Support", icon: HelpCircle, path: "/admin/support" },
   { label: "Incentives", icon: Megaphone, path: "/admin/incentives" },
+  { label: "Growth", icon: TrendingUp, path: "/admin/growth" },
   { label: "Reports", icon: FileText, path: "/admin/reports" },
   { label: "Audit Logs", icon: Lock, path: "/admin/audit" },
   { label: "Settings", icon: Settings, path: "/admin/settings" },
