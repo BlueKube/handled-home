@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Award, Copy, Link, Users, DollarSign, Clock, AlertTriangle, ChevronRight, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -114,9 +115,22 @@ export default function ProviderReferrals() {
           </Button>
         ) : (
           <Button
-            onClick={() => {
-              const programId = codes.data?.[0]?.program_id;
-              if (programId) generateCode.mutate(programId);
+            onClick={async () => {
+              // P3: Fallback to first active program if no codes exist yet
+              let programId = codes.data?.[0]?.program_id;
+              if (!programId) {
+                const { data: programs } = await (supabase as any)
+                  .from("referral_programs")
+                  .select("id")
+                  .eq("status", "active")
+                  .limit(1);
+                programId = programs?.[0]?.id;
+              }
+              if (programId) {
+                generateCode.mutate(programId);
+              } else {
+                toast.error("No active referral program found.");
+              }
             }}
             variant="outline"
             className="w-full gap-2"

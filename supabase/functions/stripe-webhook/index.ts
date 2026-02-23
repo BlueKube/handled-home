@@ -165,6 +165,26 @@ serve(async (req) => {
               .eq("customer_id", userId)
               .eq("status", "draft");
 
+            // S1: Fire 'subscribed' referral milestone
+            try {
+              const { data: referral } = await supabase
+                .from("referrals")
+                .select("id")
+                .eq("referred_user_id", userId)
+                .eq("status", "active")
+                .limit(1)
+                .maybeSingle();
+              if (referral) {
+                await supabase.rpc("record_referral_milestone", {
+                  p_referral_id: referral.id,
+                  p_milestone: "subscribed",
+                });
+                logStep("Referral milestone recorded", { milestone: "subscribed", referralId: referral.id });
+              }
+            } catch (e) {
+              logStep("Referral milestone error (subscribed)", { error: (e as Error).message });
+            }
+
             // Save payment method if available
             if (session.payment_method_types?.includes("card") && stripeCustomerId) {
               try {
@@ -380,6 +400,26 @@ serve(async (req) => {
               .eq("customer_id", internalSub.customer_id)
               .eq("type", "PAYMENT_FAILED")
               .eq("status", "OPEN");
+
+            // S1: Fire paid_cycle referral milestone
+            try {
+              const { data: referral } = await supabase
+                .from("referrals")
+                .select("id")
+                .eq("referred_user_id", internalSub.customer_id)
+                .eq("status", "active")
+                .limit(1)
+                .maybeSingle();
+              if (referral) {
+                await supabase.rpc("record_referral_milestone", {
+                  p_referral_id: referral.id,
+                  p_milestone: "paid_cycle",
+                });
+                logStep("Referral milestone recorded", { milestone: "paid_cycle", referralId: referral.id });
+              }
+            } catch (e) {
+              logStep("Referral milestone error (paid_cycle)", { error: (e as Error).message });
+            }
           }
         }
         break;

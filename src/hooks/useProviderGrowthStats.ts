@@ -55,7 +55,7 @@ export function useProviderGrowthStats() {
       const { data: rewards } = await client
         .from("referral_rewards")
         .select("amount_cents, status")
-        .eq("referrer_user_id", user!.id);
+        .eq("recipient_user_id", user!.id);
 
       const rewardsList = (rewards ?? []) as any[];
       const bonusesPendingCents = rewardsList.filter((r) => ["pending", "on_hold", "earned"].includes(r.status)).reduce((s: number, r: any) => s + r.amount_cents, 0);
