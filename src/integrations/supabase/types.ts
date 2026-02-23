@@ -695,6 +695,56 @@ export type Database = {
           },
         ]
       }
+      growth_autopilot_actions: {
+        Row: {
+          action_type: string
+          actor_user_id: string | null
+          category: string
+          created_at: string
+          id: string
+          metadata: Json
+          new_state: string | null
+          previous_state: string | null
+          reason: string | null
+          trigger_source: string
+          zone_id: string
+        }
+        Insert: {
+          action_type: string
+          actor_user_id?: string | null
+          category: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          new_state?: string | null
+          previous_state?: string | null
+          reason?: string | null
+          trigger_source?: string
+          zone_id: string
+        }
+        Update: {
+          action_type?: string
+          actor_user_id?: string | null
+          category?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          new_state?: string | null
+          previous_state?: string | null
+          reason?: string | null
+          trigger_source?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "growth_autopilot_actions_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invite_scripts: {
         Row: {
           body: string
@@ -1100,6 +1150,103 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "market_cohorts_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      market_health_snapshots: {
+        Row: {
+          category: string
+          created_at: string
+          demand_score: number
+          health_label: string
+          health_score: number
+          id: string
+          inputs: Json
+          quality_score: number
+          snapshot_at: string
+          supply_score: number
+          zone_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          demand_score?: number
+          health_label?: string
+          health_score?: number
+          id?: string
+          inputs?: Json
+          quality_score?: number
+          snapshot_at?: string
+          supply_score?: number
+          zone_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          demand_score?: number
+          health_label?: string
+          health_score?: number
+          id?: string
+          inputs?: Json
+          quality_score?: number
+          snapshot_at?: string
+          supply_score?: number
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_health_snapshots_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      market_zone_category_state: {
+        Row: {
+          category: string
+          config: Json
+          created_at: string
+          id: string
+          lock_reason: string | null
+          locked_by_admin_user_id: string | null
+          locked_until: string | null
+          status: Database["public"]["Enums"]["market_zone_category_status"]
+          updated_at: string
+          zone_id: string
+        }
+        Insert: {
+          category: string
+          config?: Json
+          created_at?: string
+          id?: string
+          lock_reason?: string | null
+          locked_by_admin_user_id?: string | null
+          locked_until?: string | null
+          status?: Database["public"]["Enums"]["market_zone_category_status"]
+          updated_at?: string
+          zone_id: string
+        }
+        Update: {
+          category?: string
+          config?: Json
+          created_at?: string
+          id?: string
+          lock_reason?: string | null
+          locked_by_admin_user_id?: string | null
+          locked_until?: string | null
+          status?: Database["public"]["Enums"]["market_zone_category_status"]
+          updated_at?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_zone_category_state_zone_id_fkey"
             columns: ["zone_id"]
             isOneToOne: false
             referencedRelation: "zones"
@@ -3936,6 +4083,16 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_override_zone_state: {
+        Args: {
+          p_category: string
+          p_lock_days?: number
+          p_new_state: string
+          p_reason: string
+          p_zone_id: string
+        }
+        Returns: undefined
+      }
       admin_provider_action: {
         Args: {
           p_action: string
@@ -3976,6 +4133,10 @@ export type Database = {
         Args: { p_job_id: string; p_provider_summary?: string }
         Returns: Json
       }
+      compute_zone_health_score: {
+        Args: { p_category: string; p_zone_id: string }
+        Returns: Json
+      }
       confirm_routine: { Args: { p_routine_id: string }; Returns: Json }
       confirm_service_day: { Args: { p_assignment_id: string }; Returns: Json }
       create_or_refresh_service_day_offer: {
@@ -4006,6 +4167,19 @@ export type Database = {
           p_referral_id: string
         }
         Returns: Json
+      }
+      record_autopilot_action: {
+        Args: {
+          p_action_type: string
+          p_category: string
+          p_metadata?: Json
+          p_new_state?: string
+          p_previous_state?: string
+          p_reason?: string
+          p_trigger_source?: string
+          p_zone_id: string
+        }
+        Returns: string
       }
       record_referral_milestone: {
         Args: {
@@ -4069,6 +4243,11 @@ export type Database = {
         | "same_day_preferred"
         | "same_week_allowed"
         | "independent_cadence"
+      market_zone_category_status:
+        | "CLOSED"
+        | "SOFT_LAUNCH"
+        | "OPEN"
+        | "PROTECT_QUALITY"
       provider_application_status:
         | "draft"
         | "submitted"
@@ -4305,6 +4484,12 @@ export const Constants = {
         "same_day_preferred",
         "same_week_allowed",
         "independent_cadence",
+      ],
+      market_zone_category_status: [
+        "CLOSED",
+        "SOFT_LAUNCH",
+        "OPEN",
+        "PROTECT_QUALITY",
       ],
       provider_application_status: [
         "draft",
