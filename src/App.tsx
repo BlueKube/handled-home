@@ -68,6 +68,7 @@ import ProviderReferrals from "@/pages/provider/Referrals";
 import ProviderInviteCustomers from "@/pages/provider/InviteCustomers";
 import ProviderApply from "@/pages/provider/Apply";
 import InviteLanding from "@/pages/InviteLanding";
+import ShareLanding from "@/pages/ShareLanding";
 
 // Admin pages
 import AdminDashboard from "@/pages/admin/Dashboard";
@@ -119,6 +120,7 @@ const App = () => (
               <Route path="/" element={<RootRedirect />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/invite/:code" element={<InviteLanding />} />
+              <Route path="/share/:shareCode" element={<ShareLanding />} />
 
               {/* Customer App */}
               <Route element={<ProtectedRoute requiredRole="customer"><AppLayout /></ProtectedRoute>}>

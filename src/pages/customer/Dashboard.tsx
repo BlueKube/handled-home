@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { SeasonalPlanCard } from "@/components/customer/SeasonalPlanCard";
 import { NextVisitCard } from "@/components/customer/NextVisitCard";
 import { WeekTimeline } from "@/components/customer/WeekTimeline";
+import { CrossPollinationCard } from "@/components/customer/CrossPollinationCard";
 
 function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -165,6 +166,9 @@ export default function CustomerDashboard() {
           <p className="text-xs text-muted-foreground">Changes take effect next cycle.</p>
         </div>
       )}
+
+      {/* Cross-Pollination Card */}
+      <CrossPollinationCard zoneId={subscription?.zone_id} propertyId={property?.id} />
 
       {/* Seasonal Plan Card */}
       <SeasonalPlanCard propertyId={property?.id} zoneId={subscription?.zone_id} />

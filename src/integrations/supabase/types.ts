@@ -745,6 +745,123 @@ export type Database = {
           },
         ]
       }
+      growth_events: {
+        Row: {
+          actor_id: string
+          actor_role: string
+          category: string | null
+          cohort_id: string | null
+          context: Json
+          created_at: string
+          event_type: string
+          id: string
+          idempotency_key: string
+          sku_id: string | null
+          source_surface: string
+          zone_id: string | null
+        }
+        Insert: {
+          actor_id: string
+          actor_role: string
+          category?: string | null
+          cohort_id?: string | null
+          context?: Json
+          created_at?: string
+          event_type: string
+          id?: string
+          idempotency_key: string
+          sku_id?: string | null
+          source_surface: string
+          zone_id?: string | null
+        }
+        Update: {
+          actor_id?: string
+          actor_role?: string
+          category?: string | null
+          cohort_id?: string | null
+          context?: Json
+          created_at?: string
+          event_type?: string
+          id?: string
+          idempotency_key?: string
+          sku_id?: string | null
+          source_surface?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "growth_events_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "market_cohorts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "growth_events_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "growth_events_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      growth_surface_config: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          incentive_visibility: boolean
+          prompt_frequency_caps: Json
+          share_brand_default: string
+          share_link_expiry_days: number
+          share_link_hard_cap_days: number
+          surface_weights: Json
+          updated_at: string
+          zone_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          incentive_visibility?: boolean
+          prompt_frequency_caps?: Json
+          share_brand_default?: string
+          share_link_expiry_days?: number
+          share_link_hard_cap_days?: number
+          surface_weights?: Json
+          updated_at?: string
+          zone_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          incentive_visibility?: boolean
+          prompt_frequency_caps?: Json
+          share_brand_default?: string
+          share_link_expiry_days?: number
+          share_link_hard_cap_days?: number
+          surface_weights?: Json
+          updated_at?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "growth_surface_config_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invite_scripts: {
         Row: {
           body: string
@@ -3231,6 +3348,81 @@ export type Database = {
         }
         Relationships: []
       }
+      share_cards: {
+        Row: {
+          asset_mode: string
+          brand_mode: string
+          category: string | null
+          checklist_bullets: Json
+          created_at: string
+          customer_id: string
+          expires_at: string
+          expiry_mode: string
+          hero_photo_path: string | null
+          id: string
+          is_revoked: boolean
+          job_id: string
+          revoked_at: string | null
+          share_code: string
+          show_first_name: boolean
+          show_neighborhood: boolean
+          zone_id: string | null
+        }
+        Insert: {
+          asset_mode?: string
+          brand_mode?: string
+          category?: string | null
+          checklist_bullets?: Json
+          created_at?: string
+          customer_id: string
+          expires_at?: string
+          expiry_mode?: string
+          hero_photo_path?: string | null
+          id?: string
+          is_revoked?: boolean
+          job_id: string
+          revoked_at?: string | null
+          share_code: string
+          show_first_name?: boolean
+          show_neighborhood?: boolean
+          zone_id?: string | null
+        }
+        Update: {
+          asset_mode?: string
+          brand_mode?: string
+          category?: string | null
+          checklist_bullets?: Json
+          created_at?: string
+          customer_id?: string
+          expires_at?: string
+          expiry_mode?: string
+          hero_photo_path?: string | null
+          id?: string
+          is_revoked?: boolean
+          job_id?: string
+          revoked_at?: string | null
+          share_code?: string
+          show_first_name?: boolean
+          show_neighborhood?: boolean
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "share_cards_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "share_cards_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_events: {
         Row: {
           created_at: string
@@ -4153,6 +4345,7 @@ export type Database = {
         Returns: Json
       }
       create_provider_earning: { Args: { p_job_id: string }; Returns: Json }
+      create_share_card: { Args: { p_job_id: string }; Returns: Json }
       generate_subscription_invoice: {
         Args: { p_subscription_id: string }
         Returns: Json
@@ -4161,6 +4354,7 @@ export type Database = {
         Args: { p_default_day: string; p_strategy: string }
         Returns: string[]
       }
+      get_share_card_public: { Args: { p_share_code: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -4189,6 +4383,20 @@ export type Database = {
         }
         Returns: undefined
       }
+      record_growth_event: {
+        Args: {
+          p_actor_role: string
+          p_category?: string
+          p_cohort_id?: string
+          p_context?: Json
+          p_event_type: string
+          p_idempotency_key: string
+          p_sku_id?: string
+          p_source_surface: string
+          p_zone_id?: string
+        }
+        Returns: Json
+      }
       record_referral_milestone: {
         Args: {
           p_milestone: Database["public"]["Enums"]["referral_milestone_type"]
@@ -4213,6 +4421,10 @@ export type Database = {
           p_severity?: string
         }
         Returns: Json
+      }
+      revoke_share_card: {
+        Args: { p_share_card_id: string }
+        Returns: undefined
       }
       run_payout_batch: { Args: { p_payout_run_id: string }; Returns: Json }
       select_alternative_service_day: {
