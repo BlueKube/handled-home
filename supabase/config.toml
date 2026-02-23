@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.support-ai-classify]
 verify_jwt = false
+
+[functions.snapshot-rollup]
+verify_jwt = false

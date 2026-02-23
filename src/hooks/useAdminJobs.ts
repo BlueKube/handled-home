@@ -8,24 +8,29 @@ interface AdminJobFilters {
   zone_id?: string;
   date_from?: string;
   date_to?: string;
+  page?: number;
+  pageSize?: number;
 }
 
 export function useAdminJobs(filters: AdminJobFilters = {}) {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const pageSize = filters.pageSize ?? 25;
+  const page = filters.page ?? 0;
 
   const jobsQuery = useQuery({
     queryKey: ["admin_jobs", filters],
     queryFn: async () => {
-      let query = supabase
-        .from("jobs")
+      const offset = page * pageSize;
+
+      let query = (supabase.from("jobs") as any)
         .select(`
           *,
           property:properties(street_address, city, zip_code),
-          job_skus(id, sku_name_snapshot)
-        `)
+          job_skus(id, sku_name_snapshot, sku_id)
+        `, { count: "exact" })
         .order("scheduled_date", { ascending: false })
-        .limit(100);
+        .range(offset, offset + pageSize - 1);
 
       if (filters.status) query = query.eq("status", filters.status);
       if (filters.provider_org_id) query = query.eq("provider_org_id", filters.provider_org_id);
@@ -33,9 +38,9 @@ export function useAdminJobs(filters: AdminJobFilters = {}) {
       if (filters.date_from) query = query.gte("scheduled_date", filters.date_from);
       if (filters.date_to) query = query.lte("scheduled_date", filters.date_to);
 
-      const { data, error } = await query;
+      const { data, error, count } = await query;
       if (error) throw error;
-      return data ?? [];
+      return { jobs: data ?? [], totalCount: count ?? 0 };
     },
   });
 
@@ -94,5 +99,11 @@ export function useAdminJobs(filters: AdminJobFilters = {}) {
     },
   });
 
-  return { jobs: jobsQuery.data ?? [], loading: jobsQuery.isLoading, overrideComplete, resolveIssue };
+  return {
+    jobs: jobsQuery.data?.jobs ?? [],
+    totalCount: jobsQuery.data?.totalCount ?? 0,
+    loading: jobsQuery.isLoading,
+    overrideComplete,
+    resolveIssue,
+  };
 }

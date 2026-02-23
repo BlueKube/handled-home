@@ -415,3 +415,18 @@ Module 14 is done when:
 - Providers can see motivating, safe performance summaries.  
 - All metrics are consistent, tappable, and trustworthy.  
 - The system scales with minimal manual reporting work.  
+
+---
+
+## 21) Dispatcher/Ops RLS Differentiation (Deferred to v2)
+
+Currently all admin users share a single `admin` role with identical access. The review identified a need for differentiated `dispatcher` and `ops` roles with scoped permissions.
+
+**Recommended v2 pattern:**
+- Add an `admin_scope` column to `user_roles` (e.g., `full`, `ops_readonly`, `dispatcher`) or create a separate `admin_permissions` table.
+- Create RLS helper function `has_admin_scope(user_id, scope)` similar to `has_role()`.
+- Scope ops cockpit read access to `ops_readonly` and `dispatcher` roles.
+- Scope write actions (overrides, adjustments) to `full` admin only.
+- Add a migration to backfill existing admins with `full` scope.
+
+**Why deferred:** No current users require scoped admin access. Adding a new role enum value and RLS policies for a P3 item risks scope creep. Revisit when the team grows beyond a single admin operator.

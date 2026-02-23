@@ -4072,9 +4072,11 @@ export type Database = {
           active_subs: number | null
           capacity_pct: number | null
           completed_jobs: number | null
+          completed_jobs_7d: number | null
           created_at: string
           id: string
           issue_rate: number | null
+          issue_rate_7d: number | null
           metadata: Json | null
           proof_compliance: number | null
           snapshot_date: string
@@ -4084,9 +4086,11 @@ export type Database = {
           active_subs?: number | null
           capacity_pct?: number | null
           completed_jobs?: number | null
+          completed_jobs_7d?: number | null
           created_at?: string
           id?: string
           issue_rate?: number | null
+          issue_rate_7d?: number | null
           metadata?: Json | null
           proof_compliance?: number | null
           snapshot_date: string
@@ -4096,9 +4100,11 @@ export type Database = {
           active_subs?: number | null
           capacity_pct?: number | null
           completed_jobs?: number | null
+          completed_jobs_7d?: number | null
           created_at?: string
           id?: string
           issue_rate?: number | null
+          issue_rate_7d?: number | null
           metadata?: Json | null
           proof_compliance?: number | null
           snapshot_date?: string

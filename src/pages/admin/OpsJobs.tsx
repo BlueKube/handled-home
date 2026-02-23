@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAdminJobs } from "@/hooks/useAdminJobs";
 import { useZones } from "@/hooks/useZones";
@@ -25,6 +25,7 @@ export default function OpsJobs() {
   const [dateFrom, setDateFrom] = useState<string>(searchParams.get("date_from") || "");
   const [dateTo, setDateTo] = useState<string>(searchParams.get("date_to") || "");
   const [proofFilter, setProofFilter] = useState<string>(searchParams.get("proof") || "");
+  const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [page, setPage] = useState(0);
 
   const { data: zones } = useZones();
@@ -38,12 +39,36 @@ export default function OpsJobs() {
     },
   });
 
-  const { jobs, loading } = useAdminJobs({
+  // Fetch SKU categories for filter
+  const { data: skuData } = useQuery({
+    queryKey: ["sku-categories-filter"],
+    queryFn: async () => {
+      const { data } = await supabase.from("service_skus").select("id, name, category").eq("status", "active");
+      return data ?? [];
+    },
+  });
+
+  const categories = useMemo(() => {
+    const cats = new Set<string>();
+    (skuData ?? []).forEach((s: any) => { if (s.category) cats.add(s.category); });
+    return Array.from(cats).sort();
+  }, [skuData]);
+
+  const skuIdsByCategory = useMemo(() => {
+    if (!categoryFilter) return null;
+    const ids = new Set<string>();
+    (skuData ?? []).forEach((s: any) => { if (s.category === categoryFilter) ids.add(s.id); });
+    return ids;
+  }, [categoryFilter, skuData]);
+
+  const { jobs, totalCount, loading } = useAdminJobs({
     status: status || undefined,
     zone_id: zoneId || undefined,
     provider_org_id: providerOrgId || undefined,
     date_from: dateFrom || undefined,
     date_to: dateTo || undefined,
+    page,
+    pageSize: PAGE_SIZE,
   });
 
   // Fetch proof & issue state for displayed jobs
@@ -89,19 +114,24 @@ export default function OpsJobs() {
   const zoneMap = new Map((zones ?? []).map((z: any) => [z.id, z.name]));
   const providerMap = new Map((providerOrgs ?? []).map((p: any) => [p.id, p.business_name]));
 
-  // Client-side proof filter
+  // Client-side filters: proof + category
   let filteredJobs = jobs;
   if (proofFilter === "missing" && proofData) {
-    filteredJobs = jobs.filter((j: any) => proofData.proofState[j.id] === "missing");
+    filteredJobs = filteredJobs.filter((j: any) => proofData.proofState[j.id] === "missing");
   } else if (proofFilter === "complete" && proofData) {
-    filteredJobs = jobs.filter((j: any) => proofData.proofState[j.id] === "complete");
+    filteredJobs = filteredJobs.filter((j: any) => proofData.proofState[j.id] === "complete");
   }
 
-  // Pagination
-  const totalPages = Math.ceil(filteredJobs.length / PAGE_SIZE);
-  const pagedJobs = filteredJobs.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  if (skuIdsByCategory) {
+    filteredJobs = filteredJobs.filter((j: any) =>
+      (j.job_skus ?? []).some((js: any) => skuIdsByCategory.has(js.sku_id))
+    );
+  }
 
-  useEffect(() => setPage(0), [status, zoneId, providerOrgId, dateFrom, dateTo, proofFilter]);
+  // Server-side pagination (totalCount from useAdminJobs), client-side category filter adjusts display
+  const serverTotalPages = Math.ceil(totalCount / PAGE_SIZE);
+
+  useEffect(() => setPage(0), [status, zoneId, providerOrgId, dateFrom, dateTo, proofFilter, categoryFilter]);
 
   return (
     <div className="p-6 space-y-4">
@@ -164,6 +194,18 @@ export default function OpsJobs() {
             <SelectItem value="complete">Proof Complete</SelectItem>
           </SelectContent>
         </Select>
+
+        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder="All Categories" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all_categories">All Categories</SelectItem>
+            {categories.map((cat) => (
+              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Filters Row 2: Date Range */}
@@ -194,12 +236,12 @@ export default function OpsJobs() {
         <div className="space-y-2">
           {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
         </div>
-      ) : pagedJobs.length === 0 ? (
+      ) : filteredJobs.length === 0 ? (
         <p className="text-muted-foreground text-center py-12">No jobs match filters.</p>
       ) : (
         <>
           <div className="space-y-2">
-            {pagedJobs.map((job: any) => {
+            {filteredJobs.map((job: any) => {
               const proof = proofData?.proofState[job.id];
               const issue = proofData?.issueState[job.id];
               return (
@@ -251,15 +293,15 @@ export default function OpsJobs() {
           </div>
 
           {/* Pagination */}
-          {totalPages > 1 && (
+          {serverTotalPages > 1 && (
             <div className="flex items-center justify-center gap-4 pt-2">
               <Button variant="ghost" size="sm" disabled={page === 0} onClick={() => setPage(page - 1)}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <span className="text-sm text-muted-foreground">
-                Page {page + 1} of {totalPages} ({filteredJobs.length} jobs)
+                Page {page + 1} of {serverTotalPages} ({totalCount} jobs)
               </span>
-              <Button variant="ghost" size="sm" disabled={page >= totalPages - 1} onClick={() => setPage(page + 1)}>
+              <Button variant="ghost" size="sm" disabled={page >= serverTotalPages - 1} onClick={() => setPage(page + 1)}>
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
