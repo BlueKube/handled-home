@@ -1,119 +1,115 @@
+# Module 14: Reporting & Analytics — Implementation Plan
 
+## Overview
+Build the Ops Cockpit (admin) and Provider Insights surfaces per the PRD at `docs/modules/14-reporting-and-analytics.md`. Mobile-first, tappable tiles → drill-down lists → deep links to existing module pages.
 
-# SQL Test Snippets + Admin Test Toggles
+## Architecture Decisions
 
-## Part 1: SQL Snippets in docs (immediate)
+### Routing Strategy
+The PRD suggests `/admin/ops/*` routes. The existing admin nav is flat (`/admin/*`). We'll use `/admin/ops` as the Ops Cockpit home and nest sub-routes under it, adding an "Ops Cockpit" nav item that replaces the current placeholder "Reports" link.
 
-Add a "Test Toggles (SQL)" section to `docs/Scenario-Test-Results.md` with copy-paste SQL using exact seeded IDs and correct typing.
+### Data Strategy (v1: Direct Queries, No Rollup Tables)
+For v1, we query existing transaction tables directly rather than building rollup/snapshot tables. The PRD's recommended rollup tables (`ops_kpi_snapshots_daily`, `zone_health_snapshots`, `provider_health_snapshots`) are deferred to v2 when performance requires it.
 
-### G-03: Market state to SOFT_LAUNCH (proxy for "not open")
+**Rationale:** With current data volumes (early-stage), direct queries with proper indexes will be fast enough. Rollup tables add schema, cron jobs, and reconciliation complexity that isn't justified yet.
 
-No WAITLIST enum value exists. Use SOFT_LAUNCH as the "limited/invite-only" state per the recommendation. Update G-03 scenario language accordingly.
-
-```sql
--- ACTIVATE: Set mowing to SOFT_LAUNCH for Austin Central
-UPDATE market_zone_category_state
-SET status = 'SOFT_LAUNCH', updated_at = now()
-WHERE zone_id = 'b1000000-0000-0000-0000-000000000001'
-  AND category = 'mowing';
-
--- RESTORE:
-UPDATE market_zone_category_state
-SET status = 'OPEN', updated_at = now()
-WHERE zone_id = 'b1000000-0000-0000-0000-000000000001'
-  AND category = 'mowing';
-```
-
-### G-09: Disable receipt_share surface (weight = 0)
-
-Uses `to_jsonb()` for proper JSON number typing and `create_missing = true`.
-
-```sql
--- ACTIVATE:
-UPDATE growth_surface_config
-SET surface_weights = jsonb_set(surface_weights, '{receipt_share}', to_jsonb(0::numeric), true),
-    updated_at = now()
-WHERE zone_id = 'b1000000-0000-0000-0000-000000000001'
-  AND category = 'mowing';
-
--- RESTORE (seeded value = 1):
-UPDATE growth_surface_config
-SET surface_weights = jsonb_set(surface_weights, '{receipt_share}', to_jsonb(1::numeric), true),
-    updated_at = now()
-WHERE zone_id = 'b1000000-0000-0000-0000-000000000001'
-  AND category = 'mowing';
-```
-
-### G-10: Set reminder cap to 1 for suppression testing
-
-Uses 1 (not 0) so behavior is "suppress after first prompt" rather than ambiguous "disable vs unlimited."
-
-```sql
--- ACTIVATE:
-UPDATE growth_surface_config
-SET prompt_frequency_caps = jsonb_set(prompt_frequency_caps, '{reminder_per_week}', to_jsonb(1::numeric), true),
-    updated_at = now()
-WHERE zone_id = 'b1000000-0000-0000-0000-000000000001'
-  AND category = 'mowing';
-
--- RESTORE (seeded value = 3):
-UPDATE growth_surface_config
-SET prompt_frequency_caps = jsonb_set(prompt_frequency_caps, '{reminder_per_week}', to_jsonb(3::numeric), true),
-    updated_at = now()
-WHERE zone_id = 'b1000000-0000-0000-0000-000000000001'
-  AND category = 'mowing';
-```
+### Hook Strategy
+Create a single `useOpsMetrics` hook that fetches all top-level KPIs in parallel, plus focused hooks for each drill-down section. Reuse existing hooks where possible.
 
 ---
 
-## Part 2: Admin Test Toggles Page
+## Phase 1: Foundation (hooks + Ops Cockpit home)
 
-A lightweight page at `/admin/test-toggles` that wraps existing hooks. Since `Growth.tsx` already has the full surfaces UI, this page focuses on **quick state flips** with safety guardrails.
+### Task 1.1: Create `useOpsMetrics` hook
+**File:** `src/hooks/useOpsMetrics.ts`
 
-### Safety guardrails
-- Yellow banner: "Test Toggles -- changes affect live zone behavior. All changes are audit-logged."
-- Every state change calls `overrideState` with `reason = "test toggle"` (already writes to `growth_autopilot_actions` + `admin_audit_log`)
-- "Reset to Seeded Defaults" button restores exact seeded values
+Fetches all top-level KPI data in a single hook using parallel queries:
+- **Today Execution:** Count jobs scheduled today, completed today, in-issue today, proof exceptions
+- **Capacity Pressure:** Zones with >90% capacity utilization in next 7 days
+- **Quality:** Issue rate per 100 jobs (7d), credits issued (7d), redo intents (7d)
+- **Revenue & Billing:** Subscriptions paid today, past due count, failed payments today
+- **Growth:** Activated referrals 7d, provider applications 7d, hot zones by demand
 
-### UI sections
+### Task 1.2: Create Ops Cockpit home page
+**File:** `src/pages/admin/OpsCockpit.tsx`
 
-1. **Zone/Category selector** -- dropdown pre-filled with Austin Central / mowing
-2. **Market State** -- RadioGroup with CLOSED / SOFT_LAUNCH / OPEN / PROTECT_QUALITY, one-click apply via `overrideState.mutate()`
-3. **Surface Weights** -- 3 sliders (receipt_share, provider_share, cross_pollination), 0-1 range, step 0.1, calls `upsertConfig.mutate()`
-4. **Frequency Caps** -- 2 number inputs (share_per_job, reminder_per_week), calls `upsertConfig.mutate()`
-5. **Reset to Defaults** button -- restores to seeded values: weights `{receipt_share:1, provider_share:1, cross_pollination:1}`, caps `{share_per_job:2, reminder_per_week:3}`
+Layout: 5 tile sections (A–E per PRD §6.1), each with 3–4 `StatCard` components. Each card is tappable → navigates to drill-down route. Shows "Updated X min ago" timestamp.
 
-### Canonical defaults constant
-
-A single source of truth for reset values, defined in the page file:
-
-```text
-SEEDED_DEFAULTS = {
-  weights: { receipt_share: 1, provider_share: 1, cross_pollination: 1 },
-  caps: { share_per_job: 2, reminder_per_week: 3 }
-}
-```
+### Task 1.3: Update routing + nav
+- Replace `/admin/reports` with `/admin/ops` → `OpsCockpit`
+- Add sub-routes for drill-downs
+- Update `AppSidebar.tsx`: rename "Reports" to "Ops Cockpit" with `Gauge` icon
 
 ---
 
-## Files
+## Phase 2: Zone Health Drill-Down
 
-| File | Action |
-|------|--------|
-| `docs/Scenario-Test-Results.md` | Add "Test Toggles (SQL)" section with 3 blocks; update G-03 language to say SOFT_LAUNCH |
-| `src/pages/admin/TestToggles.tsx` | New page: zone selector, state radio, weight sliders, cap inputs, reset button, safety banner |
-| `src/App.tsx` | Add route `/admin/test-toggles` with `ProtectedRoute requiredRole="admin"` |
+### Task 2.1: Create `useZoneHealth` hook
+**File:** `src/hooks/useZoneHealth.ts`
 
-### Hooks reused (no new hooks)
+### Task 2.2: Zone Health list page
+**File:** `src/pages/admin/OpsZones.tsx`
 
-- `useMarketZoneState` -- for state radio + overrideState
-- `useGrowthSurfaceConfig` -- for weights/caps + upsertConfig
-- `useZones` -- for zone dropdown
+### Task 2.3: Zone Health detail page
+**File:** `src/pages/admin/OpsZoneDetail.tsx`
+Route: `/admin/ops/zones/:zoneId`
 
-### Key decisions
+---
 
-- **No WAITLIST enum** -- use SOFT_LAUNCH for G-03 testing
-- **Weights are 0-1 floats** -- sliders match existing Growth.tsx pattern
-- **SQL uses `to_jsonb()`** -- prevents string-vs-number jsonb gotcha
-- **G-10 cap = 1** (not 0) -- avoids ambiguous "0 = disabled vs unlimited"
-- **Restore values match seeded data** -- not schema defaults (which differ)
+## Phase 3: Service Day, Jobs & Proof Drill-Downs
+
+### Task 3.1: Service Day Health page
+**File:** `src/pages/admin/OpsServiceDays.tsx`
+Route: `/admin/ops/service-days`
+
+### Task 3.2: Jobs & Proof Health page
+**File:** `src/pages/admin/OpsJobs.tsx`
+Route: `/admin/ops/jobs`
+
+---
+
+## Phase 4: Billing, Support, Growth Health Drill-Downs
+
+### Task 4.1: Billing Health page — `src/pages/admin/OpsBilling.tsx`
+### Task 4.2: Support Health page — `src/pages/admin/OpsSupport.tsx`
+### Task 4.3: Growth Health page — `src/pages/admin/OpsGrowth.tsx`
+
+---
+
+## Phase 5: KPI Definitions + Provider Insights
+
+### Task 5.1: KPI Definitions page — `src/pages/admin/OpsDefinitions.tsx`
+### Task 5.2: Provider Insights page — `src/pages/provider/Insights.tsx`
+### Task 5.3: Update provider nav
+
+---
+
+## Phase 6: Polish + Existing Dashboard Upgrade
+
+### Task 6.1: Upgrade Admin Dashboard with real data
+### Task 6.2: Audit Log page (real implementation)
+
+---
+
+## File Summary
+
+| Phase | New Files | Modified Files |
+|-------|-----------|----------------|
+| 1 | `useOpsMetrics.ts`, `OpsCockpit.tsx` | `App.tsx`, `AppSidebar.tsx` |
+| 2 | `useZoneHealth.ts`, `OpsZones.tsx`, `OpsZoneDetail.tsx` | `App.tsx` |
+| 3 | `OpsServiceDays.tsx`, `OpsJobs.tsx` | `App.tsx` |
+| 4 | `OpsBilling.tsx`, `OpsSupport.tsx`, `OpsGrowth.tsx` | `App.tsx` |
+| 5 | `OpsDefinitions.tsx`, `Insights.tsx` | `App.tsx`, `AppSidebar.tsx` |
+| 6 | — | `Dashboard.tsx`, `Audit.tsx` |
+
+## Dependencies
+- No new npm packages
+- No new database tables for v1
+- No new edge functions
+- Reuses existing hooks
+
+## Deferred to v2
+- Rollup/snapshot tables
+- Cron-based snapshot computation
+- Realtime 15-min counters
+- Provider Insights history page
