@@ -98,6 +98,7 @@ import AdminProviderLedger from "@/pages/admin/ProviderLedger";
 import AdminSupportPolicies from "@/pages/admin/SupportPolicies";
 import AdminSupportMacros from "@/pages/admin/SupportMacros";
 import AdminGrowth from "@/pages/admin/Growth";
+import AdminTestToggles from "@/pages/admin/TestToggles";
 
 const queryClient = new QueryClient();
 
@@ -205,6 +206,7 @@ const App = () => (
                 <Route path="/admin/support/macros" element={<AdminSupportMacros />} />
                 <Route path="/admin/incentives" element={<AdminIncentives />} />
                 <Route path="/admin/growth" element={<AdminGrowth />} />
+                <Route path="/admin/test-toggles" element={<AdminTestToggles />} />
                 <Route path="/admin/reports" element={<AdminReports />} />
                 <Route path="/admin/audit" element={<AdminAudit />} />
                 <Route path="/admin/billing" element={<AdminBilling />} />
