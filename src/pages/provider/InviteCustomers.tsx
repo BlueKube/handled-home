@@ -7,6 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useReferralCodes } from "@/hooks/useReferralCodes";
 import { useInviteScripts } from "@/hooks/useInviteScripts";
 import { useProviderOrg } from "@/hooks/useProviderOrg";
+import { useGrowthEvents } from "@/hooks/useGrowthEvents";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useRef, useEffect } from "react";
 
@@ -48,6 +50,8 @@ export default function InviteCustomers() {
   const { codes, generateCode } = useReferralCodes();
   const { scripts } = useInviteScripts();
   const { org } = useProviderOrg();
+  const { recordEvent } = useGrowthEvents();
+  const { user } = useAuth();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const inviteLink = codes.data?.[0]?.code
@@ -65,6 +69,12 @@ export default function InviteCustomers() {
     if (inviteLink) {
       navigator.clipboard.writeText(inviteLink);
       toast.success("Invite link copied!");
+      recordEvent.mutate({
+        eventType: "link_copied",
+        actorRole: "provider",
+        sourceSurface: "provider_milestone_share",
+        idempotencyKey: `prov_copy_${user?.id}_${Date.now()}`,
+      });
     }
   };
 
@@ -74,6 +84,12 @@ export default function InviteCustomers() {
       .replace("{link}", inviteLink ?? "");
     navigator.clipboard.writeText(text);
     toast.success("Script copied!");
+    recordEvent.mutate({
+      eventType: "script_copied",
+      actorRole: "provider",
+      sourceSurface: "provider_milestone_share",
+      idempotencyKey: `prov_script_${user?.id}_${Date.now()}`,
+    });
   };
 
   if (codes.isLoading) return <div className="p-4"><Skeleton className="h-48" /></div>;

@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Award, Copy, Link, Users, DollarSign, Clock, AlertTriangle, ChevronRight, TrendingUp } from "lucide-react";
+import { Award, Copy, Link, Users, DollarSign, Clock, AlertTriangle, ChevronRight, TrendingUp, Megaphone } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,9 @@ import { useProviderApplication } from "@/hooks/useProviderApplication";
 import { useProviderGrowthStats } from "@/hooks/useProviderGrowthStats";
 import { useInviteScripts } from "@/hooks/useInviteScripts";
 import { useProviderOrg } from "@/hooks/useProviderOrg";
+import { useMarketZoneState } from "@/hooks/useMarketZoneState";
+import { useGrowthEvents } from "@/hooks/useGrowthEvents";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -34,12 +37,16 @@ const APP_STATUS_COLORS: Record<string, string> = {
 
 export default function ProviderReferrals() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const rewards = useReferralRewards();
   const { codes, generateCode } = useReferralCodes();
   const { application } = useProviderApplication();
   const stats = useProviderGrowthStats();
   const { scripts } = useInviteScripts();
   const { org } = useProviderOrg();
+  const { recordEvent } = useGrowthEvents();
+  const { states } = useMarketZoneState();
+  const milestonePromptTracked = useRef(false);
 
   const isLoading = rewards.isLoading || codes.isLoading || application.isLoading;
 
@@ -52,6 +59,26 @@ export default function ProviderReferrals() {
     : null;
 
   const providerName = org?.name ?? "Your Pro";
+
+  const app = application.data;
+  const isFoundingPartner = app?.founding_partner === true;
+  const isWaitlisted = app?.status === "waitlisted";
+  const launchTarget = app?.launch_path_target ?? 0;
+  const launchProgress = stats.data ? Math.min(stats.data.installs, launchTarget) : 0;
+  const zoneState = states.data?.[0]?.status ?? "CLOSED";
+  const hasNewEarned = rewards.data?.some((r: any) => r.status === "earned") ?? false;
+
+  useEffect(() => {
+    if (hasNewEarned && !milestonePromptTracked.current && user) {
+      milestonePromptTracked.current = true;
+      recordEvent.mutate({
+        eventType: "milestone_share_shown",
+        actorRole: "provider",
+        sourceSurface: "provider_milestone_share",
+        idempotencyKey: `milestone_prompt_${user.id}_${new Date().toISOString().slice(0, 10)}`,
+      });
+    }
+  }, [hasNewEarned, user]);
 
   const copyLink = () => {
     if (inviteLink) {
@@ -71,12 +98,6 @@ export default function ProviderReferrals() {
   if (isLoading) {
     return <div className="p-4 space-y-4"><Skeleton className="h-24" /><Skeleton className="h-24" /><Skeleton className="h-48" /></div>;
   }
-
-  const app = application.data;
-  const isFoundingPartner = app?.founding_partner === true;
-  const isWaitlisted = app?.status === "waitlisted";
-  const launchTarget = app?.launch_path_target ?? 0;
-  const launchProgress = stats.data ? Math.min(stats.data.installs, launchTarget) : 0;
 
   return (
     <div className="px-4 py-6 space-y-6 animate-fade-in">
@@ -99,6 +120,26 @@ export default function ProviderReferrals() {
               <p className="text-xs text-muted-foreground mt-0.5">{app.category} · {app.zip_codes?.join(", ")}</p>
             </div>
             <Badge className={APP_STATUS_COLORS[app.status] ?? ""}>{app.status}</Badge>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Milestone share prompt */}
+      {hasNewEarned && (
+        <Card className="border-accent/30 bg-accent/5">
+          <CardContent className="py-4 px-4 flex items-start gap-3">
+            <Megaphone className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+            <div className="flex-1 space-y-1.5">
+              <p className="text-sm font-medium">
+                {zoneState === "OPEN" ? "We're live — invite customers now" :
+                 zoneState === "SOFT_LAUNCH" ? "Limited early spots available" :
+                 "Launching soon — build your waitlist"}
+              </p>
+              <p className="text-xs text-muted-foreground">You've earned new bonuses! Keep growing your book.</p>
+              <Button size="sm" variant="outline" className="gap-1" onClick={() => navigate("/provider/referrals/invite-customers")}>
+                <ChevronRight className="h-3.5 w-3.5" /> Invite more customers
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}

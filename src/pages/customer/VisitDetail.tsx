@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PhotoGallery } from "@/components/customer/PhotoGallery";
 import { ReportIssueSheet } from "@/components/customer/ReportIssueSheet";
-import { ArrowLeft, Clock, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+import { ShareCardSheet } from "@/components/customer/ShareCardSheet";
+import { ArrowLeft, Clock, CheckCircle2, XCircle, AlertTriangle, Share2 } from "lucide-react";
 import { format } from "date-fns";
 
 export default function CustomerVisitDetail() {
@@ -14,6 +15,7 @@ export default function CustomerVisitDetail() {
   const navigate = useNavigate();
   const { data, isLoading } = useCustomerVisitDetail(jobId);
   const [issueSheetOpen, setIssueSheetOpen] = useState(false);
+  const [shareSheetOpen, setShareSheetOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -134,6 +136,17 @@ export default function CustomerVisitDetail() {
         )}
       </Card>
 
+      {/* Share CTA — only for completed jobs without open disputes */}
+      {job.status === "COMPLETED" && !issue && (
+        <Button
+          variant="outline"
+          className="w-full gap-2"
+          onClick={() => setShareSheetOpen(true)}
+        >
+          <Share2 className="h-4 w-4" /> Share the after photo
+        </Button>
+      )}
+
       {/* 8.5 Issue / Problem CTA */}
       <Card className="p-4 space-y-3">
         {issue ? (
@@ -170,6 +183,15 @@ export default function CustomerVisitDetail() {
           onOpenChange={setIssueSheetOpen}
           jobId={jobId}
           visitDate={job.completed_at}
+        />
+      )}
+
+      {jobId && (
+        <ShareCardSheet
+          open={shareSheetOpen}
+          onOpenChange={setShareSheetOpen}
+          jobId={jobId}
+          zoneId={job.zone_id}
         />
       )}
     </div>
