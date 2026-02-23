@@ -1371,6 +1371,54 @@ export type Database = {
           },
         ]
       }
+      ops_kpi_snapshots_daily: {
+        Row: {
+          created_at: string
+          id: string
+          metadata: Json | null
+          metric_key: string
+          metric_value: number
+          snapshot_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          metric_key: string
+          metric_value?: number
+          snapshot_date: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          metric_key?: string
+          metric_value?: number
+          snapshot_date?: string
+        }
+        Relationships: []
+      }
+      ops_kpi_snapshots_realtime: {
+        Row: {
+          id: string
+          metric_key: string
+          metric_value: number
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          metric_key: string
+          metric_value?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          metric_key?: string
+          metric_value?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payment_webhook_events: {
         Row: {
           created_at: string
@@ -2034,6 +2082,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "provider_enforcement_actions_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_health_snapshots: {
+        Row: {
+          avg_time_on_site_minutes: number | null
+          completed_jobs: number | null
+          created_at: string
+          id: string
+          issue_rate: number | null
+          metadata: Json | null
+          proof_compliance: number | null
+          provider_org_id: string
+          snapshot_date: string
+        }
+        Insert: {
+          avg_time_on_site_minutes?: number | null
+          completed_jobs?: number | null
+          created_at?: string
+          id?: string
+          issue_rate?: number | null
+          metadata?: Json | null
+          proof_compliance?: number | null
+          provider_org_id: string
+          snapshot_date: string
+        }
+        Update: {
+          avg_time_on_site_minutes?: number | null
+          completed_jobs?: number | null
+          created_at?: string
+          id?: string
+          issue_rate?: number | null
+          metadata?: Json | null
+          proof_compliance?: number | null
+          provider_org_id?: string
+          snapshot_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_health_snapshots_provider_org_id_fkey"
             columns: ["provider_org_id"]
             isOneToOne: false
             referencedRelation: "provider_orgs"
@@ -3974,6 +4066,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      zone_health_snapshots: {
+        Row: {
+          active_subs: number | null
+          capacity_pct: number | null
+          completed_jobs: number | null
+          created_at: string
+          id: string
+          issue_rate: number | null
+          metadata: Json | null
+          proof_compliance: number | null
+          snapshot_date: string
+          zone_id: string
+        }
+        Insert: {
+          active_subs?: number | null
+          capacity_pct?: number | null
+          completed_jobs?: number | null
+          created_at?: string
+          id?: string
+          issue_rate?: number | null
+          metadata?: Json | null
+          proof_compliance?: number | null
+          snapshot_date: string
+          zone_id: string
+        }
+        Update: {
+          active_subs?: number | null
+          capacity_pct?: number | null
+          completed_jobs?: number | null
+          created_at?: string
+          id?: string
+          issue_rate?: number | null
+          metadata?: Json | null
+          proof_compliance?: number | null
+          snapshot_date?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zone_health_snapshots_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       zone_ops_config: {
         Row: {

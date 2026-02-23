@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
-import { ClipboardCheck, Camera, Bug, DollarSign, Lightbulb } from "lucide-react";
+import { ClipboardCheck, Camera, Bug, DollarSign, Lightbulb, Clock } from "lucide-react";
 
 export default function ProviderInsights() {
   const { org } = useProviderOrg();
@@ -23,16 +23,47 @@ export default function ProviderInsights() {
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
       const [jobsWeekRes, jobs30dRes, issuesRes, earningsRes] = await Promise.all([
-        supabase.from("jobs").select("id, status").eq("provider_org_id", org!.id).eq("status", "COMPLETED").gte("completed_at", weekAgo.toISOString()),
-        supabase.from("jobs").select("id, status").eq("provider_org_id", org!.id).eq("status", "COMPLETED").gte("completed_at", thirtyDaysAgo.toISOString()),
-        supabase.from("job_issues").select("id, jobs!inner(provider_org_id)").eq("jobs.provider_org_id", org!.id).gte("created_at", thirtyDaysAgo.toISOString()),
+        (supabase.from("jobs") as any).select("id, status, arrived_at, departed_at").eq("provider_org_id", org!.id).eq("status", "COMPLETED").gte("completed_at", weekAgo.toISOString()),
+        (supabase.from("jobs") as any).select("id, status").eq("provider_org_id", org!.id).eq("status", "COMPLETED").gte("completed_at", thirtyDaysAgo.toISOString()),
+        (supabase.from("job_issues") as any).select("id, jobs!inner(provider_org_id)").eq("jobs.provider_org_id", org!.id).gte("created_at", thirtyDaysAgo.toISOString()),
         supabase.from("provider_earnings").select("status, total_cents").eq("provider_org_id", org!.id),
       ]);
 
-      const completedWeek = jobsWeekRes.data?.length ?? 0;
+      const completedWeekJobs = jobsWeekRes.data ?? [];
+      const completedWeek = completedWeekJobs.length;
       const completed30d = jobs30dRes.data?.length ?? 0;
       const issues30d = issuesRes.data?.length ?? 0;
       const issueRate = completed30d > 0 ? Math.round((issues30d / completed30d) * 100) : 0;
+
+      // Proof compliance: check photos for completed jobs this week
+      const weekJobIds = completedWeekJobs.map((j: any) => j.id);
+      let proofCompliance = 100;
+      if (weekJobIds.length > 0) {
+        const [photosRes, checklistRes] = await Promise.all([
+          supabase.from("job_photos").select("job_id").in("job_id", weekJobIds),
+          supabase.from("job_checklist_items").select("job_id, is_required").in("job_id", weekJobIds),
+        ]);
+        const photosSet = new Set((photosRes.data ?? []).map((p: any) => p.job_id));
+        const requiredSet = new Set<string>();
+        (checklistRes.data ?? []).forEach((ci: any) => {
+          if (ci.is_required) requiredSet.add(ci.job_id);
+        });
+        let compliant = 0;
+        let total = 0;
+        weekJobIds.forEach((id: string) => {
+          if (requiredSet.has(id)) {
+            total++;
+            if (photosSet.has(id)) compliant++;
+          }
+        });
+        proofCompliance = total > 0 ? Math.round((compliant / total) * 100) : 100;
+      }
+
+      // Average time on site
+      const timesOnSite = completedWeekJobs
+        .filter((j: any) => j.arrived_at && j.departed_at)
+        .map((j: any) => (new Date(j.departed_at).getTime() - new Date(j.arrived_at).getTime()) / 60000);
+      const avgTimeOnSite = timesOnSite.length > 0 ? Math.round(timesOnSite.reduce((a, b) => a + b, 0) / timesOnSite.length) : 0;
 
       const earnings = earningsRes.data ?? [];
       const eligible = earnings.filter((e: any) => e.status === "ELIGIBLE").reduce((s: number, e: any) => s + e.total_cents, 0);
@@ -40,8 +71,9 @@ export default function ProviderInsights() {
 
       return {
         completedWeek,
-        proofCompliance: 100, // TODO: compute from photos
+        proofCompliance,
         issueRate,
+        avgTimeOnSite,
         eligibleCents: eligible,
         heldCents: held,
       };
@@ -61,7 +93,7 @@ export default function ProviderInsights() {
       <div className="p-6 space-y-4">
         <h1 className="text-h2">My Performance</h1>
         <div className="grid gap-3 grid-cols-2">
-          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
+          {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
         </div>
       </div>
     );
@@ -74,10 +106,11 @@ export default function ProviderInsights() {
         <p className="text-caption">How you're doing this week</p>
       </div>
 
-      <div className="grid gap-3 grid-cols-2">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-5">
         <StatCard icon={ClipboardCheck} label="Completed (Week)" value={data.completedWeek} />
         <StatCard icon={Camera} label="Proof Compliance" value={`${data.proofCompliance}%`} />
         <StatCard icon={Bug} label="Issue Rate (30d)" value={`${data.issueRate}%`} />
+        <StatCard icon={Clock} label="Avg On-Site" value={data.avgTimeOnSite > 0 ? `${data.avgTimeOnSite}m` : "—"} />
         <div onClick={() => nav("/provider/payouts")} className="cursor-pointer">
           <StatCard icon={DollarSign} label="Eligible Payout" value={`$${(data.eligibleCents / 100).toFixed(0)}`} />
         </div>
@@ -94,6 +127,10 @@ export default function ProviderInsights() {
           ))}
         </Card>
       )}
+
+      <Button variant="outline" onClick={() => nav("/provider/insights/history")}>
+        View Weekly Trends →
+      </Button>
     </div>
   );
 }

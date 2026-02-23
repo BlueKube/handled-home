@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Settings, CreditCard, TrendingUp } from "lucide-react";
+import { ArrowLeft, Settings, CreditCard, TrendingUp, Camera, RotateCcw, Clock } from "lucide-react";
 
 export default function OpsZoneDetail() {
   const { zoneId } = useParams<{ zoneId: string }>();
@@ -85,7 +85,7 @@ export default function OpsZoneDetail() {
       {/* Quality */}
       <Card className="p-4 space-y-2">
         <h2 className="font-semibold">Quality (7d)</h2>
-        <div className="grid grid-cols-3 gap-4 text-center">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 text-center">
           <div>
             <p className="text-2xl font-bold">{zone.issueRate7d}%</p>
             <p className="text-caption">Issue Rate</p>
@@ -98,7 +98,27 @@ export default function OpsZoneDetail() {
             <p className="text-2xl font-bold">{zone.issueCount7d}</p>
             <p className="text-caption">Issues</p>
           </div>
+          <div className="flex flex-col items-center">
+            <div className="flex items-center gap-1">
+              <Camera className="h-4 w-4 text-muted-foreground" />
+              <p className="text-2xl font-bold">{detail?.proofCompliance ?? 100}%</p>
+            </div>
+            <p className="text-caption">Proof Compliance</p>
+          </div>
+          <div className="flex flex-col items-center">
+            <div className="flex items-center gap-1">
+              <RotateCcw className="h-4 w-4 text-muted-foreground" />
+              <p className="text-2xl font-bold">{detail?.redoIntents ?? 0}</p>
+            </div>
+            <p className="text-caption">Redo Intents</p>
+          </div>
         </div>
+        {detail?.avgTimeOnSiteMinutes !== undefined && detail.avgTimeOnSiteMinutes > 0 && (
+          <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+            <Clock className="h-3.5 w-3.5" />
+            <span>Avg time on site: {detail.avgTimeOnSiteMinutes} min</span>
+          </div>
+        )}
       </Card>
 
       {/* Provider Coverage */}

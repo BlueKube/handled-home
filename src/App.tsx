@@ -96,6 +96,7 @@ import AdminOpsSupport from "@/pages/admin/OpsSupport";
 import AdminOpsGrowth from "@/pages/admin/OpsGrowth";
 import AdminOpsDefinitions from "@/pages/admin/OpsDefinitions";
 import ProviderInsights from "@/pages/provider/Insights";
+import ProviderInsightsHistory from "@/pages/provider/InsightsHistory";
 import AdminServiceDays from "@/pages/admin/ServiceDays";
 import AdminBundles from "@/pages/admin/Bundles";
 import AdminJobs from "@/pages/admin/Jobs";
@@ -192,6 +193,7 @@ const App = () => (
                 <Route path="/provider/referrals" element={<ProviderReferrals />} />
                 <Route path="/provider/referrals/invite-customers" element={<ProviderInviteCustomers />} />
                 <Route path="/provider/insights" element={<ProviderInsights />} />
+                <Route path="/provider/insights/history" element={<ProviderInsightsHistory />} />
                 <Route path="/provider/apply" element={<ProviderApply />} />
                 <Route path="/provider/more" element={<MoreMenuPage />} />
               </Route>

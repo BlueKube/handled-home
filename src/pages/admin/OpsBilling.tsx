@@ -1,10 +1,16 @@
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { StatCard } from "@/components/StatCard";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, UserX, XCircle, CreditCard, RotateCcw } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ArrowLeft, UserX, XCircle, CreditCard, RotateCcw, Receipt, ShieldAlert } from "lucide-react";
+import { format } from "date-fns";
 
 function formatCents(c: number) {
   return "$" + (c / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -12,9 +18,12 @@ function formatCents(c: number) {
 
 export default function OpsBilling() {
   const nav = useNavigate();
+  const [searchParams] = useSearchParams();
+  const defaultTab = searchParams.get("tab") || "overview";
+  const [tab, setTab] = useState(defaultTab);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["ops-billing-health"],
+    queryKey: ["ops-billing-health-full"],
     queryFn: async () => {
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -22,11 +31,20 @@ export default function OpsBilling() {
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const today = new Date().toISOString().split("T")[0];
 
-      const [pastDueRes, failedRes, credits7Res, credits30Res] = await Promise.all([
-        supabase.from("customer_invoices").select("id", { count: "exact", head: true }).eq("status", "PAST_DUE"),
-        supabase.from("customer_invoices").select("id", { count: "exact", head: true }).eq("status", "FAILED").gte("updated_at", today + "T00:00:00Z"),
+      const [
+        pastDueRes, failedRes,
+        credits7Res, credits30Res,
+        pastDueListRes, failedListRes,
+        creditListRes,
+      ] = await Promise.all([
+        supabase.from("customer_invoices").select("id", { count: "exact", head: true }).eq("status", "PAST_DUE" as any),
+        supabase.from("customer_invoices").select("id", { count: "exact", head: true }).eq("status", "FAILED").gte("updated_at", today + "T00:00:00Z") as any,
         supabase.from("customer_credits").select("amount_cents").gte("created_at", sevenDaysAgo.toISOString()),
         supabase.from("customer_credits").select("amount_cents").gte("created_at", thirtyDaysAgo.toISOString()),
+        // Drill-down lists
+        supabase.from("customer_invoices").select("id, customer_id, total_cents, due_at, updated_at").eq("status", "PAST_DUE" as any).order("due_at", { ascending: true }).limit(50),
+        supabase.from("customer_invoices").select("id, customer_id, total_cents, updated_at").eq("status", "FAILED").order("updated_at", { ascending: false }).limit(50) as any,
+        supabase.from("customer_credits").select("id, customer_id, amount_cents, reason, created_at, status").gte("created_at", thirtyDaysAgo.toISOString()).order("created_at", { ascending: false }).limit(100),
       ]);
 
       return {
@@ -34,6 +52,9 @@ export default function OpsBilling() {
         failedToday: failedRes.count ?? 0,
         credits7d: (credits7Res.data ?? []).reduce((s: number, c: any) => s + (c.amount_cents || 0), 0),
         credits30d: (credits30Res.data ?? []).reduce((s: number, c: any) => s + (c.amount_cents || 0), 0),
+        pastDueList: pastDueListRes.data ?? [],
+        failedList: failedListRes.data ?? [],
+        creditList: creditListRes.data ?? [],
       };
     },
   });
@@ -57,28 +78,130 @@ export default function OpsBilling() {
         </Button>
         <div>
           <h1 className="text-h2">Billing Health</h1>
-          <p className="text-caption">Deep-links into billing admin for action</p>
+          <p className="text-caption">Revenue, collections, and credit health</p>
         </div>
       </div>
 
-      <div className="grid gap-3 grid-cols-2">
-        <div onClick={() => nav("/admin/billing")} className="cursor-pointer">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+        <div onClick={() => setTab("past-due")} className="cursor-pointer">
           <StatCard icon={UserX} label="Past Due" value={data.pastDue} />
         </div>
-        <div onClick={() => nav("/admin/billing")} className="cursor-pointer">
+        <div onClick={() => setTab("failed")} className="cursor-pointer">
           <StatCard icon={XCircle} label="Failed Today" value={data.failedToday} />
         </div>
-        <div onClick={() => nav("/admin/billing")} className="cursor-pointer">
+        <div onClick={() => setTab("credits")} className="cursor-pointer">
           <StatCard icon={CreditCard} label="Credits (7d)" value={formatCents(data.credits7d)} />
         </div>
-        <div onClick={() => nav("/admin/billing")} className="cursor-pointer">
+        <div onClick={() => setTab("credits")} className="cursor-pointer">
           <StatCard icon={RotateCcw} label="Credits (30d)" value={formatCents(data.credits30d)} />
         </div>
       </div>
 
-      <Button variant="outline" onClick={() => nav("/admin/billing")}>
-        Open Billing Admin →
-      </Button>
+      <Tabs value={tab} onValueChange={setTab}>
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="past-due">Past Due ({data.pastDue})</TabsTrigger>
+          <TabsTrigger value="failed">Failed ({data.failedList.length})</TabsTrigger>
+          <TabsTrigger value="credits">Credits ({data.creditList.length})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview">
+          <Card className="p-4">
+            <p className="text-muted-foreground text-sm mb-3">Quick links to billing admin for actions.</p>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" onClick={() => nav("/admin/billing")}>
+                <Receipt className="h-3.5 w-3.5 mr-1" /> Billing Admin
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => nav("/admin/exceptions")}>
+                <ShieldAlert className="h-3.5 w-3.5 mr-1" /> Exceptions
+              </Button>
+            </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="past-due">
+          {data.pastDueList.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">No past due invoices.</p>
+          ) : (
+            <Card className="overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Due</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.pastDueList.map((inv: any) => (
+                    <TableRow key={inv.id} className="cursor-pointer" onClick={() => nav(`/admin/billing/customers/${inv.customer_id}`)}>
+                      <TableCell className="font-mono text-xs">{inv.customer_id?.slice(0, 8)}…</TableCell>
+                      <TableCell>{formatCents(inv.total_cents)}</TableCell>
+                      <TableCell className="text-xs">{inv.due_at ? format(new Date(inv.due_at), "MMM d") : "—"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="failed">
+          {data.failedList.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">No failed invoices.</p>
+          ) : (
+            <Card className="overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Updated</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.failedList.map((inv: any) => (
+                    <TableRow key={inv.id} className="cursor-pointer" onClick={() => nav(`/admin/billing/customers/${inv.customer_id}`)}>
+                      <TableCell className="font-mono text-xs">{inv.customer_id?.slice(0, 8)}…</TableCell>
+                      <TableCell>{formatCents(inv.total_cents)}</TableCell>
+                      <TableCell className="text-xs">{format(new Date(inv.updated_at), "MMM d HH:mm")}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="credits">
+          {data.creditList.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">No credits issued in last 30 days.</p>
+          ) : (
+            <Card className="overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Reason</TableHead>
+                    <TableHead>Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.creditList.map((c: any) => (
+                    <TableRow key={c.id} className="cursor-pointer" onClick={() => nav(`/admin/billing/customers/${c.customer_id}`)}>
+                      <TableCell className="font-mono text-xs">{c.customer_id?.slice(0, 8)}…</TableCell>
+                      <TableCell>{formatCents(c.amount_cents)}</TableCell>
+                      <TableCell className="text-xs max-w-[120px] truncate">{c.reason || "—"}</TableCell>
+                      <TableCell className="text-xs">{format(new Date(c.created_at), "MMM d")}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
