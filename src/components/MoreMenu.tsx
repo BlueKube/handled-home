@@ -7,6 +7,7 @@ import {
   LogOut, Moon, Sun, TrendingUp,
 } from "lucide-react";
 import { useTheme } from "next-themes";
+import { RoleSwitcher } from "@/components/settings/RoleSwitcher";
 
 interface MenuItem {
   label: string;
@@ -70,25 +71,7 @@ export default function MoreMenuPage() {
 
       {roles.length > 1 && (
         <div className="mb-6">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Switch Role</p>
-          <div className="flex gap-2">
-            {roles.map((r) => (
-              <button
-                key={r}
-                onClick={() => {
-                  setActiveRole(r);
-                  navigate(`/${r}`);
-                }}
-                className={`px-4 py-2 rounded-full text-sm font-medium capitalize transition-colors ${
-                  r === activeRole
-                    ? "bg-accent text-accent-foreground"
-                    : "bg-secondary text-secondary-foreground"
-                }`}
-              >
-                {r}
-              </button>
-            ))}
-          </div>
+          <RoleSwitcher />
         </div>
       )}
 
