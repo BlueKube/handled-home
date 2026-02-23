@@ -86,6 +86,16 @@ import AdminIncentives from "@/pages/admin/Incentives";
 import AdminReports from "@/pages/admin/Reports";
 import AdminAudit from "@/pages/admin/Audit";
 import AdminSettings from "@/pages/admin/Settings";
+import AdminOpsCockpit from "@/pages/admin/OpsCockpit";
+import AdminOpsZones from "@/pages/admin/OpsZones";
+import AdminOpsZoneDetail from "@/pages/admin/OpsZoneDetail";
+import AdminOpsServiceDays from "@/pages/admin/OpsServiceDays";
+import AdminOpsJobs from "@/pages/admin/OpsJobs";
+import AdminOpsBilling from "@/pages/admin/OpsBilling";
+import AdminOpsSupport from "@/pages/admin/OpsSupport";
+import AdminOpsGrowth from "@/pages/admin/OpsGrowth";
+import AdminOpsDefinitions from "@/pages/admin/OpsDefinitions";
+import ProviderInsights from "@/pages/provider/Insights";
 import AdminServiceDays from "@/pages/admin/ServiceDays";
 import AdminBundles from "@/pages/admin/Bundles";
 import AdminJobs from "@/pages/admin/Jobs";
@@ -181,6 +191,7 @@ const App = () => (
                 <Route path="/provider/support/tickets/:ticketId" element={<ProviderSupportTicketDetail />} />
                 <Route path="/provider/referrals" element={<ProviderReferrals />} />
                 <Route path="/provider/referrals/invite-customers" element={<ProviderInviteCustomers />} />
+                <Route path="/provider/insights" element={<ProviderInsights />} />
                 <Route path="/provider/apply" element={<ProviderApply />} />
                 <Route path="/provider/more" element={<MoreMenuPage />} />
               </Route>
@@ -207,6 +218,15 @@ const App = () => (
                 <Route path="/admin/incentives" element={<AdminIncentives />} />
                 <Route path="/admin/growth" element={<AdminGrowth />} />
                 <Route path="/admin/test-toggles" element={<AdminTestToggles />} />
+                <Route path="/admin/ops" element={<AdminOpsCockpit />} />
+                <Route path="/admin/ops/zones" element={<AdminOpsZones />} />
+                <Route path="/admin/ops/zones/:zoneId" element={<AdminOpsZoneDetail />} />
+                <Route path="/admin/ops/service-days" element={<AdminOpsServiceDays />} />
+                <Route path="/admin/ops/jobs" element={<AdminOpsJobs />} />
+                <Route path="/admin/ops/billing" element={<AdminOpsBilling />} />
+                <Route path="/admin/ops/support" element={<AdminOpsSupport />} />
+                <Route path="/admin/ops/growth" element={<AdminOpsGrowth />} />
+                <Route path="/admin/ops/definitions" element={<AdminOpsDefinitions />} />
                 <Route path="/admin/reports" element={<AdminReports />} />
                 <Route path="/admin/audit" element={<AdminAudit />} />
                 <Route path="/admin/billing" element={<AdminBilling />} />
