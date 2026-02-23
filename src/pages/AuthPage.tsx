@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { useGrowthEvents } from "@/hooks/useGrowthEvents";
 import logo from "@/assets/handled-home-logo.png";
 
 export default function AuthPage() {
@@ -18,7 +19,9 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const refCode = searchParams.get("ref");
+  const shareCode = searchParams.get("share");
   const { toast } = useToast();
+  const { recordEvent } = useGrowthEvents();
 
   // If arriving with a ref code, default to signup tab
   useEffect(() => {
@@ -79,6 +82,22 @@ export default function AuthPage() {
       } catch (e) {
         console.warn("Referral attribution failed:", e);
       }
+    }
+
+    // Emit signup_completed growth event for funnel tracking
+    try {
+      recordEvent.mutate({
+        eventType: "signup_completed",
+        actorRole: "customer",
+        sourceSurface: refCode ? "provider_invite" : shareCode ? "receipt_share_card" : "organic",
+        idempotencyKey: `signup_${email}_${Date.now()}`,
+        context: {
+          ...(refCode ? { ref_code: refCode } : {}),
+          ...(shareCode ? { share_code: shareCode } : {}),
+        },
+      });
+    } catch (e) {
+      console.warn("Growth event failed:", e);
     }
 
     setLoading(false);

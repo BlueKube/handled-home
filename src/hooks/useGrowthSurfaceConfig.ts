@@ -50,3 +50,31 @@ export function useGrowthSurfaceConfig(zoneId?: string) {
 
   return { configs, upsertConfig };
 }
+
+/**
+ * Check if a specific surface is enabled (weight > 0) for a zone/category.
+ * Returns true by default if no config exists (surfaces are on by default).
+ */
+export function useIsSurfaceEnabled(zoneId?: string, category?: string, surfaceKey?: string) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["growth-surface-enabled", zoneId, category, surfaceKey],
+    enabled: !!zoneId && !!category && !!surfaceKey,
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("growth_surface_config")
+        .select("surface_weights")
+        .eq("zone_id", zoneId)
+        .eq("category", category)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) return true; // No config = enabled by default
+      const weights = data.surface_weights as Record<string, number> | null;
+      if (!weights || !(surfaceKey! in weights)) return true;
+      return weights[surfaceKey!] > 0;
+    },
+    staleTime: 60_000,
+  });
+
+  return { enabled: isLoading ? true : (data ?? true), isLoading };
+}

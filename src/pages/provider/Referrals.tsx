@@ -15,6 +15,7 @@ import { useInviteScripts } from "@/hooks/useInviteScripts";
 import { useProviderOrg } from "@/hooks/useProviderOrg";
 import { useMarketZoneState } from "@/hooks/useMarketZoneState";
 import { useGrowthEvents } from "@/hooks/useGrowthEvents";
+import { useIsSurfaceEnabled } from "@/hooks/useGrowthSurfaceConfig";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
@@ -47,6 +48,7 @@ export default function ProviderReferrals() {
   const { recordEvent } = useGrowthEvents();
   const { states } = useMarketZoneState();
   const milestonePromptTracked = useRef(false);
+  const { enabled: providerShareEnabled } = useIsSurfaceEnabled(undefined, "lawn_care", "provider_share");
 
   const isLoading = rewards.isLoading || codes.isLoading || application.isLoading;
 
@@ -125,7 +127,7 @@ export default function ProviderReferrals() {
       )}
 
       {/* Milestone share prompt */}
-      {hasNewEarned && (
+      {hasNewEarned && providerShareEnabled && (
         <Card className="border-accent/30 bg-accent/5">
           <CardContent className="py-4 px-4 flex items-start gap-3">
             <Megaphone className="h-5 w-5 text-accent shrink-0 mt-0.5" />

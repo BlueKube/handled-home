@@ -118,7 +118,7 @@ export default function ShareLanding() {
           <Button
             size="lg"
             className="w-full gap-2"
-            onClick={() => navigate("/auth")}
+            onClick={() => navigate(`/auth?share=${shareCode}`)}
           >
             Get Handled Home <ArrowRight className="h-4 w-4" />
           </Button>
