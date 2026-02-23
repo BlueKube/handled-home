@@ -1,3 +1,183 @@
+# Scenarios Test Plan — Manual (with Smoke Pack + Growth Pack)
+
+> **Base:** 60 user scenarios across 3 roles — Customer, Provider, Admin.  
+> **Update:** Adds (1) a daily “Smoke 15” subset, (2) a “Growth 10” subset for Modules 13.1–13.4, and (3) a lightweight seed-data checklist so manual testing is fast and repeatable.  
+> **Source doc:** `Scenarios-Test.md` (original 60 scenarios). fileciteturn2file0
+
+---
+
+## How to use this test plan
+
+### A) Daily while iterating (recommended)
+Run:
+- **Smoke 15**
+- **Growth 10** (when touching Modules 13.x / share links / invites / auth)
+
+### B) Before releases / demos
+Run:
+- **All 60 scenarios**
+- **Growth 10**
+- Any relevant “Edge Cases” you touched (expiry/revoke, closed market state, etc.)
+
+### Pass/Fail rule
+A scenario fails if:
+- expected screen/state does not occur
+- any unhandled console/runtime errors
+- critical events (growth/support/billing) fail to record when called out below
+
+---
+
+## Seed Data (Manual Testing Kit)
+
+Use a consistent staging dataset so scenarios are quick to run. The goal is *minimal* seed, not realism.
+
+### Required entities
+1) **Region + Zone**
+- 1 Region (e.g., “SoCal”)
+- 1 Zone (e.g., “Westlake”) with ZIPs populated
+- Zone capacity configured (customers/day, jobs/day)
+- Market state set per category (OPEN or WAITLIST)
+
+2) **SKU Catalog**
+Create SKUs for at least:
+- Windows (requires after photo)
+- Power wash (requires after photo)
+- Pool (requires chemical proof if implemented)
+- Pest (has “expectation card” copy if implemented)
+- Dog poop
+
+3) **Plans**
+- 1 basic plan that entitles 1–2 SKUs
+- 1 premium plan that entitles more SKUs (optional)
+
+4) **Provider Org**
+- 1 provider org with coverage for the test zone
+- Provider authorized for at least windows + power wash
+- Provider can receive assigned jobs
+
+5) **Customer + Property**
+- 1 customer with a property inside the zone ZIP(s)
+- Property has access instructions
+
+6) **At least one completed job**
+- One completed job with photos + checklist so receipt & share flows can be tested
+
+### Optional but helpful
+- 1 “referred customer” cohort (from provider invite)
+- 1 “share card” already created for expiry/revoke testing
+- 1 “support ticket” created from a visit detail
+
+---
+
+## Smoke Pack (Daily) — Smoke 15
+
+Run these 15 first. If anything fails, stop and fix before running deeper scenarios.
+
+### Customer (6)
+- **C-01** New Customer Signup fileciteturn2file0  
+- **C-03** View Customer Dashboard fileciteturn2file0  
+- **C-08** Subscribe to a Plan fileciteturn2file0  
+- **C-10** View Service Day Assignment/Offer fileciteturn2file0  
+- **C-17** View Visit Detail (Photos, Checklist) fileciteturn2file0  
+- **C-18** Report an Issue from Visit Detail fileciteturn2file0  
+
+### Provider (5)
+- **P-03** Start Onboarding — Organization Setup fileciteturn2file0  
+- **P-05** Onboarding — Select Capabilities/SKUs fileciteturn2file0  
+- **P-09** View Jobs List fileciteturn2file0  
+- **P-12** Upload Job Photos fileciteturn2file0  
+- **P-13** Submit Job Completion fileciteturn2file0  
+
+### Admin (4)
+- **A-04** Create a New Zone with ZIP Codes fileciteturn2file0  
+- **A-05** Configure Zone Capacity fileciteturn2file0  
+- **A-07** Create/Edit SKU in Catalog fileciteturn2file0  
+- **A-12** View Jobs List with Filters fileciteturn2file0  
+
+---
+
+## Growth Pack — Growth 10 (Modules 13.1–13.4)
+
+These scenarios validate: share surfaces, landing pages, event emissions, expiry/revoke, market-state gating, weights/caps gating, and attribution continuity into signup.
+
+> **Expected events (high level):**  
+> `landing_viewed`, `prompt_shown`, `share_initiated`, `share_completed`, `store_clicked`, `signup_completed`
+
+### G-01 — Share card creation from a completed receipt (after-only default)
+| Field | Detail |
+|------|--------|
+| **Pre-req** | Completed job exists with after photo(s). Customer can view receipt/visit detail. |
+| **Steps** | 1) Log in as customer 2) Open visit detail / receipt 3) Tap **Share the after photo** |
+| **Expected** | Share sheet opens; default asset is **after-only**; before/after is optional toggle. `prompt_shown` and `share_initiated` record when appropriate. |
+
+### G-02 — Share landing “wow” page loads (anonymous + micro-checklist)
+| Field | Detail |
+|------|--------|
+| **Steps** | 1) From share sheet, copy link 2) Open link in incognito/private browser |
+| **Expected** | Landing is **anonymous** by default; shows after photo; shows 1–3 bounded checklist bullets; primary CTA **Get Handled Home**; secondary **I’m a provider**. Records `landing_viewed`. |
+
+### G-03 — Share link routes to WAITLIST when market closed/protect-quality
+| Field | Detail |
+|------|--------|
+| **Pre-req** | Set zone/category state to WAITLIST or PROTECT_QUALITY |
+| **Steps** | 1) Open share landing link |
+| **Expected** | Landing page shows waitlist/availability message instead of pushing install. Records `landing_viewed` with market state in context. |
+
+### G-04 — Share link expiry behavior (default 30 days)
+| Field | Detail |
+|------|--------|
+| **Pre-req** | Create a share card and set it to expired (admin or DB update). |
+| **Steps** | 1) Open expired share link |
+| **Expected** | “Link expired” UX; safe CTA remains. Underlying image is not accessible directly. |
+
+### G-05 — Share link revoke behavior
+| Field | Detail |
+|------|--------|
+| **Pre-req** | Create share card, then revoke via customer “Disable shared link” or admin action. |
+| **Steps** | 1) Open revoked share link |
+| **Expected** | “Link unavailable” UX; image access blocked; no private data exposure. |
+
+### G-06 — Invite landing `/invite/:code` records `landing_viewed`
+| Field | Detail |
+|------|--------|
+| **Pre-req** | Provider referral code exists. |
+| **Steps** | 1) Open `/invite/:code` in incognito |
+| **Expected** | Records `landing_viewed` with `source_surface = provider_invite`. Copy does **not** promise credits when incentives are OFF. |
+
+### G-07 — Incentives creep check (InviteLanding is neutral)
+| Field | Detail |
+|------|--------|
+| **Steps** | 1) Open `/invite/:code` 2) Scan copy |
+| **Expected** | No unconditional “welcome credit” promise. Copy focuses on non-incentive value props. |
+
+### G-08 — Share → Auth preserves context and records `signup_completed`
+| Field | Detail |
+|------|--------|
+| **Steps** | 1) From share landing, tap **Get Handled Home** 2) Complete signup |
+| **Expected** | `signup_completed` recorded and includes share context (e.g., `share_code`). Attribution wiring remains intact. |
+
+### G-09 — Surface weights gate prompts (weight=0 hides surface)
+| Field | Detail |
+|------|--------|
+| **Pre-req** | Set surface weight to 0 for `receipt_share` or `cross_pollination`. |
+| **Steps** | 1) Navigate to the UI where prompt would appear |
+| **Expected** | Prompt/surface does not render. No prompt events fired. |
+
+### G-10 — Frequency caps gate prompts (per job + weekly)
+| Field | Detail |
+|------|--------|
+| **Pre-req** | Caps configured (e.g., share_per_job=1, reminder_per_week=1). |
+| **Steps** | 1) Trigger share prompt once 2) Re-open receipt 3) Verify suppression 4) Trigger reminder once 5) Verify no second reminder that week |
+| **Expected** | Prompts suppressed after cap reached. No extra prompt events. |
+
+---
+
+# Original 60 Scenarios (Customer, Provider, Admin)
+
+The sections below are preserved from the original `Scenarios-Test.md`. fileciteturn2file0
+
+---
+
 # Scenarios Test Plan
 
 > 60 user scenarios across 3 roles — Customer, Provider, Admin.  
