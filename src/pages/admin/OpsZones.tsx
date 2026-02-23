@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, Users, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Calendar, Users, AlertTriangle, TrendingUp } from "lucide-react";
 
 export default function OpsZones() {
   const { data: zones, isLoading } = useZoneHealth();
@@ -25,7 +25,7 @@ export default function OpsZones() {
 
       {isLoading ? (
         <div className="space-y-3">
-          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-28 rounded-xl" />)}
+          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-36 rounded-xl" />)}
         </div>
       ) : !zones?.length ? (
         <p className="text-muted-foreground text-center py-12">No zones found.</p>
@@ -53,6 +53,28 @@ export default function OpsZones() {
                 <Progress value={z.capacityPct} className="h-2" />
               </div>
 
+              {/* Week load bars */}
+              {z.weekLoadBars.length > 0 && (
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">Week Load</p>
+                  <div className="flex gap-1">
+                    {z.weekLoadBars.map((bar, i) => (
+                      <div key={i} className="flex-1 text-center">
+                        <div className="h-6 bg-muted rounded-sm overflow-hidden relative">
+                          <div
+                            className={`absolute bottom-0 left-0 right-0 rounded-sm ${
+                              bar.pct >= 90 ? "bg-destructive" : bar.pct >= 70 ? "bg-warning" : "bg-primary"
+                            }`}
+                            style={{ height: `${Math.min(bar.pct, 100)}%` }}
+                          />
+                        </div>
+                        <span className="text-[10px] text-muted-foreground">{bar.day.slice(0, 3)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3.5 w-3.5" /> {z.defaultServiceDay}
@@ -65,6 +87,11 @@ export default function OpsZones() {
                   {z.issueRate7d}% issue rate
                 </span>
                 <span>+{z.newSignups7d} new (7d)</span>
+                {z.growthPressure > 0 && (
+                  <span className="flex items-center gap-1 text-warning">
+                    <TrendingUp className="h-3.5 w-3.5" /> {z.growthPressure} pending
+                  </span>
+                )}
               </div>
             </Card>
           ))}

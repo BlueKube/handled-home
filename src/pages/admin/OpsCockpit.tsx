@@ -7,8 +7,8 @@ import {
   ClipboardCheck, AlertTriangle, ShieldAlert, Camera,
   Gauge, Calendar,
   Bug, CreditCard as CreditCardIcon, RotateCcw,
-  DollarSign, UserX, XCircle,
-  Users, Briefcase, TrendingUp,
+  DollarSign, UserX, XCircle, ShoppingBag,
+  Users, Briefcase, TrendingUp, Send,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -25,7 +25,7 @@ export default function OpsCockpit() {
       <div className="p-6 space-y-6">
         <h1 className="text-h2">Ops Cockpit</h1>
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 12 }).map((_, i) => (
+          {Array.from({ length: 16 }).map((_, i) => (
             <Skeleton key={i} className="h-24 rounded-xl" />
           ))}
         </div>
@@ -50,16 +50,16 @@ export default function OpsCockpit() {
       <section>
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Today Execution</h2>
         <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-          <div onClick={() => nav("/admin/ops/jobs")} className="cursor-pointer">
+          <div onClick={() => nav("/admin/ops/jobs?status=SCHEDULED")} className="cursor-pointer">
             <StatCard icon={ClipboardCheck} label="Scheduled" value={m.jobsScheduledToday} />
           </div>
-          <div onClick={() => nav("/admin/ops/jobs")} className="cursor-pointer">
-            <StatCard icon={ClipboardCheck} label="Completed" value={m.jobsCompletedToday} />
+          <div onClick={() => nav("/admin/ops/jobs?status=COMPLETED")} className="cursor-pointer">
+            <StatCard icon={ClipboardCheck} label="Completed" value={`${m.jobsCompletedToday}/${m.jobsScheduledToday} (${m.completionPct}%)`} />
           </div>
-          <div onClick={() => nav("/admin/ops/jobs")} className="cursor-pointer">
+          <div onClick={() => nav("/admin/ops/jobs?status=ISSUE")} className="cursor-pointer">
             <StatCard icon={AlertTriangle} label="In Issue" value={m.jobsInIssue} />
           </div>
-          <div onClick={() => nav("/admin/ops/jobs")} className="cursor-pointer">
+          <div onClick={() => nav("/admin/ops/jobs?proof=missing")} className="cursor-pointer">
             <StatCard icon={Camera} label="Proof Exceptions" value={m.proofExceptions} />
           </div>
         </div>
@@ -109,15 +109,18 @@ export default function OpsCockpit() {
       {/* D) Revenue & Billing */}
       <section>
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Revenue & Billing</h2>
-        <div className="grid gap-3 grid-cols-3">
+        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
           <div onClick={() => nav("/admin/ops/billing")} className="cursor-pointer">
             <StatCard icon={DollarSign} label="Paid Today" value={formatCents(m.paidTodayCents)} />
           </div>
-          <div onClick={() => nav("/admin/ops/billing")} className="cursor-pointer">
+          <div onClick={() => nav("/admin/ops/billing?tab=past-due")} className="cursor-pointer">
             <StatCard icon={UserX} label="Past Due" value={m.pastDueCount} />
           </div>
-          <div onClick={() => nav("/admin/ops/billing")} className="cursor-pointer">
+          <div onClick={() => nav("/admin/ops/billing?tab=failed")} className="cursor-pointer">
             <StatCard icon={XCircle} label="Failed Today" value={m.failedPaymentsToday} />
+          </div>
+          <div onClick={() => nav("/admin/ops/billing")} className="cursor-pointer">
+            <StatCard icon={ShoppingBag} label="Add-on Rev (7d)" value={formatCents(m.addOnRevenue7dCents)} />
           </div>
         </div>
       </section>
@@ -125,7 +128,7 @@ export default function OpsCockpit() {
       {/* E) Growth (7d) */}
       <section>
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Growth (7 Days)</h2>
-        <div className="grid gap-3 grid-cols-3">
+        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
           <div onClick={() => nav("/admin/ops/growth")} className="cursor-pointer">
             <StatCard icon={Users} label="Referrals" value={m.referralsActivated} />
           </div>
@@ -133,8 +136,23 @@ export default function OpsCockpit() {
             <StatCard icon={Briefcase} label="Provider Apps" value={m.providerApplications} />
           </div>
           <div onClick={() => nav("/admin/ops/growth")} className="cursor-pointer">
-            <StatCard icon={TrendingUp} label="Hot Zones" value={m.hotZones.length} />
+            <StatCard icon={Send} label="Invites Sent" value={m.providerInvitesSent} />
           </div>
+          <Card className="p-4 cursor-pointer" onClick={() => nav("/admin/ops/growth")}>
+            <p className="text-sm text-muted-foreground mb-1">Hot Zones (Top 3)</p>
+            {m.hotZones.length === 0 ? (
+              <p className="text-caption">No demand spikes</p>
+            ) : (
+              <div className="space-y-1">
+                {m.hotZones.map((h, i) => (
+                  <div key={i} className="flex items-center justify-between text-sm">
+                    <span className="font-medium">{h.zone_name}</span>
+                    <span className="text-muted-foreground">+{h.demand} new</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
         </div>
       </section>
     </div>
