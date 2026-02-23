@@ -1,130 +1,168 @@
 
 
-# Module 13 Integration Sweep — Self-Check + Fixes
+# Update Test Plan + Add Seed Data for Scenario Testing
 
-## Current State Summary
+## Overview
 
-The schema, RPCs, and UI for Modules 13.1-13.4 are structurally solid. The critical attribution (A1) and milestone automation (S1) gaps from the earlier review have been fixed. However, there are several integration wiring gaps, missing event emissions, unenforced client-side controls, and copy issues that need attention before moving to Module 14.
-
----
-
-## Issues Found (ordered by priority)
-
-### MUST FIX
-
-**1. `signup_completed` growth event never emitted**
-The funnel dashboard tracks `signup_completed` but no code ever records this event. After successful signup in `AuthPage.tsx`, no growth event is fired. This breaks the conversion funnel from `landing_viewed` to `signup_completed`.
-- **Fix:** After successful signup + attribution in `AuthPage.tsx`, emit a `signup_completed` growth event via `record_growth_event` RPC.
-
-**2. `InviteLanding.tsx` says "Welcome credit when you activate" even when incentives are OFF**
-This is exactly the "incentives creep" concern ChatGPT raised. The copy unconditionally promises a credit. If `incentive_visibility` is false in `growth_surface_config`, this copy should not mention credits.
-- **Fix:** Make the invite landing page fetch surface config (or accept a simpler approach: change copy to a neutral value prop like "Track every visit with proof photos" since we can't easily fetch config on a public no-auth page). The simplest safe fix is to remove the credit mention entirely and replace with a non-incentive benefit.
-
-**3. Surface weights not enforced client-side anywhere**
-`growth_surface_config.surface_weights` are configurable by admins but no consumer component checks them. `CrossPollinationCard` doesn't check `cross_pollination` weight. `ShareCardSheet` doesn't check `receipt_share` weight. Provider milestone prompts don't check `provider_share` weight.
-- **Fix:** In each surface component, fetch `growth_surface_config` for the relevant zone/category and hide the component if its weight is 0.
-
-**4. Frequency caps not enforced client-side**
-`prompt_frequency_caps` (e.g., `share_per_job`, `reminder_per_week`) exist in config but no component checks recent growth events to decide whether to suppress a prompt.
-- **Fix:** Add a lightweight check: before showing share CTA or cross-pollination card, query recent `growth_events` for the current user and surface to see if caps are exceeded. Suppress if so.
-
-### SHOULD FIX
-
-**5. `InviteCustomers.tsx` generate link button still broken when no codes exist**
-Line 117: `codes.data?.[0]?.program_id` will be undefined when there are zero codes. The fallback logic that exists in `Referrals.tsx` (querying for active programs) was not replicated here.
-- **Fix:** Copy the same fallback pattern from `Referrals.tsx` lines 160-175 into `InviteCustomers.tsx`.
-
-**6. Share landing page doesn't record `signup_completed` conversion**
-When a user clicks "Get Handled Home" on `/share/:shareCode` and completes signup, the share_code context is lost. There's no way to attribute the signup back to the specific share card.
-- **Fix:** Pass `share_code` as a query parameter to `/auth` (e.g., `/auth?share={shareCode}`). In `AuthPage.tsx`, capture this and include it in the `signup_completed` event context.
-
-**7. QR code is a random noise placeholder**
-`InviteCustomers.tsx` draws random pixels instead of a real QR code. This will confuse providers.
-- **Fix:** Either install a lightweight QR library (`qrcode.react` or similar), or hide the QR section entirely with a "Coming soon" note until a real implementation is added.
-
-**8. Admin Growth Events tab is limited to last 500 events**
-The `useGrowthEventStats` hook queries only the last 500 events with no time filtering. For a real ops dashboard, this makes the funnel numbers unreliable as volume grows.
-- **Fix:** Add a date range filter (last 7 days, last 30 days) to the Events tab query.
-
-### NICE TO HAVE
-
-**9. Cross-pollination category detection is naive**
-`CrossPollinationCard` uses plan name string matching (`s.plans?.name?.toLowerCase().includes(...)`) to detect subscribed categories. This is fragile.
-- **Fix:** Query `service_skus.category` via `routine_items` or `job_skus` for a more reliable signal, or add a `category` column to subscriptions.
-
-**10. No `landing_viewed` event on `/invite/:code`**
-The invite landing page (provider referral link) doesn't emit any growth event. Only the share landing page (`/share/:shareCode`) records `landing_viewed`.
-- **Fix:** Add a `landing_viewed` event with `source_surface = 'provider_invite'` to `InviteLanding.tsx`.
+Replace `docs/Scenarios-Test.md` with the updated version (adds Smoke 15, Growth 10, seed data checklist), create a database migration to insert seed data for all 70 scenarios, and update `docs/Scenario-Test-Results.md` with the expanded results template.
 
 ---
 
-## Implementation Plan
+## Phase 1: Documentation Updates
 
-### Phase 1: Database Migration
-- No schema changes needed. All tables and RPCs exist.
+### 1A. Replace `docs/Scenarios-Test.md`
+Copy the uploaded `Scenarios-Test_UPDATED.md` to replace the existing file. This adds:
+- Smoke Pack (Smoke 15) -- daily quick-check subset
+- Growth Pack (Growth 10) -- Modules 13.1-13.4 validation
+- Seed Data checklist section
+- Original 60 scenarios preserved
 
-### Phase 2: Fix AuthPage attribution + growth event (Issues 1, 6)
-- After successful signup in `AuthPage.tsx`:
-  - Emit `signup_completed` growth event
-  - Include `share_code` from query params in event context if present
-- Read `share` query param and pass to growth event
-
-### Phase 3: Remove incentive copy from InviteLanding (Issue 2)
-- Replace "Welcome credit when you activate" with "Track and manage every service visit"
-- This avoids promising incentives when they may be disabled
-
-### Phase 4: Enforce surface weights (Issue 3)
-- Create a small utility hook `useIsSurfaceEnabled(zoneId, category, surfaceKey)` that:
-  - Fetches `growth_surface_config` for zone/category
-  - Returns false if weight is 0
-- Use in `ShareCardSheet`, `CrossPollinationCard`, and provider milestone prompt
-
-### Phase 5: Enforce frequency caps (Issue 4)
-- Add a hook `useFrequencyCapCheck(userId, surface, capKey)` that:
-  - Queries recent `growth_events` for the user and surface
-  - Compares count against `prompt_frequency_caps` from config
-  - Returns whether the prompt should be suppressed
-- Integrate into share CTA and cross-pollination card
-
-### Phase 6: Fix InviteCustomers generate link fallback (Issue 5)
-- Copy the active program fallback pattern from `Referrals.tsx` into `InviteCustomers.tsx`
-
-### Phase 7: Add landing_viewed to InviteLanding (Issue 10)
-- Import `useGrowthEvents` and emit `landing_viewed` with `source_surface = 'provider_invite'`
-
-### Phase 8: Hide QR placeholder (Issue 7)
-- Replace random noise QR with a "Coming soon" note or remove the section
-
-### Phase 9: Add date filter to Events tab (Issue 8)
-- Add a date range selector to `EventsTab` in `Growth.tsx`
-- Pass date filter to `useGrowthEventStats`
+### 1B. Update `docs/Scenario-Test-Results.md`
+Rewrite to include:
+- All 60 original scenarios (with existing results carried forward)
+- New Growth 10 section (G-01 through G-10) with NOT_TESTED status
+- Updated summary table (70 total scenarios)
+- Seed data status section
 
 ---
 
-## Files Modified
+## Phase 2: Database Seed Data Migration
 
-| File | Changes |
-|------|---------|
-| `src/pages/AuthPage.tsx` | Emit `signup_completed` event, capture `share` param |
-| `src/pages/InviteLanding.tsx` | Remove credit copy, add `landing_viewed` event |
-| `src/pages/ShareLanding.tsx` | Pass share_code to auth CTA URL |
-| `src/components/customer/ShareCardSheet.tsx` | Check surface weight before rendering |
-| `src/components/customer/CrossPollinationCard.tsx` | Check surface weight + frequency cap |
-| `src/pages/provider/Referrals.tsx` | Check surface weight for milestone prompt |
-| `src/pages/provider/InviteCustomers.tsx` | Fix generate link fallback, hide QR placeholder |
-| `src/hooks/useGrowthSurfaceConfig.ts` | Add `useIsSurfaceEnabled` utility |
-| `src/hooks/useGrowthEvents.ts` | Add `useFrequencyCapCheck` utility |
-| `src/pages/admin/Growth.tsx` | Add date range filter to Events tab |
+A single migration inserts the minimal dataset needed to unblock BLOCKED scenarios. Uses the existing test user (`7cfa1714-bf93-441f-99c0-4bc3e24a284c`) who already has customer + provider + admin roles.
 
-## Cross-Module Contract Verification
+### What already exists (no changes needed)
+- 1 Region ("Austin Metro") with 2 Zones ("Austin Central" 78701-78703, "Austin South" 78704/78745/78748)
+- 8 SKUs (Standard Mow, Edge and Trim, Leaf Blowoff, Hedge Trimming, Weed Control, Fertilizer, Mulch, Spring Cleanup)
+- 3 Plans (Essentials, Plus, Premium) with entitlement versions
+- Test user with property at 123 Oak Street, ZIP 78701 (in Austin Central zone)
+- Test user has all 3 roles (customer, provider, admin)
 
-| Question | Answer | Status |
-|----------|--------|--------|
-| Who owns market state truth? | `market_zone_category_state` (13.3) | Confirmed -- single source |
-| Who owns share link creation + expiry + revocation? | `share_cards` table + `create_share_card` / `revoke_share_card` RPCs (13.4) | Confirmed |
-| Who is source of truth for attribution payouts? | `referrals` + `referral_milestones` + `referral_rewards` (13.1) | Confirmed |
-| Who consumes cohort risk to tighten support policies? | Not yet wired (12 reads `support_policies` but doesn't reference market state) | Noted for future |
-| Does `record_autopilot_action` respect locks? | Yes -- fixed in migration `20260223010554` | Confirmed |
-| Does `compute_zone_health_score` filter by category? | Yes -- fixed in migration `20260223010731` | Confirmed |
-| Are milestones fired from canonical sources? | `subscribed` from webhook, `first_visit` from `complete_job`, `paid_cycle` from webhook | Confirmed |
-| Is attribution wired on signup? | Yes -- `AuthPage.tsx` calls `attribute_referral_signup` | Confirmed |
+### What the migration adds
+
+**2A. Additional SKUs** (per test plan: windows, power wash, pool, pest, dog poop)
+
+| SKU | Category | Duration | Price | Required Photos |
+|-----|----------|----------|-------|-----------------|
+| Window Cleaning | windows | 45 min | $65 | after |
+| Power Wash | power_wash | 60 min | $85 | after |
+| Pool Service | pool | 30 min | $50 | -- |
+| Pest Control | pest | 20 min | $40 | -- |
+| Dog Poop Cleanup | pet_waste | 15 min | $25 | -- |
+
+**2B. Provider Org + Member**
+- Provider org "Austin Pro Services" (status: ACTIVE) owned by the test user
+- Provider member entry linking test user to the org (role: OWNER, status: ACTIVE)
+
+**2C. Provider Coverage + Capabilities**
+- Coverage for Austin Central zone (approved)
+- Capabilities enabled for Standard Mow, Edge and Trim, Window Cleaning, Power Wash
+
+**2D. Subscription**
+- Active subscription for test user on "Essentials" plan, linked to their property and Austin Central zone
+- Billing cycle dates set to current month
+
+**2E. Service Day Assignment**
+- Tuesday assignment for test user in Austin Central (status: LOCKED)
+
+**2F. Completed Job with Photos + Checklist**
+- 1 completed job (status: COMPLETED) for Standard Mow + Edge and Trim
+- `job_skus` linking SKUs to the job
+- `job_checklist_items` (3 items, all status: done)
+- `job_photos` (2 entries: before + after with placeholder storage paths)
+- `job_events` (ASSIGNED, CONFIRMED, IN_PROGRESS, COMPLETED)
+
+**2G. Referral Program + Code** (for Growth scenarios G-06, G-07, G-08)
+- 1 active referral program "Provider Growth" with provider referrer type
+- 1 referral code linked to test user
+
+**2H. Market Zone Category State** (for Growth scenario G-03)
+- Austin Central / windows = OPEN
+- Austin Central / mowing = OPEN
+
+**2I. Growth Surface Config** (for Growth scenarios G-09, G-10)
+- Austin Central config with default weights and frequency caps
+
+### Seed data uses deterministic UUIDs
+
+All seed IDs follow the pattern `X1000000-0000-0000-0000-00000000000N` (consistent with existing seed data pattern) to make them easy to reference and idempotent via `ON CONFLICT DO NOTHING`.
+
+---
+
+## Phase 3: Results Document Structure
+
+The updated `Scenario-Test-Results.md` will have:
+
+```text
+# Scenario Test Results
+
+## Test Environment
+- Test user, seed data status, date
+
+## Smoke 15 Results (subset of C/P/A)
+
+## Growth 10 Results (G-01 to G-10)
+
+## Customer Scenarios (C-01 to C-20)
+  [existing results carried forward, BLOCKED ones updated to reflect seed data now exists]
+
+## Provider Scenarios (P-01 to P-20)
+  [existing results carried forward, BLOCKED ones updated]
+
+## Admin Scenarios (A-01 to A-20)
+  [existing results carried forward]
+
+## Summary table (70 scenarios total)
+```
+
+---
+
+## Technical Details
+
+### Migration SQL outline
+
+```text
+-- 1. Insert 5 new SKUs (windows, power_wash, pool, pest, pet_waste)
+-- 2. Insert provider_orgs row
+-- 3. Insert provider_members row
+-- 4. Insert provider_coverage row
+-- 5. Insert provider_capabilities rows (4 SKUs)
+-- 6. Insert subscription row
+-- 7. Insert service_day_assignments row
+-- 8. Insert job row (COMPLETED)
+-- 9. Insert job_skus rows
+-- 10. Insert job_checklist_items rows
+-- 11. Insert job_photos rows (placeholder paths)
+-- 12. Insert job_events rows (4 status transitions)
+-- 13. Insert referral_programs row
+-- 14. Insert referral_codes row
+-- 15. Insert market_zone_category_state rows
+-- 16. Insert growth_surface_config row
+-- All use ON CONFLICT DO NOTHING for idempotency
+```
+
+### Files created/modified
+
+| File | Action |
+|------|--------|
+| `docs/Scenarios-Test.md` | Replace with uploaded version |
+| `docs/Scenario-Test-Results.md` | Rewrite with 70-scenario template + seed data status |
+| Migration SQL | Create (seed data for ~16 entity types) |
+
+### What this unblocks
+
+| Previously BLOCKED | Now testable |
+|-------------------|-------------|
+| C-07 View plan detail | Plans exist with entitlements |
+| C-08 Subscribe to plan | Subscription already seeded |
+| C-09 View subscription | Active subscription exists |
+| C-10 Service day | Assignment exists (LOCKED) |
+| C-11 Accept offer | Assignment seeded |
+| C-13 Build routine | Subscription + SKUs exist |
+| C-17 Visit detail | Completed job with photos |
+| C-18 Report issue | Completed job exists |
+| P-10 Job detail | Job exists |
+| P-11 Checklist | Checklist items exist |
+| P-12 Photos | Photos exist |
+| P-13 Complete job | Job exists |
+| G-01 to G-10 | All growth scenarios enabled |
+
