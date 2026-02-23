@@ -18,7 +18,6 @@ Deno.serve(async (req) => {
 
     const today = new Date().toISOString().split("T")[0];
     const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
 
     // ── Phase 1: Gather source data in parallel ──
 
@@ -34,7 +33,6 @@ Deno.serve(async (req) => {
       capsRes,
       subsRes,
       providerOrgsRes,
-      providerCoverageRes,
       openTicketsRes,
       refundsRes,
     ] = await Promise.all([
@@ -49,17 +47,20 @@ Deno.serve(async (req) => {
       sb.from("zone_service_day_capacity").select("zone_id, max_homes, assigned_count"),
       sb.from("subscriptions").select("zone_id").eq("status", "active"),
       sb.from("provider_orgs").select("id").eq("status", "ACTIVE"),
-      sb.from("provider_coverage").select("provider_org_id, zone_id").eq("request_status", "APPROVED"),
       sb.from("support_tickets").select("id", { count: "exact", head: true }).eq("status", "open"),
       sb.from("admin_adjustments").select("amount_cents").eq("adjustment_type", "refund").gte("created_at", sevenDaysAgo),
     ]);
 
     const completedJobs = jobsCompletedRes.data ?? [];
     const completedJobIds = completedJobs.map((j: any) => j.id);
+    const jobIssues = jobIssues7dRes.data ?? [];
 
     // ── Phase 2: Scoped queries for proof data ──
 
     let proofExceptions = 0;
+    const proofByJob: Record<string, boolean> = {}; // job_id -> has proof
+    const requiredProofJobs = new Set<string>();
+
     if (completedJobIds.length > 0) {
       const [checklistRes, photosRes] = await Promise.all([
         sb.from("job_checklist_items").select("job_id, is_required").in("job_id", completedJobIds),
@@ -67,20 +68,39 @@ Deno.serve(async (req) => {
       ]);
 
       const photosSet = new Set((photosRes.data ?? []).map((p: any) => p.job_id));
-      const requiredJobs = new Set<string>();
       (checklistRes.data ?? []).forEach((ci: any) => {
-        if (ci.is_required) requiredJobs.add(ci.job_id);
+        if (ci.is_required) requiredProofJobs.add(ci.job_id);
       });
-      requiredJobs.forEach((jid) => {
+      requiredProofJobs.forEach((jid) => {
+        proofByJob[jid] = photosSet.has(jid);
         if (!photosSet.has(jid)) proofExceptions++;
       });
     }
+
+    // ── Build issue maps by zone and provider ──
+
+    // Map job_id -> zone_id and provider_org_id from completed jobs
+    const jobZoneMap: Record<string, string> = {};
+    const jobProviderMap: Record<string, string> = {};
+    completedJobs.forEach((j: any) => {
+      if (j.zone_id) jobZoneMap[j.id] = j.zone_id;
+      if (j.provider_org_id) jobProviderMap[j.id] = j.provider_org_id;
+    });
+
+    const issuesByZone: Record<string, number> = {};
+    const issuesByProvider: Record<string, number> = {};
+    jobIssues.forEach((i: any) => {
+      const zoneId = jobZoneMap[i.job_id];
+      const providerId = jobProviderMap[i.job_id];
+      if (zoneId) issuesByZone[zoneId] = (issuesByZone[zoneId] || 0) + 1;
+      if (providerId) issuesByProvider[providerId] = (issuesByProvider[providerId] || 0) + 1;
+    });
 
     // ── Compute global KPIs ──
 
     const creditsCents = (credits7dRes.data ?? []).reduce((s: number, c: any) => s + (c.amount_cents || 0), 0);
     const refundsCents = (refundsRes.data ?? []).reduce((s: number, c: any) => s + (c.amount_cents || 0), 0);
-    const issues7d = (jobIssues7dRes.data ?? []).length;
+    const issues7d = jobIssues.length;
     const issueRate = completedJobs.length > 0 ? Math.round((issues7d / completedJobs.length) * 100) : 0;
 
     const globalMetrics: Record<string, number> = {
@@ -138,14 +158,9 @@ Deno.serve(async (req) => {
       if (s.zone_id) subsByZone[s.zone_id] = (subsByZone[s.zone_id] || 0) + 1;
     });
 
-    const issuesByZone: Record<string, number> = {};
     const completedByZone: Record<string, number> = {};
     completedJobs.forEach((j: any) => {
       if (j.zone_id) completedByZone[j.zone_id] = (completedByZone[j.zone_id] || 0) + 1;
-    });
-    (jobIssues7dRes.data ?? []).forEach((i: any) => {
-      // We'd need to join to jobs for zone_id; approximate by looking at completed jobs map
-      // For simplicity, count issues per zone via completed jobs
     });
 
     let zoneSnapshotCount = 0;
@@ -153,6 +168,8 @@ Deno.serve(async (req) => {
       const cap = capByZone[z.id] ?? { max: 0, assigned: 0 };
       const capPct = cap.max > 0 ? Math.round((cap.assigned / cap.max) * 100) : 0;
       const completed = completedByZone[z.id] || 0;
+      const zoneIssues = issuesByZone[z.id] || 0;
+      const zoneIssueRate = completed > 0 ? Math.round((zoneIssues / completed) * 100) : 0;
 
       await sb.from("zone_health_snapshots").upsert({
         zone_id: z.id,
@@ -160,7 +177,7 @@ Deno.serve(async (req) => {
         capacity_pct: capPct,
         active_subs: subsByZone[z.id] || 0,
         completed_jobs_7d: completed,
-        issue_rate_7d: 0, // Would need zone-scoped issue data
+        issue_rate_7d: zoneIssueRate,
       }, { onConflict: "zone_id,snapshot_date" });
       zoneSnapshotCount++;
     }
@@ -189,13 +206,28 @@ Deno.serve(async (req) => {
         .map((j: any) => (new Date(j.departed_at).getTime() - new Date(j.arrived_at).getTime()) / 60000);
       const avgTime = times.length > 0 ? Math.round(times.reduce((a: number, b: number) => a + b, 0) / times.length) : null;
 
+      // Provider issue rate
+      const provIssues = issuesByProvider[po.id] || 0;
+      const provIssueRate = completedCount > 0 ? Math.round((provIssues / completedCount) * 100) : 0;
+
+      // Provider proof compliance
+      let proofCompliant = 0;
+      let proofTotal = 0;
+      pJobs.forEach((j: any) => {
+        if (requiredProofJobs.has(j.id)) {
+          proofTotal++;
+          if (proofByJob[j.id]) proofCompliant++;
+        }
+      });
+      const proofCompliancePct = proofTotal > 0 ? Math.round((proofCompliant / proofTotal) * 100) : null;
+
       await sb.from("provider_health_snapshots").upsert({
         provider_org_id: po.id,
         snapshot_date: today,
         completed_jobs: completedCount,
         avg_time_on_site_minutes: avgTime,
-        issue_rate: 0,
-        proof_compliance: null,
+        issue_rate: provIssueRate,
+        proof_compliance: proofCompliancePct,
       }, { onConflict: "provider_org_id,snapshot_date" });
       providerSnapshotCount++;
     }
