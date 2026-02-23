@@ -37,6 +37,7 @@ const providerNav = [
   { title: "Coverage", url: "/provider/coverage", icon: Map },
   { title: "Support", url: "/provider/support", icon: HelpCircle },
   { title: "Referrals", url: "/provider/referrals", icon: Users },
+  { title: "Insights", url: "/provider/insights", icon: BarChart3 },
   { title: "Settings", url: "/provider/settings", icon: Settings },
 ];
 
@@ -56,6 +57,7 @@ const adminNav = [
   { title: "Support", url: "/admin/support", icon: HelpCircle },
   { title: "Incentives", url: "/admin/incentives", icon: Megaphone },
   { title: "Growth", url: "/admin/growth", icon: TrendingUp },
+  { title: "Ops Cockpit", url: "/admin/ops", icon: Gauge },
   { title: "Reports", url: "/admin/reports", icon: FileText },
   { title: "Audit Logs", url: "/admin/audit", icon: Lock },
   { title: "Settings", url: "/admin/settings", icon: Settings },
