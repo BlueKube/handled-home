@@ -2,11 +2,29 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Shield, Camera, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useGrowthEvents } from "@/hooks/useGrowthEvents";
+import { useEffect, useRef } from "react";
 import handledLogo from "@/assets/handled-home-logo.png";
 
 export default function InviteLanding() {
   const { code } = useParams<{ code: string }>();
   const navigate = useNavigate();
+  const { recordEvent } = useGrowthEvents();
+  const hasTracked = useRef(false);
+
+  // Record landing_viewed event once
+  useEffect(() => {
+    if (code && !hasTracked.current) {
+      hasTracked.current = true;
+      recordEvent.mutate({
+        eventType: "landing_viewed",
+        actorRole: "system",
+        sourceSurface: "provider_invite",
+        idempotencyKey: `invite_landing_${code}_${new Date().toISOString().slice(0, 13)}`,
+        context: { invite_code: code },
+      });
+    }
+  }, [code]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12 bg-background">
@@ -17,7 +35,7 @@ export default function InviteLanding() {
 
         <div className="space-y-4">
           {[
-            { icon: <Shield className="h-6 w-6 text-primary" />, text: "Welcome credit when you activate" },
+            { icon: <Shield className="h-6 w-6 text-primary" />, text: "Track and manage every service visit" },
             { icon: <Camera className="h-6 w-6 text-primary" />, text: "Proof photos after each visit" },
             { icon: <CheckCircle className="h-6 w-6 text-primary" />, text: "Manage your home services in one place" },
           ].map((item, i) => (

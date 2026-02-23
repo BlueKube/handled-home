@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useGrowthEvents } from "@/hooks/useGrowthEvents";
+import { useGrowthEvents, useFrequencyCapCheck } from "@/hooks/useGrowthEvents";
+import { useIsSurfaceEnabled } from "@/hooks/useGrowthSurfaceConfig";
 import { useReferralCodes } from "@/hooks/useReferralCodes";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,8 @@ export function CrossPollinationCard({ zoneId, propertyId }: { zoneId?: string; 
   const { recordEvent } = useGrowthEvents();
   const { codes } = useReferralCodes();
   const promptTracked = useRef(false);
+  const { enabled: surfaceEnabled } = useIsSurfaceEnabled(zoneId, "lawn_care", "cross_pollination");
+  const capCheck = useFrequencyCapCheck("cross_pollination_invite", "reminder_per_week", zoneId, "lawn_care");
   const [dismissed, setDismissed] = useState(() => {
     const v = localStorage.getItem(DISMISS_KEY);
     if (!v) return false;
@@ -60,7 +63,7 @@ export function CrossPollinationCard({ zoneId, propertyId }: { zoneId?: string; 
     }
   }, [dismissed, unsubscribedCats.length, user]);
 
-  if (dismissed || unsubscribedCats.length === 0) return null;
+  if (dismissed || unsubscribedCats.length === 0 || !surfaceEnabled || capCheck.data?.suppressed) return null;
 
   const friendlyNames: Record<string, string> = {
     lawn_care: "lawn care pro",

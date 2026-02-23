@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Copy, Share2, Ban, Loader2, ImageIcon } from "lucide-react";
 import { useShareCard } from "@/hooks/useShareCard";
 import { useGrowthEvents } from "@/hooks/useGrowthEvents";
+import { useIsSurfaceEnabled } from "@/hooks/useGrowthSurfaceConfig";
 import { toast } from "sonner";
 
 interface ShareCardSheetProps {
@@ -20,10 +21,12 @@ interface ShareCardSheetProps {
 export function ShareCardSheet({ open, onOpenChange, jobId, zoneId, category }: ShareCardSheetProps) {
   const { card, createCard, revokeCard, updateCard } = useShareCard(jobId);
   const { recordEvent } = useGrowthEvents();
+  const { enabled: surfaceEnabled } = useIsSurfaceEnabled(zoneId, category, "receipt_share");
   const [creating, setCreating] = useState(false);
 
   // Create share card on open if none exists
   useEffect(() => {
+    if (!surfaceEnabled) return;
     if (open && !card.data && !card.isLoading && !creating) {
       setCreating(true);
       createCard.mutate(jobId, {
@@ -32,6 +35,9 @@ export function ShareCardSheet({ open, onOpenChange, jobId, zoneId, category }: 
       });
     }
   }, [open, card.data, card.isLoading]);
+
+  // If surface is disabled, don't render
+  if (!surfaceEnabled) return null;
 
   const shareData = card.data;
   const shareUrl = shareData?.share_code

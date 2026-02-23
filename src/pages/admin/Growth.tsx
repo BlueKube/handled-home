@@ -452,7 +452,16 @@ const FUNNEL_STEPS = [
 ];
 
 function EventsTab({ selectedZone, setSelectedZone }: { selectedZone: string; setSelectedZone: (v: string) => void }) {
-  const stats = useGrowthEventStats(selectedZone || undefined);
+  const [dateRange, setDateRange] = useState<"7d" | "30d" | "all">("30d");
+
+  const dateFilter = (() => {
+    if (dateRange === "all") return undefined;
+    const start = new Date();
+    start.setDate(start.getDate() - (dateRange === "7d" ? 7 : 30));
+    return { start: start.toISOString(), end: new Date().toISOString() };
+  })();
+
+  const stats = useGrowthEventStats(selectedZone || undefined, dateFilter);
 
   if (stats.isLoading) return <Skeleton className="h-48 mt-4" />;
 
@@ -471,7 +480,19 @@ function EventsTab({ selectedZone, setSelectedZone }: { selectedZone: string; se
 
   return (
     <div className="space-y-4 mt-4">
-      <ZoneFilter selectedZone={selectedZone} setSelectedZone={setSelectedZone} />
+      <div className="flex items-center gap-3">
+        <ZoneFilter selectedZone={selectedZone} setSelectedZone={setSelectedZone} />
+        <Select value={dateRange} onValueChange={(v) => setDateRange(v as any)}>
+          <SelectTrigger className="w-32">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="7d">Last 7 days</SelectItem>
+            <SelectItem value="30d">Last 30 days</SelectItem>
+            <SelectItem value="all">All time</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
       <Card>
         <CardHeader className="pb-2">
@@ -479,7 +500,7 @@ function EventsTab({ selectedZone, setSelectedZone }: { selectedZone: string; se
             <BarChart3 className="h-4 w-4" />
             Conversion Funnel
           </CardTitle>
-          <p className="text-xs text-muted-foreground">{total} total events (last 500)</p>
+          <p className="text-xs text-muted-foreground">{total} total events ({dateRange === "all" ? "all time" : `last ${dateRange === "7d" ? "7" : "30"} days`})</p>
         </CardHeader>
         <CardContent className="space-y-2">
           {funnelData.map((step, i) => (

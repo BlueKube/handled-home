@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { Copy, Link, ArrowLeft, QrCode } from "lucide-react";
+import { Copy, Link, ArrowLeft, Info } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,40 +11,7 @@ import { useProviderOrg } from "@/hooks/useProviderOrg";
 import { useGrowthEvents } from "@/hooks/useGrowthEvents";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { useRef, useEffect } from "react";
 
-function drawQR(canvas: HTMLCanvasElement, text: string) {
-  // Simple visual placeholder — real QR would need a library
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-  const size = 200;
-  canvas.width = size;
-  canvas.height = size;
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, size, size);
-  ctx.fillStyle = "#000000";
-  // Draw a pattern representing a QR code placeholder
-  const cellSize = 8;
-  const margin = 20;
-  for (let x = margin; x < size - margin; x += cellSize) {
-    for (let y = margin; y < size - margin; y += cellSize) {
-      if (Math.random() > 0.5) {
-        ctx.fillRect(x, y, cellSize - 1, cellSize - 1);
-      }
-    }
-  }
-  // Corner markers
-  const markerSize = cellSize * 3;
-  [margin, size - margin - markerSize].forEach((mx) => {
-    [margin, size - margin - markerSize].forEach((my) => {
-      if (mx === size - margin - markerSize && my === size - margin - markerSize) return;
-      ctx.fillStyle = "#000";
-      ctx.fillRect(mx, my, markerSize, markerSize);
-      ctx.fillStyle = "#fff";
-      ctx.fillRect(mx + cellSize, my + cellSize, cellSize, cellSize);
-    });
-  });
-}
 
 export default function InviteCustomers() {
   const navigate = useNavigate();
@@ -52,18 +20,11 @@ export default function InviteCustomers() {
   const { org } = useProviderOrg();
   const { recordEvent } = useGrowthEvents();
   const { user } = useAuth();
-  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const inviteLink = codes.data?.[0]?.code
     ? `${window.location.origin}/invite/${codes.data[0].code}`
     : null;
   const providerName = org?.name ?? "Your Pro";
-
-  useEffect(() => {
-    if (canvasRef.current && inviteLink) {
-      drawQR(canvasRef.current, inviteLink);
-    }
-  }, [inviteLink]);
 
   const copyLink = () => {
     if (inviteLink) {
@@ -113,9 +74,21 @@ export default function InviteCustomers() {
         </div>
       ) : (
         <Button
-          onClick={() => {
-            const programId = codes.data?.[0]?.program_id;
-            if (programId) generateCode.mutate(programId);
+          onClick={async () => {
+            let programId = codes.data?.[0]?.program_id;
+            if (!programId) {
+              const { data: programs } = await (supabase as any)
+                .from("referral_programs")
+                .select("id")
+                .eq("status", "active")
+                .limit(1);
+              programId = programs?.[0]?.id;
+            }
+            if (programId) {
+              generateCode.mutate(programId);
+            } else {
+              toast.error("No active referral program found.");
+            }
           }}
           variant="outline"
           className="w-full gap-2"
@@ -125,13 +98,12 @@ export default function InviteCustomers() {
         </Button>
       )}
 
-      {/* QR Code */}
+      {/* QR Code - Coming soon */}
       {inviteLink && (
         <Card>
-          <CardContent className="py-6 flex flex-col items-center gap-3">
-            <QrCode className="h-5 w-5 text-muted-foreground" />
-            <canvas ref={canvasRef} className="rounded-lg border" />
-            <p className="text-xs text-muted-foreground">Show this to customers</p>
+          <CardContent className="py-4 flex items-center gap-3 text-muted-foreground">
+            <Info className="h-4 w-4 shrink-0" />
+            <p className="text-xs">QR code generation coming soon. Use the copy link above for now.</p>
           </CardContent>
         </Card>
       )}
