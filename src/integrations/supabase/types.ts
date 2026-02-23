@@ -4118,7 +4118,16 @@ export type Database = {
         Args: { p_invoice_id: string; p_reason: string }
         Returns: Json
       }
-      apply_referral_reward: { Args: { p_reward_id: string }; Returns: Json }
+      apply_referral_reward:
+        | { Args: { p_reward_id: string }; Returns: Json }
+        | {
+            Args: { p_admin_user_id?: string; p_reward_id: string }
+            Returns: undefined
+          }
+      attribute_referral_signup: {
+        Args: { p_referral_code: string }
+        Returns: undefined
+      }
       bootstrap_new_user: { Args: { _full_name: string }; Returns: undefined }
       check_provider_sku_zone_eligibility: {
         Args: { p_provider_org_id: string; p_sku_id: string; p_zone_id: string }
@@ -4174,12 +4183,11 @@ export type Database = {
           p_category: string
           p_metadata?: Json
           p_new_state?: string
-          p_previous_state?: string
           p_reason?: string
           p_trigger_source?: string
           p_zone_id: string
         }
-        Returns: string
+        Returns: undefined
       }
       record_referral_milestone: {
         Args: {
@@ -4192,6 +4200,7 @@ export type Database = {
         Args: { p_assignment_id: string }
         Returns: Json
       }
+      release_expired_referral_holds: { Args: never; Returns: number }
       release_referral_hold: {
         Args: { p_reason: string; p_reward_id: string }
         Returns: Json

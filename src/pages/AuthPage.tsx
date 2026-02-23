@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,14 @@ export default function AuthPage() {
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const refCode = searchParams.get("ref");
   const { toast } = useToast();
+
+  // If arriving with a ref code, default to signup tab
+  useEffect(() => {
+    if (refCode) setTab("signup");
+  }, [refCode]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +72,15 @@ export default function AuthPage() {
     }
 
     // Bootstrap is now handled automatically by AuthContext when it detects missing roles
+    // A1: Wire referral attribution on signup
+    if (refCode) {
+      try {
+        await supabase.rpc("attribute_referral_signup", { p_referral_code: refCode });
+      } catch (e) {
+        console.warn("Referral attribution failed:", e);
+      }
+    }
+
     setLoading(false);
     toast({ title: "Success", description: "Account created! Redirecting..." });
     navigate("/");
