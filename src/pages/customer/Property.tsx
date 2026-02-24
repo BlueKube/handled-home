@@ -83,7 +83,12 @@ export default function CustomerProperty() {
   const { zoneName, isLoading: zoneLoading, isNotCovered, isCovered } = useZoneLookup(form.zip_code);
 
   const updateField = (field: keyof PropertyFormData, value: string) => {
-    const finalValue = field === "state" ? value.toUpperCase().slice(0, 2) : value;
+    let finalValue = value;
+    if (field === "state") {
+      // If current value is 2 chars and new value is longer, user is typing fresh — keep only the new chars
+      const upper = value.toUpperCase();
+      finalValue = upper.length > 2 ? upper.slice(-2) : upper.slice(0, 2);
+    }
     const newForm = { ...form, [field]: finalValue };
     setForm(newForm);
     if (touched) {
