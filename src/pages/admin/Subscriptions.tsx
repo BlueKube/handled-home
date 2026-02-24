@@ -83,7 +83,7 @@ function SubscriptionDetailSheet({ subscriptionId, onClose }: { subscriptionId: 
 
   return (
     <Sheet open={!!subscriptionId} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+      <SheetContent className="overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Subscription Detail</SheetTitle>
         </SheetHeader>

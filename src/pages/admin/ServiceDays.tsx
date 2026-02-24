@@ -87,7 +87,7 @@ export default function AdminServiceDays() {
       )}
 
       <Sheet open={!!selectedZone} onOpenChange={(open) => !open && setSelectedZone(null)}>
-        <SheetContent className="sm:max-w-lg overflow-y-auto">
+        <SheetContent className="overflow-y-auto">
           <SheetHeader>
             <SheetTitle>Zone Detail</SheetTitle>
           </SheetHeader>
