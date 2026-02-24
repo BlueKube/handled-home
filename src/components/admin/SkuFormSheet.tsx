@@ -42,6 +42,8 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
   const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
   const [priceHintCents, setPriceHintCents] = useState<number | null>(null);
   const [pricingNotes, setPricingNotes] = useState("");
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [displayOrder, setDisplayOrder] = useState(0);
 
   useEffect(() => {
     if (!open) return;
@@ -60,12 +62,15 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
       setChecklist((sku.checklist ?? []) as unknown as ChecklistItem[]);
       setPriceHintCents(sku.price_hint_cents ?? null);
       setPricingNotes(sku.pricing_notes ?? "");
+      setIsFeatured(sku.is_featured ?? false);
+      setDisplayOrder(sku.display_order ?? 0);
     } else {
       setName(""); setDescription(""); setCategory(""); setStatus("draft");
       setInclusions([""]); setExclusions([""]); setEdgeCaseNotes("");
       setDurationMinutes(30); setFulfillmentMode("same_day_preferred");
       setWeatherSensitive(false); setPhotos([]); setChecklist([]);
       setPriceHintCents(null); setPricingNotes("");
+      setIsFeatured(false); setDisplayOrder(0);
     }
   }, [open, sku]);
 
@@ -98,6 +103,8 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
     checklist: checklist.filter(c => c.label.trim()) as unknown as ServiceSkuInsert["checklist"],
     price_hint_cents: priceHintCents,
     pricing_notes: pricingNotes.trim() || null,
+    is_featured: isFeatured,
+    display_order: displayOrder,
   });
 
   const needsConfirmation = (payload: ServiceSkuInsert): boolean => {
@@ -171,6 +178,15 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
                     <SelectItem value="archived">Archived</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="flex items-center justify-between">
+                <Label>Featured Service</Label>
+                <Switch checked={isFeatured} onCheckedChange={setIsFeatured} />
+              </div>
+              <div>
+                <Label>Display Order</Label>
+                <Input type="number" min={0} value={displayOrder} onChange={e => setDisplayOrder(Number(e.target.value))} placeholder="0" />
+                <p className="text-caption mt-1">Lower numbers appear first within category.</p>
               </div>
             </div>
           </CollapsibleSection>
