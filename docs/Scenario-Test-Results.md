@@ -1,7 +1,7 @@
 # Scenario Test Results
 
 > Results from systematically testing all 70 user scenarios.  
-> Test date: 2026-02-23  
+> Test date: 2026-02-24 (updated)  
 > Commit SHA: _(update after merge)_  
 > Environment: staging/dev  
 > Database seed version: 20260223034117  
@@ -85,9 +85,9 @@
 | C-02 | Login with existing credentials | PASS | NO | Login with test@handled.home / Test1234! succeeded. Redirected to property gate, then /customer dashboard. No hanging. | 2026-02-22 |
 | C-03 | View customer dashboard | PASS | YES | Dashboard loads: welcome message, Service Day banner, Next Visit card, stats (Pending / 1 visit). No console errors. | 2026-02-23 |
 | C-04 | View property profile | PASS | NO | Property page loads showing saved address, Access & Logistics section. Zone warning shown for unserviced ZIP. | 2026-02-22 |
-| C-05 | Edit property profile details | PARTIAL | NO | Form fields editable, Save works. Bug: State field appended "TX" to "CA" → "CATX" (field not cleared before typing). | 2026-02-22 |
-| C-06 | Browse available plans | PARTIAL | NO | Plans page loads with "Choose a Plan" header. Shows "No plans available" — no seed data. Page structure correct. | 2026-02-22 |
-| C-07 | View plan detail page | NOT_TESTED | — | Seed data now includes 3 plans with entitlements. Re-test needed. | |
+| C-05 | Edit property profile details | PASS | YES | Fixed: State field now replaces value instead of appending (e.g. typing "TX" over "CA" gives "TX"). | 2026-02-24 |
+| C-06 | Browse available plans | PASS | YES | Plans page shows 3 plans (Essentials $99, Plus $149, Premium $249) with visual service catalog. | 2026-02-24 |
+| C-07 | View plan detail page | PASS | YES | Plan detail shows entitlement info, included services, and Build Routine CTA. | 2026-02-24 |
 | C-08 | Subscribe to a plan | PASS | YES | Plans page shows 3 plans (Essentials $99, Plus $149, Premium $249) with Preview/Build Routine CTAs. | 2026-02-23 |
 | C-09 | View current subscription status | NOT_TESTED | — | Active subscription now seeded (Essentials). Re-test needed. | |
 | C-10 | View Service Day assignment/offer | PASS | YES | Service Day page shows Tuesday offer with "Confirm Service Day" and "This day won't work" buttons. | 2026-02-23 |
@@ -150,7 +150,7 @@
 | A-17 | View provider ledger | PARTIAL | NO | Route at /admin/payouts/provider-ledger. Not browser-tested. | 2026-02-22 |
 | A-18 | Triage billing exceptions | PARTIAL | NO | Route at /admin/exceptions. Not browser-tested. | 2026-02-22 |
 | A-19 | View audit logs | PARTIAL | NO | Route at /admin/audit. Not browser-tested. | 2026-02-22 |
-| A-20 | View admin settings | PARTIAL | NO | Route at /admin/settings. Shows placeholder page ("Coming Soon"). | 2026-02-22 |
+| A-20 | View admin settings | PASS | YES | Settings page functional: profile editing, password change, role switcher all working. | 2026-02-24 |
 
 ---
 
@@ -158,28 +158,25 @@
 
 | Role | PASS | PARTIAL | NOT_TESTED | Total |
 |------|------|---------|------------|-------|
-| Customer | 9 | 2 | 9 | 20 |
+| Customer | 12 | 0 | 8 | 20 |
 | Provider | 5 | 11 | 4 | 20 |
-| Admin | 5 | 15 | 0 | 20 |
+| Admin | 6 | 14 | 0 | 20 |
 | Growth | 5 | 1 | 4 | 10 |
-| **Total** | **24** | **29** | **17** | **70** |
+| **Total** | **28** | **26** | **16** | **70** |
 
 ### Key Findings
 
-1. **22 of 25 Smoke+Growth scenarios passed or partially passed** on browser re-test (2026-02-23).
-2. **3 Growth scenarios (G-03, G-09, G-10)** require DB state changes to test and remain NOT_TESTED.
-3. **P-12 and P-13** are PARTIAL because the seeded job is already completed — testing upload/completion requires an in-progress job.
-4. **Photo fallback is working** — placeholder renders instead of broken images.
-5. **No console errors** observed during testing.
-6. **Share card landing pages work correctly** for active, expired, and revoked states.
-7. **Auth & Login**: Working correctly. Login, signup, and role switching all functional.
-8. **Customer Dashboard**: Fully functional with proper empty states for new users.
-9. **Property Management**: Works but minor UX bug — state field concatenation issue when editing.
-10. **Plans & Subscriptions**: 3 plans exist with entitlements. Active subscription seeded.
-11. **Service Day**: Both confirmed and offered assignments seeded with 3 offers for offer acceptance testing.
-12. **Admin Pages**: All routes exist with components built. 4 scenarios now browser-verified (A-04, A-05, A-07, A-12).
-13. **Provider Onboarding**: Steps 3 and 5 browser-verified. Full flow requires fresh provider account.
-14. **Security Linter**: Pre-existing warnings (RLS no-policy, always-true policies, leaked password protection) — not related to seed data.
+1. **28 of 70 scenarios now PASS** (up from 24), with key bug fixes applied 2026-02-24.
+2. **C-05 State field bug fixed** — typing now replaces the existing value instead of appending.
+3. **Referrals RLS policies added** — SELECT policies on `referral_programs`, `referral_codes`, `referral_milestones` to fix 400 query error.
+4. **Visual service catalog** confirmed working with images and category grouping (C-06, C-07).
+5. **A-20 Admin Settings** confirmed functional with profile editing, password change, and role switcher.
+6. **3 Growth scenarios (G-03, G-09, G-10)** require DB state changes to test and remain NOT_TESTED.
+7. **P-12 and P-13** are PARTIAL because the seeded job is already completed — testing upload/completion requires an in-progress job.
+8. **Photo fallback is working** — placeholder renders instead of broken images.
+9. **Share card landing pages work correctly** for active, expired, and revoked states.
+10. **Remaining NOT_TESTED** (C-09, C-11–C-15, G-03, G-09, G-10) mostly require routine builder or DB state toggles.
+11. **Security Linter**: Pre-existing warnings (RLS no-policy, always-true policies, leaked password protection) — not related to recent changes.
 
 ---
 
