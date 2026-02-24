@@ -3384,12 +3384,15 @@ export type Database = {
           checklist: Json
           created_at: string
           description: string
+          display_order: number
           duration_minutes: number
           edge_case_notes: string | null
           exclusions: string[]
           fulfillment_mode: Database["public"]["Enums"]["fulfillment_mode"]
           id: string
+          image_url: string | null
           inclusions: string[]
+          is_featured: boolean
           name: string
           price_hint_cents: number | null
           pricing_notes: string | null
@@ -3404,12 +3407,15 @@ export type Database = {
           checklist?: Json
           created_at?: string
           description?: string
+          display_order?: number
           duration_minutes?: number
           edge_case_notes?: string | null
           exclusions?: string[]
           fulfillment_mode?: Database["public"]["Enums"]["fulfillment_mode"]
           id?: string
+          image_url?: string | null
           inclusions?: string[]
+          is_featured?: boolean
           name: string
           price_hint_cents?: number | null
           pricing_notes?: string | null
@@ -3424,12 +3430,15 @@ export type Database = {
           checklist?: Json
           created_at?: string
           description?: string
+          display_order?: number
           duration_minutes?: number
           edge_case_notes?: string | null
           exclusions?: string[]
           fulfillment_mode?: Database["public"]["Enums"]["fulfillment_mode"]
           id?: string
+          image_url?: string | null
           inclusions?: string[]
+          is_featured?: boolean
           name?: string
           price_hint_cents?: number | null
           pricing_notes?: string | null

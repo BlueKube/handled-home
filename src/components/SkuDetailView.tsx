@@ -2,6 +2,8 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, XCircle, Camera, ClipboardList, CloudRain } from "lucide-react";
 import type { ServiceSku, PhotoRequirement, ChecklistItem } from "@/hooks/useSkus";
 import { FULFILLMENT_MODE_LABELS } from "@/hooks/useSkus";
+import { getServiceImage } from "@/lib/serviceImages";
+import { getCategoryIcon, getCategoryGradient } from "@/lib/serviceCategories";
 
 interface SkuDetailViewProps {
   sku: ServiceSku;
@@ -10,9 +12,22 @@ interface SkuDetailViewProps {
 export function SkuDetailView({ sku }: SkuDetailViewProps) {
   const photos = (sku.required_photos ?? []) as unknown as PhotoRequirement[];
   const checklist = (sku.checklist ?? []) as unknown as ChecklistItem[];
+  const image = getServiceImage(sku.id, sku.name, sku.image_url);
+  const CatIcon = getCategoryIcon(sku.category);
+  const gradient = getCategoryGradient(sku.category);
 
   return (
     <div className="space-y-6">
+      {/* Hero image */}
+      <div className="rounded-xl overflow-hidden -mx-2">
+        {image ? (
+          <img src={image} alt={sku.name} className="w-full h-40 object-cover" onError={(e) => { e.currentTarget.src = "/placeholder.svg"; }} />
+        ) : (
+          <div className={`w-full h-40 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+            <CatIcon className="h-10 w-10 text-white/80" />
+          </div>
+        )}
+      </div>
       {/* Description */}
       {sku.description && (
         <p className="text-body text-muted-foreground">{sku.description}</p>

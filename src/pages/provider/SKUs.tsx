@@ -7,6 +7,8 @@ import { Search, Clock, CloudRain } from "lucide-react";
 import { useSkus, FULFILLMENT_MODE_LABELS } from "@/hooks/useSkus";
 import type { ServiceSku } from "@/hooks/useSkus";
 import { SkuDetailView } from "@/components/SkuDetailView";
+import { getServiceImage } from "@/lib/serviceImages";
+import { getCategoryIcon, getCategoryGradient } from "@/lib/serviceCategories";
 
 export default function ProviderSKUs() {
   const [search, setSearch] = useState("");
@@ -29,27 +31,43 @@ export default function ProviderSKUs() {
         <p className="text-center text-muted-foreground py-8">No services available.</p>
       ) : (
         <div className="grid gap-3">
-          {skus.map(sku => (
-            <Card key={sku.id} className="press-feedback cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedSku(sku)}>
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-sm">{sku.name}</h3>
-                {sku.description && <p className="text-caption mt-1 line-clamp-2">{sku.description}</p>}
-                <div className="flex flex-wrap gap-1.5 mt-3">
-                  <Badge variant="secondary" className="gap-1 text-xs">
-                    <Clock className="h-3 w-3" /> {sku.duration_minutes} min
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    {FULFILLMENT_MODE_LABELS[sku.fulfillment_mode]?.split(" ").slice(0, 4).join(" ") ?? sku.fulfillment_mode}
-                  </Badge>
-                  {sku.weather_sensitive && (
-                    <Badge variant="outline" className="gap-1 text-xs text-warning">
-                      <CloudRain className="h-3 w-3" /> Weather
-                    </Badge>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          {skus.map(sku => {
+            const image = getServiceImage(sku.id, sku.name, sku.image_url);
+            const CatIcon = getCategoryIcon(sku.category);
+            const gradient = getCategoryGradient(sku.category);
+            return (
+              <Card key={sku.id} className="press-feedback cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedSku(sku)}>
+                <CardContent className="p-3 flex gap-3">
+                  <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                    {image ? (
+                      <img src={image} alt={sku.name} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = "/placeholder.svg"; }} />
+                    ) : (
+                      <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+                        <CatIcon className="h-5 w-5 text-white/80" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-semibold text-sm">{sku.name}</h3>
+                    {sku.description && <p className="text-caption mt-0.5 line-clamp-1">{sku.description}</p>}
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      <Badge variant="secondary" className="gap-1 text-xs">
+                        <Clock className="h-3 w-3" /> {sku.duration_minutes} min
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {FULFILLMENT_MODE_LABELS[sku.fulfillment_mode]?.split(" ").slice(0, 4).join(" ") ?? sku.fulfillment_mode}
+                      </Badge>
+                      {sku.weather_sensitive && (
+                        <Badge variant="outline" className="gap-1 text-xs text-warning">
+                          <CloudRain className="h-3 w-3" /> Weather
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 
