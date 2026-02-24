@@ -1,67 +1,85 @@
 
 
-# Build Real Settings Pages (Module 01 — Final 10%)
+# Add Service Images, Featured Flags, and Category Grouping
 
-The auth system, role resolution, route protection, and role switching are all implemented and working. The only remaining gap is the three placeholder Settings pages. The role switcher already works in the "More" menu, so Settings should focus on **profile management** and **account actions**.
+## Overview
 
----
-
-## Shared Settings Features (all three roles)
-
-Each Settings page will include:
-
-1. **Profile Section** — Edit full name, phone number (reads/writes `profiles` table)
-2. **Account Section** — Change password (uses `supabase.auth.updateUser`)
-3. **Sign Out** button
-4. **Role Switcher** — Only visible when user has multiple roles (already implemented in MoreMenu, will reuse `useAuth().setActiveRole`)
-
-## Admin-Only Additions
-
-The Admin Settings page will additionally show:
-
-5. **Platform Config** (read-only display for now) — placeholder section for future system configuration
+Transform the flat, text-only service catalog into a visually rich, organized browsing experience. Services will have hero images, be flaggable as "featured" or "suggested," and display grouped by category with friendly labels.
 
 ---
 
-## Implementation Details
+## Database Changes
 
-### New shared component: `src/components/settings/ProfileForm.tsx`
-- Renders editable fields for `full_name` and `phone`
-- Uses `useAuth().profile` for initial values
-- On save: `supabase.from("profiles").update({ full_name, phone }).eq("user_id", user.id)`
-- Toast on success/error
+Add three new columns to `service_skus`:
 
-### New shared component: `src/components/settings/ChangePasswordForm.tsx`
-- Current password field (for UX confirmation, not validated server-side by Supabase)
-- New password + confirm password fields
-- On save: `supabase.auth.updateUser({ password: newPassword })`
-- Validation: min 8 chars, passwords match
-- Toast on success/error
+| Column | Type | Default | Purpose |
+|--------|------|---------|---------|
+| `image_url` | text, nullable | null | URL to a hero image stored in file storage |
+| `is_featured` | boolean | false | Marks a service for the "Featured" section |
+| `display_order` | integer | 0 | Controls sort order within a category |
 
-### New shared component: `src/components/settings/RoleSwitcher.tsx`
-- Extracted from MoreMenu's existing role-switch UI
-- Only renders when `roles.length > 1`
-- Calls `setActiveRole(r)` and navigates to `/${r}`
+Create a **storage bucket** called `sku-images` (public) so admins can upload service photos directly.
 
-### Updated pages
+---
 
-**`src/pages/customer/Settings.tsx`**
-- Avatar placeholder (initials circle from profile)
-- User email (read-only, from `useAuth().user.email`)
-- ProfileForm
-- ChangePasswordForm
-- RoleSwitcher (if multi-role)
-- Sign Out button
+## Image Generation
 
-**`src/pages/provider/Settings.tsx`**
-- Same as customer Settings
+Use AI image generation (Gemini flash-image) to create a set of 13 polished hero images -- one per existing service -- depicting each service in action (e.g., a freshly mowed lawn, a sparkling pool, a clean driveway). Images will be uploaded to the `sku-images` bucket and linked via `image_url`.
 
-**`src/pages/admin/Settings.tsx`**
-- Same as customer Settings
-- Additional "Platform Configuration" card (static/placeholder for future use)
+This will be done through a one-time backend function call or manual seeding script so the catalog has visuals immediately.
 
-### MoreMenu cleanup
-- Replace inline role-switcher code with the new `RoleSwitcher` component (keeps DRY)
+---
+
+## Admin SKU Form Updates
+
+Update `SkuFormSheet.tsx` to include:
+- **Image upload** field with drag-and-drop or click-to-upload, saving to `sku-images` bucket
+- **"Featured" toggle** (switch)
+- **Display order** (number input)
+
+Update `SkuListCard.tsx` to show a thumbnail of the image alongside the service name.
+
+---
+
+## Customer Services Page Redesign
+
+Rework `customer/Services.tsx` with three visual sections:
+
+1. **Featured Services** -- horizontal scrollable row of image cards for services where `is_featured = true`. Each card shows the hero image, service name, and estimated price.
+
+2. **Category Groups** -- services grouped by `category` with friendly headers (e.g., "Lawn Care" instead of "mowing"). Each group shows its services as image cards in a grid.
+
+3. **Search** -- retains the existing search bar; when active, shows flat filtered results instead of sections.
+
+Category label mapping (hardcoded utility):
+```text
+mowing      -> Lawn Care
+trimming    -> Trimming & Hedges
+cleanup     -> Cleanup & Debris
+treatment   -> Lawn Treatment
+pool        -> Pool Care
+power_wash  -> Power Washing
+windows     -> Window Cleaning
+pest        -> Pest Control
+pet_waste   -> Pet Waste
+```
+
+---
+
+## Service Card Component
+
+Create `src/components/customer/ServiceCard.tsx`:
+- Displays the hero image in a 16:9 aspect ratio container with rounded corners
+- Service name overlaid or below the image
+- Duration badge and estimated price
+- Falls back to a colored gradient with an icon if no image is set
+- On click: opens the existing detail sheet
+
+---
+
+## Provider SKUs Page
+
+Update `provider/SKUs.tsx` to also show the image thumbnail on each card (smaller, inline) for visual consistency.
 
 ---
 
@@ -69,13 +87,13 @@ The Admin Settings page will additionally show:
 
 | File | Action |
 |------|--------|
-| `src/components/settings/ProfileForm.tsx` | Create — name + phone editor |
-| `src/components/settings/ChangePasswordForm.tsx` | Create — password change form |
-| `src/components/settings/RoleSwitcher.tsx` | Create — extracted from MoreMenu |
-| `src/pages/customer/Settings.tsx` | Replace placeholder with real page |
-| `src/pages/provider/Settings.tsx` | Replace placeholder with real page |
-| `src/pages/admin/Settings.tsx` | Replace placeholder with real page |
-| `src/components/MoreMenu.tsx` | Use RoleSwitcher component |
-
-No database changes needed — `profiles` table and RLS policies already exist.
+| Migration SQL | Add `image_url`, `is_featured`, `display_order` columns; create `sku-images` bucket + RLS |
+| `src/components/customer/ServiceCard.tsx` | New -- image-forward service card |
+| `src/pages/customer/Services.tsx` | Redesign -- featured row + category groups |
+| `src/components/admin/SkuFormSheet.tsx` | Add image upload, featured toggle, display_order |
+| `src/components/admin/SkuListCard.tsx` | Add image thumbnail |
+| `src/pages/provider/SKUs.tsx` | Add image thumbnail |
+| `src/hooks/useSkus.ts` | No changes needed (already selects `*`) |
+| `src/lib/serviceCategories.ts` | New -- category label map + icon map |
+| Edge function or seed script | Generate + upload 13 AI images, update `image_url` |
 
