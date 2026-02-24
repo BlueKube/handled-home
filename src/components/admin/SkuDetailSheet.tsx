@@ -40,7 +40,7 @@ export function SkuDetailSheet({ sku, open, onOpenChange, onEdit }: SkuDetailShe
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-lg overflow-y-auto">
+      <SheetContent className="overflow-y-auto">
         <SheetHeader>
           <div className="flex items-center gap-2">
             <SheetTitle className="flex-1">{sku.name}</SheetTitle>

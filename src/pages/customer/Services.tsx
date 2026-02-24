@@ -123,7 +123,7 @@ export default function CustomerServices() {
       )}
 
       <Sheet open={!!selectedSku} onOpenChange={(open) => { if (!open) setSelectedSku(null); }}>
-        <SheetContent className="sm:max-w-lg overflow-y-auto">
+        <SheetContent className="overflow-y-auto">
           <SheetHeader>
             <SheetTitle>{selectedSku?.name}</SheetTitle>
           </SheetHeader>
