@@ -21,7 +21,7 @@
 - Issues (submitted issue list)
 - Referrals
 - Support
-- Account Settings
+- Account Settings (includes Preview As card when admin is previewing this role)
 
 ---
 
@@ -44,7 +44,7 @@
 - Payouts Overview (account status, balances)
 - Payout History (earnings + payouts)
 - Performance
-- Account Settings
+- Account Settings (includes Preview As card when admin is previewing this role)
 
 ---
 
@@ -72,7 +72,7 @@
 - Incentives
 - Reporting & Analytics
 - Audit Logs
-- Admin Settings
+- Admin Settings (includes Preview As card for switching role views)
 
 ---
 

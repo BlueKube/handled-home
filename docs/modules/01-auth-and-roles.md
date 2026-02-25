@@ -13,8 +13,9 @@
 - **Profiles** row creation + maintenance (`profiles`)
 - **Role assignment** and retrieval (`user_roles`)
 - **Active role** selection and persistence (multi-role future-proof)
+- **Admin Preview Mode** — admins can view the app as Customer or Provider without needing those roles in the database
 - **Role-based route protection** and routing tree gating
-- Mobile-first auth UI (Login + Signup) and minimal Settings utility (role switcher)
+- Mobile-first auth UI (Login + Signup) and minimal Settings utility (role switcher + preview mode)
 - “Account Not Configured” handling (no role assigned)
 - Production-grade error handling, loading states, and security constraints
 - Analytics events for auth/role flows (recommended)
@@ -172,10 +173,17 @@ Shown when session exists but roles array is empty.
 - CTA: Sign out
 - No back navigation
 
-#### D) Settings (role switcher; dev utility)
+#### D) Settings (role switcher + preview mode)
 Shown only when `roles.length > 1`
-- Active role selector
+- Active role selector (RoleSwitcher)
 - Sign out
+
+#### E) Preview As Card (admin only)
+Visible on all Settings pages (Customer, Provider, Admin) when the real `activeRole` is `admin`.
+- Three buttons: Customer, Provider, Admin
+- Clicking sets `previewRole` in AuthContext and navigates to the corresponding dashboard
+- Clicking "Admin" clears `previewRole` (returns to real admin role)
+- The component self-hides for non-admin users via guard: `if (activeRole !== "admin") return null`
 
 ---
 
@@ -220,18 +228,28 @@ Responsibilities:
 Storage key: `activeRole`
 
 Resolution:
-1. Load roles from DB
-2. If roles empty → Account Not Configured
-3. Read saved role
-4. If saved role is valid → use it
-5. Else use deterministic default
+1. If `activeRole` in storage is valid (i.e., user has that role) → use it.
+2. Otherwise, pick highest-priority role:
 
-Deterministic ordering:
+Priority:
 1. customer
 2. provider
 3. admin
 
 Persist resolved `activeRole`.
+
+### 8.1 Admin Preview Mode
+
+Storage key: `handled_preview_role`
+
+- `previewRole` state in AuthContext, persisted in localStorage
+- `effectiveRole = previewRole ?? activeRole` — used by all UI components for rendering
+- `activeRole` remains unchanged (always reflects the real database role)
+- `ProtectedRoute` allows admins to access any role's routes when `previewRole` is set
+- `previewRole` is cleared on sign-out
+- Available only when real `activeRole === "admin"`
+
+Components using `effectiveRole`: `BottomTabBar`, `MoreMenu`, `AppHeader`, `RoleSwitcher`, `PreviewAsCard`
 
 ---
 
@@ -295,12 +313,18 @@ Rendering rule:
 ---
 
 ## 14) File impact map
-- `src/pages/Auth.tsx` (or Login/Signup split)
-- `src/contexts/AuthContext.tsx`
-- `src/components/ProtectedRoute.tsx`
-- `src/pages/Settings.tsx`
+- `src/pages/AuthPage.tsx`
+- `src/contexts/AuthContext.tsx` — includes `previewRole`, `setPreviewRole`, `effectiveRole`
+- `src/components/ProtectedRoute.tsx` — admin bypass for preview mode
+- `src/components/BottomTabBar.tsx` — uses `effectiveRole`
+- `src/components/MoreMenu.tsx` — uses `effectiveRole`
+- `src/components/AppHeader.tsx` — uses `effectiveRole`
+- `src/components/settings/RoleSwitcher.tsx` — uses `effectiveRole`
+- `src/components/settings/PreviewAsCard.tsx` — admin preview mode UI
+- `src/pages/admin/Settings.tsx` — includes PreviewAsCard
+- `src/pages/customer/Settings.tsx` — includes PreviewAsCard
+- `src/pages/provider/Settings.tsx` — includes PreviewAsCard
 - `src/constants/roles.ts`
-- `src/navigation/*`
 - Supabase SQL (RLS policies + optional RPC)
 
 ---
