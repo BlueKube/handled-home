@@ -110,6 +110,7 @@ import AdminSupportPolicies from "@/pages/admin/SupportPolicies";
 import AdminSupportMacros from "@/pages/admin/SupportMacros";
 import AdminGrowth from "@/pages/admin/Growth";
 import AdminTestToggles from "@/pages/admin/TestToggles";
+import SharedNotifications from "@/pages/shared/Notifications";
 
 const queryClient = new QueryClient();
 
@@ -163,6 +164,7 @@ const App = () => (
                 <Route path="/customer/settings" element={<CustomerPropertyGate><CustomerSettings /></CustomerPropertyGate>} />
                 <Route path="/customer/services" element={<CustomerPropertyGate><CustomerServices /></CustomerPropertyGate>} />
                 <Route path="/customer/more" element={<CustomerPropertyGate><MoreMenuPage /></CustomerPropertyGate>} />
+                <Route path="/customer/notifications" element={<CustomerPropertyGate><SharedNotifications /></CustomerPropertyGate>} />
               </Route>
 
               {/* Provider App */}
@@ -196,6 +198,7 @@ const App = () => (
                 <Route path="/provider/insights/history" element={<ProviderInsightsHistory />} />
                 <Route path="/provider/apply" element={<ProviderApply />} />
                 <Route path="/provider/more" element={<MoreMenuPage />} />
+                <Route path="/provider/notifications" element={<SharedNotifications />} />
               </Route>
 
               {/* Admin Console */}
@@ -238,6 +241,7 @@ const App = () => (
                 <Route path="/admin/exceptions" element={<AdminExceptions />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
                 <Route path="/admin/more" element={<MoreMenuPage />} />
+                <Route path="/admin/notifications" element={<SharedNotifications />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />
