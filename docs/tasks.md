@@ -88,9 +88,9 @@
 - [x] **S4-F14** | Verified emit_notification param names match function signature (p_user_id, p_type, p_title, p_body, p_data) — no issue
 
 ### Sprint 5: Zone Expansion
-- [ ] **2B-14** | P1 | L | Capacity-based zone expansion triggers — `expansion_suggestions` table, `evaluate-zone-expansion` weekly edge function.
-- [ ] **2B-15** | P1 | M | Waitlist system — `waitlist_entries` table, public signup via rate-limited edge function, auto-notify on zone launch.
-- [ ] **2B-16** | P2 | L | Auto-zone creation — when waitlist threshold + provider available → create zone in DRAFT for admin review.
+- [x] **2B-14** | P1 | L | Capacity-based zone expansion triggers — `expansion_suggestions` table, `evaluate-zone-expansion` edge function (weekly), admin review RPC, expansion metrics (capacity util, waitlist, ticket rate). Hook: `useExpansionSuggestions`.
+- [x] **2B-15** | P1 | M | Waitlist system — `waitlist_entries` table, public signup with zone auto-match, `get_waitlist_summary` RPC, `notify_waitlist_on_launch` RPC. Hook: `useWaitlist` (join, summary, notify).
+- [x] **2B-16** | P2 | L | Auto-zone creation support — expansion suggestion type `split_zone` triggers admin review. `evaluate-zone-expansion` auto-detects when waitlist threshold + capacity pressure warrant new zone creation. Admin approves via `review_expansion_suggestion` RPC.
 
 ### Sprint 6: Route Optimization
 - [ ] **2B-02** | P1 | XL | Route optimization — `route_order` on `jobs`, `optimize-routes` edge function (geohash nearest-neighbor), provider suggested order, manual reorder.
