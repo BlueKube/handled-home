@@ -84,12 +84,18 @@ Deno.serve(async (req) => {
     }
 
     // Run auto-suspension for RED providers (2B-06)
-    let suspensionResult = null;
+    let suspensionResult: any = null;
     try {
-      const { data } = await supabase.rpc("enforce_sla_suspensions");
-      suspensionResult = data;
+      const { data, error: suspErr } = await supabase.rpc("enforce_sla_suspensions");
+      if (suspErr) {
+        console.error("Suspension enforcement error:", suspErr);
+        suspensionResult = { error: suspErr.message };
+      } else {
+        suspensionResult = data;
+      }
     } catch (err) {
       console.error("Suspension enforcement error:", err);
+      suspensionResult = { error: String(err) };
     }
 
     // Update run log

@@ -8,8 +8,7 @@ const corsHeaders = {
 // Validation thresholds
 const MIN_FILE_SIZE_BYTES = 50_000; // 50KB minimum
 const MAX_FILE_SIZE_BYTES = 20_000_000; // 20MB maximum
-const MIN_WIDTH = 640;
-const MIN_HEIGHT = 480;
+// Dimension checks reserved for future perceptual hashing implementation
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
