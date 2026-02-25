@@ -17,8 +17,6 @@ function haversine(lat1: number, lng1: number, lat2: number, lng2: number): numb
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-// Approximate lat/lng from US zip code center (simple lookup via geohash fallback)
-// In production this would use a geocoding API; for MVP we rely on property lat/lng
 function geohashPrefixDistance(a: string | null, b: string | null): number {
   if (!a || !b) return 999;
   let shared = 0;
@@ -26,8 +24,6 @@ function geohashPrefixDistance(a: string | null, b: string | null): number {
     if (a[i] === b[i]) shared++;
     else break;
   }
-  // Rough distance scale by shared geohash prefix length
-  // 1 char ~ 5000km, 2 ~ 1250km, 3 ~ 156km, 4 ~ 39km, 5 ~ 5km, 6 ~ 1.2km
   const scales = [5000, 1250, 156, 39, 5, 1.2, 0.3, 0.07];
   return scales[Math.min(shared, scales.length - 1)] ?? 0.01;
 }
@@ -39,9 +35,14 @@ interface JobWithLocation {
   geohash: string | null;
 }
 
-function nearestNeighborOrder(jobs: JobWithLocation[], startLat: number | null, startLng: number | null, startGeohash: string | null): string[] {
+function nearestNeighborOrder(
+  jobs: JobWithLocation[],
+  startLat: number | null,
+  startLng: number | null,
+  startGeohash: string | null,
+): string[] {
   if (jobs.length === 0) return [];
-  
+
   const remaining = [...jobs];
   const ordered: string[] = [];
   let currentLat = startLat;
@@ -88,33 +89,59 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
+    // === Finding #2: Authorization check ===
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Authorization required" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const { data: { user }, error: authError } = await createClient(
+      supabaseUrl,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } },
+    ).auth.getUser();
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Invalid auth token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const { provider_org_id, date } = await req.json();
 
     if (!provider_org_id || !date) {
       return new Response(
         JSON.stringify({ error: "provider_org_id and date are required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    // Idempotency check
-    const idempotencyKey = `optimize-routes-${provider_org_id}-${date}`;
-    const { data: existingRun } = await supabase
-      .from("cron_run_log")
+    // Verify caller is a member of this provider org
+    const { data: membership } = await supabase
+      .from("provider_members")
       .select("id")
-      .eq("idempotency_key", idempotencyKey)
-      .eq("status", "completed")
+      .eq("provider_org_id", provider_org_id)
+      .eq("user_id", user.id)
+      .eq("status", "active")
       .maybeSingle();
 
-    // Allow re-optimization (don't block on idempotency for manual triggers)
-    // but log each run
+    if (!membership) {
+      return new Response(
+        JSON.stringify({ error: "Not authorized for this provider organization" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     // Log run start
     const { data: runLog } = await supabase
       .from("cron_run_log")
       .insert({
         function_name: "optimize-routes",
-        idempotency_key: `${idempotencyKey}-${Date.now()}`,
+        idempotency_key: `optimize-routes-${provider_org_id}-${date}-${Date.now()}`,
         status: "running",
         started_at: new Date().toISOString(),
       })
@@ -129,19 +156,16 @@ Deno.serve(async (req) => {
         .eq("id", provider_org_id)
         .single();
 
-      // Get jobs for this provider+date that haven't been completed/canceled
-      // Fetch all non-terminal jobs for this provider+date
+      // === Finding #6: Fix .not() syntax — no quotes around values ===
       const { data: allJobs, error: jobsError } = await supabase
         .from("jobs")
         .select("id, property_id, status, route_order")
         .eq("provider_org_id", provider_org_id)
         .eq("scheduled_date", date)
-        .not("status", "in", '("COMPLETED","CANCELED")')
-        ;
+        .not("status", "in", "(COMPLETED,CANCELED)");
 
       if (jobsError) throw jobsError;
 
-      // Guard: no jobs at all
       if (!allJobs || allJobs.length === 0) {
         if (runLog) {
           await supabase
@@ -151,7 +175,7 @@ Deno.serve(async (req) => {
         }
         return new Response(
           JSON.stringify({ status: "ok", optimized: 0, message: "No jobs to optimize" }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
 
@@ -159,17 +183,21 @@ Deno.serve(async (req) => {
       const pinnedJobs = allJobs.filter((j) => j.status === "IN_PROGRESS");
       const jobs = allJobs.filter((j) => j.status !== "IN_PROGRESS");
 
-      // Guard: too few optimizable jobs (< 3 stops)
+      // === Finding #9 (aligned): Guard at < 3 optimizable jobs ===
       if (jobs.length < 3) {
         if (runLog) {
           await supabase
             .from("cron_run_log")
-            .update({ status: "completed", completed_at: new Date().toISOString(), result_summary: { optimized: 0, skipped_reason: "too_few_jobs", total: allJobs.length, pinned: pinnedJobs.length } })
+            .update({
+              status: "completed",
+              completed_at: new Date().toISOString(),
+              result_summary: { optimized: 0, skipped_reason: "too_few_jobs", total: allJobs.length, pinned: pinnedJobs.length },
+            })
             .eq("id", runLog.id);
         }
         return new Response(
           JSON.stringify({ status: "ok", optimized: 0, message: "Too few jobs to optimize" }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
 
@@ -181,7 +209,7 @@ Deno.serve(async (req) => {
         .in("id", propertyIds);
 
       const propMap = new Map(
-        (properties || []).map((p) => [p.id, { lat: p.lat, lng: p.lng, geohash: p.geohash, zip_code: p.zip_code }])
+        (properties || []).map((p) => [p.id, { lat: p.lat, lng: p.lng, geohash: p.geohash, zip_code: p.zip_code }]),
       );
 
       // Build job list with locations
@@ -195,11 +223,12 @@ Deno.serve(async (req) => {
         };
       });
 
-      // Get start location — use first property with lat/lng as fallback if org has no geocoded home base
-      // For MVP, we start from the first property's general area if no home base geocoding
-      const startGeohash = org?.home_base_zip ? null : (jobsWithLoc[0]?.geohash ?? null);
-      const startLat = null; // Would need geocoding of home_base_zip for real lat/lng
-      const startLng = null;
+      // === Finding #4: Fix start location — use first job's location instead of always-null ===
+      // If we had geocoding for home_base_zip we'd use that; for MVP use the first job's coords
+      const firstJobWithCoords = jobsWithLoc.find((j) => j.lat != null && j.lng != null);
+      const startLat = firstJobWithCoords?.lat ?? null;
+      const startLng = firstJobWithCoords?.lng ?? null;
+      const startGeohash = jobsWithLoc[0]?.geohash ?? null;
 
       // Run nearest-neighbor
       const orderedIds = nearestNeighborOrder(jobsWithLoc, startLat, startLng, startGeohash);
@@ -226,10 +255,9 @@ Deno.serve(async (req) => {
 
       return new Response(
         JSON.stringify({ status: "ok", optimized: orderedIds.length }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     } catch (innerErr) {
-      // Log failure
       if (runLog) {
         await supabase
           .from("cron_run_log")
@@ -246,7 +274,7 @@ Deno.serve(async (req) => {
     console.error("optimize-routes error:", err);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 });

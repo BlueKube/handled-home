@@ -103,16 +103,19 @@ function TodayJobList() {
   };
 
   const handleMove = (fromIdx: number, toIdx: number) => {
-    if (!displayJobs) return;
+    if (!displayJobs || !org?.id) return;
     const reordered = [...displayJobs];
     const [moved] = reordered.splice(fromIdx, 1);
     reordered.splice(toIdx, 0, moved);
     setLocalJobs(reordered);
 
-    // Save to server
-    const jobOrders = reordered.map((j, i) => ({ job_id: j.id, route_order: i + 1 }));
+    // Finding #7: Exclude IN_PROGRESS jobs from the reorder payload
+    const jobOrders = reordered
+      .filter((j) => j.status !== "IN_PROGRESS")
+      .map((j, i) => ({ job_id: j.id, route_order: i + 1 }));
+
     reorderRoute.mutate(
-      { date: today, jobOrders },
+      { providerOrgId: org.id, date: today, jobOrders },
       {
         onSuccess: () => toast.success("Route order saved"),
         onError: () => {
@@ -150,7 +153,7 @@ function TodayJobList() {
         <Button
           variant="outline" size="sm"
           onClick={handleOptimize}
-          disabled={optimizeRoute.isPending || displayJobs.length < 2}
+          disabled={optimizeRoute.isPending || displayJobs.length < 3}
         >
           {optimizeRoute.isPending ? (
             <Loader2 className="h-3 w-3 mr-1 animate-spin" />
