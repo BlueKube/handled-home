@@ -1,59 +1,77 @@
 
 
-# Sprint 6 Hardening — ChatGPT's Three Guardrails
+# Sprint C1: Notification Center UI
 
-Sprint 6 (route optimization) is already implemented and working. ChatGPT suggested three smart guardrails to prevent operational issues as the system scales. Here is the assessment and plan.
+## What We Are Building
 
----
-
-## Assessment of the Three Suggestions
-
-| Guardrail | Verdict | Rationale |
-|-----------|---------|-----------|
-| **1. Freeze once started** — lock route when provider starts a job | **Add now** | Prevents "route whiplash" where optimization runs mid-day and reorders stops the provider already passed. Simple to implement: skip optimization/reorder for jobs with status IN_PROGRESS. |
-| **2. Only optimize when it matters** — skip if < 5 jobs or all have route_order already set | **Add now** | Prevents wasted computation and unpredictable behavior on short routes. Easy guard in edge function. |
-| **3. Manual reorder logs old→new order + reason** | **Partially done** | The RPC already logs to `job_events` with `new_route_order`. Adding `old_route_order` to the metadata is a one-line change. A "reason" quick-pick is UI polish — defer to a future sprint. |
-
-**Not adding**: Haversine removal — it's already there and works as a fallback when lat/lng exist. No cost to keep it.
+The notification UI layer: a bell icon in the header with an unread count badge, a slide-out panel for quick glance, and a full-screen `/notifications` route for each role. Plus a `useNotifications` hook powered by Realtime for live updates.
 
 ---
 
-## Changes
+## Technical Design
 
-### 1. Edge Function: `optimize-routes` — Add two guards
+### 1. `useNotifications` Hook (`src/hooks/useNotifications.ts`)
 
-**Guard A**: Skip if job count < 3 (not 5 — three stops is the minimum where order matters in a lawn care route). Return early with `{ status: "ok", optimized: 0, message: "Too few jobs to optimize" }`.
+- Fetches from `notifications` table filtered by `user_id = auth.uid()`, ordered by `created_at desc`, limit 50
+- Returns: `notifications`, `unreadCount`, `markRead(id)`, `markAllRead()`, `isLoading`
+- `markRead`: updates `read_at = now()` for a single notification
+- `markAllRead`: updates `read_at = now()` for all unread notifications of the user
+- Subscribes to Realtime `postgres_changes` on `notifications` table (INSERT events) to invalidate the query cache, giving live bell badge updates without polling
+- `unreadCount` derived from `notifications.filter(n => !n.read_at).length`
 
-**Guard B**: Skip jobs that are `IN_PROGRESS` — they are already being worked on. Only reorder `NOT_STARTED` jobs. If a provider has started their first job, the remaining `NOT_STARTED` jobs still get optimized, but the in-progress one stays pinned.
+### 2. `NotificationBell` Component (`src/components/NotificationBell.tsx`)
 
-Current code on line 138 filters out `COMPLETED` and `CANCELED`. Change to also exclude `IN_PROGRESS` from the optimization set but keep their existing `route_order` intact.
+- Bell icon (lucide `Bell`) with a red badge showing `unreadCount` (capped at "9+" display)
+- Click opens the slide-out `NotificationPanel` (Sheet component, side="right")
+- Badge hidden when count is 0
+- Positioned in `AppHeader` to the right of the logo
 
-### 2. RPC: `reorder_provider_route` — Add old_route_order to audit log
+### 3. `NotificationPanel` Component (`src/components/NotificationPanel.tsx`)
 
-Currently the audit log writes `new_route_order` only. Add a subquery to capture the current `route_order` before updating, and include `old_route_order` in the `job_events` metadata. This is a surgical one-line addition to the existing INSERT.
+- Uses the `Sheet` component (already exists) sliding from right
+- Header: "Notifications" title + "Mark all read" button
+- List of `NotificationItem` components showing: priority dot (red/blue/gray for CRITICAL/SERVICE/MARKETING), title, body truncated to 2 lines, relative time (date-fns `formatDistanceToNow`)
+- Unread items have a subtle left border accent or background tint
+- Clicking a notification with a `cta_route` navigates to that route and marks it read
+- Footer: "View all" link navigating to `/{role}/notifications`
+- Empty state: bell icon + "You're all caught up"
 
-Also: add a guard to prevent reordering jobs that are `IN_PROGRESS` — if a provider has started a stop, it should stay pinned at its current position.
+### 4. `NotificationItem` Component (inline in Panel or extracted)
 
-### 3. Provider UI: Disable reorder on in-progress jobs
+- Priority indicator dot (color-coded)
+- Title (bold if unread), body (muted, truncated), timestamp
+- Click handler: mark read + navigate if `cta_route` exists
 
-In `Jobs.tsx`, disable the up/down arrows on jobs with status `IN_PROGRESS`. They are already visually marked with a "Resume" label. This prevents the UI from allowing moves that the RPC would reject anyway.
+### 5. Full-Screen Notifications Page (`src/pages/shared/Notifications.tsx`)
+
+- Shared page used by all three roles
+- Filter tabs: All | Critical | Service | Marketing
+- Same `NotificationItem` rendering but with more space
+- "Mark all read" button in header
+- Pagination: initially just "Load more" button fetching next 50
+
+### 6. Routing Changes (`src/App.tsx`)
+
+- Add `/{role}/notifications` route for all three role groups (customer, provider, admin)
+- All point to the same `Notifications` page component
+
+### 7. `AppHeader` Update
+
+- Add `NotificationBell` to the right side of the header
+- Layout: logo centered, bell icon absolute-right
 
 ---
 
-## Files Changed
+## Files
 
-| File | Change |
-|------|--------|
-| `supabase/functions/optimize-routes/index.ts` | Add minimum-jobs guard (< 3 = skip), exclude IN_PROGRESS from optimization set |
-| New migration | Patch `reorder_provider_route` to log `old_route_order` and skip IN_PROGRESS jobs |
-| `src/pages/provider/Jobs.tsx` | Disable reorder arrows on IN_PROGRESS jobs |
+| File | Action | Description |
+|------|--------|-------------|
+| `src/hooks/useNotifications.ts` | Create | Query + Realtime subscription + mark read mutations |
+| `src/components/NotificationBell.tsx` | Create | Bell icon with badge, opens panel |
+| `src/components/NotificationPanel.tsx` | Create | Slide-out sheet with notification list |
+| `src/pages/shared/Notifications.tsx` | Create | Full-screen notifications page with filters |
+| `src/components/AppHeader.tsx` | Edit | Add NotificationBell to the right side |
+| `src/App.tsx` | Edit | Add `/{role}/notifications` routes for all 3 roles |
 
----
-
-## What is NOT changing
-
-- No new tables or columns
-- No Haversine removal (it works fine as-is)
-- No "reason" quick-pick on reorder (future polish)
-- No "Start Route" button concept (the existing job status flow already handles this — when a provider starts their first job, it goes to IN_PROGRESS which triggers the freeze)
+### No database changes needed — schema and RLS from C0 already support all reads/writes.
 
