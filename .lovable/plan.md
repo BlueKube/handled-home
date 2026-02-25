@@ -1,61 +1,95 @@
 
 
-# Fix Slide-Over Sheets to Cover Full Mobile Screen
+# Admin Preview Mode (No Banner)
 
-## Problem
+## Summary
 
-Right-side Sheet panels (like the SKU detail shown in the screenshot) only cover 75% of the screen width on mobile (`w-3/4` in the base Sheet component). This creates a poor mobile UX where the underlying page is partially visible and the sheet content is cramped.
+Add a `previewRole` capability to `AuthContext` so that when the active role is `admin`, you can switch the UI to view the app as Customer or Provider — without needing those roles assigned in the database. No preview banner; the bottom tab bar makes the current view obvious. Ideal for screenshots and demos.
 
-## Solution
+## Changes
 
-Two-part fix: update the base Sheet component so right-side sheets are full-width on mobile, then audit all individual sheet usages to ensure consistency.
+### 1. AuthContext — Add `previewRole` state
 
----
+**File:** `src/contexts/AuthContext.tsx`
 
-## Part 1: Update the Base Sheet Component
+- Add `previewRole: AppRole | null` state (default `null`)
+- Add `setPreviewRole: (role: AppRole | null) => void` to context
+- Add computed `effectiveRole`: returns `previewRole ?? activeRole`
+- Expose `effectiveRole` in the context value
+- When `setPreviewRole` is called, also store in localStorage so it survives page refresh; clear on sign-out
 
-In `src/components/ui/sheet.tsx`, change the `right` variant from:
+### 2. ProtectedRoute — Allow admin to preview any role
 
-```text
-w-3/4 ... sm:max-w-sm
-```
+**File:** `src/components/ProtectedRoute.tsx`
 
-to:
+- Use `effectiveRole` instead of `activeRole` for the role check (line 30)
+- Add bypass: if user's real `activeRole` is `admin` and `previewRole` is set, skip the role mismatch redirect
 
-```text
-w-full sm:w-3/4 sm:max-w-lg
-```
+### 3. BottomTabBar — Use effectiveRole
 
-This makes ALL right-side sheets automatically full-width on mobile, while keeping a constrained width on larger screens. The same change applies to the `left` variant for consistency.
+**File:** `src/components/BottomTabBar.tsx`
 
-## Part 2: Remove Redundant Per-File Overrides
+- Replace `activeRole` with `effectiveRole` from `useAuth()` for selecting which tabs to show and for the `isActive` logic
 
-These 9 files add `sm:max-w-lg` or just `overflow-y-auto` on their `SheetContent`. Once the base handles width, they only need `overflow-y-auto`:
+### 4. MoreMenu — Use effectiveRole
 
-| File | Current className | New className |
-|------|------------------|---------------|
-| `src/components/admin/SkuDetailSheet.tsx` | `sm:max-w-lg overflow-y-auto` | `overflow-y-auto` |
-| `src/components/admin/SkuFormSheet.tsx` | `sm:max-w-lg overflow-y-auto` | `overflow-y-auto` |
-| `src/pages/admin/ServiceDays.tsx` | `sm:max-w-lg overflow-y-auto` | `overflow-y-auto` |
-| `src/pages/admin/Subscriptions.tsx` | `w-full sm:max-w-lg overflow-y-auto` | `overflow-y-auto` |
-| `src/pages/customer/Services.tsx` | `sm:max-w-lg overflow-y-auto` | `overflow-y-auto` |
-| `src/pages/provider/SKUs.tsx` | `sm:max-w-lg overflow-y-auto` | `overflow-y-auto` |
-| `src/pages/admin/SupportPolicies.tsx` (x2) | `overflow-y-auto` | `overflow-y-auto` (no change) |
-| `src/pages/admin/SupportMacros.tsx` (x2) | `overflow-y-auto` | `overflow-y-auto` (no change) |
-| `src/pages/admin/Bundles.tsx` | `overflow-y-auto` | `overflow-y-auto` (no change) |
-| `src/pages/admin/Incentives.tsx` | `overflow-y-auto` | `overflow-y-auto` (no change) |
+**File:** `src/components/MoreMenu.tsx`
 
-Bottom-side sheets (like `ZoneFormSheet`, `ReportIssueSheet`, `AddServicesSheet`, `PhotoGallery`) are unaffected -- they already use `side="bottom"` which has different layout rules.
+- Replace `activeRole` with `effectiveRole` for selecting menu items
 
-## Files Modified
+### 5. AppHeader — Use effectiveRole
 
-| File | Change |
+**File:** `src/components/AppHeader.tsx`
+
+- Use `effectiveRole` wherever `activeRole` is referenced for display/routing
+
+### 6. New Component: PreviewAsCard
+
+**File:** `src/components/settings/PreviewAsCard.tsx` (new)
+
+- A `Card` with three buttons: Customer, Provider, Admin
+- Clicking one calls `setPreviewRole(role)` and navigates to `/${role}`
+- Clicking "Admin" clears preview mode (`setPreviewRole(null)`) and navigates to `/admin`
+- Only renders when real `activeRole` is `admin`
+
+### 7. Admin Settings — Add PreviewAsCard
+
+**File:** `src/pages/admin/Settings.tsx`
+
+- Import and render `<PreviewAsCard />` above the sign-out button
+
+### 8. RoleSwitcher — Use effectiveRole
+
+**File:** `src/components/settings/RoleSwitcher.tsx`
+
+- Use `effectiveRole` for the active highlight styling
+
+## How It Works
+
+1. Admin navigates to `/admin/settings` → sees "Preview As" card
+2. Clicks "Customer" → `previewRole` is set to `customer`, app navigates to `/customer`
+3. Bottom tab bar shows customer tabs, More menu shows customer items
+4. To return: navigate to More → Settings → use RoleSwitcher or PreviewAsCard (also accessible from any role's settings page since preview is active)
+5. Or: set `previewRole` back to `null` to return to admin
+
+## Technical Notes
+
+- `effectiveRole` is the single source of truth for all UI rendering
+- The real `activeRole` remains `admin` — only the view changes
+- `ProtectedRoute` allows access because the real role is admin
+- No banner needed — bottom tabs clearly show which role view is active
+- Preview state persists in localStorage, cleared on sign-out
+
+## Files Summary
+
+| File | Action |
 |------|--------|
-| `src/components/ui/sheet.tsx` | Update `right` and `left` variants to use `w-full sm:w-3/4 sm:max-w-lg` |
-| `src/components/admin/SkuDetailSheet.tsx` | Remove redundant `sm:max-w-lg` |
-| `src/components/admin/SkuFormSheet.tsx` | Remove redundant `sm:max-w-lg` |
-| `src/pages/admin/ServiceDays.tsx` | Remove redundant `sm:max-w-lg` |
-| `src/pages/admin/Subscriptions.tsx` | Remove redundant `w-full sm:max-w-lg` |
-| `src/pages/customer/Services.tsx` | Remove redundant `sm:max-w-lg` |
-| `src/pages/provider/SKUs.tsx` | Remove redundant `sm:max-w-lg` |
+| `src/contexts/AuthContext.tsx` | Add `previewRole`, `setPreviewRole`, `effectiveRole` |
+| `src/components/ProtectedRoute.tsx` | Use `effectiveRole`, allow admin bypass |
+| `src/components/BottomTabBar.tsx` | Use `effectiveRole` |
+| `src/components/MoreMenu.tsx` | Use `effectiveRole` |
+| `src/components/AppHeader.tsx` | Use `effectiveRole` |
+| `src/components/settings/RoleSwitcher.tsx` | Use `effectiveRole` |
+| `src/components/settings/PreviewAsCard.tsx` | New — preview role selector card |
+| `src/pages/admin/Settings.tsx` | Add `PreviewAsCard` |
 
