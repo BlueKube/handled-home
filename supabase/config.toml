@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.run-dunning]
 verify_jwt = false
+
+[functions.check-weather]
+verify_jwt = false

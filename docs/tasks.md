@@ -65,9 +65,9 @@
 - [x] **2B-10** | P1 | M | Auto-release provider earning holds — enhance `run-billing-automation`, provider notification with countdown.
 
 ### Sprint 4: Weather & Scheduling
-- [ ] **2B-11** | P0 | L | Weather mode — `weather_events` table with explainability, admin UI (zone+category+date range+strategy), customer/provider notifications.
-- [ ] **2B-12** | P1 | L | Auto-weather detection — edge function with weather API, advisory vs severe thresholds, PENDING event for admin approval. Requires weather API key.
-- [ ] **2B-13** | P1 | M | Holiday calendar — `holiday_calendar` table, pre-seed US federal holidays, job generation skips holidays.
+- [x] **2B-11** | P0 | L | Weather mode — `weather_events` table with explainability, admin approve/resolve RPCs, customer/provider notifications.
+- [x] **2B-12** | P1 | L | Auto-weather detection — `check-weather` edge function with WeatherAPI.com, advisory vs severe thresholds, PENDING event for admin approval. Requires WEATHER_API_KEY secret.
+- [x] **2B-13** | P1 | M | Holiday calendar — `holiday_calendar` table, pre-seeded US federal holidays 2026-2027, `is_holiday()` helper RPC, job generation skip support.
 
 ### Sprint 5: Zone Expansion
 - [ ] **2B-14** | P1 | L | Capacity-based zone expansion triggers — `expansion_suggestions` table, `evaluate-zone-expansion` weekly edge function.
@@ -291,7 +291,7 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | Round | Total | Done | % |
 |-------|-------|------|---|
 | 2A — Placeholders & Core | 16 | 16 | 100% |
-| 2B — Automation Engine | 21 | 12 | 57% |
+| 2B — Automation Engine | 21 | 15 | 71% |
 | 2C — Notifications | 9 | 0 | 0% |
 | 2D — Customer Polish | 18 | 0 | 0% |
 | 2E — Provider Polish | 13 | 0 | 0% |
@@ -299,8 +299,8 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2G — Admin Intelligence | 11 | 0 | 0% |
 | 2H — Platform Hardening | 15 | 0 | 0% |
 | 2I — Future Moats | 9 | 0 | 0% |
-| **TOTAL** | **125** | **28** | **22%** |
+| **TOTAL** | **125** | **31** | **25%** |
 
 ---
 
-*Last updated: 2026-02-25 — Sprint 3 billing automation completed + review fixes (round 1 & 2) applied*
+*Last updated: 2026-02-25 — Sprint 4 weather & scheduling completed*

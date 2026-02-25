@@ -945,6 +945,48 @@ export type Database = {
           },
         ]
       }
+      holiday_calendar: {
+        Row: {
+          created_at: string
+          explain_customer: string | null
+          explain_provider: string | null
+          holiday_date: string
+          id: string
+          is_federal: boolean
+          name: string
+          notify_customers: boolean
+          notify_providers: boolean
+          skip_jobs: boolean
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          explain_customer?: string | null
+          explain_provider?: string | null
+          holiday_date: string
+          id?: string
+          is_federal?: boolean
+          name: string
+          notify_customers?: boolean
+          notify_providers?: boolean
+          skip_jobs?: boolean
+          year: number
+        }
+        Update: {
+          created_at?: string
+          explain_customer?: string | null
+          explain_provider?: string | null
+          holiday_date?: string
+          id?: string
+          is_federal?: boolean
+          name?: string
+          notify_customers?: boolean
+          notify_providers?: boolean
+          skip_jobs?: boolean
+          year?: number
+        }
+        Relationships: []
+      }
       invite_scripts: {
         Row: {
           body: string
@@ -4410,6 +4452,92 @@ export type Database = {
         }
         Relationships: []
       }
+      weather_events: {
+        Row: {
+          affected_date_end: string
+          affected_date_start: string
+          approved_at: string | null
+          approved_by_admin_user_id: string | null
+          auto_detection_data: Json | null
+          category: string
+          created_at: string
+          description: string | null
+          event_type: string
+          explain_admin: string | null
+          explain_customer: string | null
+          explain_provider: string | null
+          id: string
+          metadata: Json | null
+          resolved_at: string | null
+          resolved_by_admin_user_id: string | null
+          severity: string
+          source: string
+          status: string
+          strategy: string
+          title: string
+          updated_at: string
+          zone_id: string
+        }
+        Insert: {
+          affected_date_end: string
+          affected_date_start: string
+          approved_at?: string | null
+          approved_by_admin_user_id?: string | null
+          auto_detection_data?: Json | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          event_type?: string
+          explain_admin?: string | null
+          explain_customer?: string | null
+          explain_provider?: string | null
+          id?: string
+          metadata?: Json | null
+          resolved_at?: string | null
+          resolved_by_admin_user_id?: string | null
+          severity?: string
+          source?: string
+          status?: string
+          strategy?: string
+          title: string
+          updated_at?: string
+          zone_id: string
+        }
+        Update: {
+          affected_date_end?: string
+          affected_date_start?: string
+          approved_at?: string | null
+          approved_by_admin_user_id?: string | null
+          auto_detection_data?: Json | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          event_type?: string
+          explain_admin?: string | null
+          explain_customer?: string | null
+          explain_provider?: string | null
+          id?: string
+          metadata?: Json | null
+          resolved_at?: string | null
+          resolved_by_admin_user_id?: string | null
+          severity?: string
+          source?: string
+          status?: string
+          strategy?: string
+          title?: string
+          updated_at?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weather_events_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       zone_category_providers: {
         Row: {
           assigned_at: string
@@ -4871,6 +4999,7 @@ export type Database = {
             Args: { p_admin_user_id?: string; p_reward_id: string }
             Returns: undefined
           }
+      approve_weather_event: { Args: { p_event_id: string }; Returns: Json }
       attribute_referral_signup: {
         Args: { p_referral_code: string }
         Returns: undefined
@@ -4941,7 +5070,12 @@ export type Database = {
         Args: { p_subscription_id: string }
         Returns: Json
       }
+      is_holiday: { Args: { p_date: string }; Returns: boolean }
       is_provider_org_member: { Args: { p_org_id: string }; Returns: boolean }
+      is_weather_affected: {
+        Args: { p_date: string; p_zone_id: string }
+        Returns: boolean
+      }
       override_referral_attribution: {
         Args: {
           p_new_referrer_id: string
@@ -5011,6 +5145,7 @@ export type Database = {
         }
         Returns: Json
       }
+      resolve_weather_event: { Args: { p_event_id: string }; Returns: Json }
       revoke_share_card: {
         Args: { p_share_card_id: string }
         Returns: undefined
