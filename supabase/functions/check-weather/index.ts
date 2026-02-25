@@ -32,14 +32,23 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  let runId: string | null = null;
+  let supabase: ReturnType<typeof createClient> | null = null;
+
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
+    supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const weatherApiKey = Deno.env.get("WEATHER_API_KEY");
+
+    // Finding 7: Return error if no API key configured instead of silent no-op
     if (!weatherApiKey) {
-      logStep("No WEATHER_API_KEY configured — running in simulation mode");
+      logStep("No WEATHER_API_KEY configured — aborting");
+      return new Response(
+        JSON.stringify({ status: "error", message: "WEATHER_API_KEY not configured. Set this secret to enable weather detection." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const today = new Date().toISOString().split("T")[0];
@@ -73,7 +82,7 @@ Deno.serve(async (req) => {
       .single();
 
     if (runLogErr) throw runLogErr;
-    const runId = runLog.id;
+    runId = runLog.id;
 
     // Get all active zones with coordinates
     const { data: zones, error: zoneErr } = await supabase
@@ -87,7 +96,6 @@ Deno.serve(async (req) => {
     let totalEventsCreated = 0;
 
     for (const zone of (zones as ZoneWithCoords[]) || []) {
-      // Need coordinates to check weather
       if (!zone.center_lat || !zone.center_lng) {
         logStep(`Skipping zone ${zone.name} — no coordinates`);
         continue;
@@ -95,34 +103,29 @@ Deno.serve(async (req) => {
 
       let alerts: WeatherAlert[] = [];
 
-      if (weatherApiKey) {
-        // Use NWS API (free, no key required actually, but we gate on it for control)
-        // Or use OpenWeatherMap / WeatherAPI.com with key
-        try {
-          const resp = await fetch(
-            `https://api.weatherapi.com/v1/forecast.json?key=${weatherApiKey}&q=${zone.center_lat},${zone.center_lng}&days=3&alerts=yes`,
-            { headers: { "Accept": "application/json" } }
-          );
+      try {
+        const resp = await fetch(
+          `https://api.weatherapi.com/v1/forecast.json?key=${weatherApiKey}&q=${zone.center_lat},${zone.center_lng}&days=3&alerts=yes`,
+          { headers: { "Accept": "application/json" } }
+        );
 
-          if (resp.ok) {
-            const data = await resp.json();
-            // Extract alerts from WeatherAPI response
-            if (data.alerts?.alert) {
-              alerts = (data.alerts.alert as Array<Record<string, string>>).map((a) => ({
-                event: a.event || "Weather Alert",
-                severity: a.severity || "Watch",
-                headline: a.headline || a.event || "Weather advisory",
-                description: a.desc || "",
-                onset: a.effective || new Date().toISOString(),
-                ends: a.expires || new Date(Date.now() + 86400000).toISOString(),
-              }));
-            }
-          } else {
-            logStep(`Weather API error for zone ${zone.name}`, { status: resp.status });
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data.alerts?.alert) {
+            alerts = (data.alerts.alert as Array<Record<string, string>>).map((a) => ({
+              event: a.event || "Weather Alert",
+              severity: a.severity || "Watch",
+              headline: a.headline || a.event || "Weather advisory",
+              description: a.desc || "",
+              onset: a.effective || new Date().toISOString(),
+              ends: a.expires || new Date(Date.now() + 86400000).toISOString(),
+            }));
           }
-        } catch (apiErr: unknown) {
-          logStep(`Weather API fetch failed for zone ${zone.name}`, { error: String(apiErr) });
+        } else {
+          logStep(`Weather API error for zone ${zone.name}`, { status: resp.status });
         }
+      } catch (apiErr: unknown) {
+        logStep(`Weather API fetch failed for zone ${zone.name}`, { error: String(apiErr) });
       }
 
       if (alerts.length === 0) {
@@ -134,7 +137,6 @@ Deno.serve(async (req) => {
 
       let eventsCreated = 0;
       for (const alert of alerts) {
-        // Determine severity: severe (Warning) vs advisory (Watch/Advisory)
         const isSevere = alert.severity === "Severe" || alert.severity === "Extreme" ||
           alert.event.toLowerCase().includes("warning") ||
           alert.event.toLowerCase().includes("tornado") ||
@@ -146,7 +148,7 @@ Deno.serve(async (req) => {
         const onsetDate = alert.onset ? alert.onset.split("T")[0] : today;
         const endsDate = alert.ends ? alert.ends.split("T")[0] : today;
 
-        // Check if we already have an event for this zone + date range
+        // Dedup check
         const { data: existing } = await supabase
           .from("weather_events")
           .select("id")
@@ -154,7 +156,7 @@ Deno.serve(async (req) => {
           .eq("source", "auto_detected")
           .lte("affected_date_start", endsDate)
           .gte("affected_date_end", onsetDate)
-          .in("status", ["pending", "approved", "active"])
+          .in("status", ["pending", "active"])
           .maybeSingle();
 
         if (existing) {
@@ -162,7 +164,6 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        // Create PENDING event for admin approval
         const { error: insertErr } = await supabase
           .from("weather_events")
           .insert({
@@ -193,19 +194,19 @@ Deno.serve(async (req) => {
           eventsCreated++;
           totalEventsCreated++;
 
-          // Notify admins about pending weather event
+          // Finding 3: Use emit_notification RPC instead of direct insert
           const { data: admins } = await supabase
             .from("user_roles")
             .select("user_id")
             .eq("role", "admin");
 
           for (const admin of admins || []) {
-            await supabase.from("notifications").insert({
-              user_id: admin.user_id,
-              type: "weather_event_pending",
-              title: `Weather Alert: ${alert.event}`,
-              body: `Auto-detected ${severity} weather for ${zone.name}. Review and approve to affect scheduling.`,
-              data: { zone_id: zone.id, severity, alert_event: alert.event },
+            await supabase.rpc("emit_notification", {
+              p_user_id: admin.user_id,
+              p_type: "weather_event_pending",
+              p_title: `Weather Alert: ${alert.event}`,
+              p_body: `Auto-detected ${severity} weather for ${zone.name}. Review and approve to affect scheduling.`,
+              p_data: { zone_id: zone.id, severity, alert_event: alert.event },
             });
           }
         }
@@ -230,8 +231,25 @@ Deno.serve(async (req) => {
     );
   } catch (error) {
     console.error("check-weather error:", error);
+
+    // Finding 8: Update orphaned cron_run_log to 'failed' status
+    if (runId && supabase) {
+      try {
+        await supabase
+          .from("cron_run_log")
+          .update({
+            status: "failed",
+            completed_at: new Date().toISOString(),
+            error_message: String(error),
+          })
+          .eq("id", runId);
+      } catch (logErr) {
+        console.error("Failed to update cron_run_log to failed:", logErr);
+      }
+    }
+
     return new Response(
-      JSON.stringify({ status: "error", message: String(error) }),
+      JSON.stringify({ status: "error", run_id: runId, message: String(error) }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

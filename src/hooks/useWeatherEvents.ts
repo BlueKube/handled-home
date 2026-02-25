@@ -57,7 +57,7 @@ export function useActiveWeatherEvents(zoneId: string | undefined) {
         .from("weather_events")
         .select("*")
         .eq("zone_id", zoneId!)
-        .in("status", ["active", "approved"])
+        .in("status", ["active"])
         .gte("affected_date_end", new Date().toISOString().split("T")[0])
         .order("affected_date_start", { ascending: true });
 
