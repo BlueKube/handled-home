@@ -26,6 +26,7 @@
 - [ ] **2A-07** | P0 | L | Build `admin/Scheduling` — manual overrides, reschedule customers, weather event mode toggle, split job tool from `service_day_instances` + zone config
 - [ ] **2A-08** | P0 | XL | Build `admin/Reports` — MRR chart, churn rate, retention cohorts, revenue per zone, provider utilization, density per zone per day, stops/day trending
 - [ ] **2A-09** | P0 | S | Remove `PlaceholderPage` component after all usages eliminated
+- [ ] **2A-10** | P1 | S | Extract reusable `SparklineChart` component from inline chart code for consistent mini-charts across dashboards
 
 ---
 
@@ -54,10 +55,14 @@
 - [ ] **2B-12** | P1 | L | Auto-weather detection — integrate weather API, auto-trigger weather mode when severe weather forecast for zone
 - [ ] **2B-13** | P1 | M | Holiday calendar — auto-skip service days on configured holidays, shift to adjacent day
 
+### Infrastructure
+- [ ] **2B-14** | P0 | M | `pg_cron` + `pg_net` setup — enable extensions, create `cron_run_log` observability table, schedule recurring jobs (billing runs, snapshot rollups, hold releases)
+- [ ] **2B-15** | P0 | S | Service week consumption tracking — increment counter when service week consumed, enforce entitlement limits server-side
+
 ### Zone Expansion
-- [ ] **2B-14** | P1 | L | Capacity-based zone expansion triggers — when zone consistently >80% capacity, auto-suggest new zone split to admin
-- [ ] **2B-15** | P1 | M | Waitlist system — customers in unsupported zips join waitlist. Auto-notify when zone launches
-- [ ] **2B-16** | P2 | L | Auto-zone creation — when waitlist hits threshold + provider available, auto-create zone in draft status for admin review
+- [ ] **2B-16** | P1 | L | Capacity-based zone expansion triggers — when zone consistently >80% capacity, auto-suggest new zone split to admin
+- [ ] **2B-17** | P1 | M | Waitlist system — customers in unsupported zips join waitlist. Auto-notify when zone launches
+- [ ] **2B-18** | P2 | L | Auto-zone creation — when waitlist hits threshold + provider available, auto-create zone in draft status for admin review
 
 ---
 
@@ -218,8 +223,9 @@
 ### Mobile & Deployment
 - [ ] **2H-11** | P1 | L | App store deployment pipeline — Capacitor build scripts, iOS/Android signing, app store metadata, screenshots, review submission checklist
 - [ ] **2H-12** | P1 | M | Deep linking — app links for share cards, referral invites, notification taps. Handle both web and native
-- [ ] **2H-13** | P2 | M | Offline mode (basic) — cache today's job list for providers. Queue photo uploads when offline. Sync when reconnected
+- [ ] **2H-13** | P1 | L | Offline photo queue resilience — Capacitor filesystem cache for photos, retry queue with exponential backoff, sync indicator UI
 - [ ] **2H-14** | P2 | M | Accessibility audit — WCAG AA compliance check, screen reader testing, keyboard navigation, color contrast verification
+- [ ] **2H-15** | P1 | M | Server-side pagination for admin tables — replace client-side `.limit(100)` with cursor-based pagination for jobs, subscriptions, providers, invoices
 
 ---
 
@@ -271,16 +277,16 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 
 | Round | Total | Done | % |
 |-------|-------|------|---|
-| 2A — Placeholders & Core | 9 | 0 | 0% |
-| 2B — Automation Engine | 16 | 0 | 0% |
+| 2A — Placeholders & Core | 10 | 0 | 0% |
+| 2B — Automation Engine | 18 | 0 | 0% |
 | 2C — Notifications | 9 | 0 | 0% |
 | 2D — Customer Polish | 18 | 0 | 0% |
 | 2E — Provider Polish | 13 | 0 | 0% |
 | 2F — Growth Engine | 13 | 0 | 0% |
 | 2G — Admin Intelligence | 11 | 0 | 0% |
-| 2H — Platform Hardening | 14 | 0 | 0% |
+| 2H — Platform Hardening | 15 | 0 | 0% |
 | 2I — Future Moats | 9 | 0 | 0% |
-| **TOTAL** | **112** | **0** | **0%** |
+| **TOTAL** | **116** | **0** | **0%** |
 
 ---
 
