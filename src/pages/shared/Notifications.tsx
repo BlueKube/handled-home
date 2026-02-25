@@ -50,7 +50,7 @@ export default function Notifications() {
         )}
       </div>
 
-      <Tabs value={filter} onValueChange={(v) => setFilter(v as PriorityFilter)}>
+      <Tabs value={filter} onValueChange={(v) => { setFilter(v as PriorityFilter); setLimit(PAGE_SIZE); }}>
         <TabsList className="w-full grid grid-cols-4">
           <TabsTrigger value="ALL">All</TabsTrigger>
           <TabsTrigger value="CRITICAL">Critical</TabsTrigger>
