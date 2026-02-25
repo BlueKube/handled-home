@@ -4691,6 +4691,7 @@ export type Database = {
         Args: { p_referral_code: string }
         Returns: undefined
       }
+      auto_assign_job: { Args: { p_job_id: string }; Returns: Json }
       bootstrap_new_user: { Args: { _full_name: string }; Returns: undefined }
       check_provider_sku_zone_eligibility: {
         Args: { p_provider_org_id: string; p_sku_id: string; p_zone_id: string }

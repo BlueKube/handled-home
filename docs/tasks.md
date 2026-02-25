@@ -50,9 +50,9 @@
 - [x] **2B-00c** | P0 | S | Zone Provider Assignments UI — rebuild `ZoneProvidersPanel` to be category-aware with Primary/Backup guardrails (only 1 Primary per zone+category), performance_score display, confirmation dialogs.
 
 ### Sprint 1: Job Assignment Engine
-- [ ] **2B-01** | P0 | XL | Auto-assign jobs to providers — `auto_assign_job` RPC (Primary-first → Backup fallback by priority_rank + performance_score), `assign-jobs` edge function with idempotency, assignment log with explainability, provider notifications.
-- [ ] **2B-03** | P1 | L | Overflow handling — when Primary at capacity and no Backup: check adjacent days → create overflow event → flag admin. Customer notification with explain_customer.
-- [ ] **2B-04** | P1 | M | Provider no-show detection — `check-no-shows` edge function (hourly), auto-reassign via Backup pool, calm customer notification, reliability impact to provider.
+- [x] **2B-01** | P0 | XL | Auto-assign jobs to providers — `auto_assign_job` RPC (Primary-first → Backup fallback by priority_rank + performance_score), `assign-jobs` edge function with idempotency, assignment log with explainability, provider notifications.
+- [x] **2B-03** | P1 | L | Overflow handling — when Primary at capacity and no Backup: check adjacent days → create overflow event → flag admin. Customer notification with explain_customer.
+- [x] **2B-04** | P1 | M | Provider no-show detection — `check-no-shows` edge function (hourly), auto-reassign via Backup pool, calm customer notification, reliability impact to provider.
 
 ### Sprint 2: Quality Enforcement
 - [ ] **2B-05** | P0 | L | SLA enforcement automation — `provider_sla_status` table, `evaluate-provider-sla` edge function (daily), threshold ladder (GREEN/YELLOW/ORANGE/RED), auto-generate enforcement actions + provider notifications.

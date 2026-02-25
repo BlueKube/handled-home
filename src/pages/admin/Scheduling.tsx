@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useZones } from "@/hooks/useZones";
 import { useServiceDayAdmin } from "@/hooks/useServiceDayAdmin";
 import { useServiceDayCapacity } from "@/hooks/useServiceDayCapacity";
+import { useAssignmentLog } from "@/hooks/useAssignmentLog";
 import { ServiceDayOverrideModal } from "@/components/admin/ServiceDayOverrideModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, CalendarClock, CloudRain, RefreshCw, Users } from "lucide-react";
+import { AlertTriangle, CalendarClock, CloudRain, FileText, RefreshCw, Users } from "lucide-react";
 import { toast } from "sonner";
 
 const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
@@ -27,6 +28,7 @@ export default function AdminScheduling() {
 
   const { assignments, overrideLogs, isLoading: assignLoading, overrideAssignment } = useServiceDayAdmin(zoneId);
   const { capacities: capacityData } = useServiceDayCapacity(zoneId);
+  const { data: assignmentLogs, isLoading: logLoading } = useAssignmentLog({ zoneId: zoneId ?? undefined, limit: 50 });
 
   const handleWeatherToggle = () => {
     setWeatherMode(!weatherMode);
@@ -95,6 +97,7 @@ export default function AdminScheduling() {
             <TabsTrigger value="assignments" className="gap-1.5"><Users className="h-3.5 w-3.5" />Assignments</TabsTrigger>
             <TabsTrigger value="capacity" className="gap-1.5"><CalendarClock className="h-3.5 w-3.5" />Capacity</TabsTrigger>
             <TabsTrigger value="history" className="gap-1.5"><RefreshCw className="h-3.5 w-3.5" />Override Log</TabsTrigger>
+            <TabsTrigger value="assignment-log" className="gap-1.5"><FileText className="h-3.5 w-3.5" />Assignment Log</TabsTrigger>
           </TabsList>
 
           <TabsContent value="assignments" className="space-y-4">
@@ -210,6 +213,56 @@ export default function AdminScheduling() {
                             {log.before?.day_of_week ?? "?"} → {log.after?.day_of_week ?? "?"}
                           </TableCell>
                           <TableCell className="text-xs">{log.reason}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="assignment-log">
+            <Card>
+              <CardContent className="pt-6">
+                {logLoading ? (
+                  <Skeleton className="h-32 w-full" />
+                ) : !assignmentLogs?.length ? (
+                  <p className="text-center text-muted-foreground py-6">No assignment logs yet</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Time</TableHead>
+                        <TableHead>Reason</TableHead>
+                        <TableHead>Provider</TableHead>
+                        <TableHead>By</TableHead>
+                        <TableHead className="max-w-[200px]">Admin Explanation</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {assignmentLogs.map((log) => (
+                        <TableRow key={log.id}>
+                          <TableCell className="text-xs whitespace-nowrap">
+                            {new Date(log.created_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={
+                              log.assignment_reason === "primary_available" ? "default" :
+                              log.assignment_reason === "backup_fallback" ? "secondary" :
+                              log.assignment_reason.startsWith("no_show") ? "destructive" :
+                              "outline"
+                            } className="text-[10px]">
+                              {log.assignment_reason.replace(/_/g, " ")}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="font-mono text-xs">
+                            {log.provider_org_id ? log.provider_org_id.slice(0, 8) + "…" : "—"}
+                          </TableCell>
+                          <TableCell className="text-xs">{log.assigned_by}</TableCell>
+                          <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate" title={log.explain_admin ?? ""}>
+                            {log.explain_admin ?? "—"}
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
