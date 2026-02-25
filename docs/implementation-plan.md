@@ -24,19 +24,13 @@ The build follows a module-by-module sequence. Each module has a dedicated spec 
 | 12 | Support and Disputes | Deflection-first support, AI classification, macro responses, ticket lifecycle, resolution offers |
 | 13 | Referrals and Incentives | Referral programs, invite codes, provider/customer referral flows, growth event bus, viral surfaces, founding partner program, growth autopilot |
 
----
-
-## Current Focus
-
-| Module | Name | Notes |
-|--------|------|-------|
-| 14 | Reporting and Analytics | Proves unit economics for scaling decisions |
+| 14 | Reporting and Analytics | Ops Cockpit (real-time KPIs, drill-downs), provider Insights (performance scores, history), daily snapshot rollups, audit logs |
 
 ---
 
 ## Remaining Modules
 
-All feature modules (01–13) are implemented. Module 14 (Reporting and Analytics) is the final module.
+All 14 feature modules are implemented.
 
 ---
 
