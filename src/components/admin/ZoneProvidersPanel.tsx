@@ -4,6 +4,7 @@ import {
   useProvidersList,
   useAssignZoneCategoryProvider,
   useRemoveZoneCategoryProvider,
+  useUpdateZoneCategoryProvider,
   type ZoneCategoryProvider,
 } from "@/hooks/useZoneProviders";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { CATEGORY_ORDER, getCategoryLabel, getCategoryIcon } from "@/lib/serviceCategories";
-import { AlertTriangle, Crown, Shield, Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, Crown, Shield, Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
 interface ZoneProvidersPanelProps {
@@ -40,6 +41,7 @@ export function ZoneProvidersPanel({ zoneId }: ZoneProvidersPanelProps) {
   const { data: providers, isLoading: provLoading } = useProvidersList();
   const assign = useAssignZoneCategoryProvider();
   const remove = useRemoveZoneCategoryProvider();
+  const updateProvider = useUpdateZoneCategoryProvider();
 
   const [selectedCategory, setSelectedCategory] = useState<string>(CATEGORY_ORDER[0]);
   const [addingRole, setAddingRole] = useState<"PRIMARY" | "BACKUP" | null>(null);
@@ -217,6 +219,28 @@ export function ZoneProvidersPanel({ zoneId }: ZoneProvidersPanelProps) {
                     )}
                   </div>
                 </div>
+                {a.role === "BACKUP" && (
+                  <div className="flex flex-col gap-0.5">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-5 w-5 text-muted-foreground hover:text-foreground"
+                      disabled={a.priority_rank <= 1 || updateProvider.isPending}
+                      onClick={() => updateProvider.mutate({ id: a.id, zoneId, priority_rank: a.priority_rank - 1 })}
+                    >
+                      <ChevronUp className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-5 w-5 text-muted-foreground hover:text-foreground"
+                      disabled={updateProvider.isPending}
+                      onClick={() => updateProvider.mutate({ id: a.id, zoneId, priority_rank: a.priority_rank + 1 })}
+                    >
+                      <ChevronDown className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
                 <Button
                   variant="ghost"
                   size="icon"
