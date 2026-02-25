@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/handled-home-logo.png";
@@ -22,7 +22,7 @@ const NotFound = () => {
           </p>
         </div>
         <Button asChild size="lg" className="mt-4">
-          <a href="/">Back to Home</a>
+          <Link to="/">Back to Home</Link>
         </Button>
       </div>
     </div>

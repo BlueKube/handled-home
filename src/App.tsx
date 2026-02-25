@@ -164,7 +164,7 @@ const App = () => (
                 <Route path="/customer/settings" element={<CustomerPropertyGate><CustomerSettings /></CustomerPropertyGate>} />
                 <Route path="/customer/services" element={<CustomerPropertyGate><CustomerServices /></CustomerPropertyGate>} />
                 <Route path="/customer/more" element={<CustomerPropertyGate><MoreMenuPage /></CustomerPropertyGate>} />
-                <Route path="/customer/notifications" element={<CustomerPropertyGate><SharedNotifications /></CustomerPropertyGate>} />
+                <Route path="/customer/notifications" element={<SharedNotifications />} />
               </Route>
 
               {/* Provider App */}

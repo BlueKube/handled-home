@@ -4,9 +4,11 @@ import {
   MapPin, Wallet, Users, HelpCircle, Settings,
   Building2, Package,
   Gauge, CreditCard, CalendarDays, Megaphone, FileText, Lock,
-  LogOut, Moon, Sun, TrendingUp, ChevronRight,
+  LogOut, Moon, Sun, TrendingUp, ChevronRight, BarChart3,
+  AlertTriangle, Banknote, Clock,
 } from "lucide-react";
 import { useTheme } from "next-themes";
+import { Switch } from "@/components/ui/switch";
 import { RoleSwitcher } from "@/components/settings/RoleSwitcher";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -48,7 +50,6 @@ const providerSections: MenuSection[] = [
   {
     title: "Business",
     items: [
-      { label: "Dashboard", icon: Building2, path: "/provider" },
       { label: "Organization", icon: Building2, path: "/provider/organization" },
     ],
   },
@@ -71,17 +72,17 @@ const adminSections: MenuSection[] = [
   {
     title: "Operations",
     items: [
-      { label: "Capacity", icon: Gauge, path: "/admin/capacity" },
+      { label: "Capacity", icon: BarChart3, path: "/admin/capacity" },
       { label: "Service Days", icon: CalendarDays, path: "/admin/service-days" },
-      { label: "Scheduling", icon: CalendarDays, path: "/admin/scheduling" },
-      { label: "Exceptions", icon: Gauge, path: "/admin/exceptions" },
+      { label: "Scheduling", icon: Clock, path: "/admin/scheduling" },
+      { label: "Exceptions", icon: AlertTriangle, path: "/admin/exceptions" },
     ],
   },
   {
     title: "Finance",
     items: [
       { label: "Billing", icon: CreditCard, path: "/admin/billing" },
-      { label: "Payouts", icon: Gauge, path: "/admin/payouts" },
+      { label: "Payouts", icon: Banknote, path: "/admin/payouts" },
       { label: "Plans", icon: CreditCard, path: "/admin/plans" },
       { label: "Bundles", icon: Package, path: "/admin/bundles" },
     ],
@@ -166,7 +167,7 @@ export default function MoreMenuPage() {
             >
               {theme === "dark" ? <Sun className="h-5 w-5 text-muted-foreground" /> : <Moon className="h-5 w-5 text-muted-foreground" />}
               <span className="font-medium flex-1">{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
-              <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+              <Switch checked={theme === "dark"} className="pointer-events-none" />
             </button>
           </CardContent>
         </Card>
