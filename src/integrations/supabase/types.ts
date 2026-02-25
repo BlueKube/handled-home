@@ -1631,38 +1631,237 @@ export type Database = {
           },
         ]
       }
+      notification_delivery: {
+        Row: {
+          attempted_at: string
+          channel: string
+          error_code: string | null
+          error_message: string | null
+          id: string
+          notification_id: string
+          provider_message_id: string | null
+          status: string
+        }
+        Insert: {
+          attempted_at?: string
+          channel: string
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          notification_id: string
+          provider_message_id?: string | null
+          status?: string
+        }
+        Update: {
+          attempted_at?: string
+          channel?: string
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          notification_id?: string
+          provider_message_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_delivery_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_events: {
+        Row: {
+          attempt_count: number
+          audience_org_id: string | null
+          audience_type: string
+          audience_user_id: string | null
+          audience_zone_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          idempotency_key: string
+          last_error: string | null
+          payload: Json
+          priority: string
+          processed_at: string | null
+          scheduled_for: string
+          status: string
+        }
+        Insert: {
+          attempt_count?: number
+          audience_org_id?: string | null
+          audience_type?: string
+          audience_user_id?: string | null
+          audience_zone_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          idempotency_key: string
+          last_error?: string | null
+          payload?: Json
+          priority?: string
+          processed_at?: string | null
+          scheduled_for?: string
+          status?: string
+        }
+        Update: {
+          attempt_count?: number
+          audience_org_id?: string | null
+          audience_type?: string
+          audience_user_id?: string | null
+          audience_zone_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          idempotency_key?: string
+          last_error?: string | null
+          payload?: Json
+          priority?: string
+          processed_at?: string | null
+          scheduled_for?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      notification_rate_limits: {
+        Row: {
+          audience_type: string
+          id: string
+          max_per_day: number
+          max_per_hour: number
+          priority: string
+          updated_at: string
+        }
+        Insert: {
+          audience_type?: string
+          id?: string
+          max_per_day?: number
+          max_per_hour?: number
+          priority: string
+          updated_at?: string
+        }
+        Update: {
+          audience_type?: string
+          id?: string
+          max_per_day?: number
+          max_per_hour?: number
+          priority?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notification_templates: {
+        Row: {
+          audience_type: string
+          body_template: string
+          channels: string[]
+          cta_label_template: string | null
+          cta_route_template: string | null
+          enabled: boolean
+          event_type: string
+          id: string
+          priority: string
+          template_key: string
+          title_template: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          audience_type?: string
+          body_template: string
+          channels?: string[]
+          cta_label_template?: string | null
+          cta_route_template?: string | null
+          enabled?: boolean
+          event_type: string
+          id?: string
+          priority?: string
+          template_key: string
+          title_template: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          audience_type?: string
+          body_template?: string
+          channels?: string[]
+          cta_label_template?: string | null
+          cta_route_template?: string | null
+          enabled?: boolean
+          event_type?: string
+          id?: string
+          priority?: string
+          template_key?: string
+          title_template?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string
+          context_id: string | null
+          context_type: string | null
           created_at: string
+          cta_label: string | null
+          cta_route: string | null
           data: Json | null
+          expires_at: string | null
           id: string
+          priority: string
           read_at: string | null
+          source_event_id: string | null
           title: string
           type: string
           user_id: string
         }
         Insert: {
           body: string
+          context_id?: string | null
+          context_type?: string | null
           created_at?: string
+          cta_label?: string | null
+          cta_route?: string | null
           data?: Json | null
+          expires_at?: string | null
           id?: string
+          priority?: string
           read_at?: string | null
+          source_event_id?: string | null
           title: string
           type: string
           user_id: string
         }
         Update: {
           body?: string
+          context_id?: string | null
+          context_type?: string | null
           created_at?: string
+          cta_label?: string | null
+          cta_route?: string | null
           data?: Json | null
+          expires_at?: string | null
           id?: string
+          priority?: string
           read_at?: string | null
+          source_event_id?: string | null
           title?: string
           type?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "notifications_source_event_id_fkey"
+            columns: ["source_event_id"]
+            isOneToOne: false
+            referencedRelation: "notification_events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ops_kpi_snapshots_daily: {
         Row: {
@@ -4493,6 +4692,75 @@ export type Database = {
           },
         ]
       }
+      user_device_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          last_seen_at: string | null
+          platform: string
+          push_provider: string
+          status: string
+          token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_seen_at?: string | null
+          platform: string
+          push_provider?: string
+          status?: string
+          token: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_seen_at?: string | null
+          platform?: string
+          push_provider?: string
+          status?: string
+          token?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_notification_preferences: {
+        Row: {
+          critical_enabled: boolean
+          marketing_enabled: boolean
+          quiet_hours_enabled: boolean
+          quiet_hours_end: string
+          quiet_hours_start: string
+          service_updates_enabled: boolean
+          timezone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          critical_enabled?: boolean
+          marketing_enabled?: boolean
+          quiet_hours_enabled?: boolean
+          quiet_hours_end?: string
+          quiet_hours_start?: string
+          service_updates_enabled?: boolean
+          timezone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          critical_enabled?: boolean
+          marketing_enabled?: boolean
+          quiet_hours_enabled?: boolean
+          quiet_hours_end?: string
+          quiet_hours_start?: string
+          service_updates_enabled?: boolean
+          timezone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -5159,6 +5427,20 @@ export type Database = {
           p_title: string
           p_type: string
           p_user_id: string
+        }
+        Returns: string
+      }
+      emit_notification_event: {
+        Args: {
+          p_audience_org_id?: string
+          p_audience_type?: string
+          p_audience_user_id?: string
+          p_audience_zone_id?: string
+          p_event_type: string
+          p_idempotency_key: string
+          p_payload?: Json
+          p_priority?: string
+          p_scheduled_for?: string
         }
         Returns: string
       }

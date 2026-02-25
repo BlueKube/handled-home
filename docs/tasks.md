@@ -107,21 +107,46 @@
 ## Round 2C — Notifications & Messaging
 
 > Users can't love what they forget about. Every critical event needs a notification.
+> **Expanded spec:** `docs/round-2c-expanded-spec.md` — Event bus architecture, priority tiers (Critical/Service/Marketing), quiet hours, rate limits, PII scrubbing.
+> **Architecture:** `notification_events` table as async event bus → `process-notification-events` edge function → `notifications` inbox + channel delivery (Push/Email/SMS). All emitters use `emit_notification_event()` RPC with deterministic idempotency keys.
 
-### In-App Notification Center
-- [ ] **2C-01** | P0 | L | Create `notifications` table — id, user_id, type, title, body, data (JSON), read_at, created_at. Enable realtime
-- [ ] **2C-02** | P0 | L | Build notification center UI — bell icon in header with unread count badge, slide-out panel with notification list, mark read on tap
-- [ ] **2C-03** | P0 | M | Notification triggers — emit notifications for: job completed, payment failed, service day reminder, issue resolved, referral reward earned, payout sent
+### Sprint C0: Schema Foundation
+- [x] **2C-C0a** | P0 | L | Create `notification_events` table (event bus/queue) — idempotency_key unique, status state machine (PENDING→PROCESSING→PROCESSED/FAILED/DEADLETTER), priority tiers, audience targeting (user/org/zone), scheduled_for support. RLS: admin-only + SECURITY DEFINER RPCs.
+- [x] **2C-C0b** | P0 | M | Enhance existing `notifications` table — add priority, cta_label, cta_route, context_type, context_id, expires_at, source_event_id FK. Enable realtime. Clean up duplicate INSERT policies.
+- [x] **2C-C0c** | P0 | M | Create `notification_delivery` table — per-channel attempt tracking (PUSH/EMAIL/SMS), status (QUEUED/SENT/FAILED/SUPPRESSED), provider_message_id, error tracking. RLS: users read own via notification join.
+- [x] **2C-C0d** | P0 | S | Create `user_notification_preferences` table — 3-tier toggles (critical always-on, service default-on, marketing default-off), quiet hours (21:00-08:00 default), timezone. RLS: users manage own.
+- [x] **2C-C0e** | P0 | S | Create `user_device_tokens` table — platform (IOS/ANDROID/WEB), push_provider (FCM/APNS), token unique, status (ACTIVE/DISABLED). RLS: users manage own.
+- [x] **2C-C0f** | P0 | S | Create `notification_rate_limits` config table — per priority+audience_type limits (max_per_day, max_per_hour). Seeded with defaults.
+- [x] **2C-C0g** | P0 | S | Create `notification_templates` table — template_key unique, event_type mapping, title/body/cta templates, channels array, version. Template seeding deferred to C3.
+- [x] **2C-C0h** | P0 | S | Create `emit_notification_event()` RPC — SECURITY DEFINER, idempotent via ON CONFLICT DO NOTHING, accepts all audience targeting params.
+- [x] **2C-C0i** | P0 | S | Create PII scrubber utility (`src/lib/piiScrubber.ts`) — regex-based phone/email/URL detection + replacement. `scrubPii()` returns cleaned text + counts. `containsPii()` for boolean checks. 9 unit tests passing.
 
-### Push Notifications (Capacitor)
-- [ ] **2C-04** | P1 | L | Capacitor push notification setup — register device token, store in `device_tokens` table, configure FCM/APNs
-- [ ] **2C-05** | P1 | M | Push notification edge function — receive event, lookup user device tokens, send via FCM/APNs
-- [ ] **2C-06** | P1 | M | Notification preferences — per-user toggles for notification categories (billing, jobs, marketing, referrals)
+### Sprint C1: Notification Center UI
+- [ ] **2C-C1a** | P0 | M | Build `useNotifications` hook — fetch user's notifications with realtime subscription, unread count, mark-read mutation, mark-all-read.
+- [ ] **2C-C1b** | P0 | L | Build AppHeader bell icon with unread badge — slide-out panel for quick glance with filters (All/Critical/Service/Marketing), "View all" link to full-screen inbox.
+- [ ] **2C-C1c** | P0 | M | Build `/notifications` full-screen inbox route — notification list with priority indicators, CTA deep links, pull-to-refresh, "You're all set" empty state.
+- [ ] **2C-C1d** | P1 | S | Add notification preference toggles to customer + provider Settings pages.
 
-### Transactional Email
-- [ ] **2C-07** | P0 | L | Email templates — welcome, payment receipt, payment failed, service day reminder (day before), job completed with photo, subscription confirmed
-- [ ] **2C-08** | P1 | M | Email sending edge function — template rendering + delivery via Resend/SendGrid
-- [ ] **2C-09** | P2 | M | SMS notifications for critical events — payment failed, job completed (optional opt-in)
+### Sprint C2: Processor + Push Proof
+- [ ] **2C-C2a** | P0 | XL | Build `process-notification-events` edge function — claim PENDING events (SKIP LOCKED), resolve audience, apply preferences + quiet hours + rate limits, write notifications + delivery records, mark events PROCESSED/FAILED, retry logic (max 3 attempts → DEADLETTER).
+- [ ] **2C-C2b** | P1 | M | Device token registration — `useDeviceToken` hook for Capacitor push registration, upsert to `user_device_tokens`, disable on logout.
+- [ ] **2C-C2c** | P1 | M | Test push pipe proof — minimal FCM send in processor (requires FCM_SERVER_KEY secret), delivery status tracking. Validates end-to-end push path.
+
+### Sprint C3: Template Seeding + Critical Flows
+- [ ] **2C-C3a** | P0 | M | Seed notification templates — all MVP event types from catalog (payment_failed, receipt_ready, service_day_reminder, provider_jobs_assigned, etc.) with premium concierge copy.
+- [ ] **2C-C3b** | P0 | L | Wire critical customer flows — payment_failed, subscription_paused, schedule_changed_weather via emit_notification_event in existing RPCs/edge functions.
+- [ ] **2C-C3c** | P0 | M | Wire critical provider flows — jobs_assigned, route_updated, sla_level_changed via emit_notification_event.
+- [ ] **2C-C3d** | P1 | M | Wire admin alerts — zone_backlog, weather_pending, dunning_spike via emit_notification_event.
+
+### Sprint C4: Service Update Flows
+- [ ] **2C-C4a** | P1 | M | Wire customer service updates — service_day_confirmed, reminder_24h, provider_en_route, job_started, receipt_ready, issue_status_changed.
+- [ ] **2C-C4b** | P1 | M | Wire provider service updates — no_show_ping, job_reassigned, payout_posted, hold_released.
+- [ ] **2C-C4c** | P1 | S | Banner surfaces — payment failure banner, weather reschedule banner, provider SLA banner tied to notification records.
+
+### Sprint C5: Polish + Delivery Providers
+- [ ] **2C-C5a** | P2 | L | Email delivery integration — transactional email provider setup, template rendering, critical-only emails (payment failed, receipt, security).
+- [ ] **2C-C5b** | P2 | M | Digest behavior — combine multiple non-critical events into daily summary, suppress extra pushes beyond rate limit.
+- [ ] **2C-C5c** | P2 | S | Admin notification health view — failed sends, deadletters, processing latency dashboard.
 
 ---
 
