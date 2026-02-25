@@ -80,6 +80,8 @@ Deno.serve(async (req) => {
     let started = 0;
     let errors = 0;
     const results: Array<{ subscription_id: string; step: number; result: string }> = [];
+    // FIX Finding 2: Track processed subscription IDs to prevent double-fire
+    const processedSubIds = new Set<string>();
 
     // Start dunning for new failed subscriptions
     for (const fi of needsStart) {
@@ -88,20 +90,27 @@ Deno.serve(async (req) => {
         const { data, error } = await supabase.rpc("run_dunning_step", {
           p_subscription_id: fi.subscription_id,
         });
+        processedSubIds.add(fi.subscription_id);
         if (error) {
           errors++;
+          // FIX Finding 8: Log subscription ID with error
+          console.error(`[run-dunning] needsStart error for ${fi.subscription_id}:`, error.message);
           results.push({ subscription_id: fi.subscription_id, step: 1, result: error.message });
         } else {
           started++;
           results.push({ subscription_id: fi.subscription_id, step: 1, result: data?.status ?? "ok" });
         }
-      } catch (err) {
+      } catch (err: any) {
         errors++;
+        console.error(`[run-dunning] needsStart exception for ${fi.subscription_id}:`, err?.message ?? err);
       }
     }
 
     // Progress existing dunning sequences based on timing
     for (const sub of dunningCandidates ?? []) {
+      // FIX Finding 2: Skip if already processed in needsStart loop
+      if (processedSubIds.has(sub.id)) continue;
+
       const currentStep = sub.dunning_step ?? 0;
       if (currentStep >= 5) continue; // Already completed dunning
 
@@ -118,13 +127,15 @@ Deno.serve(async (req) => {
         });
         if (error) {
           errors++;
+          console.error(`[run-dunning] progression error for ${sub.id} step ${currentStep + 1}:`, error.message);
           results.push({ subscription_id: sub.id, step: currentStep + 1, result: error.message });
         } else {
           stepped++;
           results.push({ subscription_id: sub.id, step: currentStep + 1, result: data?.status ?? "ok" });
         }
-      } catch (err) {
+      } catch (err: any) {
         errors++;
+        console.error(`[run-dunning] progression exception for ${sub.id}:`, err?.message ?? err);
       }
     }
 
