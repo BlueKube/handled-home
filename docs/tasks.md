@@ -17,7 +17,7 @@
 
 > Replace all placeholder pages. Wire static shells to live data. No user should ever see "Coming Soon."
 
-- [ ] **2A-01** | P0 | M | Replace `provider/Dashboard` with live data (today's jobs count, est. time from `jobs` table, upcoming jobs list, earnings summary)
+- [x] **2A-01** | P0 | M | Replace `provider/Dashboard` with live data (today's jobs count, est. time from `jobs` table, upcoming jobs list, earnings summary)
 - [ ] **2A-02** | P0 | L | Build `provider/Performance` — on-time %, redo rate, photo compliance %, avg time on site, SLA status from `provider_health_snapshots`
 - [ ] **2A-03** | P0 | L | Build `provider/Organization` — org profile edit, team member list (invite/remove), insurance status, licensing from `provider_orgs` + `provider_members` + `provider_compliance`
 - [ ] **2A-04** | P0 | L | Build `provider/Coverage` — zone coverage map, SKU authorization toggles, daily capacity settings from `provider_coverage` + `provider_capabilities`
@@ -277,7 +277,7 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 
 | Round | Total | Done | % |
 |-------|-------|------|---|
-| 2A — Placeholders & Core | 10 | 0 | 0% |
+| 2A — Placeholders & Core | 10 | 1 | 10% |
 | 2B — Automation Engine | 18 | 0 | 0% |
 | 2C — Notifications | 9 | 0 | 0% |
 | 2D — Customer Polish | 18 | 0 | 0% |
@@ -286,7 +286,7 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2G — Admin Intelligence | 11 | 0 | 0% |
 | 2H — Platform Hardening | 15 | 0 | 0% |
 | 2I — Future Moats | 9 | 0 | 0% |
-| **TOTAL** | **116** | **0** | **0%** |
+| **TOTAL** | **116** | **1** | **1%** |
 
 ---
 
