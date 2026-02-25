@@ -103,7 +103,24 @@ export function useAssignZoneCategoryProvider() {
         provider_org_id: params.providerOrgId,
         role: params.role,
         priority_rank: params.priorityRank ?? 1,
-      } as any);
+      });
+      if (error) throw error;
+    },
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ["zone-category-providers", vars.zoneId] });
+    },
+  });
+}
+
+/** Update a provider assignment (e.g. priority_rank) */
+export function useUpdateZoneCategoryProvider() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: { id: string; zoneId: string; priority_rank: number }) => {
+      const { error } = await supabase
+        .from("zone_category_providers")
+        .update({ priority_rank: params.priority_rank })
+        .eq("id", params.id);
       if (error) throw error;
     },
     onSuccess: (_, vars) => {
