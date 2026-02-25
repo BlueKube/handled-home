@@ -1,48 +1,80 @@
 
 
-# Round 2B Sprint 0 — Cleanup Pass (4 Items from Claude Review)
+# Sprint 5 Review Fixes (S5-F1 through S5-F6)
 
-Claude's review identified 4 concrete fixes needed before Sprint 1. All are small and surgical.
+## Findings Summary
 
-## Fix 1: Tighten notifications INSERT policy
+| # | Severity | Issue | Fix |
+|---|----------|-------|-----|
+| 1 | HIGH | Waitlist INSERT allows unlimited unauthenticated writes — no rate limiting, attacker can inflate waitlist metrics that drive expansion decisions | Move waitlist signup to an edge function with rate limiting; remove public INSERT RLS policy |
+| 2 | MEDIUM | `useJoinWaitlist` leaks zone boundary data by querying all zones with zip_codes client-side | Move zip→zone lookup server-side into the new edge function |
+| 3 | MEDIUM | `notify_waitlist_on_launch` marks entries as "notified" but never actually sends email or calls `emit_notification` (waitlist entries have email but no user_id) | Add clear TODO/log acknowledging this is a "mark for external email" step; update return payload to flag that external email integration is needed |
+| 4 | MEDIUM | `review_expansion_suggestion` is SECURITY DEFINER with no admin check — any authenticated user can approve/reject | Add `has_role(auth.uid(), 'admin')` check at top of function |
+| 5 | MEDIUM | `p_decision` parameter accepts arbitrary text — no validation | Add check that `p_decision IN ('approved', 'rejected')` or raise exception |
+| 6 | MEDIUM | `notify_waitlist_on_launch` has no admin check — any authenticated user can call it | Add `has_role(auth.uid(), 'admin')` check at top of function |
 
-The current policy allows ANY authenticated user to insert notifications directly:
+## Implementation Plan
+
+### Migration: Fix RPCs (findings 4, 5, 6)
+
+**`review_expansion_suggestion`** — surgical patch, two guards added at top:
 ```sql
-public.has_role(auth.uid(), 'admin') OR auth.uid() IS NOT NULL
+IF NOT has_role(auth.uid(), 'admin') THEN
+  RAISE EXCEPTION 'Admin role required';
+END IF;
+
+IF p_decision NOT IN ('approved', 'rejected') THEN
+  RAISE EXCEPTION 'Decision must be approved or rejected';
+END IF;
 ```
-The `OR auth.uid() IS NOT NULL` makes the admin check pointless. Since `emit_notification()` is SECURITY DEFINER (bypasses RLS), we only need admin-only for direct inserts.
+Rest of function unchanged.
 
-**Change:** New migration dropping and replacing the policy with admin-only `WITH CHECK`.
+**`notify_waitlist_on_launch`** — add admin check at top:
+```sql
+IF NOT has_role(auth.uid(), 'admin') THEN
+  RAISE EXCEPTION 'Admin role required';
+END IF;
+```
+Also add a log/comment acknowledging that marking status='notified' is a placeholder — actual email delivery requires external integration (e.g., SendGrid edge function). The RPC is not broken, it just can't send emails from inside Postgres. Return payload already includes `notified_count` which is correct.
 
-## Fix 2: Remove `as any` cast in useZoneProviders insert
+**`get_waitlist_summary`** — convert from SQL to PL/pgSQL to add admin check:
+```sql
+IF NOT has_role(auth.uid(), 'admin') THEN
+  RAISE EXCEPTION 'Admin role required';
+END IF;
+```
 
-Line 106 of `src/hooks/useZoneProviders.ts` uses `as any` on the insert object. The Supabase types already define `zone_category_providers.Insert` with matching fields (`zone_id`, `category`, `provider_org_id`, `role`, `priority_rank`). The cast is unnecessary and can be removed.
+### Migration: Remove public INSERT RLS policy (finding 1)
 
-**Change:** Remove `as any` from the insert call in `useAssignZoneCategoryProvider`.
+Drop the `"Anyone can join waitlist"` INSERT policy. Waitlist signups will go through an edge function instead.
 
-## Fix 3: Check off 2B-00c in tasks.md
+### Edge Function: `join-waitlist` (findings 1, 2)
 
-Line 50 shows `[ ] **2B-00c**` but the code is fully implemented.
+New edge function that:
+1. Validates email format and zip code format server-side
+2. Rate limits by IP (e.g., 5 requests per hour per IP, tracked via a simple in-memory map or waitlist_entries count check)
+3. Looks up zone_id server-side using service role (no zone data leaked to client)
+4. Inserts into `waitlist_entries` using service role
+5. Returns success/duplicate/rate-limited response — no zone boundary data exposed
 
-**Change:** `[ ]` → `[x]` on line 50.
+### Hook: Rewrite `useJoinWaitlist` (finding 2)
 
-## Fix 4: Add backup priority rank editing
+Replace the current implementation that queries zones client-side with a simple edge function call:
+```typescript
+const res = await supabase.functions.invoke("join-waitlist", {
+  body: { email, full_name, zip_code, source, referral_code }
+});
+```
+No more `supabase.from("zones").select(...)` in the hook.
 
-The `priority_rank` column exists but the UI always inserts with default `1`. Sprint 1's assignment engine will select backups by `priority_rank`, so this needs to be editable now.
+### Tasks.md Update
 
-**Change:** In `ZoneProvidersPanel.tsx`, add a small numeric input or up/down buttons on backup provider cards to set/adjust `priority_rank`. Add an `useUpdateZoneCategoryProvider` mutation to the hook for updating rank.
-
-## Files Modified
-
-- `supabase/migrations/` — new migration for notifications INSERT policy fix
-- `src/hooks/useZoneProviders.ts` — remove `as any`, add update mutation
-- `src/components/admin/ZoneProvidersPanel.tsx` — add backup priority editing
-- `docs/tasks.md` — check off 2B-00c
+Add S5-F1 through S5-F6 tracking entries, mark done.
 
 ## Technical Details
 
-- No new dependencies
-- No new tables
-- Single migration: `DROP POLICY` + `CREATE POLICY` for notifications INSERT
-- The update mutation uses `.update({ priority_rank }).eq("id", id)` on `zone_category_providers`
+- All three RPCs (`review_expansion_suggestion`, `notify_waitlist_on_launch`, `get_waitlist_summary`) use `SECURITY DEFINER` which bypasses RLS — the admin check must be inside the function body
+- The `has_role()` function already exists and is the standard pattern used across the codebase
+- Rate limiting in the edge function will use a DB query approach: count recent entries from same email in last hour, reject if > 5
+- The edge function uses service role key so it can insert without needing a public INSERT RLS policy
 
