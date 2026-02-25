@@ -41,8 +41,14 @@ interface Props {
 export function NotificationPanel({ open, onOpenChange, notificationsData }: Props) {
   const navigate = useNavigate();
   const { effectiveRole } = useAuth();
-  const { notifications, unreadCount, markRead, markAllRead, isMarkingAllRead, isLoading } =
-    notificationsData;
+  const {
+    notifications = [],
+    unreadCount = 0,
+    markRead = () => {},
+    markAllRead = () => {},
+    isMarkingAllRead = false,
+    isLoading = true,
+  } = notificationsData ?? {};
 
   const handleClick = (n: Notification) => {
     if (!n.read_at) markRead(n.id);
