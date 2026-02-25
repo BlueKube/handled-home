@@ -731,6 +731,53 @@ export type Database = {
           },
         ]
       }
+      dunning_events: {
+        Row: {
+          action: string
+          created_at: string
+          customer_id: string
+          explain_admin: string | null
+          explain_customer: string | null
+          id: string
+          metadata: Json | null
+          result: string
+          step: number
+          subscription_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          customer_id: string
+          explain_admin?: string | null
+          explain_customer?: string | null
+          id?: string
+          metadata?: Json | null
+          result?: string
+          step: number
+          subscription_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          customer_id?: string
+          explain_admin?: string | null
+          explain_customer?: string | null
+          id?: string
+          metadata?: Json | null
+          result?: string
+          step?: number
+          subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dunning_events_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       growth_autopilot_actions: {
         Row: {
           action_type: string
@@ -4814,6 +4861,10 @@ export type Database = {
         Args: { p_invoice_id: string; p_reason: string }
         Returns: Json
       }
+      apply_referral_credits_to_invoice: {
+        Args: { p_invoice_id: string }
+        Returns: Json
+      }
       apply_referral_reward:
         | { Args: { p_reward_id: string }; Returns: Json }
         | {
@@ -4945,6 +4996,7 @@ export type Database = {
         Args: { p_assignment_id: string }
         Returns: Json
       }
+      release_eligible_earning_holds: { Args: never; Returns: Json }
       release_expired_referral_holds: { Args: never; Returns: number }
       release_referral_hold: {
         Args: { p_reason: string; p_reward_id: string }
@@ -4963,6 +5015,7 @@ export type Database = {
         Args: { p_share_card_id: string }
         Returns: undefined
       }
+      run_dunning_step: { Args: { p_subscription_id: string }; Returns: Json }
       run_payout_batch: { Args: { p_payout_run_id: string }; Returns: Json }
       select_alternative_service_day: {
         Args: { p_assignment_id: string; p_offer_id: string }

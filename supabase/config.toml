@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.snapshot-rollup]
 verify_jwt = false
+
+[functions.run-dunning]
+verify_jwt = false

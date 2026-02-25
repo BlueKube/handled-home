@@ -46,7 +46,18 @@ serve(async (req) => {
 
     const results: Record<string, any> = {};
 
-    // 1. Transition eligible earnings (EARNED -> ELIGIBLE when hold_until passed)
+    // 1. Release eligible earning holds (2B-10)
+    logStep("Running release_eligible_earning_holds");
+    const { data: releaseResult, error: releaseErr } = await supabase.rpc("release_eligible_earning_holds");
+    if (releaseErr) {
+      logStep("release_eligible_earning_holds error", { error: releaseErr.message });
+      results.release_holds = { error: releaseErr.message };
+    } else {
+      results.release_holds = releaseResult;
+      logStep("release_eligible_earning_holds done", releaseResult);
+    }
+
+    // 2. Transition eligible earnings (EARNED -> ELIGIBLE when hold_until passed)
     logStep("Running transition_eligible_earnings");
     const { data: transitionResult, error: transitionErr } = await supabase.rpc("transition_eligible_earnings");
     if (transitionErr) {
@@ -57,7 +68,7 @@ serve(async (req) => {
       logStep("transition_eligible_earnings done", transitionResult);
     }
 
-    // 2. Generate invoices for subscriptions approaching cycle end
+    // 3. Generate invoices for subscriptions approaching cycle end
     logStep("Checking subscriptions for invoice generation");
     const threeDaysFromNow = new Date();
     threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
@@ -82,6 +93,18 @@ serve(async (req) => {
           invoiceResults.push({ subscription_id: sub.id, error: invoiceErr.message });
         } else {
           invoiceResults.push({ subscription_id: sub.id, result: invoiceResult });
+
+          // 2B-09: Auto-apply credits to newly generated invoices
+          if (invoiceResult?.invoice_id) {
+            const { data: creditResult, error: creditErr } = await supabase.rpc("apply_referral_credits_to_invoice", {
+              p_invoice_id: invoiceResult.invoice_id,
+            });
+            if (creditErr) {
+              invoiceResults.push({ subscription_id: sub.id, credit_error: creditErr.message });
+            } else if (creditResult?.credits_applied_cents > 0) {
+              invoiceResults.push({ subscription_id: sub.id, credits_applied: creditResult });
+            }
+          }
         }
       }
       results.invoice_generation = { processed: invoiceResults.length, details: invoiceResults };
