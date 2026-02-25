@@ -1,4 +1,17 @@
-import { PlaceholderPage } from "@/components/PlaceholderPage";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
+/**
+ * 2A-06: "Build My Service Day" is the Routine flow.
+ * This page redirects to /customer/routine which already implements
+ * the full bundle builder (SKU browser, cadence picker, entitlement guardrails, 4-week preview).
+ */
 export default function CustomerBuild() {
-  return <PlaceholderPage title="Build My Service Day" module="Module 07 — Bundle Builder" description="Select services for your upcoming Service Day. Browse available SKUs, review prep instructions, and confirm your bundle." />;
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    navigate("/customer/routine", { replace: true });
+  }, [navigate]);
+
+  return null;
 }
