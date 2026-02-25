@@ -60,9 +60,9 @@
 - [x] **2B-07** | P1 | M | Photo quality validation — `validate-photo-quality` edge function (file size, dimensions, duplicate hash), provider notification on fail.
 
 ### Sprint 3: Billing Automation
-- [ ] **2B-08** | P0 | L | Automated dunning sequence — `dunning_events` table, `run-dunning` edge function (daily, 5-step ladder), escalating customer notifications, subscription pause/cancel.
-- [ ] **2B-09** | P1 | M | Auto-apply earned referral credits to next invoice — modify invoice generation RPC, customer notification with explain_customer.
-- [ ] **2B-10** | P1 | M | Auto-release provider earning holds — enhance `run-billing-automation`, provider notification with countdown.
+- [x] **2B-08** | P0 | L | Automated dunning sequence — `dunning_events` table, `run-dunning` edge function (daily, 5-step ladder), escalating customer notifications, subscription pause/cancel.
+- [x] **2B-09** | P1 | M | Auto-apply earned referral credits to next invoice — modify invoice generation RPC, customer notification with explain_customer.
+- [x] **2B-10** | P1 | M | Auto-release provider earning holds — enhance `run-billing-automation`, provider notification with countdown.
 
 ### Sprint 4: Weather & Scheduling
 - [ ] **2B-11** | P0 | L | Weather mode — `weather_events` table with explainability, admin UI (zone+category+date range+strategy), customer/provider notifications.
@@ -291,7 +291,7 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | Round | Total | Done | % |
 |-------|-------|------|---|
 | 2A — Placeholders & Core | 16 | 16 | 100% |
-| 2B — Automation Engine | 21 | 9 | 43% |
+| 2B — Automation Engine | 21 | 12 | 57% |
 | 2C — Notifications | 9 | 0 | 0% |
 | 2D — Customer Polish | 18 | 0 | 0% |
 | 2E — Provider Polish | 13 | 0 | 0% |
@@ -299,8 +299,8 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2G — Admin Intelligence | 11 | 0 | 0% |
 | 2H — Platform Hardening | 15 | 0 | 0% |
 | 2I — Future Moats | 9 | 0 | 0% |
-| **TOTAL** | **125** | **25** | **20%** |
+| **TOTAL** | **125** | **28** | **22%** |
 
 ---
 
-*Last updated: 2026-02-25 — Sprint 2 review fixes applied, progress tracker corrected*
+*Last updated: 2026-02-25 — Sprint 3 billing automation completed*
