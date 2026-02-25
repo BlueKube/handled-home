@@ -4,6 +4,7 @@ import { ProfileForm } from "@/components/settings/ProfileForm";
 import { ChangePasswordForm } from "@/components/settings/ChangePasswordForm";
 import { RoleSwitcher } from "@/components/settings/RoleSwitcher";
 import { PreviewAsCard } from "@/components/settings/PreviewAsCard";
+import { NotificationPreferences } from "@/components/settings/NotificationPreferences";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LogOut, Mail } from "lucide-react";
@@ -43,6 +44,7 @@ export default function CustomerSettings() {
 
       <ProfileForm />
       <ChangePasswordForm />
+      <NotificationPreferences />
       <RoleSwitcher />
       <PreviewAsCard />
 
