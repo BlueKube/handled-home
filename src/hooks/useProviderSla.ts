@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+const SLA_LEVEL_ORDER: Record<string, number> = { RED: 0, ORANGE: 1, YELLOW: 2, GREEN: 3 };
+
 export interface ProviderSlaEntry {
   id: string;
   provider_org_id: string;
@@ -28,8 +30,7 @@ export function useProviderSlaAdmin(filters: { zoneId?: string; level?: string }
       let query = supabase
         .from("provider_sla_status")
         .select("*")
-        .order("sla_level", { ascending: true })
-        .order("weeks_at_level", { ascending: false })
+        .order("last_evaluated_at", { ascending: false })
         .limit(200);
 
       if (filters.zoneId) query = query.eq("zone_id", filters.zoneId);
@@ -37,7 +38,13 @@ export function useProviderSlaAdmin(filters: { zoneId?: string; level?: string }
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as ProviderSlaEntry[];
+      // Sort by severity (RED first) then by level_since ascending (longest at level first)
+      const sorted = (data as ProviderSlaEntry[]).sort((a, b) => {
+        const levelDiff = (SLA_LEVEL_ORDER[a.sla_level] ?? 4) - (SLA_LEVEL_ORDER[b.sla_level] ?? 4);
+        if (levelDiff !== 0) return levelDiff;
+        return new Date(a.level_since).getTime() - new Date(b.level_since).getTime();
+      });
+      return sorted;
     },
   });
 }

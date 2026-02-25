@@ -1667,6 +1667,13 @@ export type Database = {
             referencedRelation: "job_photos"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "photo_validation_results_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
         ]
       }
       plan_entitlement_sku_rules: {
@@ -4922,6 +4929,15 @@ export type Database = {
         Args: {
           p_milestone: Database["public"]["Enums"]["referral_milestone_type"]
           p_referral_id: string
+        }
+        Returns: Json
+      }
+      reinstate_provider: {
+        Args: {
+          p_admin_user_id?: string
+          p_category: string
+          p_provider_org_id: string
+          p_zone_id: string
         }
         Returns: Json
       }
