@@ -92,6 +92,14 @@
 - [x] **2B-15** | P1 | M | Waitlist system — `waitlist_entries` table, public signup with zone auto-match, `get_waitlist_summary` RPC, `notify_waitlist_on_launch` RPC. Hook: `useWaitlist` (join, summary, notify).
 - [x] **2B-16** | P2 | L | Auto-zone creation support — expansion suggestion type `split_zone` triggers admin review. `evaluate-zone-expansion` auto-detects when waitlist threshold + capacity pressure warrant new zone creation. Admin approves via `review_expansion_suggestion` RPC.
 
+#### Sprint 5 Review Fixes (6 findings)
+- [x] **S5-F1** | HIGH | Moved waitlist signup to `join-waitlist` edge function with rate limiting (5/hr per email); removed public INSERT RLS policy
+- [x] **S5-F2** | MEDIUM | Moved zip→zone lookup server-side into edge function — no zone boundary data leaked to client
+- [x] **S5-F3** | MEDIUM | Added comment + `email_delivery: pending_external_integration` to `notify_waitlist_on_launch` return payload acknowledging external email needed
+- [x] **S5-F4** | MEDIUM | Added `has_role(auth.uid(), 'admin')` check to `review_expansion_suggestion`
+- [x] **S5-F5** | MEDIUM | Added `p_decision IN ('approved', 'rejected')` validation to `review_expansion_suggestion`
+- [x] **S5-F6** | MEDIUM | Added `has_role(auth.uid(), 'admin')` check to `notify_waitlist_on_launch` and `get_waitlist_summary`
+
 ### Sprint 6: Route Optimization
 - [ ] **2B-02** | P1 | XL | Route optimization — `route_order` on `jobs`, `optimize-routes` edge function (geohash nearest-neighbor), provider suggested order, manual reorder.
 
