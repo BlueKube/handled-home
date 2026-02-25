@@ -57,16 +57,10 @@ serve(async (req) => {
       logStep("release_eligible_earning_holds done", releaseResult);
     }
 
-    // 2. Transition eligible earnings (EARNED -> ELIGIBLE when hold_until passed)
-    logStep("Running transition_eligible_earnings");
-    const { data: transitionResult, error: transitionErr } = await supabase.rpc("transition_eligible_earnings");
-    if (transitionErr) {
-      logStep("transition_eligible_earnings error", { error: transitionErr.message });
-      results.transition_earnings = { error: transitionErr.message };
-    } else {
-      results.transition_earnings = transitionResult;
-      logStep("transition_eligible_earnings done", transitionResult);
-    }
+    // FIX Finding 5: Removed redundant transition_eligible_earnings call.
+    // release_eligible_earning_holds (step 1) already handles EARNED → ELIGIBLE transitions
+    // for both hold-based and 24-hour-default earnings. The old transition_eligible_earnings
+    // RPC is kept in the DB for backward compatibility but no longer called here.
 
     // 3. Generate invoices for subscriptions approaching cycle end
     logStep("Checking subscriptions for invoice generation");
