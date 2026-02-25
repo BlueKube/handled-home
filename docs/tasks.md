@@ -101,7 +101,7 @@
 - [x] **S5-F6** | MEDIUM | Added `has_role(auth.uid(), 'admin')` check to `notify_waitlist_on_launch` and `get_waitlist_summary`
 
 ### Sprint 6: Route Optimization
-- [ ] **2B-02** | P1 | XL | Route optimization — `route_order` on `jobs`, `optimize-routes` edge function (geohash nearest-neighbor), provider suggested order, manual reorder.
+- [x] **2B-02** | P1 | XL | Route optimization — `optimize-routes` edge function (nearest-neighbor using geohash/lat-lng from properties), `reorder_provider_route` RPC (provider manual reorder with audit logging), provider UI with "Optimize Route" button + up/down reorder controls, jobs sorted by `route_order`, "Next" stop indicator. Logs to `cron_run_log` for observability.
 
 ---
 

@@ -5268,6 +5268,10 @@ export type Database = {
         Args: { p_reason: string; p_reward_id: string }
         Returns: Json
       }
+      reorder_provider_route: {
+        Args: { p_date: string; p_job_orders: Json }
+        Returns: Json
+      }
       report_job_issue: {
         Args: {
           p_description?: string
