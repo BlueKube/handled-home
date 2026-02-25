@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useZones, type ZoneWithRegion } from "@/hooks/useZones";
 import { useRegions } from "@/hooks/useRegions";
-import { useZoneProviders } from "@/hooks/useZoneProviders";
+import { useZoneCategoryProviders } from "@/hooks/useZoneProviders";
 import { useZoneHomeCounts } from "@/hooks/useZoneInsights";
 import { ZoneFormSheet } from "./ZoneFormSheet";
 import { ZoneDetailSheet } from "./ZoneDetailSheet";
@@ -15,10 +15,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 function ProviderSummary({ zoneId }: { zoneId: string }) {
-  const { data } = useZoneProviders(zoneId);
+  const { data } = useZoneCategoryProviders(zoneId);
   if (!data?.length) return <span className="text-caption">No providers</span>;
-  const primary = data.filter((a) => a.assignment_type === "primary").length;
-  const backup = data.filter((a) => a.assignment_type === "backup").length;
+  const primary = data.filter((a) => a.role === "PRIMARY").length;
+  const backup = data.filter((a) => a.role === "BACKUP").length;
   return <span className="text-caption">{primary} pri • {backup} bak</span>;
 }
 

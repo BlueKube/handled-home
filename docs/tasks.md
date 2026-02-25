@@ -41,36 +41,41 @@
 ## Round 2B — Automation Engine (Business Runs Itself)
 
 > Every human touchpoint gets a system. This is what eliminates employees.
+> **Expanded spec:** `docs/round-2b-expanded-spec.md` — Primary+Backup model (D1), per zone+category exclusivity (D4), competition slider (D3).
+> **Cross-cutting patterns:** Every automation table has `explain_customer`, `explain_provider`, `explain_admin` columns. Every action emits to `notifications` table. All batch functions use idempotency keys via `cron_run_log`.
 
-### Job Assignment & Routing
-- [ ] **2B-01** | P0 | XL | Auto-assign jobs to providers — match zone coverage + SKU capabilities + capacity + fairness rotation. Edge function triggered on service day lock
-- [ ] **2B-02** | P1 | XL | Route optimization — order jobs within a provider's daily list by geohash proximity to minimize drive time
-- [ ] **2B-03** | P1 | L | Overflow handling — when zone capacity exceeded, auto-split to backup provider or flag for admin
-- [ ] **2B-04** | P1 | M | Provider no-show detection — if job not started by cutoff time, auto-reassign + alert admin
+### Sprint 0: Infrastructure + Admin UX Foundation
+- [x] **2B-00** | P0 | M | Infrastructure tables — `notifications`, `cron_run_log`, `zone_category_providers` (Primary/Backup per zone+category with computed `performance_score` + `formula_version` + `computed_at`), `job_assignment_log` (with explainability columns). RLS policies for all.
+- [x] **2B-00b** | P0 | S | Service week consumption — add `service_weeks_used` + dunning columns to `subscriptions`, add `latest_start_by` + `route_order` to `jobs`. Create `increment_service_week_usage` RPC.
+- [ ] **2B-00c** | P0 | S | Zone Provider Assignments UI — rebuild `ZoneProvidersPanel` to be category-aware with Primary/Backup guardrails (only 1 Primary per zone+category), performance_score display, confirmation dialogs.
 
-### Quality Enforcement
-- [ ] **2B-05** | P0 | L | SLA enforcement automation — track on-time %, photo compliance, issue rate per provider. Auto-generate warnings at thresholds
-- [ ] **2B-06** | P1 | L | Auto-flag low-quality providers — when metrics drop below threshold for 2+ weeks, auto-restrict new assignments + notify admin
-- [ ] **2B-07** | P1 | M | Photo quality validation — basic checks (not blurry, not duplicate, correct orientation) via edge function
+### Sprint 1: Job Assignment Engine
+- [ ] **2B-01** | P0 | XL | Auto-assign jobs to providers — `auto_assign_job` RPC (Primary-first → Backup fallback by priority_rank + performance_score), `assign-jobs` edge function with idempotency, assignment log with explainability, provider notifications.
+- [ ] **2B-03** | P1 | L | Overflow handling — when Primary at capacity and no Backup: check adjacent days → create overflow event → flag admin. Customer notification with explain_customer.
+- [ ] **2B-04** | P1 | M | Provider no-show detection — `check-no-shows` edge function (hourly), auto-reassign via Backup pool, calm customer notification, reliability impact to provider.
 
-### Billing Automation
-- [ ] **2B-08** | P0 | L | Automated dunning sequence — retry failed payments at day 1, 3, 7. Pause service at day 10. Auto-cancel at day 14. Email at each step
-- [ ] **2B-09** | P1 | M | Auto-apply earned referral credits to next invoice
-- [ ] **2B-10** | P1 | M | Auto-release provider earning holds when hold_until date passes (scheduled edge function)
+### Sprint 2: Quality Enforcement
+- [ ] **2B-05** | P0 | L | SLA enforcement automation — `provider_sla_status` table, `evaluate-provider-sla` edge function (daily), threshold ladder (GREEN/YELLOW/ORANGE/RED), auto-generate enforcement actions + provider notifications.
+- [ ] **2B-06** | P1 | L | Auto-flag low-quality providers — RED for 2+ weeks → suspend in `zone_category_providers`, auto-promote highest Backup, notify admin.
+- [ ] **2B-07** | P1 | M | Photo quality validation — `validate-photo-quality` edge function (file size, dimensions, duplicate hash), provider notification on fail.
 
-### Weather & Scheduling
-- [ ] **2B-11** | P0 | L | Weather mode — admin triggers zone-wide reschedule. All affected jobs shift to next available day. Customers notified
-- [ ] **2B-12** | P1 | L | Auto-weather detection — integrate weather API, auto-trigger weather mode when severe weather forecast for zone
-- [ ] **2B-13** | P1 | M | Holiday calendar — auto-skip service days on configured holidays, shift to adjacent day
+### Sprint 3: Billing Automation
+- [ ] **2B-08** | P0 | L | Automated dunning sequence — `dunning_events` table, `run-dunning` edge function (daily, 5-step ladder), escalating customer notifications, subscription pause/cancel.
+- [ ] **2B-09** | P1 | M | Auto-apply earned referral credits to next invoice — modify invoice generation RPC, customer notification with explain_customer.
+- [ ] **2B-10** | P1 | M | Auto-release provider earning holds — enhance `run-billing-automation`, provider notification with countdown.
 
-### Infrastructure
-- [ ] **2B-14** | P0 | M | `pg_cron` + `pg_net` setup — enable extensions, create `cron_run_log` observability table, schedule recurring jobs (billing runs, snapshot rollups, hold releases)
-- [ ] **2B-15** | P0 | S | Service week consumption tracking — increment counter when service week consumed, enforce entitlement limits server-side
+### Sprint 4: Weather & Scheduling
+- [ ] **2B-11** | P0 | L | Weather mode — `weather_events` table with explainability, admin UI (zone+category+date range+strategy), customer/provider notifications.
+- [ ] **2B-12** | P1 | L | Auto-weather detection — edge function with weather API, advisory vs severe thresholds, PENDING event for admin approval. Requires weather API key.
+- [ ] **2B-13** | P1 | M | Holiday calendar — `holiday_calendar` table, pre-seed US federal holidays, job generation skips holidays.
 
-### Zone Expansion
-- [ ] **2B-16** | P1 | L | Capacity-based zone expansion triggers — when zone consistently >80% capacity, auto-suggest new zone split to admin
-- [ ] **2B-17** | P1 | M | Waitlist system — customers in unsupported zips join waitlist. Auto-notify when zone launches
-- [ ] **2B-18** | P2 | L | Auto-zone creation — when waitlist hits threshold + provider available, auto-create zone in draft status for admin review
+### Sprint 5: Zone Expansion
+- [ ] **2B-14** | P1 | L | Capacity-based zone expansion triggers — `expansion_suggestions` table, `evaluate-zone-expansion` weekly edge function.
+- [ ] **2B-15** | P1 | M | Waitlist system — `waitlist_entries` table, public signup via rate-limited edge function, auto-notify on zone launch.
+- [ ] **2B-16** | P2 | L | Auto-zone creation — when waitlist threshold + provider available → create zone in DRAFT for admin review.
+
+### Sprint 6: Route Optimization
+- [ ] **2B-02** | P1 | XL | Route optimization — `route_order` on `jobs`, `optimize-routes` edge function (geohash nearest-neighbor), provider suggested order, manual reorder.
 
 ---
 
@@ -285,8 +290,8 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 
 | Round | Total | Done | % |
 |-------|-------|------|---|
-| 2A — Placeholders & Core | 10 | 5 | 50% |
-| 2B — Automation Engine | 18 | 0 | 0% |
+| 2A — Placeholders & Core | 16 | 16 | 100% |
+| 2B — Automation Engine | 21 | 2 | 10% |
 | 2C — Notifications | 9 | 0 | 0% |
 | 2D — Customer Polish | 18 | 0 | 0% |
 | 2E — Provider Polish | 13 | 0 | 0% |
@@ -294,8 +299,8 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2G — Admin Intelligence | 11 | 0 | 0% |
 | 2H — Platform Hardening | 15 | 0 | 0% |
 | 2I — Future Moats | 9 | 0 | 0% |
-| **TOTAL** | **116** | **5** | **4%** |
+| **TOTAL** | **125** | **18** | **14%** |
 
 ---
 
-*Last updated: 2026-02-25*
+*Last updated: 2026-02-25 — Sprint 0 infrastructure tables created*

@@ -221,6 +221,42 @@ export type Database = {
         }
         Relationships: []
       }
+      cron_run_log: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          function_name: string
+          id: string
+          idempotency_key: string | null
+          result_summary: Json | null
+          started_at: string
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          function_name: string
+          id?: string
+          idempotency_key?: string | null
+          result_summary?: Json | null
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          function_name?: string
+          id?: string
+          idempotency_key?: string | null
+          result_summary?: Json | null
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
       customer_credits: {
         Row: {
           amount_cents: number
@@ -900,6 +936,73 @@ export type Database = {
           },
         ]
       }
+      job_assignment_log: {
+        Row: {
+          assigned_at: string
+          assigned_by: string
+          assignment_reason: string
+          created_at: string
+          explain_admin: string | null
+          explain_customer: string | null
+          explain_provider: string | null
+          id: string
+          job_id: string
+          previous_provider_org_id: string | null
+          provider_org_id: string | null
+          score_breakdown: Json | null
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string
+          assignment_reason: string
+          created_at?: string
+          explain_admin?: string | null
+          explain_customer?: string | null
+          explain_provider?: string | null
+          id?: string
+          job_id: string
+          previous_provider_org_id?: string | null
+          provider_org_id?: string | null
+          score_breakdown?: Json | null
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string
+          assignment_reason?: string
+          created_at?: string
+          explain_admin?: string | null
+          explain_customer?: string | null
+          explain_provider?: string | null
+          id?: string
+          job_id?: string
+          previous_provider_org_id?: string | null
+          provider_org_id?: string | null
+          score_breakdown?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_assignment_log_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_assignment_log_previous_provider_org_id_fkey"
+            columns: ["previous_provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_assignment_log_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_checklist_items: {
         Row: {
           created_at: string
@@ -1147,9 +1250,11 @@ export type Database = {
           departed_at: string | null
           departed_source: string | null
           id: string
+          latest_start_by: string | null
           property_id: string
           provider_org_id: string
           provider_summary: string | null
+          route_order: number | null
           routine_version_id: string | null
           scheduled_date: string | null
           service_day_instance_id: string | null
@@ -1169,9 +1274,11 @@ export type Database = {
           departed_at?: string | null
           departed_source?: string | null
           id?: string
+          latest_start_by?: string | null
           property_id: string
           provider_org_id: string
           provider_summary?: string | null
+          route_order?: number | null
           routine_version_id?: string | null
           scheduled_date?: string | null
           service_day_instance_id?: string | null
@@ -1191,9 +1298,11 @@ export type Database = {
           departed_at?: string | null
           departed_source?: string | null
           id?: string
+          latest_start_by?: string | null
           property_id?: string
           provider_org_id?: string
           provider_summary?: string | null
+          route_order?: number | null
           routine_version_id?: string | null
           scheduled_date?: string | null
           service_day_instance_id?: string | null
@@ -1370,6 +1479,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          data: Json | null
+          id: string
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       ops_kpi_snapshots_daily: {
         Row: {
@@ -3572,8 +3714,11 @@ export type Database = {
           current_service_week_end_at: string | null
           current_service_week_start_at: string | null
           customer_id: string
+          dunning_started_at: string | null
+          dunning_step: number
           entitlement_version_id: string | null
           id: string
+          last_dunning_at: string | null
           next_billing_at: string | null
           next_service_week_end_at: string | null
           next_service_week_start_at: string | null
@@ -3581,6 +3726,7 @@ export type Database = {
           pending_plan_id: string | null
           plan_id: string
           property_id: string | null
+          service_weeks_used: number
           status: string
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
@@ -3599,8 +3745,11 @@ export type Database = {
           current_service_week_end_at?: string | null
           current_service_week_start_at?: string | null
           customer_id: string
+          dunning_started_at?: string | null
+          dunning_step?: number
           entitlement_version_id?: string | null
           id?: string
+          last_dunning_at?: string | null
           next_billing_at?: string | null
           next_service_week_end_at?: string | null
           next_service_week_start_at?: string | null
@@ -3608,6 +3757,7 @@ export type Database = {
           pending_plan_id?: string | null
           plan_id: string
           property_id?: string | null
+          service_weeks_used?: number
           status?: string
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
@@ -3626,8 +3776,11 @@ export type Database = {
           current_service_week_end_at?: string | null
           current_service_week_start_at?: string | null
           customer_id?: string
+          dunning_started_at?: string | null
+          dunning_step?: number
           entitlement_version_id?: string | null
           id?: string
+          last_dunning_at?: string | null
           next_billing_at?: string | null
           next_service_week_end_at?: string | null
           next_service_week_start_at?: string | null
@@ -3635,6 +3788,7 @@ export type Database = {
           pending_plan_id?: string | null
           plan_id?: string
           property_id?: string | null
+          service_weeks_used?: number
           status?: string
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
@@ -4076,6 +4230,69 @@ export type Database = {
         }
         Relationships: []
       }
+      zone_category_providers: {
+        Row: {
+          assigned_at: string
+          category: string
+          computed_at: string | null
+          created_at: string
+          formula_version: string | null
+          id: string
+          performance_score: number | null
+          priority_rank: number
+          provider_org_id: string
+          role: string
+          status: string
+          updated_at: string
+          zone_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          category: string
+          computed_at?: string | null
+          created_at?: string
+          formula_version?: string | null
+          id?: string
+          performance_score?: number | null
+          priority_rank?: number
+          provider_org_id: string
+          role?: string
+          status?: string
+          updated_at?: string
+          zone_id: string
+        }
+        Update: {
+          assigned_at?: string
+          category?: string
+          computed_at?: string | null
+          created_at?: string
+          formula_version?: string | null
+          id?: string
+          performance_score?: number | null
+          priority_rank?: number
+          provider_org_id?: string
+          role?: string
+          status?: string
+          updated_at?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zone_category_providers_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zone_category_providers_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       zone_health_snapshots: {
         Row: {
           active_subs: number | null
@@ -4500,6 +4717,16 @@ export type Database = {
       }
       create_provider_earning: { Args: { p_job_id: string }; Returns: Json }
       create_share_card: { Args: { p_job_id: string }; Returns: Json }
+      emit_notification: {
+        Args: {
+          p_body: string
+          p_data?: Json
+          p_title: string
+          p_type: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       generate_subscription_invoice: {
         Args: { p_subscription_id: string }
         Returns: Json
@@ -4515,6 +4742,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_service_week_usage: {
+        Args: { p_subscription_id: string }
+        Returns: Json
       }
       is_provider_org_member: { Args: { p_org_id: string }; Returns: boolean }
       override_referral_attribution: {
