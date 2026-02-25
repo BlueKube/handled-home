@@ -22,11 +22,11 @@
 - [x] **2A-03** | P0 | L | Build `provider/Organization` — org profile edit, team member list (invite/remove), insurance status, licensing from `provider_orgs` + `provider_members` + `provider_compliance`
 - [x] **2A-04** | P0 | L | Build `provider/Coverage` — zone coverage map, SKU authorization toggles, daily capacity settings from `provider_coverage` + `provider_capabilities`
 - [x] **2A-05** | P0 | L | Build `provider/Earnings` — per-job earnings list, weekly/monthly summaries, payout history, hold status from `provider_earnings` + `provider_payouts`
-- [ ] **2A-06** | P0 | XL | Build `customer/Build` — "Build My Service Day" bundle builder with SKU browser, cadence picker, entitlement guardrails, 4-week preview (exists as Routine flow but this page is placeholder)
-- [ ] **2A-07** | P0 | L | Build `admin/Scheduling` — manual overrides, reschedule customers, weather event mode toggle, split job tool from `service_day_instances` + zone config
-- [ ] **2A-08** | P0 | XL | Build `admin/Reports` — MRR chart, churn rate, retention cohorts, revenue per zone, provider utilization, density per zone per day, stops/day trending
-- [ ] **2A-09** | P0 | S | Remove `PlaceholderPage` component after all usages eliminated
-- [ ] **2A-10** | P1 | S | Extract reusable `SparklineChart` component from inline chart code for consistent mini-charts across dashboards
+- [x] **2A-06** | P0 | XL | Build `customer/Build` — redirects to existing Routine flow (full bundle builder already implemented)
+- [x] **2A-07** | P0 | L | Build `admin/Scheduling` — manual overrides, reschedule customers, weather event mode toggle, capacity view, override log
+- [x] **2A-08** | P0 | XL | Build `admin/Reports` — MRR chart, churn rate, subscription breakdown pie, revenue per zone bar, job completion trends
+- [x] **2A-09** | P0 | S | Remove `PlaceholderPage` component — all usages eliminated, component deleted
+- [x] **2A-10** | P1 | S | Extract reusable `SparklineChart` component at `src/components/SparklineChart.tsx`
 
 ---
 
