@@ -43,19 +43,19 @@ const tabsByRole: Record<AppRole, TabItem[]> = {
 };
 
 export function BottomTabBar() {
-  const { activeRole } = useAuth();
+  const { effectiveRole } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const tabs = tabsByRole[activeRole] ?? customerTabs;
+  const tabs = tabsByRole[effectiveRole] ?? customerTabs;
 
   const isActive = (tab: TabItem) => {
     if (tab.path.endsWith("/more")) {
       const otherPaths = tabs.filter((t) => !t.path.endsWith("/more")).map((t) => t.path);
       return !otherPaths.some(
-        (p) => location.pathname === p || (p !== `/${activeRole}` && location.pathname.startsWith(p))
-      ) && location.pathname.startsWith(`/${activeRole}`);
+        (p) => location.pathname === p || (p !== `/${effectiveRole}` && location.pathname.startsWith(p))
+      ) && location.pathname.startsWith(`/${effectiveRole}`);
     }
-    if (tab.path === `/${activeRole}`) {
+    if (tab.path === `/${effectiveRole}`) {
       return location.pathname === tab.path;
     }
     return location.pathname.startsWith(tab.path);

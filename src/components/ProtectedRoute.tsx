@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
-  const { user, loading, roles, activeRole } = useAuth();
+  const { user, loading, roles, activeRole, effectiveRole, previewRole } = useAuth();
 
   if (loading) {
     return (
@@ -27,8 +27,13 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     return <AccountNotConfigured />;
   }
 
-  if (requiredRole && activeRole !== requiredRole) {
-    return <Navigate to={`/${activeRole}`} replace />;
+  // Allow admin users to preview any role
+  if (requiredRole && effectiveRole !== requiredRole) {
+    if (activeRole === "admin" && previewRole) {
+      // Admin is previewing — allow access
+    } else {
+      return <Navigate to={`/${effectiveRole}`} replace />;
+    }
   }
 
   return <>{children}</>;
