@@ -16,6 +16,7 @@ export interface ProviderJob {
   arrived_at: string | null;
   departed_at: string | null;
   provider_summary: string | null;
+  route_order: number | null;
   created_at: string;
   updated_at: string;
   property?: { street_address: string; city: string; zip_code: string; gate_code: string | null; pets: any; parking_instructions: string | null; access_instructions: string | null };
@@ -50,7 +51,12 @@ export function useProviderJobs(filter: "today" | "upcoming" | "history" = "toda
         query = query.in("status", ["COMPLETED", "CANCELED"]).order("completed_at", { ascending: false });
       }
 
-      query = query.order("scheduled_date", { ascending: true });
+      // Sort by route_order first (optimized route), then scheduled_date, then created_at as fallback
+      if (filter === "today") {
+        query = query.order("route_order", { ascending: true, nullsFirst: false }).order("created_at", { ascending: true });
+      } else {
+        query = query.order("scheduled_date", { ascending: true });
+      }
 
       const { data, error } = await query;
       if (error) throw error;
