@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Bell, Moon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -12,6 +13,8 @@ const HOURS = Array.from({ length: 24 }, (_, i) => {
   return { value: `${h}:00:00`, label: `${h}:00` };
 });
 
+let toggleIdCounter = 0;
+
 function ToggleRow({
   label,
   helper,
@@ -25,13 +28,14 @@ function ToggleRow({
   disabled?: boolean;
   onCheckedChange?: (v: boolean) => void;
 }) {
+  const id = `notif-toggle-${label.replace(/\s+/g, "-").toLowerCase()}`;
   return (
     <div className="flex items-start justify-between gap-4 py-2">
       <div className="space-y-0.5">
-        <Label className="text-sm font-medium">{label}</Label>
+        <Label htmlFor={id} className="text-sm font-medium">{label}</Label>
         <p className="text-xs text-muted-foreground">{helper}</p>
       </div>
-      <Switch checked={checked} disabled={disabled} onCheckedChange={onCheckedChange} />
+      <Switch id={id} checked={checked} disabled={disabled} onCheckedChange={onCheckedChange} />
     </div>
   );
 }
@@ -101,42 +105,48 @@ export function NotificationPreferences() {
           </div>
 
           {preferences.quiet_hours_enabled && (
-            <div className="flex items-center gap-2 pl-1">
-              <Select
-                value={preferences.quiet_hours_start}
-                onValueChange={(v) => updatePreference({ field: "quiet_hours_start", value: v })}
-              >
-                <SelectTrigger className="w-24 h-9 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {HOURS.map((h) => (
-                    <SelectItem key={h.value} value={h.value}>
-                      {h.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <span className="text-xs text-muted-foreground">to</span>
-              <Select
-                value={preferences.quiet_hours_end}
-                onValueChange={(v) => updatePreference({ field: "quiet_hours_end", value: v })}
-              >
-                <SelectTrigger className="w-24 h-9 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {HOURS.map((h) => (
-                    <SelectItem key={h.value} value={h.value}>
-                      {h.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <QuietHoursConfig
+              start={preferences.quiet_hours_start}
+              end={preferences.quiet_hours_end}
+              onStartChange={(v) => updatePreference({ field: "quiet_hours_start", value: v })}
+              onEndChange={(v) => updatePreference({ field: "quiet_hours_end", value: v })}
+            />
           )}
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function QuietHoursConfig({ start, end, onStartChange, onEndChange }: {
+  start: string; end: string;
+  onStartChange: (v: string) => void; onEndChange: (v: string) => void;
+}) {
+  const duration = useMemo(() => {
+    const s = parseInt(start);
+    const e = parseInt(end);
+    const hrs = e > s ? e - s : 24 - s + e;
+    return `${hrs}h window`;
+  }, [start, end]);
+
+  return (
+    <div className="space-y-1.5 pl-1">
+      <div className="flex items-center gap-2">
+        <Select value={start} onValueChange={onStartChange}>
+          <SelectTrigger className="w-24 h-9 text-xs"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {HOURS.map((h) => (<SelectItem key={h.value} value={h.value}>{h.label}</SelectItem>))}
+          </SelectContent>
+        </Select>
+        <span className="text-xs text-muted-foreground">to</span>
+        <Select value={end} onValueChange={onEndChange}>
+          <SelectTrigger className="w-24 h-9 text-xs"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {HOURS.map((h) => (<SelectItem key={h.value} value={h.value}>{h.label}</SelectItem>))}
+          </SelectContent>
+        </Select>
+      </div>
+      <p className="text-[11px] text-muted-foreground/70">{duration}</p>
+    </div>
   );
 }

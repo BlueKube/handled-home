@@ -3,7 +3,7 @@ import { useAuth, AppRole } from "@/contexts/AuthContext";
 import {
   MapPin, Wallet, Users, HelpCircle, Settings,
   Building2, Package,
-  Gauge, CreditCard, CalendarDays, Megaphone, FileText, Lock,
+  CreditCard, CalendarDays, Megaphone, FileText, Lock,
   LogOut, Moon, Sun, TrendingUp, ChevronRight, BarChart3,
   AlertTriangle, Banknote, Clock,
 } from "lucide-react";
