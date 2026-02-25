@@ -16,9 +16,8 @@ const EMAIL_REGEX =
 const URL_REGEX =
   /https?:\/\/[^\s"'<>]+/gi;
 
-// Catches common "dot com" obfuscations like "mysite dot com"
-const OBFUSCATED_URL_REGEX =
-  /\b[a-zA-Z0-9\-]+\s*(?:dot|\.)?\s*(?:com|net|org|io|co)\b/gi;
+// NOTE: Obfuscated URL regex ("mysite dot com") removed — too many false positives
+// (Costco, Cisco, Monaco). Revisit only if real obfuscation patterns are observed.
 
 export interface ScrubResult {
   /** The cleaned text with PII replaced */
@@ -84,16 +83,13 @@ export function scrubPii(text: string): ScrubResult {
  */
 export function containsPii(text: string): boolean {
   if (!text) return false;
+  URL_REGEX.lastIndex = 0;
+  EMAIL_REGEX.lastIndex = 0;
   return (
     URL_REGEX.test(text) ||
-    EMAIL_REGEX.test(resetRegex(EMAIL_REGEX, text)) ||
+    EMAIL_REGEX.test(text) ||
     hasPhone(text)
   );
-}
-
-function resetRegex(regex: RegExp, text: string): string {
-  regex.lastIndex = 0;
-  return text;
 }
 
 function hasPhone(text: string): boolean {

@@ -341,16 +341,16 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | Round | Total | Done | % |
 |-------|-------|------|---|
 | 2A — Placeholders & Core | 16 | 16 | 100% |
-| 2B — Automation Engine | 21 | 15 | 71% |
-| 2C — Notifications | 9 | 0 | 0% |
+| 2B — Automation Engine | 31 | 31 | 100% |
+| 2C — Notifications | 26 | 9 | 35% |
 | 2D — Customer Polish | 18 | 0 | 0% |
 | 2E — Provider Polish | 13 | 0 | 0% |
 | 2F — Growth Engine | 13 | 0 | 0% |
 | 2G — Admin Intelligence | 11 | 0 | 0% |
 | 2H — Platform Hardening | 15 | 0 | 0% |
 | 2I — Future Moats | 9 | 0 | 0% |
-| **TOTAL** | **125** | **31** | **25%** |
+| **TOTAL** | **152** | **56** | **37%** |
 
 ---
 
-*Last updated: 2026-02-25 — Sprint 4 weather & scheduling completed*
+*Last updated: 2026-02-25 — Sprint C0 review fixes applied (emit_notification_event locked to service_role, PII scrubber lastIndex fix, redundant RLS consolidated)*
