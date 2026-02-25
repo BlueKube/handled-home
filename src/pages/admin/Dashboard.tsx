@@ -35,12 +35,12 @@ export default function AdminDashboard() {
       <p className="text-caption mb-6">Operations overview</p>
 
       {isLoading ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
         </div>
       ) : (
         <>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <StatCard icon={Users} label="Customers" value={counts?.customers ?? 0} />
             <StatCard icon={DollarSign} label="Paid Today" value={`$${((ops?.paidTodayCents ?? 0) / 100).toFixed(0)}`} />
             <StatCard icon={MapPin} label="Active Zones" value={counts?.activeZones ?? 0} />
