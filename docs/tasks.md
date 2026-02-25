@@ -122,10 +122,21 @@
 - [x] **2C-C0i** | P0 | S | Create PII scrubber utility (`src/lib/piiScrubber.ts`) — regex-based phone/email/URL detection + replacement. `scrubPii()` returns cleaned text + counts. `containsPii()` for boolean checks. 9 unit tests passing.
 
 ### Sprint C1: Notification Center UI
-- [ ] **2C-C1a** | P0 | M | Build `useNotifications` hook — fetch user's notifications with realtime subscription, unread count, mark-read mutation, mark-all-read.
-- [ ] **2C-C1b** | P0 | L | Build AppHeader bell icon with unread badge — slide-out panel for quick glance with filters (All/Critical/Service/Marketing), "View all" link to full-screen inbox.
-- [ ] **2C-C1c** | P0 | M | Build `/notifications` full-screen inbox route — notification list with priority indicators, CTA deep links, pull-to-refresh, "You're all set" empty state.
+- [x] **2C-C1a** | P0 | M | Build `useNotifications` hook — fetch user's notifications with realtime subscription, unread count, mark-read mutation, mark-all-read. Server-side priority filter, error toasts on mutations.
+- [x] **2C-C1b** | P0 | L | Build AppHeader bell icon with unread badge — slide-out panel with loading skeleton, "View all" link to full-screen inbox. Hook hoisted to Bell, passed as props to Panel (single realtime channel).
+- [x] **2C-C1c** | P0 | M | Build `/notifications` full-screen inbox route — priority tabs with server-side filtering, CTA deep links, load-more pagination, "No notifications" empty state. Ungated for customers.
 - [ ] **2C-C1d** | P1 | S | Add notification preference toggles to customer + provider Settings pages.
+
+#### Sprint C1 Review Fixes (9 findings — all resolved)
+- [x] **C1-F1** | MEDIUM | Hoisted useNotifications to NotificationBell, passed as props to Panel — eliminated duplicate realtime subscriptions
+- [x] **C1-F2** | MEDIUM | Removed CustomerPropertyGate from /customer/notifications route
+- [x] **C1-F3** | MEDIUM | Moved priority filter server-side in useNotifications hook
+- [x] **C1-F4** | LOW | Added loading skeleton to NotificationPanel
+- [x] **C1-F5** | LOW | Added onError toast to markRead/markAllRead mutations
+- [x] **C1-F6** | LOW | Replaced ChevronRight with Switch on dark mode toggle
+- [x] **C1-F7** | LOW | Removed redundant Dashboard entry from provider MoreMenu
+- [x] **C1-F8** | LOW | Fixed admin MoreMenu icons
+- [x] **C1-F9** | LOW | Replaced <a href> with <Link to> on NotFound page
 
 ### Sprint C2: Processor + Push Proof
 - [ ] **2C-C2a** | P0 | XL | Build `process-notification-events` edge function — claim PENDING events (SKIP LOCKED), resolve audience, apply preferences + quiet hours + rate limits, write notifications + delivery records, mark events PROCESSED/FAILED, retry logic (max 3 attempts → DEADLETTER).
