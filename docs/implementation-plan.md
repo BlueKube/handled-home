@@ -10,7 +10,7 @@ The build follows a module-by-module sequence. Each module has a dedicated spec 
 
 | Module | Name | Notes |
 |--------|------|-------|
-| 01 | Auth and Roles | RBAC with customer, provider, admin roles |
+| 01 | Auth and Roles | RBAC with customer, provider, admin roles. Includes Admin Preview Mode (`previewRole`/`effectiveRole`) for viewing the app as any role without database changes. |
 | 02 | Property Profiles | Address, lot size, pets, access instructions |
 | 03 | Zones and Capacity | Regions, zones, zip codes, stop/minute caps |
 | 04 | SKU Catalog | Governed service definitions, checklists, photo requirements |
@@ -21,6 +21,8 @@ The build follows a module-by-module sequence. Each module has a dedicated spec 
 | 09 | Job Execution | Checklist enforcement, photo capture, server-validated completion, exception handling |
 | 10 | Customer Dashboard and Proof | Visit timeline, photo gallery, structured issue reporting, 4-week preview |
 | 11 | Billing and Payouts | Ledger-first billing, Stripe Connect payouts, webhook processing, admin exception queue |
+| 12 | Support and Disputes | Deflection-first support, AI classification, macro responses, ticket lifecycle, resolution offers |
+| 13 | Referrals and Incentives | Referral programs, invite codes, provider/customer referral flows, growth event bus, viral surfaces, founding partner program, growth autopilot |
 
 ---
 
@@ -28,16 +30,22 @@ The build follows a module-by-module sequence. Each module has a dedicated spec 
 
 | Module | Name | Notes |
 |--------|------|-------|
-| 12 | Support and Disputes | Deflection-first design critical for unit economics |
+| 14 | Reporting and Analytics | Proves unit economics for scaling decisions |
 
 ---
 
 ## Remaining Modules
 
-| Module | Name | Notes |
-|--------|------|-------|
-| 13 | Referrals and Incentives | Growth lever — activate after retention is proven |
-| 14 | Reporting and Analytics | Proves unit economics for scaling decisions |
+All feature modules (01–13) are implemented. Module 14 (Reporting and Analytics) is the final module.
+
+---
+
+## Cross-Cutting Features (Implemented)
+
+| Feature | Notes |
+|---------|-------|
+| Admin Preview Mode | Admins can view Customer/Provider UIs via `PreviewAsCard` on all Settings pages. Uses `effectiveRole` throughout UI components. No banner — bottom tab bar indicates active view. |
+| Ops Cockpit | Unified admin operations dashboard with zone health, service days, jobs, billing, growth, support, and definitions tabs |
 
 ---
 
