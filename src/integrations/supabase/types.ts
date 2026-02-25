@@ -5276,7 +5276,7 @@ export type Database = {
               p_job_orders: Json
               p_provider_org_id: string
             }
-            Returns: undefined
+            Returns: Json
           }
       report_job_issue: {
         Args: {
