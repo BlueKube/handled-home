@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ProfileForm } from "@/components/settings/ProfileForm";
 import { ChangePasswordForm } from "@/components/settings/ChangePasswordForm";
 import { RoleSwitcher } from "@/components/settings/RoleSwitcher";
+import { PreviewAsCard } from "@/components/settings/PreviewAsCard";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -58,6 +59,8 @@ export default function AdminSettings() {
           </p>
         </CardContent>
       </Card>
+
+      <PreviewAsCard />
 
       <Button variant="destructive" onClick={handleSignOut} className="w-full flex items-center gap-2">
         <LogOut className="h-4 w-4" />

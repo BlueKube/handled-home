@@ -55,9 +55,9 @@ const menuByRole: Record<AppRole, MenuItem[]> = {
 };
 
 export default function MoreMenuPage() {
-  const { activeRole, signOut, roles, setActiveRole } = useAuth();
+  const { effectiveRole, signOut, roles } = useAuth();
   const navigate = useNavigate();
-  const items = menuByRole[activeRole] ?? customerMore;
+  const items = menuByRole[effectiveRole] ?? customerMore;
   const { theme, setTheme } = useTheme();
 
   const handleSignOut = async () => {
