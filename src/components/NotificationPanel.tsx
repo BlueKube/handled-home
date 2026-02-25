@@ -2,7 +2,6 @@ import { Bell, CheckCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNotifications } from "@/hooks/useNotifications";
 import {
   Sheet,
   SheetContent,
@@ -12,6 +11,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -23,16 +23,26 @@ const PRIORITY_DOT: Record<string, string> = {
   MARKETING: "bg-muted-foreground/50",
 };
 
+interface NotificationsData {
+  notifications: Notification[];
+  unreadCount: number;
+  isLoading: boolean;
+  markRead: (id: string) => void;
+  markAllRead: () => void;
+  isMarkingAllRead: boolean;
+}
+
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  notificationsData: NotificationsData;
 }
 
-export function NotificationPanel({ open, onOpenChange }: Props) {
+export function NotificationPanel({ open, onOpenChange, notificationsData }: Props) {
   const navigate = useNavigate();
   const { effectiveRole } = useAuth();
-  const { notifications, unreadCount, markRead, markAllRead, isMarkingAllRead } =
-    useNotifications();
+  const { notifications, unreadCount, markRead, markAllRead, isMarkingAllRead, isLoading } =
+    notificationsData;
 
   const handleClick = (n: Notification) => {
     if (!n.read_at) markRead(n.id);
@@ -65,7 +75,20 @@ export function NotificationPanel({ open, onOpenChange }: Props) {
         </SheetHeader>
 
         <ScrollArea className="flex-1">
-          {notifications.length === 0 ? (
+          {isLoading ? (
+            <div className="space-y-1 p-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex gap-3 px-4 py-3">
+                  <Skeleton className="h-2 w-2 rounded-full mt-1.5 shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-2.5 w-16" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
               <Bell className="h-10 w-10 opacity-30" />
               <p className="text-sm">You're all caught up</p>

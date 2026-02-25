@@ -5,7 +5,8 @@ import { NotificationPanel } from "./NotificationPanel";
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
-  const { unreadCount } = useNotifications();
+  const notificationsData = useNotifications();
+  const { unreadCount } = notificationsData;
 
   const displayCount = unreadCount > 9 ? "9+" : String(unreadCount);
 
@@ -23,7 +24,7 @@ export function NotificationBell() {
           </span>
         )}
       </button>
-      <NotificationPanel open={open} onOpenChange={setOpen} />
+      <NotificationPanel open={open} onOpenChange={setOpen} notificationsData={notificationsData} />
     </>
   );
 }

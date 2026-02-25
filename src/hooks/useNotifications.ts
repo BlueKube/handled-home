@@ -2,28 +2,34 @@ import { useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 
 type Notification = Database["public"]["Tables"]["notifications"]["Row"];
+type PriorityFilter = "ALL" | "CRITICAL" | "SERVICE" | "MARKETING";
 
 const QUERY_KEY = "notifications";
 const PAGE_SIZE = 50;
 
-export function useNotifications(limit = PAGE_SIZE) {
+export function useNotifications(limit = PAGE_SIZE, priorityFilter: PriorityFilter = "ALL") {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const userId = user?.id;
 
   const { data: notifications = [], isLoading } = useQuery({
-    queryKey: [QUERY_KEY, userId, limit],
+    queryKey: [QUERY_KEY, userId, limit, priorityFilter],
     queryFn: async () => {
       if (!userId) return [];
-      const { data, error } = await supabase
+      let query = supabase
         .from("notifications")
         .select("*")
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(limit);
+      if (priorityFilter !== "ALL") {
+        query = query.eq("priority", priorityFilter);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data as Notification[];
     },
@@ -71,6 +77,9 @@ export function useNotifications(limit = PAGE_SIZE) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY, userId] });
     },
+    onError: () => {
+      toast.error("Failed to mark notification as read");
+    },
   });
 
   const markAllRead = useMutation({
@@ -84,6 +93,9 @@ export function useNotifications(limit = PAGE_SIZE) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY, userId] });
+    },
+    onError: () => {
+      toast.error("Failed to mark all notifications as read");
     },
   });
 
