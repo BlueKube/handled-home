@@ -57,41 +57,22 @@ export function useWaitlistSummary() {
   });
 }
 
-/** Public: join waitlist */
+/** Public: join waitlist via edge function (rate-limited, server-side zone lookup) */
 export function useJoinWaitlist() {
   return useMutation({
     mutationFn: async (entry: { email: string; full_name?: string; zip_code: string; source?: string; referral_code?: string }) => {
-      // Try to find a matching zone for this zip
-      const { data: zones } = await supabase
-        .from("zones")
-        .select("id, zip_codes")
-        .eq("status", "active");
-
-      let zoneId: string | null = null;
-      for (const zone of zones || []) {
-        if ((zone.zip_codes as string[])?.includes(entry.zip_code)) {
-          zoneId = zone.id;
-          break;
-        }
-      }
-
-      const { error } = await supabase
-        .from("waitlist_entries")
-        .insert({
+      const { data, error } = await supabase.functions.invoke("join-waitlist", {
+        body: {
           email: entry.email,
-          full_name: entry.full_name || null,
+          full_name: entry.full_name,
           zip_code: entry.zip_code,
-          zone_id: zoneId,
-          source: entry.source || "website",
-          referral_code: entry.referral_code || null,
-        });
+          source: entry.source,
+          referral_code: entry.referral_code,
+        },
+      });
 
-      if (error) {
-        if (error.message.includes("duplicate")) {
-          throw new Error("You're already on the waitlist for this area!");
-        }
-        throw error;
-      }
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
     },
   });
 }
