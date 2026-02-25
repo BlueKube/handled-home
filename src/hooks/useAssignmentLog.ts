@@ -14,6 +14,7 @@ export interface AssignmentLogEntry {
   assigned_at: string;
   assigned_by: string;
   created_at: string;
+  provider_org_name?: string;
 }
 
 export function useAssignmentLog(filters: { zoneId?: string; limit?: number } = {}) {
@@ -27,7 +28,6 @@ export function useAssignmentLog(filters: { zoneId?: string; limit?: number } = 
         .limit(filters.limit ?? 50);
 
       if (filters.zoneId) {
-        // Filter by zone through jobs table
         const { data: jobIds } = await supabase
           .from("jobs")
           .select("id")
@@ -43,7 +43,24 @@ export function useAssignmentLog(filters: { zoneId?: string; limit?: number } = 
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as AssignmentLogEntry[];
+      const logs = data as AssignmentLogEntry[];
+
+      // Resolve provider org names
+      const orgIds = [...new Set(logs.map((l) => l.provider_org_id).filter(Boolean))] as string[];
+      if (orgIds.length) {
+        const { data: orgs } = await supabase
+          .from("provider_orgs")
+          .select("id, name")
+          .in("id", orgIds);
+        const orgMap = new Map(orgs?.map((o) => [o.id, o.name]) ?? []);
+        logs.forEach((l) => {
+          if (l.provider_org_id) {
+            l.provider_org_name = orgMap.get(l.provider_org_id) ?? undefined;
+          }
+        });
+      }
+
+      return logs;
     },
   });
 }

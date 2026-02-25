@@ -60,10 +60,9 @@ Deno.serve(async (req) => {
 
     if (jobsErr) throw jobsErr;
 
-    // Filter to jobs that need assignment (no provider_org_id set, or we want to reassign)
-    // For now, we only assign jobs that don't have a provider yet
+    // Filter to jobs that need assignment (no provider_org_id set)
     const jobsToAssign = (unassignedJobs ?? []).filter(
-      (j) => !j.provider_org_id || j.status === "assigned"
+      (j) => !j.provider_org_id
     );
 
     const results: { job_id: string; result: any }[] = [];
