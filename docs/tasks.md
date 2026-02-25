@@ -81,6 +81,12 @@
 - [x] **S4-F9** | Added composite index idx_weather_events_zone_status_dates for is_weather_affected performance
 - [x] **S4-F10** | Scoped admin holiday_calendar policy (public SELECT remains, admin ALL for writes)
 
+#### Sprint 4 Review Fix Round 2 (4 findings from rewrite)
+- [x] **S4-F11** | Restored `jsonb` return type on approve_weather_event (affected_jobs count returned)
+- [x] **S4-F12** | Restored job-based notification targeting (only customers/providers with scheduled jobs in date range)
+- [x] **S4-F13** | Restored affected job count query for admin feedback
+- [x] **S4-F14** | Verified emit_notification param names match function signature (p_user_id, p_type, p_title, p_body, p_data) — no issue
+
 ### Sprint 5: Zone Expansion
 - [ ] **2B-14** | P1 | L | Capacity-based zone expansion triggers — `expansion_suggestions` table, `evaluate-zone-expansion` weekly edge function.
 - [ ] **2B-15** | P1 | M | Waitlist system — `waitlist_entries` table, public signup via rate-limited edge function, auto-notify on zone launch.
