@@ -28,6 +28,14 @@
 - [x] **2A-09** | P0 | S | Remove `PlaceholderPage` component — all usages eliminated, component deleted
 - [x] **2A-10** | P1 | S | Extract reusable `SparklineChart` component at `src/components/SparklineChart.tsx`
 
+### 2A Cleanup (Claude Review Follow-ups)
+- [x] **2A-C1** | S | Wire `SparklineChart` into `OpsCockpit.tsx` and `OpsZones.tsx` — replaced inline SVG `Sparkline` functions
+- [x] **2A-C2** | S | Add error state UI to Provider pages (Dashboard, Performance, Coverage, Earnings) — `QueryErrorCard` component with retry
+- [x] **2A-C3** | S | Fix `any` types in `Coverage.tsx` — replaced with `CoverageRow` and `CapabilityRow` interfaces
+- [x] **2A-C4** | S | Add form validation to `Organization.tsx` — name required, phone format, ZIP format with inline errors
+- [x] **2A-C5** | S | Add `useMemo` for balance calculations in `Earnings.tsx`
+- [x] **2A-C6** | S | Update `tasks.md` tracker to reflect full 2A completion + cleanup
+
 ---
 
 ## Round 2B — Automation Engine (Business Runs Itself)

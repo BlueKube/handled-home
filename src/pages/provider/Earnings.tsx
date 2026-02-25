@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { StatCard } from "@/components/StatCard";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { useProviderEarnings } from "@/hooks/useProviderEarnings";
 import {
   DollarSign,
@@ -36,7 +37,7 @@ function statusVariant(status: string): "default" | "secondary" | "outline" | "d
 }
 
 function EarningsList() {
-  const { earnings, isLoading } = useProviderEarnings();
+  const { earnings, isLoading, isError, refetch } = useProviderEarnings();
 
   if (isLoading) {
     return (
@@ -46,6 +47,10 @@ function EarningsList() {
         ))}
       </div>
     );
+  }
+
+  if (isError) {
+    return <QueryErrorCard message="Failed to load earnings." onRetry={() => refetch()} />;
   }
 
   if (earnings.length === 0) {
@@ -60,9 +65,9 @@ function EarningsList() {
 
   return (
     <div className="space-y-2">
-      {earnings.map((e: any) => {
-        const jobDate = e.jobs?.scheduled_date;
-        const address = e.jobs?.properties?.street_address;
+      {earnings.map((e) => {
+        const jobDate = (e as any).jobs?.scheduled_date;
+        const address = (e as any).jobs?.properties?.street_address;
         return (
           <Card key={e.id} className="p-3">
             <div className="flex items-center gap-3">
@@ -107,7 +112,7 @@ function EarningsList() {
 }
 
 function PayoutsList() {
-  const { payouts, isLoading } = useProviderEarnings();
+  const { payouts, isLoading, isError, refetch } = useProviderEarnings();
 
   if (isLoading) {
     return (
@@ -117,6 +122,10 @@ function PayoutsList() {
         ))}
       </div>
     );
+  }
+
+  if (isError) {
+    return <QueryErrorCard message="Failed to load payouts." onRetry={() => refetch()} />;
   }
 
   if (payouts.length === 0) {
@@ -157,8 +166,14 @@ export default function ProviderEarnings() {
   const { eligibleBalance, heldBalance, earnings, payouts, isAccountReady, isLoading } =
     useProviderEarnings();
 
-  const totalEarned = earnings.reduce((sum, e) => sum + e.total_cents, 0);
-  const totalPaid = payouts.reduce((sum: number, p: any) => sum + (p.amount_cents ?? 0), 0);
+  const totalEarned = useMemo(
+    () => earnings.reduce((sum, e) => sum + e.total_cents, 0),
+    [earnings]
+  );
+  const totalPaid = useMemo(
+    () => payouts.reduce((sum: number, p: any) => sum + (p.amount_cents ?? 0), 0),
+    [payouts]
+  );
 
   return (
     <div className="animate-fade-in p-4 pb-24 space-y-5 max-w-2xl">

@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { useProviderOrg } from "@/hooks/useProviderOrg";
 import { useProviderCoverage } from "@/hooks/useProviderCoverage";
 import { useProviderCapabilities } from "@/hooks/useProviderCapabilities";
@@ -15,11 +16,35 @@ import {
   Camera,
 } from "lucide-react";
 
+/** Typed coverage row from the query join */
+interface CoverageRow {
+  id: string;
+  coverage_type: string | null;
+  request_status: string;
+  max_travel_miles: number | null;
+  zones: { name: string } | null;
+}
+
+/** Typed capability row from the query join */
+interface CapabilityRow {
+  id: string;
+  capability_key: string;
+  is_enabled: boolean;
+  sku_id: string | null;
+  service_skus: {
+    name: string;
+    category: string;
+    duration_minutes: number | null;
+    required_photos: number | null;
+  } | null;
+}
+
 function CoverageZones() {
   const { org } = useProviderOrg();
-  const { coverage, loading } = useProviderCoverage(org?.id);
+  const { coverage, loading, isError, refetch } = useProviderCoverage(org?.id);
 
   if (loading) return <Skeleton className="h-32 rounded-xl" />;
+  if (isError) return <QueryErrorCard message="Failed to load coverage zones." onRetry={() => refetch()} />;
 
   return (
     <Card>
@@ -41,7 +66,7 @@ function CoverageZones() {
           </div>
         ) : (
           <div className="space-y-3">
-            {coverage.map((c: any) => (
+            {(coverage as CoverageRow[]).map((c) => (
               <div key={c.id} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
                 <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
                   <MapPin className="h-4 w-4 text-accent" />
@@ -74,13 +99,14 @@ function CoverageZones() {
 
 function SkuCapabilities() {
   const { org } = useProviderOrg();
-  const { capabilities, loading, toggleCapability } = useProviderCapabilities(org?.id);
+  const { capabilities, loading, toggleCapability, isError, refetch } = useProviderCapabilities(org?.id);
 
   if (loading) return <Skeleton className="h-48 rounded-xl" />;
+  if (isError) return <QueryErrorCard message="Failed to load capabilities." onRetry={() => refetch()} />;
 
   // Group by category
-  const grouped: Record<string, typeof capabilities> = {};
-  capabilities.forEach((cap: any) => {
+  const grouped: Record<string, CapabilityRow[]> = {};
+  (capabilities as CapabilityRow[]).forEach((cap) => {
     const cat = cap.service_skus?.category ?? cap.capability_key ?? "Other";
     if (!grouped[cat]) grouped[cat] = [];
     grouped[cat].push(cap);
@@ -97,7 +123,7 @@ function SkuCapabilities() {
             Service Capabilities
           </CardTitle>
           <Badge variant="outline" className="text-xs">
-            {capabilities.filter((c: any) => c.is_enabled).length}/{capabilities.length} active
+            {(capabilities as CapabilityRow[]).filter((c) => c.is_enabled).length}/{capabilities.length} active
           </Badge>
         </div>
       </CardHeader>
@@ -116,7 +142,7 @@ function SkuCapabilities() {
                   {cat}
                 </h3>
                 <div className="space-y-2">
-                  {grouped[cat].map((cap: any) => {
+                  {grouped[cat].map((cap) => {
                     const sku = cap.service_skus;
                     return (
                       <div
@@ -181,7 +207,7 @@ function SkuCapabilities() {
 }
 
 export default function ProviderCoverage() {
-  const { loading } = useProviderOrg();
+  const { loading, isError, refetch } = useProviderOrg();
 
   if (loading) {
     return (
@@ -189,6 +215,15 @@ export default function ProviderCoverage() {
         <h1 className="text-h2">Coverage & Capacity</h1>
         <Skeleton className="h-32 rounded-xl" />
         <Skeleton className="h-48 rounded-xl" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="animate-fade-in p-4 pb-24 space-y-4 max-w-2xl">
+        <h1 className="text-h2">Coverage & Capacity</h1>
+        <QueryErrorCard message="Failed to load organization data." onRetry={() => refetch()} />
       </div>
     );
   }

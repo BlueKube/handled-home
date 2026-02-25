@@ -44,5 +44,5 @@ export function useProviderCoverage(orgId?: string) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["provider_coverage"] }),
   });
 
-  return { coverage: coverageQuery.data ?? [], loading: coverageQuery.isLoading, addCoverage, removeCoverage };
+  return { coverage: coverageQuery.data ?? [], loading: coverageQuery.isLoading, isError: coverageQuery.isError, refetch: coverageQuery.refetch, addCoverage, removeCoverage };
 }

@@ -73,6 +73,8 @@ export function useProviderEarnings() {
     eligibleBalance,
     heldBalance,
     isLoading: earningsQuery.isLoading,
+    isError: earningsQuery.isError || payoutsQuery.isError,
+    refetch: earningsQuery.refetch,
     isAccountReady: payoutAccountQuery.data?.status === "READY",
   };
 }
