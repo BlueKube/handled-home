@@ -778,6 +778,68 @@ export type Database = {
           },
         ]
       }
+      expansion_suggestions: {
+        Row: {
+          created_at: string
+          explain_admin: string | null
+          id: string
+          idempotency_key: string | null
+          metrics: Json
+          priority: string
+          proposed_action: Json | null
+          recommendation: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by_admin_user_id: string | null
+          status: string
+          suggestion_type: string
+          updated_at: string
+          zone_id: string
+        }
+        Insert: {
+          created_at?: string
+          explain_admin?: string | null
+          id?: string
+          idempotency_key?: string | null
+          metrics?: Json
+          priority?: string
+          proposed_action?: Json | null
+          recommendation: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by_admin_user_id?: string | null
+          status?: string
+          suggestion_type: string
+          updated_at?: string
+          zone_id: string
+        }
+        Update: {
+          created_at?: string
+          explain_admin?: string | null
+          id?: string
+          idempotency_key?: string | null
+          metrics?: Json
+          priority?: string
+          proposed_action?: Json | null
+          recommendation?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by_admin_user_id?: string | null
+          status?: string
+          suggestion_type?: string
+          updated_at?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expansion_suggestions_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       growth_autopilot_actions: {
         Row: {
           action_type: string
@@ -4452,6 +4514,65 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist_entries: {
+        Row: {
+          converted_at: string | null
+          converted_user_id: string | null
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          metadata: Json | null
+          notified_at: string | null
+          referral_code: string | null
+          source: string
+          status: string
+          updated_at: string
+          zip_code: string
+          zone_id: string | null
+        }
+        Insert: {
+          converted_at?: string | null
+          converted_user_id?: string | null
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id?: string
+          metadata?: Json | null
+          notified_at?: string | null
+          referral_code?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          zip_code: string
+          zone_id?: string | null
+        }
+        Update: {
+          converted_at?: string | null
+          converted_user_id?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          metadata?: Json | null
+          notified_at?: string | null
+          referral_code?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          zip_code?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waitlist_entries_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       weather_events: {
         Row: {
           affected_date_end: string
@@ -5059,6 +5180,16 @@ export type Database = {
         Returns: string[]
       }
       get_share_card_public: { Args: { p_share_code: string }; Returns: Json }
+      get_waitlist_summary: {
+        Args: never
+        Returns: {
+          earliest_entry: string
+          entry_count: number
+          zip_code: string
+          zone_id: string
+          zone_name: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -5076,6 +5207,7 @@ export type Database = {
         Args: { p_date: string; p_zone_id: string }
         Returns: boolean
       }
+      notify_waitlist_on_launch: { Args: { p_zone_id: string }; Returns: Json }
       override_referral_attribution: {
         Args: {
           p_new_referrer_id: string
@@ -5146,6 +5278,10 @@ export type Database = {
         Returns: Json
       }
       resolve_weather_event: { Args: { p_event_id: string }; Returns: Json }
+      review_expansion_suggestion: {
+        Args: { p_decision: string; p_note?: string; p_suggestion_id: string }
+        Returns: undefined
+      }
       revoke_share_card: {
         Args: { p_share_card_id: string }
         Returns: undefined
