@@ -69,6 +69,18 @@
 - [x] **2B-12** | P1 | L | Auto-weather detection — `check-weather` edge function with WeatherAPI.com, advisory vs severe thresholds, PENDING event for admin approval. Requires WEATHER_API_KEY secret.
 - [x] **2B-13** | P1 | M | Holiday calendar — `holiday_calendar` table, pre-seeded US federal holidays 2026-2027, `is_holiday()` helper RPC, job generation skip support.
 
+#### Sprint 4 Review Fixes (10 findings)
+- [x] **S4-F1** | Consolidated duplicate weather_events SELECT policies into single authenticated policy
+- [x] **S4-F2** | Removed dead 'approved' status — approval goes straight to 'active' (documented as design intent)
+- [x] **S4-F3** | Switched approve_weather_event + check-weather to use emit_notification() consistently
+- [x] **S4-F4** | Fixed notification title/body swap — title uses event title, body uses explain_customer/explain_provider
+- [x] **S4-F5** | Added missing 2027 Columbus Day + Veterans Day holidays
+- [x] **S4-F6** | (Noted) WeatherAPI.com only supports query param auth — unavoidable
+- [x] **S4-F7** | check-weather returns 400 error if WEATHER_API_KEY not configured (no silent no-op)
+- [x] **S4-F8** | check-weather updates cron_run_log to 'failed' with error_message in catch block
+- [x] **S4-F9** | Added composite index idx_weather_events_zone_status_dates for is_weather_affected performance
+- [x] **S4-F10** | Scoped admin holiday_calendar policy (public SELECT remains, admin ALL for writes)
+
 ### Sprint 5: Zone Expansion
 - [ ] **2B-14** | P1 | L | Capacity-based zone expansion triggers — `expansion_suggestions` table, `evaluate-zone-expansion` weekly edge function.
 - [ ] **2B-15** | P1 | M | Waitlist system — `waitlist_entries` table, public signup via rate-limited edge function, auto-notify on zone launch.

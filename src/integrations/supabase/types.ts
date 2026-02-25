@@ -4999,7 +4999,10 @@ export type Database = {
             Args: { p_admin_user_id?: string; p_reward_id: string }
             Returns: undefined
           }
-      approve_weather_event: { Args: { p_event_id: string }; Returns: Json }
+      approve_weather_event: {
+        Args: { p_event_id: string }
+        Returns: undefined
+      }
       attribute_referral_signup: {
         Args: { p_referral_code: string }
         Returns: undefined
