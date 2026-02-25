@@ -70,6 +70,8 @@ export function useProviderOrg() {
   return {
     org: orgQuery.data,
     loading: orgQuery.isLoading,
+    isError: orgQuery.isError,
+    refetch: orgQuery.refetch,
     createOrg,
     updateOrg,
     submitOnboarding,

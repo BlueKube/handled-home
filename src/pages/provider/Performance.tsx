@@ -2,6 +2,7 @@ import { StatCard } from "@/components/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { useProviderPerformance } from "@/hooks/useProviderPerformance";
 import {
   CheckCircle,
@@ -56,7 +57,6 @@ function SnapshotTrend({ snapshots }: { snapshots: { snapshot_date: string; comp
     );
   }
 
-  // Show last 14 days as a mini bar chart
   const recent = [...snapshots].reverse().slice(-14);
   const maxVal = Math.max(...recent.map((s) => s.completed_jobs ?? 0), 1);
 
@@ -80,7 +80,7 @@ function SnapshotTrend({ snapshots }: { snapshots: { snapshot_date: string; comp
 }
 
 export default function ProviderPerformance() {
-  const { data, isLoading } = useProviderPerformance();
+  const { data, isLoading, isError, refetch } = useProviderPerformance();
 
   if (isLoading) {
     return (
@@ -96,11 +96,19 @@ export default function ProviderPerformance() {
     );
   }
 
+  if (isError) {
+    return (
+      <div className="animate-fade-in p-4 pb-24 space-y-4 max-w-2xl">
+        <h1 className="text-h2">Performance</h1>
+        <QueryErrorCard message="Failed to load performance data." onRetry={() => refetch()} />
+      </div>
+    );
+  }
+
   const stats = data?.jobStats;
   const snapshots = data?.snapshots ?? [];
   const enforcements = data?.enforcements ?? [];
 
-  // Latest snapshot for proof compliance
   const latestSnapshot = snapshots.length > 0 ? snapshots[0] : null;
   const proofCompliance = latestSnapshot?.proof_compliance != null ? Math.round(Number(latestSnapshot.proof_compliance)) : null;
   const issueRate = latestSnapshot?.issue_rate != null ? Math.round(Number(latestSnapshot.issue_rate) * 100) : null;
@@ -112,31 +120,13 @@ export default function ProviderPerformance() {
         <p className="text-caption mt-0.5">Last 30 days</p>
       </div>
 
-      {/* Key Stats */}
       <div className="grid gap-3 grid-cols-2">
-        <StatCard
-          icon={CheckCircle}
-          label="Jobs Completed"
-          value={stats?.totalCompleted ?? 0}
-        />
-        <StatCard
-          icon={Clock}
-          label="Avg Time On Site"
-          value={stats?.avgCompletionMinutes ? `${stats.avgCompletionMinutes} min` : "—"}
-        />
-        <StatCard
-          icon={RotateCcw}
-          label="Redo Requests"
-          value={stats?.redoCount ?? 0}
-        />
-        <StatCard
-          icon={XCircle}
-          label="Canceled"
-          value={stats?.totalCanceled ?? 0}
-        />
+        <StatCard icon={CheckCircle} label="Jobs Completed" value={stats?.totalCompleted ?? 0} />
+        <StatCard icon={Clock} label="Avg Time On Site" value={stats?.avgCompletionMinutes ? `${stats.avgCompletionMinutes} min` : "—"} />
+        <StatCard icon={RotateCcw} label="Redo Requests" value={stats?.redoCount ?? 0} />
+        <StatCard icon={XCircle} label="Canceled" value={stats?.totalCanceled ?? 0} />
       </div>
 
-      {/* Performance Rings */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
@@ -146,26 +136,13 @@ export default function ProviderPerformance() {
         </CardHeader>
         <CardContent>
           <div className="flex justify-around py-2">
-            <MetricRing
-              value={stats?.onTimeRate ?? null}
-              label="On-Time Rate"
-              color="hsl(var(--success))"
-            />
-            <MetricRing
-              value={proofCompliance}
-              label="Photo Compliance"
-              color="hsl(var(--accent))"
-            />
-            <MetricRing
-              value={issueRate !== null ? Math.max(0, 100 - issueRate) : null}
-              label="Issue-Free"
-              color="hsl(var(--warning))"
-            />
+            <MetricRing value={stats?.onTimeRate ?? null} label="On-Time Rate" color="hsl(var(--success))" />
+            <MetricRing value={proofCompliance} label="Photo Compliance" color="hsl(var(--accent))" />
+            <MetricRing value={issueRate !== null ? Math.max(0, 100 - issueRate) : null} label="Issue-Free" color="hsl(var(--warning))" />
           </div>
         </CardContent>
       </Card>
 
-      {/* Jobs Completed Trend */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Daily Completions</CardTitle>
@@ -180,7 +157,6 @@ export default function ProviderPerformance() {
         </CardContent>
       </Card>
 
-      {/* SLA / Enforcement Status */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">

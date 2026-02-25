@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { useProviderOrg } from "@/hooks/useProviderOrg";
 import { useProviderMembers } from "@/hooks/useProviderMembers";
 import { useProviderCompliance } from "@/hooks/useProviderCompliance";
@@ -24,6 +25,24 @@ import {
   FileText,
 } from "lucide-react";
 
+interface FormErrors {
+  name?: string;
+  contact_phone?: string;
+  home_base_zip?: string;
+}
+
+function validateOrgForm(form: { name: string; contact_phone: string; home_base_zip: string }): FormErrors {
+  const errors: FormErrors = {};
+  if (!form.name.trim()) errors.name = "Company name is required.";
+  if (form.contact_phone && !/^\+?[\d\s\-().]{7,20}$/.test(form.contact_phone)) {
+    errors.contact_phone = "Enter a valid phone number.";
+  }
+  if (form.home_base_zip && !/^\d{5}(-\d{4})?$/.test(form.home_base_zip)) {
+    errors.home_base_zip = "Enter a valid 5-digit ZIP code.";
+  }
+  return errors;
+}
+
 function OrgProfileSection() {
   const { org, updateOrg } = useProviderOrg();
   const [editing, setEditing] = useState(false);
@@ -33,14 +52,20 @@ function OrgProfileSection() {
     home_base_zip: org?.home_base_zip ?? "",
     website: org?.website ?? "",
   });
+  const [errors, setErrors] = useState<FormErrors>({});
 
   if (!org) return null;
 
   const handleSave = async () => {
+    const validationErrors = validateOrgForm(form);
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) return;
+
     try {
       await updateOrg.mutateAsync({ id: org.id, ...form });
       toast.success("Organization updated");
       setEditing(false);
+      setErrors({});
     } catch {
       toast.error("Failed to update organization");
     }
@@ -62,6 +87,7 @@ function OrgProfileSection() {
                 home_base_zip: org.home_base_zip ?? "",
                 website: org.website ?? "",
               });
+              setErrors({});
               setEditing(true);
             }}>
               Edit
@@ -100,16 +126,19 @@ function OrgProfileSection() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="org-name">Company Name</Label>
+          <Label htmlFor="org-name">Company Name *</Label>
           <Input id="org-name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
+          {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="org-phone">Contact Phone</Label>
-          <Input id="org-phone" value={form.contact_phone} onChange={(e) => setForm((f) => ({ ...f, contact_phone: e.target.value }))} />
+          <Input id="org-phone" value={form.contact_phone} onChange={(e) => setForm((f) => ({ ...f, contact_phone: e.target.value }))} placeholder="(555) 123-4567" />
+          {errors.contact_phone && <p className="text-xs text-destructive">{errors.contact_phone}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="org-zip">Home Base ZIP</Label>
-          <Input id="org-zip" value={form.home_base_zip} onChange={(e) => setForm((f) => ({ ...f, home_base_zip: e.target.value }))} />
+          <Input id="org-zip" value={form.home_base_zip} onChange={(e) => setForm((f) => ({ ...f, home_base_zip: e.target.value }))} placeholder="12345" maxLength={10} />
+          {errors.home_base_zip && <p className="text-xs text-destructive">{errors.home_base_zip}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="org-web">Website</Label>
@@ -119,7 +148,7 @@ function OrgProfileSection() {
           <Button onClick={handleSave} disabled={updateOrg.isPending} className="flex-1">
             {updateOrg.isPending ? "Saving…" : "Save"}
           </Button>
-          <Button variant="outline" onClick={() => setEditing(false)} className="flex-1">
+          <Button variant="outline" onClick={() => { setEditing(false); setErrors({}); }} className="flex-1">
             Cancel
           </Button>
         </div>
@@ -248,7 +277,7 @@ function InfoRow({ icon: Icon, label, value }: { icon: React.ComponentType<{ cla
 }
 
 export default function ProviderOrganization() {
-  const { org, loading } = useProviderOrg();
+  const { org, loading, isError, refetch } = useProviderOrg();
 
   if (loading) {
     return (
@@ -257,6 +286,15 @@ export default function ProviderOrganization() {
         <Skeleton className="h-40 rounded-xl" />
         <Skeleton className="h-32 rounded-xl" />
         <Skeleton className="h-40 rounded-xl" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="animate-fade-in p-4 pb-24 space-y-4 max-w-2xl">
+        <h1 className="text-h2">Organization</h1>
+        <QueryErrorCard message="Failed to load organization data." onRetry={() => refetch()} />
       </div>
     );
   }

@@ -11,29 +11,10 @@ import {
   Users, Briefcase, TrendingUp, Send,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { SparklineChart } from "@/components/SparklineChart";
 
 function formatCents(cents: number) {
   return "$" + (cents / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-}
-
-/** Tiny inline SVG sparkline from an array of numbers */
-function Sparkline({ data, className = "" }: { data: number[]; className?: string }) {
-  if (!data || data.length < 2) return null;
-  const max = Math.max(...data, 1);
-  const min = Math.min(...data, 0);
-  const range = max - min || 1;
-  const w = 60;
-  const h = 20;
-  const points = data.map((v, i) => {
-    const x = (i / (data.length - 1)) * w;
-    const y = h - ((v - min) / range) * h;
-    return `${x},${y}`;
-  }).join(" ");
-  return (
-    <svg width={w} height={h} className={`inline-block ${className}`} viewBox={`0 0 ${w} ${h}`}>
-      <polyline points={points} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
 }
 
 export default function OpsCockpit() {
@@ -116,11 +97,11 @@ export default function OpsCockpit() {
         <div className="grid gap-3 grid-cols-3">
           <div onClick={() => nav("/admin/ops/jobs")} className="cursor-pointer">
             <StatCard icon={Bug} label="Issue Rate" value={`${m.issueRate}%`} />
-            {m.trends.issue_rate_7d && <Sparkline data={m.trends.issue_rate_7d} className="text-destructive mt-1" />}
+            {m.trends.issue_rate_7d && <SparklineChart data={m.trends.issue_rate_7d} color="hsl(var(--destructive))" height={20} className="mt-1" />}
           </div>
           <div onClick={() => nav("/admin/ops/billing")} className="cursor-pointer">
             <StatCard icon={CreditCardIcon} label="Credits Issued" value={formatCents(m.creditsIssuedCents)} />
-            {m.trends.credits_issued_7d_cents && <Sparkline data={m.trends.credits_issued_7d_cents} className="text-warning mt-1" />}
+            {m.trends.credits_issued_7d_cents && <SparklineChart data={m.trends.credits_issued_7d_cents} color="hsl(var(--warning))" height={20} className="mt-1" />}
           </div>
           <div onClick={() => nav("/admin/ops/jobs")} className="cursor-pointer">
             <StatCard icon={RotateCcw} label="Redo Intents" value={m.redoIntents} />
@@ -137,7 +118,7 @@ export default function OpsCockpit() {
           </div>
           <div onClick={() => nav("/admin/ops/billing?tab=past-due")} className="cursor-pointer">
             <StatCard icon={UserX} label="Past Due" value={m.pastDueCount} />
-            {m.trends.past_due_count && <Sparkline data={m.trends.past_due_count} className="text-destructive mt-1" />}
+            {m.trends.past_due_count && <SparklineChart data={m.trends.past_due_count} color="hsl(var(--destructive))" height={20} className="mt-1" />}
           </div>
           <div onClick={() => nav("/admin/ops/billing?tab=failed")} className="cursor-pointer">
             <StatCard icon={XCircle} label="Failed Today" value={m.failedPaymentsToday} />

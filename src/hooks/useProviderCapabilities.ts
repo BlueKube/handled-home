@@ -44,5 +44,5 @@ export function useProviderCapabilities(orgId?: string) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["provider_capabilities"] }),
   });
 
-  return { capabilities: capabilitiesQuery.data ?? [], loading: capabilitiesQuery.isLoading, toggleCapability };
+  return { capabilities: capabilitiesQuery.data ?? [], loading: capabilitiesQuery.isLoading, isError: capabilitiesQuery.isError, refetch: capabilitiesQuery.refetch, toggleCapability };
 }

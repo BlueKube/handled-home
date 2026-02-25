@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { useProviderJobs, ProviderJob } from "@/hooks/useProviderJobs";
 import { useProviderEarnings } from "@/hooks/useProviderEarnings";
 import { useAuth } from "@/contexts/AuthContext";
@@ -66,7 +67,7 @@ function QuickJobCard({ job, index }: { job: ProviderJob; index: number }) {
 }
 
 function TodaysJobsList() {
-  const { data: jobs, isLoading } = useProviderJobs("today");
+  const { data: jobs, isLoading, isError, refetch } = useProviderJobs("today");
   const navigate = useNavigate();
 
   if (isLoading) {
@@ -77,6 +78,10 @@ function TodaysJobsList() {
         ))}
       </div>
     );
+  }
+
+  if (isError) {
+    return <QueryErrorCard message="Failed to load today's jobs." onRetry={() => refetch()} />;
   }
 
   if (!jobs || jobs.length === 0) {
@@ -112,10 +117,14 @@ function TodaysJobsList() {
 }
 
 function UpcomingPreview() {
-  const { data: jobs, isLoading } = useProviderJobs("upcoming");
+  const { data: jobs, isLoading, isError, refetch } = useProviderJobs("upcoming");
 
   if (isLoading) {
     return <Skeleton className="h-20 w-full rounded-xl" />;
+  }
+
+  if (isError) {
+    return <QueryErrorCard message="Failed to load upcoming jobs." onRetry={() => refetch()} />;
   }
 
   const upcoming = (jobs ?? []).slice(0, 3);
@@ -157,8 +166,8 @@ function UpcomingPreview() {
 
 export default function ProviderDashboard() {
   const { profile } = useAuth();
-  const { data: todayJobs, isLoading: jobsLoading } = useProviderJobs("today");
-  const { eligibleBalance, heldBalance, earnings, isLoading: earningsLoading } =
+  const { data: todayJobs, isLoading: jobsLoading, isError: jobsError } = useProviderJobs("today");
+  const { eligibleBalance, heldBalance, earnings, isLoading: earningsLoading, isError: earningsError } =
     useProviderEarnings();
   const navigate = useNavigate();
 
@@ -183,6 +192,7 @@ export default function ProviderDashboard() {
 
   const firstName = profile?.full_name?.split(" ")[0] ?? "Provider";
   const isLoading = jobsLoading || earningsLoading;
+  const hasError = jobsError || earningsError;
 
   return (
     <div className="animate-fade-in p-4 pb-24 space-y-5 max-w-2xl">
