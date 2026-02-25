@@ -4,10 +4,11 @@ import {
   MapPin, Wallet, Users, HelpCircle, Settings,
   Building2, Package,
   Gauge, CreditCard, CalendarDays, Megaphone, FileText, Lock,
-  LogOut, Moon, Sun, TrendingUp,
+  LogOut, Moon, Sun, TrendingUp, ChevronRight,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { RoleSwitcher } from "@/components/settings/RoleSwitcher";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface MenuItem {
   label: string;
@@ -15,49 +16,104 @@ interface MenuItem {
   path: string;
 }
 
-const customerMore: MenuItem[] = [
-  { label: "Property", icon: MapPin, path: "/customer/property" },
-  { label: "Billing", icon: Wallet, path: "/customer/billing" },
-  { label: "Referrals", icon: Users, path: "/customer/referrals" },
-  { label: "Support", icon: HelpCircle, path: "/customer/support" },
-  { label: "Settings", icon: Settings, path: "/customer/settings" },
+interface MenuSection {
+  title: string;
+  items: MenuItem[];
+}
+
+const customerSections: MenuSection[] = [
+  {
+    title: "Account",
+    items: [
+      { label: "Property", icon: MapPin, path: "/customer/property" },
+      { label: "Billing", icon: Wallet, path: "/customer/billing" },
+    ],
+  },
+  {
+    title: "Community",
+    items: [
+      { label: "Referrals", icon: Users, path: "/customer/referrals" },
+      { label: "Support", icon: HelpCircle, path: "/customer/support" },
+    ],
+  },
+  {
+    title: "Preferences",
+    items: [
+      { label: "Settings", icon: Settings, path: "/customer/settings" },
+    ],
+  },
 ];
 
-const providerMore: MenuItem[] = [
-  { label: "Dashboard", icon: Building2, path: "/provider" },
-  { label: "Organization", icon: Building2, path: "/provider/organization" },
-  { label: "Support", icon: HelpCircle, path: "/provider/support" },
-  { label: "Referrals", icon: Users, path: "/provider/referrals" },
-  { label: "Settings", icon: Settings, path: "/provider/settings" },
+const providerSections: MenuSection[] = [
+  {
+    title: "Business",
+    items: [
+      { label: "Dashboard", icon: Building2, path: "/provider" },
+      { label: "Organization", icon: Building2, path: "/provider/organization" },
+    ],
+  },
+  {
+    title: "Help & Growth",
+    items: [
+      { label: "Support", icon: HelpCircle, path: "/provider/support" },
+      { label: "Referrals", icon: Users, path: "/provider/referrals" },
+    ],
+  },
+  {
+    title: "Preferences",
+    items: [
+      { label: "Settings", icon: Settings, path: "/provider/settings" },
+    ],
+  },
 ];
 
-const adminMore: MenuItem[] = [
-  { label: "Billing", icon: CreditCard, path: "/admin/billing" },
-  { label: "Payouts", icon: Gauge, path: "/admin/payouts" },
-  { label: "Exceptions", icon: Gauge, path: "/admin/exceptions" },
-  { label: "Capacity", icon: Gauge, path: "/admin/capacity" },
-  { label: "Plans", icon: CreditCard, path: "/admin/plans" },
-  { label: "Bundles", icon: Package, path: "/admin/bundles" },
-  { label: "Service Days", icon: CalendarDays, path: "/admin/service-days" },
-  { label: "Scheduling", icon: CalendarDays, path: "/admin/scheduling" },
-  { label: "Support", icon: HelpCircle, path: "/admin/support" },
-  { label: "Incentives", icon: Megaphone, path: "/admin/incentives" },
-  { label: "Growth", icon: TrendingUp, path: "/admin/growth" },
-  { label: "Reports", icon: FileText, path: "/admin/reports" },
-  { label: "Audit Logs", icon: Lock, path: "/admin/audit" },
-  { label: "Settings", icon: Settings, path: "/admin/settings" },
+const adminSections: MenuSection[] = [
+  {
+    title: "Operations",
+    items: [
+      { label: "Capacity", icon: Gauge, path: "/admin/capacity" },
+      { label: "Service Days", icon: CalendarDays, path: "/admin/service-days" },
+      { label: "Scheduling", icon: CalendarDays, path: "/admin/scheduling" },
+      { label: "Exceptions", icon: Gauge, path: "/admin/exceptions" },
+    ],
+  },
+  {
+    title: "Finance",
+    items: [
+      { label: "Billing", icon: CreditCard, path: "/admin/billing" },
+      { label: "Payouts", icon: Gauge, path: "/admin/payouts" },
+      { label: "Plans", icon: CreditCard, path: "/admin/plans" },
+      { label: "Bundles", icon: Package, path: "/admin/bundles" },
+    ],
+  },
+  {
+    title: "Growth & Insights",
+    items: [
+      { label: "Incentives", icon: Megaphone, path: "/admin/incentives" },
+      { label: "Growth", icon: TrendingUp, path: "/admin/growth" },
+      { label: "Reports", icon: FileText, path: "/admin/reports" },
+      { label: "Support", icon: HelpCircle, path: "/admin/support" },
+    ],
+  },
+  {
+    title: "System",
+    items: [
+      { label: "Audit Logs", icon: Lock, path: "/admin/audit" },
+      { label: "Settings", icon: Settings, path: "/admin/settings" },
+    ],
+  },
 ];
 
-const menuByRole: Record<AppRole, MenuItem[]> = {
-  customer: customerMore,
-  provider: providerMore,
-  admin: adminMore,
+const sectionsByRole: Record<AppRole, MenuSection[]> = {
+  customer: customerSections,
+  provider: providerSections,
+  admin: adminSections,
 };
 
 export default function MoreMenuPage() {
   const { effectiveRole, signOut, roles } = useAuth();
   const navigate = useNavigate();
-  const items = menuByRole[effectiveRole] ?? customerMore;
+  const sections = sectionsByRole[effectiveRole] ?? customerSections;
   const { theme, setTheme } = useTheme();
 
   const handleSignOut = async () => {
@@ -66,45 +122,67 @@ export default function MoreMenuPage() {
   };
 
   return (
-    <div className="px-4 py-6 animate-fade-in">
-      <h1 className="text-2xl font-bold mb-6">More</h1>
+    <div className="px-4 py-6 animate-fade-in space-y-5">
+      <h1 className="text-2xl font-bold">More</h1>
 
       {roles.length > 1 && (
-        <div className="mb-6">
+        <div>
           <RoleSwitcher />
         </div>
       )}
 
-      <div className="space-y-1">
-        {items.map((item) => (
+      {sections.map((section) => (
+        <div key={section.title}>
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">
+            {section.title}
+          </h2>
+          <Card>
+            <CardContent className="p-0 divide-y divide-border">
+              {section.items.map((item) => (
+                <button
+                  key={item.path}
+                  onClick={() => navigate(item.path)}
+                  className="flex items-center gap-3 w-full px-4 py-3.5 text-left text-foreground hover:bg-secondary/50 active:bg-secondary transition-colors first:rounded-t-xl last:rounded-b-xl"
+                >
+                  <item.icon className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  <span className="font-medium flex-1">{item.label}</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+                </button>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      ))}
+
+      <div>
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">
+          Appearance
+        </h2>
+        <Card>
+          <CardContent className="p-0 divide-y divide-border">
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="flex items-center gap-3 w-full px-4 py-3.5 text-left text-foreground hover:bg-secondary/50 active:bg-secondary transition-colors rounded-xl"
+            >
+              {theme === "dark" ? <Sun className="h-5 w-5 text-muted-foreground" /> : <Moon className="h-5 w-5 text-muted-foreground" />}
+              <span className="font-medium flex-1">{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+              <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+            </button>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="border-destructive/20">
+        <CardContent className="p-0">
           <button
-            key={item.path}
-            onClick={() => navigate(item.path)}
-            className="flex items-center gap-3 w-full px-3 py-3.5 rounded-xl text-left text-foreground hover:bg-secondary active:bg-secondary/80 transition-colors"
+            onClick={handleSignOut}
+            className="flex items-center gap-3 w-full px-4 py-3.5 rounded-xl text-left text-destructive hover:bg-destructive/5 active:bg-destructive/10 transition-colors"
           >
-            <item.icon className="h-5 w-5 text-muted-foreground" />
-            <span className="font-medium">{item.label}</span>
+            <LogOut className="h-5 w-5" />
+            <span className="font-medium">Sign Out</span>
           </button>
-        ))}
-      </div>
-
-      <div className="mt-6 pt-6 border-t border-border space-y-1">
-        <button
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="flex items-center gap-3 w-full px-3 py-3.5 rounded-xl text-left text-foreground hover:bg-secondary active:bg-secondary/80 transition-colors"
-        >
-          {theme === "dark" ? <Sun className="h-5 w-5 text-muted-foreground" /> : <Moon className="h-5 w-5 text-muted-foreground" />}
-          <span className="font-medium">{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
-        </button>
-
-        <button
-          onClick={handleSignOut}
-          className="flex items-center gap-3 w-full px-3 py-3.5 rounded-xl text-left text-destructive hover:bg-destructive/10 active:bg-destructive/20 transition-colors"
-        >
-          <LogOut className="h-5 w-5" />
-          <span className="font-medium">Sign Out</span>
-        </button>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

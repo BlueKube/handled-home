@@ -36,7 +36,7 @@ export function SkuListCard({ sku, onClick }: SkuListCardProps) {
             <div className="min-w-0 flex-1">
               <h3 className="font-semibold text-sm truncate">{sku.name}</h3>
               {sku.category && (
-                <span className="text-caption">{sku.category}</span>
+                <span className="text-caption line-clamp-1">{sku.category}</span>
               )}
             </div>
             <StatusBadge status={sku.status} />
