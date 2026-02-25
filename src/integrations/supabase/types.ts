@@ -1621,6 +1621,54 @@ export type Database = {
         }
         Relationships: []
       }
+      photo_validation_results: {
+        Row: {
+          checks: Json
+          created_at: string
+          failure_reasons: string[] | null
+          id: string
+          job_id: string
+          job_photo_id: string
+          provider_org_id: string
+          validation_status: string
+        }
+        Insert: {
+          checks?: Json
+          created_at?: string
+          failure_reasons?: string[] | null
+          id?: string
+          job_id: string
+          job_photo_id: string
+          provider_org_id: string
+          validation_status?: string
+        }
+        Update: {
+          checks?: Json
+          created_at?: string
+          failure_reasons?: string[] | null
+          id?: string
+          job_id?: string
+          job_photo_id?: string
+          provider_org_id?: string
+          validation_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photo_validation_results_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photo_validation_results_job_photo_id_fkey"
+            columns: ["job_photo_id"]
+            isOneToOne: false
+            referencedRelation: "job_photos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plan_entitlement_sku_rules: {
         Row: {
           entitlement_version_id: string
@@ -2736,6 +2784,84 @@ export type Database = {
             columns: ["provider_org_id"]
             isOneToOne: false
             referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_sla_status: {
+        Row: {
+          category: string
+          completion_pct: number | null
+          created_at: string
+          explain_admin: string | null
+          explain_provider: string | null
+          id: string
+          issue_rate: number | null
+          jobs_evaluated: number | null
+          last_evaluated_at: string | null
+          level_since: string
+          on_time_pct: number | null
+          photo_compliance_pct: number | null
+          provider_org_id: string
+          redo_rate: number | null
+          sla_level: string
+          updated_at: string
+          weeks_at_level: number | null
+          zone_id: string
+        }
+        Insert: {
+          category: string
+          completion_pct?: number | null
+          created_at?: string
+          explain_admin?: string | null
+          explain_provider?: string | null
+          id?: string
+          issue_rate?: number | null
+          jobs_evaluated?: number | null
+          last_evaluated_at?: string | null
+          level_since?: string
+          on_time_pct?: number | null
+          photo_compliance_pct?: number | null
+          provider_org_id: string
+          redo_rate?: number | null
+          sla_level?: string
+          updated_at?: string
+          weeks_at_level?: number | null
+          zone_id: string
+        }
+        Update: {
+          category?: string
+          completion_pct?: number | null
+          created_at?: string
+          explain_admin?: string | null
+          explain_provider?: string | null
+          id?: string
+          issue_rate?: number | null
+          jobs_evaluated?: number | null
+          last_evaluated_at?: string | null
+          level_since?: string
+          on_time_pct?: number | null
+          photo_compliance_pct?: number | null
+          provider_org_id?: string
+          redo_rate?: number | null
+          sla_level?: string
+          updated_at?: string
+          weeks_at_level?: number | null
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_sla_status_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_sla_status_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
             referencedColumns: ["id"]
           },
         ]
@@ -4727,6 +4853,15 @@ export type Database = {
           p_user_id: string
         }
         Returns: string
+      }
+      enforce_sla_suspensions: { Args: never; Returns: Json }
+      evaluate_provider_sla: {
+        Args: {
+          p_category: string
+          p_provider_org_id: string
+          p_zone_id: string
+        }
+        Returns: Json
       }
       generate_subscription_invoice: {
         Args: { p_subscription_id: string }
