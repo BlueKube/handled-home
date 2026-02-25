@@ -76,7 +76,8 @@ Deno.serve(async (req) => {
           .eq("job_id", job.id)
           .limit(1);
 
-        const category = (jobSkus?.[0] as any)?.service_skus?.category ?? "lawn_care";
+        const skuRow = jobSkus?.[0] as { sku_id: string; service_skus: { category: string } | null } | undefined;
+        const category = skuRow?.service_skus?.category ?? "lawn_care";
 
         // Find backup providers for this zone+category
         const { data: backups } = await supabase
@@ -138,6 +139,27 @@ Deno.serve(async (req) => {
             });
           }
 
+          // Notify the no-show (original) provider
+          if (originalProviderId) {
+            const { data: origProviderUser } = await supabase
+              .from("provider_members")
+              .select("user_id")
+              .eq("provider_org_id", originalProviderId)
+              .eq("status", "ACTIVE")
+              .limit(1)
+              .maybeSingle();
+
+            if (origProviderUser) {
+              await supabase.rpc("emit_notification", {
+                p_user_id: origProviderUser.user_id,
+                p_type: "no_show_warning",
+                p_title: "Job Reassigned — No-Show",
+                p_body: "This job was reassigned because you didn't start on time. Repeated no-shows may affect your assignments.",
+                p_data: { job_id: job.id, deep_link: `/provider/jobs/${job.id}` },
+              });
+            }
+          }
+
           // Notify new provider
           const { data: newProviderUser } = await supabase
             .from("provider_members")
@@ -145,7 +167,7 @@ Deno.serve(async (req) => {
             .eq("provider_org_id", newProviderId)
             .eq("status", "ACTIVE")
             .limit(1)
-            .single();
+            .maybeSingle();
 
           if (newProviderUser) {
             await supabase.rpc("emit_notification", {

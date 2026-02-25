@@ -256,8 +256,8 @@ export default function AdminScheduling() {
                               {log.assignment_reason.replace(/_/g, " ")}
                             </Badge>
                           </TableCell>
-                          <TableCell className="font-mono text-xs">
-                            {log.provider_org_id ? log.provider_org_id.slice(0, 8) + "…" : "—"}
+                          <TableCell className="text-xs">
+                            {log.provider_org_name ?? (log.provider_org_id ? log.provider_org_id.slice(0, 8) + "…" : "—")}
                           </TableCell>
                           <TableCell className="text-xs">{log.assigned_by}</TableCell>
                           <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate" title={log.explain_admin ?? ""}>
