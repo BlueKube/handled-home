@@ -102,8 +102,7 @@
 
 ### Sprint 6: Route Optimization
 - [x] **2B-02** | P1 | XL | Route optimization — `optimize-routes` edge function (nearest-neighbor using geohash/lat-lng from properties), `reorder_provider_route` RPC (provider manual reorder with audit logging), provider UI with "Optimize Route" button + up/down reorder controls, jobs sorted by `route_order`, "Next" stop indicator. Logs to `cron_run_log` for observability.
-
----
+- [x] **2B-02h** | P1 | S | Sprint 6 hardening — minimum-jobs guard (< 3 = skip optimization), IN_PROGRESS freeze (pinned jobs excluded from optimization + reorder), old_route_order logged in audit trail, reorder arrows disabled on in-progress jobs in UI.
 
 ## Round 2C — Notifications & Messaging
 

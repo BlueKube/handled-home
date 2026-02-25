@@ -28,12 +28,12 @@ function JobCard({ job, index, total, onMoveUp, onMoveDown, showReorder }: {
   return (
     <Card className={`p-4 press-feedback cursor-pointer ${isNext ? "ring-2 ring-accent/40" : ""}`}>
       <div className="flex items-start gap-2">
-        {showReorder && (
+         {showReorder && (
           <div className="flex flex-col gap-0.5 shrink-0 pt-1">
             <Button
               variant="ghost" size="icon"
               className="h-6 w-6"
-              disabled={index === 0}
+              disabled={index === 0 || job.status === "IN_PROGRESS"}
               onClick={(e) => { e.stopPropagation(); onMoveUp?.(); }}
             >
               <ArrowUp className="h-3 w-3" />
@@ -41,7 +41,7 @@ function JobCard({ job, index, total, onMoveUp, onMoveDown, showReorder }: {
             <Button
               variant="ghost" size="icon"
               className="h-6 w-6"
-              disabled={index === total - 1}
+              disabled={index === total - 1 || job.status === "IN_PROGRESS"}
               onClick={(e) => { e.stopPropagation(); onMoveDown?.(); }}
             >
               <ArrowDown className="h-3 w-3" />

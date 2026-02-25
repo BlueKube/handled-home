@@ -130,17 +130,19 @@ Deno.serve(async (req) => {
         .single();
 
       // Get jobs for this provider+date that haven't been completed/canceled
-      const { data: jobs, error: jobsError } = await supabase
+      // Fetch all non-terminal jobs for this provider+date
+      const { data: allJobs, error: jobsError } = await supabase
         .from("jobs")
-        .select("id, property_id")
+        .select("id, property_id, status, route_order")
         .eq("provider_org_id", provider_org_id)
         .eq("scheduled_date", date)
         .not("status", "in", '("COMPLETED","CANCELED")')
         ;
 
       if (jobsError) throw jobsError;
-      if (!jobs || jobs.length === 0) {
-        // Update log
+
+      // Guard: no jobs at all
+      if (!allJobs || allJobs.length === 0) {
         if (runLog) {
           await supabase
             .from("cron_run_log")
@@ -149,6 +151,24 @@ Deno.serve(async (req) => {
         }
         return new Response(
           JSON.stringify({ status: "ok", optimized: 0, message: "No jobs to optimize" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Separate pinned (IN_PROGRESS) jobs from optimizable (NOT_STARTED) jobs
+      const pinnedJobs = allJobs.filter((j) => j.status === "IN_PROGRESS");
+      const jobs = allJobs.filter((j) => j.status !== "IN_PROGRESS");
+
+      // Guard: too few optimizable jobs (< 3 stops)
+      if (jobs.length < 3) {
+        if (runLog) {
+          await supabase
+            .from("cron_run_log")
+            .update({ status: "completed", completed_at: new Date().toISOString(), result_summary: { optimized: 0, skipped_reason: "too_few_jobs", total: allJobs.length, pinned: pinnedJobs.length } })
+            .eq("id", runLog.id);
+        }
+        return new Response(
+          JSON.stringify({ status: "ok", optimized: 0, message: "Too few jobs to optimize" }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
