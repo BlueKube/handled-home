@@ -61,6 +61,14 @@ Deno.serve(async (req) => {
     let errors = 0;
     const levelCounts: Record<string, number> = { GREEN: 0, YELLOW: 0, ORANGE: 0, RED: 0 };
 
+    // Pre-fetch zone names for notifications
+    const zoneIds = [...new Set((assignments ?? []).map(a => a.zone_id))];
+    const { data: zones } = await supabase
+      .from("zones")
+      .select("id, name")
+      .in("id", zoneIds);
+    const zoneNameMap = new Map((zones ?? []).map((z: { id: string; name: string }) => [z.id, z.name]));
+
     for (const assignment of assignments ?? []) {
       try {
         const { data, error } = await supabase.rpc("evaluate_provider_sla", {
@@ -88,7 +96,7 @@ Deno.serve(async (req) => {
               p_payload: {
                 sla_level: level,
                 category: assignment.category,
-                zone_name: assignment.zone_id,
+                zone_name: zoneNameMap.get(assignment.zone_id) ?? assignment.zone_id,
                 action_hint: level === "RED"
                   ? "Your account may be suspended. Contact support immediately."
                   : "Improve your metrics to avoid restrictions.",
