@@ -5403,6 +5403,32 @@ export type Database = {
         Args: { p_category: string; p_zip_codes: string[] }
         Returns: Json
       }
+      claim_notification_events: {
+        Args: { batch_limit?: number }
+        Returns: {
+          attempt_count: number
+          audience_org_id: string | null
+          audience_type: string
+          audience_user_id: string | null
+          audience_zone_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          idempotency_key: string
+          last_error: string | null
+          payload: Json
+          priority: string
+          processed_at: string | null
+          scheduled_for: string
+          status: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "notification_events"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       cleanup_expired_offers: { Args: never; Returns: Json }
       complete_job: {
         Args: { p_job_id: string; p_provider_summary?: string }

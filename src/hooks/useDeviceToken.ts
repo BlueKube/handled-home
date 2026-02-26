@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 export function useDeviceToken() {
   const { user } = useAuth();
   const registeredRef = useRef(false);
+  const tokenRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!user?.id || registeredRef.current) return;
@@ -41,6 +42,7 @@ export function useDeviceToken() {
           async (tokenData) => {
             const platform = Capacitor.getPlatform().toUpperCase(); // IOS or ANDROID
             const token = tokenData.value;
+            tokenRef.current = token;
 
             const { error } = await supabase.from("user_device_tokens").upsert(
               {
@@ -48,7 +50,7 @@ export function useDeviceToken() {
                 token,
                 platform,
                 push_provider: "FCM",
-                status: "active",
+                status: "ACTIVE",
                 last_seen_at: new Date().toISOString(),
               },
               { onConflict: "user_id,token" }
@@ -83,11 +85,21 @@ export function useDeviceToken() {
     return () => cleanup?.();
   }, [user?.id]);
 
-  // Disable tokens on logout
+  // Disable token on logout
   useEffect(() => {
     if (user) return;
-    // User just logged out — mark all tokens as disabled
-    // We can't know which token was ours without storing it, so this is a no-op
-    // The actual disable happens via AuthContext signOut clearing the session
+    if (!tokenRef.current) return;
+
+    const token = tokenRef.current;
+    tokenRef.current = null;
+    registeredRef.current = false;
+
+    supabase
+      .from("user_device_tokens")
+      .update({ status: "DISABLED" })
+      .eq("token", token)
+      .then(({ error }) => {
+        if (error) console.error("Failed to disable device token:", error.message);
+      });
   }, [user]);
 }

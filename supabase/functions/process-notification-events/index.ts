@@ -232,17 +232,27 @@ Deno.serve(async (req: Request) => {
           const rateLimit = rateLimitMap.get(`${priority}:${event.audience_type}`);
           let rateLimited = false;
           if (rateLimit && priority !== "CRITICAL") {
-            // Count today's deliveries for this user+priority
             const todayStart = new Date();
             todayStart.setUTCHours(0, 0, 0, 0);
-            const { count } = await supabase
+            const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
+
+            // Count today's deliveries for daily limit
+            const { count: dailyCount } = await supabase
               .from("notifications")
               .select("id", { count: "exact", head: true })
               .eq("user_id", userId)
               .eq("priority", priority)
               .gte("created_at", todayStart.toISOString());
 
-            if ((count ?? 0) >= rateLimit.max_per_day) {
+            // Count last hour's deliveries for hourly limit
+            const { count: hourlyCount } = await supabase
+              .from("notifications")
+              .select("id", { count: "exact", head: true })
+              .eq("user_id", userId)
+              .eq("priority", priority)
+              .gte("created_at", hourAgo.toISOString());
+
+            if ((dailyCount ?? 0) >= rateLimit.max_per_day || (hourlyCount ?? 0) >= rateLimit.max_per_hour) {
               rateLimited = true;
             }
           }
@@ -384,7 +394,7 @@ async function resolveAudience(
 
   // Zone targeting: resolve based on audience_type
   if (event.audience_zone_id) {
-    if (event.audience_type === "admin") {
+    if (event.audience_type === "ADMIN") {
       const { data } = await supabase
         .from("user_roles")
         .select("user_id")
@@ -392,7 +402,7 @@ async function resolveAudience(
       return (data ?? []).map((r: { user_id: string }) => r.user_id);
     }
 
-    if (event.audience_type === "provider") {
+    if (event.audience_type === "PROVIDER") {
       const { data } = await supabase
         .from("provider_members")
         .select("user_id, provider_orgs!inner(id)")
@@ -505,7 +515,7 @@ async function attemptPushDelivery(
     .from("user_device_tokens")
     .select("user_id, token, platform")
     .in("user_id", userIds)
-    .eq("status", "active");
+    .eq("status", "ACTIVE");
 
   if (!tokens || tokens.length === 0) {
     // No active tokens, mark as FAILED
