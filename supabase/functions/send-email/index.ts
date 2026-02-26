@@ -77,7 +77,7 @@ Deno.serve(async (req: Request) => {
             Authorization: `Bearer ${resendKey}`,
           },
           body: JSON.stringify({
-            from: Deno.env.get("RESEND_FROM_EMAIL") ?? "Handled Home <notifications@handl.homes>",
+            from: Deno.env.get("RESEND_FROM_EMAIL") ?? "Handled Home <notifications@handled-home.com>",
             to: [to_email],
             subject,
             html: html_body,

@@ -40,4 +40,4 @@ Functions that accept unauthenticated requests have `verify_jwt = false` in `sup
 | Function | Trigger | Schedule | Required Secrets | Status |
 |----------|---------|----------|-----------------|--------|
 | `process-notification-events` | Cron / Manual | Every min | — | ✅ Deployed |
-| `send-email` | Internal (called by processor) | — | `RESEND_API_KEY` (optional) | ✅ Deployed (infrastructure-only until key added) |
+| `send-email` | Internal (called by processor) | — | `RESEND_API_KEY`, `RESEND_FROM_EMAIL` | ✅ Active |
