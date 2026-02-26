@@ -1,4 +1,5 @@
 # Round 2C — Notifications & Messaging System (Expanded Spec)
+> **STATUS: 🔄 IN PROGRESS** — Sprint C0 (schema) ✅, Sprint C1 (UI) ✅, Sprint C2 (processor) next.
 
 **Purpose:** Make Handled Home feel *alive*, trustworthy, and self-running by delivering the right information to the right person at the right time—without creating support load or enabling off-platform leakage.
 

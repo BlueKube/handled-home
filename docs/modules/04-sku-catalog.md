@@ -1,4 +1,5 @@
 # Module 04: SKU Catalog (Services Library)
+> **Implementation Status:** ✅ Implemented in Round 1. No key divergences.
 **Handled Home — PRD (Standardized Service Definitions, Pricing Flexible)**  
 **Customer + Provider:** Mobile-only  
 **Admin Console:** Mobile-optimized, operationally usable  

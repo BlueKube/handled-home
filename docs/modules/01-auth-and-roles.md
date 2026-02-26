@@ -1,4 +1,5 @@
 # 01-auth-and-roles.md
+> **Implementation Status:** ✅ Implemented in Round 1. Key divergences: Admin Preview Mode added (not in original spec).
 **Handled Home — Module 01 PRD (Expanded, Production-Ready)**  
 **Platform:** Mobile-only (iOS + Android) via Capacitor  
 **Backend:** Supabase (Auth + Postgres + Storage + Edge Functions)  

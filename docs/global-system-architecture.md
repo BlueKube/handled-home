@@ -122,6 +122,33 @@ INITIATED → PAID / FAILED
 ### Hold status
 ACTIVE → RELEASED / EXPIRED
 
+### Notification event status (Round 2C)
+PENDING → PROCESSING → PROCESSED / FAILED / DEADLETTER
+
+### Notification priority tiers
+- CRITICAL (always delivered, ignores quiet hours)
+- SERVICE (default-on, respects quiet hours)
+- MARKETING (default-off, respects quiet hours + rate limits)
+
+### Provider SLA status (Round 2B)
+GREEN → YELLOW → ORANGE → RED
+
+### Weather event status (Round 2B)
+PENDING → ACTIVE → RESOLVED
+
+### Market zone category status (Round 2B)
+- open
+- waitlist_only
+- closed
+- provider_recruiting
+
+### Zone launch status (Round 2B)
+- planning
+- recruiting
+- soft_launch
+- live
+- paused
+
 Rule: every state change writes an immutable event row (e.g., `job_events`, `ticket_events`, `customer_ledger_events`, `provider_ledger_events`).
 
 ---
@@ -210,13 +237,43 @@ Rule: every state change writes an immutable event row (e.g., `job_events`, `tic
 - ticket_events (Module 12)
 - dispute_records (Module 12)
 
-### Growth
-- referrals (Module 13)
-- incentive_campaigns (Module 13)
+### Growth & Referrals
+- referral_programs
+- referral_codes
+- referrals
+- referral_rewards
+- invite_scripts
+- growth_events
+- growth_surface_config
+- growth_autopilot_actions
+- market_cohorts
+- market_zone_category_state
+- market_health_snapshots
 
-### Analytics
-- event_log (Module 14)
-- daily_metrics_rollups (Module 14)
+### Analytics & Observability
+- ops_kpi_snapshots_daily
+- ops_kpi_snapshots_realtime
+- cron_run_log
+
+### Notifications (Round 2C)
+- notifications (enhanced: priority, CTA, context, expires_at, source_event_id)
+- notification_events (async event bus/queue)
+- notification_delivery (per-channel attempt tracking)
+- notification_templates (template_key, event_type, channels)
+- notification_rate_limits (per priority+audience limits)
+- user_notification_preferences (3-tier toggles, quiet hours)
+- user_device_tokens (FCM/APNs registration)
+
+### Automation (Round 2B)
+- weather_events
+- holiday_calendar
+- dunning_events
+- provider_sla_status
+- zone_category_providers (Primary/Backup per zone+category)
+- job_assignment_log (with explainability columns)
+- expansion_suggestions
+- waitlist_entries
+- photo_validation_results
 
 Rule: modules may extend schema, but must not rename these concepts.
 

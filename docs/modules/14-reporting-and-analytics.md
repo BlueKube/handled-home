@@ -1,4 +1,6 @@
-# 14-reporting-and-analytics.md  
+# 14-reporting-and-analytics.md
+> **Implementation Status:** ✅ Implemented in Round 1. Ops Cockpit, provider Insights, snapshot rollup, audit logs all built.
+
 **Handled Home — Module 14 PRD (Reporting & Analytics: Mobile-First Ops Cockpit)**  
 **Platforms:** iOS + Android (Capacitor) — mobile-first UI; Admin console mobile-optimized  
 **Primary users:** Admins, Dispatch/Ops, Provider managers (optional)  

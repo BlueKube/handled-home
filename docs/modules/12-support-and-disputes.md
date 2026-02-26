@@ -1,4 +1,6 @@
-# 12-support-and-disputes.md  
+# 12-support-and-disputes.md
+> **Implementation Status:** ✅ Implemented in Round 1. AI classification, macros, resolution offers all built.
+
 **Handled Home — Module 12 PRD (Support, Disputes, Policy Engine, Partner-Driven Growth)**  
 **Mobile:** iOS + Android (Capacitor) — Customer + Provider  
 **Admin Console:** Mobile-optimized, operationally usable  

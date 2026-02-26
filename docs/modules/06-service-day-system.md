@@ -1,4 +1,6 @@
-# 06-service-day-system.md  
+# 06-service-day-system.md
+> **Implementation Status:** ✅ Implemented in Round 1. Round 2B added weather_events, holiday_calendar, route optimization. See also 06.1-service-day-engine-addendum.md.
+
 **Handled Home — Module 06 PRD (Service Day Engine: Assign → Confirm → Track)**  
 **Mobile:** iOS + Android (Capacitor) — Customer + Provider  
 **Admin Console:** Mobile-optimized, operationally usable  

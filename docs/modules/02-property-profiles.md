@@ -1,4 +1,6 @@
-# 02-property-profiles.md  
+# 02-property-profiles.md
+> **Implementation Status:** ✅ Implemented in Round 1. No key divergences.
+
 **Handled Home — Module 02 PRD (Expanded, Production-Ready)**  
 **Platform:** Mobile-only (iOS + Android) via Capacitor  
 **Backend:** Supabase (Postgres + RLS)  

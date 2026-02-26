@@ -187,22 +187,19 @@ Raising before proof puts you on a growth treadmill. Proving first gives leverag
 
 ## Roadmap
 
-### MVP — Completed
-- **Modules 01–11:** Auth & Roles, Property Profiles, Zones & Capacity, SKU Catalog, Subscription Engine, Service Day System, Bundle Builder, Provider Onboarding, Job Execution, Customer Dashboard & Proof, Billing & Payouts
-- 1 city, 3–5 SKUs, zone density proof, manual admin oversight
+### Round 1 — All 14 Modules Complete ✅
+- **Modules 01–14:** Auth & Roles, Property Profiles, Zones & Capacity, SKU Catalog, Subscription Engine, Service Day System, Bundle Builder, Provider Onboarding, Job Execution, Customer Dashboard & Proof, Billing & Payouts, Support & Disputes, Referrals & Incentives, Reporting & Analytics
+- 1 city, 3–5 SKUs, zone density proof, full admin tooling
 
-### Current Focus
-- **Module 12:** Support and Disputes — deflection-first design, structured resolution, admin triage
+### Round 2 — Autonomous Scaling (Current)
+- **2A — Placeholders & Core:** ✅ Complete — all placeholder pages replaced with live data
+- **2B — Automation Engine:** ✅ Complete — job assignment, SLA enforcement, dunning, weather, zone expansion, route optimization
+- **2C — Notifications:** 🔄 In Progress — event bus schema + notification center UI complete, processor + delivery pipeline next
+- **2D–2I:** Planned — customer polish, provider polish, growth engine, admin intelligence, platform hardening, future moats
 
-### Remaining
-- **Module 13:** Referrals and Incentives — growth lever, activate after retention is proven
-- **Module 14:** Reporting and Analytics — proves unit economics for scaling decisions
+See `docs/tasks.md` for the detailed task list and progress tracking.
 
-### V1
-- Utilization dashboards
-- Enforcement automation
-- Referral system
-- Unit economics reporting
+### V2 (Future)
 
 ### V2
 - Multi-city (3–5 cities, proving hybrid scaling path)

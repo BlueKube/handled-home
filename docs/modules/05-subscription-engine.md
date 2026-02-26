@@ -1,4 +1,6 @@
-# 05-subscription-engine.md  
+# 05-subscription-engine.md
+> **Implementation Status:** ✅ Implemented in Round 1. Round 2B added service_weeks_used tracking, dunning automation.
+
 **Handled Home — Module 05 PRD (Subscription Engine + Soft Onboarding)**  
 **Mobile:** iOS + Android (Capacitor) — Customer + Provider  
 **Admin Console:** Mobile-optimized but operationally usable  
