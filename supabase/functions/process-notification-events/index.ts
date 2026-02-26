@@ -392,16 +392,17 @@ async function resolveAudience(
     return (data ?? []).map((r: { user_id: string }) => r.user_id);
   }
 
+  // Admin targeting: all admin users (zone_id optional, admins see everything)
+  if (event.audience_type === "ADMIN") {
+    const { data } = await supabase
+      .from("user_roles")
+      .select("user_id")
+      .eq("role", "admin");
+    return (data ?? []).map((r: { user_id: string }) => r.user_id);
+  }
+
   // Zone targeting: resolve based on audience_type
   if (event.audience_zone_id) {
-    if (event.audience_type === "ADMIN") {
-      const { data } = await supabase
-        .from("user_roles")
-        .select("user_id")
-        .eq("role", "admin");
-      return (data ?? []).map((r: { user_id: string }) => r.user_id);
-    }
-
     if (event.audience_type === "PROVIDER") {
       const { data } = await supabase
         .from("provider_members")

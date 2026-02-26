@@ -178,6 +178,13 @@ Deno.serve(async (req) => {
             assigned_by: "system",
           });
 
+          // Look up zone name for human-readable notifications
+          const { data: zoneRow } = await supabase
+            .from("zones")
+            .select("name")
+            .eq("id", job.zone_id)
+            .single();
+
           // Notify admins via event bus
           await supabase.rpc("emit_notification_event", {
             p_event_type: "ADMIN_ZONE_ALERT_BACKLOG",
@@ -186,7 +193,7 @@ Deno.serve(async (req) => {
             p_priority: "CRITICAL",
             p_payload: {
               job_id: job.id,
-              zone_name: job.zone_id,
+              zone_name: zoneRow?.name ?? job.zone_id,
               unassigned_count: 1,
             },
           });

@@ -149,7 +149,7 @@
 - [x] **2C-C3c** | P0 | M | Wire critical provider flows — PROVIDER_JOBS_ASSIGNED in assign-jobs (batched per org), PROVIDER_SLA_LEVEL_CHANGED in evaluate-provider-sla (ORANGE/RED only), PROVIDER_NO_SHOW_PING + PROVIDER_JOB_REASSIGNED in check-no-shows.
 - [x] **2C-C3d** | P1 | M | Wire admin alerts — ADMIN_ZONE_ALERT_BACKLOG in assign-jobs (overflow≥3) + check-no-shows (no backup), ADMIN_WEATHER_PENDING in check-weather, ADMIN_DUNNING_SPIKE in run-dunning (≥5 events). All migrated from old emit_notification to emit_notification_event bus.
 
-#### Sprint C2/C3 Review Fixes (8 findings from Claude Code review — F1-F8 resolved, F9-F13 deferred)
+#### Sprint C2/C3 Review Fixes (10 findings — F1-F8 resolved round 1, F14-F15 resolved round 2, F9-F13 deferred)
 - [x] **C23-F1** | CRITICAL | Fixed `resolveAudience` casing — compare `"ADMIN"`/`"PROVIDER"` (uppercase) to match DB values
 - [x] **C23-F2** | CRITICAL | Fixed device token status — write `"ACTIVE"` not `"active"` in useDeviceToken + processor query
 - [x] **C23-F3** | CRITICAL | Seeded 19 MVP notification templates via migration (including CUSTOMER_PROVIDER_REASSIGNED)
@@ -158,6 +158,8 @@
 - [x] **C23-F6** | HIGH | Created `claim_notification_events` RPC with `FOR UPDATE SKIP LOCKED` + priority ordering
 - [x] **C23-F7** | HIGH | Added `max_per_hour` enforcement in processor (hourly count query after daily check)
 - [x] **C23-F8** | MEDIUM | Token stored in `useRef` for logout disable; marks token `DISABLED` on user logout
+- [x] **C23-F14** | CRITICAL | Moved admin audience resolution outside `audience_zone_id` block — admin events with null zone_id now resolve all admin users
+- [x] **C23-F15** | HIGH | Fixed 4 template placeholder mismatches: `{{failure_count}}`→`{{count}}`, `{{job_count}}`→`{{count}}`, weather body uses `{{zone_name}}`, check-no-shows lookups zone name instead of passing UUID
 
 ### Sprint C4: Service Update Flows
 - [ ] **2C-C4a** | P1 | M | Wire customer service updates — service_day_confirmed, reminder_24h, provider_en_route, job_started, receipt_ready, issue_status_changed.
