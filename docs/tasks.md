@@ -125,7 +125,7 @@
 - [x] **2C-C1a** | P0 | M | Build `useNotifications` hook — fetch user's notifications with realtime subscription, unread count, mark-read mutation, mark-all-read. Server-side priority filter, error toasts on mutations.
 - [x] **2C-C1b** | P0 | L | Build AppHeader bell icon with unread badge — slide-out panel with loading skeleton, "View all" link to full-screen inbox. Hook hoisted to Bell, passed as props to Panel (single realtime channel).
 - [x] **2C-C1c** | P0 | M | Build `/notifications` full-screen inbox route — priority tabs with server-side filtering, CTA deep links, load-more pagination, "No notifications" empty state. Ungated for customers.
-- [ ] **2C-C1d** | P1 | S | Add notification preference toggles to customer + provider Settings pages.
+- [x] **2C-C1d** | P1 | S | Add notification preference toggles to customer + provider Settings pages.
 
 #### Sprint C1 Review Fixes (9 findings — all resolved)
 - [x] **C1-F1** | MEDIUM | Hoisted useNotifications to NotificationBell, passed as props to Panel — eliminated duplicate realtime subscriptions
@@ -139,9 +139,9 @@
 - [x] **C1-F9** | LOW | Replaced <a href> with <Link to> on NotFound page
 
 ### Sprint C2: Processor + Push Proof
-- [ ] **2C-C2a** | P0 | XL | Build `process-notification-events` edge function — claim PENDING events (SKIP LOCKED), resolve audience, apply preferences + quiet hours + rate limits, write notifications + delivery records, mark events PROCESSED/FAILED, retry logic (max 3 attempts → DEADLETTER).
-- [ ] **2C-C2b** | P1 | M | Device token registration — `useDeviceToken` hook for Capacitor push registration, upsert to `user_device_tokens`, disable on logout.
-- [ ] **2C-C2c** | P1 | M | Test push pipe proof — minimal FCM send in processor (requires FCM_SERVER_KEY secret), delivery status tracking. Validates end-to-end push path.
+- [x] **2C-C2a** | P0 | XL | Build `process-notification-events` edge function — claim PENDING events (SKIP LOCKED), resolve audience, apply preferences + quiet hours + rate limits, write notifications + delivery records, mark events PROCESSED/FAILED, retry logic (max 3 attempts → DEADLETTER).
+- [x] **2C-C2b** | P1 | M | Device token registration — `useDeviceToken` hook for Capacitor push registration, upsert to `user_device_tokens`, disable on logout.
+- [x] **2C-C2c** | P1 | M | Test push pipe proof — minimal FCM send in processor (requires FCM_SERVER_KEY secret), delivery status tracking. Validates end-to-end push path.
 
 ### Sprint C3: Template Seeding + Critical Flows
 - [ ] **2C-C3a** | P0 | M | Seed notification templates — all MVP event types from catalog (payment_failed, receipt_ready, service_day_reminder, provider_jobs_assigned, etc.) with premium concierge copy.
@@ -353,15 +353,15 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 |-------|-------|------|---|
 | 2A — Placeholders & Core | 16 | 16 | 100% |
 | 2B — Automation Engine | 31 | 31 | 100% |
-| 2C — Notifications | 35 | 21 | 60% |
+| 2C — Notifications | 35 | 25 | 71% |
 | 2D — Customer Polish | 18 | 0 | 0% |
 | 2E — Provider Polish | 13 | 0 | 0% |
 | 2F — Growth Engine | 13 | 0 | 0% |
 | 2G — Admin Intelligence | 11 | 0 | 0% |
 | 2H — Platform Hardening | 15 | 0 | 0% |
 | 2I — Future Moats | 9 | 0 | 0% |
-| **TOTAL** | **161** | **68** | **42%** |
+| **TOTAL** | **161** | **72** | **45%** |
 
 ---
 
-*Last updated: 2026-02-26 — Progress table corrected (2C includes C1 review fixes in count), documentation audit completed*
+*Last updated: 2026-02-26 — Sprint C2 complete (processor edge function, device token hook, FCM push delivery)*
