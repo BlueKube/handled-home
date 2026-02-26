@@ -8,6 +8,7 @@ import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { useProviderJobs, ProviderJob } from "@/hooks/useProviderJobs";
 import { useProviderEarnings } from "@/hooks/useProviderEarnings";
 import { useAuth } from "@/contexts/AuthContext";
+import { ProviderNotificationBanners } from "@/components/provider/NotificationBanners";
 import {
   Briefcase,
   Clock,
@@ -207,6 +208,9 @@ export default function ProviderDashboard() {
             : "No jobs scheduled for today"}
         </p>
       </div>
+
+      {/* SLA Notification Banners */}
+      <ProviderNotificationBanners />
 
       {/* Stats Row */}
       <div className="grid gap-3 grid-cols-2">

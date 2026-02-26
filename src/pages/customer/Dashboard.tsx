@@ -15,6 +15,7 @@ import { SeasonalPlanCard } from "@/components/customer/SeasonalPlanCard";
 import { NextVisitCard } from "@/components/customer/NextVisitCard";
 import { WeekTimeline } from "@/components/customer/WeekTimeline";
 import { CrossPollinationCard } from "@/components/customer/CrossPollinationCard";
+import { CustomerNotificationBanners } from "@/components/customer/NotificationBanners";
 
 function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -85,6 +86,9 @@ export default function CustomerDashboard() {
         <h1 className="text-h2 mb-1">Your home is handled.</h1>
         <p className="text-caption">Welcome back{user?.user_metadata?.full_name ? `, ${user.user_metadata.full_name}` : ""}.</p>
       </div>
+
+      {/* Notification Banners (payment failure, weather reschedule) */}
+      <CustomerNotificationBanners />
 
       {/* Truth Banners */}
       {showServiceDayBanner && (

@@ -482,6 +482,28 @@ serve(async (req) => {
             .eq("status", "IN_PAYOUT");
         }
 
+        // C4: Emit PROVIDER_PAYOUT_POSTED notification
+        if (payout) {
+          const { data: payoutRow } = await supabase
+            .from("provider_payouts")
+            .select("provider_org_id, total_cents")
+            .eq("id", payout.id)
+            .single();
+          if (payoutRow) {
+            await supabase.rpc("emit_notification_event", {
+              p_event_type: "PROVIDER_PAYOUT_POSTED",
+              p_idempotency_key: `payout_posted:${payout.id}`,
+              p_audience_type: "PROVIDER",
+              p_audience_org_id: payoutRow.provider_org_id,
+              p_priority: "NORMAL",
+              p_payload: {
+                payout_id: payout.id,
+                amount_cents: payoutRow.total_cents,
+              },
+            });
+          }
+        }
+
         logStep("Transfer paid", { transferId: transfer.id });
         break;
       }
