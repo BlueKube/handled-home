@@ -93,12 +93,23 @@ Deno.serve(async (req) => {
         processedSubIds.add(fi.subscription_id);
         if (error) {
           errors++;
-          // FIX Finding 8: Log subscription ID with error
           console.error(`[run-dunning] needsStart error for ${fi.subscription_id}:`, error.message);
           results.push({ subscription_id: fi.subscription_id, step: 1, result: error.message });
         } else {
           started++;
           results.push({ subscription_id: fi.subscription_id, step: 1, result: data?.status ?? "ok" });
+
+          // Emit CUSTOMER_PAYMENT_FAILED notification
+          if (fi.customer_id) {
+            await supabase.rpc("emit_notification_event", {
+              p_event_type: "CUSTOMER_PAYMENT_FAILED",
+              p_idempotency_key: `payment_failed:${fi.subscription_id}:${today}`,
+              p_audience_type: "CUSTOMER",
+              p_audience_user_id: fi.customer_id,
+              p_priority: "CRITICAL",
+              p_payload: { subscription_id: fi.subscription_id },
+            });
+          }
         }
       } catch (err: any) {
         errors++;
@@ -132,11 +143,35 @@ Deno.serve(async (req) => {
         } else {
           stepped++;
           results.push({ subscription_id: sub.id, step: currentStep + 1, result: data?.status ?? "ok" });
+
+          // Emit subscription_paused at step 3+ (pause threshold)
+          if (currentStep + 1 >= 3 && sub.customer_id) {
+            await supabase.rpc("emit_notification_event", {
+              p_event_type: "CUSTOMER_SUBSCRIPTION_PAUSED",
+              p_idempotency_key: `sub_paused:${sub.id}:step${currentStep + 1}`,
+              p_audience_type: "CUSTOMER",
+              p_audience_user_id: sub.customer_id,
+              p_priority: "CRITICAL",
+              p_payload: { subscription_id: sub.id, step: currentStep + 1 },
+            });
+          }
         }
       } catch (err: any) {
         errors++;
         console.error(`[run-dunning] progression exception for ${sub.id}:`, err?.message ?? err);
       }
+    }
+
+    // Emit admin dunning spike alert if significant activity
+    if (started + stepped >= 5) {
+      await supabase.rpc("emit_notification_event", {
+        p_event_type: "ADMIN_DUNNING_SPIKE",
+        p_idempotency_key: `dunning_spike:${today}`,
+        p_audience_type: "ADMIN",
+        p_audience_zone_id: null,
+        p_priority: "SERVICE",
+        p_payload: { count: started + stepped, date: today },
+      });
     }
 
     // Update run log

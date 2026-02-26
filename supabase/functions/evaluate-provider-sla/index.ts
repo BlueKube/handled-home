@@ -76,6 +76,25 @@ Deno.serve(async (req) => {
           evaluated++;
           const level = data.sla_level as string;
           if (level in levelCounts) levelCounts[level]++;
+
+          // Emit SLA level change notification for ORANGE/RED
+          if (level === "ORANGE" || level === "RED") {
+            await supabase.rpc("emit_notification_event", {
+              p_event_type: "PROVIDER_SLA_LEVEL_CHANGED",
+              p_idempotency_key: `sla_change:${assignment.provider_org_id}:${assignment.zone_id}:${assignment.category}:${today}`,
+              p_audience_type: "PROVIDER",
+              p_audience_org_id: assignment.provider_org_id,
+              p_priority: "CRITICAL",
+              p_payload: {
+                sla_level: level,
+                category: assignment.category,
+                zone_name: assignment.zone_id,
+                action_hint: level === "RED"
+                  ? "Your account may be suspended. Contact support immediately."
+                  : "Improve your metrics to avoid restrictions.",
+              },
+            });
+          }
         }
       } catch (err) {
         errors++;

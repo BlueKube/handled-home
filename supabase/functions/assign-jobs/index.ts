@@ -71,6 +71,9 @@ Deno.serve(async (req) => {
     let skipped = 0;
     let errors = 0;
 
+    // Track assignments per provider for batch notification
+    const assignmentsByProvider = new Map<string, string[]>();
+
     for (const job of jobsToAssign) {
       try {
         const { data, error } = await supabase.rpc("auto_assign_job", {
@@ -82,7 +85,14 @@ Deno.serve(async (req) => {
           results.push({ job_id: job.id, result: { status: "error", message: error.message } });
         } else {
           const status = data?.status;
-          if (status === "assigned") assigned++;
+          if (status === "assigned") {
+            assigned++;
+            const provId = data?.provider_org_id;
+            if (provId) {
+              if (!assignmentsByProvider.has(provId)) assignmentsByProvider.set(provId, []);
+              assignmentsByProvider.get(provId)!.push(job.id);
+            }
+          }
           else if (status === "overflow") overflow++;
           else skipped++;
           results.push({ job_id: job.id, result: data });
@@ -91,6 +101,29 @@ Deno.serve(async (req) => {
         errors++;
         results.push({ job_id: job.id, result: { status: "error", message: String(err) } });
       }
+    }
+
+    // Emit PROVIDER_JOBS_ASSIGNED per provider org
+    for (const [provOrgId, jobIds] of assignmentsByProvider) {
+      await supabase.rpc("emit_notification_event", {
+        p_event_type: "PROVIDER_JOBS_ASSIGNED",
+        p_idempotency_key: `jobs_assigned:${provOrgId}:${today}`,
+        p_audience_type: "PROVIDER",
+        p_audience_org_id: provOrgId,
+        p_priority: "SERVICE",
+        p_payload: { count: jobIds.length, date: today, job_ids: jobIds },
+      });
+    }
+
+    // Emit admin backlog alert if overflow is significant
+    if (overflow >= 3) {
+      await supabase.rpc("emit_notification_event", {
+        p_event_type: "ADMIN_ZONE_ALERT_BACKLOG",
+        p_idempotency_key: `zone_backlog:${today}`,
+        p_audience_type: "ADMIN",
+        p_priority: "CRITICAL",
+        p_payload: { unassigned_count: overflow, date: today },
+      });
     }
 
     // Update run log

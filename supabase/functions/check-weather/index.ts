@@ -194,19 +194,29 @@ Deno.serve(async (req) => {
           eventsCreated++;
           totalEventsCreated++;
 
-          // Finding 3: Use emit_notification RPC instead of direct insert
-          const { data: admins } = await supabase
-            .from("user_roles")
-            .select("user_id")
-            .eq("role", "admin");
+          // Emit via event bus for admin weather review
+          await supabase.rpc("emit_notification_event", {
+            p_event_type: "ADMIN_WEATHER_PENDING",
+            p_idempotency_key: `weather_pending:${zone.id}:${onsetDate}:${alert.event.replace(/\s+/g, '_')}`,
+            p_audience_type: "ADMIN",
+            p_priority: "SERVICE",
+            p_payload: {
+              zone_id: zone.id,
+              zone_name: zone.name,
+              severity,
+              event: alert.event,
+            },
+          });
 
-          for (const admin of admins || []) {
-            await supabase.rpc("emit_notification", {
-              p_user_id: admin.user_id,
-              p_type: "weather_event_pending",
-              p_title: `Weather Alert: ${alert.event}`,
-              p_body: `Auto-detected ${severity} weather for ${zone.name}. Review and approve to affect scheduling.`,
-              p_data: { zone_id: zone.id, severity, alert_event: alert.event },
+          // Emit customer schedule change for severe weather
+          if (isSevere) {
+            await supabase.rpc("emit_notification_event", {
+              p_event_type: "CUSTOMER_SCHEDULE_CHANGED_WEATHER",
+              p_idempotency_key: `weather_customer:${zone.id}:${onsetDate}`,
+              p_audience_type: "CUSTOMER",
+              p_audience_zone_id: zone.id,
+              p_priority: "CRITICAL",
+              p_payload: { event: alert.event, zone_name: zone.name },
             });
           }
         }
