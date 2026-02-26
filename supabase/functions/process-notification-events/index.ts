@@ -337,6 +337,9 @@ Deno.serve(async (req: Request) => {
     // Attempt FCM push for QUEUED deliveries
     await attemptPushDelivery(supabase);
 
+    // Attempt email delivery for QUEUED EMAIL deliveries
+    await attemptEmailDelivery(supabase);
+
     // Update cron run log
     await supabase
       .from("cron_run_log")
@@ -475,6 +478,104 @@ async function markEventProcessed(
       processed_at: new Date().toISOString(),
     })
     .eq("id", eventId);
+}
+
+async function attemptEmailDelivery(
+  supabase: ReturnType<typeof createClient>
+) {
+  // Get QUEUED EMAIL deliveries
+  const { data: queued } = await supabase
+    .from("notification_delivery")
+    .select("id, notification_id, channel")
+    .eq("status", "QUEUED")
+    .eq("channel", "EMAIL")
+    .limit(100);
+
+  if (!queued || queued.length === 0) return;
+
+  // Get notification details + user emails
+  const notifIds = [...new Set(queued.map((q: { notification_id: string }) => q.notification_id))];
+  const { data: notifications } = await supabase
+    .from("notifications")
+    .select("id, user_id, title, body")
+    .in("id", notifIds);
+
+  if (!notifications || notifications.length === 0) return;
+
+  const userIds = [...new Set(notifications.map((n: { user_id: string }) => n.user_id))];
+
+  // Lookup emails from auth.users via profiles or auth admin
+  // We use service role to get user emails
+  const emailMap = new Map<string, string>();
+  for (const uid of userIds) {
+    const { data: userData } = await supabase.auth.admin.getUserById(uid);
+    if (userData?.user?.email) {
+      emailMap.set(uid, userData.user.email);
+    }
+  }
+
+  const notifMap = new Map<string, { user_id: string; title: string; body: string }>();
+  for (const n of notifications) {
+    notifMap.set(n.id, n);
+  }
+
+  const deliveries: Array<{
+    delivery_id: string;
+    to_email: string;
+    subject: string;
+    html_body: string;
+  }> = [];
+
+  for (const q of queued) {
+    const notif = notifMap.get(q.notification_id);
+    if (!notif) continue;
+    const email = emailMap.get(notif.user_id);
+    if (!email) {
+      await supabase
+        .from("notification_delivery")
+        .update({
+          status: "FAILED",
+          error_message: "No email address found for user",
+          attempted_at: new Date().toISOString(),
+        })
+        .eq("id", q.id);
+      continue;
+    }
+
+    deliveries.push({
+      delivery_id: q.id,
+      to_email: email,
+      subject: notif.title,
+      html_body: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;">
+        <h2 style="color:#1a1a1a;">${notif.title}</h2>
+        <p style="color:#4a4a4a;line-height:1.6;">${notif.body}</p>
+        <hr style="border:none;border-top:1px solid #e5e5e5;margin:24px 0;" />
+        <p style="color:#999;font-size:12px;">Handled Home — Your home, handled.</p>
+      </div>`,
+    });
+  }
+
+  if (deliveries.length === 0) return;
+
+  // Call send-email edge function
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+  try {
+    const res = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${serviceKey}`,
+      },
+      body: JSON.stringify({ deliveries }),
+    });
+
+    const result = await res.json();
+    console.log("[process-notification-events] Email delivery result:", JSON.stringify(result));
+  } catch (emailErr) {
+    console.error("[process-notification-events] Email delivery call failed:", emailErr);
+  }
 }
 
 async function attemptPushDelivery(

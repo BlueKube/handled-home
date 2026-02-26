@@ -34,4 +34,10 @@ Functions that accept unauthenticated requests have `verify_jwt = false` in `sup
 ### Planned (Not Yet Deployed)
 | Function | Purpose | Sprint |
 |----------|---------|--------|
-| `process-notification-events` | Event bus processor → notifications + delivery | 2C-C2 |
+| *(none — all planned functions deployed)* | | |
+
+### Recently Added
+| Function | Trigger | Schedule | Required Secrets | Status |
+|----------|---------|----------|-----------------|--------|
+| `process-notification-events` | Cron / Manual | Every min | — | ✅ Deployed |
+| `send-email` | Internal (called by processor) | — | `RESEND_API_KEY` (optional) | ✅ Deployed (infrastructure-only until key added) |

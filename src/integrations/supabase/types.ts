@@ -1672,6 +1672,47 @@ export type Database = {
           },
         ]
       }
+      notification_digests: {
+        Row: {
+          created_at: string
+          digest_date: string
+          event_ids: string[]
+          id: string
+          notification_id: string | null
+          processed_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          digest_date: string
+          event_ids?: string[]
+          id?: string
+          notification_id?: string | null
+          processed_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          digest_date?: string
+          event_ids?: string[]
+          id?: string
+          notification_id?: string | null
+          processed_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_digests_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_events: {
         Row: {
           attempt_count: number
@@ -1760,6 +1801,7 @@ export type Database = {
           channels: string[]
           cta_label_template: string | null
           cta_route_template: string | null
+          digest_eligible: boolean
           enabled: boolean
           event_type: string
           id: string
@@ -1775,6 +1817,7 @@ export type Database = {
           channels?: string[]
           cta_label_template?: string | null
           cta_route_template?: string | null
+          digest_eligible?: boolean
           enabled?: boolean
           event_type: string
           id?: string
@@ -1790,6 +1833,7 @@ export type Database = {
           channels?: string[]
           cta_label_template?: string | null
           cta_route_template?: string | null
+          digest_eligible?: boolean
           enabled?: boolean
           event_type?: string
           id?: string
@@ -1854,6 +1898,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "notifications_source_event_id_fkey"
+            columns: ["source_event_id"]
+            isOneToOne: false
+            referencedRelation: "notification_deadletters"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "notifications_source_event_id_fkey"
             columns: ["source_event_id"]
@@ -5313,7 +5364,69 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      notification_deadletters: {
+        Row: {
+          attempt_count: number | null
+          audience_type: string | null
+          audience_user_id: string | null
+          audience_zone_id: string | null
+          created_at: string | null
+          event_type: string | null
+          id: string | null
+          last_error: string | null
+          payload: Json | null
+          priority: string | null
+        }
+        Insert: {
+          attempt_count?: number | null
+          audience_type?: string | null
+          audience_user_id?: string | null
+          audience_zone_id?: string | null
+          created_at?: string | null
+          event_type?: string | null
+          id?: string | null
+          last_error?: string | null
+          payload?: Json | null
+          priority?: string | null
+        }
+        Update: {
+          attempt_count?: number | null
+          audience_type?: string | null
+          audience_user_id?: string | null
+          audience_zone_id?: string | null
+          created_at?: string | null
+          event_type?: string | null
+          id?: string | null
+          last_error?: string | null
+          payload?: Json | null
+          priority?: string | null
+        }
+        Relationships: []
+      }
+      notification_delivery_daily: {
+        Row: {
+          channel: string | null
+          count: number | null
+          delivery_date: string | null
+          status: string | null
+        }
+        Relationships: []
+      }
+      notification_health_summary: {
+        Row: {
+          avg_latency_minutes: number | null
+          deadletter_total: number | null
+          failed_24h: number | null
+          last_run_at: string | null
+          last_run_status: string | null
+          pending_total: number | null
+          processing_total: number | null
+          queued_24h: number | null
+          sent_24h: number | null
+          suppressed_24h: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       accept_support_offer: { Args: { p_offer_id: string }; Returns: Json }
