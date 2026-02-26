@@ -128,56 +128,39 @@ Deno.serve(async (req) => {
             assigned_by: "system",
           });
 
-          // Notify customer
+          // Notify customer via event bus
           if (job.customer_id) {
-            await supabase.rpc("emit_notification", {
-              p_user_id: job.customer_id,
-              p_type: "service_update",
-              p_title: "Service Update",
-              p_body: "We're sending a different pro to keep your Service Day on track.",
-              p_data: { job_id: job.id, deep_link: `/customer/visits/${job.id}` },
+            await supabase.rpc("emit_notification_event", {
+              p_event_type: "PROVIDER_ROUTE_UPDATED",
+              p_idempotency_key: `noshow_customer:${job.id}:${newProviderId}`,
+              p_audience_type: "CUSTOMER",
+              p_audience_user_id: job.customer_id,
+              p_priority: "CRITICAL",
+              p_payload: { job_id: job.id, date: job.scheduled_date },
             });
           }
 
-          // Notify the no-show (original) provider
+          // Notify the no-show (original) provider via event bus
           if (originalProviderId) {
-            const { data: origProviderUser } = await supabase
-              .from("provider_members")
-              .select("user_id")
-              .eq("provider_org_id", originalProviderId)
-              .eq("status", "ACTIVE")
-              .limit(1)
-              .maybeSingle();
-
-            if (origProviderUser) {
-              await supabase.rpc("emit_notification", {
-                p_user_id: origProviderUser.user_id,
-                p_type: "no_show_warning",
-                p_title: "Job Reassigned — No-Show",
-                p_body: "This job was reassigned because you didn't start on time. Repeated no-shows may affect your assignments.",
-                p_data: { job_id: job.id, deep_link: `/provider/jobs/${job.id}` },
-              });
-            }
-          }
-
-          // Notify new provider
-          const { data: newProviderUser } = await supabase
-            .from("provider_members")
-            .select("user_id")
-            .eq("provider_org_id", newProviderId)
-            .eq("status", "ACTIVE")
-            .limit(1)
-            .maybeSingle();
-
-          if (newProviderUser) {
-            await supabase.rpc("emit_notification", {
-              p_user_id: newProviderUser.user_id,
-              p_type: "job_assigned",
-              p_title: "Urgent Job Assignment",
-              p_body: "A job has been reassigned to you. Please start as soon as possible.",
-              p_data: { job_id: job.id, deep_link: `/provider/jobs/${job.id}` },
+            await supabase.rpc("emit_notification_event", {
+              p_event_type: "PROVIDER_NO_SHOW_PING",
+              p_idempotency_key: `noshow_provider:${job.id}:${originalProviderId}`,
+              p_audience_type: "PROVIDER",
+              p_audience_org_id: originalProviderId,
+              p_priority: "SERVICE",
+              p_payload: { job_id: job.id },
             });
           }
+
+          // Notify new provider via event bus
+          await supabase.rpc("emit_notification_event", {
+            p_event_type: "PROVIDER_JOB_REASSIGNED",
+            p_idempotency_key: `noshow_reassign:${job.id}:${newProviderId}`,
+            p_audience_type: "PROVIDER",
+            p_audience_org_id: newProviderId,
+            p_priority: "SERVICE",
+            p_payload: { job_id: job.id },
+          });
 
           reassigned++;
           results.push({ job_id: job.id, action: "reassigned", new_provider: newProviderId });
@@ -195,21 +178,18 @@ Deno.serve(async (req) => {
             assigned_by: "system",
           });
 
-          // Notify admins
-          const { data: admins } = await supabase
-            .from("user_roles")
-            .select("user_id")
-            .eq("role", "admin");
-
-          for (const admin of admins ?? []) {
-            await supabase.rpc("emit_notification", {
-              p_user_id: admin.user_id,
-              p_type: "no_show_alert",
-              p_title: "No-Show: No Backup Available",
-              p_body: `Job ${job.id} has no provider after no-show. Manual intervention needed.`,
-              p_data: { job_id: job.id, deep_link: `/admin/jobs/${job.id}` },
-            });
-          }
+          // Notify admins via event bus
+          await supabase.rpc("emit_notification_event", {
+            p_event_type: "ADMIN_ZONE_ALERT_BACKLOG",
+            p_idempotency_key: `noshow_admin:${job.id}`,
+            p_audience_type: "ADMIN",
+            p_priority: "CRITICAL",
+            p_payload: {
+              job_id: job.id,
+              zone_name: job.zone_id,
+              unassigned_count: 1,
+            },
+          });
 
           flagged++;
           results.push({ job_id: job.id, action: "flagged_admin" });
