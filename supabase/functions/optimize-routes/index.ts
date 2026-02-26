@@ -241,6 +241,19 @@ Deno.serve(async (req) => {
           .eq("id", orderedIds[i]);
       }
 
+      // C4: Emit PROVIDER_ROUTE_UPDATED notification
+      await supabase.rpc("emit_notification_event", {
+        p_event_type: "PROVIDER_ROUTE_UPDATED",
+        p_idempotency_key: `route_updated:${provider_org_id}:${date}`,
+        p_audience_type: "PROVIDER",
+        p_audience_org_id: provider_org_id,
+        p_priority: "NORMAL",
+        p_payload: {
+          date,
+          job_count: orderedIds.length,
+        },
+      });
+
       // Update log
       if (runLog) {
         await supabase

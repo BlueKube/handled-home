@@ -162,9 +162,9 @@
 - [x] **C23-F15** | HIGH | Fixed 4 template placeholder mismatches: `{{failure_count}}`→`{{count}}`, `{{job_count}}`→`{{count}}`, weather body uses `{{zone_name}}`, check-no-shows lookups zone name instead of passing UUID
 
 ### Sprint C4: Service Update Flows
-- [ ] **2C-C4a** | P1 | M | Wire customer service updates — service_day_confirmed, reminder_24h, provider_en_route, job_started, receipt_ready, issue_status_changed.
-- [ ] **2C-C4b** | P1 | M | Wire provider service updates — no_show_ping, job_reassigned, payout_posted, hold_released.
-- [ ] **2C-C4c** | P1 | S | Banner surfaces — payment failure banner, weather reschedule banner, provider SLA banner tied to notification records.
+- [x] **2C-C4a** | P1 | M | Wire customer service updates — service_day_confirmed (confirm_service_day RPC), reminder_24h (send-reminders edge function), provider_en_route (DB trigger on jobs.arrived_at), job_started (start_job RPC), receipt_ready (complete_job RPC), issue_status_changed (admin_resolve_customer_issue RPC).
+- [x] **2C-C4b** | P1 | M | Wire provider service updates — no_show_ping + job_reassigned (C3, check-no-shows), payout_posted (stripe-webhook transfer.paid), route_updated (optimize-routes). hold_released deferred (requires Stripe Connect account.updated → earnings flow, already emits status change but no dedicated notification).
+- [x] **2C-C4c** | P1 | S | Banner surfaces — CustomerNotificationBanners (payment failure + weather reschedule) on customer dashboard, ProviderNotificationBanners (SLA orange/red) on provider dashboard. All tied to unread notification records.
 
 ### Sprint C5: Polish + Delivery Providers
 - [ ] **2C-C5a** | P2 | L | Email delivery integration — transactional email provider setup, template rendering, critical-only emails (payment failed, receipt, security).
