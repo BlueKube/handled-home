@@ -131,12 +131,12 @@ Deno.serve(async (req) => {
           // Notify customer via event bus
           if (job.customer_id) {
             await supabase.rpc("emit_notification_event", {
-              p_event_type: "PROVIDER_ROUTE_UPDATED",
+              p_event_type: "CUSTOMER_SCHEDULE_CHANGED_WEATHER",
               p_idempotency_key: `noshow_customer:${job.id}:${newProviderId}`,
               p_audience_type: "CUSTOMER",
               p_audience_user_id: job.customer_id,
               p_priority: "CRITICAL",
-              p_payload: { job_id: job.id, date: job.scheduled_date },
+              p_payload: { job_id: job.id, date: job.scheduled_date, event: "Provider reassignment" },
             });
           }
 

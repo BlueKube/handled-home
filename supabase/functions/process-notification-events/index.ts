@@ -228,6 +228,25 @@ Deno.serve(async (req: Request) => {
           const inQuietHours =
             priority !== "CRITICAL" && isInQuietHours(prefs);
 
+          // Check rate limits for push/email suppression
+          const rateLimit = rateLimitMap.get(`${priority}:${event.audience_type}`);
+          let rateLimited = false;
+          if (rateLimit && priority !== "CRITICAL") {
+            // Count today's deliveries for this user+priority
+            const todayStart = new Date();
+            todayStart.setUTCHours(0, 0, 0, 0);
+            const { count } = await supabase
+              .from("notifications")
+              .select("id", { count: "exact", head: true })
+              .eq("user_id", userId)
+              .eq("priority", priority)
+              .gte("created_at", todayStart.toISOString());
+
+            if ((count ?? 0) >= rateLimit.max_per_day) {
+              rateLimited = true;
+            }
+          }
+
           const notifId = crypto.randomUUID();
           notificationsToInsert.push({
             id: notifId,
@@ -248,7 +267,7 @@ Deno.serve(async (req: Request) => {
           for (const channel of channels) {
             if (channel === "IN_APP") continue; // in-app is the notification row itself
 
-            const suppressed = inQuietHours;
+            const suppressed = inQuietHours || rateLimited;
             deliveriesToInsert.push({
               notification_id: notifId,
               channel,
