@@ -498,7 +498,7 @@ serve(async (req) => {
               p_priority: "NORMAL",
               p_payload: {
                 payout_id: payout.id,
-                amount_cents: payoutRow.total_cents,
+                amount: (payoutRow.total_cents / 100).toFixed(2),
               },
             });
           }
