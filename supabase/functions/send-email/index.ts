@@ -46,7 +46,7 @@ Deno.serve(async (req: Request) => {
       await supabase
         .from("notification_delivery")
         .update({
-          status: "SKIPPED",
+          status: "SUPPRESSED",
           error_message: "RESEND_API_KEY not configured — email delivery deferred",
           attempted_at: new Date().toISOString(),
         })
@@ -55,7 +55,7 @@ Deno.serve(async (req: Request) => {
       return new Response(
         JSON.stringify({
           sent: 0,
-          skipped: deliveries.length,
+          suppressed: deliveries.length,
           reason: "RESEND_API_KEY not configured",
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
