@@ -1,42 +1,78 @@
 
 
-## Sprint C2/C3 Code Review Fixes
+# Sprint C5 Review — Fix Plan
 
-Claude Code's review is accurate across all 13 findings. No misunderstandings — every bug maps to real code.
+## Findings to Fix
 
-### Fixes to implement now (F1–F8)
+| ID | Severity | Action |
+|----|----------|--------|
+| C5-F1 | CRITICAL | Add `SKIPPED` to delivery status CHECK constraint |
+| C5-F2 | HIGH | Add `escapeHtml` helper, escape title/body in email HTML |
+| C5-F3 | HIGH | Parallelize email lookups with `Promise.all` |
+| C5-F4 | MEDIUM | Add fetch failure handling in processor |
+| C5-F6 | MEDIUM | Add FK on `notification_digests.user_id` → `profiles(id)` |
+| C5-F7 | MEDIUM | Filter `notification_delivery_daily` view to exclude QUEUED rows |
+| C5-F5 | MEDIUM | Acceptable for MVP — skip |
+| C5-F8 | LOW | Verify recharts — already in dependencies (confirmed) |
+| C5-F9 | LOW | Acceptable — skip |
 
-**F1 — CRITICAL** `resolveAudience` casing: Lines 387/395 compare `"admin"`/`"provider"` but DB stores `"ADMIN"`/`"PROVIDER"`. Fix to uppercase.
+## Implementation
 
-**F2 — CRITICAL** Device token status casing: `useDeviceToken.ts` line 51 writes `"active"`, processor line 508 queries `"active"`. DB constraint requires `"ACTIVE"`. Fix both sides.
+### 1. Migration (C5-F1, C5-F6, C5-F7)
 
-**F3 — CRITICAL** Template seeding migration missing. Create migration inserting 18 templates from the expanded spec.
+Single migration file:
 
-**F4 — HIGH** `check-no-shows` emits `CUSTOMER_SCHEDULE_CHANGED_WEATHER` for provider reassignment. Create `CUSTOMER_PROVIDER_REASSIGNED` event type and template.
+```sql
+-- C5-F1: Add SKIPPED to delivery status constraint
+ALTER TABLE notification_delivery DROP CONSTRAINT notification_delivery_status_check;
+ALTER TABLE notification_delivery ADD CONSTRAINT notification_delivery_status_check
+  CHECK (status IN ('QUEUED','SENT','FAILED','SUPPRESSED','SKIPPED'));
 
-**F5 — HIGH** `useDeviceToken` never mounted. Add call in `ProtectedRoute.tsx` or `AppLayout.tsx` (runs after auth).
+-- C5-F6: Add FK on notification_digests.user_id
+ALTER TABLE notification_digests
+  ADD CONSTRAINT notification_digests_user_id_fkey
+  FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE;
 
-**F6 — HIGH** `claim_notification_events` RPC missing. Create migration with `FOR UPDATE SKIP LOCKED`.
+-- C5-F7: Fix daily view to exclude unprocessed rows
+CREATE OR REPLACE VIEW notification_delivery_daily
+WITH (security_invoker = true) AS
+SELECT
+  date_trunc('day', attempted_at)::date AS delivery_date,
+  channel,
+  status,
+  count(*)::int AS count
+FROM notification_delivery
+WHERE attempted_at >= now() - interval '7 days'
+  AND status != 'QUEUED'
+GROUP BY 1, 2, 3
+ORDER BY 1 DESC, 2, 3;
+```
 
-**F7 — HIGH** `max_per_hour` rate limit fetched but never checked. Add hourly count query after daily check.
+### 2. Edge Function Update — `process-notification-events/index.ts` (C5-F2, C5-F3, C5-F4)
 
-**F8 — MEDIUM** Token not stored in ref for logout disable. Store token value in `useRef`, use it to update status on logout.
+**C5-F2:** Add `escapeHtml` function, wrap `notif.title` and `notif.body` in the HTML template.
 
-### Defer (as Claude Code recommends)
+**C5-F3:** Replace sequential `for` loop with `Promise.all`:
+```typescript
+await Promise.all(userIds.map(async (uid) => {
+  const { data } = await supabase.auth.admin.getUserById(uid);
+  if (data?.user?.email) emailMap.set(uid, data.user.email);
+}));
+```
 
-- **F9** (zone context in admin backlog) — nice-to-have, minor payload enrichment
-- **F10** (payload validation) — log warning for missing template fields
-- **F11** (FCM v1 migration) — tracked, not blocking MVP
-- **F12** (PROVIDER_ROUTE_UPDATED) — Sprint C4 scope
-- **F13** (timezone quiet hours) — Sprint C5 scope
+**C5-F4:** Add failure handling after `fetch`:
+```typescript
+if (!res.ok) {
+  const ids = deliveries.map(d => d.delivery_id);
+  await supabase
+    .from("notification_delivery")
+    .update({ status: "FAILED", error_message: `send-email returned ${res.status}` })
+    .in("id", ids);
+}
+```
 
-### Implementation order
+### 3. Documentation
 
-1. Migration: seed 18 templates + create `claim_notification_events` RPC (F3, F6)
-2. Fix `process-notification-events/index.ts` — casing F1, status F2, hourly rate limit F7
-3. Fix `useDeviceToken.ts` — status casing F2, ref storage F8
-4. Fix `check-no-shows/index.ts` — event type F4
-5. Mount `useDeviceToken` in app layout (F5)
-6. Save review doc to `docs/` for reference
-7. Update `tasks.md`
+- Save review to `docs/2e-sprint-c5-review.md`
+- Update `docs/tasks.md` marking C5 findings resolved
 
