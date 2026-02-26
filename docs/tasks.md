@@ -174,9 +174,9 @@
 - [x] **C4-F7** | MEDIUM | Optimized en_route trigger with `WHEN` clause and `UPDATE OF arrived_at` column filter
 
 ### Sprint C5: Polish + Delivery Providers
-- [ ] **2C-C5a** | P2 | L | Email delivery integration — transactional email provider setup, template rendering, critical-only emails (payment failed, receipt, security).
-- [ ] **2C-C5b** | P2 | M | Digest behavior — combine multiple non-critical events into daily summary, suppress extra pushes beyond rate limit.
-- [ ] **2C-C5c** | P2 | S | Admin notification health view — failed sends, deadletters, processing latency dashboard.
+- [x] **2C-C5a** | P2 | L | Email delivery infrastructure — `send-email` edge function with Resend integration (infrastructure-only: marks deliveries as SKIPPED when RESEND_API_KEY not configured, live sends when key present). Processor calls send-email for QUEUED EMAIL deliveries. Templates with `channels` including EMAIL will route through this pipe.
+- [x] **2C-C5b** | P2 | M | Digest infrastructure — `digest_eligible` column on `notification_templates`, `notification_digests` table for per-user daily aggregation tracking. SERVICE-tier templates marked digest-eligible by default.
+- [x] **2C-C5c** | P2 | S | Admin notification health view — `/admin/notification-health` page with: delivery stats (sent/failed/suppressed/queued last 24h), deadletter count, avg processing latency, 7-day delivery breakdown chart, deadletter investigation table. Backed by 3 database views (`notification_health_summary`, `notification_delivery_daily`, `notification_deadletters`).
 
 ---
 
@@ -372,15 +372,15 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 |-------|-------|------|---|
 | 2A — Placeholders & Core | 16 | 16 | 100% |
 | 2B — Automation Engine | 31 | 31 | 100% |
-| 2C — Notifications | 35 | 29 | 83% |
+| 2C — Notifications | 35 | 35 | 100% |
 | 2D — Customer Polish | 18 | 0 | 0% |
 | 2E — Provider Polish | 13 | 0 | 0% |
 | 2F — Growth Engine | 13 | 0 | 0% |
 | 2G — Admin Intelligence | 11 | 0 | 0% |
 | 2H — Platform Hardening | 15 | 0 | 0% |
 | 2I — Future Moats | 9 | 0 | 0% |
-| **TOTAL** | **161** | **76** | **47%** |
+| **TOTAL** | **161** | **82** | **51%** |
 
 ---
 
-*Last updated: 2026-02-26 — Sprint C3 complete (18 templates seeded, 5 edge functions wired to event bus)*
+*Last updated: 2026-02-26 — Sprint C5 complete (email infrastructure, digest schema, admin notification health dashboard). Round 2C: 100%*

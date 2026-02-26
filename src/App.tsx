@@ -110,6 +110,7 @@ import AdminSupportPolicies from "@/pages/admin/SupportPolicies";
 import AdminSupportMacros from "@/pages/admin/SupportMacros";
 import AdminGrowth from "@/pages/admin/Growth";
 import AdminTestToggles from "@/pages/admin/TestToggles";
+import AdminNotificationHealth from "@/pages/admin/NotificationHealth";
 import SharedNotifications from "@/pages/shared/Notifications";
 
 const queryClient = new QueryClient();
@@ -222,6 +223,7 @@ const App = () => (
                 <Route path="/admin/support/macros" element={<AdminSupportMacros />} />
                 <Route path="/admin/incentives" element={<AdminIncentives />} />
                 <Route path="/admin/growth" element={<AdminGrowth />} />
+                <Route path="/admin/notification-health" element={<AdminNotificationHealth />} />
                 <Route path="/admin/test-toggles" element={<AdminTestToggles />} />
                 <Route path="/admin/ops" element={<AdminOpsCockpit />} />
                 <Route path="/admin/ops/zones" element={<AdminOpsZones />} />
