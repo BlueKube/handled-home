@@ -178,6 +178,17 @@
 - [x] **2C-C5b** | P2 | M | Digest infrastructure — `digest_eligible` column on `notification_templates`, `notification_digests` table for per-user daily aggregation tracking. SERVICE-tier templates marked digest-eligible by default.
 - [x] **2C-C5c** | P2 | S | Admin notification health view — `/admin/notification-health` page with: delivery stats (sent/failed/suppressed/queued last 24h), deadletter count, avg processing latency, 7-day delivery breakdown chart, deadletter investigation table. Backed by 3 database views (`notification_health_summary`, `notification_delivery_daily`, `notification_deadletters`).
 
+#### Sprint C5 Review Fixes (6 findings resolved, 3 skipped)
+- [x] **C5-F1** | CRITICAL | Added SKIPPED to notification_delivery status CHECK constraint
+- [x] **C5-F2** | HIGH | Added escapeHtml helper, escape title/body in email HTML template
+- [x] **C5-F3** | HIGH | Parallelized email lookups with Promise.all (was sequential for loop)
+- [x] **C5-F4** | MEDIUM | Added fetch failure handling — marks deliveries FAILED on non-ok response or network error
+- [x] **C5-F6** | MEDIUM | Added FK on notification_digests.user_id → profiles(id) ON DELETE CASCADE
+- [x] **C5-F7** | MEDIUM | Filtered notification_delivery_daily view to exclude QUEUED rows
+- [x] **C5-F5** | MEDIUM | Skipped — acceptable for MVP (single-worker processor)
+- [x] **C5-F8** | LOW | Verified — recharts already in dependencies
+- [x] **C5-F9** | LOW | Skipped — acceptable (views use security_invoker)
+
 ---
 
 ## Round 2D — Customer Experience Polish (Retention)
@@ -372,15 +383,15 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 |-------|-------|------|---|
 | 2A — Placeholders & Core | 16 | 16 | 100% |
 | 2B — Automation Engine | 31 | 31 | 100% |
-| 2C — Notifications | 35 | 35 | 100% |
+| 2C — Notifications | 44 | 44 | 100% |
 | 2D — Customer Polish | 18 | 0 | 0% |
 | 2E — Provider Polish | 13 | 0 | 0% |
 | 2F — Growth Engine | 13 | 0 | 0% |
 | 2G — Admin Intelligence | 11 | 0 | 0% |
 | 2H — Platform Hardening | 15 | 0 | 0% |
 | 2I — Future Moats | 9 | 0 | 0% |
-| **TOTAL** | **161** | **82** | **51%** |
+| **TOTAL** | **170** | **91** | **54%** |
 
 ---
 
-*Last updated: 2026-02-26 — Sprint C5 complete (email infrastructure, digest schema, admin notification health dashboard). Round 2C: 100%*
+*Last updated: 2026-02-26 — Sprint C5 review fixes applied (F1-F4, F6-F7). All C5 findings resolved. Round 2C: 100%*

@@ -480,6 +480,16 @@ async function markEventProcessed(
     .eq("id", eventId);
 }
 
+// C5-F2: HTML escape helper to prevent XSS in email bodies
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 async function attemptEmailDelivery(
   supabase: ReturnType<typeof createClient>
 ) {
@@ -504,15 +514,12 @@ async function attemptEmailDelivery(
 
   const userIds = [...new Set(notifications.map((n: { user_id: string }) => n.user_id))];
 
-  // Lookup emails from auth.users via profiles or auth admin
-  // We use service role to get user emails
+  // C5-F3: Parallel email lookups via Promise.all
   const emailMap = new Map<string, string>();
-  for (const uid of userIds) {
+  await Promise.all(userIds.map(async (uid) => {
     const { data: userData } = await supabase.auth.admin.getUserById(uid);
-    if (userData?.user?.email) {
-      emailMap.set(uid, userData.user.email);
-    }
-  }
+    if (userData?.user?.email) emailMap.set(uid, userData.user.email);
+  }));
 
   const notifMap = new Map<string, { user_id: string; title: string; body: string }>();
   for (const n of notifications) {
@@ -542,13 +549,17 @@ async function attemptEmailDelivery(
       continue;
     }
 
+    // C5-F2: Escape title and body in HTML template
+    const safeTitle = escapeHtml(notif.title);
+    const safeBody = escapeHtml(notif.body);
+
     deliveries.push({
       delivery_id: q.id,
       to_email: email,
       subject: notif.title,
       html_body: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;">
-        <h2 style="color:#1a1a1a;">${notif.title}</h2>
-        <p style="color:#4a4a4a;line-height:1.6;">${notif.body}</p>
+        <h2 style="color:#1a1a1a;">${safeTitle}</h2>
+        <p style="color:#4a4a4a;line-height:1.6;">${safeBody}</p>
         <hr style="border:none;border-top:1px solid #e5e5e5;margin:24px 0;" />
         <p style="color:#999;font-size:12px;">Handled Home — Your home, handled.</p>
       </div>`,
@@ -571,10 +582,36 @@ async function attemptEmailDelivery(
       body: JSON.stringify({ deliveries }),
     });
 
+    // C5-F4: Handle fetch failure — mark deliveries as FAILED
+    if (!res.ok) {
+      const ids = deliveries.map(d => d.delivery_id);
+      await supabase
+        .from("notification_delivery")
+        .update({
+          status: "FAILED",
+          error_message: `send-email returned ${res.status}`,
+          attempted_at: new Date().toISOString(),
+        })
+        .in("id", ids);
+      console.error(`[process-notification-events] send-email returned ${res.status}`);
+      return;
+    }
+
     const result = await res.json();
     console.log("[process-notification-events] Email delivery result:", JSON.stringify(result));
   } catch (emailErr) {
-    console.error("[process-notification-events] Email delivery call failed:", emailErr);
+    // C5-F4: Network failure — mark all deliveries as FAILED
+    const errMsg = emailErr instanceof Error ? emailErr.message : String(emailErr);
+    const ids = deliveries.map(d => d.delivery_id);
+    await supabase
+      .from("notification_delivery")
+      .update({
+        status: "FAILED",
+        error_message: `send-email call failed: ${errMsg}`.slice(0, 500),
+        attempted_at: new Date().toISOString(),
+      })
+      .in("id", ids);
+    console.error("[process-notification-events] Email delivery call failed:", errMsg);
   }
 }
 
