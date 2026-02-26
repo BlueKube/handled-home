@@ -1,4 +1,6 @@
-# 10-customer-dashboard-and-proof.md  
+# 10-customer-dashboard-and-proof.md
+> **Implementation Status:** ✅ Implemented in Round 1. This is the canonical Module 10 spec. See also `10-visit-tracking-photos.md` (redirects here).
+
 **Handled Home — Module 10 PRD (Customer Control Center + Proof)**  
 **Mobile:** iOS + Android (Capacitor) — **Customer**  
 **Admin Console:** Mobile-optimized, operationally usable  

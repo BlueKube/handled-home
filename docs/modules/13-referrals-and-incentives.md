@@ -1,4 +1,5 @@
 # Module 13: Referrals & Incentives (Index)
+> **Implementation Status:** ✅ Implemented in Round 1. All 4 sub-modules (13.1–13.4) built: attribution core, founding partner, growth autopilot, viral surfaces.
 
 Module 13 is the growth engine, split into three sub-modules:
 

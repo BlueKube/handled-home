@@ -1,4 +1,6 @@
-# 09-job-execution.md  
+# 09-job-execution.md
+> **Implementation Status:** ✅ Implemented in Round 1. Round 2B added auto-assign, no-show detection, photo quality validation, route optimization.
+
 **Handled Home — Module 09 PRD (Provider Job Execution + Proof)**  
 **Mobile:** iOS + Android (Capacitor) — **Provider**  
 **Admin Console:** Mobile-optimized, operationally usable  

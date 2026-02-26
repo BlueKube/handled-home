@@ -1,4 +1,6 @@
-# Module 03: Zones, Coverage & Capacity  
+# Module 03: Zones, Coverage & Capacity
+> **Implementation Status:** ✅ Implemented in Round 1. Round 2B added zone_category_providers (Primary/Backup model), expansion_suggestions, waitlist_entries.
+
 **Handled Home — PRD (Governance Layer, no scheduling yet)**  
 **Customer + Provider:** Mobile-only  
 **Admin Console:** Mobile-optimized, operationally usable  

@@ -1,4 +1,6 @@
-# 07-bundle-builder.md  
+# 07-bundle-builder.md
+> **Implementation Status:** ✅ Implemented in Round 1. No key divergences.
+
 **Handled Home — Module 07 PRD (Routine & Bundle Builder)**  
 **Mobile:** iOS + Android (Capacitor) — Customer + Provider  
 **Admin Console:** Mobile-optimized, operationally usable (support + ops knobs only)  

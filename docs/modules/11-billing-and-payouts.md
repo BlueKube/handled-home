@@ -1,4 +1,6 @@
-# 11-billing-and-payouts.md  
+# 11-billing-and-payouts.md
+> **Implementation Status:** ✅ Implemented in Round 1. Round 2B added dunning automation, auto-apply credits, auto-release holds.
+
 **Handled Home — Module 11 PRD (Billing + Payouts + Exceptions)**  
 **Mobile:** iOS + Android (Capacitor) — Customer + Provider  
 **Admin Console:** Mobile-optimized, operationally usable  

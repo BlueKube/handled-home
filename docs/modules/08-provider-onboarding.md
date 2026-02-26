@@ -1,4 +1,5 @@
 # HANDLED HOME — MODULE 08
+> **Implementation Status:** ✅ Implemented in Round 1. Round 2B added provider SLA enforcement, auto-flag/suspend flow.
 
 ## Module: 08-provider-onboarding.md
 
