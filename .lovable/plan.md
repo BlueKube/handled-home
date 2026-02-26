@@ -1,68 +1,116 @@
 
 
-# Automated Code Review via n8n — Setup Guide
+## Documentation Audit — Findings & Recommendations
 
-## What We're Building
+### 1. `claude-implementation-notes.md` is a stale copy of the OLD `tasks.md`
 
-An n8n workflow that accepts code diffs, sends them to Claude for review using your project's review checklist, and returns structured findings. Once built, I can execute this workflow directly from our conversation using the n8n MCP integration.
+This is the biggest issue. `claude-implementation-notes.md` (921 lines) is an outdated snapshot of a previous version of `tasks.md` — it still lists Phase 0/1/2/3/4/5/6/7 structure, references `PlaceholderPage` as current state, and says "Push Notifications: Not implemented." Meanwhile, the actual `tasks.md` has been rewritten into Round 2A–2I format and tracks 56/152 tasks complete.
 
-## Constraint
-
-I cannot create n8n workflows remotely — they must be built in n8n's visual editor. I will give you exact step-by-step instructions to build it, then I can call it automatically after every implementation task.
+**Action:** Rewrite `claude-implementation-notes.md` to serve its intended purpose — tactical, file-level implementation guidance (which files implement what, hook→page mappings, common patterns, edge function inventory). Remove all roadmap content since `tasks.md` owns that.
 
 ---
 
-## The Workflow (4 nodes)
+### 2. `masterplan.md` — Roadmap section is stale
 
-```text
-[Webhook Trigger] → [Set Review Prompt] → [HTTP Request to Claude API] → [Respond to Webhook]
-```
+Lines 190–207 say Module 12 is "Current Focus" and Modules 13–14 are "Remaining." All 14 modules are complete. The Roadmap section needs updating to reflect Round 2 as the current phase.
 
-### Node 1: Webhook Trigger
-- Type: **Webhook**
-- Method: POST
-- Path: `code-review`
-- Accepts JSON body with `{ files, taskId, checklist }`
-
-### Node 2: Set Review Prompt (Code node)
-- Assembles the prompt: combines the changed files content with the Handled Home review checklist into a single Claude-ready message
-
-### Node 3: HTTP Request (Claude API call)
-- POST to `https://api.anthropic.com/v1/messages`
-- Headers: `x-api-key` (your Anthropic key), `anthropic-version: 2023-06-01`, `content-type: application/json`
-- Body: model `claude-sonnet-4-20250514`, system prompt with review checklist, user message with code
-- This is where Claude Opus 4 would go when available (swap model string)
-
-### Node 4: Respond to Webhook
-- Returns Claude's review findings as JSON back to the caller
+**Action:** Update the Roadmap section to show all 14 modules complete and Round 2C as current focus.
 
 ---
 
-## Steps for You in n8n
+### 3. `implementation-plan.md` — Redundant with `tasks.md`
 
-1. Create a new workflow named **"Lovable Code Review"**
-2. Add each of the 4 nodes above (I will provide exact configurations for each once you're ready)
-3. Add your Anthropic API key as an n8n credential
-4. Activate the workflow
-5. Go to workflow **Settings → toggle "Available in MCP"**
-6. Tell me it's ready — I'll search for it and test it
+This 58-line file just lists completed modules and launch criteria. `tasks.md` already tracks this more comprehensively (Progress Tracking table at bottom). This file adds no unique information.
 
-## How I'll Use It
+**Action:** Either delete it or convert it into a brief "status dashboard" that auto-summarizes from `tasks.md`. Recommend deletion — one source of truth is better than two.
 
-After each implementation task, I will:
-1. Gather the files I changed
-2. Call `execute_workflow` with the file contents and task context
-3. Read Claude's review findings
-4. Apply fixes immediately
-5. Re-run the review to confirm clean
+---
 
-This eliminates the copy-paste loop entirely. You only see the final "all clear" result.
+### 4. `global-system-architecture.md` — Schema spine is outdated
 
-## What You Need
-- An **Anthropic API key** (for Claude access from n8n)
-- ~15 minutes to build the workflow following my instructions
+Section 6 (Canonical schema spine) is missing tables added in Round 2B/2C:
+- `notification_events`, `notifications` (enhanced), `notification_delivery`, `user_notification_preferences`, `user_device_tokens`, `notification_rate_limits`, `notification_templates`
+- `weather_events`, `holiday_calendar`, `dunning_events`
+- `provider_sla_status`, `zone_category_providers`, `job_assignment_log`
+- `expansion_suggestions`, `waitlist_entries`
+- `growth_events`, `growth_surface_config`, `market_zone_category_state`, `market_health_snapshots`
+- `cron_run_log`
 
-## Next Step
+Section 5 (Global enums) is also missing notification-related enums (`PENDING | PROCESSING | PROCESSED | FAILED | DEADLETTER`, priority tiers, etc.).
 
-Tell me you're ready to start building the workflow in n8n, and I will give you the exact configuration for each node — field by field, paste-ready.
+**Action:** Add a "Round 2B+ additions" subsection to sections 5 and 6 with the new tables and enums.
+
+---
+
+### 5. `app-flow-pages-and-roles.md` — Missing pages
+
+Missing pages that were added in Round 2:
+- `/shared/notifications` (notification inbox)
+- Provider Insights + Insights History
+- Admin Ops Cockpit sub-pages (OpsZoneDetail, OpsBilling, OpsJobs, etc.)
+- Customer SupportHome, SupportNew, SupportTickets, SupportTicketDetail
+- Share landing, Invite landing pages
+
+**Action:** Update with complete route list matching `App.tsx`.
+
+---
+
+### 6. `tasks.md` — Progress table is slightly stale
+
+The table says "2C — Notifications | 26 | 9 | 35%" but counting the actual checkboxes, Sprint C0 has 9 done + Sprint C1 has 3 done = 12 done (not 9). The total count of 26 also doesn't match the actual items listed. Minor but should be accurate.
+
+**Action:** Recount and correct the progress table.
+
+---
+
+### 7. Module specs (01–14) — No completion status markers
+
+The 14 module spec files in `docs/modules/` were written as build specs. Now that they're all implemented, there's no indication of what was built as-spec vs. what diverged. When you expand tasks in future rounds, you may reference these specs and find they don't match reality.
+
+**Action:** Add a brief "Implementation Status" header to each module file noting: "Implemented in Round 1. Key divergences from spec: [none / list]." This takes 1 line per file and prevents confusion.
+
+---
+
+### 8. Duplicate Module 10 specs
+
+There are two Module 10 files:
+- `10-customer-dashboard-and-proof.md`
+- `10-visit-tracking-photos.md`
+
+These likely cover overlapping scope (customer visit photos/proof).
+
+**Action:** Review both, merge if redundant, or clarify which is canonical.
+
+---
+
+### 9. `round-2b-expanded-spec.md` — Should be marked complete
+
+All Round 2B tasks are done (31/31). This spec is still written in future tense ("Objective: ..."). No harm, but adding a "STATUS: COMPLETE" header would prevent re-reading it as pending work.
+
+**Action:** Add completion status header to both `round-2b-expanded-spec.md` and `round-2c-expanded-spec.md` (noting which sprints are done).
+
+---
+
+### 10. Missing doc: Edge Function inventory
+
+There are 16+ edge functions deployed but no single document listing them, their triggers (cron vs webhook vs manual), required secrets, and current status.
+
+**Action:** Create `docs/edge-function-inventory.md` — a simple table: function name, trigger type, schedule, required secrets, status.
+
+---
+
+### Summary — Recommended changes in priority order
+
+| # | Action | Effort |
+|---|--------|--------|
+| 1 | Rewrite `claude-implementation-notes.md` to actual implementation notes | M |
+| 2 | Update `masterplan.md` roadmap section | S |
+| 3 | Delete `implementation-plan.md` (redundant) | S |
+| 4 | Update `global-system-architecture.md` schema spine + enums | M |
+| 5 | Update `app-flow-pages-and-roles.md` with all current routes | S |
+| 6 | Fix `tasks.md` progress table counts | S |
+| 7 | Add 1-line status headers to each module spec | S |
+| 8 | Resolve duplicate Module 10 files | S |
+| 9 | Add completion status to expanded spec docs | S |
+| 10 | Create `docs/edge-function-inventory.md` | S |
 
