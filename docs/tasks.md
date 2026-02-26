@@ -166,6 +166,13 @@
 - [x] **2C-C4b** | P1 | M | Wire provider service updates — no_show_ping + job_reassigned (C3, check-no-shows), payout_posted (stripe-webhook transfer.paid), route_updated (optimize-routes). hold_released deferred (requires Stripe Connect account.updated → earnings flow, already emits status change but no dedicated notification).
 - [x] **2C-C4c** | P1 | S | Banner surfaces — CustomerNotificationBanners (payment failure + weather reschedule) on customer dashboard, ProviderNotificationBanners (SLA orange/red) on provider dashboard. All tied to unread notification records.
 
+### Sprint C4 Review Fixes
+- [x] **C4-F1** | CRITICAL | Added missing `PROVIDER_ROUTE_UPDATED` template (was causing raw event name in notifications)
+- [x] **C4-F2** | CRITICAL | Fixed payout payload: `amount_cents` → `amount` with dollar formatting `(total_cents / 100).toFixed(2)`
+- [x] **C4-F3** | HIGH | Fixed issue CTA route template: `{{ticket_id}}` → `{{issue_id}}`
+- [x] **C4-F4** | MEDIUM | Already fixed — `check-no-shows` correctly emits `CUSTOMER_PROVIDER_REASSIGNED` (reviewer had stale ref)
+- [x] **C4-F7** | MEDIUM | Optimized en_route trigger with `WHEN` clause and `UPDATE OF arrived_at` column filter
+
 ### Sprint C5: Polish + Delivery Providers
 - [ ] **2C-C5a** | P2 | L | Email delivery integration — transactional email provider setup, template rendering, critical-only emails (payment failed, receipt, security).
 - [ ] **2C-C5b** | P2 | M | Digest behavior — combine multiple non-critical events into daily summary, suppress extra pushes beyond rate limit.
