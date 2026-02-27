@@ -303,9 +303,9 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 - [x] **2E-E02-F3** | Fix | Balance query filters to unpaid statuses only (ELIGIBLE/HELD/HELD_UNTIL_READY) instead of all-time
 
 ### Sprint E-03 — Availability + Coverage
-- [ ] **2E-E03-01** | P0 | L | `provider_availability_blocks` table + calendar UI for vacation/days off
-- [ ] **2E-E03-02** | P0 | L | Assignment engine respects availability blocks
-- [ ] **2E-E03-03** | P1 | M | Lead-time warnings + coverage gap detection
+- [x] **2E-E03-01** | P0 | L | `provider_availability_blocks` table with RLS, validation trigger, calendar UI on Coverage page (create/cancel blocks with date pickers)
+- [x] **2E-E03-02** | P0 | L | `auto_assign_job` RPC updated — skips providers with active DAY_OFF/VACATION blocks for job's scheduled_date (both PRIMARY and BACKUP loops)
+- [x] **2E-E03-03** | P1 | M | Lead-time warnings — blocks starting within 48 hours flagged in UI with coverage confirmation message
 
 ### Sprint E-04 — BYOC / Founding Partner
 - [ ] **2E-E04-01** | P0 | L | `byoc_attributions` table + invite funnel tracking
