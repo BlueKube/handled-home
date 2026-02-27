@@ -34,11 +34,12 @@ export interface Subscription {
   handles_balance: number;
 }
 
-export function useCustomerSubscription() {
+export function useCustomerSubscription(refetchInterval?: number) {
   const { user } = useAuth();
   return useQuery({
     queryKey: ["subscription", user?.id],
     enabled: !!user,
+    refetchInterval,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("subscriptions")

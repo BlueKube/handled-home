@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOnboardingProgress, ONBOARDING_STEPS, type OnboardingStep } from "@/hooks/useOnboardingProgress";
 import { useProperty, PropertyFormData, formatPetsForDisplay } from "@/hooks/useProperty";
@@ -86,21 +86,35 @@ function validateProperty(form: PropertyFormData): FieldErrors {
 // ════════════════════════════════════════
 export default function OnboardingWizard() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const { progress, isLoading, currentStep, completedSteps, selectedPlanId, completeStep, goToStep, isSaving } =
     useOnboardingProgress();
   const { property, isLoading: propLoading } = useProperty();
-  const { data: subscription, isLoading: subLoading } = useCustomerSubscription();
 
-  // If already fully onboarded (has property + subscription), redirect to dashboard
+  // D1-F2: Detect checkout=success and poll for subscription
+  const checkoutSuccess = searchParams.get("checkout") === "success";
+  const { data: subscription, isLoading: subLoading } = useCustomerSubscription(
+    checkoutSuccess ? 2000 : undefined
+  );
+
+  // D1-F2: Auto-advance after successful checkout when subscription appears
   useEffect(() => {
-    if (!propLoading && !subLoading && property && subscription) {
-      const activeStatuses = ["active", "trialing", "past_due"];
-      if (activeStatuses.includes(subscription.status)) {
-        navigate("/customer", { replace: true });
+    if (checkoutSuccess && subscription && ["active", "trialing"].includes(subscription.status)) {
+      // Clear query param and advance past subscribe step
+      setSearchParams({}, { replace: true });
+      if (!completedSteps.includes("subscribe")) {
+        completeStep("subscribe");
       }
     }
-  }, [propLoading, subLoading, property, subscription, navigate]);
+  }, [checkoutSuccess, subscription, completedSteps, completeStep, setSearchParams]);
+
+  // D1-F1 FIX: Only redirect when onboarding is truly complete
+  useEffect(() => {
+    if (!isLoading && !propLoading && !subLoading && currentStep === "complete" && completedSteps.includes("routine")) {
+      navigate("/customer", { replace: true });
+    }
+  }, [isLoading, propLoading, subLoading, currentStep, completedSteps, navigate]);
 
   if (isLoading || propLoading) {
     return (
@@ -108,6 +122,17 @@ export default function OnboardingWizard() {
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  // D1-F2: Show verifying state after checkout redirect
+  if (checkoutSuccess && (!subscription || !["active", "trialing"].includes(subscription.status ?? ""))) {
+    return (
+      <div className="max-w-lg mx-auto p-4 space-y-6 text-center animate-fade-in">
+        <Loader2 className="h-10 w-10 animate-spin text-accent mx-auto" />
+        <h1 className="text-h2">Verifying your subscription…</h1>
+        <p className="text-muted-foreground text-sm">This usually takes just a few seconds.</p>
       </div>
     );
   }
@@ -196,9 +221,6 @@ export default function OnboardingWizard() {
         {effectiveStep === "service_day" && (
           <ServiceDayStep
             onComplete={async () => {
-              await completeStep("service_day");
-            }}
-            onSkip={async () => {
               await completeStep("service_day");
             }}
           />
@@ -546,7 +568,6 @@ function PlanStep({ onSelectPlan }: { onSelectPlan: (planId: string) => Promise<
 // Step 4: Subscribe
 // ════════════════════════════════════════
 function SubscribeStep({ planId, onComplete }: { planId: string | null; onComplete: () => Promise<void> }) {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { data: plan, isLoading } = useQuery({
     queryKey: ["plans", planId],
@@ -563,11 +584,11 @@ function SubscribeStep({ planId, onComplete }: { planId: string | null; onComple
     if (!user || !planId) return;
     setLoading(true);
     try {
+      // D1-F8: Removed customer_id — edge function derives identity from JWT
       const { data, error } = await supabase.functions.invoke("create-checkout-session", {
         body: {
           plan_id: planId,
           customer_email: user.email,
-          customer_id: user.id,
           success_url: `${window.location.origin}/customer/onboarding?checkout=success`,
           cancel_url: `${window.location.origin}/customer/onboarding?checkout=cancel`,
         },
@@ -622,23 +643,33 @@ function SubscribeStep({ planId, onComplete }: { planId: string | null; onComple
 }
 
 // ════════════════════════════════════════
-// Step 5: Service Day
+// Step 5: Service Day (D1-F4: inline with complete action)
 // ════════════════════════════════════════
-function ServiceDayStep({ onComplete, onSkip }: { onComplete: () => Promise<void>; onSkip: () => Promise<void> }) {
-  const navigate = useNavigate();
+function ServiceDayStep({ onComplete }: { onComplete: () => Promise<void> }) {
+  const [completing, setCompleting] = useState(false);
+
+  const handleAccept = async () => {
+    setCompleting(true);
+    try {
+      await onComplete();
+    } finally {
+      setCompleting(false);
+    }
+  };
 
   return (
     <div className="max-w-lg mx-auto space-y-6 text-center">
       <CalendarCheck className="h-10 w-10 text-accent mx-auto" />
       <h1 className="text-h2">Your Service Day</h1>
       <p className="text-muted-foreground text-sm">
-        We'll match you to the most efficient route day in your area. You can review and adjust this anytime.
+        We'll match you to the most efficient route day in your area. You can review and adjust this anytime from your dashboard.
       </p>
 
-      <Button className="w-full" onClick={() => navigate("/customer/service-day")}>
-        View & Accept Service Day
+      <Button className="w-full" onClick={handleAccept} disabled={completing}>
+        {completing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+        Accept & Continue
       </Button>
-      <Button variant="ghost" className="w-full text-sm" onClick={onSkip}>
+      <Button variant="ghost" className="w-full text-sm" onClick={handleAccept} disabled={completing}>
         Skip for now — I'll set this up later
       </Button>
     </div>
@@ -646,23 +677,33 @@ function ServiceDayStep({ onComplete, onSkip }: { onComplete: () => Promise<void
 }
 
 // ════════════════════════════════════════
-// Step 6: Routine
+// Step 6: Routine (D1-F4: inline with complete action)
 // ════════════════════════════════════════
 function RoutineStep({ onComplete }: { onComplete: () => Promise<void> }) {
-  const navigate = useNavigate();
+  const [completing, setCompleting] = useState(false);
+
+  const handleComplete = async () => {
+    setCompleting(true);
+    try {
+      await onComplete();
+    } finally {
+      setCompleting(false);
+    }
+  };
 
   return (
     <div className="max-w-lg mx-auto space-y-6 text-center">
       <Sparkles className="h-10 w-10 text-accent mx-auto" />
       <h1 className="text-h2">Build your routine</h1>
       <p className="text-muted-foreground text-sm">
-        Choose which services you'd like on your regular visits. You can always swap, add, or remove services later.
+        Choose which services you'd like on your regular visits. You can always swap, add, or remove services later from your dashboard.
       </p>
 
-      <Button className="w-full" onClick={() => navigate("/customer/routine")}>
-        Build My Routine
+      <Button className="w-full" onClick={handleComplete} disabled={completing}>
+        {completing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+        Continue to Complete Setup
       </Button>
-      <Button variant="ghost" className="w-full text-sm" onClick={onComplete}>
+      <Button variant="ghost" className="w-full text-sm" onClick={handleComplete} disabled={completing}>
         Skip for now
       </Button>
     </div>

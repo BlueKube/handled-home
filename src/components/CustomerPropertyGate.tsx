@@ -39,11 +39,11 @@ export function CustomerPropertyGate({ children }: CustomerPropertyGateProps) {
     );
   }
 
-  // If no property OR no active subscription, redirect to onboarding wizard
-  const activeStatuses = ["active", "trialing", "past_due"];
-  const hasActiveSub = subscription && activeStatuses.includes(subscription.status);
+  // D1-F3 FIX: Only redirect truly new users (no property AND no subscription history).
+  // Churned/expired customers who have a subscription record can still access their account.
+  const hasAnySub = subscription != null;
 
-  if (!hasProperty || !hasActiveSub) {
+  if (!hasProperty && !hasAnySub) {
     return <Navigate to="/customer/onboarding" replace state={{ from: location.pathname }} />;
   }
 
