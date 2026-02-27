@@ -298,6 +298,9 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 - [x] **2E-E02-01** | P0 | M | Day/week/month period selector on Earnings page with filtered queries
 - [x] **2E-E02-02** | P1 | M | "At current pace" monthly projection card — remaining scheduled jobs × 30-day avg per job
 - [x] **2E-E02-03** | P1 | M | Expandable earning cards with base/modifier/net breakdown, hold reason + release countdown
+- [x] **2E-E02-F1** | Fix | Already resolved — provider_org_id filter added to earnings/payouts queries
+- [x] **2E-E02-F2** | Fix | Monthly projection now uses dedicated MTD query, accurate regardless of period selector
+- [x] **2E-E02-F3** | Fix | Balance query filters to unpaid statuses only (ELIGIBLE/HELD/HELD_UNTIL_READY) instead of all-time
 
 ### Sprint E-03 — Availability + Coverage
 - [ ] **2E-E03-01** | P0 | L | `provider_availability_blocks` table + calendar UI for vacation/days off

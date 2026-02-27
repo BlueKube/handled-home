@@ -43,14 +43,32 @@ export function useProviderEarnings(period: EarningsPeriod = "month") {
     enabled: !!org?.id,
   });
 
-  // All-time query for totals
-  const allEarningsQuery = useQuery({
-    queryKey: ["provider-earnings-all", org?.id],
+  // Only unpaid statuses for balance computation (E02-F3 fix)
+  const balanceQuery = useQuery({
+    queryKey: ["provider-earnings-balances", org?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("provider_earnings")
         .select("total_cents, status")
-        .eq("provider_org_id", org!.id);
+        .eq("provider_org_id", org!.id)
+        .in("status", ["ELIGIBLE", "HELD", "HELD_UNTIL_READY"]);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!org?.id,
+  });
+
+  // Month-to-date earnings (always current month, independent of period selector — E02-F2 fix)
+  const mtdRange = { from: format(startOfMonth(new Date()), "yyyy-MM-dd"), to: format(endOfMonth(new Date()), "yyyy-MM-dd") };
+  const mtdQuery = useQuery({
+    queryKey: ["provider-earnings-mtd", org?.id, mtdRange.from],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("provider_earnings")
+        .select("total_cents")
+        .eq("provider_org_id", org!.id)
+        .gte("created_at", `${mtdRange.from}T00:00:00`)
+        .lte("created_at", `${mtdRange.to}T23:59:59`);
       if (error) throw error;
       return data;
     },
@@ -125,14 +143,14 @@ export function useProviderEarnings(period: EarningsPeriod = "month") {
   });
 
   const earnings = earningsQuery.data ?? [];
-  const allEarnings = allEarningsQuery.data ?? [];
+  const balances = balanceQuery.data ?? [];
   const periodTotal = earnings.reduce((s, e) => s + e.total_cents, 0);
   const periodModifiers = earnings.reduce((s, e) => s + e.modifier_cents, 0);
-  const eligibleBalance = allEarnings.filter(e => e.status === "ELIGIBLE").reduce((s, e) => s + e.total_cents, 0);
-  const heldBalance = allEarnings.filter(e => ["HELD", "HELD_UNTIL_READY"].includes(e.status)).reduce((s, e) => s + e.total_cents, 0);
+  const eligibleBalance = balances.filter(e => e.status === "ELIGIBLE").reduce((s, e) => s + e.total_cents, 0);
+  const heldBalance = balances.filter(e => ["HELD", "HELD_UNTIL_READY"].includes(e.status)).reduce((s, e) => s + e.total_cents, 0);
 
-  // Month-to-date earned + projected remaining
-  const monthEarned = period === "month" ? periodTotal : 0;
+  // E02-F2 fix: always use MTD query for projection, not period-dependent
+  const monthEarned = (mtdQuery.data ?? []).reduce((s, e) => s + e.total_cents, 0);
   const projection = projectionQuery.data;
   const monthProjection = monthEarned + (projection?.projectedRemaining ?? 0);
 
