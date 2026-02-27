@@ -8,11 +8,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ChevronLeft, CheckCircle2, Camera, AlertTriangle, Clock, Shield, XCircle } from "lucide-react";
+import { ChevronLeft, CheckCircle2, Camera, AlertTriangle, Clock, Shield, XCircle, Brain } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
+import { DecisionTraceCard } from "@/components/admin/DecisionTraceCard";
 
 export default function AdminJobDetail() {
   const { jobId } = useParams<{ jobId: string }>();
@@ -94,6 +95,7 @@ export default function AdminJobDetail() {
           <TabsTrigger value="photos" className="flex-1">Photos</TabsTrigger>
           <TabsTrigger value="issues" className="flex-1">Issues</TabsTrigger>
           <TabsTrigger value="events" className="flex-1">Events</TabsTrigger>
+          <TabsTrigger value="decisions" className="flex-1"><Brain className="h-3 w-3 mr-1" />Trace</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-4 space-y-3">
@@ -160,6 +162,10 @@ export default function AdminJobDetail() {
               <p className="text-xs text-muted-foreground">{ev.actor_role}</p>
             </Card>
           ))}
+        </TabsContent>
+
+        <TabsContent value="decisions" className="mt-4">
+          <DecisionTraceCard entityType="job" entityId={jobId} />
         </TabsContent>
       </Tabs>
 

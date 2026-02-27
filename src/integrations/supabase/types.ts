@@ -999,6 +999,45 @@ export type Database = {
           },
         ]
       }
+      decision_traces: {
+        Row: {
+          candidates: Json
+          created_at: string
+          decision_type: string
+          entity_id: string
+          entity_type: string
+          id: string
+          inputs: Json
+          outcome: Json
+          override_event_id: string | null
+          scoring: Json
+        }
+        Insert: {
+          candidates?: Json
+          created_at?: string
+          decision_type: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          inputs?: Json
+          outcome?: Json
+          override_event_id?: string | null
+          scoring?: Json
+        }
+        Update: {
+          candidates?: Json
+          created_at?: string
+          decision_type?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          inputs?: Json
+          outcome?: Json
+          override_event_id?: string | null
+          scoring?: Json
+        }
+        Relationships: []
+      }
       dunning_events: {
         Row: {
           action: string
@@ -6775,6 +6814,17 @@ export type Database = {
       lock_provider_route: {
         Args: { p_date: string; p_provider_org_id: string }
         Returns: Json
+      }
+      log_admin_action: {
+        Args: {
+          p_action: string
+          p_after?: Json
+          p_before?: Json
+          p_entity_id?: string
+          p_entity_type: string
+          p_reason?: string
+        }
+        Returns: string
       }
       notify_waitlist_on_launch: { Args: { p_zone_id: string }; Returns: Json }
       override_referral_attribution: {
