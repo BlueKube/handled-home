@@ -4442,6 +4442,8 @@ export type Database = {
           billing_cycle_length_days: number
           billing_cycle_start_at: string | null
           cancel_at_period_end: boolean
+          cancel_feedback: string | null
+          cancel_reason: string | null
           created_at: string
           current_period_end: string | null
           current_period_start: string | null
@@ -4457,10 +4459,14 @@ export type Database = {
           next_billing_at: string | null
           next_service_week_end_at: string | null
           next_service_week_start_at: string | null
+          pause_weeks: number | null
+          paused_at: string | null
           pending_effective_at: string | null
           pending_plan_id: string | null
           plan_id: string
           property_id: string | null
+          resume_at: string | null
+          retention_offer_accepted: boolean | null
           service_weeks_used: number
           status: string
           stripe_customer_id: string | null
@@ -4474,6 +4480,8 @@ export type Database = {
           billing_cycle_length_days?: number
           billing_cycle_start_at?: string | null
           cancel_at_period_end?: boolean
+          cancel_feedback?: string | null
+          cancel_reason?: string | null
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string | null
@@ -4489,10 +4497,14 @@ export type Database = {
           next_billing_at?: string | null
           next_service_week_end_at?: string | null
           next_service_week_start_at?: string | null
+          pause_weeks?: number | null
+          paused_at?: string | null
           pending_effective_at?: string | null
           pending_plan_id?: string | null
           plan_id: string
           property_id?: string | null
+          resume_at?: string | null
+          retention_offer_accepted?: boolean | null
           service_weeks_used?: number
           status?: string
           stripe_customer_id?: string | null
@@ -4506,6 +4518,8 @@ export type Database = {
           billing_cycle_length_days?: number
           billing_cycle_start_at?: string | null
           cancel_at_period_end?: boolean
+          cancel_feedback?: string | null
+          cancel_reason?: string | null
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string | null
@@ -4521,10 +4535,14 @@ export type Database = {
           next_billing_at?: string | null
           next_service_week_end_at?: string | null
           next_service_week_start_at?: string | null
+          pause_weeks?: number | null
+          paused_at?: string | null
           pending_effective_at?: string | null
           pending_plan_id?: string | null
           plan_id?: string
           property_id?: string | null
+          resume_at?: string | null
+          retention_offer_accepted?: boolean | null
           service_weeks_used?: number
           status?: string
           stripe_customer_id?: string | null
@@ -5783,6 +5801,19 @@ export type Database = {
       }
       auto_assign_job: { Args: { p_job_id: string }; Returns: Json }
       bootstrap_new_user: { Args: { _full_name: string }; Returns: undefined }
+      cancel_pending_plan_change: {
+        Args: { p_subscription_id: string }
+        Returns: Json
+      }
+      cancel_subscription_with_reason: {
+        Args: {
+          p_accept_retention_offer?: boolean
+          p_feedback?: string
+          p_reason: string
+          p_subscription_id: string
+        }
+        Returns: Json
+      }
       check_provider_sku_zone_eligibility: {
         Args: { p_provider_org_id: string; p_sku_id: string; p_zone_id: string }
         Returns: boolean
@@ -5929,6 +5960,10 @@ export type Database = {
         }
         Returns: Json
       }
+      pause_subscription: {
+        Args: { p_subscription_id: string; p_weeks: number }
+        Returns: Json
+      }
       recalc_handles_balance: {
         Args: { p_subscription_id: string }
         Returns: number
@@ -6015,6 +6050,10 @@ export type Database = {
         Returns: Json
       }
       resolve_weather_event: { Args: { p_event_id: string }; Returns: Json }
+      resume_subscription: {
+        Args: { p_subscription_id: string }
+        Returns: Json
+      }
       review_expansion_suggestion: {
         Args: { p_decision: string; p_note?: string; p_suggestion_id: string }
         Returns: undefined
@@ -6025,6 +6064,10 @@ export type Database = {
       }
       run_dunning_step: { Args: { p_subscription_id: string }; Returns: Json }
       run_payout_batch: { Args: { p_payout_run_id: string }; Returns: Json }
+      schedule_plan_change: {
+        Args: { p_new_plan_id: string; p_subscription_id: string }
+        Returns: Json
+      }
       select_alternative_service_day: {
         Args: { p_assignment_id: string; p_offer_id: string }
         Returns: Json
