@@ -295,9 +295,9 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 - [ ] **2E-E01-F3** | P2 | Deferred | `unlock_provider_route` admin RPC for mid-day schedule changes — not urgent for E-01.
 
 ### Sprint E-02 — Earnings & Payout Trust
-- [ ] **2E-E02-01** | P0 | M | Day/week/month tab filtering on Earnings page
-- [ ] **2E-E02-02** | P1 | M | "At current pace" monthly projection based on scheduled jobs
-- [ ] **2E-E02-03** | P1 | M | Modifier transparency — bonus/hold/rush breakdown per earning
+- [x] **2E-E02-01** | P0 | M | Day/week/month period selector on Earnings page with filtered queries
+- [x] **2E-E02-02** | P1 | M | "At current pace" monthly projection card — remaining scheduled jobs × 30-day avg per job
+- [x] **2E-E02-03** | P1 | M | Expandable earning cards with base/modifier/net breakdown, hold reason + release countdown
 
 ### Sprint E-03 — Availability + Coverage
 - [ ] **2E-E03-01** | P0 | L | `provider_availability_blocks` table + calendar UI for vacation/days off

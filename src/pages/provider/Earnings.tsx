@@ -1,11 +1,11 @@
 import { useState, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { StatCard } from "@/components/StatCard";
 import { QueryErrorCard } from "@/components/QueryErrorCard";
-import { useProviderEarnings } from "@/hooks/useProviderEarnings";
+import { useProviderEarnings, type EarningsPeriod } from "@/hooks/useProviderEarnings";
 import {
   DollarSign,
   TrendingUp,
@@ -14,8 +14,12 @@ import {
   Banknote,
   ArrowDownToLine,
   CheckCircle,
+  Zap,
+  Target,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 
 function formatCents(cents: number) {
   return `$${(cents / 100).toFixed(2)}`;
@@ -36,8 +40,90 @@ function statusVariant(status: string): "default" | "secondary" | "outline" | "d
   }
 }
 
-function EarningsList() {
-  const { earnings, isLoading, isError, refetch } = useProviderEarnings();
+function EarningCard({ earning }: { earning: any }) {
+  const [expanded, setExpanded] = useState(false);
+  const jobDate = earning.jobs?.scheduled_date;
+  const address = earning.jobs?.properties?.street_address;
+
+  return (
+    <Card className="p-3 cursor-pointer" onClick={() => setExpanded(!expanded)}>
+      <div className="flex items-center gap-3">
+        <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+          <DollarSign className="h-4 w-4 text-accent" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate">{address ?? "Job"}</p>
+          <div className="flex items-center gap-2 mt-0.5">
+            {jobDate && (
+              <span className="text-xs text-muted-foreground">
+                {format(new Date(jobDate), "MMM d")}
+              </span>
+            )}
+            <Badge variant={statusVariant(earning.status)} className="text-xs">
+              {earning.status.replace(/_/g, " ")}
+            </Badge>
+          </div>
+        </div>
+        <div className="text-right shrink-0 flex items-center gap-1">
+          <div>
+            <p className="text-sm font-bold">{formatCents(earning.total_cents)}</p>
+            {earning.modifier_cents !== 0 && (
+              <p className="text-xs text-muted-foreground">
+                {earning.modifier_cents > 0 ? "+" : ""}
+                {formatCents(earning.modifier_cents)}
+              </p>
+            )}
+          </div>
+          {expanded ? (
+            <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" />
+          ) : (
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+          )}
+        </div>
+      </div>
+
+      {/* Expanded modifier breakdown */}
+      {expanded && (
+        <div className="mt-3 pt-3 border-t border-border space-y-1.5">
+          <div className="flex justify-between text-xs">
+            <span className="text-muted-foreground">Base pay</span>
+            <span className="font-medium">{formatCents(earning.base_amount_cents)}</span>
+          </div>
+          {earning.modifier_cents !== 0 && (
+            <div className="flex justify-between text-xs">
+              <span className="text-muted-foreground flex items-center gap-1">
+                <Zap className="h-3 w-3" />
+                {earning.modifier_cents > 0 ? "Bonus / Rush" : "Adjustment"}
+              </span>
+              <span className={`font-medium ${earning.modifier_cents > 0 ? "text-success" : "text-destructive"}`}>
+                {earning.modifier_cents > 0 ? "+" : ""}
+                {formatCents(earning.modifier_cents)}
+              </span>
+            </div>
+          )}
+          <div className="flex justify-between text-xs font-semibold pt-1 border-t border-border/50">
+            <span>Net pay</span>
+            <span>{formatCents(earning.total_cents)}</span>
+          </div>
+          {earning.hold_reason && (
+            <div className="flex items-center gap-1.5 text-xs text-warning mt-1">
+              <PauseCircle className="h-3 w-3" />
+              <span>Hold: {earning.hold_reason}</span>
+              {earning.hold_until && (
+                <span className="text-muted-foreground">
+                  · releases {formatDistanceToNow(new Date(earning.hold_until), { addSuffix: true })}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function EarningsList({ period }: { period: EarningsPeriod }) {
+  const { earnings, isLoading, isError, refetch } = useProviderEarnings(period);
 
   if (isLoading) {
     return (
@@ -57,7 +143,7 @@ function EarningsList() {
     return (
       <div className="text-center py-10">
         <DollarSign className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
-        <p className="text-sm text-muted-foreground">No earnings yet</p>
+        <p className="text-sm text-muted-foreground">No earnings for this period</p>
         <p className="text-xs text-muted-foreground/60 mt-1">Complete jobs to start earning</p>
       </div>
     );
@@ -65,48 +151,9 @@ function EarningsList() {
 
   return (
     <div className="space-y-2">
-      {earnings.map((e) => {
-        const jobDate = (e as any).jobs?.scheduled_date;
-        const address = (e as any).jobs?.properties?.street_address;
-        return (
-          <Card key={e.id} className="p-3">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
-                <DollarSign className="h-4 w-4 text-accent" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">
-                  {address ?? "Job"}
-                </p>
-                <div className="flex items-center gap-2 mt-0.5">
-                  {jobDate && (
-                    <span className="text-xs text-muted-foreground">
-                      {format(new Date(jobDate), "MMM d")}
-                    </span>
-                  )}
-                  <Badge variant={statusVariant(e.status)} className="text-xs">
-                    {e.status.replace(/_/g, " ")}
-                  </Badge>
-                </div>
-              </div>
-              <div className="text-right shrink-0">
-                <p className="text-sm font-bold">{formatCents(e.total_cents)}</p>
-                {e.modifier_cents !== 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    {e.modifier_cents > 0 ? "+" : ""}{formatCents(e.modifier_cents)} modifier
-                  </p>
-                )}
-              </div>
-            </div>
-            {e.hold_reason && (
-              <div className="mt-2 flex items-center gap-1.5 text-xs text-warning">
-                <PauseCircle className="h-3 w-3" />
-                <span>Hold: {e.hold_reason}</span>
-              </div>
-            )}
-          </Card>
-        );
-      })}
+      {earnings.map((e) => (
+        <EarningCard key={e.id} earning={e} />
+      ))}
     </div>
   );
 }
@@ -162,18 +209,20 @@ function PayoutsList() {
 }
 
 export default function ProviderEarnings() {
-  const [tab, setTab] = useState("earnings");
-  const { eligibleBalance, heldBalance, earnings, payouts, isAccountReady, isLoading } =
-    useProviderEarnings();
+  const [mainTab, setMainTab] = useState("earnings");
+  const [period, setPeriod] = useState<EarningsPeriod>("month");
+  const {
+    eligibleBalance,
+    heldBalance,
+    periodTotal,
+    periodModifiers,
+    monthProjection,
+    projectionDetail,
+    isAccountReady,
+    isLoading,
+  } = useProviderEarnings(period);
 
-  const totalEarned = useMemo(
-    () => earnings.reduce((sum, e) => sum + e.total_cents, 0),
-    [earnings]
-  );
-  const totalPaid = useMemo(
-    () => payouts.reduce((sum: number, p: any) => sum + (p.amount_cents ?? 0), 0),
-    [payouts]
-  );
+  const periodLabel = period === "today" ? "Today" : period === "week" ? "This Week" : "This Month";
 
   return (
     <div className="animate-fade-in p-4 pb-24 space-y-5 max-w-2xl">
@@ -182,10 +231,37 @@ export default function ProviderEarnings() {
         <p className="text-caption mt-0.5">Track your earnings and payouts</p>
       </div>
 
+      {/* Period Selector */}
+      <div className="flex gap-1 bg-muted rounded-lg p-1">
+        {(["today", "week", "month"] as EarningsPeriod[]).map((p) => (
+          <button
+            key={p}
+            onClick={() => setPeriod(p)}
+            className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-colors ${
+              period === p
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {p === "today" ? "Today" : p === "week" ? "Week" : "Month"}
+          </button>
+        ))}
+      </div>
+
       {/* Summary Stats */}
       <div className="grid gap-3 grid-cols-2">
         <StatCard
           icon={DollarSign}
+          label={`${periodLabel} Earned`}
+          value={isLoading ? "—" : formatCents(periodTotal)}
+        />
+        <StatCard
+          icon={Zap}
+          label="Modifiers"
+          value={isLoading ? "—" : `${periodModifiers >= 0 ? "+" : ""}${formatCents(periodModifiers)}`}
+        />
+        <StatCard
+          icon={TrendingUp}
           label="Available"
           value={isLoading ? "—" : formatCents(eligibleBalance)}
         />
@@ -194,17 +270,27 @@ export default function ProviderEarnings() {
           label="On Hold"
           value={isLoading ? "—" : formatCents(heldBalance)}
         />
-        <StatCard
-          icon={TrendingUp}
-          label="Total Earned"
-          value={isLoading ? "—" : formatCents(totalEarned)}
-        />
-        <StatCard
-          icon={Banknote}
-          label="Total Paid"
-          value={isLoading ? "—" : formatCents(totalPaid)}
-        />
       </div>
+
+      {/* Monthly Projection Card */}
+      {projectionDetail && projectionDetail.remainingJobs > 0 && (
+        <Card className="p-4 bg-primary/5 border-primary/20">
+          <div className="flex items-start gap-3">
+            <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <Target className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                At current pace: {formatCents(monthProjection)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {projectionDetail.remainingJobs} scheduled job{projectionDetail.remainingJobs !== 1 ? "s" : ""} remaining
+                · avg {formatCents(projectionDetail.avgPerJob)}/job
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Payout Account Status */}
       <Card className="p-3">
@@ -228,13 +314,13 @@ export default function ProviderEarnings() {
       </Card>
 
       {/* Earnings / Payouts Tabs */}
-      <Tabs value={tab} onValueChange={setTab}>
+      <Tabs value={mainTab} onValueChange={setMainTab}>
         <TabsList className="w-full">
           <TabsTrigger value="earnings" className="flex-1">Earnings</TabsTrigger>
           <TabsTrigger value="payouts" className="flex-1">Payouts</TabsTrigger>
         </TabsList>
         <TabsContent value="earnings" className="mt-4">
-          <EarningsList />
+          <EarningsList period={period} />
         </TabsContent>
         <TabsContent value="payouts" className="mt-4">
           <PayoutsList />
