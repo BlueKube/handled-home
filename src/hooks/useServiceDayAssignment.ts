@@ -13,6 +13,7 @@ export interface ServiceDayAssignment {
   rejection_used: boolean;
   reserved_until: string | null;
   reason_code: string | null;
+  alignment_explanation: string | null;
   created_at: string;
   updated_at: string;
 }
