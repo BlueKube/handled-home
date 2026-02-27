@@ -32,6 +32,13 @@ export interface Subscription {
   next_service_week_end_at: string | null;
   // Handles balance (cache — source of truth is handle_transactions ledger)
   handles_balance: number;
+  // D4 columns
+  paused_at: string | null;
+  resume_at: string | null;
+  pause_weeks: number | null;
+  cancel_reason: string | null;
+  cancel_feedback: string | null;
+  retention_offer_accepted: boolean;
 }
 
 export function useCustomerSubscription(refetchInterval?: number) {
@@ -45,7 +52,7 @@ export function useCustomerSubscription(refetchInterval?: number) {
         .from("subscriptions")
         .select("*")
         .eq("customer_id", user!.id)
-        .in("status", ["active", "trialing", "past_due", "canceling"])
+        .in("status", ["active", "trialing", "past_due", "canceling", "paused"])
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();

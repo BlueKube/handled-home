@@ -18,9 +18,9 @@ export function PausePanel({ subscription }: PausePanelProps) {
   const pauseSub = usePauseSubscription();
   const resumeSub = useResumeSubscription();
 
-  const isPaused = (subscription as any).paused_at != null;
-  const resumeAt = (subscription as any).resume_at;
-  const pauseWeeks = (subscription as any).pause_weeks;
+  const isPaused = subscription.paused_at != null;
+  const resumeAt = subscription.resume_at;
+  const pauseWeeks = subscription.pause_weeks;
 
   const handlePause = async () => {
     if (!weeks) return;
