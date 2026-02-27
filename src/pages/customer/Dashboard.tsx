@@ -19,6 +19,7 @@ import { CrossPollinationCard } from "@/components/customer/CrossPollinationCard
 import { CustomerNotificationBanners } from "@/components/customer/NotificationBanners";
 import { HandleBalanceBar } from "@/components/customer/HandleBalanceBar";
 import { PropertyHealthWidget } from "@/components/customer/PropertyHealthWidget";
+import { AddonSuggestionsCard } from "@/components/customer/AddonSuggestionsCard";
 
 function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -189,6 +190,9 @@ export default function CustomerDashboard() {
 
       {/* Cross-Pollination Card */}
       <CrossPollinationCard zoneId={subscription?.zone_id} propertyId={property?.id} />
+
+      {/* Contextual Add-ons */}
+      <AddonSuggestionsCard />
 
       {/* Seasonal Plan Card */}
       <SeasonalPlanCard propertyId={property?.id} zoneId={subscription?.zone_id} />

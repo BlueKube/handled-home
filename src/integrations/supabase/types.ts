@@ -14,6 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
+      addon_orders: {
+        Row: {
+          created_at: string
+          customer_id: string
+          handle_cost: number
+          id: string
+          job_id: string | null
+          payment_method: string
+          price_cents: number
+          property_id: string
+          refund_reason: string | null
+          sku_id: string
+          status: string
+          subscription_id: string
+          updated_at: string
+          zone_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          handle_cost?: number
+          id?: string
+          job_id?: string | null
+          payment_method: string
+          price_cents?: number
+          property_id: string
+          refund_reason?: string | null
+          sku_id: string
+          status?: string
+          subscription_id: string
+          updated_at?: string
+          zone_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          handle_cost?: number
+          id?: string
+          job_id?: string | null
+          payment_method?: string
+          price_cents?: number
+          property_id?: string
+          refund_reason?: string | null
+          sku_id?: string
+          status?: string
+          subscription_id?: string
+          updated_at?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "addon_orders_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "addon_orders_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "addon_orders_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "addon_orders_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "addon_orders_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_adjustments: {
         Row: {
           adjustment_type: string
@@ -4252,6 +4339,7 @@ export type Database = {
       }
       service_skus: {
         Row: {
+          addon_triggers: Json
           base_price_cents: number
           category: string | null
           checklist: Json
@@ -4266,6 +4354,7 @@ export type Database = {
           id: string
           image_url: string | null
           inclusions: string[]
+          is_addon: boolean
           is_featured: boolean
           name: string
           price_hint_cents: number | null
@@ -4276,6 +4365,7 @@ export type Database = {
           weather_sensitive: boolean
         }
         Insert: {
+          addon_triggers?: Json
           base_price_cents?: number
           category?: string | null
           checklist?: Json
@@ -4290,6 +4380,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           inclusions?: string[]
+          is_addon?: boolean
           is_featured?: boolean
           name: string
           price_hint_cents?: number | null
@@ -4300,6 +4391,7 @@ export type Database = {
           weather_sensitive?: boolean
         }
         Update: {
+          addon_triggers?: Json
           base_price_cents?: number
           category?: string | null
           checklist?: Json
@@ -4314,6 +4406,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           inclusions?: string[]
+          is_addon?: boolean
           is_featured?: boolean
           name?: string
           price_hint_cents?: number | null
@@ -5964,6 +6057,16 @@ export type Database = {
         Args: { p_subscription_id: string; p_weeks: number }
         Returns: Json
       }
+      purchase_addon: {
+        Args: {
+          p_payment_method?: string
+          p_property_id: string
+          p_sku_id: string
+          p_subscription_id: string
+          p_zone_id: string
+        }
+        Returns: Json
+      }
       recalc_handles_balance: {
         Args: { p_subscription_id: string }
         Returns: number
@@ -5999,6 +6102,10 @@ export type Database = {
           p_milestone: Database["public"]["Enums"]["referral_milestone_type"]
           p_referral_id: string
         }
+        Returns: Json
+      }
+      refund_addon: {
+        Args: { p_order_id: string; p_reason?: string }
         Returns: Json
       }
       refund_handles: {
