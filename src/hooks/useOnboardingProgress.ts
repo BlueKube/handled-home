@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { useAuth } from "@/contexts/AuthContext";
 
 export const ONBOARDING_STEPS = [
@@ -60,7 +61,7 @@ export function useOnboardingProgress() {
             current_step: updates.current_step,
             completed_steps: updates.completed_steps ?? existing.completed_steps,
             selected_plan_id: updates.selected_plan_id !== undefined ? updates.selected_plan_id : existing.selected_plan_id,
-            metadata: (updates.metadata ?? existing.metadata) as Record<string, unknown> as any,
+            metadata: (updates.metadata ?? existing.metadata) as unknown as Json,
           })
           .eq("id", existing.id);
         if (error) throw error;
@@ -72,7 +73,7 @@ export function useOnboardingProgress() {
             current_step: updates.current_step,
             completed_steps: updates.completed_steps ?? [],
             selected_plan_id: updates.selected_plan_id ?? null,
-            metadata: (updates.metadata ?? {}) as Record<string, unknown> as any,
+            metadata: (updates.metadata ?? {}) as unknown as Json,
           }]);
         if (error) throw error;
       }
