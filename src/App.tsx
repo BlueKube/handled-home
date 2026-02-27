@@ -11,6 +11,7 @@ import NotFound from "@/pages/NotFound";
 import { AppLayout } from "@/components/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { CustomerPropertyGate } from "@/components/CustomerPropertyGate";
+import { AdminShell } from "@/components/admin/AdminShell";
 import MoreMenuPage from "@/components/MoreMenu";
 
 // Customer pages
@@ -211,7 +212,7 @@ const App = () => (
               </Route>
 
               {/* Admin Console */}
-              <Route element={<ProtectedRoute requiredRole="admin"><AppLayout /></ProtectedRoute>}>
+              <Route element={<ProtectedRoute requiredRole="admin"><AdminShell /></ProtectedRoute>}>
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/admin/zones" element={<AdminZones />} />
                 <Route path="/admin/capacity" element={<AdminCapacity />} />

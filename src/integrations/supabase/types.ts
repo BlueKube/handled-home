@@ -173,6 +173,30 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_memberships: {
+        Row: {
+          admin_role: Database["public"]["Enums"]["admin_role"]
+          created_at: string
+          is_active: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_role?: Database["public"]["Enums"]["admin_role"]
+          created_at?: string
+          is_active?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_role?: Database["public"]["Enums"]["admin_role"]
+          created_at?: string
+          is_active?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_inference_runs: {
         Row: {
           classification: Json | null
@@ -6690,6 +6714,10 @@ export type Database = {
         Args: { p_subscription_id: string }
         Returns: Json
       }
+      get_admin_role: {
+        Args: { p_user_id: string }
+        Returns: Database["public"]["Enums"]["admin_role"]
+      }
       get_day_order: {
         Args: { p_default_day: string; p_strategy: string }
         Returns: string[]
@@ -6718,6 +6746,13 @@ export type Database = {
         }
         Returns: Json
       }
+      has_admin_role: {
+        Args: {
+          p_role: Database["public"]["Enums"]["admin_role"]
+          p_user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -6729,8 +6764,10 @@ export type Database = {
         Args: { p_subscription_id: string }
         Returns: Json
       }
+      is_admin_member: { Args: { p_user_id: string }; Returns: boolean }
       is_holiday: { Args: { p_date: string }; Returns: boolean }
       is_provider_org_member: { Args: { p_org_id: string }; Returns: boolean }
+      is_superuser: { Args: { p_user_id: string }; Returns: boolean }
       is_weather_affected: {
         Args: { p_date: string; p_zone_id: string }
         Returns: boolean
@@ -6918,6 +6955,7 @@ export type Database = {
       }
     }
     Enums: {
+      admin_role: "superuser" | "ops" | "dispatcher" | "growth_manager"
       app_role: "customer" | "provider" | "admin"
       cadence_type:
         | "weekly"
@@ -7163,6 +7201,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      admin_role: ["superuser", "ops", "dispatcher", "growth_manager"],
       app_role: ["customer", "provider", "admin"],
       cadence_type: ["weekly", "biweekly", "four_week", "monthly", "quarterly"],
       day_of_week: [

@@ -46,6 +46,10 @@ export function BottomTabBar() {
   const { effectiveRole } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Admin uses AdminShell sidebar — hide bottom tabs
+  if (effectiveRole === "admin") return null;
+
   const tabs = tabsByRole[effectiveRole] ?? customerTabs;
 
   const isActive = (tab: TabItem) => {
