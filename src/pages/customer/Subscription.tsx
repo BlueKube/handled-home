@@ -28,7 +28,7 @@ export default function CustomerSubscription() {
     );
   }
 
-  const isPaused = (subscription as any).paused_at != null;
+  const isPaused = subscription.paused_at != null;
 
   return (
     <div className="p-4 pb-24 space-y-6 animate-fade-in max-w-lg mx-auto">
