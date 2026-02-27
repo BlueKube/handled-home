@@ -4885,6 +4885,7 @@ export type Database = {
           proof_rules: Json
           provider_category: string
           required_photos: Json
+          requires_training_gate: boolean
           status: string
           updated_at: string
           weather_sensitive: boolean
@@ -4915,6 +4916,7 @@ export type Database = {
           proof_rules?: Json
           provider_category?: string
           required_photos?: Json
+          requires_training_gate?: boolean
           status?: string
           updated_at?: string
           weather_sensitive?: boolean
@@ -4945,6 +4947,7 @@ export type Database = {
           proof_rules?: Json
           provider_category?: string
           required_photos?: Json
+          requires_training_gate?: boolean
           status?: string
           updated_at?: string
           weather_sensitive?: boolean
@@ -6681,6 +6684,7 @@ export type Database = {
         Args: { p_provider_org_id: string }
         Returns: Json
       }
+      evaluate_training_gates: { Args: never; Returns: Json }
       expire_stale_handles: { Args: never; Returns: Json }
       generate_subscription_invoice: {
         Args: { p_subscription_id: string }
