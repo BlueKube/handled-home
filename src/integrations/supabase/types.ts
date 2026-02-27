@@ -4010,6 +4010,7 @@ export type Database = {
       }
       service_day_assignments: {
         Row: {
+          alignment_explanation: string | null
           created_at: string
           customer_id: string
           day_of_week: string
@@ -4024,6 +4025,7 @@ export type Database = {
           zone_id: string
         }
         Insert: {
+          alignment_explanation?: string | null
           created_at?: string
           customer_id: string
           day_of_week: string
@@ -4038,6 +4040,7 @@ export type Database = {
           zone_id: string
         }
         Update: {
+          alignment_explanation?: string | null
           created_at?: string
           customer_id?: string
           day_of_week?: string
@@ -4152,25 +4155,37 @@ export type Database = {
       }
       service_day_preferences: {
         Row: {
+          align_days_preference: boolean
           created_at: string
           customer_id: string
           id: string
+          must_be_home: boolean
+          must_be_home_window: string | null
           preferred_days: string[]
           property_id: string
+          updated_at: string
         }
         Insert: {
+          align_days_preference?: boolean
           created_at?: string
           customer_id: string
           id?: string
+          must_be_home?: boolean
+          must_be_home_window?: string | null
           preferred_days?: string[]
           property_id: string
+          updated_at?: string
         }
         Update: {
+          align_days_preference?: boolean
           created_at?: string
           customer_id?: string
           id?: string
+          must_be_home?: boolean
+          must_be_home_window?: string | null
           preferred_days?: string[]
           property_id?: string
+          updated_at?: string
         }
         Relationships: [
           {

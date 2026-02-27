@@ -6,6 +6,7 @@ import { useServiceDayCapacity } from "@/hooks/useServiceDayCapacity";
 import { ServiceDayOfferCard } from "@/components/customer/ServiceDayOffer";
 import { ServiceDayAlternatives } from "@/components/customer/ServiceDayAlternatives";
 import { ServiceDayConfirmed } from "@/components/customer/ServiceDayConfirmed";
+import { SchedulingPreferences, type SchedulingPrefs } from "@/components/customer/SchedulingPreferences";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info, Loader2 } from "lucide-react";
 
@@ -31,6 +32,24 @@ export default function CustomerServiceDay() {
 
   const [showAlternatives, setShowAlternatives] = useState(false);
   const [showExpiredMessage, setShowExpiredMessage] = useState(false);
+  const [prefs, setPrefs] = useState<SchedulingPrefs>({
+    align_days_preference: false,
+    must_be_home: false,
+    must_be_home_window: null,
+  });
+
+  // Save preferences when toggled
+  const handlePrefsChange = (newPrefs: SchedulingPrefs) => {
+    setPrefs(newPrefs);
+    if (property?.id) {
+      savePreferences.mutate({
+        propertyId: property.id,
+        alignDaysPreference: newPrefs.align_days_preference,
+        mustBeHome: newPrefs.must_be_home,
+        mustBeHomeWindow: newPrefs.must_be_home ? newPrefs.must_be_home_window : null,
+      });
+    }
+  };
 
   // Auto-create offer on mount if no assignment exists
   useEffect(() => {
@@ -85,8 +104,16 @@ export default function CustomerServiceDay() {
   // Confirmed state
   if (assignment.status === "confirmed") {
     return (
-      <div className="p-6 max-w-md mx-auto animate-fade-in">
+      <div className="p-6 max-w-md mx-auto animate-fade-in space-y-6">
         <ServiceDayConfirmed dayOfWeek={assignment.day_of_week} />
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-foreground">Scheduling preferences</h3>
+          <SchedulingPreferences
+            value={prefs}
+            onChange={handlePrefsChange}
+            alignmentExplanation={(assignment as any).alignment_explanation}
+          />
+        </div>
       </div>
     );
   }
@@ -117,10 +144,10 @@ export default function CustomerServiceDay() {
 
   // Offer pending state
   return (
-    <div className="p-6 max-w-md mx-auto animate-fade-in">
+    <div className="p-6 max-w-md mx-auto animate-fade-in space-y-6">
       {/* M4: Calm expiry message */}
       {showExpiredMessage && (
-        <Alert className="mb-4">
+        <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
             Your previous offer expired, so we refreshed your Service Day options.
@@ -145,6 +172,16 @@ export default function CustomerServiceDay() {
         isRejecting={rejectServiceDay.isPending}
         capacityUtilization={capacityUtilization}
       />
+
+      {/* D1.5: Scheduling preferences */}
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium text-foreground">Scheduling preferences</h3>
+        <SchedulingPreferences
+          value={prefs}
+          onChange={handlePrefsChange}
+          alignmentExplanation={(assignment as any).alignment_explanation}
+        />
+      </div>
     </div>
   );
 }

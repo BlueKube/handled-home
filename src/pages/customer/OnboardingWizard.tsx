@@ -6,6 +6,10 @@ import { useProperty, PropertyFormData, formatPetsForDisplay } from "@/hooks/use
 import { useZoneLookup } from "@/hooks/useZoneLookup";
 import { usePlans, type Plan } from "@/hooks/usePlans";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
+import { useServiceDayAssignment } from "@/hooks/useServiceDayAssignment";
+import { useServiceDayActions } from "@/hooks/useServiceDayActions";
+import { useServiceDayCapacity } from "@/hooks/useServiceDayCapacity";
+import { SchedulingPreferences as SchedulingPreferencesComponent, type SchedulingPrefs } from "@/components/customer/SchedulingPreferences";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PlanCard } from "@/components/plans/PlanCard";
@@ -30,6 +34,7 @@ import {
   CalendarCheck,
   Home,
   Bell,
+  Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -61,6 +66,10 @@ const STEP_LABELS: Record<OnboardingStep, string> = {
 // ── Helpers ──
 function stripNonDigits(val: string): string {
   return val.replace(/\D/g, "").slice(0, 5);
+}
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 interface FieldErrors {
@@ -643,33 +652,123 @@ function SubscribeStep({ planId, onComplete }: { planId: string | null; onComple
 }
 
 // ════════════════════════════════════════
-// Step 5: Service Day (D1-F4: inline with complete action)
+// Step 5: Service Day (D1.5: scheduling UX polish — efficiency framing + preferences)
 // ════════════════════════════════════════
 function ServiceDayStep({ onComplete }: { onComplete: () => Promise<void> }) {
   const [completing, setCompleting] = useState(false);
+  const { property } = useProperty();
+  const { assignment, offers, isLoading: assignLoading, refetch } = useServiceDayAssignment(property?.id);
+  const { createOrRefreshOffer, confirmServiceDay, savePreferences } = useServiceDayActions();
+  const { capacities } = useServiceDayCapacity(assignment?.zone_id ?? null);
+
+  const [prefs, setPrefs] = useState<SchedulingPrefs>({
+    align_days_preference: false,
+    must_be_home: false,
+    must_be_home_window: null,
+  });
+
+  // Auto-create offer if none exists
+  useEffect(() => {
+    if (!assignLoading && property?.id && !assignment) {
+      createOrRefreshOffer.mutate(property.id, { onSuccess: () => refetch() });
+    }
+  }, [assignLoading, property?.id, assignment]);
+
+  const primaryOffer = offers.find((o) => o.offer_type === "primary");
+  const offeredDay = primaryOffer?.offered_day_of_week ?? assignment?.day_of_week;
+  const offeredCap = capacities.find((c) => c.day_of_week === offeredDay);
+  const capacityUtilization = offeredCap
+    ? Math.round((offeredCap.assigned_count / Math.max(1, offeredCap.max_homes + Math.floor(offeredCap.max_homes * offeredCap.buffer_percent / 100))) * 100)
+    : undefined;
 
   const handleAccept = async () => {
     setCompleting(true);
     try {
+      // Save scheduling preferences
+      if (property?.id) {
+        await savePreferences.mutateAsync({
+          propertyId: property.id,
+          alignDaysPreference: prefs.align_days_preference,
+          mustBeHome: prefs.must_be_home,
+          mustBeHomeWindow: prefs.must_be_home ? prefs.must_be_home_window : null,
+        });
+      }
+      // Confirm the service day if there's an assignment
+      if (assignment && assignment.status === "offered") {
+        await confirmServiceDay.mutateAsync(assignment.id);
+      }
       await onComplete();
+    } catch {
+      // Errors handled by mutation toasts
     } finally {
       setCompleting(false);
     }
   };
 
-  return (
-    <div className="max-w-lg mx-auto space-y-6 text-center">
-      <CalendarCheck className="h-10 w-10 text-accent mx-auto" />
-      <h1 className="text-h2">Your Service Day</h1>
-      <p className="text-muted-foreground text-sm">
-        We'll match you to the most efficient route day in your area. You can review and adjust this anytime from your dashboard.
-      </p>
+  if (assignLoading || createOrRefreshOffer.isPending) {
+    return (
+      <div className="max-w-lg mx-auto space-y-4 text-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin text-accent mx-auto" />
+        <p className="text-sm text-muted-foreground">Finding the best route day for your area…</p>
+      </div>
+    );
+  }
 
-      <Button className="w-full" onClick={handleAccept} disabled={completing}>
+  return (
+    <div className="max-w-lg mx-auto space-y-6">
+      <div className="text-center">
+        <CalendarCheck className="h-10 w-10 text-accent mx-auto mb-3" />
+        <h1 className="text-h2">Your Service Day</h1>
+        <p className="text-muted-foreground text-sm mt-1">
+          We match you to the most efficient route day — so your provider arrives on time, every time.
+        </p>
+      </div>
+
+      {/* Show the system-recommended day */}
+      {assignment && offeredDay && (
+        <Card className="p-5 space-y-3">
+          <div className="flex items-center gap-2">
+            <Zap className="h-4 w-4 text-accent" />
+            <span className="text-xs font-medium text-accent uppercase tracking-wide">System Recommended</span>
+          </div>
+          <div className="text-center py-3">
+            <p className="text-3xl font-bold text-accent">{capitalize(offeredDay)}</p>
+            {capacityUtilization != null && capacityUtilization < 70 && (
+              <p className="text-xs text-muted-foreground mt-1">Stable day — plenty of availability</p>
+            )}
+            {capacityUtilization != null && capacityUtilization >= 70 && capacityUtilization < 90 && (
+              <p className="text-xs text-muted-foreground mt-1">Popular day in your area</p>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground text-center leading-relaxed">
+            This day has the best route density in your neighborhood, which means reliable, on-time service.
+          </p>
+        </Card>
+      )}
+
+      {/* Scheduling preferences */}
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium text-foreground">Scheduling preferences</h3>
+        <SchedulingPreferencesComponent
+          value={prefs}
+          onChange={setPrefs}
+          alignmentExplanation={
+            prefs.align_days_preference
+              ? (assignment as any)?.alignment_explanation ?? null
+              : null
+          }
+          compact
+        />
+      </div>
+
+      <Button className="w-full h-12 text-base font-semibold rounded-xl" onClick={handleAccept} disabled={completing}>
         {completing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
         Accept & Continue
       </Button>
-      <Button variant="ghost" className="w-full text-sm" onClick={handleAccept} disabled={completing}>
+      <Button variant="ghost" className="w-full text-sm" onClick={async () => {
+        setCompleting(true);
+        try { await onComplete(); } finally { setCompleting(false); }
+      }} disabled={completing}>
         Skip for now — I'll set this up later
       </Button>
     </div>

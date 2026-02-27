@@ -233,8 +233,8 @@
 - [x] **D1-F9** | LOW | Added validation trigger for current_step column values
 
 ### Sprint D1.5: Scheduling UX Polish (moved up — informs onboarding)
-- [ ] **2D-23** | P1 | M | System-recommended scheduling frame — service day assignment shows "Best for efficiency" default, optional "Try to align days" preference toggle with tradeoff messaging. When alignment isn't possible, show one-sentence explanation ("All aligned days are full — we picked your next-best option"). Embedded in onboarding service-day step.
-- [ ] **2D-24** | P2 | S | "Must be home" toggle — per-visit or per-category, shows available windows when enabled, notes potential handle cost increase.
+- [x] **2D-23** | P1 | M | System-recommended scheduling frame — service day assignment shows "Best for efficiency" default with "System Recommended" badge, efficiency-framed reason text. Optional "Try to align days" preference toggle with tradeoff messaging. When alignment isn't possible, shows server-provided `alignment_explanation`. Embedded in onboarding service-day step and standalone ServiceDay page. New `SchedulingPreferences` component. DB: `align_days_preference`, `must_be_home`, `must_be_home_window`, `updated_at` columns on `service_day_preferences`; `alignment_explanation` column on `service_day_assignments`.
+- [x] **2D-24** | P2 | S | "Must be home" toggle — toggle with time window selector (morning/afternoon). When enabled, shows available windows. Notes potential handle cost increase in helper text. Persisted to `service_day_preferences` table. Available in onboarding wizard and standalone ServiceDay page.
 
 ### Sprint D2: Ratings & Reviews (receipt-anchored)
 - [ ] **2D-04** | P0 | L | Post-visit rating — prompt after customer views visit receipt/proof (not immediate post-job). 1-5 stars + optional comment. `visit_ratings` table.

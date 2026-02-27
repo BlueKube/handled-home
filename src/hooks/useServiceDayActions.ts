@@ -79,23 +79,31 @@ export function useServiceDayActions() {
     mutationFn: async ({
       propertyId,
       days,
+      alignDaysPreference,
+      mustBeHome,
+      mustBeHomeWindow,
     }: {
       propertyId: string;
-      days: string[];
+      days?: string[];
+      alignDaysPreference?: boolean;
+      mustBeHome?: boolean;
+      mustBeHomeWindow?: string | null;
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      const payload: Record<string, unknown> = {
+        customer_id: user.id,
+        property_id: propertyId,
+      };
+      if (days !== undefined) payload.preferred_days = days;
+      if (alignDaysPreference !== undefined) payload.align_days_preference = alignDaysPreference;
+      if (mustBeHome !== undefined) payload.must_be_home = mustBeHome;
+      if (mustBeHomeWindow !== undefined) payload.must_be_home_window = mustBeHomeWindow;
+
       const { error } = await supabase
         .from("service_day_preferences")
-        .upsert(
-          {
-            customer_id: user.id,
-            property_id: propertyId,
-            preferred_days: days,
-          },
-          { onConflict: "customer_id,property_id" }
-        );
+        .upsert(payload as any, { onConflict: "customer_id,property_id" });
       if (error) throw error;
     },
     onSuccess: () => toast.success("Preferences saved"),

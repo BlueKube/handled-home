@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, ShieldCheck, TrendingUp } from "lucide-react";
+import { CalendarDays, ShieldCheck, TrendingUp, Zap } from "lucide-react";
 import type { ServiceDayAssignment, ServiceDayOffer as OfferType } from "@/hooks/useServiceDayAssignment";
 
 interface ServiceDayOfferProps {
@@ -11,19 +11,19 @@ interface ServiceDayOfferProps {
   onReject: () => void;
   isConfirming: boolean;
   isRejecting: boolean;
-  capacityUtilization?: number; // L10: 0-100 percentage
+  capacityUtilization?: number;
 }
 
 function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-// L9: Reason code templates
+// Reason code templates with efficiency framing
 const REASON_TEMPLATES: Record<string, (day: string) => string> = {
   default_day_available: (day) =>
-    `We chose ${capitalize(day)} because it matches your neighborhood route and keeps service reliable.`,
+    `${capitalize(day)} is the most efficient route day for your neighborhood — your provider serves nearby homes on this day too.`,
   default_day_full: () =>
-    "Your zone's default day is at capacity. We've matched you to the next best route day.",
+    "Your zone's most efficient day is full. We've matched you to the next best route day for reliable, on-time service.",
   no_capacity: () =>
     "All days are currently at capacity. We'll confirm your spot as soon as one opens up.",
 };
@@ -32,10 +32,10 @@ function getReasonText(reasonCode: string | null, day: string): string {
   if (reasonCode && REASON_TEMPLATES[reasonCode]) {
     return REASON_TEMPLATES[reasonCode](day);
   }
-  return "We've matched you to the best available route.";
+  return "We've matched you to the most efficient route day in your area.";
 }
 
-// L10: Confidence badge
+// Confidence badge
 function ConfidenceBadge({ utilization }: { utilization?: number }) {
   if (utilization == null) return null;
   if (utilization < 70) {
@@ -74,11 +74,16 @@ export function ServiceDayOfferCard({
         </div>
         <div>
           <h2 className="text-lg font-semibold">Your Service Day</h2>
-          <p className="text-caption text-sm">
-            {getReasonText(assignment.reason_code, primaryOffer?.offered_day_of_week ?? assignment.day_of_week)}
-          </p>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <Zap className="h-3 w-3 text-accent" />
+            <span className="text-xs font-medium text-accent">System Recommended</span>
+          </div>
         </div>
       </div>
+
+      <p className="text-sm text-muted-foreground leading-relaxed">
+        {getReasonText(assignment.reason_code, primaryOffer?.offered_day_of_week ?? assignment.day_of_week)}
+      </p>
 
       <div className="text-center py-4 space-y-2">
         <p className="text-3xl font-bold text-accent">
@@ -86,6 +91,15 @@ export function ServiceDayOfferCard({
         </p>
         <ConfidenceBadge utilization={capacityUtilization} />
       </div>
+
+      {/* Alignment explanation if present */}
+      {(assignment as any).alignment_explanation && (
+        <div className="p-3 rounded-lg bg-muted/50 border border-border/40">
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            {(assignment as any).alignment_explanation}
+          </p>
+        </div>
+      )}
 
       <Button onClick={onConfirm} disabled={isConfirming} className="w-full">
         {isConfirming ? "Confirming…" : "Confirm Service Day"}
