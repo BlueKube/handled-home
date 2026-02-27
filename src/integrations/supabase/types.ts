@@ -5844,15 +5844,25 @@ export type Database = {
         Args: { p_assignment_id: string; p_offer_id: string }
         Returns: Json
       }
-      spend_handles: {
-        Args: {
-          p_amount: number
-          p_customer_id: string
-          p_reference_id?: string
-          p_subscription_id: string
-        }
-        Returns: Json
-      }
+      spend_handles:
+        | {
+            Args: {
+              p_amount: number
+              p_customer_id: string
+              p_reference_id?: string
+              p_subscription_id: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_amount: number
+              p_customer_id: string
+              p_reference_id?: string
+              p_subscription_id: string
+            }
+            Returns: Json
+          }
       start_job: { Args: { p_job_id: string }; Returns: Json }
       submit_provider_onboarding: { Args: { p_org_id: string }; Returns: Json }
       transition_eligible_earnings: { Args: never; Returns: Json }

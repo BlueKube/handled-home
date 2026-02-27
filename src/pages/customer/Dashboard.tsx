@@ -147,7 +147,7 @@ export default function CustomerDashboard() {
       <NextVisitCard job={nextJob} isLoading={jobsLoading} />
 
       {/* Handles Balance */}
-      {handleBalance != null && planHandles && (
+      {handleBalance != null && planHandles && planHandles.handles_per_cycle > 0 && (
         <HandleBalanceBar
           balance={handleBalance}
           perCycle={planHandles.handles_per_cycle}

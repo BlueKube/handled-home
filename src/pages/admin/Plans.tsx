@@ -589,7 +589,7 @@ function PlanHandlesEditor({ planId }: { planId: string }) {
             rollover_cap: rolloverCap,
             rollover_expiry_days: expiryDays,
             updated_at: new Date().toISOString(),
-          } as any)
+          })
           .eq("plan_id", planId);
         if (error) throw error;
       } else {
@@ -600,7 +600,7 @@ function PlanHandlesEditor({ planId }: { planId: string }) {
             handles_per_cycle: handlesPerCycle,
             rollover_cap: rolloverCap,
             rollover_expiry_days: expiryDays,
-          } as any);
+          });
         if (error) throw error;
       }
     },

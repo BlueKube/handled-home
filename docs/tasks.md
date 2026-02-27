@@ -205,6 +205,17 @@
 - [x] **2D-00b** | P0 | M | Handles UI components — usage bar (Used/Remaining), per-SKU handle cost display ("Costs 3 handles"), handle balance on customer dashboard. All read from `get_handle_balance` RPC.
 - [x] **2D-00c** | P0 | S | Plan tier handle configuration — admin sets handles_per_cycle, rollover_cap, rollover_expiry_days per plan. Display on plan cards.
 
+#### Sprint D0 Review Fixes (7 findings — F1-F4/F6/F7 resolved, F5/F8/F9 acceptable/deferred)
+- [x] **D0-F1** | CRITICAL | Fixed `expire_stale_handles` — now inserts 'expire' transactions (negative amounts) for expired grants instead of just recalculating
+- [x] **D0-F2** | HIGH | Added auth check to `spend_handles` — caller must own subscription or be admin
+- [x] **D0-F3** | HIGH | Added functional index `idx_handle_txn_idempotency` on `metadata->>'idempotency_key'`
+- [x] **D0-F4** | MEDIUM | Added validation trigger `trg_validate_handle_txn_type` enforcing grant/spend/expire/rollover/refund
+- [x] **D0-F5** | MEDIUM | Acceptable — `balance_after` concurrency mitigated by FOR UPDATE lock
+- [x] **D0-F6** | MEDIUM | `HandleBalanceBar` now hidden when `handles_per_cycle === 0`
+- [x] **D0-F7** | MEDIUM | Removed `as any` casts from `PlanHandlesEditor` insert/update
+- [x] **D0-F8** | LOW | Acceptable — refund expiry lookup is best-effort heuristic with 60-day fallback
+- [x] **D0-F9** | LOW | Deferred — cascade chain verified via subscription_id FK
+
 ### Sprint D1: Onboarding Wizard (membership-first)
 - [ ] **2D-01** | P0 | XL | Guided onboarding — property → zip/zone check (waitlist if unavailable) → plan selection (membership-first, handles explained simply) → subscribe → service day accept → build routine → confirmation. Progress bar, back nav.
 - [ ] **2D-02** | P0 | M | Zone availability check — zip lookup during onboarding, waitlist signup if no zone.
