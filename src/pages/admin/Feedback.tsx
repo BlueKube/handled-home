@@ -1,13 +1,73 @@
 import { useAdminFeedback } from "@/hooks/useAdminFeedback";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertTriangle, CheckCircle2, Star, MessageSquare } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { AlertTriangle, CheckCircle2, Star, MessageSquare, Gift, ShieldAlert, ClipboardEdit } from "lucide-react";
 import { format } from "date-fns";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+type ActionType = "credit" | "coaching" | "warning";
+interface ActionTarget {
+  type: ActionType;
+  provider_org_id: string;
+  customer_id: string;
+  job_id: string;
+}
 
 export default function AdminFeedback() {
   const { quickFeedback, privateRatings, issueCount, isLoading } = useAdminFeedback();
+  const [actionTarget, setActionTarget] = useState<ActionTarget | null>(null);
+  const [actionNote, setActionNote] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleAction = async () => {
+    if (!actionTarget) return;
+    setSubmitting(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      if (actionTarget.type === "credit") {
+        await supabase.from("customer_credits").insert({
+          customer_id: actionTarget.customer_id,
+          amount_cents: 500,
+          reason: actionNote || "Goodwill credit from feedback review",
+          issued_by_admin_user_id: user.id,
+          status: "active",
+        });
+        toast.success("$5 credit issued to customer");
+      } else {
+        // coaching or warning → admin audit log
+        await supabase.from("admin_audit_log").insert({
+          admin_user_id: user.id,
+          action: actionTarget.type === "warning" ? "provider_warning" : "provider_coaching_note",
+          entity_type: "provider_org",
+          entity_id: actionTarget.provider_org_id,
+          reason: actionNote || `${actionTarget.type} from feedback review`,
+          after: { job_id: actionTarget.job_id, feedback_type: actionTarget.type } as any,
+        });
+        toast.success(actionTarget.type === "warning" ? "Warning logged" : "Coaching note saved");
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Action failed");
+    } finally {
+      setSubmitting(false);
+      setActionTarget(null);
+      setActionNote("");
+    }
+  };
+
+  const actionLabel: Record<ActionType, string> = {
+    credit: "Issue Credit",
+    coaching: "Add Coaching Note",
+    warning: "Log Provider Warning",
+  };
 
   if (isLoading) {
     return (
@@ -81,6 +141,35 @@ export default function AdminFeedback() {
                       ))}
                     </div>
                   )}
+                  {/* D8-F2: One-click actions */}
+                  <div className="flex gap-1.5 mt-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs gap-1"
+                      onClick={() => setActionTarget({ type: "credit", customer_id: f.customer_id, provider_org_id: f.provider_org_id, job_id: f.job_id })}
+                    >
+                      <Gift className="h-3 w-3" /> Credit
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs gap-1"
+                      onClick={() => setActionTarget({ type: "coaching", customer_id: f.customer_id, provider_org_id: f.provider_org_id, job_id: f.job_id })}
+                    >
+                      <ClipboardEdit className="h-3 w-3" /> Coach
+                    </Button>
+                    {f.outcome === "ISSUE" && (
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="h-7 text-xs gap-1"
+                        onClick={() => setActionTarget({ type: "warning", customer_id: f.customer_id, provider_org_id: f.provider_org_id, job_id: f.job_id })}
+                      >
+                        <ShieldAlert className="h-3 w-3" /> Warn
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </Card>
             ))
@@ -105,6 +194,9 @@ export default function AdminFeedback() {
                   <span className="text-xs text-muted-foreground">
                     {r.submitted_at ? format(new Date(r.submitted_at), "MMM d, h:mm a") : "Pending"}
                   </span>
+                  {r.rating <= 2 && (
+                    <Badge variant="destructive" className="text-[10px]">Low Score</Badge>
+                  )}
                 </div>
                 <p className="text-xs text-muted-foreground font-mono truncate">
                   Job: {r.job_id.slice(0, 8)}… | Customer: {r.customer_id.slice(0, 8)}… | Provider: {r.provider_org_id.slice(0, 8)}…
@@ -128,11 +220,61 @@ export default function AdminFeedback() {
                     ))}
                   </div>
                 )}
+                {/* D8-F2: Actions on ratings */}
+                <div className="flex gap-1.5 mt-1">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs gap-1"
+                    onClick={() => setActionTarget({ type: "credit", customer_id: r.customer_id, provider_org_id: r.provider_org_id, job_id: r.job_id })}
+                  >
+                    <Gift className="h-3 w-3" /> Credit
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs gap-1"
+                    onClick={() => setActionTarget({ type: "coaching", customer_id: r.customer_id, provider_org_id: r.provider_org_id, job_id: r.job_id })}
+                  >
+                    <ClipboardEdit className="h-3 w-3" /> Coach
+                  </Button>
+                  {r.rating <= 2 && (
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="h-7 text-xs gap-1"
+                      onClick={() => setActionTarget({ type: "warning", customer_id: r.customer_id, provider_org_id: r.provider_org_id, job_id: r.job_id })}
+                    >
+                      <ShieldAlert className="h-3 w-3" /> Warn
+                    </Button>
+                  )}
+                </div>
               </Card>
             ))
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Action dialog */}
+      <Dialog open={!!actionTarget} onOpenChange={(open) => { if (!open) { setActionTarget(null); setActionNote(""); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{actionTarget ? actionLabel[actionTarget.type] : ""}</DialogTitle>
+          </DialogHeader>
+          <Textarea
+            placeholder={actionTarget?.type === "credit" ? "Reason for credit (optional)" : "Note for the record…"}
+            value={actionNote}
+            onChange={(e) => setActionNote(e.target.value)}
+            rows={3}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setActionTarget(null); setActionNote(""); }}>Cancel</Button>
+            <Button onClick={handleAction} disabled={submitting}>
+              {submitting ? "Saving…" : "Confirm"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
