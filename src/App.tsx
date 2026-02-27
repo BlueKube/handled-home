@@ -40,7 +40,7 @@ import CustomerServiceDay from "@/pages/customer/ServiceDay";
 import CustomerRoutineReview from "@/pages/customer/RoutineReview";
 import CustomerRoutineConfirm from "@/pages/customer/RoutineConfirm";
 import CustomerOnboardingWizard from "@/pages/customer/OnboardingWizard";
-
+import CustomerPhotoTimeline from "@/pages/customer/PhotoTimeline";
 // Provider pages
 import ProviderDashboard from "@/pages/provider/Dashboard";
 import ProviderJobs from "@/pages/provider/Jobs";
@@ -153,6 +153,7 @@ const App = () => (
                 <Route path="/customer/history" element={<CustomerPropertyGate><CustomerHistory /></CustomerPropertyGate>} />
                 <Route path="/customer/visits" element={<CustomerPropertyGate><CustomerHistory /></CustomerPropertyGate>} />
                 <Route path="/customer/visits/:jobId" element={<CustomerPropertyGate><CustomerVisitDetail /></CustomerPropertyGate>} />
+                <Route path="/customer/photos" element={<CustomerPropertyGate><CustomerPhotoTimeline /></CustomerPropertyGate>} />
                 <Route path="/customer/issues" element={<CustomerPropertyGate><CustomerIssues /></CustomerPropertyGate>} />
                 <Route path="/customer/subscription" element={<CustomerPropertyGate><CustomerSubscription /></CustomerPropertyGate>} />
                 <Route path="/customer/billing" element={<CustomerPropertyGate><CustomerBilling /></CustomerPropertyGate>} />
