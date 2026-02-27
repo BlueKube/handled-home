@@ -349,26 +349,39 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 
 ---
 
-## Round 2G — Admin Intelligence (Operational Leverage)
+## Round 2G — Admin Controls / Ops Cockpit
 
-> Admins should manage by exception, not by process.
+> Admin sub-roles, dispatcher workstation, pricing/payout engine, governance/audit, decision traces, SOP playbooks.
+> **Expanded spec:** `docs/2G/00-overview-and-ux.md`, `docs/2G/01-pricing-and-payout-engine.md`, `docs/2G/02-governance-audit-and-implementation.md`
 
-### Advanced Analytics
-- [ ] **2G-01** | P0 | XL | Unit economics dashboard — CAC, LTV, LTV:CAC ratio, payback period, gross margin per job, per zone, per plan tier. Cohort analysis by signup month
-- [ ] **2G-02** | P1 | L | Churn analysis — churn by reason, by zone, by plan, by tenure. Predictive churn score per customer
-- [ ] **2G-03** | P1 | L | Provider utilization dashboard — jobs/day per provider, capacity utilization %, idle time, geographic coverage efficiency
-- [ ] **2G-04** | P1 | M | Revenue forecasting — next 30/60/90 day MRR projection based on current subscribers + churn rate + pipeline
+### Sprint 2G-A — Access Control + Admin Shell
+- [ ] **2G-A1** | P0 | L | Create `admin_memberships` table (user_id PK, admin_role enum, is_active) + helper SQL functions (`is_admin`, `admin_role`, `has_admin_role`) + RLS policies scoped by sub-role
+- [ ] **2G-A2** | P0 | M | Gate all `/admin/*` routes by `admin_memberships` — create `useAdminMembership` hook, update `ProtectedRoute` to check membership
+- [ ] **2G-A3** | P0 | L | Build `AdminShell` layout — desktop sidebar with grouped nav (Cockpit, Execution, People, Markets, Catalog, Money, Growth, Support, Governance, Control Room, Playbooks), top command bar placeholder, responsive (sidebar on lg+, mobile nav otherwise)
+- [ ] **2G-A4** | P0 | M | Role-based nav and action gating — hide Control Room nav for non-superusers, disable financial actions for dispatchers, wire UI locks to `useAdminMembership`
 
-### Admin Tools
-- [ ] **2G-05** | P1 | L | Admin impersonation mode — "View as Customer X" to see exactly what they see. Read-only. Audit logged
-- [ ] **2G-06** | P1 | M | Bulk operations — bulk reassign jobs, bulk notify customers, bulk apply credits. For zone-wide operations
-- [ ] **2G-07** | P1 | M | Admin notification queue — real-time feed of events requiring attention: failed payments, SLA breaches, capacity warnings, new provider applications
-- [ ] **2G-08** | P2 | M | Automated pricing optimization — suggest price adjustments based on zone density, demand elasticity, provider cost
+### Sprint 2G-B — Cockpit + Dispatcher Queues
+- [ ] **2G-B1** | P0 | XL | Upgrade Ops Cockpit to 4-column layout (Now/Money/Quality/Markets) with clickable drilldown tiles linking to pre-filtered views
+- [ ] **2G-B2** | P0 | L | Build dispatcher queue page (`/admin/ops/dispatch`) — At Risk Today, Missing Proof, Unassigned, Coverage Gaps, Customer Issues, Provider Incidents queues
+- [ ] **2G-B3** | P1 | L | Dispatcher actions — reassign job (server-validated), trigger backup flow, add internal notes, create/attach support ticket, mark needs-follow-up
+- [ ] **2G-B4** | P1 | M | Universal search (command bar) — search by customer email/phone, provider name, job ID, subscription ID across tables
 
-### Zone Health
-- [ ] **2G-09** | P0 | M | Zone health alerting — real-time alerts when zone metrics degrade: capacity >90%, provider churn, customer churn spike, photo compliance drop
-- [ ] **2G-10** | P1 | M | Zone comparison dashboard — side-by-side zone metrics for identifying best/worst performers
-- [ ] **2G-11** | P2 | L | Automated zone health reports — weekly email digest to admin with zone-by-zone scorecard
+### Sprint 2G-C — Governance + Explainability
+- [ ] **2G-C1** | P0 | L | Create `admin_audit_log` table + `log_admin_action` RPC — before/after state, reason, actor role. Integrate into all machine-changing writes
+- [ ] **2G-C2** | P0 | L | Create `decision_traces` table + reusable `DecisionTraceCard` component — show on job detail, service day detail, provider org detail, payout/hold detail
+- [ ] **2G-C3** | P1 | M | Wire `auto_assign_job` and other RPCs to emit decision trace records (inputs, candidates, scoring, outcome)
+
+### Sprint 2G-D — Control Room (Superuser-Only)
+- [ ] **2G-D1** | P0 | XL | Zone pricing engine — `sku_pricing_base`, `sku_pricing_zone_overrides` tables with versioning. Admin UI for zone multipliers, bulk set, copy from zone, schedule effective dates, rollback. Superuser-only write RLS
+- [ ] **2G-D2** | P0 | XL | Provider payout engine — `provider_payout_base`, `provider_payout_zone_overrides`, `provider_org_contracts` (partner_flat / partner_time_guarded / contractor_time_based), `payout_overtime_rules` tables. Admin UI for payout tables, contract types, overtime params. Superuser-only write RLS
+- [ ] **2G-D3** | P1 | L | `admin_change_requests` table + UI — non-superusers can submit change requests for pricing/payout/incentives/algorithm. Superuser reviews and applies
+- [ ] **2G-D4** | P1 | M | Change log + rollback UI — view all versioned config changes with rollback action (creates new version copying previous)
+
+### Sprint 2G-E — SOPs + Polish
+- [ ] **2G-E1** | P1 | M | Create `/admin/playbooks` page — render SOP markdown with role filtering (dispatcher/ops/growth/superuser playbooks)
+- [ ] **2G-E2** | P1 | M | Write core SOP content — end-of-day reconciliation, missing proof handling, no-show escalation, provider probation ladder, zone pause workflow, emergency pricing override
+- [ ] **2G-E3** | P2 | M | Dense table polish — compact row height, sticky headers, hover actions, keyboard shortcuts (J/K/Enter/A/E/N) for dispatcher queues
+- [ ] **2G-E4** | P2 | S | Saved views per role — dispatcher default queue filters persisted to localStorage
 
 ---
 
@@ -455,11 +468,11 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2D — Customer Polish | 28 | 17 | 61% |
 | 2E — Provider Polish | 17 | 17 | 100% |
 | 2F — Growth Engine | 13 | 4 | 31% |
-| 2G — Admin Intelligence | 11 | 0 | 0% |
+| 2G — Admin Controls / Ops Cockpit | 22 | 0 | 0% |
 | 2H — Platform Hardening | 15 | 0 | 0% |
 | 2I — Future Moats | 9 | 0 | 0% |
-| **TOTAL** | **180** | **104** | **58%** |
+| **TOTAL** | **191** | **104** | **54%** |
 
 ---
 
-*Last updated: 2026-02-27 — Sprint D1 review fixes complete: F1-F9 all resolved.*
+*Last updated: 2026-02-27 — Round 2G replaced with expanded Admin Controls / Ops Cockpit (5 sprints, 22 tasks).*
