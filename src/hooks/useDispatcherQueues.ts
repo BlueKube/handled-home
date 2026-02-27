@@ -64,7 +64,7 @@ export function useDispatcherQueues() {
           .from("jobs")
           .select("*")
           .eq("scheduled_date", today)
-          .in("status", ["issue", "ISSUE", "in_progress", "IN_PROGRESS", "scheduled", "SCHEDULED"])
+          .in("status", ["IN_PROGRESS", "ISSUE_REPORTED"])
           .order("updated_at", { ascending: false })
           .limit(50),
 
@@ -73,7 +73,7 @@ export function useDispatcherQueues() {
           .from("jobs")
           .select("*")
           .eq("scheduled_date", today)
-          .in("status", ["completed", "COMPLETED"])
+          .in("status", ["COMPLETED"])
           .order("completed_at", { ascending: false })
           .limit(100),
 
@@ -83,7 +83,7 @@ export function useDispatcherQueues() {
           .select("*")
           .eq("scheduled_date", today)
           .or("provider_org_id.is.null")
-          .in("status", ["pending", "PENDING", "scheduled", "SCHEDULED"])
+          .in("status", ["NOT_STARTED"])
           .order("created_at", { ascending: true })
           .limit(50),
 

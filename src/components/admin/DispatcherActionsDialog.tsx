@@ -36,12 +36,8 @@ export function DispatcherActionsDialog({ jobId, open, onClose }: DispatcherActi
       });
       if (error) throw error;
 
-      if (action === "follow_up") {
-        await supabase.from("jobs").update({ 
-          status: "needs_follow_up" as any,
-          updated_at: new Date().toISOString(),
-        }).eq("id", jobId);
-      }
+      // "Follow Up" is tracked via the job_event only — no job status change
+      // to avoid violating the CHECK constraint on jobs.status
 
       if (action === "create_ticket") {
         // Get the job's customer_id (required FK on support_tickets)
