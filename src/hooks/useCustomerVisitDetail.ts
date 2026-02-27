@@ -44,6 +44,7 @@ export interface VisitDetail {
     provider_summary: string | null;
     property_id: string;
     zone_id: string;
+    provider_org_id: string;
   };
   skus: { sku_id: string; sku_name_snapshot: string | null; duration_minutes_snapshot: number | null }[];
   photos: VisitPhoto[];
@@ -65,7 +66,7 @@ export function useCustomerVisitDetail(jobId: string | undefined) {
       const [jobRes, skuRes, photoRes, checklistRes, issueRes] = await Promise.all([
         supabase
           .from("jobs")
-          .select("id, status, scheduled_date, started_at, arrived_at, departed_at, completed_at, provider_summary, property_id, zone_id")
+          .select("id, status, scheduled_date, started_at, arrived_at, departed_at, completed_at, provider_summary, property_id, zone_id, provider_org_id")
           .eq("id", jobId)
           .eq("customer_id", user.id)
           .single(),

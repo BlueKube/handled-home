@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useProviderAdmin } from "@/hooks/useProviderAdmin";
+import { useProviderRatingSummary } from "@/hooks/useProviderRatingSummary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, CheckCircle, AlertTriangle, XCircle, Shield, MapPin, Loader2, User, FileText } from "lucide-react";
+import { ArrowLeft, CheckCircle, AlertTriangle, XCircle, Shield, MapPin, Loader2, User, FileText, Star } from "lucide-react";
 import { toast } from "sonner";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -23,6 +24,7 @@ export default function AdminProviderDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { orgDetailQuery, performAction, updateCoverageStatus } = useProviderAdmin();
+  const { data: ratingSummary } = useProviderRatingSummary(id);
   const { data: org, isLoading } = orgDetailQuery(id);
   const [actionDialog, setActionDialog] = useState<string | null>(null);
   const [reason, setReason] = useState("");
@@ -92,6 +94,7 @@ export default function AdminProviderDetail() {
       <Tabs defaultValue="overview">
         <TabsList className="mb-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="ratings">Ratings</TabsTrigger>
           <TabsTrigger value="coverage">Coverage</TabsTrigger>
           <TabsTrigger value="capabilities">Capabilities</TabsTrigger>
           <TabsTrigger value="compliance">Compliance</TabsTrigger>
@@ -120,6 +123,45 @@ export default function AdminProviderDetail() {
               </Card>
             )}
           </div>
+        </TabsContent>
+
+        <TabsContent value="ratings">
+          <Card>
+            <CardHeader><CardTitle className="text-base flex items-center gap-2"><Star className="h-4 w-4" />Rating Summary</CardTitle></CardHeader>
+            <CardContent>
+              {ratingSummary ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl font-bold">{ratingSummary.avg_rating}</span>
+                    <div className="flex items-center gap-0.5">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star
+                          key={s}
+                          className={`h-5 w-5 ${s <= Math.round(ratingSummary.avg_rating) ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">Total Reviews</p>
+                      <p className="font-medium">{ratingSummary.total_reviews}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Positive (4-5★)</p>
+                      <p className="font-medium text-success">{ratingSummary.positive_count}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Negative (1-2★)</p>
+                      <p className="font-medium text-destructive">{ratingSummary.negative_count}</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No ratings yet.</p>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="coverage">
