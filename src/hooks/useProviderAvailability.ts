@@ -67,8 +67,9 @@ export function useProviderAvailability() {
     mutationFn: async (blockId: string) => {
       const { error } = await supabase
         .from("provider_availability_blocks")
-        .update({ status: "canceled", updated_at: new Date().toISOString() })
-        .eq("id", blockId);
+        .update({ status: "canceled" })
+        .eq("id", blockId)
+        .eq("provider_org_id", org!.id);
       if (error) throw error;
     },
     onSuccess: () => {

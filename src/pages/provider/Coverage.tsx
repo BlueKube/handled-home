@@ -59,6 +59,15 @@ function blockTypeVariant(t: string): "default" | "secondary" | "outline" {
   }
 }
 
+function blockTypeDescription(t: string) {
+  switch (t) {
+    case "DAY_OFF": return "Blocks auto-assignment for the day";
+    case "VACATION": return "Blocks auto-assignment for the entire period";
+    case "LIMITED_CAPACITY": return "Informational only — visible to admin, does not block assignment";
+    default: return "";
+  }
+}
+
 function AvailabilitySection() {
   const { blocks, shortNoticeBlocks, isLoading, isError, refetch, createBlock, cancelBlock } = useProviderAvailability();
   const [showForm, setShowForm] = useState(false);
@@ -140,6 +149,11 @@ function AvailabilitySection() {
                 <SelectItem value="LIMITED_CAPACITY">Limited Capacity</SelectItem>
               </SelectContent>
             </Select>
+            {blockType === "LIMITED_CAPACITY" && (
+              <p className="text-xs text-muted-foreground italic">
+                ℹ️ Limited Capacity is informational — it won't block job assignments. Use Day Off or Vacation to prevent scheduling.
+              </p>
+            )}
 
             <div className="grid grid-cols-2 gap-2">
               <Popover>
