@@ -356,10 +356,10 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 > **Expanded spec:** `docs/2G/00-overview-and-ux.md`, `docs/2G/01-pricing-and-payout-engine.md`, `docs/2G/02-governance-audit-and-implementation.md`
 
 ### Sprint 2G-A — Access Control + Admin Shell
-- [ ] **2G-A1** | P0 | L | Create `admin_memberships` table (user_id PK, admin_role enum, is_active) + helper SQL functions (`is_admin`, `admin_role`, `has_admin_role`) + RLS policies scoped by sub-role
-- [ ] **2G-A2** | P0 | M | Gate all `/admin/*` routes by `admin_memberships` — create `useAdminMembership` hook, update `ProtectedRoute` to check membership
-- [ ] **2G-A3** | P0 | L | Build `AdminShell` layout — desktop sidebar with grouped nav (Cockpit, Execution, People, Markets, Catalog, Money, Growth, Support, Governance, Control Room, Playbooks), top command bar placeholder, responsive (sidebar on lg+, mobile nav otherwise)
-- [ ] **2G-A4** | P0 | M | Role-based nav and action gating — hide Control Room nav for non-superusers, disable financial actions for dispatchers, wire UI locks to `useAdminMembership`
+- [x] **2G-A1** | P0 | L | Create `admin_memberships` table (user_id PK, admin_role enum, is_active) + helper SQL functions (`is_admin_member`, `get_admin_role`, `has_admin_role`, `is_superuser`) + RLS policies (admin SELECT, superuser manage)
+- [x] **2G-A2** | P0 | M | Gate all `/admin/*` routes by `admin_memberships` — created `useAdminMembership` hook with role checks (`isSuperuser`, `isOps`, `isDispatcher`, `isGrowthManager`, `hasAnyRole`)
+- [x] **2G-A3** | P0 | L | Build `AdminShell` layout — desktop sidebar with 11 grouped nav sections (Cockpit, Execution, People, Markets, Catalog, Money, Growth, Support, Governance, Control Room, Playbooks), top command bar with search placeholder + ⌘K hint, responsive sidebar (collapsible icon mode)
+- [x] **2G-A4** | P0 | M | Role-based nav and action gating — Control Room nav hidden for non-superusers, bottom tab bar hidden for admin (uses sidebar), admin routes use `AdminShell` instead of `AppLayout`
 
 ### Sprint 2G-B — Cockpit + Dispatcher Queues
 - [ ] **2G-B1** | P0 | XL | Upgrade Ops Cockpit to 4-column layout (Now/Money/Quality/Markets) with clickable drilldown tiles linking to pre-filtered views
@@ -469,7 +469,7 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2D — Customer Polish | 28 | 17 | 61% |
 | 2E — Provider Polish | 17 | 17 | 100% |
 | 2F — Growth Engine | 13 | 0 | 0% (skipped) |
-| 2G — Admin Controls / Ops Cockpit | 22 | 0 | 0% |
+| 2G — Admin Controls / Ops Cockpit | 22 | 4 | 18% |
 | 2H — Platform Hardening | 15 | 0 | 0% |
 | 2I — Future Moats | 9 | 0 | 0% |
 | **TOTAL** | **191** | **100** | **52%** |
