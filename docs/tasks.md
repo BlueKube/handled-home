@@ -191,39 +191,66 @@
 
 ---
 
-## Round 2D — Customer Experience Polish (Retention)
+## Round 2D — Customer Experience Polish & Retention
 
 > Make customers unable to imagine life without Handled Home.
+> **Strategy doc:** `docs/round-2d-strategy.md` — Membership-first model, handles currency, contextual add-ons, Home Assistant category, density-first scheduling.
+> **Key decisions:** Handles are the internal unit of value (simple usage bar UX). Plan changes default to next-cycle. Add-ons gated until after first completed visit. Ratings receipt-anchored.
 
-### Onboarding Wizard
-- [ ] **2D-01** | P0 | XL | Guided onboarding flow — single wizard: property → zone check → plan selection → subscribe → service day accept → build routine → confirmation. Progress bar, back navigation, skip-ability
-- [ ] **2D-02** | P0 | M | Zone availability check during onboarding — after property entered, check zip against zones. If no zone: show waitlist signup. If zone exists: continue flow
-- [ ] **2D-03** | P1 | M | Onboarding completion tracking — track which steps completed. Re-engage incomplete signups with notification/email
+### D-Pre: Plan Card & Handles UX Prototype
+- [ ] **2D-00pre** | P0 | S | Plan card + handles explanation prototype — design plan tier cards (Essential/Plus/Premium) with handles messaging ("Most homes use 10-13 handles/month", "Swap services anytime"). No backend, UX validation only.
 
-### Ratings & Reviews
-- [ ] **2D-04** | P0 | L | Post-visit rating — after job completed, prompt customer to rate (1-5 stars) + optional comment. Per-SKU or per-visit. Store in `visit_ratings` table
-- [ ] **2D-05** | P1 | M | Rating summary on provider profile — average rating, total reviews, displayed to admin
-- [ ] **2D-06** | P2 | M | Smart rating prompts — only prompt after 2nd+ visit (first visit = learning curve). Suppress if issue already reported
+### Sprint D0: Handles v0 (allowance + spend + expire + rollover)
+- [ ] **2D-00a** | P0 | L | Handles v0 schema — `plan_handles` (handles_per_cycle, rollover_cap, rollover_expiry_days per plan), `handle_transactions` ledger (type: grant/spend/expire/rollover/refund, amount, balance_after, reference columns). `handles_balance` on subscription as **cache only**, reconcilable from ledger via `recalc_handles_balance()` RPC. RPCs: `spend_handles` (at booking/confirmation), `grant_cycle_handles`, `expire_stale_handles`, `refund_handles` (preserves original expiry). No earn, no proration math.
+- [ ] **2D-00b** | P0 | M | Handles UI components — usage bar (Used/Remaining), per-SKU handle cost display ("Costs 3 handles"), handle balance on customer dashboard. All read from `get_handle_balance` RPC.
+- [ ] **2D-00c** | P0 | S | Plan tier handle configuration — admin sets handles_per_cycle, rollover_cap, rollover_expiry_days per plan. Display on plan cards.
 
-### Property Health Score
-- [ ] **2D-07** | P1 | L | Property health score algorithm — composite of: service regularity, SKU coverage, seasonal service adoption, issue frequency. 0-100 scale
-- [ ] **2D-08** | P1 | M | Property health dashboard widget — show score on customer dashboard with trend arrow. "Your home health: 87/100 ↑"
-- [ ] **2D-09** | P2 | M | Health score anxiety loop — if score drops (missed services, skipped seasons), show gentle nudge: "Your lawn health dropped 12 points this month"
+### Sprint D1: Onboarding Wizard (membership-first)
+- [ ] **2D-01** | P0 | XL | Guided onboarding — property → zip/zone check (waitlist if unavailable) → plan selection (membership-first, handles explained simply) → subscribe → service day accept → build routine → confirmation. Progress bar, back nav.
+- [ ] **2D-02** | P0 | M | Zone availability check — zip lookup during onboarding, waitlist signup if no zone.
+- [ ] **2D-03** | P1 | M | Onboarding completion tracking — step tracking, re-engagement notifications for incomplete signups.
 
-### Plan Self-Service
-- [ ] **2D-10** | P0 | L | Plan upgrade/downgrade flow — customer can switch plans. Pro-rate billing. Update entitlements immediately. Confirm via modal
-- [ ] **2D-11** | P0 | M | Subscription cancellation flow — cancel with reason survey, retention offer (discount or credit), confirm cancellation, grace period
-- [ ] **2D-12** | P1 | M | Subscription pause — pause for 1-4 weeks (configurable). Auto-resume. Jobs skipped during pause
+### Sprint D1.5: Scheduling UX Polish (moved up — informs onboarding)
+- [ ] **2D-23** | P1 | M | System-recommended scheduling frame — service day assignment shows "Best for efficiency" default, optional "Try to align days" preference toggle with tradeoff messaging. When alignment isn't possible, show one-sentence explanation ("All aligned days are full — we picked your next-best option"). Embedded in onboarding service-day step.
+- [ ] **2D-24** | P2 | S | "Must be home" toggle — per-visit or per-category, shows available windows when enabled, notes potential handle cost increase.
 
-### Photo & Proof Experience
-- [ ] **2D-13** | P0 | L | Wire Supabase Storage for visit photos — create bucket, upload from provider app, signed URL display in customer gallery
-- [ ] **2D-14** | P1 | M | Before/after photo comparison view — side-by-side or swipe slider for customer visit detail
-- [ ] **2D-15** | P2 | M | Photo timeline — chronological property photo history across all visits. "See your yard over time"
+### Sprint D2: Ratings & Reviews (receipt-anchored)
+- [ ] **2D-04** | P0 | L | Post-visit rating — prompt after customer views visit receipt/proof (not immediate post-job). 1-5 stars + optional comment. `visit_ratings` table.
+- [ ] **2D-05** | P1 | M | Rating summary on provider profile — average rating, total reviews, admin-visible.
+- [ ] **2D-06** | P2 | M | Smart rating prompts — suppress on first visit or if issue already reported.
 
-### Customer Engagement
-- [ ] **2D-16** | P2 | M | NPS survey — trigger at day 30, 90, 180. Simple 0-10 + comment. Track in `nps_responses` table
-- [ ] **2D-17** | P2 | M | Customer streak rewards — "12 consecutive service weeks!" Badge on dashboard. Milestone notifications
-- [ ] **2D-18** | P2 | L | Neighborhood leaderboard — "Your neighborhood: 14 homes handled. You're one of the first!" Social proof widget
+### Sprint D3: Property Health Score
+- [ ] **2D-07** | P1 | L | Health score algorithm — regularity, SKU coverage, seasonal adoption, issue frequency → 0-100.
+- [ ] **2D-08** | P1 | M | Dashboard widget with trend arrow.
+- [ ] **2D-09** | P2 | M | Health score anxiety nudge on drop.
+
+### Sprint D4: Plan Self-Service (next-cycle default)
+- [ ] **2D-10** | P0 | L | Plan upgrade/downgrade — changes take effect next billing cycle by default. Downgrades always next-cycle. Optional "upgrade now" as future P2. Handles balance carries over (no proration).
+- [ ] **2D-11** | P0 | M | Cancellation flow — reason survey, retention offer (bonus handles), grace period.
+- [ ] **2D-12** | P1 | M | Subscription pause — 1-4 weeks, auto-resume, jobs skipped, handles frozen.
+
+### Sprint D5a: Photo Storage (early — unblocks proof + ratings)
+- [ ] **2D-13** | P0 | L | Wire storage bucket — create bucket, provider upload, signed URL display in customer gallery.
+
+### Sprint D5b: Photo Proof UI (after D2/D3 — ratings insights inform proof design)
+- [ ] **2D-14** | P1 | M | Before/after comparison view — side-by-side or swipe slider for customer visit detail.
+- [ ] **2D-15** | P2 | M | Photo timeline — chronological property photo history across all visits.
+
+### Sprint D6: Contextual Add-ons
+- [ ] **2D-19** | P1 | L | Add-on catalog — SKUs flagged `is_addon`, contextual surfacing (season, weather, time-since-last), payable in $ or handles. "Need extra help?" card with 3-6 suggestions. **Gated:** only surfaced after first completed visit or user-initiated browse.
+- [ ] **2D-20** | P1 | M | Add-on checkout — one-tap purchase (deduct handles or charge card), creates one-off job. Refund hooks for system/provider cancellations (refund handles preserving original expiry).
+
+### Sprint D7: Home Assistant Scaffolding
+- [ ] **2D-21** | P1 | L | Home Assistant SKU scaffolding — `provider_category = 'home_assistant'`, time-boxed SKUs (30/60/90 min), allowed/not-included checklists, customer prep requirements, privacy-safe proof rules. Members-only gate.
+- [ ] **2D-22** | P2 | M | Home Assistant booking — constrained to "next available 2-3 windows", time-boxed selection, member verification. No real-time dispatch. Premium feel, not Uber dispatch.
+
+### Sprint D8: Customer Engagement
+- [ ] **2D-16** | P2 | M | NPS survey (day 30/90/180).
+- [ ] **2D-17** | P2 | M | Customer streak rewards + milestone notifications.
+- [ ] **2D-18** | P2 | L | Neighborhood leaderboard.
+
+### Build Order
+D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 → D8
 
 ---
 
@@ -384,14 +411,14 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2A — Placeholders & Core | 16 | 16 | 100% |
 | 2B — Automation Engine | 31 | 31 | 100% |
 | 2C — Notifications | 44 | 44 | 100% |
-| 2D — Customer Polish | 18 | 0 | 0% |
+| 2D — Customer Polish | 28 | 0 | 0% |
 | 2E — Provider Polish | 13 | 0 | 0% |
 | 2F — Growth Engine | 13 | 0 | 0% |
 | 2G — Admin Intelligence | 11 | 0 | 0% |
 | 2H — Platform Hardening | 15 | 0 | 0% |
 | 2I — Future Moats | 9 | 0 | 0% |
-| **TOTAL** | **170** | **91** | **54%** |
+| **TOTAL** | **180** | **91** | **51%** |
 
 ---
 
-*Last updated: 2026-02-26 — Sprint C5 review fixes applied (F1-F4, F6-F7). All C5 findings resolved. Round 2C: 100%*
+*Last updated: 2026-02-27 — Round 2D revised: membership-first + handles currency + contextual add-ons + Home Assistant scaffolding + scheduling UX moved up. D5 split (storage early, proof UI after ratings). Strategy doc at docs/round-2d-strategy.md.*
