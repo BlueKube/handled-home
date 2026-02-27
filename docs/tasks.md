@@ -327,12 +327,12 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 > Every touchpoint is a growth opportunity. Viral by design.
 
 ### Neighborhood Social Proof
-- [ ] **2F-01** | P1 | L | Neighborhood density widget — "X homes on your street use Handled Home" (based on zip/geohash proximity)
-- [ ] **2F-02** | P1 | M | Post-job share prompt — after every completed job, prompt: "Share your results with neighbors?" → generate share card
-- [ ] **2F-03** | P2 | M | Neighborhood milestone notifications — "Your neighborhood just hit 25 homes! 🎉" Celebrate density milestones
+- [x] **2F-01** | P1 | L | Neighborhood density widget — "X homes in your area use Handled Home" (zip-based density via `neighborhood_density` table + `get_neighborhood_density` RPC)
+- [x] **2F-02** | P1 | M | Post-job share prompt — after every completed job, `PostJobSharePrompt` component with frequency cap integration + dismiss persistence
+- [x] **2F-03** | P2 | M | Neighborhood milestone notifications — `check_density_milestones` RPC with tiered milestones (5/10/25/50/100), `emit_notification` to all zip customers
 
 ### Viral Mechanics
-- [ ] **2F-04** | P0 | M | Shareable proof cards — auto-generate branded before/after card from job photos. Shareable link with referral code embedded
+- [x] **2F-04** | P0 | M | Shareable proof cards — `ShareCardSheet` with branded "Handled." stamp, before/after toggle, privacy controls, `ShareLanding` public page with referral-embedded CTA
 - [ ] **2F-05** | P1 | L | Referral compounding — multi-tier referral tracking. Referrer gets credit when their referral also refers. Cap at 2 levels
 - [ ] **2F-06** | P1 | M | Provider customer acquisition bonus — providers earn bonus for customers they bring to the platform (tracked via provider invite code)
 - [ ] **2F-07** | P2 | M | Yard sign program — customer opts in to physical yard sign after service. Track sign-ups. Discount incentive for participation
@@ -454,7 +454,7 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2C — Notifications | 44 | 44 | 100% |
 | 2D — Customer Polish | 28 | 17 | 61% |
 | 2E — Provider Polish | 17 | 17 | 100% |
-| 2F — Growth Engine | 13 | 0 | 0% |
+| 2F — Growth Engine | 13 | 4 | 31% |
 | 2G — Admin Intelligence | 11 | 0 | 0% |
 | 2H — Platform Hardening | 15 | 0 | 0% |
 | 2I — Future Moats | 9 | 0 | 0% |
