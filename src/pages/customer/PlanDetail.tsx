@@ -1,25 +1,19 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { usePlanDetail } from "@/hooks/usePlans";
 import { useEntitlements } from "@/hooks/useEntitlements";
+import { usePlanHandlesConfig } from "@/hooks/useHandles";
 import { EntitlementBadge } from "@/components/plans/EntitlementBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Check, X, Info, Sparkles, Calendar, Shield } from "lucide-react";
 
-/** D-Pre prototype: static handles metadata until D0 schema */
-function getHandlesForPlan(name: string): number {
-  const lower = name.toLowerCase();
-  if (lower.includes("premium")) return 24;
-  if (lower.includes("plus")) return 16;
-  return 10;
-}
-
 export default function CustomerPlanDetail() {
   const { planId } = useParams<{ planId: string }>();
   const navigate = useNavigate();
   const { data: plan, isLoading: planLoading } = usePlanDetail(planId ?? null);
   const { data: entitlements, isLoading: entLoading } = useEntitlements(planId ?? null, null);
+  const { data: planHandles } = usePlanHandlesConfig(planId ?? null);
 
   const isLoading = planLoading || entLoading;
 
@@ -43,7 +37,8 @@ export default function CustomerPlanDetail() {
     );
   }
 
-  const handlesPerCycle = getHandlesForPlan(plan.name);
+  const handlesPerCycle = planHandles?.handles_per_cycle ?? 0;
+  const rolloverCap = planHandles?.rollover_cap ?? 0;
   const includedSkus = entitlements?.skus.filter((s) => s.status === "included") ?? [];
   const extraSkus = entitlements?.skus.filter((s) => s.status === "extra_allowed" || s.status === "available") ?? [];
   const blockedSkus = entitlements?.skus.filter((s) => s.status === "blocked") ?? [];
@@ -79,7 +74,7 @@ export default function CustomerPlanDetail() {
           </div>
           <p className="text-sm text-muted-foreground">
             Each service costs a set number of handles. Most homes use 10–13 per month.
-            Unused handles roll over (up to {Math.floor(handlesPerCycle * 1.5)}).
+            {rolloverCap > 0 ? ` Unused handles roll over (up to ${rolloverCap}).` : " Unused handles roll over."}
           </p>
         </CardContent>
       </Card>

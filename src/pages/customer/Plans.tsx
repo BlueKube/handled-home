@@ -10,42 +10,46 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 
 /**
- * D-Pre prototype: static tier metadata until handles schema (D0) lands.
- * Keys match plan name substring (case-insensitive).
+ * Fallback tier highlights (used when plan_handles has no DB rows yet).
  */
-const TIER_META: Record<string, { handlesPerCycle: number; highlights: string[] }> = {
-  essential: {
-    handlesPerCycle: 10,
-    highlights: [
-      "Weekly mow + edge trim",
-      "Swap services each cycle",
-      "Roll over unused handles",
-    ],
-  },
-  plus: {
-    handlesPerCycle: 16,
-    highlights: [
-      "Everything in Essential",
-      "Seasonal services included",
-      "Priority scheduling",
-    ],
-  },
-  premium: {
-    handlesPerCycle: 24,
-    highlights: [
-      "Everything in Plus",
-      "Home Assistant access",
-      "Dedicated provider team",
-      "Same-day add-on booking",
-    ],
-  },
+const TIER_HIGHLIGHTS: Record<string, string[]> = {
+  essential: [
+    "Weekly mow + edge trim",
+    "Swap services each cycle",
+    "Roll over unused handles",
+  ],
+  plus: [
+    "Everything in Essential",
+    "Seasonal services included",
+    "Priority scheduling",
+  ],
+  premium: [
+    "Everything in Plus",
+    "Home Assistant access",
+    "Dedicated provider team",
+    "Same-day add-on booking",
+  ],
 };
 
-function getTierMeta(planName: string) {
-  const lower = planName.toLowerCase();
-  if (lower.includes("premium")) return TIER_META.premium;
-  if (lower.includes("plus")) return TIER_META.plus;
-  return TIER_META.essential;
+function getTierKey(name: string): string {
+  const lower = name.toLowerCase();
+  if (lower.includes("premium")) return "premium";
+  if (lower.includes("plus")) return "plus";
+  return "essential";
+}
+
+/** Fetch all plan_handles rows in one query */
+function useAllPlanHandles() {
+  return useQuery({
+    queryKey: ["plan_handles_all"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("plan_handles")
+        .select("plan_id, handles_per_cycle, rollover_cap, rollover_expiry_days");
+      if (error) throw error;
+      return new Map((data ?? []).map((r) => [r.plan_id, r]));
+    },
+  });
 }
 
 function useAllPlanZoneAvailability() {
@@ -87,6 +91,7 @@ export default function CustomerPlans() {
   const { property } = useProperty();
   const { data: customerZoneId } = useZoneByZip(property?.zip_code ?? "");
   const { data: allAvail } = useAllPlanZoneAvailability();
+  const { data: allHandles } = useAllPlanHandles();
 
   const isPlanZoneEnabled = (planId: string): boolean => {
     if (!customerZoneId || !allAvail) return true;
@@ -123,16 +128,22 @@ export default function CustomerPlans() {
         </div>
       ) : (
         <div className="space-y-4">
-          {plans?.map((plan, idx) => {
-            const meta = getTierMeta(plan.name);
+          {plans?.map((plan) => {
+            const tierKey = getTierKey(plan.name);
+            const dbHandles = allHandles?.get(plan.id);
+            const handlesPerCycle = dbHandles?.handles_per_cycle;
+            // Use recommended_rank: highest rank = recommended
+            const isRecommended = plan.recommended_rank != null && plans.every(
+              (p) => (p.recommended_rank ?? 0) <= (plan.recommended_rank ?? 0)
+            );
             return (
               <PlanCard
                 key={plan.id}
                 plan={plan}
-                isRecommended={idx === 0}
+                isRecommended={isRecommended}
                 zoneEnabled={isPlanZoneEnabled(plan.id)}
-                handlesPerCycle={meta.handlesPerCycle}
-                tierHighlights={meta.highlights}
+                handlesPerCycle={handlesPerCycle}
+                tierHighlights={TIER_HIGHLIGHTS[tierKey]}
                 onPreview={() => navigate(`/customer/plans/${plan.id}`)}
                 onBuildRoutine={() => navigate(`/customer/routine?plan=${plan.id}`)}
               />

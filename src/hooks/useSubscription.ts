@@ -30,6 +30,8 @@ export interface Subscription {
   current_service_week_end_at: string | null;
   next_service_week_start_at: string | null;
   next_service_week_end_at: string | null;
+  // Handles balance (cache — source of truth is handle_transactions ledger)
+  handles_balance: number;
 }
 
 export function useCustomerSubscription() {
