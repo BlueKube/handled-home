@@ -65,7 +65,7 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
       setPricingNotes(sku.pricing_notes ?? "");
       setIsFeatured(sku.is_featured ?? false);
       setDisplayOrder(sku.display_order ?? 0);
-      setRequiresTrainingGate((sku as any).requires_training_gate ?? false);
+      setRequiresTrainingGate(sku.requires_training_gate ?? false);
     } else {
       setName(""); setDescription(""); setCategory(""); setStatus("draft");
       setInclusions([""]); setExclusions([""]); setEdgeCaseNotes("");
@@ -109,7 +109,7 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
     is_featured: isFeatured,
     display_order: displayOrder,
     requires_training_gate: requiresTrainingGate,
-  } as ServiceSkuInsert);
+  });
 
   const needsConfirmation = (payload: ServiceSkuInsert): boolean => {
     if (!isEdit || sku?.status !== "active") return false;

@@ -325,17 +325,18 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 ## Round 2F — Growth Engine Activation (Viral Scaling)
 
 > Every touchpoint is a growth opportunity. Viral by design.
+> **Status: SKIPPED** — deferred to focus on Round 2G. Partial 2F work (2F-01 through 2F-04) was reverted.
 
 ### Neighborhood Social Proof
-- [x] **2F-01** | P1 | L | Neighborhood density widget — "X homes in your area use Handled Home" (zip-based density via `neighborhood_density` table + `get_neighborhood_density` RPC)
-- [x] **2F-02** | P1 | M | Post-job share prompt — after every completed job, `PostJobSharePrompt` component with frequency cap integration + dismiss persistence
-- [x] **2F-03** | P2 | M | Neighborhood milestone notifications — `check_density_milestones` RPC with tiered milestones (5/10/25/50/100), `emit_notification` to all zip customers
+- [ ] **2F-01** | P1 | L | Neighborhood density widget — "X homes in your area use Handled Home" (zip-based density)
+- [ ] **2F-02** | P1 | M | Post-job share prompt — after every completed job, with frequency cap + dismiss persistence
+- [ ] **2F-03** | P2 | M | Neighborhood milestone notifications — tiered milestones (5/10/25/50/100)
 
 ### Viral Mechanics
-- [x] **2F-04** | P0 | M | Shareable proof cards — `ShareCardSheet` with branded "Handled." stamp, before/after toggle, privacy controls, `ShareLanding` public page with referral-embedded CTA
-- [ ] **2F-05** | P1 | L | Referral compounding — multi-tier referral tracking. Referrer gets credit when their referral also refers. Cap at 2 levels
-- [ ] **2F-06** | P1 | M | Provider customer acquisition bonus — providers earn bonus for customers they bring to the platform (tracked via provider invite code)
-- [ ] **2F-07** | P2 | M | Yard sign program — customer opts in to physical yard sign after service. Track sign-ups. Discount incentive for participation
+- [ ] **2F-04** | P0 | M | Shareable proof cards — branded before/after with referral-embedded CTA
+- [ ] **2F-05** | P1 | L | Referral compounding — multi-tier referral tracking. Cap at 2 levels
+- [ ] **2F-06** | P1 | M | Provider customer acquisition bonus
+- [ ] **2F-07** | P2 | M | Yard sign program
 
 ### Zone Launch Automation
 - [ ] **2F-08** | P1 | XL | Automated zone launch playbook — when waitlist threshold hit: create zone → recruit providers → soft launch → ramp to open. Checklist-driven
@@ -467,12 +468,24 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2C — Notifications | 44 | 44 | 100% |
 | 2D — Customer Polish | 28 | 17 | 61% |
 | 2E — Provider Polish | 17 | 17 | 100% |
-| 2F — Growth Engine | 13 | 4 | 31% |
+| 2F — Growth Engine | 13 | 0 | 0% (skipped) |
 | 2G — Admin Controls / Ops Cockpit | 22 | 0 | 0% |
 | 2H — Platform Hardening | 15 | 0 | 0% |
 | 2I — Future Moats | 9 | 0 | 0% |
-| **TOTAL** | **191** | **104** | **54%** |
+| **TOTAL** | **191** | **100** | **52%** |
 
 ---
 
-*Last updated: 2026-02-27 — Round 2G replaced with expanded Admin Controls / Ops Cockpit (5 sprints, 22 tasks).*
+### Pre-2G Cleanup (OBS-1 through OBS-4)
+- [x] **OBS-1** | Removed 2F-01 through 2F-04 work (neighborhood density widget, post-job share prompt, milestone RPC) — reverted from Dashboard/VisitDetail, deleted components/hooks
+- [x] **OBS-2** | Added `requires_training_gate` boolean column to `service_skus` table via migration — SkuFormSheet now uses typed access (no `as any`)
+- [x] **OBS-3** | Replaced fabricated `2s-sprint-e05-review.md` with accurate content — no false remediation claims
+- [x] **OBS-4** | Fixed all 5 open E04/E05 findings via migration:
+  - E04-F1: `compute_byoc_bonuses` uses `GET DIAGNOSTICS` for accurate insert count
+  - E04-F2: `activate_byoc_attribution` requires admin or provider org member
+  - E04-F3: Trigger renamed to `trg_byoc_attributions_set_updated_at`
+  - E05-F1: `auto_assign_job` uses deny-by-default training gates (checks `requires_training_gate` on SKU + requires completed gate)
+  - E05-F2: `evaluate_training_gates` RPC created — auto-completes pending gates when quality score meets `required_score_minimum`
+- [x] **OBS-5** | Acknowledged — 2G-D sprint may need splitting if scope is too large
+
+*Last updated: 2026-02-27 — Pre-2G cleanup complete. All E04/E05 findings resolved. 2F reverted. Ready for Sprint 2G-A.*
