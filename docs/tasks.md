@@ -259,8 +259,8 @@
 - [x] **2D-15** | P2 | M | Photo timeline — `usePropertyPhotoTimeline` hook fetches all UPLOADED photos across COMPLETED jobs for a property (limit 50), groups by visit date with SKU labels. `PhotoTimeline` component with grid thumbnails, full-screen viewer sheet. New `/customer/photos` route.
 
 ### Sprint D6: Contextual Add-ons
-- [ ] **2D-19** | P1 | L | Add-on catalog — SKUs flagged `is_addon`, contextual surfacing (season, weather, time-since-last), payable in $ or handles. "Need extra help?" card with 3-6 suggestions. **Gated:** only surfaced after first completed visit or user-initiated browse.
-- [ ] **2D-20** | P1 | M | Add-on checkout — one-tap purchase (deduct handles or charge card), creates one-off job. Refund hooks for system/provider cancellations (refund handles preserving original expiry).
+- [x] **2D-19** | P1 | L | Add-on catalog — SKUs flagged `is_addon`, contextual surfacing (season, weather, time-since-last), payable in $ or handles. "Need extra help?" card with 3-6 suggestions. **Gated:** only surfaced after first completed visit or user-initiated browse. DB: `is_addon` + `addon_triggers` columns on `service_skus`, `addon_orders` table with RLS. `useAddonSuggestions` hook with seasonal relevance scoring. `AddonSuggestionsCard` component on customer dashboard.
+- [x] **2D-20** | P1 | M | Add-on checkout — one-tap purchase (deduct handles or charge card), creates one-off job. Refund hooks for system/provider cancellations (refund handles preserving original expiry). `purchase_addon` RPC (SECURITY DEFINER) with completed-visit gate, `refund_addon` RPC. `usePurchaseAddon` mutation hook. Bottom sheet purchase UI with handles/cash options.
 
 ### Sprint D7: Home Assistant Scaffolding
 - [ ] **2D-21** | P1 | L | Home Assistant SKU scaffolding — `provider_category = 'home_assistant'`, time-boxed SKUs (30/60/90 min), allowed/not-included checklists, customer prep requirements, privacy-safe proof rules. Members-only gate.
@@ -433,7 +433,7 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2A — Placeholders & Core | 16 | 16 | 100% |
 | 2B — Automation Engine | 31 | 31 | 100% |
 | 2C — Notifications | 44 | 44 | 100% |
-| 2D — Customer Polish | 28 | 13 | 46% |
+| 2D — Customer Polish | 28 | 15 | 54% |
 | 2E — Provider Polish | 13 | 0 | 0% |
 | 2F — Growth Engine | 13 | 0 | 0% |
 | 2G — Admin Intelligence | 11 | 0 | 0% |
