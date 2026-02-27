@@ -5,7 +5,15 @@ import { EntitlementBadge } from "@/components/plans/EntitlementBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Check, X, Info } from "lucide-react";
+import { ArrowLeft, Check, X, Info, Sparkles, Calendar, Shield } from "lucide-react";
+
+/** D-Pre prototype: static handles metadata until D0 schema */
+function getHandlesForPlan(name: string): number {
+  const lower = name.toLowerCase();
+  if (lower.includes("premium")) return 24;
+  if (lower.includes("plus")) return 16;
+  return 10;
+}
 
 export default function CustomerPlanDetail() {
   const { planId } = useParams<{ planId: string }>();
@@ -35,21 +43,46 @@ export default function CustomerPlanDetail() {
     );
   }
 
+  const handlesPerCycle = getHandlesForPlan(plan.name);
   const includedSkus = entitlements?.skus.filter((s) => s.status === "included") ?? [];
   const extraSkus = entitlements?.skus.filter((s) => s.status === "extra_allowed" || s.status === "available") ?? [];
   const blockedSkus = entitlements?.skus.filter((s) => s.status === "blocked") ?? [];
 
   return (
     <div className="p-4 pb-24 space-y-6 animate-fade-in max-w-lg mx-auto">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <button
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      >
         <ArrowLeft className="h-4 w-4" /> Back
       </button>
 
+      {/* Hero */}
       <div>
         <h1 className="text-h2">{plan.name}</h1>
         {plan.tagline && <p className="text-muted-foreground mt-1">{plan.tagline}</p>}
-        {plan.display_price_text && <p className="text-2xl font-bold mt-2">{plan.display_price_text}</p>}
+        <div className="flex items-baseline gap-3 mt-3">
+          {plan.display_price_text && (
+            <span className="text-3xl font-bold tracking-tight">{plan.display_price_text}</span>
+          )}
+          <span className="text-xs text-muted-foreground">/ 4 weeks</span>
+        </div>
       </div>
+
+      {/* Handles callout */}
+      <Card className="border-accent/30 bg-accent/5">
+        <CardContent className="pt-4 pb-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-accent" />
+            <span className="text-lg font-bold">{handlesPerCycle} handles</span>
+            <span className="text-sm text-muted-foreground">per cycle</span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Each service costs a set number of handles. Most homes use 10–13 per month.
+            Unused handles roll over (up to {Math.floor(handlesPerCycle * 1.5)}).
+          </p>
+        </CardContent>
+      </Card>
 
       {entitlements && (
         <p className="text-sm text-muted-foreground">{entitlements.messages.included_explainer}</p>
@@ -106,12 +139,25 @@ export default function CustomerPlanDetail() {
         </Card>
       )}
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">How Changes Work</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">{entitlements?.messages.change_policy}</p>
+      {/* Plan change policy */}
+      <Card className="border-dashed">
+        <CardContent className="pt-4 pb-4 space-y-3">
+          <p className="text-sm font-medium text-foreground">How changes work</p>
+          <div className="space-y-2">
+            <div className="flex items-start gap-2 text-sm text-muted-foreground">
+              <Calendar className="h-4 w-4 shrink-0 mt-0.5" />
+              <span>Plan changes take effect at the start of your next billing cycle.</span>
+            </div>
+            <div className="flex items-start gap-2 text-sm text-muted-foreground">
+              <Shield className="h-4 w-4 shrink-0 mt-0.5" />
+              <span>Your remaining handles carry over — nothing is lost.</span>
+            </div>
+          </div>
+          {entitlements?.messages.change_policy && (
+            <p className="text-xs text-muted-foreground border-t border-border pt-2 mt-2">
+              {entitlements.messages.change_policy}
+            </p>
+          )}
         </CardContent>
       </Card>
 

@@ -198,7 +198,7 @@
 > **Key decisions:** Handles are the internal unit of value (simple usage bar UX). Plan changes default to next-cycle. Add-ons gated until after first completed visit. Ratings receipt-anchored.
 
 ### D-Pre: Plan Card & Handles UX Prototype
-- [ ] **2D-00pre** | P0 | S | Plan card + handles explanation prototype — design plan tier cards (Essential/Plus/Premium) with handles messaging ("Most homes use 10-13 handles/month", "Swap services anytime"). No backend, UX validation only.
+- [x] **2D-00pre** | P0 | S | Plan card + handles explanation prototype — design plan tier cards (Essential/Plus/Premium) with handles messaging ("Most homes use 10-13 handles/month", "Swap services anytime"). No backend, UX validation only. Components: `PlanCard` (redesigned with handles callout + tier highlights), `HandlesExplainer` (3-point education card), Plans page (membership-first copy), PlanDetail page (handles allowance + rollover cap + change policy).
 
 ### Sprint D0: Handles v0 (allowance + spend + expire + rollover)
 - [ ] **2D-00a** | P0 | L | Handles v0 schema — `plan_handles` (handles_per_cycle, rollover_cap, rollover_expiry_days per plan), `handle_transactions` ledger (type: grant/spend/expire/rollover/refund, amount, balance_after, reference columns). `handles_balance` on subscription as **cache only**, reconcilable from ledger via `recalc_handles_balance()` RPC. RPCs: `spend_handles` (at booking/confirmation), `grant_cycle_handles`, `expire_stale_handles`, `refund_handles` (preserves original expiry). No earn, no proration math.
@@ -411,13 +411,13 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2A — Placeholders & Core | 16 | 16 | 100% |
 | 2B — Automation Engine | 31 | 31 | 100% |
 | 2C — Notifications | 44 | 44 | 100% |
-| 2D — Customer Polish | 28 | 0 | 0% |
+| 2D — Customer Polish | 28 | 1 | 4% |
 | 2E — Provider Polish | 13 | 0 | 0% |
 | 2F — Growth Engine | 13 | 0 | 0% |
 | 2G — Admin Intelligence | 11 | 0 | 0% |
 | 2H — Platform Hardening | 15 | 0 | 0% |
 | 2I — Future Moats | 9 | 0 | 0% |
-| **TOTAL** | **180** | **91** | **51%** |
+| **TOTAL** | **180** | **92** | **51%** |
 
 ---
 
