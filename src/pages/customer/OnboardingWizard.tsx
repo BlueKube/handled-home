@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOnboardingProgress, ONBOARDING_STEPS, type OnboardingStep } from "@/hooks/useOnboardingProgress";
@@ -667,9 +667,13 @@ function ServiceDayStep({ onComplete }: { onComplete: () => Promise<void> }) {
     must_be_home_window: null,
   });
 
+  // D1.5-F4: Ref guard to prevent duplicate offer creation
+  const offerCreated = useRef(false);
+
   // Auto-create offer if none exists
   useEffect(() => {
-    if (!assignLoading && property?.id && !assignment) {
+    if (!assignLoading && property?.id && !assignment && !offerCreated.current) {
+      offerCreated.current = true;
       createOrRefreshOffer.mutate(property.id, { onSuccess: () => refetch() });
     }
   }, [assignLoading, property?.id, assignment]);
@@ -754,7 +758,7 @@ function ServiceDayStep({ onComplete }: { onComplete: () => Promise<void> }) {
           onChange={setPrefs}
           alignmentExplanation={
             prefs.align_days_preference
-              ? (assignment as any)?.alignment_explanation ?? null
+              ? assignment?.alignment_explanation ?? null
               : null
           }
           compact

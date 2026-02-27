@@ -93,10 +93,10 @@ export function ServiceDayOfferCard({
       </div>
 
       {/* Alignment explanation if present */}
-      {(assignment as any).alignment_explanation && (
+      {assignment.alignment_explanation && (
         <div className="p-3 rounded-lg bg-muted/50 border border-border/40">
           <p className="text-xs text-muted-foreground leading-relaxed">
-            {(assignment as any).alignment_explanation}
+            {assignment.alignment_explanation}
           </p>
         </div>
       )}

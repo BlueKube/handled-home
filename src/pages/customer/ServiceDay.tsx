@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { useProperty } from "@/hooks/useProperty";
 import { useServiceDayAssignment } from "@/hooks/useServiceDayAssignment";
 import { useServiceDayActions } from "@/hooks/useServiceDayActions";
@@ -38,6 +40,31 @@ export default function CustomerServiceDay() {
     must_be_home_window: null,
   });
 
+  // D1.5-F1: Load saved preferences from DB
+  const { data: savedPrefs } = useQuery({
+    queryKey: ["service_day_prefs", property?.id],
+    enabled: !!property?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_day_preferences")
+        .select("align_days_preference, must_be_home, must_be_home_window")
+        .eq("property_id", property!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  useEffect(() => {
+    if (savedPrefs) {
+      setPrefs({
+        align_days_preference: savedPrefs.align_days_preference,
+        must_be_home: savedPrefs.must_be_home,
+        must_be_home_window: savedPrefs.must_be_home_window,
+      });
+    }
+  }, [savedPrefs]);
+
   // Save preferences when toggled
   const handlePrefsChange = (newPrefs: SchedulingPrefs) => {
     setPrefs(newPrefs);
@@ -51,9 +78,13 @@ export default function CustomerServiceDay() {
     }
   };
 
+  // D1.5-F4: Ref guard for auto-create offer
+  const offerCreated = useRef(false);
+
   // Auto-create offer on mount if no assignment exists
   useEffect(() => {
-    if (!propLoading && !assignLoading && property?.id && !assignment) {
+    if (!propLoading && !assignLoading && property?.id && !assignment && !offerCreated.current) {
+      offerCreated.current = true;
       // M4: Show expiry message if a previous offer expired
       if (expiredPrevious) {
         setShowExpiredMessage(true);
@@ -111,7 +142,7 @@ export default function CustomerServiceDay() {
           <SchedulingPreferences
             value={prefs}
             onChange={handlePrefsChange}
-            alignmentExplanation={(assignment as any).alignment_explanation}
+            alignmentExplanation={assignment.alignment_explanation}
           />
         </div>
       </div>
@@ -179,7 +210,7 @@ export default function CustomerServiceDay() {
         <SchedulingPreferences
           value={prefs}
           onChange={handlePrefsChange}
-          alignmentExplanation={(assignment as any).alignment_explanation}
+          alignmentExplanation={assignment.alignment_explanation}
         />
       </div>
     </div>
