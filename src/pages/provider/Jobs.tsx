@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useProviderJobs, ProviderJob } from "@/hooks/useProviderJobs";
 import { useProviderOrg } from "@/hooks/useProviderOrg";
+import { useProviderRoutePlan } from "@/hooks/useProviderRoutePlan";
 import { useOptimizeRoute, useReorderRoute } from "@/hooks/useRouteOptimization";
-import { MapPin, Clock, ChevronRight, ArrowUp, ArrowDown, Route, Loader2 } from "lucide-react";
+import { MapPin, Clock, ChevronRight, ArrowUp, ArrowDown, Route, Loader2, Lock } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -81,6 +82,7 @@ function JobCard({ job, index, total, onMoveUp, onMoveDown, showReorder }: {
 function TodayJobList() {
   const { data: jobs, isLoading } = useProviderJobs("today");
   const { org } = useProviderOrg();
+  const { isLocked } = useProviderRoutePlan();
   const optimizeRoute = useOptimizeRoute();
   const reorderRoute = useReorderRoute();
   const [localJobs, setLocalJobs] = useState<ProviderJob[] | null>(null);
@@ -109,7 +111,6 @@ function TodayJobList() {
     reordered.splice(toIdx, 0, moved);
     setLocalJobs(reordered);
 
-    // Finding #7: Exclude IN_PROGRESS jobs from the reorder payload
     const jobOrders = reordered
       .filter((j) => j.status !== "IN_PROGRESS")
       .map((j, i) => ({ job_id: j.id, route_order: i + 1 }));
@@ -149,19 +150,28 @@ function TodayJobList() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">{displayJobs.length} stop{displayJobs.length !== 1 ? "s" : ""}</p>
-        <Button
-          variant="outline" size="sm"
-          onClick={handleOptimize}
-          disabled={optimizeRoute.isPending || displayJobs.length < 3}
-        >
-          {optimizeRoute.isPending ? (
-            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-          ) : (
-            <Route className="h-3 w-3 mr-1" />
+        <p className="text-xs text-muted-foreground">
+          {displayJobs.length} stop{displayJobs.length !== 1 ? "s" : ""}
+          {isLocked && (
+            <span className="ml-2 inline-flex items-center gap-1 text-accent font-medium">
+              <Lock className="h-3 w-3" /> Locked
+            </span>
           )}
-          Optimize Route
-        </Button>
+        </p>
+        {!isLocked && (
+          <Button
+            variant="outline" size="sm"
+            onClick={handleOptimize}
+            disabled={optimizeRoute.isPending || displayJobs.length < 3}
+          >
+            {optimizeRoute.isPending ? (
+              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+            ) : (
+              <Route className="h-3 w-3 mr-1" />
+            )}
+            Optimize Route
+          </Button>
+        )}
       </div>
       {displayJobs.map((job, i) => (
         <JobCard
@@ -169,7 +179,7 @@ function TodayJobList() {
           job={job}
           index={i}
           total={displayJobs.length}
-          showReorder={displayJobs.length > 1}
+          showReorder={!isLocked && displayJobs.length > 1}
           onMoveUp={() => handleMove(i, i - 1)}
           onMoveDown={() => handleMove(i, i + 1)}
         />

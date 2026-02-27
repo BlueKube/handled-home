@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { useProviderJobs, ProviderJob } from "@/hooks/useProviderJobs";
 import { useProviderEarnings } from "@/hooks/useProviderEarnings";
+import { useProviderRoutePlan } from "@/hooks/useProviderRoutePlan";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProviderNotificationBanners } from "@/components/provider/NotificationBanners";
 import {
@@ -17,8 +18,12 @@ import {
   MapPin,
   CalendarDays,
   TrendingUp,
+  Car,
+  Lock,
+  Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 function formatCents(cents: number) {
   return `$${(cents / 100).toFixed(2)}`;
@@ -170,21 +175,20 @@ export default function ProviderDashboard() {
   const { data: todayJobs, isLoading: jobsLoading, isError: jobsError } = useProviderJobs("today");
   const { eligibleBalance, heldBalance, earnings, isLoading: earningsLoading, isError: earningsError } =
     useProviderEarnings();
+  const {
+    isLocked,
+    totalStops,
+    estWorkMinutes,
+    estDriveMinutes,
+    projectedEarningsCents,
+    lockRoute,
+    isLocking,
+  } = useProviderRoutePlan();
   const navigate = useNavigate();
 
   const todayCount = todayJobs?.length ?? 0;
-  const estMinutes =
-    todayJobs?.reduce(
-      (sum, job) =>
-        sum +
-        (job.job_skus?.reduce(
-          (s, sku) => s + (sku.duration_minutes_snapshot ?? 0),
-          0
-        ) ?? 0),
-      0
-    ) ?? 0;
 
-  // This week's earnings: filter earnings created in the last 7 days
+  // This week's earnings
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
   const weekEarnings = earnings
@@ -193,7 +197,13 @@ export default function ProviderDashboard() {
 
   const firstName = profile?.full_name?.split(" ")[0] ?? "Provider";
   const isLoading = jobsLoading || earningsLoading;
-  const hasError = jobsError || earningsError;
+
+  const handleLockRoute = () => {
+    lockRoute(undefined, {
+      onSuccess: () => toast.success("Route locked! Your day is set."),
+      onError: (err: any) => toast.error(err?.message ?? "Failed to lock route"),
+    });
+  };
 
   return (
     <div className="animate-fade-in p-4 pb-24 space-y-5 max-w-2xl">
@@ -212,6 +222,53 @@ export default function ProviderDashboard() {
       {/* SLA Notification Banners */}
       <ProviderNotificationBanners />
 
+      {/* Start Route / Route Locked Banner */}
+      {todayCount > 0 && (
+        <Card className={`p-4 ${isLocked ? "bg-accent/5 border-accent/20" : "bg-primary/5 border-primary/20"}`}>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              {isLocked ? (
+                <Lock className="h-5 w-5 text-accent shrink-0" />
+              ) : (
+                <Car className="h-5 w-5 text-primary shrink-0" />
+              )}
+              <div>
+                <p className="text-sm font-semibold">
+                  {isLocked ? "Route Locked" : "Ready to start?"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {isLocked
+                    ? `${totalStops} stops · ${estWorkMinutes + estDriveMinutes} min total`
+                    : "Lock your route to begin your day"}
+                </p>
+              </div>
+            </div>
+            {!isLocked && (
+              <Button
+                size="sm"
+                onClick={handleLockRoute}
+                disabled={isLocking}
+              >
+                {isLocking ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                ) : (
+                  <Lock className="h-4 w-4 mr-1" />
+                )}
+                Start Route
+              </Button>
+            )}
+          </div>
+          {isLocked && projectedEarningsCents > 0 && (
+            <div className="mt-3 pt-3 border-t border-border flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-accent" />
+              <span className="text-sm font-semibold text-accent">
+                Projected today: {formatCents(projectedEarningsCents)}
+              </span>
+            </div>
+          )}
+        </Card>
+      )}
+
       {/* Stats Row */}
       <div className="grid gap-3 grid-cols-2">
         <StatCard
@@ -221,16 +278,16 @@ export default function ProviderDashboard() {
         />
         <StatCard
           icon={Clock}
-          label="Est. Time"
-          value={isLoading ? "—" : estMinutes > 0 ? `${estMinutes} min` : "0 min"}
+          label="Est. Work"
+          value={isLoading ? "—" : estWorkMinutes > 0 ? `${estWorkMinutes} min` : "0 min"}
         />
       </div>
 
       <div className="grid gap-3 grid-cols-2">
         <StatCard
-          icon={DollarSign}
-          label="Available"
-          value={isLoading ? "—" : formatCents(eligibleBalance)}
+          icon={Car}
+          label="Est. Drive"
+          value={isLoading ? "—" : estDriveMinutes > 0 ? `${estDriveMinutes} min` : "0 min"}
         />
         <StatCard
           icon={TrendingUp}

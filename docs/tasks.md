@@ -283,27 +283,32 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 ## Round 2E — Provider Experience Polish (Supply Retention)
 
 > Make it economically irrational for providers to leave.
+> **PRDs:** `docs/prds/2e-*`
 
-### Real-Time Job Tracking
-- [ ] **2E-01** | P0 | L | Job status flow UI — en route → arrived → in progress → completed. Status buttons in job detail. GPS timestamp on arrive/depart
-- [ ] **2E-02** | P1 | M | Live job status for customers — "Your provider is on the way" / "Service in progress" on customer dashboard
-- [ ] **2E-03** | P1 | M | Estimated arrival time — based on job order + avg time per job in route
+### Sprint E-01 — Provider Day Command Center
+- [x] **2E-E01-01** | P0 | M | `provider_route_plans` table + `lock_provider_route` RPC — freezes route order, computes projected earnings/drive/work time. RLS for provider members + admin.
+- [x] **2E-E01-02** | P0 | M | `useProviderRoutePlan` hook — fetches plan for today, exposes lock state, live stats fallback when unlocked.
+- [x] **2E-E01-03** | P0 | M | Dashboard enhancements — projected earnings banner, est. drive/work time stats, "Start Route" lock button. Route locked indicator.
+- [x] **2E-E01-04** | P0 | M | Jobs page — hide Optimize Route + reorder arrows when route is locked. Show "Locked" badge.
 
-### Earnings Analytics
-- [ ] **2E-04** | P0 | L | Earnings dashboard — daily/weekly/monthly breakdown. Per-job earnings with SKU detail. Graphs showing earnings trend
-- [ ] **2E-05** | P1 | M | Earnings projections — "At current pace, you'll earn $X this month" based on scheduled jobs
-- [ ] **2E-06** | P1 | M | Bonus/modifier transparency — show why earning was adjusted (quality bonus, rush fee, hold reason)
+### Sprint E-02 — Earnings & Payout Trust
+- [ ] **2E-E02-01** | P0 | M | Day/week/month tab filtering on Earnings page
+- [ ] **2E-E02-02** | P1 | M | "At current pace" monthly projection based on scheduled jobs
+- [ ] **2E-E02-03** | P1 | M | Modifier transparency — bonus/hold/rush breakdown per earning
 
-### Provider Tools
-- [ ] **2E-07** | P1 | L | Provider training/certification — required video/content before SKU authorization. Track completion in `provider_certifications` table
-- [ ] **2E-08** | P2 | M | Equipment recommendations — per-SKU equipment list. "Recommended for Standard Mow: Honda HRX217"
-- [ ] **2E-09** | P2 | L | Tax document generation — annual 1099 summary. Download as PDF. Based on `provider_earnings` aggregation
-- [ ] **2E-10** | P2 | M | Provider availability calendar — set days off, vacation blocks. System respects during job assignment
+### Sprint E-03 — Availability + Coverage
+- [ ] **2E-E03-01** | P0 | L | `provider_availability_blocks` table + calendar UI for vacation/days off
+- [ ] **2E-E03-02** | P0 | L | Assignment engine respects availability blocks
+- [ ] **2E-E03-03** | P1 | M | Lead-time warnings + coverage gap detection
 
-### Provider Gamification
-- [ ] **2E-11** | P1 | M | Provider leaderboard — top earners, highest rated, most consistent. Zone-level and platform-level
-- [ ] **2E-12** | P2 | M | Achievement badges — "100 jobs completed", "30-day perfect score", "5-star streak". Display on provider profile
-- [ ] **2E-13** | P2 | M | Tier system — Bronze/Silver/Gold/Platinum based on performance. Higher tiers get priority assignment + lower hold periods
+### Sprint E-04 — BYOC / Founding Partner
+- [ ] **2E-E04-01** | P0 | L | `byoc_attributions` table + invite funnel tracking
+- [ ] **2E-E04-02** | P0 | XL | Attribution + $10/week bonus computation RPC + `provider_incentive_config`
+- [ ] **2E-E04-03** | P1 | M | Reassignment rules + customer "request provider change"
+
+### Sprint E-05 — Tier System + Training Gates
+- [ ] **2E-E05-01** | P1 | L | `provider_tier_history` table + tier logic tied to assignment priority
+- [ ] **2E-E05-02** | P1 | M | Coaching checklist + SKU training gates
 
 ---
 
