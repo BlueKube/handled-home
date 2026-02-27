@@ -6292,6 +6292,7 @@ export type Database = {
         | "same_day_preferred"
         | "same_week_allowed"
         | "independent_cadence"
+        | "window_booking"
       market_zone_category_status:
         | "CLOSED"
         | "SOFT_LAUNCH"
@@ -6533,6 +6534,7 @@ export const Constants = {
         "same_day_preferred",
         "same_week_allowed",
         "independent_cadence",
+        "window_booking",
       ],
       market_zone_category_status: [
         "CLOSED",
