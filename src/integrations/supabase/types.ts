@@ -308,6 +308,122 @@ export type Database = {
         }
         Relationships: []
       }
+      byoc_attributions: {
+        Row: {
+          bonus_end_at: string | null
+          bonus_start_at: string | null
+          created_at: string
+          customer_id: string
+          first_completed_visit_at: string | null
+          id: string
+          installed_at: string | null
+          invite_code: string | null
+          invited_at: string
+          provider_org_id: string
+          referral_code: string | null
+          revoked_reason: string | null
+          status: string
+          subscribed_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          bonus_end_at?: string | null
+          bonus_start_at?: string | null
+          created_at?: string
+          customer_id: string
+          first_completed_visit_at?: string | null
+          id?: string
+          installed_at?: string | null
+          invite_code?: string | null
+          invited_at?: string
+          provider_org_id: string
+          referral_code?: string | null
+          revoked_reason?: string | null
+          status?: string
+          subscribed_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bonus_end_at?: string | null
+          bonus_start_at?: string | null
+          created_at?: string
+          customer_id?: string
+          first_completed_visit_at?: string | null
+          id?: string
+          installed_at?: string | null
+          invite_code?: string | null
+          invited_at?: string
+          provider_org_id?: string
+          referral_code?: string | null
+          revoked_reason?: string | null
+          status?: string
+          subscribed_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "byoc_attributions_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      byoc_bonus_ledger: {
+        Row: {
+          amount_cents: number
+          attribution_id: string
+          created_at: string
+          customer_id: string
+          earning_id: string | null
+          id: string
+          provider_org_id: string
+          status: string
+          week_end: string
+          week_start: string
+        }
+        Insert: {
+          amount_cents?: number
+          attribution_id: string
+          created_at?: string
+          customer_id: string
+          earning_id?: string | null
+          id?: string
+          provider_org_id: string
+          status?: string
+          week_end: string
+          week_start: string
+        }
+        Update: {
+          amount_cents?: number
+          attribution_id?: string
+          created_at?: string
+          customer_id?: string
+          earning_id?: string | null
+          id?: string
+          provider_org_id?: string
+          status?: string
+          week_end?: string
+          week_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "byoc_bonus_ledger_attribution_id_fkey"
+            columns: ["attribution_id"]
+            isOneToOne: false
+            referencedRelation: "byoc_attributions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "byoc_bonus_ledger_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cron_run_log: {
         Row: {
           completed_at: string | null
@@ -3239,6 +3355,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      provider_incentive_config: {
+        Row: {
+          byoc_duration_days: number
+          byoc_weekly_amount_cents: number
+          created_at: string
+          id: string
+          max_byoc_per_provider_per_month: number | null
+          reason: string | null
+          scope: string
+          scope_id: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          byoc_duration_days?: number
+          byoc_weekly_amount_cents?: number
+          created_at?: string
+          id?: string
+          max_byoc_per_provider_per_month?: number | null
+          reason?: string | null
+          scope?: string
+          scope_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          byoc_duration_days?: number
+          byoc_weekly_amount_cents?: number
+          created_at?: string
+          id?: string
+          max_byoc_per_provider_per_month?: number | null
+          reason?: string | null
+          scope?: string
+          scope_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       provider_invites: {
         Row: {
@@ -6220,6 +6375,10 @@ export type Database = {
     }
     Functions: {
       accept_support_offer: { Args: { p_offer_id: string }; Returns: Json }
+      activate_byoc_attribution: {
+        Args: { p_customer_id: string }
+        Returns: Json
+      }
       admin_apply_credit: {
         Args: {
           p_amount_cents: number
@@ -6272,6 +6431,10 @@ export type Database = {
       admin_resolve_customer_issue: {
         Args: { p_issue_id: string; p_resolution_note: string }
         Returns: Json
+      }
+      admin_revoke_byoc_attribution: {
+        Args: { p_attribution_id: string; p_reason: string }
+        Returns: undefined
       }
       admin_update_coverage_status: {
         Args: { p_coverage_id: string; p_new_status: string; p_reason?: string }
@@ -6361,6 +6524,7 @@ export type Database = {
         Args: { p_job_id: string; p_provider_summary?: string }
         Returns: Json
       }
+      compute_byoc_bonuses: { Args: { p_week_start: string }; Returns: Json }
       compute_property_health_score: {
         Args: { p_customer_id: string; p_property_id: string }
         Returns: Json

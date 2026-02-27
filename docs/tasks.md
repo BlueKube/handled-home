@@ -306,11 +306,15 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 - [x] **2E-E03-01** | P0 | L | `provider_availability_blocks` table with RLS, validation trigger, calendar UI on Coverage page (create/cancel blocks with date pickers)
 - [x] **2E-E03-02** | P0 | L | `auto_assign_job` RPC updated — skips providers with active DAY_OFF/VACATION blocks for job's scheduled_date (both PRIMARY and BACKUP loops)
 - [x] **2E-E03-03** | P1 | M | Lead-time warnings — blocks starting within 48 hours flagged in UI with coverage confirmation message
+- [x] **2E-E03-F1** | Fix | LIMITED_CAPACITY documented as informational-only with UI hint
+- [x] **2E-E03-F2** | Fix | Added FK constraint on created_by_user_id → auth.users(id)
+- [x] **2E-E03-F3** | Fix | Added gist exclusion constraint preventing overlapping active blocks
+- [x] **2E-E03-F4** | Fix | cancelBlock adds provider_org_id guard + server-side updated_at trigger
 
 ### Sprint E-04 — BYOC / Founding Partner
-- [ ] **2E-E04-01** | P0 | L | `byoc_attributions` table + invite funnel tracking
-- [ ] **2E-E04-02** | P0 | XL | Attribution + $10/week bonus computation RPC + `provider_incentive_config`
-- [ ] **2E-E04-03** | P1 | M | Reassignment rules + customer "request provider change"
+- [x] **2E-E04-01** | P0 | L | `byoc_attributions` table + `byoc_bonus_ledger` + `provider_incentive_config` with RLS, unique constraints, FK references
+- [x] **2E-E04-02** | P0 | XL | `compute_byoc_bonuses` RPC (weekly batch, admin-only), `activate_byoc_attribution` RPC (first-visit trigger), `admin_revoke_byoc_attribution` RPC
+- [x] **2E-E04-03** | P1 | M | Provider "Founding Partner Program" UI — BYOC dashboard with active/pending counts, earned total, per-attribution progress bars, bonus window tracking
 
 ### Sprint E-05 — Tier System + Training Gates
 - [ ] **2E-E05-01** | P1 | L | `provider_tier_history` table + tier logic tied to assignment priority
@@ -449,7 +453,7 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2B — Automation Engine | 31 | 31 | 100% |
 | 2C — Notifications | 44 | 44 | 100% |
 | 2D — Customer Polish | 28 | 17 | 61% |
-| 2E — Provider Polish | 13 | 0 | 0% |
+| 2E — Provider Polish | 17 | 17 | 100% |
 | 2F — Growth Engine | 13 | 0 | 0% |
 | 2G — Admin Intelligence | 11 | 0 | 0% |
 | 2H — Platform Hardening | 15 | 0 | 0% |
