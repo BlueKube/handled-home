@@ -64,7 +64,7 @@ const navGroups: NavGroup[] = [
   {
     label: "People",
     items: [
-      { title: "Customers", url: "/admin/billing", icon: Users },
+      { title: "Customer Billing", url: "/admin/billing", icon: Users },
       { title: "Providers", url: "/admin/providers", icon: Shield },
     ],
   },
@@ -156,12 +156,6 @@ function AdminSidebar() {
         {navGroups.filter(isGroupVisible).map((group) => {
           const visibleItems = group.items.filter(isItemVisible);
           if (visibleItems.length === 0) return null;
-
-          const groupHasActive = visibleItems.some(
-            (item) =>
-              location.pathname === item.url ||
-              (item.url !== "/admin/ops" && location.pathname.startsWith(item.url))
-          );
 
           return (
             <SidebarGroup key={group.label}>
