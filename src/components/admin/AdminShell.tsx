@@ -2,6 +2,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminMembership } from "@/hooks/useAdminMembership";
 import { NotificationBell } from "@/components/NotificationBell";
+import { AdminSearchDialog } from "@/components/admin/AdminSearchDialog";
 import { NavLink } from "@/components/NavLink";
 import logo from "@/assets/handled-home-logo.png";
 import {
@@ -26,7 +27,7 @@ import {
   Megaphone, TrendingUp,
   HelpCircle, FileText, BookOpen,
   Activity, Bell, MessageSquare, ToggleLeft,
-  Settings, Search,
+  Settings,
 } from "lucide-react";
 import type { AdminRole } from "@/hooks/useAdminMembership";
 
@@ -214,11 +215,7 @@ function AdminCommandBar() {
     <header className="h-12 bg-card border-b border-border flex items-center px-4 gap-3">
       <SidebarTrigger className="shrink-0" />
       <div className="flex-1 flex items-center gap-2">
-        <div className="hidden md:flex items-center gap-2 bg-muted/50 rounded-lg px-3 py-1.5 text-sm text-muted-foreground max-w-xs w-full cursor-pointer hover:bg-muted transition-colors">
-          <Search className="h-3.5 w-3.5" />
-          <span>Search customers, providers, jobs…</span>
-          <kbd className="ml-auto text-[10px] bg-background rounded px-1.5 py-0.5 border border-border font-mono">⌘K</kbd>
-        </div>
+        <AdminSearchDialog />
       </div>
       <NotificationBell />
     </header>
