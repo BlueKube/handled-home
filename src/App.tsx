@@ -117,6 +117,7 @@ import AdminNotificationHealth from "@/pages/admin/NotificationHealth";
 import AdminFeedback from "@/pages/admin/Feedback";
 import SharedNotifications from "@/pages/shared/Notifications";
 import ProviderQualityScore from "@/pages/provider/QualityScore";
+import AdminDispatcherQueues from "@/pages/admin/DispatcherQueues";
 
 const queryClient = new QueryClient();
 
@@ -236,6 +237,7 @@ const App = () => (
                 <Route path="/admin/feedback" element={<AdminFeedback />} />
                 <Route path="/admin/test-toggles" element={<AdminTestToggles />} />
                 <Route path="/admin/ops" element={<AdminOpsCockpit />} />
+                <Route path="/admin/ops/dispatch" element={<AdminDispatcherQueues />} />
                 <Route path="/admin/ops/zones" element={<AdminOpsZones />} />
                 <Route path="/admin/ops/zones/:zoneId" element={<AdminOpsZoneDetail />} />
                 <Route path="/admin/ops/service-days" element={<AdminOpsServiceDays />} />

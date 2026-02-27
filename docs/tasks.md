@@ -362,10 +362,10 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 - [x] **2G-A4** | P0 | M | Role-based nav and action gating — Control Room nav hidden for non-superusers, bottom tab bar hidden for admin (uses sidebar), admin routes use `AdminShell` instead of `AppLayout`
 
 ### Sprint 2G-B — Cockpit + Dispatcher Queues
-- [ ] **2G-B1** | P0 | XL | Upgrade Ops Cockpit to 4-column layout (Now/Money/Quality/Markets) with clickable drilldown tiles linking to pre-filtered views
-- [ ] **2G-B2** | P0 | L | Build dispatcher queue page (`/admin/ops/dispatch`) — At Risk Today, Missing Proof, Unassigned, Coverage Gaps, Customer Issues, Provider Incidents queues
-- [ ] **2G-B3** | P1 | L | Dispatcher actions — reassign job (server-validated), trigger backup flow, add internal notes, create/attach support ticket, mark needs-follow-up
-- [ ] **2G-B4** | P1 | M | Universal search (command bar) — search by customer email/phone, provider name, job ID, subscription ID across tables
+- [x] **2G-B1** | P0 | XL | Upgrade Ops Cockpit to 4-column layout (Now/Money/Quality/Markets) with clickable drilldown tiles, sparklines, alert highlighting, dispatcher link badge
+- [x] **2G-B2** | P0 | L | Build dispatcher queue page (`/admin/ops/dispatch`) — 6 tabbed queues (At Risk, Missing Proof, Unassigned, Coverage Gaps, Customer Issues, Provider Incidents) with counts, auto-refresh, job/issue rows
+- [x] **2G-B3** | P1 | L | Dispatcher actions dialog — add internal note, mark needs-follow-up (updates job status + job_events), create support ticket (pulls customer_id from job). Hover "Action" button on queue rows
+- [x] **2G-B4** | P1 | M | Universal search (⌘K command bar) — searches profiles (name/email/phone), provider_orgs (name), jobs (ID), subscriptions (ID). Grouped results with navigation. Wired into AdminShell command bar
 
 ### Sprint 2G-C — Governance + Explainability
 - [ ] **2G-C1** | P0 | L | Create `admin_audit_log` table + `log_admin_action` RPC — before/after state, reason, actor role. Integrate into all machine-changing writes

@@ -1,20 +1,106 @@
 import { useNavigate } from "react-router-dom";
 import { useOpsMetrics } from "@/hooks/useOpsMetrics";
-import { StatCard } from "@/components/StatCard";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { SparklineChart } from "@/components/SparklineChart";
 import {
-  ClipboardCheck, AlertTriangle, ShieldAlert, Camera,
-  Gauge, Calendar,
-  Bug, CreditCard as CreditCardIcon, RotateCcw,
-  DollarSign, UserX, XCircle, ShoppingBag,
-  Users, Briefcase, TrendingUp, Send,
+  AlertTriangle, Camera, Clock, ShieldAlert,
+  DollarSign, CreditCard, Pause, Gift,
+  Bug, RotateCcw, Timer, UserX,
+  Globe, Users, Briefcase, TrendingUp,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { SparklineChart } from "@/components/SparklineChart";
+import { cn } from "@/lib/utils";
 
 function formatCents(cents: number) {
   return "$" + (cents / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+/* ── Drilldown tile ── */
+interface DrillTileProps {
+  icon: React.ElementType;
+  label: string;
+  value: string | number;
+  href: string;
+  alert?: boolean;
+  sparkline?: number[];
+  sparkColor?: string;
+  sub?: string;
+  className?: string;
+}
+
+function DrillTile({ icon: Icon, label, value, href, alert, sparkline, sparkColor, sub, className }: DrillTileProps) {
+  const nav = useNavigate();
+  return (
+    <Card
+      variant="interactive"
+      className={cn(
+        "p-3 cursor-pointer hover:shadow-md transition-shadow group",
+        alert && "border-destructive/40 bg-destructive/5",
+        className,
+      )}
+      onClick={() => nav(href)}
+    >
+      <div className="flex items-start gap-2.5">
+        <div className={cn(
+          "flex h-8 w-8 items-center justify-center rounded-lg shrink-0",
+          alert ? "bg-destructive/10" : "bg-accent/10",
+        )}>
+          <Icon className={cn("h-4 w-4", alert ? "text-destructive" : "text-accent")} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs text-muted-foreground truncate">{label}</p>
+          <p className="text-lg font-bold tracking-tight leading-tight">{value}</p>
+          {sub && <p className="text-[10px] text-muted-foreground mt-0.5">{sub}</p>}
+        </div>
+      </div>
+      {sparkline && sparkline.length > 1 && (
+        <SparklineChart data={sparkline} color={sparkColor ?? "hsl(var(--accent))"} height={18} className="mt-2" />
+      )}
+    </Card>
+  );
+}
+
+/* ── Column header ── */
+function ColHeader({ title, badge }: { title: string; badge?: string }) {
+  return (
+    <div className="flex items-center gap-2 mb-3">
+      <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">{title}</h2>
+      {badge && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{badge}</Badge>}
+    </div>
+  );
+}
+
+/* ── Compact list tile (for tight days / hot zones) ── */
+function ListTile({ title, items, emptyLabel, href }: {
+  title: string;
+  items: { label: string; detail: string }[];
+  emptyLabel: string;
+  href: string;
+}) {
+  const nav = useNavigate();
+  return (
+    <Card
+      variant="interactive"
+      className="p-3 cursor-pointer hover:shadow-md transition-shadow"
+      onClick={() => nav(href)}
+    >
+      <p className="text-xs text-muted-foreground mb-2">{title}</p>
+      {items.length === 0 ? (
+        <p className="text-xs text-muted-foreground/60 italic">{emptyLabel}</p>
+      ) : (
+        <div className="space-y-1">
+          {items.map((item, i) => (
+            <div key={i} className="flex items-center justify-between text-xs">
+              <span className="font-medium truncate">{item.label}</span>
+              <span className="text-muted-foreground shrink-0 ml-2">{item.detail}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
 }
 
 export default function OpsCockpit() {
@@ -25,9 +111,13 @@ export default function OpsCockpit() {
     return (
       <div className="p-6 space-y-6">
         <h1 className="text-h2">Ops Cockpit</h1>
-        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 16 }).map((_, i) => (
-            <Skeleton key={i} className="h-24 rounded-xl" />
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="space-y-3">
+              {Array.from({ length: 4 }).map((_, j) => (
+                <Skeleton key={j} className="h-20 rounded-xl" />
+              ))}
+            </div>
           ))}
         </div>
       </div>
@@ -38,127 +128,165 @@ export default function OpsCockpit() {
     ? `Updated ${formatDistanceToNow(new Date(dataUpdatedAt), { addSuffix: true })}`
     : "";
 
+  const atRiskCount = m.jobsInIssue + m.proofExceptions;
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-5">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-h2 mb-1">Ops Cockpit</h1>
+          <h1 className="text-h2 mb-0.5">Ops Cockpit</h1>
           <p className="text-caption">{updatedLabel}</p>
         </div>
+        <Badge
+          variant="outline"
+          className="cursor-pointer text-xs"
+          onClick={() => nav("/admin/ops/dispatch")}
+        >
+          Open Dispatcher →
+        </Badge>
       </div>
 
-      {/* A) Today Execution */}
-      <section>
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Today Execution</h2>
-        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-          <div onClick={() => nav("/admin/ops/jobs?status=SCHEDULED")} className="cursor-pointer">
-            <StatCard icon={ClipboardCheck} label="Scheduled" value={m.jobsScheduledToday} />
-          </div>
-          <div onClick={() => nav("/admin/ops/jobs?status=COMPLETED")} className="cursor-pointer">
-            <StatCard icon={ClipboardCheck} label="Completed" value={`${m.jobsCompletedToday}/${m.jobsScheduledToday} (${m.completionPct}%)`} />
-          </div>
-          <div onClick={() => nav("/admin/ops/jobs?status=ISSUE")} className="cursor-pointer">
-            <StatCard icon={AlertTriangle} label="In Issue" value={m.jobsInIssue} />
-          </div>
-          <div onClick={() => nav("/admin/ops/jobs?proof=missing")} className="cursor-pointer">
-            <StatCard icon={Camera} label="Proof Exceptions" value={m.proofExceptions} />
+      {/* 4-column grid */}
+      <div className="grid gap-5 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
+        {/* ═══ Column 1: NOW (Reliability) ═══ */}
+        <div>
+          <ColHeader title="Now" badge={atRiskCount > 0 ? `${atRiskCount} alerts` : undefined} />
+          <div className="space-y-2.5">
+            <DrillTile
+              icon={Clock}
+              label="Jobs at Risk"
+              value={m.jobsInIssue}
+              href="/admin/ops/dispatch"
+              alert={m.jobsInIssue > 0}
+              sub={`${m.jobsCompletedToday}/${m.jobsScheduledToday} done (${m.completionPct}%)`}
+            />
+            <DrillTile
+              icon={Camera}
+              label="Missing Proof"
+              value={m.proofExceptions}
+              href="/admin/ops/jobs?proof=missing"
+              alert={m.proofExceptions > 0}
+            />
+            <DrillTile
+              icon={ShieldAlert}
+              label="Provider Incidents"
+              value={m.redoIntents}
+              href="/admin/ops/dispatch"
+              alert={m.redoIntents > 0}
+            />
+            <ListTile
+              title="Tight Zones (Top 3)"
+              items={m.tightDays.map(t => ({ label: t.zone_name, detail: `${t.pct}%` }))}
+              emptyLabel="No zones near capacity"
+              href="/admin/ops/zones"
+            />
           </div>
         </div>
-      </section>
 
-      {/* B) Capacity Pressure */}
-      <section>
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Capacity Pressure</h2>
-        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-          <div onClick={() => nav("/admin/ops/zones")} className="cursor-pointer">
-            <StatCard icon={Gauge} label="Zones >90%" value={m.zonesOverCapacity} />
+        {/* ═══ Column 2: MONEY (Profit Pulse) ═══ */}
+        <div>
+          <ColHeader title="Money" />
+          <div className="space-y-2.5">
+            <DrillTile
+              icon={DollarSign}
+              label="Paid Today"
+              value={formatCents(m.paidTodayCents)}
+              href="/admin/ops/billing"
+            />
+            <DrillTile
+              icon={CreditCard}
+              label="Credits Issued (7d)"
+              value={formatCents(m.creditsIssuedCents)}
+              href="/admin/ops/billing"
+              sparkline={m.trends.credits_issued_7d_cents}
+              sparkColor="hsl(var(--warning))"
+            />
+            <DrillTile
+              icon={Pause}
+              label="Past Due"
+              value={m.pastDueCount}
+              href="/admin/ops/billing?tab=past-due"
+              alert={m.pastDueCount > 0}
+              sparkline={m.trends.past_due_count}
+              sparkColor="hsl(var(--destructive))"
+            />
+            <DrillTile
+              icon={Gift}
+              label="Add-on Rev (7d)"
+              value={formatCents(m.addOnRevenue7dCents)}
+              href="/admin/ops/billing"
+            />
           </div>
-          <Card className="p-4 col-span-1 lg:col-span-3 cursor-pointer" onClick={() => nav("/admin/ops/zones")}>
-            <p className="text-sm text-muted-foreground mb-2">Tight Days (Top 3)</p>
-            {m.tightDays.length === 0 ? (
-              <p className="text-caption">No zones near capacity</p>
-            ) : (
-              <div className="space-y-1">
-                {m.tightDays.map((t, i) => (
-                  <div key={i} className="flex items-center justify-between text-sm">
-                    <span className="font-medium">{t.zone_name}</span>
-                    <span className="text-muted-foreground">{t.day} — {t.pct}%</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Card>
         </div>
-      </section>
 
-      {/* C) Quality (7d) */}
-      <section>
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Quality (7 Days)</h2>
-        <div className="grid gap-3 grid-cols-3">
-          <div onClick={() => nav("/admin/ops/jobs")} className="cursor-pointer">
-            <StatCard icon={Bug} label="Issue Rate" value={`${m.issueRate}%`} />
-            {m.trends.issue_rate_7d && <SparklineChart data={m.trends.issue_rate_7d} color="hsl(var(--destructive))" height={20} className="mt-1" />}
-          </div>
-          <div onClick={() => nav("/admin/ops/billing")} className="cursor-pointer">
-            <StatCard icon={CreditCardIcon} label="Credits Issued" value={formatCents(m.creditsIssuedCents)} />
-            {m.trends.credits_issued_7d_cents && <SparklineChart data={m.trends.credits_issued_7d_cents} color="hsl(var(--warning))" height={20} className="mt-1" />}
-          </div>
-          <div onClick={() => nav("/admin/ops/jobs")} className="cursor-pointer">
-            <StatCard icon={RotateCcw} label="Redo Intents" value={m.redoIntents} />
+        {/* ═══ Column 3: QUALITY (Service Health) ═══ */}
+        <div>
+          <ColHeader title="Quality" />
+          <div className="space-y-2.5">
+            <DrillTile
+              icon={Bug}
+              label="Issue Rate (7d)"
+              value={`${m.issueRate}%`}
+              href="/admin/ops/jobs"
+              alert={m.issueRate > 5}
+              sparkline={m.trends.issue_rate_7d}
+              sparkColor="hsl(var(--destructive))"
+            />
+            <DrillTile
+              icon={RotateCcw}
+              label="Redo Intents (7d)"
+              value={m.redoIntents}
+              href="/admin/ops/jobs"
+            />
+            <DrillTile
+              icon={AlertTriangle}
+              label="Failed Payments"
+              value={m.failedPaymentsToday}
+              href="/admin/ops/billing?tab=failed"
+              alert={m.failedPaymentsToday > 0}
+            />
+            <DrillTile
+              icon={Timer}
+              label="Zones >90% Cap"
+              value={m.zonesOverCapacity}
+              href="/admin/capacity"
+              alert={m.zonesOverCapacity > 0}
+            />
           </div>
         </div>
-      </section>
 
-      {/* D) Revenue & Billing */}
-      <section>
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Revenue & Billing</h2>
-        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-          <div onClick={() => nav("/admin/ops/billing")} className="cursor-pointer">
-            <StatCard icon={DollarSign} label="Paid Today" value={formatCents(m.paidTodayCents)} />
-          </div>
-          <div onClick={() => nav("/admin/ops/billing?tab=past-due")} className="cursor-pointer">
-            <StatCard icon={UserX} label="Past Due" value={m.pastDueCount} />
-            {m.trends.past_due_count && <SparklineChart data={m.trends.past_due_count} color="hsl(var(--destructive))" height={20} className="mt-1" />}
-          </div>
-          <div onClick={() => nav("/admin/ops/billing?tab=failed")} className="cursor-pointer">
-            <StatCard icon={XCircle} label="Failed Today" value={m.failedPaymentsToday} />
-          </div>
-          <div onClick={() => nav("/admin/ops/billing")} className="cursor-pointer">
-            <StatCard icon={ShoppingBag} label="Add-on Rev (7d)" value={formatCents(m.addOnRevenue7dCents)} />
+        {/* ═══ Column 4: MARKETS / GROWTH ═══ */}
+        <div>
+          <ColHeader title="Markets" />
+          <div className="space-y-2.5">
+            <DrillTile
+              icon={Users}
+              label="Referrals (7d)"
+              value={m.referralsActivated}
+              href="/admin/ops/growth"
+            />
+            <DrillTile
+              icon={Briefcase}
+              label="Provider Apps (7d)"
+              value={m.providerApplications}
+              href="/admin/ops/growth"
+            />
+            <DrillTile
+              icon={TrendingUp}
+              label="Invites Sent (7d)"
+              value={m.providerInvitesSent}
+              href="/admin/ops/growth"
+            />
+            <ListTile
+              title="Hot Zones (Top 3)"
+              items={m.hotZones.map(h => ({ label: h.zone_name, detail: `+${h.demand} new` }))}
+              emptyLabel="No demand spikes"
+              href="/admin/ops/growth"
+            />
           </div>
         </div>
-      </section>
-
-      {/* E) Growth (7d) */}
-      <section>
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Growth (7 Days)</h2>
-        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-          <div onClick={() => nav("/admin/ops/growth")} className="cursor-pointer">
-            <StatCard icon={Users} label="Referrals" value={m.referralsActivated} />
-          </div>
-          <div onClick={() => nav("/admin/ops/growth")} className="cursor-pointer">
-            <StatCard icon={Briefcase} label="Provider Apps" value={m.providerApplications} />
-          </div>
-          <div onClick={() => nav("/admin/ops/growth")} className="cursor-pointer">
-            <StatCard icon={Send} label="Invites Sent" value={m.providerInvitesSent} />
-          </div>
-          <Card className="p-4 cursor-pointer" onClick={() => nav("/admin/ops/growth")}>
-            <p className="text-sm text-muted-foreground mb-1">Hot Zones (Top 3)</p>
-            {m.hotZones.length === 0 ? (
-              <p className="text-caption">No demand spikes</p>
-            ) : (
-              <div className="space-y-1">
-                {m.hotZones.map((h, i) => (
-                  <div key={i} className="flex items-center justify-between text-sm">
-                    <span className="font-medium">{h.zone_name}</span>
-                    <span className="text-muted-foreground">+{h.demand} new</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Card>
-        </div>
-      </section>
+      </div>
     </div>
   );
 }
