@@ -290,6 +290,9 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 - [x] **2E-E01-02** | P0 | M | `useProviderRoutePlan` hook — fetches plan for today, exposes lock state, live stats fallback when unlocked.
 - [x] **2E-E01-03** | P0 | M | Dashboard enhancements — projected earnings banner, est. drive/work time stats, "Start Route" lock button. Route locked indicator.
 - [x] **2E-E01-04** | P0 | M | Jobs page — hide Optimize Route + reorder arrows when route is locked. Show "Locked" badge.
+- [x] **2E-E01-F1** | Fix | `lock_provider_route` RPC — projected earnings now sums actual completed + (historical avg × remaining stops) instead of double-counting.
+- [x] **2E-E01-F2** | Fix | `lock_provider_route` RPC — `total_stops` now counts all non-canceled jobs (including completed) for full-day picture.
+- [ ] **2E-E01-F3** | P2 | Deferred | `unlock_provider_route` admin RPC for mid-day schedule changes — not urgent for E-01.
 
 ### Sprint E-02 — Earnings & Payout Trust
 - [ ] **2E-E02-01** | P0 | M | Day/week/month tab filtering on Earnings page
