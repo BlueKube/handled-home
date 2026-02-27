@@ -247,9 +247,9 @@
 - [x] **2D-09** | P2 | M | Health score anxiety nudge on drop. `CUSTOMER_HEALTH_SCORE_DROP` notification template seeded. Nudge triggers via notification event bus when score drops.
 
 ### Sprint D4: Plan Self-Service (next-cycle default)
-- [ ] **2D-10** | P0 | L | Plan upgrade/downgrade — changes take effect next billing cycle by default. Downgrades always next-cycle. Optional "upgrade now" as future P2. Handles balance carries over (no proration).
-- [ ] **2D-11** | P0 | M | Cancellation flow — reason survey, retention offer (bonus handles), grace period.
-- [ ] **2D-12** | P1 | M | Subscription pause — 1-4 weeks, auto-resume, jobs skipped, handles frozen.
+- [x] **2D-10** | P0 | L | Plan upgrade/downgrade — `schedule_plan_change` RPC with auth check, direction detection (upgrade/downgrade/lateral), `cancel_pending_plan_change` RPC. `PlanChangePanel` component with pending change banner.
+- [x] **2D-11** | P0 | M | Cancellation flow — `cancel_subscription_with_reason` RPC with reason survey, 5-handle retention offer, `CancellationFlow` multi-step dialog (reason → offer → confirm).
+- [x] **2D-12** | P1 | M | Subscription pause — `pause_subscription` / `resume_subscription` RPCs (1-4 weeks), `PausePanel` component with frozen handles messaging.
 
 ### Sprint D5a: Photo Storage (early — unblocks proof + ratings)
 - [ ] **2D-13** | P0 | L | Wire storage bucket — create bucket, provider upload, signed URL display in customer gallery.
