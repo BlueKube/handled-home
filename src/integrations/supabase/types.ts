@@ -3635,6 +3635,53 @@ export type Database = {
           },
         ]
       }
+      provider_route_plans: {
+        Row: {
+          created_at: string
+          est_drive_minutes: number
+          est_work_minutes: number
+          id: string
+          locked_at: string | null
+          plan_date: string
+          projected_earnings_cents: number
+          provider_org_id: string
+          total_stops: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          est_drive_minutes?: number
+          est_work_minutes?: number
+          id?: string
+          locked_at?: string | null
+          plan_date: string
+          projected_earnings_cents?: number
+          provider_org_id: string
+          total_stops?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          est_drive_minutes?: number
+          est_work_minutes?: number
+          id?: string
+          locked_at?: string | null
+          plan_date?: string
+          projected_earnings_cents?: number
+          provider_org_id?: string
+          total_stops?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_route_plans_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       provider_sla_status: {
         Row: {
           category: string
@@ -6364,6 +6411,10 @@ export type Database = {
       is_weather_affected: {
         Args: { p_date: string; p_zone_id: string }
         Returns: boolean
+      }
+      lock_provider_route: {
+        Args: { p_date: string; p_provider_org_id: string }
+        Returns: Json
       }
       notify_waitlist_on_launch: { Args: { p_zone_id: string }; Returns: Json }
       override_referral_attribution: {
