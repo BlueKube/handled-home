@@ -15,12 +15,12 @@ export function useProviderRatingSummary(providerOrgId: string | undefined) {
     enabled: !!providerOrgId,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("provider_rating_summary" as any)
+        .from("provider_rating_summary")
         .select("*")
         .eq("provider_org_id", providerOrgId!)
         .maybeSingle();
       if (error) throw error;
-      return data as unknown as ProviderRatingSummary | null;
+      return data as ProviderRatingSummary | null;
     },
   });
 }
