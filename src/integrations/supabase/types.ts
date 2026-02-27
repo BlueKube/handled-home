@@ -2994,6 +2994,59 @@ export type Database = {
           },
         ]
       }
+      provider_feedback_rollups: {
+        Row: {
+          avg_rating: number | null
+          created_at: string
+          id: string
+          period_end: string
+          period_start: string
+          provider_org_id: string
+          published_at: string | null
+          review_count: number
+          summary_improve: string | null
+          summary_positive: string | null
+          theme_counts: Json | null
+          visibility_status: string
+        }
+        Insert: {
+          avg_rating?: number | null
+          created_at?: string
+          id?: string
+          period_end: string
+          period_start: string
+          provider_org_id: string
+          published_at?: string | null
+          review_count?: number
+          summary_improve?: string | null
+          summary_positive?: string | null
+          theme_counts?: Json | null
+          visibility_status?: string
+        }
+        Update: {
+          avg_rating?: number | null
+          created_at?: string
+          id?: string
+          period_end?: string
+          period_start?: string
+          provider_org_id?: string
+          published_at?: string | null
+          review_count?: number
+          summary_improve?: string | null
+          summary_positive?: string | null
+          theme_counts?: Json | null
+          visibility_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_feedback_rollups_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       provider_health_snapshots: {
         Row: {
           avg_time_on_site_minutes: number | null
@@ -3458,6 +3511,85 @@ export type Database = {
           },
           {
             foreignKeyName: "provider_payouts_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_quality_score_events: {
+        Row: {
+          change_reasons: Json | null
+          created_at: string
+          id: string
+          new_band: string
+          new_score: number
+          old_band: string | null
+          old_score: number | null
+          provider_org_id: string
+        }
+        Insert: {
+          change_reasons?: Json | null
+          created_at?: string
+          id?: string
+          new_band: string
+          new_score: number
+          old_band?: string | null
+          old_score?: number | null
+          provider_org_id: string
+        }
+        Update: {
+          change_reasons?: Json | null
+          created_at?: string
+          id?: string
+          new_band?: string
+          new_score?: number
+          old_band?: string | null
+          old_score?: number | null
+          provider_org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_quality_score_events_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_quality_score_snapshots: {
+        Row: {
+          band: string
+          components: Json
+          computed_at: string
+          id: string
+          provider_org_id: string
+          score: number
+          score_window_days: number
+        }
+        Insert: {
+          band?: string
+          components?: Json
+          computed_at?: string
+          id?: string
+          provider_org_id: string
+          score?: number
+          score_window_days?: number
+        }
+        Update: {
+          band?: string
+          components?: Json
+          computed_at?: string
+          id?: string
+          provider_org_id?: string
+          score?: number
+          score_window_days?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_quality_score_snapshots_provider_org_id_fkey"
             columns: ["provider_org_id"]
             isOneToOne: false
             referencedRelation: "provider_orgs"
@@ -5197,6 +5329,64 @@ export type Database = {
         }
         Relationships: []
       }
+      visit_feedback_quick: {
+        Row: {
+          category: string | null
+          created_at: string
+          customer_id: string
+          id: string
+          job_id: string
+          outcome: string
+          provider_org_id: string
+          tags: Json | null
+          zone_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          customer_id: string
+          id?: string
+          job_id: string
+          outcome?: string
+          provider_org_id: string
+          tags?: Json | null
+          zone_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          customer_id?: string
+          id?: string
+          job_id?: string
+          outcome?: string
+          provider_org_id?: string
+          tags?: Json | null
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visit_feedback_quick_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visit_feedback_quick_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visit_feedback_quick_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       visit_ratings: {
         Row: {
           comment: string | null
@@ -5247,6 +5437,76 @@ export type Database = {
             columns: ["provider_org_id"]
             isOneToOne: false
             referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      visit_ratings_private: {
+        Row: {
+          category: string | null
+          comment_private: string | null
+          comment_public_candidate: string | null
+          created_at: string
+          customer_id: string
+          id: string
+          job_id: string
+          provider_org_id: string
+          rating: number
+          scheduled_release_at: string
+          submitted_at: string | null
+          tags: Json | null
+          zone_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          comment_private?: string | null
+          comment_public_candidate?: string | null
+          created_at?: string
+          customer_id: string
+          id?: string
+          job_id: string
+          provider_org_id: string
+          rating: number
+          scheduled_release_at: string
+          submitted_at?: string | null
+          tags?: Json | null
+          zone_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          comment_private?: string | null
+          comment_public_candidate?: string | null
+          created_at?: string
+          customer_id?: string
+          id?: string
+          job_id?: string
+          provider_org_id?: string
+          rating?: number
+          scheduled_release_at?: string
+          submitted_at?: string | null
+          tags?: Json | null
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visit_ratings_private_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visit_ratings_private_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visit_ratings_private_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
             referencedColumns: ["id"]
           },
         ]
@@ -6260,7 +6520,21 @@ export type Database = {
             Returns: Json
           }
       start_job: { Args: { p_job_id: string }; Returns: Json }
+      submit_private_review: {
+        Args: {
+          p_comment_private?: string
+          p_comment_public_candidate?: string
+          p_job_id: string
+          p_rating: number
+          p_tags?: Json
+        }
+        Returns: Json
+      }
       submit_provider_onboarding: { Args: { p_org_id: string }; Returns: Json }
+      submit_quick_feedback: {
+        Args: { p_job_id: string; p_outcome: string; p_tags?: Json }
+        Returns: Json
+      }
       transition_eligible_earnings: { Args: never; Returns: Json }
       validate_provider_invite: { Args: { p_code: string }; Returns: Json }
       void_referral_reward: {
