@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useCustomerVisitDetail } from "@/hooks/useCustomerVisitDetail";
 import { useVisitRating } from "@/hooks/useVisitRating";
@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PhotoGallery } from "@/components/customer/PhotoGallery";
+import { BeforeAfterSlider } from "@/components/customer/BeforeAfterSlider";
 import { ReportIssueSheet } from "@/components/customer/ReportIssueSheet";
 import { ShareCardSheet } from "@/components/customer/ShareCardSheet";
 import { VisitRatingCard } from "@/components/customer/VisitRatingCard";
@@ -19,6 +20,12 @@ export default function CustomerVisitDetail() {
   const { rating, submitRating } = useVisitRating(jobId);
   const [issueSheetOpen, setIssueSheetOpen] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
+
+  // Find before/after pair for comparison
+  const photos = data?.photos ?? [];
+  const beforePhoto = useMemo(() => photos.find((p) => p.slot_key?.toLowerCase().includes("before")), [photos]);
+  const afterPhoto = useMemo(() => photos.find((p) => p.slot_key?.toLowerCase().includes("after")), [photos]);
+  const hasBeforeAfter = !!(beforePhoto?.signedUrl && afterPhoto?.signedUrl);
 
   if (isLoading) {
     return (
@@ -42,7 +49,8 @@ export default function CustomerVisitDetail() {
     );
   }
 
-  const { job, skus, photos, checklistHighlights, issue, timeOnSiteMinutes } = data;
+  const { job, skus, checklistHighlights, issue, timeOnSiteMinutes } = data;
+
   const skuSummary = skus.map((s) => s.sku_name_snapshot ?? "Service").join(", ") || "Visit";
   const visitDate = job.completed_at
     ? format(new Date(job.completed_at), "EEEE, MMM d, yyyy")
@@ -106,7 +114,17 @@ export default function CustomerVisitDetail() {
         <PhotoGallery photos={photos} />
       </Card>
 
-      {/* 8.4 Work Summary */}
+      {/* Before/After Comparison */}
+      {hasBeforeAfter && (
+        <Card className="p-4 space-y-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Before &amp; After</h3>
+          <BeforeAfterSlider
+            beforeUrl={beforePhoto!.signedUrl!}
+            afterUrl={afterPhoto!.signedUrl!}
+          />
+        </Card>
+      )}
+
       <Card className="p-4 space-y-3">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Work Summary</h3>
 

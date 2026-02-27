@@ -252,11 +252,11 @@
 - [x] **2D-12** | P1 | M | Subscription pause — `pause_subscription` / `resume_subscription` RPCs (1-4 weeks), `PausePanel` component with frozen handles messaging.
 
 ### Sprint D5a: Photo Storage (early — unblocks proof + ratings)
-- [ ] **2D-13** | P0 | L | Wire storage bucket — create bucket, provider upload, signed URL display in customer gallery.
+- [x] **2D-13** | P0 | L | Wire storage bucket — `job-photos` bucket already existed with RLS policies for provider upload (authenticated INSERT), customer/provider/admin SELECT via job ownership joins, signed URL display in customer gallery via `useCustomerVisitDetail`, provider upload via `useJobActions.uploadPhoto` with canvas compression. Validation via `validate-photo-quality` edge function.
 
 ### Sprint D5b: Photo Proof UI (after D2/D3 — ratings insights inform proof design)
-- [ ] **2D-14** | P1 | M | Before/after comparison view — side-by-side or swipe slider for customer visit detail.
-- [ ] **2D-15** | P2 | M | Photo timeline — chronological property photo history across all visits.
+- [x] **2D-14** | P1 | M | Before/after comparison view — `BeforeAfterSlider` component with pointer-drag slider, auto-detects `before`/`after` slot_key pairs from job photos. Integrated into `VisitDetail` page between photo gallery and work summary.
+- [x] **2D-15** | P2 | M | Photo timeline — `usePropertyPhotoTimeline` hook fetches all UPLOADED photos across COMPLETED jobs for a property (limit 50), groups by visit date with SKU labels. `PhotoTimeline` component with grid thumbnails, full-screen viewer sheet. New `/customer/photos` route.
 
 ### Sprint D6: Contextual Add-ons
 - [ ] **2D-19** | P1 | L | Add-on catalog — SKUs flagged `is_addon`, contextual surfacing (season, weather, time-since-last), payable in $ or handles. "Need extra help?" card with 3-6 suggestions. **Gated:** only surfaced after first completed visit or user-initiated browse.
