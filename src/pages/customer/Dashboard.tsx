@@ -8,6 +8,7 @@ import { useRoutine } from "@/hooks/useRoutine";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
 import { useCustomerJobs } from "@/hooks/useCustomerJobs";
 import { useFourWeekPreview } from "@/hooks/useFourWeekPreview";
+import { useHandleBalance, usePlanHandlesConfig } from "@/hooks/useHandles";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import { NextVisitCard } from "@/components/customer/NextVisitCard";
 import { WeekTimeline } from "@/components/customer/WeekTimeline";
 import { CrossPollinationCard } from "@/components/customer/CrossPollinationCard";
 import { CustomerNotificationBanners } from "@/components/customer/NotificationBanners";
+import { HandleBalanceBar } from "@/components/customer/HandleBalanceBar";
 
 function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -38,6 +40,8 @@ export default function CustomerDashboard() {
   const { data: routineData } = useRoutine(property?.id, subscription?.plan_id);
   const { data: upcomingJobs, isLoading: jobsLoading } = useCustomerJobs("upcoming");
   const { data: completedJobs } = useCustomerJobs("completed");
+  const { data: handleBalance } = useHandleBalance();
+  const { data: planHandles } = usePlanHandlesConfig(subscription?.plan_id);
   const navigate = useNavigate();
   const [nudgeDismissed, setNudgeDismissed] = useState(isNudgeDismissed);
 
@@ -141,6 +145,14 @@ export default function CustomerDashboard() {
 
       {/* Next Visit Card */}
       <NextVisitCard job={nextJob} isLoading={jobsLoading} />
+
+      {/* Handles Balance */}
+      {handleBalance != null && planHandles && (
+        <HandleBalanceBar
+          balance={handleBalance}
+          perCycle={planHandles.handles_per_cycle}
+        />
+      )}
 
       {/* Stats Row */}
       <div className="grid gap-4 md:grid-cols-2">

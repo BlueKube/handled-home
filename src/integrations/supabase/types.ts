@@ -1007,6 +1007,56 @@ export type Database = {
           },
         ]
       }
+      handle_transactions: {
+        Row: {
+          amount: number
+          balance_after: number
+          created_at: string
+          customer_id: string
+          expires_at: string | null
+          id: string
+          metadata: Json | null
+          reference_id: string | null
+          reference_type: string | null
+          subscription_id: string
+          txn_type: string
+        }
+        Insert: {
+          amount: number
+          balance_after?: number
+          created_at?: string
+          customer_id: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json | null
+          reference_id?: string | null
+          reference_type?: string | null
+          subscription_id: string
+          txn_type: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number
+          created_at?: string
+          customer_id?: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json | null
+          reference_id?: string | null
+          reference_type?: string | null
+          subscription_id?: string
+          txn_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "handle_transactions_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       holiday_calendar: {
         Row: {
           created_at: string
@@ -2170,6 +2220,44 @@ export type Database = {
             foreignKeyName: "plan_entitlement_versions_plan_id_fkey"
             columns: ["plan_id"]
             isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_handles: {
+        Row: {
+          created_at: string
+          handles_per_cycle: number
+          id: string
+          plan_id: string
+          rollover_cap: number
+          rollover_expiry_days: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          handles_per_cycle?: number
+          id?: string
+          plan_id: string
+          rollover_cap?: number
+          rollover_expiry_days?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          handles_per_cycle?: number
+          id?: string
+          plan_id?: string
+          rollover_cap?: number
+          rollover_expiry_days?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_handles_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: true
             referencedRelation: "plans"
             referencedColumns: ["id"]
           },
@@ -4065,6 +4153,7 @@ export type Database = {
           edge_case_notes: string | null
           exclusions: string[]
           fulfillment_mode: Database["public"]["Enums"]["fulfillment_mode"]
+          handle_cost: number
           id: string
           image_url: string | null
           inclusions: string[]
@@ -4088,6 +4177,7 @@ export type Database = {
           edge_case_notes?: string | null
           exclusions?: string[]
           fulfillment_mode?: Database["public"]["Enums"]["fulfillment_mode"]
+          handle_cost?: number
           id?: string
           image_url?: string | null
           inclusions?: string[]
@@ -4111,6 +4201,7 @@ export type Database = {
           edge_case_notes?: string | null
           exclusions?: string[]
           fulfillment_mode?: Database["public"]["Enums"]["fulfillment_mode"]
+          handle_cost?: number
           id?: string
           image_url?: string | null
           inclusions?: string[]
@@ -4251,6 +4342,7 @@ export type Database = {
           dunning_started_at: string | null
           dunning_step: number
           entitlement_version_id: string | null
+          handles_balance: number
           id: string
           last_dunning_at: string | null
           next_billing_at: string | null
@@ -4282,6 +4374,7 @@ export type Database = {
           dunning_started_at?: string | null
           dunning_step?: number
           entitlement_version_id?: string | null
+          handles_balance?: number
           id?: string
           last_dunning_at?: string | null
           next_billing_at?: string | null
@@ -4313,6 +4406,7 @@ export type Database = {
           dunning_started_at?: string | null
           dunning_step?: number
           entitlement_version_id?: string | null
+          handles_balance?: number
           id?: string
           last_dunning_at?: string | null
           next_billing_at?: string | null
@@ -5592,6 +5686,7 @@ export type Database = {
         }
         Returns: Json
       }
+      expire_stale_handles: { Args: never; Returns: Json }
       generate_subscription_invoice: {
         Args: { p_subscription_id: string }
         Returns: Json
@@ -5599,6 +5694,10 @@ export type Database = {
       get_day_order: {
         Args: { p_default_day: string; p_strategy: string }
         Returns: string[]
+      }
+      get_handle_balance: {
+        Args: { p_subscription_id: string }
+        Returns: number
       }
       get_share_card_public: { Args: { p_share_code: string }; Returns: Json }
       get_waitlist_summary: {
@@ -5610,6 +5709,14 @@ export type Database = {
           zone_id: string
           zone_name: string
         }[]
+      }
+      grant_cycle_handles: {
+        Args: {
+          p_customer_id: string
+          p_idempotency_key?: string
+          p_subscription_id: string
+        }
+        Returns: Json
       }
       has_role: {
         Args: {
@@ -5636,6 +5743,10 @@ export type Database = {
           p_referral_id: string
         }
         Returns: Json
+      }
+      recalc_handles_balance: {
+        Args: { p_subscription_id: string }
+        Returns: number
       }
       record_autopilot_action: {
         Args: {
@@ -5667,6 +5778,16 @@ export type Database = {
         Args: {
           p_milestone: Database["public"]["Enums"]["referral_milestone_type"]
           p_referral_id: string
+        }
+        Returns: Json
+      }
+      refund_handles: {
+        Args: {
+          p_amount: number
+          p_customer_id: string
+          p_original_expires_at?: string
+          p_reference_id?: string
+          p_subscription_id: string
         }
         Returns: Json
       }
@@ -5721,6 +5842,15 @@ export type Database = {
       run_payout_batch: { Args: { p_payout_run_id: string }; Returns: Json }
       select_alternative_service_day: {
         Args: { p_assignment_id: string; p_offer_id: string }
+        Returns: Json
+      }
+      spend_handles: {
+        Args: {
+          p_amount: number
+          p_customer_id: string
+          p_reference_id?: string
+          p_subscription_id: string
+        }
         Returns: Json
       }
       start_job: { Args: { p_job_id: string }; Returns: Json }

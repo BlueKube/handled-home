@@ -201,9 +201,9 @@
 - [x] **2D-00pre** | P0 | S | Plan card + handles explanation prototype — design plan tier cards (Essential/Plus/Premium) with handles messaging ("Most homes use 10-13 handles/month", "Swap services anytime"). No backend, UX validation only. Components: `PlanCard` (redesigned with handles callout + tier highlights), `HandlesExplainer` (3-point education card), Plans page (membership-first copy), PlanDetail page (handles allowance + rollover cap + change policy).
 
 ### Sprint D0: Handles v0 (allowance + spend + expire + rollover)
-- [ ] **2D-00a** | P0 | L | Handles v0 schema — `plan_handles` (handles_per_cycle, rollover_cap, rollover_expiry_days per plan), `handle_transactions` ledger (type: grant/spend/expire/rollover/refund, amount, balance_after, reference columns). `handles_balance` on subscription as **cache only**, reconcilable from ledger via `recalc_handles_balance()` RPC. RPCs: `spend_handles` (at booking/confirmation), `grant_cycle_handles`, `expire_stale_handles`, `refund_handles` (preserves original expiry). No earn, no proration math.
-- [ ] **2D-00b** | P0 | M | Handles UI components — usage bar (Used/Remaining), per-SKU handle cost display ("Costs 3 handles"), handle balance on customer dashboard. All read from `get_handle_balance` RPC.
-- [ ] **2D-00c** | P0 | S | Plan tier handle configuration — admin sets handles_per_cycle, rollover_cap, rollover_expiry_days per plan. Display on plan cards.
+- [x] **2D-00a** | P0 | L | Handles v0 schema — `plan_handles` (handles_per_cycle, rollover_cap, rollover_expiry_days per plan), `handle_transactions` ledger (type: grant/spend/expire/rollover/refund, amount, balance_after, reference columns). `handles_balance` on subscription as **cache only**, reconcilable from ledger via `recalc_handles_balance()` RPC. RPCs: `spend_handles` (at booking/confirmation), `grant_cycle_handles`, `expire_stale_handles`, `refund_handles` (preserves original expiry). No earn, no proration math.
+- [x] **2D-00b** | P0 | M | Handles UI components — usage bar (Used/Remaining), per-SKU handle cost display ("Costs 3 handles"), handle balance on customer dashboard. All read from `get_handle_balance` RPC.
+- [x] **2D-00c** | P0 | S | Plan tier handle configuration — admin sets handles_per_cycle, rollover_cap, rollover_expiry_days per plan. Display on plan cards.
 
 ### Sprint D1: Onboarding Wizard (membership-first)
 - [ ] **2D-01** | P0 | XL | Guided onboarding — property → zip/zone check (waitlist if unavailable) → plan selection (membership-first, handles explained simply) → subscribe → service day accept → build routine → confirmation. Progress bar, back nav.
@@ -411,14 +411,14 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2A — Placeholders & Core | 16 | 16 | 100% |
 | 2B — Automation Engine | 31 | 31 | 100% |
 | 2C — Notifications | 44 | 44 | 100% |
-| 2D — Customer Polish | 28 | 1 | 4% |
+| 2D — Customer Polish | 28 | 4 | 14% |
 | 2E — Provider Polish | 13 | 0 | 0% |
 | 2F — Growth Engine | 13 | 0 | 0% |
 | 2G — Admin Intelligence | 11 | 0 | 0% |
 | 2H — Platform Hardening | 15 | 0 | 0% |
 | 2I — Future Moats | 9 | 0 | 0% |
-| **TOTAL** | **180** | **92** | **51%** |
+| **TOTAL** | **180** | **95** | **53%** |
 
 ---
 
-*Last updated: 2026-02-27 — Round 2D revised: membership-first + handles currency + contextual add-ons + Home Assistant scaffolding + scheduling UX moved up. D5 split (storage early, proof UI after ratings). Strategy doc at docs/round-2d-strategy.md.*
+*Last updated: 2026-02-27 — Sprint D0 complete: handles v0 schema, RPCs (spend/grant/expire/refund), UI components, admin config.*
