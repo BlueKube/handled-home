@@ -60,24 +60,45 @@ export function useOnboardingProgress() {
             current_step: updates.current_step,
             completed_steps: updates.completed_steps ?? existing.completed_steps,
             selected_plan_id: updates.selected_plan_id !== undefined ? updates.selected_plan_id : existing.selected_plan_id,
-            metadata: updates.metadata ?? existing.metadata,
-          } as any)
+            metadata: (updates.metadata ?? existing.metadata) as Record<string, unknown> as any,
+          })
           .eq("id", existing.id);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from("customer_onboarding_progress")
-          .insert({
+          .insert([{
             user_id: user.id,
             current_step: updates.current_step,
             completed_steps: updates.completed_steps ?? [],
             selected_plan_id: updates.selected_plan_id ?? null,
-            metadata: updates.metadata ?? {},
-          } as any);
+            metadata: (updates.metadata ?? {}) as Record<string, unknown> as any,
+          }]);
         if (error) throw error;
       }
     },
-    onSuccess: () => {
+    // D1-F5: Optimistic cache update to prevent flash of stale data
+    onMutate: async (updates) => {
+      await qc.cancelQueries({ queryKey: ["onboarding_progress", user?.id] });
+      const prev = qc.getQueryData<OnboardingProgress | null>(["onboarding_progress", user?.id]);
+      qc.setQueryData<OnboardingProgress | null>(["onboarding_progress", user?.id], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          current_step: updates.current_step,
+          completed_steps: (updates.completed_steps ?? old.completed_steps) as OnboardingStep[],
+          selected_plan_id: updates.selected_plan_id !== undefined ? updates.selected_plan_id : old.selected_plan_id,
+          metadata: (updates.metadata ?? old.metadata) as Record<string, unknown>,
+        };
+      });
+      return { prev };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.prev !== undefined) {
+        qc.setQueryData(["onboarding_progress", user?.id], context.prev);
+      }
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ["onboarding_progress", user?.id] });
     },
   });

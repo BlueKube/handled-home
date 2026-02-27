@@ -221,6 +221,17 @@
 - [x] **2D-02** | P0 | M | Zone availability check — zip lookup during onboarding, waitlist signup if no zone.
 - [x] **2D-03** | P1 | M | Onboarding completion tracking — step tracking via `customer_onboarding_progress` table, persistent step state, auto-resume on return.
 
+### Sprint D1 Review Fixes
+- [x] **D1-F1** | CRITICAL | Wizard redirect only fires when onboarding is complete (currentStep=complete + routine completed), not just when subscription exists
+- [x] **D1-F2** | HIGH | checkout=success polling — verifying loading state, refetchInterval on subscription query, auto-advance when sub appears
+- [x] **D1-F3** | HIGH | CustomerPropertyGate only redirects truly new users (no property AND no sub history); churned customers access their account
+- [x] **D1-F4** | MEDIUM | Steps 5-6 complete inline instead of navigating away from wizard
+- [x] **D1-F5** | MEDIUM | Optimistic cache update in useOnboardingProgress prevents selectedPlanId null flash
+- [x] **D1-F6** | MEDIUM | Removed unnecessary `as any` casts — uses proper type coercion for metadata Json field
+- [x] **D1-F7** | MEDIUM | Added FK on user_id → auth.users(id) ON DELETE CASCADE
+- [x] **D1-F8** | LOW | Removed misleading customer_id param from create-checkout-session call
+- [x] **D1-F9** | LOW | Added validation trigger for current_step column values
+
 ### Sprint D1.5: Scheduling UX Polish (moved up — informs onboarding)
 - [ ] **2D-23** | P1 | M | System-recommended scheduling frame — service day assignment shows "Best for efficiency" default, optional "Try to align days" preference toggle with tradeoff messaging. When alignment isn't possible, show one-sentence explanation ("All aligned days are full — we picked your next-best option"). Embedded in onboarding service-day step.
 - [ ] **2D-24** | P2 | S | "Must be home" toggle — per-visit or per-category, shows available windows when enabled, notes potential handle cost increase.
@@ -422,14 +433,14 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2A — Placeholders & Core | 16 | 16 | 100% |
 | 2B — Automation Engine | 31 | 31 | 100% |
 | 2C — Notifications | 44 | 44 | 100% |
-| 2D — Customer Polish | 28 | 4 | 14% |
+| 2D — Customer Polish | 28 | 13 | 46% |
 | 2E — Provider Polish | 13 | 0 | 0% |
 | 2F — Growth Engine | 13 | 0 | 0% |
 | 2G — Admin Intelligence | 11 | 0 | 0% |
 | 2H — Platform Hardening | 15 | 0 | 0% |
 | 2I — Future Moats | 9 | 0 | 0% |
-| **TOTAL** | **180** | **95** | **53%** |
+| **TOTAL** | **180** | **104** | **58%** |
 
 ---
 
-*Last updated: 2026-02-27 — Sprint D0 complete: handles v0 schema, RPCs (spend/grant/expire/refund), UI components, admin config.*
+*Last updated: 2026-02-27 — Sprint D1 review fixes complete: F1-F9 all resolved.*
