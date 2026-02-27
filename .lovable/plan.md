@@ -1,71 +1,73 @@
 
 
-# Round 2E — Revised Scope & Implementation Plan
+## Round 2G — Admin Controls / Ops Cockpit
 
-## Current State
-The existing 2E section in `tasks.md` (lines 283-307) has 13 old tasks that don't align with the expanded PRD. Much of the old 2E scope is already partially built:
-- **Job status flow** (2E-01/02/03): Already exists in `JobDetail.tsx` with EN_ROUTE → ARRIVED → IN_PROGRESS → COMPLETED + arrival/departure timestamps + customer notifications via Round 2C
-- **Earnings dashboard** (2E-04/05/06): Already exists in `Earnings.tsx` with per-job breakdowns, modifiers, holds, payouts
-- **Quality Score** (2E-11/12/13): Already built as D8 with rolling 28-day score, bands, weekly rollups
+This replaces the old "Admin Intelligence" round with the expanded 3-document spec covering admin sub-roles, pricing/payout engine, governance/audit, dispatcher workstation, decision traces, and SOP playbooks.
 
-## What the Expanded 2E PRD Adds (Net-New Work)
+### Step 0: Copy spec files to docs/2G/
 
-Based on the expanded PRD (`docs/prds/Expanded Round 2E.md`) cross-referenced with existing code:
+Copy the three uploaded markdown files into `docs/2G/`:
+- `docs/2G/00-overview-and-ux.md`
+- `docs/2G/01-pricing-and-payout-engine.md`
+- `docs/2G/02-governance-audit-and-implementation.md`
 
-### E0 — Provider Day Command Center (partially built)
-- **E0-01**: "Today" screen enhancements — projected earnings today, expected drive time, "Start Route" lock button. Dashboard exists but lacks earnings projection and route lock.
-- **E0-02**: Job detail already has full status flow + proof + timestamps. **Already done.**
-- **E0-03**: Customer coarse state notifications. **Already done in Round 2C.**
+### Updated tasks.md — Round 2G replacement
 
-### E1 — Earnings & Payout Trust (partially built)
-- **E1-01**: Day/week/month tab filtering on earnings. Currently flat list — needs time-period tabs.
-- **E1-02**: "At current pace" monthly projection based on scheduled jobs. **Net new.**
-- **E1-03**: Modifier transparency (bonus/hold/rush). Hold reasons exist, but modifier breakdown could be enhanced.
+Replace the existing Round 2G section with the following sprints, following the implementation order from spec doc 02 section 10:
 
-### E2 — Quality & Tier (partially built)
-- **E2-01**: Quality Score page exists at `/provider/quality`. **Already done.**
-- **E2-02**: Tier system tied to assignment priority + hold periods. **Net new** — needs `provider_tier_history` table and tier logic.
-- **E2-03**: Coaching checklist + SKU training gates. **Net new.**
+---
 
-### E3 — Availability + Coverage (net new)
-- **E3-01**: `provider_availability_blocks` table + calendar UI for vacation/days off
-- **E3-02**: Assignment engine respects blocks (modify `auto_assign_job`)
-- **E3-03**: Lead-time warnings + coverage gap detection
+### Sprint 2G-A — Access Control + Admin Shell
 
-### E4 — BYOC / Founding Partner (partially built)
-- **E4-01**: Invite flow exists at `/provider/invite-customers`. Needs `byoc_attributions` table + funnel tracking.
-- **E4-02**: Attribution + $10/week bonus computation. **Net new** — `provider_incentive_config`, weekly bonus RPC.
-- **E4-03**: Reassignment rules + customer "request provider change". **Net new.**
+| ID | Pri | Size | Task |
+|----|-----|------|------|
+| 2G-A1 | P0 | L | Create `admin_memberships` table (user_id PK, admin_role enum, is_active) + helper SQL functions (`is_admin`, `admin_role`, `has_admin_role`) + RLS policies scoped by sub-role |
+| 2G-A2 | P0 | M | Gate all `/admin/*` routes by `admin_memberships` — create `useAdminMembership` hook, update `ProtectedRoute` to check membership |
+| 2G-A3 | P0 | L | Build `AdminShell` layout — desktop sidebar with grouped nav (Cockpit, Execution, People, Markets, Catalog, Money, Growth, Support, Governance, Control Room, Playbooks), top command bar placeholder, responsive (sidebar on lg+, mobile nav otherwise) |
+| 2G-A4 | P0 | M | Role-based nav and action gating — hide Control Room nav for non-superusers, disable financial actions for dispatchers, wire UI locks to `useAdminMembership` |
 
-### E5 — Pricing/Pay Engine Admin Controls (net new, P2)
-- Deferred per PRD recommendation ("P1-P2 depending how deep")
+### Sprint 2G-B — Cockpit + Dispatcher Queues
 
-## Recommended Sprint Order
+| ID | Pri | Size | Task |
+|----|-----|------|------|
+| 2G-B1 | P0 | XL | Upgrade Ops Cockpit to 4-column layout (Now/Money/Quality/Markets) with clickable drilldown tiles linking to pre-filtered views |
+| 2G-B2 | P0 | L | Build dispatcher queue page (`/admin/ops/dispatch`) — At Risk Today, Missing Proof, Unassigned, Coverage Gaps, Customer Issues, Provider Incidents queues |
+| 2G-B3 | P1 | L | Dispatcher actions — reassign job (server-validated), trigger backup flow, add internal notes, create/attach support ticket, mark needs-follow-up |
+| 2G-B4 | P1 | M | Universal search (command bar) — search by customer email/phone, provider name, job ID, subscription ID across tables |
 
-| Sprint | Scope | Complexity |
-|--------|-------|-----------|
-| **E-01** | Provider Day Command Center enhancements (projected earnings, drive time, route lock) | M |
-| **E-02** | Earnings trust polish (time-period tabs, monthly projection, modifier detail) | M |
-| **E-03** | Availability + Coverage (blocks table, calendar UI, assignment integration) | L |
-| **E-04** | BYOC / Founding Partner (attribution table, bonus computation, funnel dashboard) | XL |
-| **E-05** | Tier system + training gates (tier history, assignment priority modifiers, SKU gates) | L |
+### Sprint 2G-C — Governance + Explainability
 
-## Proposed First Sprint: E-01 (Provider Day Command Center)
+| ID | Pri | Size | Task |
+|----|-----|------|------|
+| 2G-C1 | P0 | L | Create `admin_audit_log` table + `log_admin_action` RPC — before/after state, reason, actor role. Integrate into all machine-changing writes |
+| 2G-C2 | P0 | L | Create `decision_traces` table + reusable `DecisionTraceCard` component — show on job detail, service day detail, provider org detail, payout/hold detail |
+| 2G-C3 | P1 | M | Wire `auto_assign_job` and other RPCs to emit decision trace records (inputs, candidates, scoring, outcome) |
 
-### What gets built
-1. **Database**: `provider_route_plans` table (provider_org_id, date, locked_at, total_stops, est_drive_minutes, est_work_minutes, projected_earnings_cents)
-2. **RPC**: `lock_provider_route(p_provider_org_id, p_date)` — freezes route order, computes projections
-3. **Dashboard enhancements**: Add projected earnings today, estimated drive/work time, "Start Route" button that locks the route
-4. **Route lock behavior**: Once locked, reorder arrows disabled, optimize button hidden
+### Sprint 2G-D — Control Room (Superuser-Only)
 
-### Files changed
-- New migration for `provider_route_plans` + `lock_provider_route` RPC
-- New/updated hook: enhance `useProviderJobs` or create `useProviderRoutePlan`
-- Update `src/pages/provider/Dashboard.tsx` — add projected earnings + drive time stats
-- Update `src/pages/provider/Jobs.tsx` — add "Start Route" lock button, disable reorder when locked
-- Update `docs/tasks.md` — replace old 2E section with new task list
+| ID | Pri | Size | Task |
+|----|-----|------|------|
+| 2G-D1 | P0 | XL | Zone pricing engine — `sku_pricing_base`, `sku_pricing_zone_overrides` tables with versioning. Admin UI for zone multipliers, bulk set, copy from zone, schedule effective dates, rollback. Superuser-only write RLS |
+| 2G-D2 | P0 | XL | Provider payout engine — `provider_payout_base`, `provider_payout_zone_overrides`, `provider_org_contracts` (partner_flat / partner_time_guarded / contractor_time_based), `payout_overtime_rules` tables. Admin UI for payout tables, contract types, overtime params. Superuser-only write RLS |
+| 2G-D3 | P1 | L | `admin_change_requests` table + UI — non-superusers can submit change requests for pricing/payout/incentives/algorithm. Superuser reviews and applies |
+| 2G-D4 | P1 | M | Change log + rollback UI — view all versioned config changes with rollback action (creates new version copying previous) |
 
-### Documentation updates (all sprints)
-- Replace `docs/tasks.md` lines 283-307 with the new 2E task structure
-- Update progress table
+### Sprint 2G-E — SOPs + Polish
+
+| ID | Pri | Size | Task |
+|----|-----|------|------|
+| 2G-E1 | P1 | M | Create `/admin/playbooks` page — render SOP markdown with role filtering (dispatcher/ops/growth/superuser playbooks) |
+| 2G-E2 | P1 | M | Write core SOP content — end-of-day reconciliation, missing proof handling, no-show escalation, provider probation ladder, zone pause workflow, emergency pricing override |
+| 2G-E3 | P2 | M | Dense table polish — compact row height, sticky headers, hover actions, keyboard shortcuts (J/K/Enter/A/E/N) for dispatcher queues |
+| 2G-E4 | P2 | S | Saved views per role — dispatcher default queue filters persisted to localStorage |
+
+---
+
+### Technical notes
+
+- **No new auth system** — admin sub-roles are implemented as a new `admin_memberships` table within the existing `role = admin` app-auth layer. The existing `ProtectedRoute` already gates by `admin` role; sub-role checks add a second layer.
+- **Existing admin pages** remain functional — the new `AdminShell` wraps them with improved navigation grouping. Existing routes (`/admin/ops`, `/admin/zones`, etc.) keep working.
+- **Pricing/payout tables** are append-only versioned configs — rollback creates a new version, never deletes.
+- **All audit/pricing/payout writes** go through RPCs with `SECURITY DEFINER` + `has_admin_role(auth.uid(), 'superuser')` checks.
+- **Decision traces** are read-only for all admin sub-roles, written by system RPCs only.
 
