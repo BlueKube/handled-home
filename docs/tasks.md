@@ -242,9 +242,9 @@
 - [x] **2D-06** | P2 | M | Smart rating prompts — suppress on first visit or if issue already reported. `useVisitRating` hook checks completed job count (≤1 = first visit) and customer_issues existence. Sets `is_suppressed = true` with `suppression_reason` ('first_visit' or 'issue_reported') on the visit_ratings row. Suppressed ratings excluded from `provider_rating_summary` view.
 
 ### Sprint D3: Property Health Score
-- [ ] **2D-07** | P1 | L | Health score algorithm — regularity, SKU coverage, seasonal adoption, issue frequency → 0-100.
-- [ ] **2D-08** | P1 | M | Dashboard widget with trend arrow.
-- [ ] **2D-09** | P2 | M | Health score anxiety nudge on drop.
+- [x] **2D-07** | P1 | L | Health score algorithm — regularity, SKU coverage, seasonal adoption, issue frequency → 0-100. `compute_property_health_score` RPC (SECURITY DEFINER), `property_health_scores` table with RLS. Weighted: regularity 40%, coverage 25%, seasonal 15%, issue 20%.
+- [x] **2D-08** | P1 | M | Dashboard widget with trend arrow. `PropertyHealthWidget` component with SVG score ring, color-coded labels (Excellent/Good/Fair/Needs Attention/Critical), sub-score breakdown, trend delta arrow. Auto-computes on load if stale >24h.
+- [x] **2D-09** | P2 | M | Health score anxiety nudge on drop. `CUSTOMER_HEALTH_SCORE_DROP` notification template seeded. Nudge triggers via notification event bus when score drops.
 
 ### Sprint D4: Plan Self-Service (next-cycle default)
 - [ ] **2D-10** | P0 | L | Plan upgrade/downgrade — changes take effect next billing cycle by default. Downgrades always next-cycle. Optional "upgrade now" as future P2. Handles balance carries over (no proration).

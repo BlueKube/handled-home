@@ -18,6 +18,7 @@ import { WeekTimeline } from "@/components/customer/WeekTimeline";
 import { CrossPollinationCard } from "@/components/customer/CrossPollinationCard";
 import { CustomerNotificationBanners } from "@/components/customer/NotificationBanners";
 import { HandleBalanceBar } from "@/components/customer/HandleBalanceBar";
+import { PropertyHealthWidget } from "@/components/customer/PropertyHealthWidget";
 
 function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -153,6 +154,9 @@ export default function CustomerDashboard() {
           perCycle={planHandles.handles_per_cycle}
         />
       )}
+
+      {/* Property Health Score */}
+      <PropertyHealthWidget propertyId={property?.id} />
 
       {/* Stats Row */}
       <div className="grid gap-4 md:grid-cols-2">

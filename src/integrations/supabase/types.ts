@@ -2483,6 +2483,59 @@ export type Database = {
         }
         Relationships: []
       }
+      property_health_scores: {
+        Row: {
+          computed_at: string
+          coverage_score: number
+          created_at: string
+          customer_id: string
+          id: string
+          issue_score: number
+          overall_score: number
+          previous_overall_score: number | null
+          property_id: string
+          regularity_score: number
+          seasonal_score: number
+          updated_at: string
+        }
+        Insert: {
+          computed_at?: string
+          coverage_score?: number
+          created_at?: string
+          customer_id: string
+          id?: string
+          issue_score?: number
+          overall_score?: number
+          previous_overall_score?: number | null
+          property_id: string
+          regularity_score?: number
+          seasonal_score?: number
+          updated_at?: string
+        }
+        Update: {
+          computed_at?: string
+          coverage_score?: number
+          created_at?: string
+          customer_id?: string
+          id?: string
+          issue_score?: number
+          overall_score?: number
+          previous_overall_score?: number | null
+          property_id?: string
+          regularity_score?: number
+          seasonal_score?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_health_scores_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       provider_applications: {
         Row: {
           category: string
@@ -5767,6 +5820,10 @@ export type Database = {
       cleanup_expired_offers: { Args: never; Returns: Json }
       complete_job: {
         Args: { p_job_id: string; p_provider_summary?: string }
+        Returns: Json
+      }
+      compute_property_health_score: {
+        Args: { p_customer_id: string; p_property_id: string }
         Returns: Json
       }
       compute_zone_health_score: {
