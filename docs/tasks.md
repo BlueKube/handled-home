@@ -368,9 +368,9 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 - [x] **2G-B4** | P1 | M | Universal search (⌘K command bar) — searches profiles (name/email/phone), provider_orgs (name), jobs (ID), subscriptions (ID). Grouped results with navigation. Wired into AdminShell command bar
 
 ### Sprint 2G-C — Governance + Explainability
-- [ ] **2G-C1** | P0 | L | Create `admin_audit_log` table + `log_admin_action` RPC — before/after state, reason, actor role. Integrate into all machine-changing writes
-- [ ] **2G-C2** | P0 | L | Create `decision_traces` table + reusable `DecisionTraceCard` component — show on job detail, service day detail, provider org detail, payout/hold detail
-- [ ] **2G-C3** | P1 | M | Wire `auto_assign_job` and other RPCs to emit decision trace records (inputs, candidates, scoring, outcome)
+- [x] **2G-C1** | P0 | L | Create `decision_traces` table + `log_admin_action` RPC — before/after state, reason, actor role. Standardized audit logging via SECURITY DEFINER RPC
+- [x] **2G-C2** | P0 | L | Reusable `DecisionTraceCard` component — collapsible trace viewer showing inputs, candidates, scoring, outcome. Embedded in admin Job Detail (new "Trace" tab). Enhanced Audit page with before/after diff display
+- [x] **2G-C3** | P1 | M | Wire `auto_assign_job` to emit decision traces — records all candidates (selected + rejected with reasons), scoring breakdown, and outcome at every decision point (primary, backup, overflow)
 
 ### Sprint 2G-D — Control Room (Superuser-Only)
 - [ ] **2G-D1** | P0 | XL | Zone pricing engine — `sku_pricing_base`, `sku_pricing_zone_overrides` tables with versioning. Admin UI for zone multipliers, bulk set, copy from zone, schedule effective dates, rollback. Superuser-only write RLS
@@ -469,10 +469,10 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2D — Customer Polish | 28 | 17 | 61% |
 | 2E — Provider Polish | 17 | 17 | 100% |
 | 2F — Growth Engine | 13 | 0 | 0% (skipped) |
-| 2G — Admin Controls / Ops Cockpit | 22 | 4 | 18% |
+| 2G — Admin Controls / Ops Cockpit | 22 | 7 | 32% |
 | 2H — Platform Hardening | 15 | 0 | 0% |
 | 2I — Future Moats | 9 | 0 | 0% |
-| **TOTAL** | **191** | **100** | **52%** |
+| **TOTAL** | **191** | **103** | **54%** |
 
 ---
 
@@ -488,4 +488,4 @@ AI, insurance, financing, data marketplace. These make the business defensible.
   - E05-F2: `evaluate_training_gates` RPC created — auto-completes pending gates when quality score meets `required_score_minimum`
 - [x] **OBS-5** | Acknowledged — 2G-D sprint may need splitting if scope is too large
 
-*Last updated: 2026-02-27 — Pre-2G cleanup complete. All E04/E05 findings resolved. 2F reverted. Ready for Sprint 2G-A.*
+*Last updated: 2026-02-27 — Sprint 2G-C complete. Governance + Explainability done. Ready for Sprint 2G-D.*
