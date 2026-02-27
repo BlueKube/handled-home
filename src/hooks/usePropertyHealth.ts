@@ -23,12 +23,12 @@ export function usePropertyHealth(propertyId: string | undefined) {
     enabled: !!propertyId && !!user,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("property_health_scores" as any)
+        .from("property_health_scores")
         .select("*")
         .eq("property_id", propertyId!)
         .maybeSingle();
       if (error) throw error;
-      return data as unknown as PropertyHealthScore | null;
+      return data as PropertyHealthScore | null;
     },
   });
 
