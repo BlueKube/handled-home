@@ -8,6 +8,7 @@ import {
   Waves,
   Wind,
   Trees,
+  Home,
   type LucideIcon,
 } from "lucide-react";
 
@@ -21,6 +22,7 @@ export const CATEGORY_LABELS: Record<string, string> = {
   windows: "Window Cleaning",
   pest: "Pest Control",
   pet_waste: "Pet Waste",
+  home_assistant: "Home Assistant",
 };
 
 export const CATEGORY_ICONS: Record<string, LucideIcon> = {
@@ -33,6 +35,7 @@ export const CATEGORY_ICONS: Record<string, LucideIcon> = {
   windows: Sparkles,
   pest: Bug,
   pet_waste: PawPrint,
+  home_assistant: Home,
 };
 
 /** Gradient fallbacks when no image is available */
@@ -46,6 +49,7 @@ export const CATEGORY_GRADIENTS: Record<string, string> = {
   windows: "from-sky-300 to-blue-500",
   pest: "from-red-400 to-rose-600",
   pet_waste: "from-yellow-400 to-amber-500",
+  home_assistant: "from-violet-400 to-purple-600",
 };
 
 export function getCategoryLabel(category: string | null | undefined): string {
@@ -71,4 +75,5 @@ export const CATEGORY_ORDER = [
   "windows",
   "pest",
   "pet_waste",
+  "home_assistant",
 ];

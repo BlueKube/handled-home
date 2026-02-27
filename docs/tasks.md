@@ -263,8 +263,8 @@
 - [x] **2D-20** | P1 | M | Add-on checkout — one-tap purchase (deduct handles or charge card), creates one-off job. Refund hooks for system/provider cancellations (refund handles preserving original expiry). `purchase_addon` RPC (SECURITY DEFINER) with completed-visit gate, `refund_addon` RPC. `usePurchaseAddon` mutation hook. Bottom sheet purchase UI with handles/cash options.
 
 ### Sprint D7: Home Assistant Scaffolding
-- [ ] **2D-21** | P1 | L | Home Assistant SKU scaffolding — `provider_category = 'home_assistant'`, time-boxed SKUs (30/60/90 min), allowed/not-included checklists, customer prep requirements, privacy-safe proof rules. Members-only gate.
-- [ ] **2D-22** | P2 | M | Home Assistant booking — constrained to "next available 2-3 windows", time-boxed selection, member verification. No real-time dispatch. Premium feel, not Uber dispatch.
+- [x] **2D-21** | P1 | L | Home Assistant SKU scaffolding — `provider_category = 'home_assistant'`, time-boxed SKUs (30/60/90 min), allowed/not-included checklists, customer prep requirements, privacy-safe proof rules. Members-only gate. DB: `provider_category`, `customer_prep`, `proof_rules`, `members_only` columns on `service_skus`. `home_assistant_windows` table with capacity tracking. `book_home_assistant` RPC. 5 starter SKUs seeded.
+- [x] **2D-22** | P2 | M | Home Assistant booking — constrained to "next available 2-3 windows", time-boxed selection, member verification. No real-time dispatch. Premium feel, not Uber dispatch. `useHomeAssistant` hook suite. `HomeAssistantBooking` page at `/customer/home-assistant` with members-only gate, trust banner, window picker, handles/cash payment.
 
 ### Sprint D8: Customer Engagement
 - [ ] **2D-16** | P2 | M | NPS survey (day 30/90/180).
@@ -433,7 +433,7 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2A — Placeholders & Core | 16 | 16 | 100% |
 | 2B — Automation Engine | 31 | 31 | 100% |
 | 2C — Notifications | 44 | 44 | 100% |
-| 2D — Customer Polish | 28 | 15 | 54% |
+| 2D — Customer Polish | 28 | 17 | 61% |
 | 2E — Provider Polish | 13 | 0 | 0% |
 | 2F — Growth Engine | 13 | 0 | 0% |
 | 2G — Admin Intelligence | 11 | 0 | 0% |

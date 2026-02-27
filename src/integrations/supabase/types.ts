@@ -1227,6 +1227,44 @@ export type Database = {
         }
         Relationships: []
       }
+      home_assistant_windows: {
+        Row: {
+          booked: number
+          capacity: number
+          created_at: string
+          id: string
+          window_date: string
+          window_slot: string
+          zone_id: string
+        }
+        Insert: {
+          booked?: number
+          capacity?: number
+          created_at?: string
+          id?: string
+          window_date: string
+          window_slot: string
+          zone_id: string
+        }
+        Update: {
+          booked?: number
+          capacity?: number
+          created_at?: string
+          id?: string
+          window_date?: string
+          window_slot?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_assistant_windows_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invite_scripts: {
         Row: {
           body: string
@@ -4344,6 +4382,7 @@ export type Database = {
           category: string | null
           checklist: Json
           created_at: string
+          customer_prep: string[]
           description: string
           display_order: number
           duration_minutes: number
@@ -4356,9 +4395,12 @@ export type Database = {
           inclusions: string[]
           is_addon: boolean
           is_featured: boolean
+          members_only: boolean
           name: string
           price_hint_cents: number | null
           pricing_notes: string | null
+          proof_rules: Json
+          provider_category: string
           required_photos: Json
           status: string
           updated_at: string
@@ -4370,6 +4412,7 @@ export type Database = {
           category?: string | null
           checklist?: Json
           created_at?: string
+          customer_prep?: string[]
           description?: string
           display_order?: number
           duration_minutes?: number
@@ -4382,9 +4425,12 @@ export type Database = {
           inclusions?: string[]
           is_addon?: boolean
           is_featured?: boolean
+          members_only?: boolean
           name: string
           price_hint_cents?: number | null
           pricing_notes?: string | null
+          proof_rules?: Json
+          provider_category?: string
           required_photos?: Json
           status?: string
           updated_at?: string
@@ -4396,6 +4442,7 @@ export type Database = {
           category?: string | null
           checklist?: Json
           created_at?: string
+          customer_prep?: string[]
           description?: string
           display_order?: number
           duration_minutes?: number
@@ -4408,9 +4455,12 @@ export type Database = {
           inclusions?: string[]
           is_addon?: boolean
           is_featured?: boolean
+          members_only?: boolean
           name?: string
           price_hint_cents?: number | null
           pricing_notes?: string | null
+          proof_rules?: Json
+          provider_category?: string
           required_photos?: Json
           status?: string
           updated_at?: string
@@ -5893,6 +5943,17 @@ export type Database = {
         Returns: undefined
       }
       auto_assign_job: { Args: { p_job_id: string }; Returns: Json }
+      book_home_assistant: {
+        Args: {
+          p_payment_method?: string
+          p_property_id: string
+          p_sku_id: string
+          p_subscription_id: string
+          p_window_id: string
+          p_zone_id: string
+        }
+        Returns: Json
+      }
       bootstrap_new_user: { Args: { _full_name: string }; Returns: undefined }
       cancel_pending_plan_change: {
         Args: { p_subscription_id: string }
