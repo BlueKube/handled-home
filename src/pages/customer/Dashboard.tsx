@@ -20,6 +20,7 @@ import { CustomerNotificationBanners } from "@/components/customer/NotificationB
 import { HandleBalanceBar } from "@/components/customer/HandleBalanceBar";
 import { PropertyHealthWidget } from "@/components/customer/PropertyHealthWidget";
 import { AddonSuggestionsCard } from "@/components/customer/AddonSuggestionsCard";
+import { NeighborhoodDensityWidget } from "@/components/customer/NeighborhoodDensityWidget";
 
 function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -187,6 +188,9 @@ export default function CustomerDashboard() {
           <p className="text-xs text-muted-foreground">Changes take effect next cycle.</p>
         </div>
       )}
+
+      {/* Neighborhood Social Proof */}
+      <NeighborhoodDensityWidget />
 
       {/* Cross-Pollination Card */}
       <CrossPollinationCard zoneId={subscription?.zone_id} propertyId={property?.id} />

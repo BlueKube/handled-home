@@ -44,6 +44,7 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
   const [pricingNotes, setPricingNotes] = useState("");
   const [isFeatured, setIsFeatured] = useState(false);
   const [displayOrder, setDisplayOrder] = useState(0);
+  const [requiresTrainingGate, setRequiresTrainingGate] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -64,6 +65,7 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
       setPricingNotes(sku.pricing_notes ?? "");
       setIsFeatured(sku.is_featured ?? false);
       setDisplayOrder(sku.display_order ?? 0);
+      setRequiresTrainingGate((sku as any).requires_training_gate ?? false);
     } else {
       setName(""); setDescription(""); setCategory(""); setStatus("draft");
       setInclusions([""]); setExclusions([""]); setEdgeCaseNotes("");
@@ -71,6 +73,7 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
       setWeatherSensitive(false); setPhotos([]); setChecklist([]);
       setPriceHintCents(null); setPricingNotes("");
       setIsFeatured(false); setDisplayOrder(0);
+      setRequiresTrainingGate(false);
     }
   }, [open, sku]);
 
@@ -105,7 +108,8 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
     pricing_notes: pricingNotes.trim() || null,
     is_featured: isFeatured,
     display_order: displayOrder,
-  });
+    requires_training_gate: requiresTrainingGate,
+  } as ServiceSkuInsert);
 
   const needsConfirmation = (payload: ServiceSkuInsert): boolean => {
     if (!isEdit || sku?.status !== "active") return false;
@@ -236,6 +240,13 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
               <div className="flex items-center justify-between">
                 <Label>Weather Sensitive</Label>
                 <Switch checked={weatherSensitive} onCheckedChange={setWeatherSensitive} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Requires Training Gate</Label>
+                  <p className="text-xs text-muted-foreground">Providers must complete training before being assigned this SKU</p>
+                </div>
+                <Switch checked={requiresTrainingGate} onCheckedChange={setRequiresTrainingGate} />
               </div>
             </div>
           </CollapsibleSection>

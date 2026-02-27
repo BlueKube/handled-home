@@ -10,6 +10,7 @@ import { PhotoGallery } from "@/components/customer/PhotoGallery";
 import { BeforeAfterSlider } from "@/components/customer/BeforeAfterSlider";
 import { ReportIssueSheet } from "@/components/customer/ReportIssueSheet";
 import { ShareCardSheet } from "@/components/customer/ShareCardSheet";
+import { PostJobSharePrompt } from "@/components/customer/PostJobSharePrompt";
 import { QuickFeedbackCard } from "@/components/customer/QuickFeedbackCard";
 import { PrivateReviewCard } from "@/components/customer/PrivateReviewCard";
 import { ArrowLeft, Clock, CheckCircle2, XCircle, AlertTriangle, Share2 } from "lucide-react";
@@ -183,7 +184,12 @@ export default function CustomerVisitDetail() {
         />
       )}
 
-      {/* Share CTA — only for completed jobs without open disputes */}
+      {/* Post-job share prompt — auto-prompted for completed jobs */}
+      {job.status === "COMPLETED" && !issue && jobId && (
+        <PostJobSharePrompt jobId={jobId} zoneId={job.zone_id} />
+      )}
+
+      {/* Share CTA — manual button fallback */}
       {job.status === "COMPLETED" && !issue && (
         <Button
           variant="outline"

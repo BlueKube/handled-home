@@ -6587,6 +6587,7 @@ export type Database = {
         }
         Returns: Json
       }
+      check_density_milestones: { Args: never; Returns: Json }
       check_provider_sku_zone_eligibility: {
         Args: { p_provider_org_id: string; p_sku_id: string; p_zone_id: string }
         Returns: boolean
@@ -6693,6 +6694,7 @@ export type Database = {
         Args: { p_subscription_id: string }
         Returns: number
       }
+      get_neighborhood_density: { Args: { p_user_id: string }; Returns: Json }
       get_share_card_public: { Args: { p_share_code: string }; Returns: Json }
       get_waitlist_summary: {
         Args: never
@@ -6793,6 +6795,7 @@ export type Database = {
         }
         Returns: Json
       }
+      refresh_neighborhood_density: { Args: never; Returns: Json }
       refund_addon: {
         Args: { p_order_id: string; p_reason?: string }
         Returns: Json
