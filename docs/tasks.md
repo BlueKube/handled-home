@@ -266,10 +266,14 @@
 - [x] **2D-21** | P1 | L | Home Assistant SKU scaffolding — `provider_category = 'home_assistant'`, time-boxed SKUs (30/60/90 min), allowed/not-included checklists, customer prep requirements, privacy-safe proof rules. Members-only gate. DB: `provider_category`, `customer_prep`, `proof_rules`, `members_only` columns on `service_skus`. `home_assistant_windows` table with capacity tracking. `book_home_assistant` RPC. 5 starter SKUs seeded.
 - [x] **2D-22** | P2 | M | Home Assistant booking — constrained to "next available 2-3 windows", time-boxed selection, member verification. No real-time dispatch. Premium feel, not Uber dispatch. `useHomeAssistant` hook suite. `HomeAssistantBooking` page at `/customer/home-assistant` with members-only gate, trust banner, window picker, handles/cash payment.
 
-### Sprint D8: Customer Engagement
-- [ ] **2D-16** | P2 | M | NPS survey (day 30/90/180).
-- [ ] **2D-17** | P2 | M | Customer streak rewards + milestone notifications.
-- [ ] **2D-18** | P2 | L | Neighborhood leaderboard.
+### Sprint D8: Private Customer Feedback + Provider Quality Score
+> **PRD:** `docs/modules/15-private-feedback-provider-quality-score.md`
+> Replaces original D8 (NPS/streaks/leaderboard). Two-channel feedback: immediate satisfaction check + delayed anonymous provider review. Provider Quality Score (rolling 28-day, weekly rollups). Admin full transparency. Provider-anonymous, admin-transparent.
+
+- [x] **2D-16** | P0 | L | Quick satisfaction check — `visit_feedback_quick` table (GOOD/ISSUE outcome), receipt-anchored UI on VisitDetail page. "How did today's visit go?" with optional positive tags. ISSUE routes into existing issue flow. Admin sees immediately. `submit_quick_feedback` RPC (SECURITY DEFINER). `useQuickFeedback` hook. `QuickFeedbackCard` component.
+- [x] **2D-17** | P0 | L | Delayed private provider review — `visit_ratings_private` table with scheduled_release_at (7-21 day randomized delay), privacy-first UI ("Providers won't know it's you"), 1-5 stars + tags + optional comment (public candidate after thresholds) + confidential note (admin only). One per job/customer. `submit_private_review` RPC. `usePrivateReview` hook. `PrivateReviewCard` component.
+- [x] **2D-18** | P1 | L | Provider feedback rollups + Quality Score — `provider_feedback_rollups` (weekly aggregated, visibility gated by N_min=5), `provider_quality_score_snapshots` (rolling 28-day composite: rating 35%, issue rate 25%, photo compliance 20%, on-time 20%). `provider_quality_score_events` audit trail. Bands: GREEN 85-100, YELLOW 70-84, ORANGE 55-69, RED <55. Provider Quality Score page at `/provider/quality`. `useProviderQualityScore` hook.
+- [x] **2D-19-new** | P1 | M | Admin feedback transparency — `/admin/feedback` page with full quick feedback + private ratings, confidential notes, issue counts. `useAdminFeedback` hook. 5 notification templates seeded (quick requested, review requested, issue flagged, rollup published, risk alert).
 
 ### Build Order
 D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 → D8
