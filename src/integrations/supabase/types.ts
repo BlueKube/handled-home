@@ -2734,6 +2734,53 @@ export type Database = {
           },
         ]
       }
+      provider_availability_blocks: {
+        Row: {
+          block_type: string
+          created_at: string
+          created_by_user_id: string
+          end_date: string
+          id: string
+          note: string | null
+          provider_org_id: string
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          block_type?: string
+          created_at?: string
+          created_by_user_id: string
+          end_date: string
+          id?: string
+          note?: string | null
+          provider_org_id: string
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          block_type?: string
+          created_at?: string
+          created_by_user_id?: string
+          end_date?: string
+          id?: string
+          note?: string | null
+          provider_org_id?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_availability_blocks_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       provider_capabilities: {
         Row: {
           capability_key: string
