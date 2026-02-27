@@ -3962,6 +3962,108 @@ export type Database = {
           },
         ]
       }
+      provider_tier_history: {
+        Row: {
+          assignment_priority_modifier: number
+          created_at: string
+          effective_at: string
+          hold_period_days: number
+          id: string
+          previous_tier: string | null
+          provider_org_id: string
+          quality_score_snapshot_id: string | null
+          reason: string
+          tier: string
+        }
+        Insert: {
+          assignment_priority_modifier?: number
+          created_at?: string
+          effective_at?: string
+          hold_period_days?: number
+          id?: string
+          previous_tier?: string | null
+          provider_org_id: string
+          quality_score_snapshot_id?: string | null
+          reason: string
+          tier?: string
+        }
+        Update: {
+          assignment_priority_modifier?: number
+          created_at?: string
+          effective_at?: string
+          hold_period_days?: number
+          id?: string
+          previous_tier?: string | null
+          provider_org_id?: string
+          quality_score_snapshot_id?: string | null
+          reason?: string
+          tier?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_tier_history_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_tier_history_quality_score_snapshot_id_fkey"
+            columns: ["quality_score_snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "provider_quality_score_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_training_gates: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          provider_org_id: string
+          required_score_minimum: number
+          sku_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          provider_org_id: string
+          required_score_minimum?: number
+          sku_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          provider_org_id?: string
+          required_score_minimum?: number
+          sku_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_training_gates_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_training_gates_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       referral_codes: {
         Row: {
           code: string
@@ -6572,6 +6674,10 @@ export type Database = {
           p_provider_org_id: string
           p_zone_id: string
         }
+        Returns: Json
+      }
+      evaluate_provider_tier: {
+        Args: { p_provider_org_id: string }
         Returns: Json
       }
       expire_stale_handles: { Args: never; Returns: Json }

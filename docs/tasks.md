@@ -317,8 +317,8 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 - [x] **2E-E04-03** | P1 | M | Provider "Founding Partner Program" UI — BYOC dashboard with active/pending counts, earned total, per-attribution progress bars, bonus window tracking
 
 ### Sprint E-05 — Tier System + Training Gates
-- [ ] **2E-E05-01** | P1 | L | `provider_tier_history` table + tier logic tied to assignment priority
-- [ ] **2E-E05-02** | P1 | M | Coaching checklist + SKU training gates
+- [x] **2E-E05-01** | P1 | L | `provider_tier_history` table + `evaluate_provider_tier` RPC (admin, SECURITY DEFINER). Tiers: gold (score ≥80, 2d hold, +2 priority), silver (60-79, 3d hold, +1), standard (<60, 5d hold, +0). `auto_assign_job` updated to factor tier modifier into backup ordering.
+- [x] **2E-E05-02** | P1 | M | `provider_training_gates` table (provider_org_id + sku_id unique). Assignment engine skips providers with pending gates for job SKUs. Quality & Tier page shows tier badge, thresholds, pending/completed gates, and tier history.
 
 ---
 
