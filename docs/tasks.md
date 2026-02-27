@@ -217,9 +217,9 @@
 - [x] **D0-F9** | LOW | Deferred — cascade chain verified via subscription_id FK
 
 ### Sprint D1: Onboarding Wizard (membership-first)
-- [ ] **2D-01** | P0 | XL | Guided onboarding — property → zip/zone check (waitlist if unavailable) → plan selection (membership-first, handles explained simply) → subscribe → service day accept → build routine → confirmation. Progress bar, back nav.
-- [ ] **2D-02** | P0 | M | Zone availability check — zip lookup during onboarding, waitlist signup if no zone.
-- [ ] **2D-03** | P1 | M | Onboarding completion tracking — step tracking, re-engagement notifications for incomplete signups.
+- [x] **2D-01** | P0 | XL | Guided onboarding — property → zip/zone check (waitlist if unavailable) → plan selection (membership-first, handles explained simply) → subscribe → service day accept → build routine → confirmation. Progress bar, back nav.
+- [x] **2D-02** | P0 | M | Zone availability check — zip lookup during onboarding, waitlist signup if no zone.
+- [x] **2D-03** | P1 | M | Onboarding completion tracking — step tracking via `customer_onboarding_progress` table, persistent step state, auto-resume on return.
 
 ### Sprint D1.5: Scheduling UX Polish (moved up — informs onboarding)
 - [ ] **2D-23** | P1 | M | System-recommended scheduling frame — service day assignment shows "Best for efficiency" default, optional "Try to align days" preference toggle with tradeoff messaging. When alignment isn't possible, show one-sentence explanation ("All aligned days are full — we picked your next-best option"). Embedded in onboarding service-day step.

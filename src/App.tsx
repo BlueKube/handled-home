@@ -39,6 +39,7 @@ import CustomerSubscribe from "@/pages/customer/Subscribe";
 import CustomerServiceDay from "@/pages/customer/ServiceDay";
 import CustomerRoutineReview from "@/pages/customer/RoutineReview";
 import CustomerRoutineConfirm from "@/pages/customer/RoutineConfirm";
+import CustomerOnboardingWizard from "@/pages/customer/OnboardingWizard";
 
 // Provider pages
 import ProviderDashboard from "@/pages/provider/Dashboard";
@@ -138,6 +139,7 @@ const App = () => (
 
               {/* Customer App */}
               <Route element={<ProtectedRoute requiredRole="customer"><AppLayout /></ProtectedRoute>}>
+                <Route path="/customer/onboarding" element={<CustomerOnboardingWizard />} />
                 <Route path="/customer/property" element={<CustomerProperty />} />
                 <Route path="/customer/plans" element={<CustomerPlans />} />
                 <Route path="/customer/plans/:planId" element={<CustomerPlanDetail />} />

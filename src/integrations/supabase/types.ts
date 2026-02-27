@@ -501,6 +501,47 @@ export type Database = {
           },
         ]
       }
+      customer_onboarding_progress: {
+        Row: {
+          completed_steps: string[]
+          created_at: string
+          current_step: string
+          id: string
+          metadata: Json | null
+          selected_plan_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_steps?: string[]
+          created_at?: string
+          current_step?: string
+          id?: string
+          metadata?: Json | null
+          selected_plan_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_steps?: string[]
+          created_at?: string
+          current_step?: string
+          id?: string
+          metadata?: Json | null
+          selected_plan_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_onboarding_progress_selected_plan_id_fkey"
+            columns: ["selected_plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_payment_methods: {
         Row: {
           brand: string | null
