@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useCustomerVisitDetail } from "@/hooks/useCustomerVisitDetail";
+import { useVisitRating } from "@/hooks/useVisitRating";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PhotoGallery } from "@/components/customer/PhotoGallery";
 import { ReportIssueSheet } from "@/components/customer/ReportIssueSheet";
 import { ShareCardSheet } from "@/components/customer/ShareCardSheet";
+import { VisitRatingCard } from "@/components/customer/VisitRatingCard";
 import { ArrowLeft, Clock, CheckCircle2, XCircle, AlertTriangle, Share2 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -14,6 +16,7 @@ export default function CustomerVisitDetail() {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
   const { data, isLoading } = useCustomerVisitDetail(jobId);
+  const { rating, submitRating } = useVisitRating(jobId);
   const [issueSheetOpen, setIssueSheetOpen] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
 
@@ -135,6 +138,22 @@ export default function CustomerVisitDetail() {
           <p className="text-sm text-muted-foreground">No additional details available.</p>
         )}
       </Card>
+
+      {/* Rating — receipt-anchored, only for completed jobs */}
+      {job.status === "COMPLETED" && (
+        <VisitRatingCard
+          existingRating={rating ? { rating: rating.rating, comment: rating.comment } : null}
+          onSubmit={(stars, comment) =>
+            submitRating.mutate({
+              jobId: job.id,
+              providerOrgId: job.provider_org_id,
+              rating: stars,
+              comment,
+            })
+          }
+          isSubmitting={submitRating.isPending}
+        />
+      )}
 
       {/* Share CTA — only for completed jobs without open disputes */}
       {job.status === "COMPLETED" && !issue && (

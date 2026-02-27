@@ -4983,6 +4983,60 @@ export type Database = {
         }
         Relationships: []
       }
+      visit_ratings: {
+        Row: {
+          comment: string | null
+          created_at: string
+          customer_id: string
+          id: string
+          is_suppressed: boolean
+          job_id: string
+          provider_org_id: string
+          rating: number
+          suppression_reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          customer_id: string
+          id?: string
+          is_suppressed?: boolean
+          job_id: string
+          provider_org_id: string
+          rating: number
+          suppression_reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          customer_id?: string
+          id?: string
+          is_suppressed?: boolean
+          job_id?: string
+          provider_org_id?: string
+          rating?: number
+          suppression_reason?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visit_ratings_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visit_ratings_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       waitlist_entries: {
         Row: {
           converted_at: string | null
@@ -5576,6 +5630,24 @@ export type Database = {
           suppressed_24h: number | null
         }
         Relationships: []
+      }
+      provider_rating_summary: {
+        Row: {
+          avg_rating: number | null
+          negative_count: number | null
+          positive_count: number | null
+          provider_org_id: string | null
+          total_reviews: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visit_ratings_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {

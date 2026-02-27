@@ -237,9 +237,9 @@
 - [x] **2D-24** | P2 | S | "Must be home" toggle — toggle with time window selector (morning/afternoon). When enabled, shows available windows. Notes potential handle cost increase in helper text. Persisted to `service_day_preferences` table. Available in onboarding wizard and standalone ServiceDay page.
 
 ### Sprint D2: Ratings & Reviews (receipt-anchored)
-- [ ] **2D-04** | P0 | L | Post-visit rating — prompt after customer views visit receipt/proof (not immediate post-job). 1-5 stars + optional comment. `visit_ratings` table.
-- [ ] **2D-05** | P1 | M | Rating summary on provider profile — average rating, total reviews, admin-visible.
-- [ ] **2D-06** | P2 | M | Smart rating prompts — suppress on first visit or if issue already reported.
+- [x] **2D-04** | P0 | L | Post-visit rating — prompt after customer views visit receipt/proof (not immediate post-job). 1-5 stars + optional comment. `visit_ratings` table. Receipt-anchored: rating card appears on VisitDetail page for COMPLETED jobs. `VisitRatingCard` component with 1-5 star selector, optional comment, word labels. `useVisitRating` hook with upsert. DB: `visit_ratings` table with unique(job_id, customer_id), CHECK(1-5), RLS (customer own + admin all), `provider_rating_summary` view (security_invoker).
+- [x] **2D-05** | P1 | M | Rating summary on provider profile — average rating, total reviews, admin-visible. Added "Ratings" tab to admin ProviderDetail page showing avg_rating, total_reviews, positive (4-5★) and negative (1-2★) counts from `provider_rating_summary` view. `useProviderRatingSummary` hook.
+- [x] **2D-06** | P2 | M | Smart rating prompts — suppress on first visit or if issue already reported. `useVisitRating` hook checks completed job count (≤1 = first visit) and customer_issues existence. Sets `is_suppressed = true` with `suppression_reason` ('first_visit' or 'issue_reported') on the visit_ratings row. Suppressed ratings excluded from `provider_rating_summary` view.
 
 ### Sprint D3: Property Health Score
 - [ ] **2D-07** | P1 | L | Health score algorithm — regularity, SKU coverage, seasonal adoption, issue frequency → 0-100.
