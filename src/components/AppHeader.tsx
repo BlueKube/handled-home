@@ -1,4 +1,4 @@
-import logo from "@/assets/handled-home-logo.png";
+import logo from "@/assets/handled-home-logo-no-roof.png";
 import { NotificationBell } from "./NotificationBell";
 
 export function AppHeader() {
