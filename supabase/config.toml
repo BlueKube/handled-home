@@ -50,3 +50,6 @@ verify_jwt = false
 
 [functions.compute-quality-scores]
 verify_jwt = false
+
+[functions.run-scheduled-jobs]
+verify_jwt = false
