@@ -140,6 +140,7 @@ export type Database = {
       admin_audit_log: {
         Row: {
           action: string
+          actor_admin_role: string | null
           admin_user_id: string
           after: Json | null
           before: Json | null
@@ -151,6 +152,7 @@ export type Database = {
         }
         Insert: {
           action: string
+          actor_admin_role?: string | null
           admin_user_id: string
           after?: Json | null
           before?: Json | null
@@ -162,6 +164,7 @@ export type Database = {
         }
         Update: {
           action?: string
+          actor_admin_role?: string | null
           admin_user_id?: string
           after?: Json | null
           before?: Json | null
@@ -6952,6 +6955,15 @@ export type Database = {
         Returns: Json
       }
       bootstrap_new_user: { Args: { _full_name: string }; Returns: undefined }
+      bulk_set_zone_multiplier: {
+        Args: {
+          p_price_multiplier: number
+          p_reason: string
+          p_sku_ids: string[]
+          p_zone_id: string
+        }
+        Returns: Json
+      }
       cancel_pending_plan_change: {
         Args: { p_subscription_id: string }
         Returns: Json
@@ -7078,8 +7090,9 @@ export type Database = {
         Returns: {
           base_payout_cents: number
           effective_payout_cents: number
-          zone_multiplier: number
-          zone_override_cents: number
+          override_payout_cents: number
+          payout_multiplier: number
+          sku_id: string
         }[]
       }
       get_effective_sku_price: {
@@ -7087,8 +7100,9 @@ export type Database = {
         Returns: {
           base_price_cents: number
           effective_price_cents: number
-          zone_multiplier: number
-          zone_override_cents: number
+          override_price_cents: number
+          price_multiplier: number
+          sku_id: string
         }[]
       }
       get_handle_balance: {
@@ -7145,17 +7159,30 @@ export type Database = {
         Args: { p_date: string; p_provider_org_id: string }
         Returns: Json
       }
-      log_admin_action: {
-        Args: {
-          p_action: string
-          p_after?: Json
-          p_before?: Json
-          p_entity_id?: string
-          p_entity_type: string
-          p_reason?: string
-        }
-        Returns: string
-      }
+      log_admin_action:
+        | {
+            Args: {
+              p_action: string
+              p_after?: Json
+              p_before?: Json
+              p_entity_id?: string
+              p_entity_type: string
+              p_reason?: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_action: string
+              p_admin_user_id: string
+              p_after?: Json
+              p_before?: Json
+              p_entity_id?: string
+              p_entity_type: string
+              p_reason?: string
+            }
+            Returns: undefined
+          }
       notify_waitlist_on_launch: { Args: { p_zone_id: string }; Returns: Json }
       override_referral_attribution: {
         Args: {
@@ -7294,6 +7321,21 @@ export type Database = {
       }
       select_alternative_service_day: {
         Args: { p_assignment_id: string; p_offer_id: string }
+        Returns: Json
+      }
+      set_sku_base_price: {
+        Args: { p_base_price_cents: number; p_reason: string; p_sku_id: string }
+        Returns: Json
+      }
+      set_zone_pricing_override: {
+        Args: {
+          p_active_from?: string
+          p_override_price_cents?: number
+          p_price_multiplier?: number
+          p_reason?: string
+          p_sku_id: string
+          p_zone_id: string
+        }
         Returns: Json
       }
       spend_handles:

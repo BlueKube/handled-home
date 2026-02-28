@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 export interface SkuPricingBase {
@@ -62,17 +61,16 @@ export function useZonePricingOverrides(zoneId: string | undefined) {
 
 export function useSetBasePriceMutation() {
   const qc = useQueryClient();
-  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async (params: { sku_id: string; base_price_cents: number; reason: string }) => {
-      const { error } = await supabase.from("sku_pricing_base").insert({
-        sku_id: params.sku_id,
-        base_price_cents: params.base_price_cents,
-        changed_by: user!.id,
-        reason: params.reason,
-      } as any);
+      const { data, error } = await supabase.rpc("set_sku_base_price", {
+        p_sku_id: params.sku_id,
+        p_base_price_cents: params.base_price_cents,
+        p_reason: params.reason,
+      });
       if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["sku-pricing-base"] });
@@ -84,7 +82,6 @@ export function useSetBasePriceMutation() {
 
 export function useSetZoneOverrideMutation() {
   const qc = useQueryClient();
-  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async (params: {
@@ -95,24 +92,16 @@ export function useSetZoneOverrideMutation() {
       reason: string;
       active_from?: string;
     }) => {
-      // Expire current active override for same zone+sku
-      await supabase
-        .from("sku_pricing_zone_overrides")
-        .update({ active_to: new Date().toISOString() } as any)
-        .eq("zone_id", params.zone_id)
-        .eq("sku_id", params.sku_id)
-        .is("active_to", null);
-
-      const { error } = await supabase.from("sku_pricing_zone_overrides").insert({
-        zone_id: params.zone_id,
-        sku_id: params.sku_id,
-        price_multiplier: params.price_multiplier ?? null,
-        override_price_cents: params.override_price_cents ?? null,
-        changed_by: user!.id,
-        reason: params.reason,
-        active_from: params.active_from ?? new Date().toISOString(),
-      } as any);
+      const { data, error } = await supabase.rpc("set_zone_pricing_override", {
+        p_zone_id: params.zone_id,
+        p_sku_id: params.sku_id,
+        p_price_multiplier: params.price_multiplier ?? null,
+        p_override_price_cents: params.override_price_cents ?? null,
+        p_reason: params.reason,
+        p_active_from: params.active_from ?? new Date().toISOString(),
+      });
       if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["zone-pricing-overrides"] });
@@ -124,7 +113,6 @@ export function useSetZoneOverrideMutation() {
 
 export function useBulkSetMultiplierMutation() {
   const qc = useQueryClient();
-  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async (params: {
@@ -133,27 +121,14 @@ export function useBulkSetMultiplierMutation() {
       price_multiplier: number;
       reason: string;
     }) => {
-      // Expire all current overrides for these SKUs in this zone
-      for (const skuId of params.sku_ids) {
-        await supabase
-          .from("sku_pricing_zone_overrides")
-          .update({ active_to: new Date().toISOString() } as any)
-          .eq("zone_id", params.zone_id)
-          .eq("sku_id", skuId)
-          .is("active_to", null);
-      }
-
-      const rows = params.sku_ids.map((skuId) => ({
-        zone_id: params.zone_id,
-        sku_id: skuId,
-        price_multiplier: params.price_multiplier,
-        override_price_cents: null,
-        changed_by: user!.id,
-        reason: params.reason,
-      }));
-
-      const { error } = await supabase.from("sku_pricing_zone_overrides").insert(rows as any);
+      const { data, error } = await supabase.rpc("bulk_set_zone_multiplier", {
+        p_zone_id: params.zone_id,
+        p_sku_ids: params.sku_ids,
+        p_price_multiplier: params.price_multiplier,
+        p_reason: params.reason,
+      });
       if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["zone-pricing-overrides"] });
