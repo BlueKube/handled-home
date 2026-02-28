@@ -386,32 +386,39 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 
 ---
 
-## Round 2H — Platform Hardening (Scale Readiness)
+## Round 2H — Fix Pack (PRD Completeness)
 
-> Build for 100x the current load. No technical debt at scale.
+> Close all gaps identified in the PRD completeness review. Cron observability, quality pipeline, BYOC automation, provider map, admin polish.
+> **Specs:** `docs/2H/prd-completeness-review.md`, `docs/2H/round-2h-fix-pack-spec.md`
 
-### Data & Storage
-- [ ] **2H-01** | P0 | L | Photo storage optimization — image compression on upload, thumbnail generation, CDN-backed signed URLs, cleanup of orphaned uploads
-- [ ] **2H-02** | P1 | M | Database query optimization — add missing indexes, query plan analysis for slow queries, connection pooling review
-- [ ] **2H-03** | P1 | M | Data archival strategy — move jobs/invoices older than 2 years to archive tables. Keep aggregates accessible
+### Sprint 2H-A — Cron Infrastructure + Run Logging (P0)
+- [ ] **2H-A1** | P0 | M | `cron_run_log` table already exists — create `start_cron_run()` and `finish_cron_run()` SECURITY DEFINER RPCs for consistent logging pattern
+- [ ] **2H-A2** | P0 | M | Create `admin_system_config` table (key-value config for algorithm params, guardrails, caps). Superuser-only write RLS
+- [ ] **2H-A3** | P0 | L | Build `/admin/cron-health` page — last N runs per job, status + runtime, failure details, superuser-only "Retry Now" button. Add to AdminShell Governance nav
 
-### Multi-Property
-- [ ] **2H-04** | P1 | L | Multi-property support — customer can manage 2+ properties. Each property has own zone, service day, routine. Property switcher in app
-- [ ] **2H-05** | P1 | M | Per-property billing — each property can be on different plan. Consolidated or separate invoices (customer choice)
+### Sprint 2H-B — Quality Score Compute Pipeline (P0)
+- [ ] **2H-B1** | P0 | XL | Create `compute_provider_quality_scores()` RPC — rolling 28-day weighted score (rating 35%, issues 25%, photos 20%, on-time 20%), upsert into `provider_quality_score_snapshots`, call `evaluate_provider_tier()`, emit risk alerts for band downgrades
+- [ ] **2H-B2** | P0 | M | Fix `evaluate_training_gates()` RPC — correct column references (`composite_score` → `score`, `snapshot_at` → `computed_at`). Wire to run daily after quality compute
+- [ ] **2H-B3** | P0 | M | Create `compute-quality-scores` edge function — wrapper calling both RPCs in sequence, error handling, cron_run_log integration
 
-### Security & Compliance
-- [ ] **2H-06** | P0 | M | Terms of Service acceptance flow — require ToS + Privacy Policy acceptance at signup. Track version + timestamp. Re-prompt on policy updates
-- [ ] **2H-07** | P0 | M | Rate limiting — API rate limits on auth endpoints, edge functions. Prevent abuse
-- [ ] **2H-08** | P1 | M | Error monitoring — structured error logging, edge function error tracking, client-side error boundary reporting
-- [ ] **2H-09** | P1 | M | RLS policy audit — review all tables for proper row-level security. Ensure no data leaks between customers/providers
-- [ ] **2H-10** | P2 | M | GDPR/CCPA compliance — data export (customer can download their data), data deletion request flow, consent tracking
+### Sprint 2H-C — BYOC Automation + Weekly Rollups (P0)
+- [ ] **2H-C1** | P0 | L | Create `run_byoc_lifecycle_transitions()` RPC — advance lifecycle states, activate bonus window on first visit, expire ACTIVE→ENDED when bonus window passes
+- [ ] **2H-C2** | P0 | M | Create `compute_provider_weekly_rollups()` RPC — aggregate completion/on-time/redo rates, avg duration, customer feedback per active provider. Write to `provider_feedback_rollups`
+- [ ] **2H-C3** | P0 | M | Create `run-scheduled-jobs` edge function — orchestrate daily lifecycle + weekly BYOC bonus + weekly rollups
 
-### Mobile & Deployment
-- [ ] **2H-11** | P1 | L | App store deployment pipeline — Capacitor build scripts, iOS/Android signing, app store metadata, screenshots, review submission checklist
-- [ ] **2H-12** | P1 | M | Deep linking — app links for share cards, referral invites, notification taps. Handle both web and native
-- [ ] **2H-13** | P1 | L | Offline photo queue resilience — Capacitor filesystem cache for photos, retry queue with exponential backoff, sync indicator UI
-- [ ] **2H-14** | P2 | M | Accessibility audit — WCAG AA compliance check, screen reader testing, keyboard navigation, color contrast verification
-- [ ] **2H-15** | P1 | M | Server-side pagination for admin tables — replace client-side `.limit(100)` with cursor-based pagination for jobs, subscriptions, providers, invoices
+### Sprint 2H-D — Provider Map View (P1)
+- [ ] **2H-D1** | P1 | S | Install `react-map-gl` + `mapbox-gl`. Add MAPBOX_ACCESS_TOKEN secret
+- [ ] **2H-D2** | P1 | XL | Build `ProviderMapView.tsx` — numbered pins for today's stops, tap → stop preview card, "Navigate" deep link, provider location dot, fallback for missing lat/lng
+- [ ] **2H-D3** | P1 | L | Integrate map into provider Dashboard/Jobs — list/map toggle, synced selection, "Navigate to next stop" primary action
+- [ ] **2H-D4** | P1 | M | Admin read-only map — provider route pins on service day detail and provider org detail pages
+- [ ] **2H-D5** | P1 | S | Geocode handling — ensure lat/lng cached on properties, "Report address issue" for providers, "Fix address" for admin
+
+### Sprint 2H-E — Admin Completeness Polish (P1.5)
+- [ ] **2H-E1** | P1 | M | Wire `DecisionTraceCard` to service day detail, provider org detail, payout/hold detail, exception detail
+- [ ] **2H-E2** | P1 | M | Add 4 missing SOP playbooks — Growth Manager zone launch, BYOC close checklist, coverage exception approvals, payout/hold escalation
+- [ ] **2H-E3** | P1 | L | Build Control Room gaps — Incentive caps, Algorithm params, Policy guardrails (read from `admin_system_config`)
+- [ ] **2H-E4** | P1 | S | Add payout schedule visibility — "Next payout" card on provider Payouts page
+- [ ] **2H-E5** | P1 | S | Wire dispatcher keyboard shortcuts E (escalate) and N (note) to DispatcherActionsDialog
 
 ---
 
@@ -469,8 +476,8 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2D — Customer Polish | 28 | 17 | 61% |
 | 2E — Provider Polish | 17 | 17 | 100% |
 | 2F — Growth Engine | 13 | 0 | 0% (skipped) |
-| 2G — Admin Controls / Ops Cockpit | 22 | 11 | 50% |
-| 2H — Platform Hardening | 15 | 0 | 0% |
+| 2G — Admin Controls / Ops Cockpit | 22 | 22 | 100% |
+| 2H — Fix Pack (PRD Completeness) | 20 | 0 | 0% |
 | 2I — Future Moats | 9 | 0 | 0% |
 | **TOTAL** | **191** | **103** | **54%** |
 
@@ -488,4 +495,4 @@ AI, insurance, financing, data marketplace. These make the business defensible.
   - E05-F2: `evaluate_training_gates` RPC created — auto-completes pending gates when quality score meets `required_score_minimum`
 - [x] **OBS-5** | Acknowledged — 2G-D sprint may need splitting if scope is too large
 
-*Last updated: 2026-02-28 — Sprint 2G-E complete. Playbooks page with 6 SOPs, dense table polish with keyboard shortcuts (J/K/Enter/A/R/←→), saved views via localStorage. Round 2G fully complete.*
+*Last updated: 2026-02-28 — Round 2G complete. Round 2H Fix Pack planned (5 sprints, 20 tasks). Starting Sprint 2H-A.*
