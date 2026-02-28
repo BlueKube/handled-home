@@ -7103,6 +7103,7 @@ export type Database = {
         Args: { p_customer_id: string; p_property_id: string }
         Returns: Json
       }
+      compute_provider_quality_scores: { Args: never; Returns: Json }
       compute_zone_health_score: {
         Args: { p_category: string; p_zone_id: string }
         Returns: Json
