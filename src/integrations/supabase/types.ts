@@ -7104,6 +7104,10 @@ export type Database = {
         Returns: Json
       }
       compute_provider_quality_scores: { Args: never; Returns: Json }
+      compute_provider_weekly_rollups: {
+        Args: { p_week_start?: string }
+        Returns: Json
+      }
       compute_zone_health_score: {
         Args: { p_category: string; p_zone_id: string }
         Returns: Json
@@ -7412,6 +7416,7 @@ export type Database = {
         Args: { p_override_id: string; p_reason: string }
         Returns: string
       }
+      run_byoc_lifecycle_transitions: { Args: never; Returns: Json }
       run_dunning_step: { Args: { p_subscription_id: string }; Returns: Json }
       run_payout_batch: { Args: { p_payout_run_id: string }; Returns: Json }
       schedule_plan_change: {

@@ -392,9 +392,9 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 > **Specs:** `docs/2H/prd-completeness-review.md`, `docs/2H/round-2h-fix-pack-spec.md`
 
 ### Sprint 2H-A — Cron Infrastructure + Run Logging (P0)
-- [ ] **2H-A1** | P0 | M | `cron_run_log` table already exists — create `start_cron_run()` and `finish_cron_run()` SECURITY DEFINER RPCs for consistent logging pattern
-- [ ] **2H-A2** | P0 | M | Create `admin_system_config` table (key-value config for algorithm params, guardrails, caps). Superuser-only write RLS
-- [ ] **2H-A3** | P0 | L | Build `/admin/cron-health` page — last N runs per job, status + runtime, failure details, superuser-only "Retry Now" button. Add to AdminShell Governance nav
+- [x] **2H-A1** | P0 | M | `cron_run_log` table already exists — create `start_cron_run()` and `finish_cron_run()` SECURITY DEFINER RPCs for consistent logging pattern
+- [x] **2H-A2** | P0 | M | Create `admin_system_config` table (key-value config for algorithm params, guardrails, caps). Superuser-only write RLS
+- [x] **2H-A3** | P0 | L | Build `/admin/cron-health` page — last N runs per job, status + runtime, failure details, superuser-only "Retry Now" button. Add to AdminShell Governance nav
 
 ### Sprint 2H-B — Quality Score Compute Pipeline (P0)
 - [x] **2H-B1** | P0 | XL | Create `compute_provider_quality_scores()` RPC — rolling 28-day weighted score (rating 35%, issues 25%, photos 20%, on-time 20%), upsert into `provider_quality_score_snapshots`, call `evaluate_provider_tier()`, emit risk alerts for band downgrades
@@ -402,9 +402,9 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 - [x] **2H-B3** | P0 | M | Create `compute-quality-scores` edge function — wrapper calling both RPCs in sequence, error handling, cron_run_log integration
 
 ### Sprint 2H-C — BYOC Automation + Weekly Rollups (P0)
-- [ ] **2H-C1** | P0 | L | Create `run_byoc_lifecycle_transitions()` RPC — advance lifecycle states, activate bonus window on first visit, expire ACTIVE→ENDED when bonus window passes
-- [ ] **2H-C2** | P0 | M | Create `compute_provider_weekly_rollups()` RPC — aggregate completion/on-time/redo rates, avg duration, customer feedback per active provider. Write to `provider_feedback_rollups`
-- [ ] **2H-C3** | P0 | M | Create `run-scheduled-jobs` edge function — orchestrate daily lifecycle + weekly BYOC bonus + weekly rollups
+- [x] **2H-C1** | P0 | L | Create `run_byoc_lifecycle_transitions()` RPC — advance lifecycle states, activate bonus window on first visit, expire ACTIVE→ENDED when bonus window passes
+- [x] **2H-C2** | P0 | M | Create `compute_provider_weekly_rollups()` RPC — aggregate completion/on-time/redo rates, avg duration, customer feedback per active provider. Write to `provider_feedback_rollups`
+- [x] **2H-C3** | P0 | M | Create `run-scheduled-jobs` edge function — orchestrate daily lifecycle + weekly BYOC bonus + weekly rollups
 
 ### Sprint 2H-D — Provider Map View (P1)
 - [ ] **2H-D1** | P1 | S | Install `react-map-gl` + `mapbox-gl`. Add MAPBOX_ACCESS_TOKEN secret
@@ -477,7 +477,7 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2E — Provider Polish | 17 | 17 | 100% |
 | 2F — Growth Engine | 13 | 0 | 0% (skipped) |
 | 2G — Admin Controls / Ops Cockpit | 22 | 22 | 100% |
-| 2H — Fix Pack (PRD Completeness) | 20 | 0 | 0% |
+| 2H — Fix Pack (PRD Completeness) | 20 | 9 | 45% |
 | 2I — Future Moats | 9 | 0 | 0% |
 | **TOTAL** | **191** | **103** | **54%** |
 
@@ -495,4 +495,4 @@ AI, insurance, financing, data marketplace. These make the business defensible.
   - E05-F2: `evaluate_training_gates` RPC created — auto-completes pending gates when quality score meets `required_score_minimum`
 - [x] **OBS-5** | Acknowledged — 2G-D sprint may need splitting if scope is too large
 
-*Last updated: 2026-02-28 — Round 2G complete. Round 2H Fix Pack planned (5 sprints, 20 tasks). Starting Sprint 2H-A.*
+*Last updated: 2026-02-28 — Sprints 2H-A, 2H-B, 2H-C complete (9/20 tasks). Starting Sprint 2H-D.*
