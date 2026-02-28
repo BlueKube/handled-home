@@ -7544,6 +7544,7 @@ export type Database = {
         Args: { p_job_id: string; p_outcome: string; p_tags?: Json }
         Returns: Json
       }
+      to_date_immutable: { Args: { ts: string }; Returns: string }
       transition_eligible_earnings: { Args: never; Returns: Json }
       validate_provider_invite: { Args: { p_code: string }; Returns: Json }
       void_referral_reward: {

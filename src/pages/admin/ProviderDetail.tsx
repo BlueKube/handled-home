@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useProviderAdmin } from "@/hooks/useProviderAdmin";
 import { useProviderRatingSummary } from "@/hooks/useProviderRatingSummary";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +13,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, CheckCircle, AlertTriangle, XCircle, Shield, MapPin, Loader2, User, FileText, Star } from "lucide-react";
 import { toast } from "sonner";
+import { DecisionTraceCard } from "@/components/admin/DecisionTraceCard";
+import { AdminReadOnlyMap } from "@/components/admin/AdminReadOnlyMap";
+import { format } from "date-fns";
 
 const STATUS_COLORS: Record<string, string> = {
   DRAFT: "bg-muted text-muted-foreground",
@@ -29,6 +34,34 @@ export default function AdminProviderDetail() {
   const [actionDialog, setActionDialog] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const [acting, setActing] = useState(false);
+
+  // Fetch today's jobs for map
+  const today = format(new Date(), "yyyy-MM-dd");
+  const { data: providerJobs } = useQuery({
+    queryKey: ["provider-jobs-map", id, today],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("jobs")
+        .select("id, status, scheduled_date, route_order, property:properties(lat, lng, street_address)")
+        .eq("provider_org_id", id!)
+        .eq("scheduled_date", today)
+        .not("status", "eq", "CANCELED")
+        .order("route_order", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id,
+  });
+
+  const mapStops = (providerJobs ?? [])
+    .filter((j: any) => j.property?.lat && j.property?.lng)
+    .map((j: any) => ({
+      id: j.id,
+      lat: j.property.lat,
+      lng: j.property.lng,
+      label: j.property.street_address,
+      status: j.status,
+    }));
 
   if (isLoading) {
     return <div className="p-4 flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>;
@@ -92,13 +125,14 @@ export default function AdminProviderDetail() {
       </div>
 
       <Tabs defaultValue="overview">
-        <TabsList className="mb-4">
+        <TabsList className="mb-4 flex-wrap">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="ratings">Ratings</TabsTrigger>
           <TabsTrigger value="coverage">Coverage</TabsTrigger>
           <TabsTrigger value="capabilities">Capabilities</TabsTrigger>
           <TabsTrigger value="compliance">Compliance</TabsTrigger>
           {riskFlags.length > 0 && <TabsTrigger value="risks">Risks ({riskFlags.length})</TabsTrigger>}
+          <TabsTrigger value="traces">Traces</TabsTrigger>
           <TabsTrigger value="history">History</TabsTrigger>
         </TabsList>
 
@@ -121,6 +155,9 @@ export default function AdminProviderDetail() {
                   <div className="text-muted-foreground">{owner.phone || "—"}</div>
                 </CardContent>
               </Card>
+            )}
+            {mapStops.length > 0 && (
+              <AdminReadOnlyMap stops={mapStops} title="Today's Route" />
             )}
           </div>
         </TabsContent>
@@ -248,6 +285,10 @@ export default function AdminProviderDetail() {
             </div>
           </TabsContent>
         )}
+
+        <TabsContent value="traces">
+          <DecisionTraceCard entityType="provider_org" entityId={id} />
+        </TabsContent>
 
         <TabsContent value="history">
           <div className="space-y-2">

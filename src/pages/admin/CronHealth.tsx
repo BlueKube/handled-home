@@ -6,14 +6,45 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RefreshCw, CheckCircle, XCircle, Clock, Play } from "lucide-react";
-import { formatDistanceToNow, format, differenceInSeconds } from "date-fns";
+import { RefreshCw, CheckCircle, XCircle, Clock, Play, AlertTriangle } from "lucide-react";
+import { formatDistanceToNow, format, differenceInSeconds, addMinutes, addHours, addDays, isAfter } from "date-fns";
 
 const statusConfig: Record<string, { icon: React.ElementType; color: string }> = {
   success: { icon: CheckCircle, color: "text-green-600" },
   failed: { icon: XCircle, color: "text-destructive" },
   running: { icon: Clock, color: "text-yellow-600" },
 };
+
+/* ── Schedule map: function → cron expression + human label ── */
+const SCHEDULE_MAP: Record<string, { cron: string; label: string; intervalMinutes: number }> = {
+  "compute-quality-scores": { cron: "0 3 * * *", label: "Daily 03:00 UTC", intervalMinutes: 24 * 60 },
+  "run-scheduled-jobs": { cron: "0 4 * * *", label: "Daily 04:00 UTC", intervalMinutes: 24 * 60 },
+  "process-notification-events": { cron: "*/2 * * * *", label: "Every 2 min", intervalMinutes: 2 },
+  "cleanup-expired-offers": { cron: "0 5 * * *", label: "Daily 05:00 UTC", intervalMinutes: 24 * 60 },
+  "check-weather": { cron: "0 */6 * * *", label: "Every 6 hours", intervalMinutes: 6 * 60 },
+  "check-no-shows": { cron: "0 * * * *", label: "Hourly", intervalMinutes: 60 },
+  "evaluate-provider-sla": { cron: "0 2 * * *", label: "Daily 02:00 UTC", intervalMinutes: 24 * 60 },
+  "run-dunning": { cron: "0 6 * * *", label: "Daily 06:00 UTC", intervalMinutes: 24 * 60 },
+  "run-billing-automation": { cron: "0 7 * * *", label: "Daily 07:00 UTC", intervalMinutes: 24 * 60 },
+  "send-reminders": { cron: "0 12 * * *", label: "Daily 12:00 UTC", intervalMinutes: 24 * 60 },
+  "snapshot-rollup": { cron: "0 1 * * 1", label: "Weekly Mon 01:00 UTC", intervalMinutes: 7 * 24 * 60 },
+};
+
+function getExpectedNextAndOverdue(lastRunAt: string | undefined, functionName: string) {
+  const schedule = SCHEDULE_MAP[functionName];
+  if (!schedule) return { expectedNext: null, isOverdue: false };
+
+  if (!lastRunAt) return { expectedNext: "No runs yet", isOverdue: true };
+
+  const lastRun = new Date(lastRunAt);
+  const expectedNext = addMinutes(lastRun, schedule.intervalMinutes);
+  const isOverdue = isAfter(new Date(), addMinutes(expectedNext, 5)); // 5 min grace
+
+  return {
+    expectedNext: format(expectedNext, "MMM d, HH:mm"),
+    isOverdue,
+  };
+}
 
 export default function CronHealth() {
   const { runs, retryNow } = useCronHealth();
@@ -31,7 +62,6 @@ export default function CronHealth() {
     return runs.data.filter((r) => r.function_name === filter);
   }, [runs.data, filter]);
 
-  // Group by function for summary cards
   const summaryByFn = useMemo(() => {
     if (!runs.data) return new Map<string, { last: typeof runs.data[0]; total: number; failures: number }>();
     const map = new Map<string, { last: typeof runs.data[0]; total: number; failures: number }>();
@@ -75,6 +105,8 @@ export default function CronHealth() {
           const runtime = s.last.completed_at
             ? `${differenceInSeconds(new Date(s.last.completed_at), new Date(s.last.started_at))}s`
             : "—";
+          const schedule = SCHEDULE_MAP[fn];
+          const { expectedNext, isOverdue } = getExpectedNextAndOverdue(s.last.started_at, fn);
 
           return (
             <Card key={fn} className="relative">
@@ -90,6 +122,24 @@ export default function CronHealth() {
                 <p className="text-muted-foreground">
                   Last: {formatDistanceToNow(new Date(s.last.started_at), { addSuffix: true })}
                 </p>
+                {schedule && (
+                  <p className="text-muted-foreground text-xs">
+                    Schedule: {schedule.label}
+                  </p>
+                )}
+                {expectedNext && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-muted-foreground">
+                      Expected next: {expectedNext}
+                    </span>
+                    {isOverdue && (
+                      <Badge variant="destructive" className="text-[10px] px-1.5 py-0 gap-1">
+                        <AlertTriangle className="h-3 w-3" />
+                        Overdue
+                      </Badge>
+                    )}
+                  </div>
+                )}
                 <p className="text-muted-foreground">
                   {s.total} runs · {s.failures} failures
                 </p>

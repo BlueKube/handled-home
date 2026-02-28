@@ -1,10 +1,14 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useZoneHealth, useZoneHealthDetail } from "@/hooks/useZoneHealth";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, Settings, CreditCard, TrendingUp, Camera, RotateCcw, Clock } from "lucide-react";
+import { AdminReadOnlyMap } from "@/components/admin/AdminReadOnlyMap";
+import { format } from "date-fns";
 
 export default function OpsZoneDetail() {
   const { zoneId } = useParams<{ zoneId: string }>();
@@ -25,6 +29,33 @@ export default function OpsZoneDetail() {
 
   const capacities = detail?.capacities ?? [];
   const providers = detail?.providers ?? [];
+
+  // Fetch today's jobs with coordinates for the map
+  const today = format(new Date(), "yyyy-MM-dd");
+  const { data: zoneJobs } = useQuery({
+    queryKey: ["zone-jobs-map", zoneId, today],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("jobs")
+        .select("id, status, scheduled_date, property:properties(lat, lng, street_address)")
+        .eq("zone_id", zoneId!)
+        .eq("scheduled_date", today)
+        .not("status", "eq", "CANCELED");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!zoneId,
+  });
+
+  const mapStops = (zoneJobs ?? [])
+    .filter((j: any) => j.property?.lat && j.property?.lng)
+    .map((j: any) => ({
+      id: j.id,
+      lat: j.property.lat,
+      lng: j.property.lng,
+      label: j.property.street_address,
+      status: j.status,
+    }));
 
   return (
     <div className="p-6 space-y-6">
@@ -140,6 +171,11 @@ export default function OpsZoneDetail() {
           </div>
         )}
       </Card>
+
+      {/* Route Map */}
+      {mapStops.length > 0 && (
+        <AdminReadOnlyMap stops={mapStops} title={`Today's Route — ${zone.name}`} />
+      )}
 
       {/* Actions */}
       <Card className="p-4 space-y-2">

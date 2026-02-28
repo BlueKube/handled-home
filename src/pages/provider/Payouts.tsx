@@ -3,12 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, AlertTriangle, ChevronRight, Clock, CheckCircle2 } from "lucide-react";
+import { DollarSign, AlertTriangle, ChevronRight, Clock, CheckCircle2, Calendar } from "lucide-react";
 import { PageSkeleton } from "@/components/PageSkeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderOrg } from "@/hooks/useProviderOrg";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { nextFriday, format, isBefore } from "date-fns";
 
 function formatCents(cents: number) { return `$${(cents / 100).toFixed(2)}`; }
 
@@ -17,6 +19,35 @@ export default function ProviderPayouts() {
   const { org } = useProviderOrg();
   const { eligibleBalance, heldBalance, payoutAccount, isAccountReady, isLoading } = useProviderEarnings();
   const [onboarding, setOnboarding] = useState(false);
+
+  // Compute next payout date from provider_org_contracts (weekly Friday cadence)
+  const contractQuery = useQuery({
+    queryKey: ["provider-contract", org?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("provider_org_contracts")
+        .select("*")
+        .eq("provider_org_id", org!.id)
+        .is("active_to", null)
+        .order("active_from", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!org?.id,
+  });
+
+  const nextPayoutDate = useMemo(() => {
+    // Default: next Friday from now (weekly payout cadence)
+    const now = new Date();
+    const nf = nextFriday(now);
+    // If today is Friday and before cutoff, use today
+    if (now.getDay() === 5 && now.getHours() < 12) {
+      return format(now, "EEEE, MMM d");
+    }
+    return format(nf, "EEEE, MMM d");
+  }, []);
 
   const handleSetupPayouts = async () => {
     if (!org?.id) return;
@@ -80,6 +111,20 @@ export default function ProviderPayouts() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Next payout card */}
+      {isAccountReady && eligibleBalance > 0 && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="p-4 flex items-center gap-3">
+            <Calendar className="h-5 w-5 text-primary" />
+            <div className="flex-1">
+              <p className="text-sm font-medium">Next payout: {nextPayoutDate}</p>
+              <p className="text-xs text-muted-foreground">Estimated · Weekly Friday cadence</p>
+            </div>
+            <Badge variant="outline" className="text-xs">{formatCents(eligibleBalance)}</Badge>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Links */}
       <Card className="cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => navigate("/provider/payouts/history")}>
