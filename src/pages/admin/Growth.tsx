@@ -38,7 +38,7 @@ const HEALTH_COLORS: Record<string, string> = {
 };
 
 export default function AdminGrowth() {
-  const [selectedZone, setSelectedZone] = useState<string>("");
+  const [selectedZone, setSelectedZone] = useState<string>("__all__");
 
   return (
     <div className="px-4 py-6 space-y-6 animate-fade-in">
@@ -76,7 +76,7 @@ function ZoneFilter({ selectedZone, setSelectedZone }: { selectedZone: string; s
         <SelectValue placeholder="All zones" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="">All zones</SelectItem>
+        <SelectItem value="__all__">All zones</SelectItem>
         {zones?.map((z: any) => (
           <SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>
         ))}
@@ -88,7 +88,7 @@ function ZoneFilter({ selectedZone, setSelectedZone }: { selectedZone: string; s
 function ZoneMatrixTab({ selectedZone, setSelectedZone }: { selectedZone: string; setSelectedZone: (v: string) => void }) {
   const zonesQuery = useZones();
   const zones = zonesQuery.data;
-  const { states, overrideState } = useMarketZoneState(selectedZone || undefined);
+  const { states, overrideState } = useMarketZoneState(selectedZone === "__all__" ? undefined : selectedZone);
   const { computeHealth } = useMarketHealth();
   const [overrideDialog, setOverrideDialog] = useState<{ zoneId: string; category: string; currentState: string } | null>(null);
   const [overrideForm, setOverrideForm] = useState({ newState: "CLOSED", reason: "", lockDays: "" });
@@ -126,7 +126,7 @@ function ZoneMatrixTab({ selectedZone, setSelectedZone }: { selectedZone: string
 
   if (states.isLoading) return <Skeleton className="h-48 mt-4" />;
 
-  const displayZones = zones?.filter((z: any) => !selectedZone || z.id === selectedZone) ?? [];
+  const displayZones = zones?.filter((z: any) => selectedZone === "__all__" || z.id === selectedZone) ?? [];
 
   return (
     <div className="space-y-4 mt-4">
@@ -223,7 +223,7 @@ function ZoneMatrixTab({ selectedZone, setSelectedZone }: { selectedZone: string
 }
 
 function HealthTab({ selectedZone, setSelectedZone }: { selectedZone: string; setSelectedZone: (v: string) => void }) {
-  const { snapshots } = useMarketHealth(selectedZone || undefined);
+  const { snapshots } = useMarketHealth(selectedZone === "__all__" ? undefined : selectedZone);
 
   if (snapshots.isLoading) return <Skeleton className="h-48 mt-4" />;
 
@@ -283,7 +283,7 @@ function ScoreBar({ label, score, detail }: { label: string; score: number; deta
 }
 
 function ActionsTab({ selectedZone, setSelectedZone }: { selectedZone: string; setSelectedZone: (v: string) => void }) {
-  const actions = useAutopilotActions(selectedZone || undefined);
+  const actions = useAutopilotActions(selectedZone === "__all__" ? undefined : selectedZone);
 
   if (actions.isLoading) return <Skeleton className="h-48 mt-4" />;
 
@@ -333,9 +333,9 @@ function ActionsTab({ selectedZone, setSelectedZone }: { selectedZone: string; s
 function SurfacesTab({ selectedZone, setSelectedZone }: { selectedZone: string; setSelectedZone: (v: string) => void }) {
   const zonesQuery = useZones();
   const zones = zonesQuery.data ?? [];
-  const { configs, upsertConfig } = useGrowthSurfaceConfig(selectedZone || undefined);
+  const { configs, upsertConfig } = useGrowthSurfaceConfig(selectedZone === "__all__" ? undefined : selectedZone);
 
-  const displayZones = zones.filter((z: any) => !selectedZone || z.id === selectedZone);
+  const displayZones = zones.filter((z: any) => selectedZone === "__all__" || z.id === selectedZone);
 
   const configMap = new Map<string, any>();
   configs.data?.forEach((c: any) => configMap.set(`${c.zone_id}:${c.category}`, c));
@@ -461,7 +461,7 @@ function EventsTab({ selectedZone, setSelectedZone }: { selectedZone: string; se
     return { start: start.toISOString(), end: new Date().toISOString() };
   })();
 
-  const stats = useGrowthEventStats(selectedZone || undefined, dateFilter);
+  const stats = useGrowthEventStats(selectedZone === "__all__" ? undefined : selectedZone, dateFilter);
 
   if (stats.isLoading) return <Skeleton className="h-48 mt-4" />;
 
