@@ -11,9 +11,11 @@ function fmtDate(d: Date): string {
   return d.toISOString().split("T")[0];
 }
 
+type Client = ReturnType<typeof createClient>;
+
 /** Start a cron_run_log entry via RPC, returns its id */
 async function startRun(
-  supabase: ReturnType<typeof createClient>,
+  supabase: Client,
   functionName: string,
   idempotencyKey: string,
 ): Promise<string | null> {
@@ -30,7 +32,7 @@ async function startRun(
 
 /** Finish a cron_run_log entry via RPC */
 async function finishRun(
-  supabase: ReturnType<typeof createClient>,
+  supabase: Client,
   runId: string | null,
   status: "success" | "partial_failure" | "failed",
   resultSummary?: Record<string, unknown>,
@@ -44,6 +46,33 @@ async function finishRun(
     p_error_message: errorMessage ?? null,
   });
   if (error) console.error(`Failed to finish cron_run_log ${runId}:`, error.message);
+}
+
+/** Run a single sub-job with its own cron_run_log entry */
+async function runSubJob(
+  supabase: Client,
+  jobName: string,
+  idempotencyKey: string,
+  fn: () => Promise<{ data: unknown; error: { message: string } | null }>,
+): Promise<{ status: string; data?: unknown; error?: string }> {
+  const subRunId = await startRun(supabase, jobName, idempotencyKey);
+  console.log(`Running ${jobName}...`);
+  try {
+    const { data, error } = await fn();
+    if (error) {
+      console.error(`${jobName} failed:`, error);
+      await finishRun(supabase, subRunId, "failed", undefined, error.message);
+      return { status: "failed", error: error.message };
+    }
+    console.log(`${jobName} result:`, data);
+    await finishRun(supabase, subRunId, "success", { result: data });
+    return { status: "success", data };
+  } catch (err) {
+    const msg = err?.message ?? String(err);
+    console.error(`${jobName} threw:`, msg);
+    await finishRun(supabase, subRunId, "failed", undefined, msg);
+    return { status: "failed", error: msg };
+  }
 }
 
 Deno.serve(async (req) => {
@@ -76,68 +105,67 @@ Deno.serve(async (req) => {
     const job = body.job || "all";
     const subResults: Record<string, { status: string; data?: unknown; error?: string }> = {};
 
+    // ── Daily: Quality score computation ──
+    if (job === "all" || job === "quality_compute_daily") {
+      subResults.quality_compute_daily = await runSubJob(
+        supabase,
+        "quality_compute_daily",
+        `quality_compute_daily:${today}`,
+        () => supabase.rpc("compute_provider_quality_scores"),
+      );
+    }
+
+    // ── Daily: Training gates evaluation ──
+    if (job === "all" || job === "training_gates_daily") {
+      subResults.training_gates_daily = await runSubJob(
+        supabase,
+        "training_gates_daily",
+        `training_gates_daily:${today}`,
+        () => supabase.rpc("evaluate_training_gates"),
+      );
+    }
+
     // ── Daily: BYOC lifecycle transitions ──
-    if (job === "all" || job === "byoc_lifecycle") {
-      const subKey = `byoc_lifecycle:${today}`;
-      const subRunId = await startRun(supabase, "byoc_lifecycle", subKey);
-      console.log("Running BYOC lifecycle transitions...");
-      const { data, error } = await supabase.rpc("run_byoc_lifecycle_transitions");
-      if (error) {
-        console.error("BYOC lifecycle failed:", error);
-        subResults.byoc_lifecycle = { status: "failed", error: error.message };
-        await finishRun(supabase, subRunId, "failed", undefined, error.message);
-      } else {
-        subResults.byoc_lifecycle = { status: "success", data };
-        console.log("BYOC lifecycle result:", data);
-        await finishRun(supabase, subRunId, "success", { result: data });
-      }
+    if (job === "all" || job === "byoc_lifecycle_daily") {
+      subResults.byoc_lifecycle_daily = await runSubJob(
+        supabase,
+        "byoc_lifecycle_daily",
+        `byoc_lifecycle_daily:${today}`,
+        () => supabase.rpc("run_byoc_lifecycle_transitions"),
+      );
     }
 
     // ── Weekly (Monday): BYOC bonus computation ──
-    if (job === "compute_byoc_bonuses" || (job === "all" && isMonday)) {
+    if (job === "byoc_bonuses_weekly" || (job === "all" && isMonday)) {
       const prevMonday = new Date(now);
       prevMonday.setUTCDate(now.getUTCDate() - 7);
       const mondayOffset = prevMonday.getUTCDay() === 0 ? 6 : prevMonday.getUTCDay() - 1;
       prevMonday.setUTCDate(prevMonday.getUTCDate() - mondayOffset);
       const weekStart = fmtDate(prevMonday);
 
-      const subKey = `compute_byoc_bonuses:${weekStart}`;
-      const subRunId = await startRun(supabase, "compute_byoc_bonuses", subKey);
-      console.log("Running BYOC bonus computation...");
-      const { data, error } = await supabase.rpc("compute_byoc_bonuses", {
-        p_week_start: weekStart,
-      });
-      if (error) {
-        console.error("BYOC bonuses failed:", error);
-        subResults.compute_byoc_bonuses = { status: "failed", error: error.message };
-        await finishRun(supabase, subRunId, "failed", undefined, error.message);
-      } else {
-        subResults.compute_byoc_bonuses = { status: "success", data };
-        console.log("BYOC bonuses result:", data);
-        await finishRun(supabase, subRunId, "success", { result: data, week_start: weekStart });
-      }
+      subResults.byoc_bonuses_weekly = await runSubJob(
+        supabase,
+        "byoc_bonuses_weekly",
+        `byoc_bonuses_weekly:${weekStart}`,
+        () => supabase.rpc("compute_byoc_bonuses", { p_week_start: weekStart }),
+      );
     }
 
     // ── Weekly (Monday): Provider weekly rollups ──
-    if (job === "provider_weekly_rollups" || (job === "all" && isMonday)) {
-      const subKey = `provider_weekly_rollups:${today}`;
-      const subRunId = await startRun(supabase, "provider_weekly_rollups", subKey);
-      console.log("Running provider weekly rollups...");
-      const { data, error } = await supabase.rpc("compute_provider_weekly_rollups");
-      if (error) {
-        console.error("Weekly rollups failed:", error);
-        subResults.provider_weekly_rollups = { status: "failed", error: error.message };
-        await finishRun(supabase, subRunId, "failed", undefined, error.message);
-      } else {
-        subResults.provider_weekly_rollups = { status: "success", data };
-        console.log("Weekly rollups result:", data);
-        await finishRun(supabase, subRunId, "success", { result: data });
-      }
+    if (job === "provider_weekly_rollups_weekly" || (job === "all" && isMonday)) {
+      subResults.provider_weekly_rollups_weekly = await runSubJob(
+        supabase,
+        "provider_weekly_rollups_weekly",
+        `provider_weekly_rollups_weekly:${today}`,
+        () => supabase.rpc("compute_provider_weekly_rollups"),
+      );
     }
 
     // Determine orchestrator outcome
-    const failedSubs = Object.entries(subResults).filter(([, v]) => v.status === "failed");
-    const totalSubs = Object.keys(subResults).length;
+    const entries = Object.entries(subResults);
+    const failedSubs = entries.filter(([, v]) => v.status === "failed");
+    const successSubs = entries.filter(([, v]) => v.status === "success");
+    const totalSubs = entries.length;
     const orchStatus = failedSubs.length === 0
       ? "success"
       : failedSubs.length === totalSubs
@@ -146,15 +174,16 @@ Deno.serve(async (req) => {
 
     const orchSummary = {
       sub_jobs_ran: totalSubs,
+      sub_jobs_succeeded: successSubs.length,
       sub_jobs_failed: failedSubs.length,
-      sub_job_results: subResults,
+      per_job: Object.fromEntries(entries.map(([k, v]) => [k, { status: v.status, error: v.error }])),
     };
 
     await finishRun(supabase, orchRunId, orchStatus, orchSummary,
       failedSubs.length > 0 ? failedSubs.map(([k, v]) => `${k}: ${v.error}`).join("; ") : undefined);
 
     return new Response(
-      JSON.stringify({ success: orchStatus === "success", results: subResults, errors: failedSubs.length > 0 ? failedSubs.map(([k, v]) => `${k}: ${v.error}`) : undefined }),
+      JSON.stringify({ success: orchStatus === "success", results: subResults }),
       {
         status: orchStatus === "success" ? 200 : 207,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

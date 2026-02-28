@@ -10,6 +10,7 @@ interface MapStop {
   lng: number;
   label?: string;
   status?: string;
+  stop_index?: number;
 }
 
 interface AdminReadOnlyMapProps {
@@ -28,7 +29,9 @@ export function AdminReadOnlyMap({ stops, title }: AdminReadOnlyMapProps) {
   const token = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
   const validStops = useMemo(
-    () => stops.filter((s) => s.lat && s.lng && !isNaN(s.lat) && !isNaN(s.lng)),
+    () => stops
+      .filter((s) => s.lat && s.lng && !isNaN(s.lat) && !isNaN(s.lng))
+      .sort((a, b) => (a.stop_index ?? Infinity) - (b.stop_index ?? Infinity)),
     [stops]
   );
 

@@ -509,7 +509,7 @@ AI, insurance, financing, data marketplace. These make the business defensible.
   - E05-F2: `evaluate_training_gates` RPC created — auto-completes pending gates when quality score meets `required_score_minimum`
 - [x] **OBS-5** | Acknowledged — 2G-D sprint may need splitting if scope is too large
 
-*Last updated: 2026-02-28 — Sprint 2H-E complete (23/23 tasks). Round 2H Fix Pack 100% done. E2 review remediation complete.*
+*Last updated: 2026-02-28 — Sprint 2H-E2 remediation complete. Round 2H Fix Pack 100% done.*
 
 ### Sprint 2H-E Remediation (Review Findings E-F1 through E-F7)
 - [x] **E-F1** | P0 | S | Idempotency — `compute_quality_scores` already filters `WHERE computed_at::date < CURRENT_DATE` for previous-score lookup (verified in migration)
@@ -521,8 +521,8 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 
 ### Sprint 2H-E2 Remediation (Review Findings E2-F1 through E2-F6)
 - [x] **E2-F1** | P0 | S | CRITICAL: Fixed `compute_provider_quality_scores` to use correct columns (`band` + `components` jsonb) instead of non-existent `rating_score`, `performance_band` columns. Also re-added `start_cron_run`/`finish_cron_run` calls.
+- [x] **E2-F2** | P1 | M | Created pg_cron schedules: `quality-compute-daily` (00:30 UTC), `byoc-lifecycle-daily` (02:00 UTC), `byoc-bonuses-weekly` (Mon 00:30 UTC), `provider-rollups-weekly` (Mon 01:30 UTC). Removed old overlapping schedules.
 - [x] **E2-F3** | P1 | S | Seeded 10 missing config keys for ControlConfig UI (`byoc_bonus_weekly_cap_cents`, `referral_reward_cap_cents`, `max_credits_per_customer_cents`, `founding_partner_bonus_weeks`, `assignment_competition_slider`, `dunning_max_steps`, `no_show_penalty_points`, `probation_score_threshold`, `suspension_score_threshold`, `max_buffer_percent`)
 - [x] **E2-F4** | P0 | S | Removed unused `contractQuery` in provider Payouts.tsx
-- [x] **E2-F6** | P1 | S | `run-scheduled-jobs` edge function now uses `start_cron_run`/`finish_cron_run` RPCs instead of direct `cron_run_log` table inserts
-- [ ] **E2-F2** | P1 | M | pg_cron schedules not created — deferred (requires `cron.schedule()` via insert tool, not migration)
-- [ ] **E2-F5** | P2 | S | Admin map pin numbers use filtered index instead of route order (same as D-F1, low impact)
+- [x] **E2-F5** | P0 | S | Map pin ordering: AdminReadOnlyMap sorts by `stop_index`, ProviderMapView sorts by `route_order` — deterministic pin numbering matches list order
+- [x] **E2-F6** | P1 | S | `run-scheduled-jobs` edge function now uses `start_cron_run`/`finish_cron_run` RPCs; distinct sub-job entries for `quality_compute_daily`, `training_gates_daily`, `byoc_lifecycle_daily`, `byoc_bonuses_weekly`, `provider_weekly_rollups_weekly`

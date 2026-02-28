@@ -37,7 +37,9 @@ export function ProviderMapView({ jobs, selectedJobId, onSelectJob, readOnly }: 
   const [popupJob, setPopupJob] = useState<ProviderJob | null>(null);
 
   const mappableJobs = useMemo(
-    () => jobs.filter((j) => j.property?.lat != null && j.property?.lng != null),
+    () => jobs
+      .filter((j) => j.property?.lat != null && j.property?.lng != null)
+      .sort((a, b) => (a.route_order ?? Infinity) - (b.route_order ?? Infinity)),
     [jobs]
   );
 
