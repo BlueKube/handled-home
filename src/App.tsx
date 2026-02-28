@@ -122,6 +122,7 @@ import AdminControlPricing from "@/pages/admin/ControlPricing";
 import AdminControlPayouts from "@/pages/admin/ControlPayouts";
 import AdminControlChangeRequests from "@/pages/admin/ControlChangeRequests";
 import AdminControlChangeLog from "@/pages/admin/ControlChangeLog";
+import AdminPlaybooks from "@/pages/admin/Playbooks";
 
 const queryClient = new QueryClient();
 
@@ -263,6 +264,7 @@ const App = () => (
                 <Route path="/admin/control/payouts" element={<AdminControlPayouts />} />
                 <Route path="/admin/control/change-requests" element={<AdminControlChangeRequests />} />
                 <Route path="/admin/control/change-log" element={<AdminControlChangeLog />} />
+                <Route path="/admin/playbooks" element={<AdminPlaybooks />} />
                 <Route path="/admin/notifications" element={<SharedNotifications />} />
               </Route>
 
