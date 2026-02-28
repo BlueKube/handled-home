@@ -510,3 +510,11 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **OBS-5** | Acknowledged — 2G-D sprint may need splitting if scope is too large
 
 *Last updated: 2026-02-28 — Sprint 2H-E complete (23/23 tasks). Round 2H Fix Pack 100% done. Next: Round 2I (Future Moats) or revisit 2D/2F gaps.*
+
+### Sprint 2H-E Remediation (Review Findings E-F1 through E-F7)
+- [x] **E-F1** | P0 | S | Idempotency — `compute_quality_scores` already filters `WHERE computed_at::date < CURRENT_DATE` for previous-score lookup (verified in migration)
+- [x] **E-F2** | P1 | S | pg_cron/pg_net extensions — verified both enabled (pg_cron 1.6.4, pg_net 0.19.5)
+- [x] **E-F3** | P0 | M | `run-scheduled-jobs` now logs orchestrator + per-sub-job entries to `cron_run_log` with structured idempotency keys (`daily:YYYY-MM-DD`, `byoc_lifecycle:YYYY-MM-DD`, etc.) and `success|partial_failure|failed` status
+- [x] **E-F5** | P1 | S | Config keys — verified 8 rows seeded in `admin_system_config` (no action needed)
+- [x] **E-F6** | P0 | S | Payout cadence — already shows hardcoded "Weekly Friday cadence" with "Estimated" label in provider payouts UI
+- [x] **E-F7** | P1 | S | `DispatcherActionsDialog` now accepts `defaultAction` prop; `E` shortcut pre-selects "Create Ticket", `N` pre-selects "Note", `A` opens with no preset; action+note reset on jobId/defaultAction change

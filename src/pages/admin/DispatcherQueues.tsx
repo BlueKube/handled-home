@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatcherQueues, type QueueJob, type QueueIssue } from "@/hooks/useDispatcherQueues";
-import { DispatcherActionsDialog } from "@/components/admin/DispatcherActionsDialog";
+import { DispatcherActionsDialog, type ActionType } from "@/components/admin/DispatcherActionsDialog";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -174,6 +174,7 @@ export default function DispatcherQueues() {
   const nav = useNavigate();
   const [activeTab, setActiveTab] = useState<QueueKey>(loadSavedTab);
   const [actionJobId, setActionJobId] = useState<string | null>(null);
+  const [defaultAction, setDefaultAction] = useState<ActionType | undefined>(undefined);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   // Persist tab choice
@@ -229,12 +230,15 @@ export default function DispatcherQueues() {
             if (job) nav(`/admin/jobs/${job.id}`);
           }
           break;
-        case "a": // Action on selected job
+        case "a": // Action on selected job (no preset)
           e.preventDefault();
           if (!data) break;
           if (activeTab !== "coverageGaps" && activeTab !== "customerIssues" && activeTab !== "providerIncidents") {
             const job = data[activeTab][selectedIndex];
-            if (job) setActionJobId(job.id);
+            if (job) {
+              setDefaultAction(undefined);
+              setActionJobId(job.id);
+            }
           }
           break;
         case "e": // Escalate — open action dialog with "create_ticket" pre-selected
@@ -243,8 +247,8 @@ export default function DispatcherQueues() {
           if (activeTab !== "coverageGaps" && activeTab !== "customerIssues" && activeTab !== "providerIncidents") {
             const job = data[activeTab][selectedIndex];
             if (job) {
+              setDefaultAction("create_ticket");
               setActionJobId(job.id);
-              // DispatcherActionsDialog will open; user can select "Create Ticket"
             }
           }
           break;
@@ -254,6 +258,7 @@ export default function DispatcherQueues() {
           if (activeTab !== "coverageGaps" && activeTab !== "customerIssues" && activeTab !== "providerIncidents") {
             const job = data[activeTab][selectedIndex];
             if (job) {
+              setDefaultAction("note");
               setActionJobId(job.id);
             }
           }
@@ -450,7 +455,8 @@ export default function DispatcherQueues() {
         <DispatcherActionsDialog
           jobId={actionJobId}
           open={!!actionJobId}
-          onClose={() => setActionJobId(null)}
+          onClose={() => { setActionJobId(null); setDefaultAction(undefined); }}
+          defaultAction={defaultAction}
         />
       )}
     </div>

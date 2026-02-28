@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,19 +10,26 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
+export type ActionType = "note" | "follow_up" | "create_ticket";
+
 interface DispatcherActionsProps {
   jobId: string;
   open: boolean;
   onClose: () => void;
+  defaultAction?: ActionType;
 }
 
-type ActionType = "note" | "follow_up" | "create_ticket";
-
-export function DispatcherActionsDialog({ jobId, open, onClose }: DispatcherActionsProps) {
+export function DispatcherActionsDialog({ jobId, open, onClose, defaultAction }: DispatcherActionsProps) {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const [action, setAction] = useState<ActionType>("note");
+  const [action, setAction] = useState<ActionType>(defaultAction ?? "note");
   const [note, setNote] = useState("");
+
+  // Reset action & note when jobId or defaultAction changes
+  useEffect(() => {
+    setAction(defaultAction ?? "note");
+    setNote("");
+  }, [jobId, defaultAction]);
 
   const addNoteMutation = useMutation({
     mutationFn: async () => {
@@ -36,11 +43,7 @@ export function DispatcherActionsDialog({ jobId, open, onClose }: DispatcherActi
       });
       if (error) throw error;
 
-      // "Follow Up" is tracked via the job_event only — no job status change
-      // to avoid violating the CHECK constraint on jobs.status
-
       if (action === "create_ticket") {
-        // Get the job's customer_id (required FK on support_tickets)
         const { data: jobData } = await supabase
           .from("jobs")
           .select("customer_id")
