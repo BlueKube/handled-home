@@ -32,8 +32,9 @@ export default function ControlChangeLog() {
 
   if (isLoading) return <div className="p-6 space-y-4"><Skeleton className="h-8 w-64" /><Skeleton className="h-96 w-full" /></div>;
 
+  // D2-F2: Only pricing overrides have a rollback RPC; payout rollback not yet implemented
   const isRollbackable = (action: string) =>
-    ["set_zone_pricing_override", "set_sku_base_price", "set_provider_payout_zone_override", "set_provider_payout_base"].includes(action);
+    ["set_zone_pricing_override"].includes(action);
 
   return (
     <div className="p-6 space-y-6 max-w-6xl">

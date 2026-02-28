@@ -7394,14 +7394,26 @@ export type Database = {
         }
         Returns: undefined
       }
-      set_provider_org_contract: {
-        Args: {
-          p_contract_type: string
-          p_provider_org_id: string
-          p_reason: string
-        }
-        Returns: undefined
-      }
+      set_provider_org_contract:
+        | {
+            Args: {
+              p_contract_type: string
+              p_flat_rate_cents?: number
+              p_hourly_rate_cents?: number
+              p_provider_org_id: string
+              p_reason?: string
+              p_time_guard_minutes?: number
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_contract_type: string
+              p_provider_org_id: string
+              p_reason: string
+            }
+            Returns: undefined
+          }
       set_provider_payout_base: {
         Args: {
           p_base_payout_cents: number
