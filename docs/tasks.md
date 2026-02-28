@@ -397,9 +397,9 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 - [ ] **2H-A3** | P0 | L | Build `/admin/cron-health` page — last N runs per job, status + runtime, failure details, superuser-only "Retry Now" button. Add to AdminShell Governance nav
 
 ### Sprint 2H-B — Quality Score Compute Pipeline (P0)
-- [ ] **2H-B1** | P0 | XL | Create `compute_provider_quality_scores()` RPC — rolling 28-day weighted score (rating 35%, issues 25%, photos 20%, on-time 20%), upsert into `provider_quality_score_snapshots`, call `evaluate_provider_tier()`, emit risk alerts for band downgrades
-- [ ] **2H-B2** | P0 | M | Fix `evaluate_training_gates()` RPC — correct column references (`composite_score` → `score`, `snapshot_at` → `computed_at`). Wire to run daily after quality compute
-- [ ] **2H-B3** | P0 | M | Create `compute-quality-scores` edge function — wrapper calling both RPCs in sequence, error handling, cron_run_log integration
+- [x] **2H-B1** | P0 | XL | Create `compute_provider_quality_scores()` RPC — rolling 28-day weighted score (rating 35%, issues 25%, photos 20%, on-time 20%), upsert into `provider_quality_score_snapshots`, call `evaluate_provider_tier()`, emit risk alerts for band downgrades
+- [x] **2H-B2** | P0 | M | Fix `evaluate_training_gates()` RPC — correct column references (`composite_score` → `score`, `snapshot_at` → `computed_at`). Wire to run daily after quality compute
+- [x] **2H-B3** | P0 | M | Create `compute-quality-scores` edge function — wrapper calling both RPCs in sequence, error handling, cron_run_log integration
 
 ### Sprint 2H-C — BYOC Automation + Weekly Rollups (P0)
 - [ ] **2H-C1** | P0 | L | Create `run_byoc_lifecycle_transitions()` RPC — advance lifecycle states, activate bonus window on first visit, expire ACTIVE→ENDED when bonus window passes
