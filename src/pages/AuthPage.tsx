@@ -109,7 +109,7 @@ export default function AuthPage() {
     <div className="min-h-screen flex flex-col bg-background px-6 safe-top animate-fade-in">
       {/* Logo & tagline */}
       <div className="pt-16 pb-10 flex flex-col items-center">
-        <img src={logo} alt="Handled Home" className="h-16 w-auto mb-4" />
+        <img src={logo} alt="Handled Home" className="h-32 w-auto mb-4" />
         <p className="text-muted-foreground text-sm">Your home is handled.</p>
       </div>
 
