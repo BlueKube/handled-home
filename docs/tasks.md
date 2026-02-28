@@ -373,8 +373,8 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 - [x] **2G-C3** | P1 | M | Wire `auto_assign_job` to emit decision traces — records all candidates (selected + rejected with reasons), scoring breakdown, and outcome at every decision point (primary, backup, overflow)
 
 ### Sprint 2G-D — Control Room (Superuser-Only)
-- [ ] **2G-D1** | P0 | XL | Zone pricing engine — `sku_pricing_base`, `sku_pricing_zone_overrides` tables with versioning. Admin UI for zone multipliers, bulk set, copy from zone, schedule effective dates, rollback. Superuser-only write RLS
-- [ ] **2G-D2** | P0 | XL | Provider payout engine — `provider_payout_base`, `provider_payout_zone_overrides`, `provider_org_contracts` (partner_flat / partner_time_guarded / contractor_time_based), `payout_overtime_rules` tables. Admin UI for payout tables, contract types, overtime params. Superuser-only write RLS
+- [x] **2G-D1** | P0 | XL | Zone pricing engine — `sku_pricing_base`, `sku_pricing_zone_overrides` tables with versioning. Admin UI for zone multipliers, bulk set, copy from zone, schedule effective dates, rollback. Superuser-only write RLS. Also created `provider_payout_base`, `provider_payout_zone_overrides`, `provider_org_contracts`, `payout_overtime_rules` tables + `get_effective_sku_price` / `get_effective_provider_payout` / `rollback_pricing_override` RPCs
+- [ ] **2G-D2** | P0 | XL | Provider payout engine UI — Admin UI for payout tables, contract types, overtime params. Superuser-only write
 - [ ] **2G-D3** | P1 | L | `admin_change_requests` table + UI — non-superusers can submit change requests for pricing/payout/incentives/algorithm. Superuser reviews and applies
 - [ ] **2G-D4** | P1 | M | Change log + rollback UI — view all versioned config changes with rollback action (creates new version copying previous)
 
@@ -469,7 +469,7 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2D — Customer Polish | 28 | 17 | 61% |
 | 2E — Provider Polish | 17 | 17 | 100% |
 | 2F — Growth Engine | 13 | 0 | 0% (skipped) |
-| 2G — Admin Controls / Ops Cockpit | 22 | 7 | 32% |
+| 2G — Admin Controls / Ops Cockpit | 22 | 8 | 36% |
 | 2H — Platform Hardening | 15 | 0 | 0% |
 | 2I — Future Moats | 9 | 0 | 0% |
 | **TOTAL** | **191** | **103** | **54%** |
@@ -488,4 +488,4 @@ AI, insurance, financing, data marketplace. These make the business defensible.
   - E05-F2: `evaluate_training_gates` RPC created — auto-completes pending gates when quality score meets `required_score_minimum`
 - [x] **OBS-5** | Acknowledged — 2G-D sprint may need splitting if scope is too large
 
-*Last updated: 2026-02-27 — Sprint 2G-C complete. Governance + Explainability done. Ready for Sprint 2G-D.*
+*Last updated: 2026-02-28 — Sprint 2G-D Part 1 complete. Pricing schema (6 tables) + Zone Pricing UI done. Ready for 2G-D Part 2 (Payout UI + Change Requests).*
