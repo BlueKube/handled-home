@@ -2387,6 +2387,72 @@ export type Database = {
         }
         Relationships: []
       }
+      payout_overtime_rules: {
+        Row: {
+          active_from: string
+          active_to: string | null
+          category: string | null
+          changed_by: string
+          created_at: string
+          expected_minutes: number
+          id: string
+          overtime_cap_cents: number
+          overtime_rate_cents_per_min: number
+          overtime_start_after_minutes: number
+          reason: string | null
+          sku_id: string | null
+          version: number
+          zone_id: string
+        }
+        Insert: {
+          active_from?: string
+          active_to?: string | null
+          category?: string | null
+          changed_by: string
+          created_at?: string
+          expected_minutes?: number
+          id?: string
+          overtime_cap_cents?: number
+          overtime_rate_cents_per_min?: number
+          overtime_start_after_minutes?: number
+          reason?: string | null
+          sku_id?: string | null
+          version?: number
+          zone_id: string
+        }
+        Update: {
+          active_from?: string
+          active_to?: string | null
+          category?: string | null
+          changed_by?: string
+          created_at?: string
+          expected_minutes?: number
+          id?: string
+          overtime_cap_cents?: number
+          overtime_rate_cents_per_min?: number
+          overtime_start_after_minutes?: number
+          reason?: string | null
+          sku_id?: string | null
+          version?: number
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_overtime_rules_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payout_overtime_rules_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payout_runs: {
         Row: {
           completed_at: string | null
@@ -3599,6 +3665,53 @@ export type Database = {
           },
         ]
       }
+      provider_org_contracts: {
+        Row: {
+          active_from: string
+          active_to: string | null
+          category: string | null
+          changed_by: string
+          contract_type: Database["public"]["Enums"]["provider_contract_type"]
+          created_at: string
+          id: string
+          provider_org_id: string
+          reason: string | null
+          version: number
+        }
+        Insert: {
+          active_from?: string
+          active_to?: string | null
+          category?: string | null
+          changed_by: string
+          contract_type?: Database["public"]["Enums"]["provider_contract_type"]
+          created_at?: string
+          id?: string
+          provider_org_id: string
+          reason?: string | null
+          version?: number
+        }
+        Update: {
+          active_from?: string
+          active_to?: string | null
+          category?: string | null
+          changed_by?: string
+          contract_type?: Database["public"]["Enums"]["provider_contract_type"]
+          created_at?: string
+          id?: string
+          provider_org_id?: string
+          reason?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_org_contracts_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       provider_orgs: {
         Row: {
           accountable_owner_user_id: string
@@ -3693,6 +3806,47 @@ export type Database = {
           },
         ]
       }
+      provider_payout_base: {
+        Row: {
+          active_from: string
+          base_payout_cents: number
+          changed_by: string
+          created_at: string
+          id: string
+          reason: string | null
+          sku_id: string
+          version: number
+        }
+        Insert: {
+          active_from?: string
+          base_payout_cents?: number
+          changed_by: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+          sku_id: string
+          version?: number
+        }
+        Update: {
+          active_from?: string
+          base_payout_cents?: number
+          changed_by?: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+          sku_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_payout_base_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       provider_payout_line_items: {
         Row: {
           amount_cents: number
@@ -3728,6 +3882,63 @@ export type Database = {
             columns: ["payout_id"]
             isOneToOne: false
             referencedRelation: "provider_payouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_payout_zone_overrides: {
+        Row: {
+          active_from: string
+          active_to: string | null
+          changed_by: string
+          created_at: string
+          id: string
+          override_payout_cents: number | null
+          payout_multiplier: number | null
+          reason: string | null
+          sku_id: string
+          version: number
+          zone_id: string
+        }
+        Insert: {
+          active_from?: string
+          active_to?: string | null
+          changed_by: string
+          created_at?: string
+          id?: string
+          override_payout_cents?: number | null
+          payout_multiplier?: number | null
+          reason?: string | null
+          sku_id: string
+          version?: number
+          zone_id: string
+        }
+        Update: {
+          active_from?: string
+          active_to?: string | null
+          changed_by?: string
+          created_at?: string
+          id?: string
+          override_payout_cents?: number | null
+          payout_multiplier?: number | null
+          reason?: string | null
+          sku_id?: string
+          version?: number
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_payout_zone_overrides_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_payout_zone_overrides_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
             referencedColumns: ["id"]
           },
         ]
@@ -5085,6 +5296,107 @@ export type Database = {
           },
           {
             foreignKeyName: "share_cards_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sku_pricing_base: {
+        Row: {
+          active_from: string
+          base_price_cents: number
+          changed_by: string
+          created_at: string
+          currency: string
+          id: string
+          reason: string | null
+          sku_id: string
+          version: number
+        }
+        Insert: {
+          active_from?: string
+          base_price_cents?: number
+          changed_by: string
+          created_at?: string
+          currency?: string
+          id?: string
+          reason?: string | null
+          sku_id: string
+          version?: number
+        }
+        Update: {
+          active_from?: string
+          base_price_cents?: number
+          changed_by?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          reason?: string | null
+          sku_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sku_pricing_base_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sku_pricing_zone_overrides: {
+        Row: {
+          active_from: string
+          active_to: string | null
+          changed_by: string
+          created_at: string
+          id: string
+          override_price_cents: number | null
+          price_multiplier: number | null
+          reason: string | null
+          sku_id: string
+          version: number
+          zone_id: string
+        }
+        Insert: {
+          active_from?: string
+          active_to?: string | null
+          changed_by: string
+          created_at?: string
+          id?: string
+          override_price_cents?: number | null
+          price_multiplier?: number | null
+          reason?: string | null
+          sku_id: string
+          version?: number
+          zone_id: string
+        }
+        Update: {
+          active_from?: string
+          active_to?: string | null
+          changed_by?: string
+          created_at?: string
+          id?: string
+          override_price_cents?: number | null
+          price_multiplier?: number | null
+          reason?: string | null
+          sku_id?: string
+          version?: number
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sku_pricing_zone_overrides_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sku_pricing_zone_overrides_zone_id_fkey"
             columns: ["zone_id"]
             isOneToOne: false
             referencedRelation: "zones"
@@ -6761,6 +7073,24 @@ export type Database = {
         Args: { p_default_day: string; p_strategy: string }
         Returns: string[]
       }
+      get_effective_provider_payout: {
+        Args: { p_sku_id: string; p_zone_id: string }
+        Returns: {
+          base_payout_cents: number
+          effective_payout_cents: number
+          zone_multiplier: number
+          zone_override_cents: number
+        }[]
+      }
+      get_effective_sku_price: {
+        Args: { p_sku_id: string; p_zone_id: string }
+        Returns: {
+          base_price_cents: number
+          effective_price_cents: number
+          zone_multiplier: number
+          zone_override_cents: number
+        }[]
+      }
       get_handle_balance: {
         Args: { p_subscription_id: string }
         Returns: number
@@ -6952,6 +7282,10 @@ export type Database = {
         Args: { p_share_card_id: string }
         Returns: undefined
       }
+      rollback_pricing_override: {
+        Args: { p_override_id: string; p_reason?: string }
+        Returns: string
+      }
       run_dunning_step: { Args: { p_subscription_id: string }; Returns: Json }
       run_payout_batch: { Args: { p_payout_run_id: string }; Returns: Json }
       schedule_plan_change: {
@@ -7041,6 +7375,10 @@ export type Database = {
         | "approved"
         | "waitlisted"
         | "rejected"
+      provider_contract_type:
+        | "partner_flat"
+        | "partner_time_guarded"
+        | "contractor_time_based"
       referral_milestone_type:
         | "installed"
         | "subscribed"
@@ -7286,6 +7624,11 @@ export const Constants = {
         "approved",
         "waitlisted",
         "rejected",
+      ],
+      provider_contract_type: [
+        "partner_flat",
+        "partner_time_guarded",
+        "contractor_time_based",
       ],
       referral_milestone_type: [
         "installed",
