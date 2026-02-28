@@ -379,10 +379,10 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 - [x] **2G-D4** | P1 | M | Change log + rollback UI — audit trail filtered by entity type (8 config tables), collapsible before/after JSON diff, rollback button for pricing/payout overrides. Uses `useAuditLog` hook
 
 ### Sprint 2G-E — SOPs + Polish
-- [ ] **2G-E1** | P1 | M | Create `/admin/playbooks` page — render SOP markdown with role filtering (dispatcher/ops/growth/superuser playbooks)
-- [ ] **2G-E2** | P1 | M | Write core SOP content — end-of-day reconciliation, missing proof handling, no-show escalation, provider probation ladder, zone pause workflow, emergency pricing override
-- [ ] **2G-E3** | P2 | M | Dense table polish — compact row height, sticky headers, hover actions, keyboard shortcuts (J/K/Enter/A/E/N) for dispatcher queues
-- [ ] **2G-E4** | P2 | S | Saved views per role — dispatcher default queue filters persisted to localStorage
+- [x] **2G-E1** | P1 | M | Create `/admin/playbooks` page — render SOP markdown with role filtering (dispatcher/ops/growth/superuser playbooks)
+- [x] **2G-E2** | P1 | M | Write core SOP content — end-of-day reconciliation, missing proof handling, no-show escalation, provider probation ladder, zone pause workflow, emergency pricing override
+- [x] **2G-E3** | P2 | M | Dense table polish — compact row height, sticky headers, hover actions, keyboard shortcuts (J/K/Enter/A/E/N) for dispatcher queues
+- [x] **2G-E4** | P2 | S | Saved views per role — dispatcher default queue filters persisted to localStorage
 
 ---
 
@@ -488,4 +488,4 @@ AI, insurance, financing, data marketplace. These make the business defensible.
   - E05-F2: `evaluate_training_gates` RPC created — auto-completes pending gates when quality score meets `required_score_minimum`
 - [x] **OBS-5** | Acknowledged — 2G-D sprint may need splitting if scope is too large
 
-*Last updated: 2026-02-28 — Sprint 2G-D Part 2 complete. Payout Engine UI (3 tabs), Change Requests (submit/review), Change Log (audit trail + rollback) done. Ready for 2G-E (SOPs + Polish).*
+*Last updated: 2026-02-28 — Sprint 2G-E complete. Playbooks page with 6 SOPs, dense table polish with keyboard shortcuts (J/K/Enter/A/R/←→), saved views via localStorage. Round 2G fully complete.*
