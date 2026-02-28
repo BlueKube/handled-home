@@ -419,15 +419,20 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 - [x] **2H-D1** | P1 | S | Install `react-map-gl` + `mapbox-gl`. Add MAPBOX_ACCESS_TOKEN via VITE env var
 - [x] **2H-D2** | P1 | XL | Build `ProviderMapView.tsx` — numbered pins for today's stops, tap → stop preview card, "Navigate" deep link, fallback for missing lat/lng
 - [x] **2H-D3** | P1 | L | Integrate map into provider Jobs — list/map toggle, synced selection, "Navigate to next stop" primary action
-- [ ] **2H-D4** | P1 | M | Admin read-only map — provider route pins on service day detail and provider org detail pages
+- [x] **2H-D4** | P1 | M | Admin read-only map — provider route pins on service day detail and provider org detail pages
 - [x] **2H-D5** | P1 | S | Geocode handling — lat/lng included in property select, missing-coords banner, navigate deep links to Apple/Google Maps
 
 ### Sprint 2H-E — Admin Completeness Polish (P1.5)
-- [ ] **2H-E1** | P1 | M | Wire `DecisionTraceCard` to service day detail, provider org detail, payout/hold detail, exception detail
-- [ ] **2H-E2** | P1 | M | Add 4 missing SOP playbooks — Growth Manager zone launch, BYOC close checklist, coverage exception approvals, payout/hold escalation
-- [ ] **2H-E3** | P1 | L | Build Control Room gaps — Incentive caps, Algorithm params, Policy guardrails (read from `admin_system_config`)
-- [ ] **2H-E4** | P1 | S | Add payout schedule visibility — "Next payout" card on provider Payouts page
-- [ ] **2H-E5** | P1 | S | Wire dispatcher keyboard shortcuts E (escalate) and N (note) to DispatcherActionsDialog
+- [x] **2H-E1** | P1 | M | Wire `DecisionTraceCard` to service day detail, provider org detail, payout/hold detail, exception detail
+- [x] **2H-E2** | P1 | M | Add 4 missing SOP playbooks — Growth Manager zone launch, BYOC close checklist, coverage exception approvals, payout/hold escalation
+- [x] **2H-E3** | P1 | L | Build Control Room gaps — Incentive caps, Algorithm params, Policy guardrails (read from `admin_system_config`) at `/admin/control/config`
+- [x] **2H-E4** | P1 | S | Add payout schedule visibility — "Next payout" card on provider Payouts page (computed weekly Friday cadence)
+- [x] **2H-E5** | P1 | S | Wire dispatcher keyboard shortcuts E (escalate) and N (note) to DispatcherActionsDialog
+
+#### Sprint 2H-E Remediation (ChatGPT feedback)
+- [x] **2H-E-R1** | P0 | S | Quality snapshot idempotency — unique index on `(provider_org_id, to_date_immutable(computed_at))`, RPC uses ON CONFLICT DO UPDATE
+- [x] **2H-E-R2** | P0 | S | pg_cron schedules — 4 cron.schedule entries for compute-quality-scores (03:00 UTC), run-scheduled-jobs (04:00 UTC), process-notification-events (every 2 min), cleanup-expired-offers (05:00 UTC)
+- [x] **2H-E-R3** | P1 | S | Expected next run on cron-health UI — schedule map with overdue badges
 
 ---
 
@@ -486,9 +491,9 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2E — Provider Polish | 17 | 17 | 100% |
 | 2F — Growth Engine | 13 | 0 | 0% (skipped) |
 | 2G — Admin Controls / Ops Cockpit | 22 | 22 | 100% |
-| 2H — Fix Pack (PRD Completeness) | 20 | 13 | 65% |
+| 2H — Fix Pack (PRD Completeness) | 23 | 23 | 100% |
 | 2I — Future Moats | 9 | 0 | 0% |
-| **TOTAL** | **191** | **107** | **56%** |
+| **TOTAL** | **194** | **117** | **60%** |
 
 ---
 
@@ -504,4 +509,4 @@ AI, insurance, financing, data marketplace. These make the business defensible.
   - E05-F2: `evaluate_training_gates` RPC created — auto-completes pending gates when quality score meets `required_score_minimum`
 - [x] **OBS-5** | Acknowledged — 2G-D sprint may need splitting if scope is too large
 
-*Last updated: 2026-02-28 — Sprint 2H-D complete (13/20 tasks). 2H-D4 (admin read-only map) deferred to 2H-E. Next: Sprint 2H-E.*
+*Last updated: 2026-02-28 — Sprint 2H-E complete (23/23 tasks). Round 2H Fix Pack 100% done. Next: Round 2I (Future Moats) or revisit 2D/2F gaps.*

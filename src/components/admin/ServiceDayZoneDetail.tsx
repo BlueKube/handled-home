@@ -7,6 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { useServiceDayCapacity } from "@/hooks/useServiceDayCapacity";
 import { useServiceDayAdmin } from "@/hooks/useServiceDayAdmin";
 import { ServiceDayOverrideModal } from "./ServiceDayOverrideModal";
+import { DecisionTraceCard } from "@/components/admin/DecisionTraceCard";
 import { ArrowLeftRight, ChevronDown, History } from "lucide-react";
 import { format } from "date-fns";
 
@@ -128,6 +129,9 @@ export function ServiceDayZoneDetail({ zoneId, zoneName }: ServiceDayZoneDetailP
           </CollapsibleContent>
         </Collapsible>
       )}
+
+      {/* Decision Traces */}
+      <DecisionTraceCard entityType="zone" entityId={zoneId} />
 
       {overrideTarget && (
         <ServiceDayOverrideModal

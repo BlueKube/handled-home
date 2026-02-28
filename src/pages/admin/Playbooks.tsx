@@ -211,6 +211,126 @@ const PLAYBOOKS: Playbook[] = [
       },
     ],
   },
+  {
+    id: "growth-zone-launch",
+    title: "Growth Manager Zone Launch",
+    allowedRoles: ["ops", "superuser"],
+    checklist: "Validate readiness, seed capacity, activate zone, notify waitlist, monitor first week",
+    steps: [
+      {
+        title: "Pre-launch readiness check",
+        body: "Verify zone has at least 1 Primary provider with approved coverage, active capabilities, and passing compliance. Confirm capacity rows exist for default service day.",
+        links: [{ label: "Zone List", url: "/admin/zones" }],
+      },
+      {
+        title: "Seed initial capacity",
+        body: "Set max_homes per day based on provider commitment. Start conservative (10-15 homes). Enable buffer_percent at 10%.",
+        links: [{ label: "Service Days", url: "/admin/service-days" }],
+      },
+      {
+        title: "Activate zone",
+        body: 'Set zone status to "active". Verify it appears in customer-facing zone lookup. Confirm SKU pricing is configured.',
+      },
+      {
+        title: "Notify waitlist",
+        body: "Run waitlist notification for the zone. Monitor signup conversion over 48 hours.",
+        links: [{ label: "Growth Dashboard", url: "/admin/growth" }],
+      },
+      {
+        title: "Monitor first week",
+        body: "Check daily: assignment success rate, proof compliance, customer issues. Escalate if issue rate > 10% or assignment failures > 0.",
+        links: [{ label: "Ops Cockpit", url: "/admin/ops" }],
+      },
+    ],
+  },
+  {
+    id: "byoc-close-checklist",
+    title: "BYOC Close Checklist",
+    allowedRoles: ["ops", "superuser"],
+    checklist: "Verify attribution, confirm subscription, activate bonus window, track first visit",
+    steps: [
+      {
+        title: "Verify attribution record",
+        body: "Confirm byoc_attribution exists with correct provider_org_id and customer_id. Check invite_code matches the provider's referral code.",
+        links: [{ label: "Growth Dashboard", url: "/admin/growth" }],
+      },
+      {
+        title: "Confirm customer subscription",
+        body: "Verify customer has active subscription. Update attribution status from 'invited' to 'subscribed'. Set subscribed_at timestamp.",
+      },
+      {
+        title: "Activate bonus window",
+        body: "Once first visit completes, attribution moves to 'active'. Bonus window starts (typically 12 weeks). Verify bonus_start_at and bonus_end_at are set.",
+      },
+      {
+        title: "Monitor bonus accrual",
+        body: "Weekly BYOC bonuses should appear in byoc_bonus_ledger. Verify amounts match configured rates. Check no duplicate entries.",
+      },
+      {
+        title: "Handle disputes",
+        body: "If provider claims missing attribution: check invite timestamps, verify customer used correct code, review referral_code on attribution record.",
+      },
+    ],
+  },
+  {
+    id: "coverage-exception-approvals",
+    title: "Coverage Exception Approvals",
+    allowedRoles: ["ops", "superuser"],
+    checklist: "Review request, verify provider capacity, check zone needs, approve/deny with reason",
+    steps: [
+      {
+        title: "Review incoming request",
+        body: "Check provider_coverage record with status REQUESTED. Review which zone and what categories the provider wants to cover.",
+        links: [{ label: "Provider List", url: "/admin/providers" }],
+      },
+      {
+        title: "Verify provider readiness",
+        body: "Check: quality score > 60, no active probation, required capabilities enabled, compliance docs current. If any fail, deny with specific reason.",
+      },
+      {
+        title: "Assess zone need",
+        body: "Does the zone need another provider? Check capacity utilization, current provider count, and any coverage gaps. Surplus providers create scheduling conflicts.",
+      },
+      {
+        title: "Approve or deny",
+        body: "Approve: set request_status to APPROVED. Creates zone_category_providers entry as Backup. Deny: set to DENIED with clear reason for provider notification.",
+      },
+      {
+        title: "Post-approval monitoring",
+        body: "Monitor new provider's first 2 weeks: completion rate, proof compliance, customer feedback. Apply standard probation ladder if issues arise.",
+      },
+    ],
+  },
+  {
+    id: "payout-hold-escalation",
+    title: "Payout/Hold Escalation",
+    allowedRoles: ["superuser"],
+    checklist: "Identify held payouts, review hold reason, verify resolution, release or escalate",
+    steps: [
+      {
+        title: "Identify held earnings",
+        body: "Review provider_earnings with status HELD or HELD_UNTIL_READY. Group by provider org to see total held amount.",
+        links: [{ label: "Payouts", url: "/admin/payouts" }],
+      },
+      {
+        title: "Review hold reason",
+        body: "Check associated job issues, missing proof, or payout account status. HELD_UNTIL_READY means Stripe Connect not fully set up.",
+      },
+      {
+        title: "Contact provider if needed",
+        body: "For holds > 7 days: send notification reminder. For holds > 14 days: direct outreach. Document all contact attempts in job events.",
+      },
+      {
+        title: "Release or maintain hold",
+        body: "If issue resolved (proof uploaded, issue closed): update earning status to ELIGIBLE. If payout account now ready: batch release all HELD_UNTIL_READY earnings.",
+      },
+      {
+        title: "Escalation path",
+        body: "Holds > 30 days with unresolved issues: create billing_exception with severity HIGH. Include total held amount and days held in exception metadata.",
+        links: [{ label: "Exceptions", url: "/admin/exceptions" }],
+      },
+    ],
+  },
 ];
 
 /* ── Expandable playbook card ── */

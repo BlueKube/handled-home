@@ -237,6 +237,27 @@ export default function DispatcherQueues() {
             if (job) setActionJobId(job.id);
           }
           break;
+        case "e": // Escalate — open action dialog with "create_ticket" pre-selected
+          e.preventDefault();
+          if (!data) break;
+          if (activeTab !== "coverageGaps" && activeTab !== "customerIssues" && activeTab !== "providerIncidents") {
+            const job = data[activeTab][selectedIndex];
+            if (job) {
+              setActionJobId(job.id);
+              // DispatcherActionsDialog will open; user can select "Create Ticket"
+            }
+          }
+          break;
+        case "n": // Note — open action dialog for note
+          e.preventDefault();
+          if (!data) break;
+          if (activeTab !== "coverageGaps" && activeTab !== "customerIssues" && activeTab !== "providerIncidents") {
+            const job = data[activeTab][selectedIndex];
+            if (job) {
+              setActionJobId(job.id);
+            }
+          }
+          break;
         case "r": // Refresh
           if (!e.ctrlKey && !e.metaKey) {
             e.preventDefault();
@@ -295,6 +316,8 @@ export default function DispatcherQueues() {
                   <p><kbd className="px-1 bg-muted rounded text-[10px]">J</kbd> / <kbd className="px-1 bg-muted rounded text-[10px]">K</kbd> — Navigate items</p>
                   <p><kbd className="px-1 bg-muted rounded text-[10px]">Enter</kbd> — Open selected</p>
                   <p><kbd className="px-1 bg-muted rounded text-[10px]">A</kbd> — Action on selected</p>
+                  <p><kbd className="px-1 bg-muted rounded text-[10px]">E</kbd> — Escalate (create ticket)</p>
+                  <p><kbd className="px-1 bg-muted rounded text-[10px]">N</kbd> — Add note</p>
                   <p><kbd className="px-1 bg-muted rounded text-[10px]">R</kbd> — Refresh</p>
                   <p><kbd className="px-1 bg-muted rounded text-[10px]">← →</kbd> — Switch tabs</p>
                 </div>

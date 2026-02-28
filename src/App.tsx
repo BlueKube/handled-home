@@ -122,6 +122,7 @@ import AdminControlPricing from "@/pages/admin/ControlPricing";
 import AdminControlPayouts from "@/pages/admin/ControlPayouts";
 import AdminControlChangeRequests from "@/pages/admin/ControlChangeRequests";
 import AdminControlChangeLog from "@/pages/admin/ControlChangeLog";
+import AdminControlConfig from "@/pages/admin/ControlConfig";
 import AdminPlaybooks from "@/pages/admin/Playbooks";
 import AdminCronHealth from "@/pages/admin/CronHealth";
 
@@ -265,6 +266,7 @@ const App = () => (
                 <Route path="/admin/control/payouts" element={<AdminControlPayouts />} />
                 <Route path="/admin/control/change-requests" element={<AdminControlChangeRequests />} />
                 <Route path="/admin/control/change-log" element={<AdminControlChangeLog />} />
+                <Route path="/admin/control/config" element={<AdminControlConfig />} />
                 <Route path="/admin/playbooks" element={<AdminPlaybooks />} />
                 <Route path="/admin/cron-health" element={<AdminCronHealth />} />
                 <Route path="/admin/notifications" element={<SharedNotifications />} />
