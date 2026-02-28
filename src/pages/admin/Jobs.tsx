@@ -14,18 +14,18 @@ const STATUSES = ["", "NOT_STARTED", "IN_PROGRESS", "ISSUE_REPORTED", "PARTIAL_C
 
 export default function AdminJobs() {
   const navigate = useNavigate();
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState("__all__");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [zoneId, setZoneId] = useState("");
+  const [zoneId, setZoneId] = useState("__all__");
 
   // A1: Fetch zones for filter dropdown
   const zonesQuery = useZones();
   const zones = zonesQuery.data ?? [];
 
   const { jobs, loading } = useAdminJobs({
-    status: status || undefined,
-    zone_id: zoneId || undefined,
+    status: status === "__all__" ? undefined : status,
+    zone_id: zoneId === "__all__" ? undefined : zoneId,
     date_from: dateFrom || undefined,
     date_to: dateTo || undefined,
   });
@@ -39,7 +39,7 @@ export default function AdminJobs() {
         <Select value={status} onValueChange={setStatus}>
           <SelectTrigger className="w-40"><SelectValue placeholder="All statuses" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All statuses</SelectItem>
+            <SelectItem value="__all__">All statuses</SelectItem>
             {STATUSES.filter(Boolean).map((s) => (
               <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>
             ))}
@@ -50,7 +50,7 @@ export default function AdminJobs() {
         <Select value={zoneId} onValueChange={setZoneId}>
           <SelectTrigger className="w-40"><SelectValue placeholder="All zones" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All zones</SelectItem>
+            <SelectItem value="__all__">All zones</SelectItem>
             {(zones ?? []).map((z: any) => (
               <SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>
             ))}
