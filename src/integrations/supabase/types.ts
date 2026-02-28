@@ -7310,7 +7310,7 @@ export type Database = {
         Returns: undefined
       }
       rollback_pricing_override: {
-        Args: { p_override_id: string; p_reason?: string }
+        Args: { p_override_id: string; p_reason: string }
         Returns: string
       }
       run_dunning_step: { Args: { p_subscription_id: string }; Returns: Json }
