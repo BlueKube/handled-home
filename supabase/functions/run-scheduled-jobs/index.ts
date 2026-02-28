@@ -11,30 +11,24 @@ function fmtDate(d: Date): string {
   return d.toISOString().split("T")[0];
 }
 
-/** Start a cron_run_log entry, returns its id */
+/** Start a cron_run_log entry via RPC, returns its id */
 async function startRun(
   supabase: ReturnType<typeof createClient>,
   functionName: string,
   idempotencyKey: string,
 ): Promise<string | null> {
-  const { data, error } = await supabase
-    .from("cron_run_log")
-    .insert({
-      function_name: functionName,
-      idempotency_key: idempotencyKey,
-      started_at: new Date().toISOString(),
-      status: "running",
-    })
-    .select("id")
-    .single();
+  const { data, error } = await supabase.rpc("start_cron_run", {
+    p_function_name: functionName,
+    p_idempotency_key: idempotencyKey,
+  });
   if (error) {
     console.error(`Failed to start cron_run_log for ${functionName}:`, error.message);
     return null;
   }
-  return data.id;
+  return data as string;
 }
 
-/** Finish a cron_run_log entry */
+/** Finish a cron_run_log entry via RPC */
 async function finishRun(
   supabase: ReturnType<typeof createClient>,
   runId: string | null,
@@ -43,15 +37,12 @@ async function finishRun(
   errorMessage?: string,
 ) {
   if (!runId) return;
-  const { error } = await supabase
-    .from("cron_run_log")
-    .update({
-      status,
-      completed_at: new Date().toISOString(),
-      result_summary: resultSummary ?? null,
-      error_message: errorMessage ?? null,
-    })
-    .eq("id", runId);
+  const { error } = await supabase.rpc("finish_cron_run", {
+    p_run_id: runId,
+    p_status: status,
+    p_result_summary: resultSummary ?? null,
+    p_error_message: errorMessage ?? null,
+  });
   if (error) console.error(`Failed to finish cron_run_log ${runId}:`, error.message);
 }
 
