@@ -374,9 +374,9 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 
 ### Sprint 2G-D — Control Room (Superuser-Only)
 - [x] **2G-D1** | P0 | XL | Zone pricing engine — `sku_pricing_base`, `sku_pricing_zone_overrides` tables with versioning. Admin UI for zone multipliers, bulk set, copy from zone, schedule effective dates, rollback. Superuser-only write RLS. Also created `provider_payout_base`, `provider_payout_zone_overrides`, `provider_org_contracts`, `payout_overtime_rules` tables + `get_effective_sku_price` / `get_effective_provider_payout` / `rollback_pricing_override` RPCs. **Review fixes:** D-F1/F2/F3/F4 (server-side RPCs with transactional safety, version incrementing, audit logging, reason enforcement), D-F5 (admin access check on effective price/payout RPCs), C-F3 (added `actor_admin_role` to audit log), D-F9 (fixed `rollback_pricing_override` to use new 7-arg `log_admin_action` signature)
-- [ ] **2G-D2** | P0 | XL | Provider payout engine UI — Admin UI for payout tables, contract types, overtime params. Superuser-only write
-- [ ] **2G-D3** | P1 | L | `admin_change_requests` table + UI — non-superusers can submit change requests for pricing/payout/incentives/algorithm. Superuser reviews and applies
-- [ ] **2G-D4** | P1 | M | Change log + rollback UI — view all versioned config changes with rollback action (creates new version copying previous)
+- [x] **2G-D2** | P0 | XL | Provider payout engine UI — Admin UI for payout tables (base + zone overrides), contract types (partner_flat/time_guarded/time_based), overtime params. 3-tab layout (Payouts/Contracts/Overtime). Server-side RPCs: `set_provider_payout_base`, `set_provider_payout_zone_override`, `set_provider_org_contract`, `set_payout_overtime_rules`. All audited via `log_admin_action`. Superuser-only write
+- [x] **2G-D3** | P1 | L | `admin_change_requests` table + UI — non-superusers submit change requests (pricing/payout/incentive/algorithm) with JSON proposed_changes. Superuser reviews via `review_change_request` RPC (approve/reject with note). RPCs: `submit_change_request`, `review_change_request`. Tabbed view (Pending/Approved/Rejected/All)
+- [x] **2G-D4** | P1 | M | Change log + rollback UI — audit trail filtered by entity type (8 config tables), collapsible before/after JSON diff, rollback button for pricing/payout overrides. Uses `useAuditLog` hook
 
 ### Sprint 2G-E — SOPs + Polish
 - [ ] **2G-E1** | P1 | M | Create `/admin/playbooks` page — render SOP markdown with role filtering (dispatcher/ops/growth/superuser playbooks)
@@ -469,7 +469,7 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2D — Customer Polish | 28 | 17 | 61% |
 | 2E — Provider Polish | 17 | 17 | 100% |
 | 2F — Growth Engine | 13 | 0 | 0% (skipped) |
-| 2G — Admin Controls / Ops Cockpit | 22 | 8 | 36% |
+| 2G — Admin Controls / Ops Cockpit | 22 | 11 | 50% |
 | 2H — Platform Hardening | 15 | 0 | 0% |
 | 2I — Future Moats | 9 | 0 | 0% |
 | **TOTAL** | **191** | **103** | **54%** |
@@ -488,4 +488,4 @@ AI, insurance, financing, data marketplace. These make the business defensible.
   - E05-F2: `evaluate_training_gates` RPC created — auto-completes pending gates when quality score meets `required_score_minimum`
 - [x] **OBS-5** | Acknowledged — 2G-D sprint may need splitting if scope is too large
 
-*Last updated: 2026-02-28 — Sprint 2G-D Part 1 complete. Pricing schema (6 tables) + Zone Pricing UI done. Ready for 2G-D Part 2 (Payout UI + Change Requests).*
+*Last updated: 2026-02-28 — Sprint 2G-D Part 2 complete. Payout Engine UI (3 tabs), Change Requests (submit/review), Change Log (audit trail + rollback) done. Ready for 2G-E (SOPs + Polish).*
