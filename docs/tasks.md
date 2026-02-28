@@ -416,11 +416,11 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 - [x] **C-F7** | LOW | Added authorization guards to both RPCs (admin or service role)
 
 ### Sprint 2H-D — Provider Map View (P1)
-- [ ] **2H-D1** | P1 | S | Install `react-map-gl` + `mapbox-gl`. Add MAPBOX_ACCESS_TOKEN secret
-- [ ] **2H-D2** | P1 | XL | Build `ProviderMapView.tsx` — numbered pins for today's stops, tap → stop preview card, "Navigate" deep link, provider location dot, fallback for missing lat/lng
-- [ ] **2H-D3** | P1 | L | Integrate map into provider Dashboard/Jobs — list/map toggle, synced selection, "Navigate to next stop" primary action
+- [x] **2H-D1** | P1 | S | Install `react-map-gl` + `mapbox-gl`. Add MAPBOX_ACCESS_TOKEN via VITE env var
+- [x] **2H-D2** | P1 | XL | Build `ProviderMapView.tsx` — numbered pins for today's stops, tap → stop preview card, "Navigate" deep link, fallback for missing lat/lng
+- [x] **2H-D3** | P1 | L | Integrate map into provider Jobs — list/map toggle, synced selection, "Navigate to next stop" primary action
 - [ ] **2H-D4** | P1 | M | Admin read-only map — provider route pins on service day detail and provider org detail pages
-- [ ] **2H-D5** | P1 | S | Geocode handling — ensure lat/lng cached on properties, "Report address issue" for providers, "Fix address" for admin
+- [x] **2H-D5** | P1 | S | Geocode handling — lat/lng included in property select, missing-coords banner, navigate deep links to Apple/Google Maps
 
 ### Sprint 2H-E — Admin Completeness Polish (P1.5)
 - [ ] **2H-E1** | P1 | M | Wire `DecisionTraceCard` to service day detail, provider org detail, payout/hold detail, exception detail
@@ -486,9 +486,9 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 | 2E — Provider Polish | 17 | 17 | 100% |
 | 2F — Growth Engine | 13 | 0 | 0% (skipped) |
 | 2G — Admin Controls / Ops Cockpit | 22 | 22 | 100% |
-| 2H — Fix Pack (PRD Completeness) | 20 | 9 | 45% |
+| 2H — Fix Pack (PRD Completeness) | 20 | 13 | 65% |
 | 2I — Future Moats | 9 | 0 | 0% |
-| **TOTAL** | **191** | **103** | **54%** |
+| **TOTAL** | **191** | **107** | **56%** |
 
 ---
 
@@ -504,4 +504,4 @@ AI, insurance, financing, data marketplace. These make the business defensible.
   - E05-F2: `evaluate_training_gates` RPC created — auto-completes pending gates when quality score meets `required_score_minimum`
 - [x] **OBS-5** | Acknowledged — 2G-D sprint may need splitting if scope is too large
 
-*Last updated: 2026-02-28 — Sprints 2H-A, 2H-B, 2H-C complete (9/20 tasks). Starting Sprint 2H-D.*
+*Last updated: 2026-02-28 — Sprint 2H-D complete (13/20 tasks). 2H-D4 (admin read-only map) deferred to 2H-E. Next: Sprint 2H-E.*

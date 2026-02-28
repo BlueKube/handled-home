@@ -8,18 +8,21 @@ import { useProviderJobs, ProviderJob } from "@/hooks/useProviderJobs";
 import { useProviderOrg } from "@/hooks/useProviderOrg";
 import { useProviderRoutePlan } from "@/hooks/useProviderRoutePlan";
 import { useOptimizeRoute, useReorderRoute } from "@/hooks/useRouteOptimization";
-import { MapPin, Clock, ChevronRight, ArrowUp, ArrowDown, Route, Loader2, Lock } from "lucide-react";
+import { ProviderMapView } from "@/components/provider/ProviderMapView";
+import { MapPin, Clock, ChevronRight, ArrowUp, ArrowDown, Route, Loader2, Lock, Map as MapIcon, List } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
-function JobCard({ job, index, total, onMoveUp, onMoveDown, showReorder }: {
+function JobCard({ job, index, total, onMoveUp, onMoveDown, showReorder, isSelected, onSelect }: {
   job: ProviderJob;
   index: number;
   total: number;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
   showReorder: boolean;
+  isSelected?: boolean;
+  onSelect?: () => void;
 }) {
   const navigate = useNavigate();
   const skuNames = job.job_skus?.map((s) => s.sku_name_snapshot).filter(Boolean).join(", ") || "No services listed";
@@ -27,7 +30,10 @@ function JobCard({ job, index, total, onMoveUp, onMoveDown, showReorder }: {
   const isNext = index === 0 && job.status !== "IN_PROGRESS";
 
   return (
-    <Card className={`p-4 press-feedback cursor-pointer ${isNext ? "ring-2 ring-accent/40" : ""}`}>
+    <Card
+      className={`p-4 press-feedback cursor-pointer ${isNext ? "ring-2 ring-accent/40" : ""} ${isSelected ? "bg-accent/5 border-accent/30" : ""}`}
+      onClick={onSelect}
+    >
       <div className="flex items-start gap-2">
          {showReorder && (
           <div className="flex flex-col gap-0.5 shrink-0 pt-1">
@@ -51,7 +57,7 @@ function JobCard({ job, index, total, onMoveUp, onMoveDown, showReorder }: {
         )}
         <div
           className="flex-1 min-w-0"
-          onClick={() => navigate(`/provider/jobs/${job.id}`)}
+          onClick={(e) => { e.stopPropagation(); navigate(`/provider/jobs/${job.id}`); }}
         >
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs font-bold text-accent bg-accent/10 rounded-full px-2 py-0.5">
@@ -86,6 +92,8 @@ function TodayJobList() {
   const optimizeRoute = useOptimizeRoute();
   const reorderRoute = useReorderRoute();
   const [localJobs, setLocalJobs] = useState<ProviderJob[] | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "map">("list");
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
   const displayJobs = localJobs ?? jobs;
   const today = new Date().toISOString().split("T")[0];
@@ -158,32 +166,64 @@ function TodayJobList() {
             </span>
           )}
         </p>
-        {!isLocked && (
-          <Button
-            variant="outline" size="sm"
-            onClick={handleOptimize}
-            disabled={optimizeRoute.isPending || displayJobs.length < 3}
-          >
-            {optimizeRoute.isPending ? (
-              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-            ) : (
-              <Route className="h-3 w-3 mr-1" />
-            )}
-            Optimize Route
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {/* List / Map toggle */}
+          <div className="flex items-center border border-border rounded-lg overflow-hidden">
+            <Button
+              variant={viewMode === "list" ? "default" : "ghost"}
+              size="sm"
+              className="h-7 px-2 rounded-none"
+              onClick={() => setViewMode("list")}
+            >
+              <List className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant={viewMode === "map" ? "default" : "ghost"}
+              size="sm"
+              className="h-7 px-2 rounded-none"
+              onClick={() => setViewMode("map")}
+            >
+              <MapIcon className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+          {viewMode === "list" && !isLocked && (
+            <Button
+              variant="outline" size="sm"
+              onClick={handleOptimize}
+              disabled={optimizeRoute.isPending || displayJobs.length < 3}
+            >
+              {optimizeRoute.isPending ? (
+                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+              ) : (
+                <Route className="h-3 w-3 mr-1" />
+              )}
+              Optimize
+            </Button>
+          )}
+        </div>
       </div>
-      {displayJobs.map((job, i) => (
-        <JobCard
-          key={job.id}
-          job={job}
-          index={i}
-          total={displayJobs.length}
-          showReorder={!isLocked && displayJobs.length > 1}
-          onMoveUp={() => handleMove(i, i - 1)}
-          onMoveDown={() => handleMove(i, i + 1)}
+
+      {viewMode === "map" ? (
+        <ProviderMapView
+          jobs={displayJobs}
+          selectedJobId={selectedJobId}
+          onSelectJob={setSelectedJobId}
         />
-      ))}
+      ) : (
+        displayJobs.map((job, i) => (
+          <JobCard
+            key={job.id}
+            job={job}
+            index={i}
+            total={displayJobs.length}
+            showReorder={!isLocked && displayJobs.length > 1}
+            isSelected={job.id === selectedJobId}
+            onSelect={() => setSelectedJobId(job.id === selectedJobId ? null : job.id)}
+            onMoveUp={() => handleMove(i, i - 1)}
+            onMoveDown={() => handleMove(i, i + 1)}
+          />
+        ))
+      )}
     </div>
   );
 }

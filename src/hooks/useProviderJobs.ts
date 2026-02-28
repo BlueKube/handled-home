@@ -19,7 +19,7 @@ export interface ProviderJob {
   route_order: number | null;
   created_at: string;
   updated_at: string;
-  property?: { street_address: string; city: string; zip_code: string; gate_code: string | null; pets: any; parking_instructions: string | null; access_instructions: string | null };
+  property?: { street_address: string; city: string; zip_code: string; gate_code: string | null; pets: any; parking_instructions: string | null; access_instructions: string | null; lat: number | null; lng: number | null };
   job_skus?: { id: string; sku_id: string; sku_name_snapshot: string | null; duration_minutes_snapshot: number | null }[];
   issue_count?: number;
 }
@@ -38,7 +38,7 @@ export function useProviderJobs(filter: "today" | "upcoming" | "history" = "toda
         .from("jobs")
         .select(`
           *,
-          property:properties(street_address, city, zip_code, gate_code, pets, parking_instructions, access_instructions),
+          property:properties(street_address, city, zip_code, gate_code, pets, parking_instructions, access_instructions, lat, lng),
           job_skus(id, sku_id, sku_name_snapshot, duration_minutes_snapshot)
         `)
         .eq("provider_org_id", org.id);
