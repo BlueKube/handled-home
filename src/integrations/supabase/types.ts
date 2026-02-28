@@ -251,6 +251,36 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_system_config: {
+        Row: {
+          config_key: string
+          config_value: Json
+          created_at: string
+          description: string | null
+          id: string
+          updated_at: string
+          updated_by_user_id: string | null
+        }
+        Insert: {
+          config_key: string
+          config_value?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          updated_at?: string
+          updated_by_user_id?: string | null
+        }
+        Update: {
+          config_key?: string
+          config_value?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          updated_at?: string
+          updated_by_user_id?: string | null
+        }
+        Relationships: []
+      }
       ai_inference_runs: {
         Row: {
           classification: Json | null
@@ -7124,6 +7154,15 @@ export type Database = {
       }
       evaluate_training_gates: { Args: never; Returns: Json }
       expire_stale_handles: { Args: never; Returns: Json }
+      finish_cron_run: {
+        Args: {
+          p_error_message?: string
+          p_result_summary?: Json
+          p_run_id: string
+          p_status?: string
+        }
+        Returns: undefined
+      }
       generate_subscription_invoice: {
         Args: { p_subscription_id: string }
         Returns: Json
@@ -7467,6 +7506,10 @@ export type Database = {
             }
             Returns: Json
           }
+      start_cron_run: {
+        Args: { p_function_name: string; p_idempotency_key?: string }
+        Returns: string
+      }
       start_job: { Args: { p_job_id: string }; Returns: Json }
       submit_change_request: {
         Args: {

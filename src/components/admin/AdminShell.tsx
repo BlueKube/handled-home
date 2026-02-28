@@ -110,6 +110,7 @@ const navGroups: NavGroup[] = [
     label: "Governance",
     items: [
       { title: "Audit Log", url: "/admin/audit", icon: Activity },
+      { title: "Cron Health", url: "/admin/cron-health", icon: Activity },
       { title: "Notification Health", url: "/admin/notification-health", icon: Bell },
       { title: "Feedback", url: "/admin/feedback", icon: MessageSquare },
       { title: "Test Toggles", url: "/admin/test-toggles", icon: ToggleLeft },
