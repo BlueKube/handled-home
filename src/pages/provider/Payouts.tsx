@@ -9,7 +9,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useProviderOrg } from "@/hooks/useProviderOrg";
 import { toast } from "sonner";
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { nextFriday, format, isBefore } from "date-fns";
 
 function formatCents(cents: number) { return `$${(cents / 100).toFixed(2)}`; }
@@ -19,24 +18,6 @@ export default function ProviderPayouts() {
   const { org } = useProviderOrg();
   const { eligibleBalance, heldBalance, payoutAccount, isAccountReady, isLoading } = useProviderEarnings();
   const [onboarding, setOnboarding] = useState(false);
-
-  // Compute next payout date from provider_org_contracts (weekly Friday cadence)
-  const contractQuery = useQuery({
-    queryKey: ["provider-contract", org?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("provider_org_contracts")
-        .select("*")
-        .eq("provider_org_id", org!.id)
-        .is("active_to", null)
-        .order("active_from", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!org?.id,
-  });
 
   const nextPayoutDate = useMemo(() => {
     // Default: next Friday from now (weekly payout cadence)

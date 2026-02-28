@@ -509,7 +509,7 @@ AI, insurance, financing, data marketplace. These make the business defensible.
   - E05-F2: `evaluate_training_gates` RPC created — auto-completes pending gates when quality score meets `required_score_minimum`
 - [x] **OBS-5** | Acknowledged — 2G-D sprint may need splitting if scope is too large
 
-*Last updated: 2026-02-28 — Sprint 2H-E complete (23/23 tasks). Round 2H Fix Pack 100% done. Next: Round 2I (Future Moats) or revisit 2D/2F gaps.*
+*Last updated: 2026-02-28 — Sprint 2H-E complete (23/23 tasks). Round 2H Fix Pack 100% done. E2 review remediation complete.*
 
 ### Sprint 2H-E Remediation (Review Findings E-F1 through E-F7)
 - [x] **E-F1** | P0 | S | Idempotency — `compute_quality_scores` already filters `WHERE computed_at::date < CURRENT_DATE` for previous-score lookup (verified in migration)
@@ -518,3 +518,11 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **E-F5** | P1 | S | Config keys — verified 8 rows seeded in `admin_system_config` (no action needed)
 - [x] **E-F6** | P0 | S | Payout cadence — already shows hardcoded "Weekly Friday cadence" with "Estimated" label in provider payouts UI
 - [x] **E-F7** | P1 | S | `DispatcherActionsDialog` now accepts `defaultAction` prop; `E` shortcut pre-selects "Create Ticket", `N` pre-selects "Note", `A` opens with no preset; action+note reset on jobId/defaultAction change
+
+### Sprint 2H-E2 Remediation (Review Findings E2-F1 through E2-F6)
+- [x] **E2-F1** | P0 | S | CRITICAL: Fixed `compute_provider_quality_scores` to use correct columns (`band` + `components` jsonb) instead of non-existent `rating_score`, `performance_band` columns. Also re-added `start_cron_run`/`finish_cron_run` calls.
+- [x] **E2-F3** | P1 | S | Seeded 10 missing config keys for ControlConfig UI (`byoc_bonus_weekly_cap_cents`, `referral_reward_cap_cents`, `max_credits_per_customer_cents`, `founding_partner_bonus_weeks`, `assignment_competition_slider`, `dunning_max_steps`, `no_show_penalty_points`, `probation_score_threshold`, `suspension_score_threshold`, `max_buffer_percent`)
+- [x] **E2-F4** | P0 | S | Removed unused `contractQuery` in provider Payouts.tsx
+- [x] **E2-F6** | P1 | S | `run-scheduled-jobs` edge function now uses `start_cron_run`/`finish_cron_run` RPCs instead of direct `cron_run_log` table inserts
+- [ ] **E2-F2** | P1 | M | pg_cron schedules not created — deferred (requires `cron.schedule()` via insert tool, not migration)
+- [ ] **E2-F5** | P2 | S | Admin map pin numbers use filtered index instead of route order (same as D-F1, low impact)
