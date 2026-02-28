@@ -406,6 +406,15 @@ D-Pre → D0 → D1 → D1.5 → D4 → D5a → D2 → D3 → D5b → D6 → D7 
 - [x] **2H-C2** | P0 | M | Create `compute_provider_weekly_rollups()` RPC — aggregate completion/on-time/redo rates, avg duration, customer feedback per active provider. Write to `provider_feedback_rollups`
 - [x] **2H-C3** | P0 | M | Create `run-scheduled-jobs` edge function — orchestrate daily lifecycle + weekly BYOC bonus + weekly rollups
 
+#### Sprint 2H-C Review Fixes (7 findings)
+- [x] **C-F1** | HIGH | Redo metric uses `customer_issues` table instead of non-existent `redo_requested` issue_type
+- [x] **C-F2** | HIGH | Fixed JOIN fan-out with CTE-based pre-aggregation (issue_agg + rating_agg CTEs)
+- [x] **C-F3** | HIGH | Added missing `updated_at` column to `provider_feedback_rollups` + fixed upsert
+- [x] **C-F4** | HIGH | Reverted bonus query to `.eq("status", "EARNED")` (uppercase matches DB CHECK)
+- [x] **C-F5** | MEDIUM | Implemented `installed_at` lifecycle step (checks profiles table for signup)
+- [x] **C-F6** | LOW | Activation loop filters `status = 'PENDING'` only + checks return value
+- [x] **C-F7** | LOW | Added authorization guards to both RPCs (admin or service role)
+
 ### Sprint 2H-D — Provider Map View (P1)
 - [ ] **2H-D1** | P1 | S | Install `react-map-gl` + `mapbox-gl`. Add MAPBOX_ACCESS_TOKEN secret
 - [ ] **2H-D2** | P1 | XL | Build `ProviderMapView.tsx` — numbered pins for today's stops, tap → stop preview card, "Navigate" deep link, provider location dot, fallback for missing lat/lng

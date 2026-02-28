@@ -59,7 +59,7 @@ export function useByocAttributions() {
         .from("byoc_bonus_ledger")
         .select("*")
         .eq("provider_org_id", org!.id)
-        .eq("status", "earned")
+        .eq("status", "EARNED")
         .order("week_start", { ascending: false });
       if (error) throw error;
       return data as ByocBonusEntry[];

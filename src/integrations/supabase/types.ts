@@ -3383,6 +3383,7 @@ export type Database = {
           summary_improve: string | null
           summary_positive: string | null
           theme_counts: Json | null
+          updated_at: string | null
           visibility_status: string
         }
         Insert: {
@@ -3397,6 +3398,7 @@ export type Database = {
           summary_improve?: string | null
           summary_positive?: string | null
           theme_counts?: Json | null
+          updated_at?: string | null
           visibility_status?: string
         }
         Update: {
@@ -3411,6 +3413,7 @@ export type Database = {
           summary_improve?: string | null
           summary_positive?: string | null
           theme_counts?: Json | null
+          updated_at?: string | null
           visibility_status?: string
         }
         Relationships: [
@@ -7104,10 +7107,9 @@ export type Database = {
         Returns: Json
       }
       compute_provider_quality_scores: { Args: never; Returns: Json }
-      compute_provider_weekly_rollups: {
-        Args: { p_week_start?: string }
-        Returns: Json
-      }
+      compute_provider_weekly_rollups:
+        | { Args: never; Returns: Json }
+        | { Args: { p_week_start?: string }; Returns: Json }
       compute_zone_health_score: {
         Args: { p_category: string; p_zone_id: string }
         Returns: Json
