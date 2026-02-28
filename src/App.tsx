@@ -119,6 +119,9 @@ import SharedNotifications from "@/pages/shared/Notifications";
 import ProviderQualityScore from "@/pages/provider/QualityScore";
 import AdminDispatcherQueues from "@/pages/admin/DispatcherQueues";
 import AdminControlPricing from "@/pages/admin/ControlPricing";
+import AdminControlPayouts from "@/pages/admin/ControlPayouts";
+import AdminControlChangeRequests from "@/pages/admin/ControlChangeRequests";
+import AdminControlChangeLog from "@/pages/admin/ControlChangeLog";
 
 const queryClient = new QueryClient();
 
@@ -257,6 +260,9 @@ const App = () => (
                 <Route path="/admin/settings" element={<AdminSettings />} />
                 <Route path="/admin/more" element={<MoreMenuPage />} />
                 <Route path="/admin/control/pricing" element={<AdminControlPricing />} />
+                <Route path="/admin/control/payouts" element={<AdminControlPayouts />} />
+                <Route path="/admin/control/change-requests" element={<AdminControlChangeRequests />} />
+                <Route path="/admin/control/change-log" element={<AdminControlChangeLog />} />
                 <Route path="/admin/notifications" element={<SharedNotifications />} />
               </Route>
 

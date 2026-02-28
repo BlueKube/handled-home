@@ -176,6 +176,57 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_change_requests: {
+        Row: {
+          change_type: string
+          created_at: string
+          id: string
+          proposed_changes: Json
+          reason: string
+          requester_role: string
+          requester_user_id: string
+          reviewed_at: string | null
+          reviewer_note: string | null
+          reviewer_user_id: string | null
+          status: string
+          target_entity_id: string | null
+          target_table: string
+          updated_at: string
+        }
+        Insert: {
+          change_type: string
+          created_at?: string
+          id?: string
+          proposed_changes?: Json
+          reason: string
+          requester_role: string
+          requester_user_id: string
+          reviewed_at?: string | null
+          reviewer_note?: string | null
+          reviewer_user_id?: string | null
+          status?: string
+          target_entity_id?: string | null
+          target_table: string
+          updated_at?: string
+        }
+        Update: {
+          change_type?: string
+          created_at?: string
+          id?: string
+          proposed_changes?: Json
+          reason?: string
+          requester_role?: string
+          requester_user_id?: string
+          reviewed_at?: string | null
+          reviewer_note?: string | null
+          reviewer_user_id?: string | null
+          status?: string
+          target_entity_id?: string | null
+          target_table?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       admin_memberships: {
         Row: {
           admin_role: Database["public"]["Enums"]["admin_role"]
@@ -7301,6 +7352,14 @@ export type Database = {
         Args: { p_subscription_id: string }
         Returns: Json
       }
+      review_change_request: {
+        Args: {
+          p_decision: string
+          p_request_id: string
+          p_reviewer_note?: string
+        }
+        Returns: undefined
+      }
       review_expansion_suggestion: {
         Args: { p_decision: string; p_note?: string; p_suggestion_id: string }
         Returns: undefined
@@ -7322,6 +7381,45 @@ export type Database = {
       select_alternative_service_day: {
         Args: { p_assignment_id: string; p_offer_id: string }
         Returns: Json
+      }
+      set_payout_overtime_rules: {
+        Args: {
+          p_expected_minutes: number
+          p_overtime_cap_cents: number
+          p_overtime_rate_cents_per_min: number
+          p_overtime_start_after_minutes: number
+          p_reason: string
+          p_sku_id: string
+          p_zone_id: string
+        }
+        Returns: undefined
+      }
+      set_provider_org_contract: {
+        Args: {
+          p_contract_type: string
+          p_provider_org_id: string
+          p_reason: string
+        }
+        Returns: undefined
+      }
+      set_provider_payout_base: {
+        Args: {
+          p_base_payout_cents: number
+          p_reason: string
+          p_sku_id: string
+        }
+        Returns: undefined
+      }
+      set_provider_payout_zone_override: {
+        Args: {
+          p_active_from?: string
+          p_override_payout_cents?: number
+          p_payout_multiplier?: number
+          p_reason?: string
+          p_sku_id: string
+          p_zone_id: string
+        }
+        Returns: undefined
       }
       set_sku_base_price: {
         Args: { p_base_price_cents: number; p_reason: string; p_sku_id: string }
@@ -7358,6 +7456,16 @@ export type Database = {
             Returns: Json
           }
       start_job: { Args: { p_job_id: string }; Returns: Json }
+      submit_change_request: {
+        Args: {
+          p_change_type: string
+          p_proposed_changes: Json
+          p_reason: string
+          p_target_entity_id: string
+          p_target_table: string
+        }
+        Returns: string
+      }
       submit_private_review: {
         Args: {
           p_comment_private?: string

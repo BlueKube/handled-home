@@ -121,7 +121,8 @@ const navGroups: NavGroup[] = [
     items: [
       { title: "Pricing & Margin", url: "/admin/control/pricing", icon: DollarSign },
       { title: "Payout Rules", url: "/admin/control/payouts", icon: Wallet },
-      { title: "Change Log", url: "/admin/control/changes", icon: FileText },
+      { title: "Change Requests", url: "/admin/control/change-requests", icon: FileText },
+      { title: "Change Log", url: "/admin/control/change-log", icon: FileText },
     ],
   },
   {
