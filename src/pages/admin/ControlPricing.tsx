@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DollarSign, Copy, RotateCcw, Layers } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 export default function ControlPricing() {
   const { isSuperuser } = useAdminMembership();
@@ -80,10 +81,11 @@ export default function ControlPricing() {
 
   const handleSaveBase = () => {
     if (!editBaseSkuId || !editBasePrice) return;
+    if (!editBaseReason.trim()) { toast.error("Reason is required"); return; }
     setBaseMut.mutate({
       sku_id: editBaseSkuId,
       base_price_cents: Math.round(parseFloat(editBasePrice) * 100),
-      reason: editBaseReason || "Updated base price",
+      reason: editBaseReason.trim(),
     }, {
       onSuccess: () => setEditBaseSkuId(null),
     });
@@ -91,12 +93,13 @@ export default function ControlPricing() {
 
   const handleSaveOverride = () => {
     if (!editOverrideSkuId || !selectedZoneId) return;
+    if (!editOverrideReason.trim()) { toast.error("Reason is required"); return; }
     setOverrideMut.mutate({
       zone_id: selectedZoneId,
       sku_id: editOverrideSkuId,
       price_multiplier: editMultiplier ? parseFloat(editMultiplier) : null,
       override_price_cents: editOverridePrice ? Math.round(parseFloat(editOverridePrice) * 100) : null,
-      reason: editOverrideReason || "Zone override",
+      reason: editOverrideReason.trim(),
     }, {
       onSuccess: () => setEditOverrideSkuId(null),
     });
@@ -104,11 +107,12 @@ export default function ControlPricing() {
 
   const handleBulkApply = () => {
     if (!selectedZoneId || !bulkMultiplier || !skus) return;
+    if (!bulkReason.trim()) { toast.error("Reason is required"); return; }
     bulkMut.mutate({
       zone_id: selectedZoneId,
       sku_ids: skus.map((s) => s.id),
       price_multiplier: parseFloat(bulkMultiplier),
-      reason: bulkReason || "Bulk multiplier",
+      reason: bulkReason.trim(),
     }, {
       onSuccess: () => setBulkOpen(false),
     });
