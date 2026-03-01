@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +27,7 @@ interface LevelFormState {
   proof_photo_min: number;
   handles_cost: number;
   is_active: boolean;
+  effective_start_cycle: string;
 }
 
 const defaultForm: LevelFormState = {
@@ -36,6 +39,7 @@ const defaultForm: LevelFormState = {
   proof_photo_min: 1,
   handles_cost: 0,
   is_active: true,
+  effective_start_cycle: "",
 };
 
 export function SkuLevelEditor({ skuId }: SkuLevelEditorProps) {
@@ -66,6 +70,7 @@ export function SkuLevelEditor({ skuId }: SkuLevelEditorProps) {
       proof_photo_min: level.proof_photo_min,
       handles_cost: level.handles_cost,
       is_active: level.is_active,
+      effective_start_cycle: level.effective_start_cycle ?? "",
     });
   };
 
@@ -98,6 +103,7 @@ export function SkuLevelEditor({ skuId }: SkuLevelEditorProps) {
             proof_photo_min: form.proof_photo_min,
             handles_cost: form.handles_cost,
             is_active: form.is_active,
+            effective_start_cycle: form.effective_start_cycle || null,
           },
         },
         {
@@ -119,6 +125,7 @@ export function SkuLevelEditor({ skuId }: SkuLevelEditorProps) {
           proof_photo_min: form.proof_photo_min,
           handles_cost: form.handles_cost,
           is_active: form.is_active,
+          effective_start_cycle: form.effective_start_cycle || null,
         },
         {
           onSuccess: () => { toast.success("Level created"); resetForm(); },
@@ -138,15 +145,20 @@ export function SkuLevelEditor({ skuId }: SkuLevelEditorProps) {
     );
   };
 
+  const qc = useQueryClient();
   const handleReorder = (level: SkuLevel, direction: "up" | "down") => {
     const idx = levels.findIndex(l => l.id === level.id);
     const swapIdx = direction === "up" ? idx - 1 : idx + 1;
     if (swapIdx < 0 || swapIdx >= levels.length) return;
 
     const other = levels[swapIdx];
-    // Swap level_numbers
-    updateLevel.mutate({ id: level.id, skuId, updates: { level_number: other.level_number } });
-    updateLevel.mutate({ id: other.id, skuId, updates: { level_number: level.level_number } });
+    supabase.rpc("swap_sku_level_order", {
+      p_level_a_id: level.id,
+      p_level_b_id: other.id,
+    } as any).then(({ error }: any) => {
+      if (error) { toast.error(error.message); return; }
+      qc.invalidateQueries({ queryKey: ["sku_levels", skuId] });
+    });
   };
 
   const updateListItem = (list: string[], idx: number, val: string, setter: (v: string[]) => void) => {
@@ -330,6 +342,11 @@ function LevelForm({
         <Button variant="ghost" size="sm" className="mt-1 gap-1 text-xs h-7" onClick={() => setForm({ ...form, exclusions: [...form.exclusions, ""] })}>
           <Plus className="h-3 w-3" /> Add
         </Button>
+      </div>
+      <div>
+        <Label className="text-xs">Effective Start Cycle</Label>
+        <Input type="date" value={form.effective_start_cycle} onChange={e => setForm({ ...form, effective_start_cycle: e.target.value })} />
+        <p className="text-[10px] text-muted-foreground mt-0.5">Optional. Leave blank for immediate availability.</p>
       </div>
       <div className="flex items-center justify-between">
         <Label className="text-xs">Active</Label>
