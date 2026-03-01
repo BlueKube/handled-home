@@ -37,7 +37,8 @@ const INTENT_OPTIONS: { value: SwitchIntent; label: string }[] = [
 export default function CoverageMap() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const returnTo = searchParams.get("return") || "/customer";
+  const rawReturn = searchParams.get("return") || "/customer";
+  const returnTo = rawReturn.startsWith("/") ? rawReturn : "/customer";
   const { coverage, coverageMap, isLoading, save, isSaving } = usePropertyCoverage();
 
   // Local state keyed by category
@@ -45,18 +46,24 @@ export default function CoverageMap() {
     Record<string, { status: CoverageStatus; intent: SwitchIntent | null }>
   >({});
 
-  // Initialize from DB data
+  // Initialize from DB data, or default all to NONE for first-time users
   useEffect(() => {
+    const init: typeof selections = {};
     if (coverage.length > 0) {
-      const init: typeof selections = {};
       for (const row of coverage) {
         init[row.category_key] = {
           status: row.coverage_status as CoverageStatus,
           intent: row.switch_intent as SwitchIntent | null,
         };
       }
-      setSelections(init);
     }
+    // Fill any missing categories with NONE
+    for (const cat of COVERAGE_CATEGORIES) {
+      if (!init[cat.key]) {
+        init[cat.key] = { status: "NONE", intent: null };
+      }
+    }
+    setSelections(init);
   }, [coverage]);
 
   const setStatus = (key: string, status: CoverageStatus) => {
@@ -86,8 +93,12 @@ export default function CoverageMap() {
         switch_intent: sel?.intent ?? null,
       };
     });
-    await save(updates);
-    navigate(returnTo);
+    try {
+      await save(updates);
+      navigate(returnTo);
+    } catch {
+      // onError in hook already shows toast
+    }
   };
 
   const filledCount = Object.keys(selections).length;
