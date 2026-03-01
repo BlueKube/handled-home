@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Search, Info } from "lucide-react";
-import { useSkuLevels } from "@/hooks/useSkuLevels";
+import { useLevelDefault } from "@/hooks/useLevelDefault";
 import { useCategoryEligibility } from "@/hooks/useCategoryEligibility";
 import type { EntitlementSku } from "@/hooks/useEntitlements";
 import { SkuDetailModal } from "./SkuDetailModal";
@@ -16,10 +16,9 @@ interface AddServicesSheetProps {
 }
 
 /** Returns the sizing-aware default level ID for a SKU, or null */
-function useDefaultLevelId(skuId: string | null) {
-  const { data: levels } = useSkuLevels(skuId);
-  const activeLevels = (levels ?? []).filter((l) => l.is_active);
-  return activeLevels.length > 0 ? activeLevels[0].id : null;
+function useDefaultLevelId(skuId: string | null, category: string | null) {
+  const { default_level_id } = useLevelDefault(skuId, category);
+  return default_level_id;
 }
 
 function QuickAddButton({ sku, alreadyAdded, onAdd, onDetail }: {
@@ -28,7 +27,7 @@ function QuickAddButton({ sku, alreadyAdded, onAdd, onDetail }: {
   onAdd: (skuId: string, levelId?: string | null) => void;
   onDetail: () => void;
 }) {
-  const defaultLevelId = useDefaultLevelId(sku.sku_id);
+  const defaultLevelId = useDefaultLevelId(sku.sku_id, sku.category);
   const hasLevels = defaultLevelId !== null;
 
   return (
@@ -76,7 +75,7 @@ export function AddServicesSheet({ skus, existingSkuIds, onAdd }: AddServicesShe
 
   const filtered = skus
     .filter((s) => s.status !== "blocked" && s.status !== "provider_only")
-    .filter((s) => isEligible((s as any).category)) // Suppress NA categories
+    .filter((s) => isEligible(s.category))
     .filter((s) => s.sku_name.toLowerCase().includes(search.toLowerCase()));
 
   const grouped = {
