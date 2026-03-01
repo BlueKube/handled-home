@@ -215,6 +215,7 @@ Deno.serve(async (req) => {
               const delayMs = batchHad429 ? 5000 : 1500;
               await new Promise(r => setTimeout(r, delayMs));
             }
+          }
 
           return {
             data: { total: propertyIds.length, succeeded, failed },
