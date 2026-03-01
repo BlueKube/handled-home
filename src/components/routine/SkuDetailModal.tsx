@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, XCircle, Camera } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSkuLevels, useGuidanceQuestions } from "@/hooks/useSkuLevels";
+import { useLevelDefault } from "@/hooks/useLevelDefault";
 import { LevelSelector } from "./LevelSelector";
 import type { EntitlementSku } from "@/hooks/useEntitlements";
 
@@ -33,6 +34,7 @@ export function SkuDetailModal({ sku, onClose, onAdd, alreadyAdded }: SkuDetailM
 
   const { data: levels } = useSkuLevels(sku?.sku_id ?? null);
   const { data: guidanceQuestions } = useGuidanceQuestions(sku?.sku_id ?? null);
+  const { default_level_id, default_level_reason } = useLevelDefault(sku?.sku_id ?? null, sku?.category ?? null);
   const activeLevels = (levels ?? []).filter((l) => l.is_active);
   const hasLevels = activeLevels.length > 0;
   const activeQuestions = guidanceQuestions ?? [];
@@ -40,15 +42,15 @@ export function SkuDetailModal({ sku, onClose, onAdd, alreadyAdded }: SkuDetailM
   const [selectedLevelId, setSelectedLevelId] = useState<string | null>(null);
   const [questionAnswers, setQuestionAnswers] = useState<Record<string, number>>({});
 
-  // Reset state when SKU changes
+  // Reset state when SKU changes — use sizing-aware default instead of activeLevels[0]
   useEffect(() => {
     setQuestionAnswers({});
     if (hasLevels) {
-      setSelectedLevelId(activeLevels[0].id);
+      setSelectedLevelId(default_level_id ?? activeLevels[0].id);
     } else {
       setSelectedLevelId(null);
     }
-  }, [sku?.sku_id, levels]);
+  }, [sku?.sku_id, levels, default_level_id]);
 
   // P5-F1 fix: Use additive level_bump from guidance options (not maps_to_level_number)
   const guidanceRecommendedLevelId = useMemo(() => {
@@ -129,6 +131,11 @@ export function SkuDetailModal({ sku, onClose, onAdd, alreadyAdded }: SkuDetailM
             <div>
               {guidanceRecommendedLevelId && (
                 <p className="text-xs text-primary mb-1">✨ Recommended based on your answers</p>
+              )}
+              {!guidanceRecommendedLevelId && default_level_reason && (
+                <p className="text-xs text-muted-foreground italic mb-1">
+                  {default_level_reason}
+                </p>
               )}
               <LevelSelector
                 levels={activeLevels}
