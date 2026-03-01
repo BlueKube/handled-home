@@ -652,4 +652,13 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - `property_service_predictions` table (new)
 - `ai_inference_runs.ticket_id` made nullable, added `entity_type` + `entity_id` columns for non-ticket AI usage
 
-*Last updated: 2026-03-01 — Sprint 3D Phases B1-B3 + C1-C2 complete.*
+### Review Fixes (Sprint 3D)
+- [x] **3D-H1** | HIGH | Fixed credit status in auto-resolve-dispute: `"active"` → `"AVAILABLE"` to match billing flows
+- [x] **3D-H2** | HIGH | Added mandatory auth to predict-services: verifies property owner, admin, or service_role
+- [x] **3D-H3** | HIGH | Added mandatory auth to auto-resolve-dispute: restricted to service_role or admin only
+- [x] **3D-M1** | MEDIUM | Fixed support-ai-classify auth bypass: Authorization header now mandatory (no more skip-if-missing)
+- [ ] **3D-M2** | MEDIUM | Surface differentiation in get_service_suggestions RPC (predicted vs other types)
+- [ ] **3D-L1** | LOW | Stale prediction cleanup (cron to delete expired predictions)
+- [ ] **3D-L2** | LOW | Photo analysis — include actual signed photo URLs for visual AI analysis
+
+*Last updated: 2026-03-01 — Sprint 3D review fixes H1-H3, M1 applied.*

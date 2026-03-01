@@ -13,6 +13,48 @@ serve(async (req) => {
   }
 
   try {
+    // H-3: Restrict to service_role or admin — this function should only be called
+    // server-side (from support-ai-classify or scheduled jobs), never directly by clients.
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Authorization required" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Check if caller is service_role (internal call) or an admin user
+    const token = authHeader.replace("Bearer ", "");
+    const isServiceRole = token === serviceKey;
+
+    if (!isServiceRole) {
+      const userClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data, error: claimsErr } = await userClient.auth.getClaims(token);
+      if (claimsErr || !data?.claims?.sub) {
+        return new Response(JSON.stringify({ error: "Invalid token" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const adminSupabase = createClient(supabaseUrl, serviceKey);
+      const { data: isAdmin } = await adminSupabase.rpc("has_role", {
+        _user_id: data.claims.sub,
+        _role: "admin",
+      });
+      if (!isAdmin) {
+        return new Response(JSON.stringify({ error: "Admin access required" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     const { ticket_id } = await req.json();
     if (!ticket_id) {
       return new Response(JSON.stringify({ error: "ticket_id required" }), {
@@ -21,8 +63,6 @@ serve(async (req) => {
       });
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
     // Fetch ticket with AI classification
@@ -75,7 +115,7 @@ serve(async (req) => {
         customer_id: ticket.customer_id,
         amount_cents: creditCents,
         reason: `AI auto-resolution: ${resolutionExplanation.slice(0, 100)}`,
-        status: "active",
+        status: "AVAILABLE",
       });
     }
 

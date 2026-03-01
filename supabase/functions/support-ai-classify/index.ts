@@ -13,6 +13,38 @@ serve(async (req) => {
   }
 
   try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
+
+    // M-1: Auth is mandatory — verify caller is ticket owner, admin, or service_role
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Authorization required" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const isServiceRole = token === serviceKey;
+    let callerUserId: string | null = null;
+
+    if (!isServiceRole) {
+      const userClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data, error: claimsErr } = await userClient.auth.getClaims(token);
+      if (claimsErr || !data?.claims?.sub) {
+        return new Response(JSON.stringify({ error: "Invalid token" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      callerUserId = data.claims.sub as string;
+    }
+
     const { ticket_id } = await req.json();
     if (!ticket_id) {
       return new Response(JSON.stringify({ error: "ticket_id required" }), {
@@ -21,35 +53,24 @@ serve(async (req) => {
       });
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
-
-    // E1: Auth check — verify caller owns the ticket or is admin
-    const authHeader = req.headers.get("Authorization");
-    if (authHeader) {
-      const userClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY") ?? "", {
-        global: { headers: { Authorization: authHeader } },
-      });
-      const { data: { user } } = await userClient.auth.getUser();
-      if (user) {
-        const adminSupabase = createClient(supabaseUrl, serviceKey);
-        const { data: ticketCheck } = await adminSupabase
-          .from("support_tickets")
-          .select("customer_id")
-          .eq("id", ticket_id)
-          .single();
-        if (ticketCheck && ticketCheck.customer_id !== user.id) {
-          const { data: isAdmin } = await adminSupabase.rpc("has_role", {
-            _user_id: user.id,
-            _role: "admin",
+    // Verify ownership or admin (skip for service_role)
+    if (!isServiceRole && callerUserId) {
+      const adminSupabase = createClient(supabaseUrl, serviceKey);
+      const { data: ticketCheck } = await adminSupabase
+        .from("support_tickets")
+        .select("customer_id")
+        .eq("id", ticket_id)
+        .single();
+      if (ticketCheck && ticketCheck.customer_id !== callerUserId) {
+        const { data: isAdmin } = await adminSupabase.rpc("has_role", {
+          _user_id: callerUserId,
+          _role: "admin",
+        });
+        if (!isAdmin) {
+          return new Response(JSON.stringify({ error: "Not authorized" }), {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
-          if (!isAdmin) {
-            return new Response(JSON.stringify({ error: "Not authorized" }), {
-              status: 403,
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-            });
-          }
         }
       }
     }

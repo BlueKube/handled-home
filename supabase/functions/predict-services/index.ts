@@ -13,6 +13,38 @@ serve(async (req) => {
   }
 
   try {
+    // H-2: Auth — restrict to property owner, admin, or service_role
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
+
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Authorization required" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const isServiceRole = token === serviceKey;
+    let callerUserId: string | null = null;
+
+    if (!isServiceRole) {
+      const userClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data, error: claimsErr } = await userClient.auth.getClaims(token);
+      if (claimsErr || !data?.claims?.sub) {
+        return new Response(JSON.stringify({ error: "Invalid token" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      callerUserId = data.claims.sub as string;
+    }
+
     const { property_id } = await req.json();
     if (!property_id) {
       return new Response(JSON.stringify({ error: "property_id required" }), {
@@ -20,10 +52,6 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
 
     if (!lovableApiKey) {
       return new Response(JSON.stringify({ error: "LOVABLE_API_KEY not configured" }), {
@@ -33,6 +61,33 @@ serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, serviceKey);
+
+    // Verify caller owns property or is admin (skip for service_role)
+    if (!isServiceRole && callerUserId) {
+      const { data: property } = await supabase
+        .from("properties")
+        .select("customer_id")
+        .eq("id", property_id)
+        .single();
+      if (!property) {
+        return new Response(JSON.stringify({ error: "Property not found" }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (property.customer_id !== callerUserId) {
+        const { data: isAdmin } = await supabase.rpc("has_role", {
+          _user_id: callerUserId,
+          _role: "admin",
+        });
+        if (!isAdmin) {
+          return new Response(JSON.stringify({ error: "Not authorized for this property" }), {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
+    }
 
     // Gather property context in parallel
     const [signalsRes, coverageRes, historyRes, healthRes, skusRes] = await Promise.all([
