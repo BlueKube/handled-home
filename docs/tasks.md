@@ -565,3 +565,34 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 
 ### Pre-requisite Fixes
 - [x] **3A-FIX-01** | P0 | S | Fixed `create-connect-account-link` edge function: changed `npm:@supabase/supabase-js` import to `https://esm.sh/` pattern
+
+---
+
+## Sprint 3B — Coverage Map + Property Sizing + Personalization Signals
+
+> Household intelligence layer: coverage map, property sizing tiers, personalization signals for smarter defaults + suggestions.
+
+### Phase 1: Schema & RLS
+- [x] **3B-01** | P0 | M | Created `property_coverage` table (property_id + category_key unique, coverage_status SELF/PROVIDER/NONE/NA, switch_intent OPEN_NOW/OPEN_LATER/NOT_OPEN). Validation trigger, RLS: customer own-property, admin all.
+- [x] **3B-02** | P0 | M | Created `property_signals` table (property_id PK, home_sqft_tier, yard_tier, windows_tier, stories_tier, signals_version). Validation trigger for tier enums, RLS: customer own, admin all.
+- [x] **3B-03** | P1 | S | Created `personalization_events` table (append-only analytics, property_id FK, event_type, payload jsonb). RLS: customer insert+read own, admin all.
+
+### Phase 2: Customer UI — Coverage Map
+- [ ] **3B-04** | P0 | L | Coverage Map screen with ~10 categories and segmented controls, inline switch intent sub-question
+- [ ] **3B-05** | P0 | M | Integrate coverage map into onboarding flow
+
+### Phase 3: Customer UI — Property Sizing
+- [ ] **3B-06** | P0 | M | Property Sizing screen with tier selectors (sqft, yard, windows, stories)
+- [ ] **3B-07** | P1 | S | Progressive "Complete Home Setup" prompt card on dashboard
+
+### Phase 4: Edit & Settings
+- [ ] **3B-08** | P0 | M | More → Property → Home Setup edit screens for coverage + sizing
+- [ ] **3B-09** | P1 | S | Event logging for setup completion/updates
+
+### Phase 5: Personalization API + Level Integration
+- [ ] **3B-10** | P0 | L | `get_property_profile_context` RPC returning coverage, sizing, computed eligibility
+- [ ] **3B-11** | P1 | M | Level-default selection using sizing signals
+- [ ] **3B-12** | P1 | M | Category eligibility checks (suppress NA categories)
+
+### Phase 6: Admin Visibility
+- [ ] **3B-13** | P1 | M | Property detail section showing coverage map + sizing tiers
