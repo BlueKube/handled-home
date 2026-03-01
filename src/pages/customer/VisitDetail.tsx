@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useCustomerVisitDetail } from "@/hooks/useCustomerVisitDetail";
 import { useQuickFeedback } from "@/hooks/useQuickFeedback";
@@ -28,6 +28,7 @@ export default function CustomerVisitDetail() {
   const { review, submitReview } = usePrivateReview(jobId);
   const [issueSheetOpen, setIssueSheetOpen] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
+  const [dismissedRecommendation, setDismissedRecommendation] = useState(false);
   const { property } = useProperty();
   const { data: routineData } = useRoutine(property?.id);
   const updateLevel = useUpdateRoutineItemLevel();
@@ -220,7 +221,7 @@ export default function CustomerVisitDetail() {
       )}
 
       {/* Provider Recommendation Notice */}
-      {recommendation && !courtesyUpgrade && (
+      {recommendation && !courtesyUpgrade && !dismissedRecommendation && (
         <Card className="p-4 space-y-2 border-accent/30 bg-accent/5">
           <div className="flex items-start gap-2">
             <Lightbulb className="h-5 w-5 text-accent shrink-0 mt-0.5" />
@@ -244,7 +245,15 @@ export default function CustomerVisitDetail() {
             >
               Update going forward
             </Button>
-            <Button variant="outline" size="sm" className="flex-1 text-xs">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 text-xs"
+              onClick={() => {
+                setDismissedRecommendation(true);
+                toast.info("Keeping current level");
+              }}
+            >
               Keep current level
             </Button>
           </div>

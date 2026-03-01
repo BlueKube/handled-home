@@ -50,20 +50,21 @@ export function SkuDetailModal({ sku, onClose, onAdd, alreadyAdded }: SkuDetailM
     }
   }, [sku?.sku_id, levels]);
 
-  // P4-F6: Compute recommended level from guidance question answers
+  // P5-F1 fix: Use additive level_bump from guidance options (not maps_to_level_number)
   const guidanceRecommendedLevelId = useMemo(() => {
     if (!hasLevels || activeQuestions.length === 0) return null;
-    let maxLevelNumber = 1;
+    let totalBump = 0;
     for (const q of activeQuestions) {
       const answerIdx = questionAnswers[q.id];
       if (answerIdx === undefined) continue;
       const options = (q.options as any[]) ?? [];
       const chosen = options[answerIdx];
-      if (chosen?.maps_to_level_number && chosen.maps_to_level_number > maxLevelNumber) {
-        maxLevelNumber = chosen.maps_to_level_number;
+      if (chosen?.level_bump && chosen.level_bump > totalBump) {
+        totalBump = chosen.level_bump;
       }
     }
-    const recommended = activeLevels.find((l) => l.level_number === maxLevelNumber);
+    const targetNumber = 1 + totalBump;
+    const recommended = activeLevels.find((l) => l.level_number === targetNumber);
     return recommended?.id ?? null;
   }, [questionAnswers, activeQuestions, activeLevels, hasLevels]);
 
