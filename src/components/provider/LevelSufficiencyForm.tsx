@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, AlertTriangle, ArrowUpCircle, Lightbulb } from "lucide-react";
 import { useSkuLevels, useLevelRecommendation, useCourtesyUpgrade } from "@/hooks/useSkuLevels";
+import { toast } from "sonner";
 import type { JobSku } from "@/hooks/useJobDetail";
 
 const REASON_CODES = [
@@ -45,10 +46,12 @@ export function LevelSufficiencyForm({ jobSku, jobId, propertyId, providerOrgId,
     (l) => l.level_number > (activeLevels.find((a) => a.id === jobSku.scheduled_level_id)?.level_number ?? 0)
   );
 
-  if (!hasLevels) {
-    // No levels on this SKU — auto-complete
-    return null;
-  }
+  // P5-F2: Auto-complete when no levels exist (e.g. deactivated after scheduling)
+  useEffect(() => {
+    if (!hasLevels) onComplete();
+  }, [hasLevels, onComplete]);
+
+  if (!hasLevels) return null;
 
   const scheduledLevel = activeLevels.find((l) => l.id === jobSku.scheduled_level_id);
   const recommendedLevel = activeLevels.find((l) => l.id === recommendedLevelId);
@@ -98,7 +101,8 @@ export function LevelSufficiencyForm({ jobSku, jobId, propertyId, providerOrgId,
       setStep("done");
       onComplete();
     } catch (e: any) {
-      // If it fails (e.g. 6-month guardrail), still proceed
+      // P5-F4: Show toast on courtesy upgrade failure, then proceed
+      toast.error("Courtesy upgrade not recorded: already used in last 6 months");
       setStep("done");
       onComplete();
     }
