@@ -1,249 +1,256 @@
-# masterplan.md
+# Handled Home — Master Plan (Bundle & Save Vision)
 
 ## 30-Second Elevator Pitch
-Handled Home is a subscription-only, density-driven home services platform that turns maintenance into a predictable routine.
-Homeowners receive an assigned recurring Service Day based on their zone and bundle standardized services (SKUs) for that cycle.
-By clustering homes geographically, Handled Home creates route density — delivering lower cost, higher reliability, and predictable MRR rather than one-off transactional bookings.
+The Handled Home app is **Bundle & Save for home services**.
 
-It is a profit-first density engine for recurring home maintenance.
+We acquire a household once, then increase ARR per household through **one-click bundling**: customers add, remove, upgrade, and rearrange services with a tap—because we already have the hard stuff: address, access preferences, and payment. That means expansion happens with **near-zero incremental CAC**, just like adding items to a cart.
 
----
-
-## Problem and Mission
-
-### Problem
-- Home maintenance is reactive and fragmented.
-- Homeowners coordinate multiple vendors manually.
-- Scheduling is unpredictable.
-- Service quality is inconsistent.
-- Providers lose margin to drive time and sales overhead.
-
-### Mission
-Make home upkeep automatic and predictable.
+Handled Home wins by:
+1) **One-click bundle expansion (primary engine):** more services per household → higher ARR → CAC amortized → margin headroom → better value and retention.  
+2) **Operational control (enabler):** SKUs + Levels + proof receipts + zones/capacity keep delivery reliable and support costs low.  
+3) **Density (amplifier):** as households stack in zones, routing efficiency improves unit economics and provider retention.
 
 Core promise:
-> "Your home is handled."
+> **Your home is handled.**
 
 ---
 
-## Target Audience
+## The Problem
+Home upkeep is fragmented and reactive:
+- homeowners juggle multiple vendors, schedules, and payment methods
+- quality is inconsistent and hard to verify
+- switching vendors is awkward, time-consuming, and risky
+- providers lose margin to drive time, idle time, cancellations, and sales overhead
 
-### Primary
-- Busy suburban homeowners
-- Dual-income households
-- Homeowners who value predictability over price shopping
+The “marketplace calendar” model creates chaos at scale: scope ambiguity → disputes → support costs → margin collapse.
 
-### Secondary
-- Light multi-property owners
-- High-trust neighborhoods
-- Service providers seeking consistent route density
+---
+
+## The Mission
+Make home upkeep **automatic, predictable, provable, and easy to change**—without calendar chaos.
+
+---
+
+## What Handled Home Really Is (North Star)
+Handled Home is a **household bundling engine** for home maintenance.
+
+Most home service companies are single-service subscriptions (pool, pest, lawn). They struggle to cross-sell because:
+- scheduling isn’t unified
+- billing isn’t unified
+- scope and quality standards aren’t standardized
+- adding services means a new vendor relationship
+
+Handled Home unifies the household into a single account so additional services become a **one-tap bundle decision**—with transparent Levels, standardized scope, and proof-of-work receipts to keep quality consistent.
+
+Compounding economics:
+- higher ARR per household
+- lower blended CAC over time (no re-acquisition for each new service)
+- higher retention as the home’s routine and history becomes embedded
+
+---
+
+## Target Customer
+- busy suburban homeowners (time-starved, value reliability)
+- households who want fewer decisions and fewer vendor relationships
+- people who want control without confrontation (“firing” a landscaper, renegotiating scope)
+
+### Customer psychology (what we sell)
+- calm, predictability, trust, and “it’s handled”
+- one place to manage everything
+- easy upgrades/add-ons when the value is obvious
+
+---
+
+## Target Provider
+- quality-focused local operators
+- prefer predictable work and dense routes over random one-off jobs
+- want clear scope, fewer disputes, and stable earnings
+
+**Curation-first**, not “anyone can join” gig supply.
 
 ---
 
 ## Business Model
+### Revenue
+- household membership subscription (MRR)
+- add-on handles consumption / bundle usage
+- take-rate on provider payouts (range flexible; optimize later)
+- optional future tiers: premium membership, white-glove levels, concierge switching
 
-### Revenue Model
-- Subscription MRR from homeowners
-- 10–15% take rate on provider payouts
-- No payroll — providers are independent partners (initially)
+### The Primary Flywheel: Bundle Expansion (the Amazon-like engine)
+1) Acquire household once (capture service or starter bundle)  
+2) Capture durable context: address + access + preferences + payment  
+3) Present relevant services (filtered, eligible, non-spammy)  
+4) One-click add-ons + Level upgrades increase attach rate  
+5) ARR per household rises; CAC amortizes; retention improves  
+6) More margin headroom enables better value and better service reliability  
+7) Reliability increases trust → expansion becomes easier → repeat
 
-### Density Flywheel
+### The Secondary Flywheel: Density & Reliability (amplifier)
+1) Membership creates predictable demand  
+2) Zones + cycles + Service Day create routable schedules  
+3) Higher stops/day reduces cost per stop  
+4) Provider margin improves → provider retention improves  
+5) Reliability improves → customer retention improves  
+6) Retention compounds bundle expansion
 
-1. **Subscription creates predictable demand** — Customers commit to recurring Service Days.
-2. **Zone stacking creates operational density** — Grouped jobs lower provider time per job.
-3. **Density increases provider margin** — Providers tolerate lower take rate because utilization is high.
-4. **Providers accept recurring flow** — Handled Home becomes embedded in their revenue stream.
-5. **Recurring flow increases SKU adoption** — Customers add services they normally wouldn't call for.
-6. **Higher ARPU + higher retention** — Long-term compounding.
-
-### What We Optimize For
-- MRR per household
-- Gross margin per Service Day
-- Density per zone per day
-- Provider retention
-- Subscription retention
-- Support cost per job (must stay low — if support cost explodes, model dies)
-
-### Strategic Bets (Explicit Decisions)
-
-1. **Launch SKU count: 3–5 per zone** until density + proof compliance is stable. Every SKU adds edge cases + disputes.
-2. **Default routine is the primary path.** Recommended routine and auto-fit are the main flow, not a side feature. Fastest path to density is not asking customers to design everything from scratch.
-3. **Seasonal complexity boundary:** Window preference (early/mid/late month) only, no date-level scheduling. Seasonal is an ARPU lever, not a scheduling trap.
-
-### What We Are NOT
-- Not a gig marketplace
-- Not a lead gen platform
-- Not a CRM for contractors
-- Not a discount club
+**Key idea:** density strengthens unit economics; **bundle expansion drives growth velocity**.
 
 ---
 
-## Strategic Approach
+## What We Optimize (Scoreboard)
+### Growth / unit economics
+- **ARR per household** (primary)
+- **Attach rate** (active services per household per cycle)
+- **Expansion velocity** (2nd service within 30/60/90 days)
+- **Blended CAC** (should drop as attach rate rises)
 
-### Profit-First, Cash-Flow Disciplined
-- Build a density business, not a growth-at-all-costs marketplace.
-- Prove unit economics in 1 city before expanding.
-- Zone-by-zone expansion, not city-wide blitz.
-
-### Hybrid Scaling Path
-1. Prove retention > 80% in launch market.
-2. Prove attach rate (cross-SKU adoption) increases over time.
-3. Prove density measurably reduces cost per job across 3–5 cities.
-4. Then decide: continue cash-flowing or raise capital to accelerate.
-
-Raising before proof puts you on a growth treadmill. Proving first gives leverage.
-
----
-
-## Core Features
-
-### Customer Experience
-- Zone-based recurring Service Day assignment
-- Controlled rejection flow (2–3 alternatives only)
-- Subscription-first billing
-- Bundle builder per cycle
-- Standardized SKU transparency
-- Before/after photo proof
-- Line-item ratings
-- Structured issue resolution
-
-### Provider Experience
-- Daily job list
-- Checklist enforcement
-- Required photo uploads
-- Exception handling
-- Performance metrics dashboard
-- Earnings transparency
-
-### Admin Experience
-- Regions and zip-based zones
-- Capacity guardrails (stops + minutes)
-- SKU governance system
-- Subscription plan configuration
-- Provider onboarding + enforcement
-- Support tooling (refunds, redos, impersonation)
-- Analytics dashboards
+### Reliability / scalability
+- **Support minutes per job** (must stay low)
+- **Proof compliance %** (photos + checklist)
+- **Issues per 100 jobs**
+- **On-time / completion rate**
+- **Capacity utilization** per zone/service day
+- **Stops per Service Day** and **minutes per stop** (density health)
 
 ---
 
-## Tech Stack
+## Core Product Principles
+1) **OS feel, not marketplace feel**
+   - no open calendar browsing
+   - routine and cycle-based scheduling
+   - app feels like your home is “in motion,” not “shopping for contractors”
 
-### Frontend
-- React + Vite + Tailwind CSS + TypeScript
-- Capacitor for iOS/Android
+2) **One-click expansion, not spam**
+   - suggestions are relevant, limited, explainable
+   - “hide / not interested” feedback is respected
 
-### Backend
-- Lovable Cloud (Supabase: Auth, Postgres, Storage, Edge Functions)
+3) **Levels standardize scope + time + proof**
+   - every meaningful SKU has Levels (variants) defining:
+     - inclusions/exclusions
+     - planned minutes
+     - proof requirements
+     - handles cost
+   - providers can recommend correct Level next time
+   - courtesy upgrade protects quality today, corrects next cycle
 
-### Payments
-- Stripe (payment rail only; entitlements managed in database)
+4) **Proof-of-work is a premium artifact**
+   - every job produces a “Handled Receipt”
+   - receipts reduce disputes and create a sticky home history
+   - receipts are also the most tasteful upsell moment (“keep this standard next time”)
 
-### Infrastructure
-- Supabase-managed hosting
-- Supabase Storage for photo uploads
-- Edge Functions for custom logic and webhooks
-
----
-
-## Conceptual Data Model (ERD in Words)
-
-- User (roles: Customer, ProviderMember, Admin)
-- Household → has many Users
-- Property → belongs to Household and Zone
-- Zone → has default Service Days + capacity caps
-- Subscription → belongs to Household
-- SKU → governed service definition
-- Bundle → per-cycle service selection
-- Job → provider execution unit
-- ChecklistResponse + PhotoEvidence
-- ProviderOrg + ProviderMembers
-- SupportTicket
-- Payout
-- AuditLog
+5) **Constraints-first scaling**
+   - zones/caps prevent overselling
+   - curated providers protect brand trust
+   - ops cockpit keeps the machine healthy
 
 ---
 
-## UI Principles
+## The Product, End-to-End
 
-- One visible promise at all times
-- No open calendar browsing
-- Clear scope definitions
-- Calm defaults
-- Design for forgiveness
-- Reduce cognitive load
+### Customer
+- auth + roles
+- property profiles + access notes
+- **Home Setup signals**
+  - coverage map (self / have someone / none / NA)
+  - sizing tiers (sqft, yard, windows, stories)
+- membership selection (bundle model)
+- routine builder (draft → activate)
+- assigned Service Day with controlled alternatives
+- Add Service Drawer (one-tap add, Undo, smart defaults)
+- Level selection + micro-questions (0–3) where needed
+- Handled Receipts (photos + checklist proof + next-time actions)
+- Switch Kit (safe, scheduled transition from incumbents)
 
----
+### Provider
+- curated onboarding + approval
+- job list optimized for “today → next”
+- job detail includes: Level, scope, time target, proof requirements
+- completion includes: proof enforcement + “level sufficient?” feedback + courtesy upgrade (guardrails)
+- simple issue reporting
 
-## Security Notes
-
-- TLS everywhere
-- Role-based access control
-- Encrypted sensitive data
-- Signed photo URLs
-- Immutable audit logs
-- Stripe tokenization only
-
----
-
-## Roadmap
-
-### Round 1 — All 14 Modules Complete ✅
-- **Modules 01–14:** Auth & Roles, Property Profiles, Zones & Capacity, SKU Catalog, Subscription Engine, Service Day System, Bundle Builder, Provider Onboarding, Job Execution, Customer Dashboard & Proof, Billing & Payouts, Support & Disputes, Referrals & Incentives, Reporting & Analytics
-- 1 city, 3–5 SKUs, zone density proof, full admin tooling
-
-### Round 2 — Autonomous Scaling (Current)
-- **2A — Placeholders & Core:** ✅ Complete — all placeholder pages replaced with live data
-- **2B — Automation Engine:** ✅ Complete — job assignment, SLA enforcement, dunning, weather, zone expansion, route optimization
-- **2C — Notifications:** 🔄 In Progress — event bus schema + notification center UI complete, processor + delivery pipeline next
-- **2D–2I:** Planned — customer polish, provider polish, growth engine, admin intelligence, platform hardening, future moats
-
-See `docs/tasks.md` for the detailed task list and progress tracking.
-
-### V2 (Future)
-
-### V2
-- Multi-city (3–5 cities, proving hybrid scaling path)
-- Polygon zones
-- Additional verticals (pest, pool)
-- Managed crews in dense zones (hybrid model)
+### Admin / Ops
+- zones, capacity, Service Day patterns
+- SKU governance + Levels editor
+- provider coverage mapping (primary/backup)
+- support/disputes with evidence spine
+- Ops Cockpit:
+  - capacity, proof compliance, issues/100
+  - level mismatch signals (recommendations + courtesy upgrades)
+  - attach-rate signals (as instrumentation matures)
+  - next-best actions (simple threshold rules)
 
 ---
 
-## Launch Scoreboard (Weekly Metrics)
+## Strategic Bets (Updated)
+1) **Wallet share is the growth engine**
+   - Acquire once → expand the bundle → no recurring CAC for each added service.
 
-These metrics prove the flywheel is working. Track weekly from day one:
+2) **Levels prevent scope drift**
+   - Standardization beats negotiation; quality becomes enforceable.
 
-| Metric | Target | Why It Matters |
-|--------|--------|----------------|
-| Service Day offer acceptance rate | >90% | Validates the assignment algorithm works |
-| Offer expiry rate | Near zero | TTL cleanup should rarely fire if alternatives are good |
-| Photo compliance % | ≥95% | Quality moat — proof-of-work must be non-negotiable |
-| On-time completion % | ≥90% | Operational promise to customers |
-| Redo rate | Baseline TBD | Leading indicator of provider quality issues |
-| Support minutes per job | <3 min | If this rises, unit economics collapse |
-| Zone density: stops/day | Trending up | Core operational efficiency metric |
-| Zone density: minutes/stop | Trending down | Drive time efficiency improving with density |
-| Gross margin per Service Day | Positive | Must be positive in launch zone before expanding |
+3) **Receipts are the trust moat**
+   - Proof artifacts reduce disputes and make the product “real.”
 
----
+4) **Switching must be painless**
+   - Capture with low-incumbent services first; convert incumbents with Switch Kit.
 
-## Risks and Mitigations
-
-- Service debt → no rollover; unused service weeks expire at billing cycle end
-- Quality variance → mandatory photo enforcement
-- Density failure → geo focus strategy, zone-by-zone expansion
-- Operational override creep → strict audit logging
-- Weather volatility → weather mode
-- Support cost creep → structured deflection, atomic SKUs, unambiguous scope
-- Providers bypassing platform → embed in their revenue stream via recurring flow
+5) **Curated launch beats “liquidity first”**
+   - Start constrained; expand category-by-category with standards.
 
 ---
 
-## Future Expansion
+## Risks & Mitigations
+- **Marketplace entropy (quality/support blowup)**  
+  → Constraints-first: SKUs + Levels + proof + zone/capacity, curated providers
 
-- Property health score
-- Predictive maintenance
-- Insurance integrations
-- Fleet optimization
-- National scaling
-- Vertical integration of high-margin SKUs in dense zones
+- **Spammy upsells degrade premium brand**  
+  → 2–4 suggestions max, relevance rules, suppression/hide feedback, post-visit recommendations only when justified
+
+- **Provider abuse of courtesy upgrades**  
+  → rate limits + reason codes + proof required + ops review + disable per provider/org
+
+- **Switching creates schedule chaos**  
+  → next-cycle start default, “switch pending” state, waitlist when capacity constrained
+
+- **Too many services too soon**  
+  → curated “Always-On” set + seasonal rotation + staged rollouts
+
+---
+
+## Roadmap: Round 3 Sprints (Current Direction)
+### 3A — Levels (SKU Variants)
+- scope/time/proof/handles buckets
+- provider recommendation next time
+- courtesy upgrade + guardrails
+
+### 3B — Coverage Map + Property Signals
+- what’s already handled + not applicable
+- sizing tiers (sqft/yard/windows/stories)
+- feeds smart defaults + relevance
+
+### 3C — Growth Surfaces + Add Service Drawer + Home Restructure
+- Home becomes action-first and calm
+- Add Service Drawer enables one-tap expansion + Undo
+- suggestion throttling + suppression
+
+### 3D — Switch Kit + Ops Cockpit v1
+- safe scheduled switching from incumbents
+- operator control tower with drilldowns and actions
+
+### 3E — Handled Receipts (Proof-of-Work Artifact)
+- premium receipt per visit (photos + checklist + notes)
+- tasteful post-visit actions:
+  - update Level going forward
+  - add adjacent service next cycle
+
+---
+
+## What Success Looks Like
+A customer shifts from:
+> “I need to find someone for X…”
+
+to:
+> “I’ll just add that.”
+
+Handled Home becomes the default “Bundle & Save” layer for home maintenance: one account, one routine, one history, endless one-tap expansion—delivered reliably through constraints, proof, and operator-grade control.
