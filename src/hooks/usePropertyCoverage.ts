@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -75,8 +76,8 @@ export function usePropertyCoverage() {
         .upsert(rows, { onConflict: "property_id,category_key" });
       if (error) throw error;
 
-      // Log personalization event
-      await supabase.from("personalization_events").insert({
+      // Log personalization event (non-critical — warn on failure)
+      const { error: eventError } = await supabase.from("personalization_events").insert({
         property_id: propertyId,
         event_type: "coverage_map_updated",
         payload: {
@@ -89,6 +90,7 @@ export function usePropertyCoverage() {
           },
         },
       });
+      if (eventError) console.warn("Failed to log personalization event:", eventError);
     },
     onSuccess: () => {
       toast.success("Coverage map saved");
@@ -99,11 +101,12 @@ export function usePropertyCoverage() {
     },
   });
 
-  // Build a map from existing data for easy lookup
-  const coverageMap = new Map<string, CoverageRow>();
-  for (const row of query.data ?? []) {
-    coverageMap.set(row.category_key, row);
-  }
+  // Build a map from existing data for easy lookup (memoized)
+  const coverageMap = useMemo(() => {
+    const map = new Map<string, CoverageRow>();
+    for (const row of query.data ?? []) map.set(row.category_key, row);
+    return map;
+  }, [query.data]);
 
   return {
     coverage: query.data ?? [],
