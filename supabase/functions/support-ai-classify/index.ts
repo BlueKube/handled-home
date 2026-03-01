@@ -33,7 +33,6 @@ serve(async (req) => {
       });
       const { data: { user } } = await userClient.auth.getUser();
       if (user) {
-        // Verify ownership or admin role
         const adminSupabase = createClient(supabaseUrl, serviceKey);
         const { data: ticketCheck } = await adminSupabase
           .from("support_tickets")
@@ -64,7 +63,7 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Fetch ticket with related data
+    // Fetch ticket
     const { data: ticket, error: ticketErr } = await supabase
       .from("support_tickets")
       .select("*")
@@ -78,20 +77,53 @@ serve(async (req) => {
       });
     }
 
-    // Fetch job context if available
+    // Fetch job context + photos if available
     let jobContext = "";
+    let photoContext = "";
     if (ticket.job_id) {
-      const { data: job } = await supabase
-        .from("jobs")
-        .select("status, scheduled_date, started_at, completed_at, provider_summary")
-        .eq("id", ticket.job_id)
-        .single();
-      if (job) {
-        jobContext = `\nJob context: status=${job.status}, scheduled=${job.scheduled_date}, started=${job.started_at}, completed=${job.completed_at}, provider_summary="${job.provider_summary || "none"}"`;
+      const [jobRes, photoRes] = await Promise.all([
+        supabase
+          .from("jobs")
+          .select("status, scheduled_date, started_at, completed_at, provider_summary, arrived_at, departed_at")
+          .eq("id", ticket.job_id)
+          .single(),
+        supabase
+          .from("job_photos")
+          .select("id, slot_key, upload_status, captured_at")
+          .eq("job_id", ticket.job_id)
+          .eq("upload_status", "UPLOADED"),
+      ]);
+
+      if (jobRes.data) {
+        const job = jobRes.data;
+        const timeOnSite = job.arrived_at && job.departed_at
+          ? Math.round((new Date(job.departed_at).getTime() - new Date(job.arrived_at).getTime()) / 60000)
+          : null;
+        jobContext = `\nJob context: status=${job.status}, scheduled=${job.scheduled_date}, arrived=${job.arrived_at || "none"}, departed=${job.departed_at || "none"}, time_on_site=${timeOnSite ? `${timeOnSite}min` : "unknown"}, provider_summary="${job.provider_summary || "none"}"`;
+      }
+
+      const photos = photoRes.data ?? [];
+      if (photos.length > 0) {
+        photoContext = `\nJob photos: ${photos.length} uploaded (slots: ${photos.map(p => p.slot_key || "unknown").join(", ")})`;
       }
     }
 
-    // Check for duplicate tickets from same customer
+    // Check for customer issue photos
+    let issuePhotoContext = "";
+    if (ticket.job_id) {
+      const { data: issues } = await supabase
+        .from("customer_issues")
+        .select("photo_storage_path, photo_upload_status, reason, note")
+        .eq("job_id", ticket.job_id)
+        .eq("customer_id", ticket.customer_id);
+      
+      if (issues && issues.length > 0) {
+        const withPhotos = issues.filter(i => i.photo_upload_status === "UPLOADED");
+        issuePhotoContext = `\nCustomer issues: ${issues.length} filed (${withPhotos.length} with photos). Reasons: ${issues.map(i => i.reason).join(", ")}`;
+      }
+    }
+
+    // Check for duplicate tickets
     const { data: recentTickets } = await supabase
       .from("support_tickets")
       .select("id, ticket_type, category, status, created_at")
@@ -106,7 +138,6 @@ serve(async (req) => {
 
     const startMs = Date.now();
 
-    // Call Lovable AI for classification using tool calling
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -118,15 +149,27 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a support ticket classifier for a home services marketplace. Analyze the ticket and classify it. Consider the severity of the issue, evidence quality, risk of chargeback or fraud, and whether this might be a duplicate of a recent ticket.`,
+            content: `You are a support ticket classifier and resolution engine for a home services marketplace. Analyze the ticket and classify it. Consider severity, evidence quality, risk of chargeback or fraud, whether this might be a duplicate, and whether it can be auto-resolved.
+
+Auto-resolution criteria:
+- Clear-cut service quality issues with photo evidence (e.g., missed area, incomplete work)
+- Minor billing discrepancies under $50
+- Simple scheduling errors with no financial impact
+- Issues where provider summary confirms the problem
+
+Do NOT auto-resolve:
+- Safety concerns
+- Repeated complaints from same customer (potential abuse)
+- High-value disputes (>$100)
+- Issues requiring provider investigation`,
           },
           {
             role: "user",
-            content: `Classify this support ticket:
+            content: `Classify this support ticket and determine if it can be auto-resolved:
 Type: ${ticket.ticket_type}
 Category: ${ticket.category || "none"}
 Severity (customer-reported): ${ticket.severity}
-Customer note: "${ticket.customer_note || "none"}"${jobContext}${historyContext}`,
+Customer note: "${ticket.customer_note || "none"}"${jobContext}${photoContext}${issuePhotoContext}${historyContext}`,
           },
         ],
         tools: [
@@ -134,7 +177,7 @@ Customer note: "${ticket.customer_note || "none"}"${jobContext}${historyContext}
             type: "function",
             function: {
               name: "classify_ticket",
-              description: "Return classification results for a support ticket.",
+              description: "Return classification and auto-resolution results for a support ticket.",
               parameters: {
                 type: "object",
                 properties: {
@@ -145,7 +188,6 @@ Customer note: "${ticket.customer_note || "none"}"${jobContext}${historyContext}
                   recommended_severity: {
                     type: "string",
                     enum: ["low", "medium", "high", "critical"],
-                    description: "AI-recommended severity based on analysis.",
                   },
                   evidence_score: {
                     type: "number",
@@ -172,8 +214,33 @@ Customer note: "${ticket.customer_note || "none"}"${jobContext}${historyContext}
                     required: ["is_repeat_offender", "recommended_action", "reasoning"],
                     additionalProperties: false,
                   },
+                  auto_resolvable: {
+                    type: "boolean",
+                    description: "True if AI is confident this can be resolved without human review.",
+                  },
+                  suggested_credit_cents: {
+                    type: "integer",
+                    description: "AI-recommended credit amount in cents, or 0 if no credit needed.",
+                  },
+                  resolution_explanation: {
+                    type: "string",
+                    description: "Customer-facing explanation of the resolution (max 200 chars).",
+                  },
+                  photo_analysis: {
+                    type: "object",
+                    properties: {
+                      has_evidence: { type: "boolean", description: "Whether photos provide relevant evidence." },
+                      evidence_description: { type: "string", description: "Brief description of what photos show." },
+                    },
+                    required: ["has_evidence", "evidence_description"],
+                    additionalProperties: false,
+                  },
                 },
-                required: ["ai_summary", "recommended_severity", "evidence_score", "risk_score", "classification"],
+                required: [
+                  "ai_summary", "recommended_severity", "evidence_score", "risk_score",
+                  "classification", "auto_resolvable", "suggested_credit_cents",
+                  "resolution_explanation", "photo_analysis"
+                ],
                 additionalProperties: false,
               },
             },
@@ -210,7 +277,6 @@ Customer note: "${ticket.customer_note || "none"}"${jobContext}${historyContext}
     const aiData = await aiResponse.json();
     const latencyMs = Date.now() - startMs;
 
-    // Parse tool call result
     const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall) {
       return new Response(JSON.stringify({ error: "No classification returned" }), {
@@ -221,14 +287,20 @@ Customer note: "${ticket.customer_note || "none"}"${jobContext}${historyContext}
 
     const result = JSON.parse(toolCall.function.arguments);
 
-    // Update ticket with AI results (E2: also write ai_classification)
+    // Update ticket with AI results (includes new auto-resolution fields)
     await supabase
       .from("support_tickets")
       .update({
         ai_summary: result.ai_summary?.slice(0, 200),
         ai_evidence_score: result.evidence_score,
         ai_risk_score: result.risk_score,
-        ai_classification: result.classification ?? null,
+        ai_classification: {
+          ...(result.classification ?? {}),
+          auto_resolvable: result.auto_resolvable ?? false,
+          suggested_credit_cents: result.suggested_credit_cents ?? 0,
+          resolution_explanation: result.resolution_explanation ?? "",
+          photo_analysis: result.photo_analysis ?? null,
+        },
       })
       .eq("id", ticket_id);
 
@@ -245,7 +317,16 @@ Customer note: "${ticket.customer_note || "none"}"${jobContext}${historyContext}
       latency_ms: latencyMs,
     });
 
-    return new Response(JSON.stringify({ success: true, ...result }), {
+    // If auto-resolvable and meets guard criteria, trigger auto-resolution
+    const shouldAutoResolve = result.auto_resolvable === true
+      && (result.evidence_score ?? 0) >= 75
+      && (result.risk_score ?? 100) < 30;
+
+    return new Response(JSON.stringify({
+      success: true,
+      ...result,
+      should_auto_resolve: shouldAutoResolve,
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

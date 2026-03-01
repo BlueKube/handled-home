@@ -628,3 +628,28 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3C-R2** | S | Removed dead `recordDrawerOpen` no-op mutation from `useSuggestionActions`
 
 *Last updated: 2026-03-01 — Sprint 3C Phase 1-5 complete. Phase 6 deferred (instrumentation polish).*
+
+---
+
+## Sprint 3D — AI Intelligence Layer
+
+> Predictive service recommendations + smart dispute resolution.
+> **Spec:** `docs/sprint-3d-spec.md`
+
+### 3D-B: Predictive Service Recommendations
+- [x] **3D-B2** | P0 | M | `property_service_predictions` table with RLS (customer own-property read, admin all, service_role write), unique (property_id, sku_id), 7-day TTL
+- [x] **3D-B1** | P0 | L | `predict-services` edge function — gathers property signals, coverage, visit history, health score; calls Lovable AI (gemini-3-flash-preview) with structured tool calling; upserts predictions; logs to ai_inference_runs
+- [x] **3D-B3** | P0 | M | Updated `get_service_suggestions` RPC — joins `property_service_predictions`, adds `predicted` suggestion_type with confidence-based scoring (confidence/10), AI-generated reason text. Predicted SKUs bypass category eligibility filter
+- [ ] **3D-B4** | P1 | S | Wire `predict-services` into `run-scheduled-jobs` weekly automation
+
+### 3D-C: Smart Dispute Resolution
+- [x] **3D-C1** | P0 | L | Enhanced `support-ai-classify` — added `auto_resolvable`, `suggested_credit_cents`, `resolution_explanation`, `photo_analysis` to AI tool output. Includes job photo count + customer issue photo context in prompt. Guard criteria: auto_resolvable AND evidence≥75 AND risk<30
+- [x] **3D-C2** | P0 | L | `auto-resolve-dispute` edge function — validates guard criteria, applies credit (capped at $50), resolves ticket, emits CUSTOMER_ISSUE_AUTO_RESOLVED notification, logs to ai_inference_runs
+- [ ] **3D-C3** | P1 | M | Admin AI insights card on ticket detail — classification reasoning, evidence/risk scores, photo analysis, "Apply AI suggestion" button
+- [ ] **3D-C4** | P1 | M | Customer issue auto-classification on insert — trigger or hook calls support-ai-classify immediately
+
+### Schema Changes
+- `property_service_predictions` table (new)
+- `ai_inference_runs.ticket_id` made nullable, added `entity_type` + `entity_id` columns for non-ticket AI usage
+
+*Last updated: 2026-03-01 — Sprint 3D Phases B1-B3 + C1-C2 complete.*

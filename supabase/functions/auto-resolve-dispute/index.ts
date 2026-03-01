@@ -1,0 +1,152 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { ticket_id } = await req.json();
+    if (!ticket_id) {
+      return new Response(JSON.stringify({ error: "ticket_id required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, serviceKey);
+
+    // Fetch ticket with AI classification
+    const { data: ticket, error: ticketErr } = await supabase
+      .from("support_tickets")
+      .select("*")
+      .eq("id", ticket_id)
+      .single();
+
+    if (ticketErr || !ticket) {
+      return new Response(JSON.stringify({ error: "Ticket not found" }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const classification = ticket.ai_classification as Record<string, any> | null;
+    if (!classification) {
+      return new Response(JSON.stringify({ error: "Ticket has no AI classification" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Guard checks
+    const autoResolvable = classification.auto_resolvable === true;
+    const evidenceScore = ticket.ai_evidence_score ?? 0;
+    const riskScore = ticket.ai_risk_score ?? 100;
+    const suggestedCreditCents = classification.suggested_credit_cents ?? 0;
+    const resolutionExplanation = classification.resolution_explanation ?? "We've reviewed your issue and applied a resolution.";
+
+    if (!autoResolvable || evidenceScore < 75 || riskScore >= 30) {
+      return new Response(JSON.stringify({
+        success: false,
+        reason: "Does not meet auto-resolution criteria",
+        auto_resolvable: autoResolvable,
+        evidence_score: evidenceScore,
+        risk_score: riskScore,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Cap auto-credit at $50 (5000 cents) for safety
+    const creditCents = Math.min(suggestedCreditCents, 5000);
+
+    // Apply credit if suggested
+    if (creditCents > 0) {
+      await supabase.from("customer_credits").insert({
+        customer_id: ticket.customer_id,
+        amount_cents: creditCents,
+        reason: `AI auto-resolution: ${resolutionExplanation.slice(0, 100)}`,
+        status: "active",
+      });
+    }
+
+    // Resolve the ticket
+    await supabase
+      .from("support_tickets")
+      .update({
+        status: "resolved",
+        resolution_summary: `[AI Auto-Resolved] ${resolutionExplanation}${creditCents > 0 ? ` ($${(creditCents / 100).toFixed(2)} credit applied)` : ""}`,
+        resolved_at: new Date().toISOString(),
+      })
+      .eq("id", ticket_id);
+
+    // Log the resolution event
+    await supabase.from("support_ticket_events").insert({
+      ticket_id,
+      event_type: "admin_resolved",
+      actor_user_id: null,
+      metadata: {
+        resolved_by: "ai_auto_resolve",
+        credit_cents: creditCents,
+        evidence_score: evidenceScore,
+        risk_score: riskScore,
+        classification: classification,
+      },
+    });
+
+    // Emit notification to customer
+    try {
+      await supabase.rpc("emit_notification_event", {
+        p_event_type: "CUSTOMER_ISSUE_AUTO_RESOLVED",
+        p_audience_type: "CUSTOMER",
+        p_audience_user_id: ticket.customer_id,
+        p_idempotency_key: `auto_resolve_${ticket_id}`,
+        p_payload: {
+          ticket_id,
+          resolution: resolutionExplanation,
+          credit_cents: creditCents,
+        },
+        p_priority: "service",
+      });
+    } catch (notifErr) {
+      console.error("Notification emit failed (non-fatal):", notifErr);
+    }
+
+    // Log to ai_inference_runs
+    await supabase.from("ai_inference_runs").insert({
+      ticket_id,
+      model_name: "auto-resolve-v1",
+      input_summary: `auto-resolve: ticket ${ticket_id}, credit $${(creditCents / 100).toFixed(2)}`,
+      output: {
+        action: "auto_resolved",
+        credit_cents: creditCents,
+        resolution: resolutionExplanation,
+      },
+      evidence_score: evidenceScore,
+      risk_score: riskScore,
+    });
+
+    return new Response(JSON.stringify({
+      success: true,
+      credit_cents: creditCents,
+      resolution: resolutionExplanation,
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (e) {
+    console.error("auto-resolve-dispute error:", e);
+    return new Response(
+      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
