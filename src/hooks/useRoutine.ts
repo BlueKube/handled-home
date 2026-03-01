@@ -16,6 +16,7 @@ export interface RoutineItem {
   proof_photo_labels: any;
   proof_photo_count: number;
   checklist_count: number;
+  level_id: string | null;
   created_at: string;
 }
 

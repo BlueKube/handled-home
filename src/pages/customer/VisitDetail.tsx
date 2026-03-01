@@ -3,6 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useCustomerVisitDetail } from "@/hooks/useCustomerVisitDetail";
 import { useQuickFeedback } from "@/hooks/useQuickFeedback";
 import { usePrivateReview } from "@/hooks/usePrivateReview";
+import { useUpdateRoutineItemLevel } from "@/hooks/useRoutineActions";
+import { useRoutine } from "@/hooks/useRoutine";
+import { useProperty } from "@/hooks/useProperty";
+import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -24,6 +28,28 @@ export default function CustomerVisitDetail() {
   const { review, submitReview } = usePrivateReview(jobId);
   const [issueSheetOpen, setIssueSheetOpen] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
+  const { property } = useProperty();
+  const { data: routineData } = useRoutine(property?.id);
+  const updateLevel = useUpdateRoutineItemLevel();
+
+  const handleUpdateLevel = (levelId: string, skuId: string) => {
+    if (!routineData) {
+      toast.error("No active routine found");
+      return;
+    }
+    const item = routineData.items.find((i) => i.sku_id === skuId);
+    if (!item) {
+      toast.error("Service not found in your routine");
+      return;
+    }
+    updateLevel.mutate(
+      { itemId: item.id, levelId },
+      {
+        onSuccess: () => toast.success("Routine updated to new level"),
+        onError: () => toast.error("Failed to update level"),
+      }
+    );
+  };
 
   // Find before/after pair for comparison
   const photos = data?.photos ?? [];
@@ -181,7 +207,13 @@ export default function CustomerVisitDetail() {
               </p>
             </div>
           </div>
-          <Button variant="default" size="sm" className="w-full text-xs mt-2">
+          <Button
+            variant="default"
+            size="sm"
+            className="w-full text-xs mt-2"
+            disabled={updateLevel.isPending}
+            onClick={() => handleUpdateLevel(courtesyUpgrade.performed_level_id, courtesyUpgrade.sku_id)}
+          >
             Update to {courtesyUpgrade.performed_level_label} going forward
           </Button>
         </Card>
@@ -203,7 +235,13 @@ export default function CustomerVisitDetail() {
             </div>
           </div>
           <div className="flex gap-2 mt-2">
-            <Button variant="default" size="sm" className="flex-1 text-xs">
+            <Button
+              variant="default"
+              size="sm"
+              className="flex-1 text-xs"
+              disabled={updateLevel.isPending}
+              onClick={() => handleUpdateLevel(recommendation.recommended_level_id, recommendation.sku_id)}
+            >
               Update going forward
             </Button>
             <Button variant="outline" size="sm" className="flex-1 text-xs">

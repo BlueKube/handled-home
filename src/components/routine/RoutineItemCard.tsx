@@ -20,7 +20,7 @@ export function RoutineItemCard({ item, onRemove, onCadenceChange, onLevelChange
   const { data: levels } = useSkuLevels(item.sku_id);
   const activeLevels = (levels ?? []).filter((l) => l.is_active);
   const hasLevels = activeLevels.length > 0;
-  const selectedLevel = activeLevels.find((l) => l.id === (item as any).level_id);
+  const selectedLevel = activeLevels.find((l) => l.id === item.level_id);
 
   return (
     <div className="rounded-xl border border-border bg-card p-3 space-y-2 press-feedback">
@@ -60,7 +60,7 @@ export function RoutineItemCard({ item, onRemove, onCadenceChange, onLevelChange
       {hasLevels && onLevelChange && (
         <LevelSelector
           levels={activeLevels}
-          selectedLevelId={(item as any).level_id ?? activeLevels[0]?.id ?? null}
+          selectedLevelId={item.level_id ?? activeLevels[0]?.id ?? null}
           onSelect={(levelId) => onLevelChange(item.id, levelId)}
           compact
         />
