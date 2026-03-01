@@ -75,7 +75,7 @@ serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (property.user_id !== callerUserId) {
+      if (property.customer_id !== callerUserId) {
         const { data: isAdmin } = await supabase.rpc("has_role", {
           _user_id: callerUserId,
           _role: "admin",
