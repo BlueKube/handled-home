@@ -123,14 +123,26 @@ serve(async (req) => {
     }
 
     // Resolve the ticket
+    const resolvedAt = new Date().toISOString();
     await supabase
       .from("support_tickets")
       .update({
         status: "resolved",
         resolution_summary: `[AI Auto-Resolved] ${resolutionExplanation}${creditCents > 0 ? ` ($${(creditCents / 100).toFixed(2)} credit applied)` : ""}`,
-        resolved_at: new Date().toISOString(),
+        resolved_at: resolvedAt,
       })
       .eq("id", ticket_id);
+
+    // Sync linked customer_issues row status
+    await supabase
+      .from("customer_issues")
+      .update({
+        status: "resolved",
+        resolution_note: resolutionExplanation,
+        resolved_at: resolvedAt,
+        updated_at: resolvedAt,
+      })
+      .eq("support_ticket_id", ticket_id);
 
     // Log the resolution event
     await supabase.from("support_ticket_events").insert({

@@ -14,6 +14,9 @@ export interface CustomerIssueRow {
   resolved_at: string | null;
   created_at: string;
   updated_at: string;
+  support_ticket_id: string | null;
+  // Joined from support_tickets
+  ticket_status: string | null;
 }
 
 export function useCustomerIssues(statusFilter?: string) {
@@ -26,7 +29,7 @@ export function useCustomerIssues(statusFilter?: string) {
       if (!user) return [];
       let q = supabase
         .from("customer_issues")
-        .select("*")
+        .select("*, support_tickets(status)")
         .eq("customer_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -36,7 +39,12 @@ export function useCustomerIssues(statusFilter?: string) {
 
       const { data, error } = await q;
       if (error) throw error;
-      return (data ?? []) as CustomerIssueRow[];
+      // Flatten the joined ticket status
+      return (data ?? []).map((row: any) => ({
+        ...row,
+        ticket_status: row.support_tickets?.status ?? null,
+        support_tickets: undefined,
+      })) as CustomerIssueRow[];
     },
   });
 
