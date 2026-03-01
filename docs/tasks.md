@@ -582,8 +582,8 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [ ] **3B-05** | P0 | M | Integrate coverage map into onboarding flow
 
 ### Phase 3: Customer UI — Property Sizing
-- [ ] **3B-06** | P0 | M | Property Sizing screen with tier selectors (sqft, yard, windows, stories)
-- [ ] **3B-07** | P1 | S | Progressive "Complete Home Setup" prompt card on dashboard
+- [x] **3B-06** | P0 | M | Property Sizing screen with tier selectors (sqft, yard, windows, stories). Hook: `usePropertySignals`. Route: `/customer/property-sizing`.
+- [x] **3B-07** | P1 | S | Progressive "Complete Home Setup" prompt card on dashboard — `HomeSetupCard` component with coverage + sizing completion tracking.
 
 ### Phase 4: Edit & Settings
 - [ ] **3B-08** | P0 | M | More → Property → Home Setup edit screens for coverage + sizing
