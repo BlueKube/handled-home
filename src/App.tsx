@@ -44,6 +44,7 @@ import CustomerOnboardingWizard from "@/pages/customer/OnboardingWizard";
 import CustomerPhotoTimeline from "@/pages/customer/PhotoTimeline";
 import CustomerHomeAssistant from "@/pages/customer/HomeAssistant";
 import CustomerCoverageMap from "@/pages/customer/CoverageMap";
+import CustomerPropertySizing from "@/pages/customer/PropertySizing";
 // Provider pages
 import ProviderDashboard from "@/pages/provider/Dashboard";
 import ProviderJobs from "@/pages/provider/Jobs";
@@ -156,6 +157,7 @@ const App = () => (
                 <Route path="/customer/onboarding" element={<CustomerOnboardingWizard />} />
                 <Route path="/customer/property" element={<CustomerProperty />} />
                 <Route path="/customer/coverage-map" element={<CustomerCoverageMap />} />
+                <Route path="/customer/property-sizing" element={<CustomerPropertySizing />} />
                 <Route path="/customer/plans" element={<CustomerPlans />} />
                 <Route path="/customer/plans/:planId" element={<CustomerPlanDetail />} />
                 <Route path="/customer/routine" element={<CustomerPropertyGate><CustomerRoutine /></CustomerPropertyGate>} />

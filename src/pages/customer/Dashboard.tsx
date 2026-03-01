@@ -20,6 +20,7 @@ import { CustomerNotificationBanners } from "@/components/customer/NotificationB
 import { HandleBalanceBar } from "@/components/customer/HandleBalanceBar";
 import { PropertyHealthWidget } from "@/components/customer/PropertyHealthWidget";
 import { AddonSuggestionsCard } from "@/components/customer/AddonSuggestionsCard";
+import { HomeSetupCard } from "@/components/customer/HomeSetupCard";
 
 
 function capitalize(s: string) {
@@ -96,6 +97,9 @@ export default function CustomerDashboard() {
 
       {/* Notification Banners (payment failure, weather reschedule) */}
       <CustomerNotificationBanners />
+
+      {/* Home Setup Prompt */}
+      <HomeSetupCard />
 
       {/* Truth Banners */}
       {showServiceDayBanner && (
