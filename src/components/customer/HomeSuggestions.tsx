@@ -64,7 +64,6 @@ export function HomeSuggestions({ onAddToRoutine, onUndo }: HomeSuggestionsProps
             onAdd={handleAdd}
             onHide={handleHide}
             onImpression={handleImpression}
-            surface="home"
           />
         ))}
       </div>

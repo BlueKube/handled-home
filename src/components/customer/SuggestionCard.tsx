@@ -14,7 +14,6 @@ interface SuggestionCardProps {
   onAdd: (suggestion: ServiceSuggestion) => void;
   onHide: (skuId: string, reason: string) => void;
   onImpression?: (skuId: string) => void;
-  surface: string;
 }
 
 const HIDE_REASONS = [
@@ -24,7 +23,7 @@ const HIDE_REASONS = [
   { value: "not_now", label: "Not now" },
 ] as const;
 
-export function SuggestionCard({ suggestion, onAdd, onHide, onImpression, surface }: SuggestionCardProps) {
+export function SuggestionCard({ suggestion, onAdd, onHide, onImpression }: SuggestionCardProps) {
   const [hideOpen, setHideOpen] = useState(false);
   const impressionRef = useRef(false);
 

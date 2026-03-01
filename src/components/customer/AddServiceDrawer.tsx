@@ -92,7 +92,6 @@ export function AddServiceDrawer({
                     onAdd={handleAdd}
                     onHide={handleHide}
                     onImpression={handleImpression}
-                    surface="drawer"
                   />
                 ))}
               </div>
@@ -113,7 +112,6 @@ export function AddServiceDrawer({
                     onAdd={handleAdd}
                     onHide={handleHide}
                     onImpression={handleImpression}
-                    surface="drawer"
                   />
                 ))}
               </div>
