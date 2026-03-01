@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import { useCreateSku, useUpdateSku } from "@/hooks/useSkus";
 import type { ServiceSku, PhotoRequirement, ChecklistItem, ServiceSkuInsert } from "@/hooks/useSkus";
 import { Constants } from "@/integrations/supabase/types";
+import { SkuLevelEditor } from "@/components/admin/SkuLevelEditor";
+import { GuidanceQuestionEditor } from "@/components/admin/GuidanceQuestionEditor";
 
 interface SkuFormSheetProps {
   sku: ServiceSku | null; // null = create mode
@@ -298,6 +300,20 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
               <Button variant="ghost" size="sm" className="gap-1" onClick={() => setChecklist([...checklist, { ...defaultChecklist }])}><Plus className="h-3.5 w-3.5" /> Add Checklist Item</Button>
             </div>
           </CollapsibleSection>
+
+          {/* Levels (only in edit mode) */}
+          {isEdit && sku && (
+            <CollapsibleSection title="Service Levels (Variants)">
+              <SkuLevelEditor skuId={sku.id} />
+            </CollapsibleSection>
+          )}
+
+          {/* Guidance Questions (only in edit mode) */}
+          {isEdit && sku && (
+            <CollapsibleSection title="Guidance Questions">
+              <GuidanceQuestionEditor skuId={sku.id} />
+            </CollapsibleSection>
+          )}
 
           {/* Pricing */}
           <CollapsibleSection title="Pricing Metadata">

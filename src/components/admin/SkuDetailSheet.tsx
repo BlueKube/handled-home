@@ -1,11 +1,13 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/StatusBadge";
 import { SkuDetailView } from "@/components/SkuDetailView";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Copy, Pencil, Archive } from "lucide-react";
+import { Copy, Pencil, Archive, Layers } from "lucide-react";
 import type { ServiceSku } from "@/hooks/useSkus";
 import { useUpdateSku, useDuplicateSku } from "@/hooks/useSkus";
+import { useSkuLevels } from "@/hooks/useSkuLevels";
 import { toast } from "sonner";
 
 interface SkuDetailSheetProps {
@@ -18,6 +20,7 @@ interface SkuDetailSheetProps {
 export function SkuDetailSheet({ sku, open, onOpenChange, onEdit }: SkuDetailSheetProps) {
   const updateSku = useUpdateSku();
   const duplicateSku = useDuplicateSku();
+  const { data: levels = [] } = useSkuLevels(sku?.id ?? null);
 
   if (!sku) return null;
 
@@ -51,6 +54,30 @@ export function SkuDetailSheet({ sku, open, onOpenChange, onEdit }: SkuDetailShe
         <div className="mt-6">
           <SkuDetailView sku={sku} />
         </div>
+
+        {/* Levels summary */}
+        {levels.length > 0 && (
+          <div className="mt-4">
+            <h4 className="text-caption uppercase mb-2 flex items-center gap-1.5">
+              <Layers className="h-3.5 w-3.5" /> Service Levels
+            </h4>
+            <div className="space-y-2">
+              {levels.map(level => (
+                <div key={level.id} className="flex items-center justify-between p-2 rounded-lg bg-secondary/50">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="text-xs">L{level.level_number}</Badge>
+                    <span className="text-sm font-medium">{level.label}</span>
+                    {!level.is_active && <Badge variant="outline" className="text-xs text-muted-foreground">Inactive</Badge>}
+                  </div>
+                  <div className="flex gap-2 text-xs text-muted-foreground">
+                    <span>{level.planned_minutes}min</span>
+                    <span>{level.handles_cost}h</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Pricing notes (admin only) */}
         {sku.pricing_notes && (

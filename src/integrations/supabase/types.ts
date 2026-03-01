@@ -2106,7 +2106,7 @@ export type Database = {
           {
             foreignKeyName: "level_recommendations_job_id_fkey"
             columns: ["job_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "jobs"
             referencedColumns: ["id"]
           },
@@ -7514,6 +7514,18 @@ export type Database = {
       increment_service_week_usage: {
         Args: { p_subscription_id: string }
         Returns: Json
+      }
+      insert_courtesy_upgrade: {
+        Args: {
+          p_job_id: string
+          p_performed_level_id: string
+          p_property_id: string
+          p_provider_org_id: string
+          p_reason_code: string
+          p_scheduled_level_id: string
+          p_sku_id: string
+        }
+        Returns: string
       }
       is_admin_member: { Args: { p_user_id: string }; Returns: boolean }
       is_holiday: { Args: { p_date: string }; Returns: boolean }
