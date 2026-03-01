@@ -526,3 +526,42 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **E2-F4** | P0 | S | Removed unused `contractQuery` in provider Payouts.tsx
 - [x] **E2-F5** | P0 | S | Map pin ordering: AdminReadOnlyMap sorts by `stop_index`, ProviderMapView sorts by `route_order` — deterministic pin numbering matches list order
 - [x] **E2-F6** | P1 | S | `run-scheduled-jobs` edge function now uses `start_cron_run`/`finish_cron_run` RPCs; distinct sub-job entries for `quality_compute_daily`, `training_gates_daily`, `byoc_lifecycle_daily`, `byoc_bonuses_weekly`, `provider_weekly_rollups_weekly`
+
+---
+
+## Sprint 3A — SKU Levels (Variants) System
+
+> Allow services to have tiered levels (e.g. Maintenance / Standard / Deep) with different scope, duration, and handles cost.
+
+### Phase 1: Schema & Data Layer
+- [x] **3A-01** | P0 | M | Created `sku_levels` table with level_number, label, inclusions/exclusions, planned_minutes, handles_cost, proof settings. RLS: public read, admin write.
+- [x] **3A-02** | P0 | S | Created `sku_guidance_questions` table for logic-based level selection questions. RLS: public read, admin write.
+- [x] **3A-03** | P1 | S | Created `level_recommendations` table for provider feedback at job completion. RLS: provider insert/read own, admin all.
+- [x] **3A-04** | P1 | S | Created `courtesy_upgrades` table with 1-per-property/SKU/6mo guardrail. RLS: provider insert own, customer read own property, admin all.
+- [x] **3A-05** | P0 | S | Added `level_id` FK to `routine_items`, `scheduled_level_id` + `performed_level_id` to `job_skus`.
+
+### Phase 2: Hooks & Data Access
+- [x] **3A-06** | P0 | M | Created `useSkuLevels` hook with full CRUD (useSkuLevels, useCreateLevel, useUpdateLevel, useDeleteLevel)
+- [x] **3A-07** | P0 | S | Created guidance question hooks (useGuidanceQuestions, useCreateGuidanceQuestion, useUpdateGuidanceQuestion, useDeleteGuidanceQuestion)
+- [x] **3A-08** | P1 | S | Created `useLevelRecommendation` and `useCourtesyUpgrade` hooks with 6-month guardrail check
+
+### Phase 3: Admin UI
+- [ ] **3A-09** | P0 | L | Level editor inside SkuFormSheet — collapsible section to add/edit/reorder/delete levels per SKU
+- [ ] **3A-10** | P1 | M | Guidance questions editor inside SkuFormSheet — configure 0–3 questions per SKU
+- [ ] **3A-11** | P0 | S | SKU detail sheet — show levels summary with scope, planned minutes, handles cost
+
+### Phase 4: Customer UI
+- [ ] **3A-12** | P0 | L | Level selector in SKU detail — side-by-side level comparison, handle delta display
+- [ ] **3A-13** | P0 | M | Level selector in add-to-routine flow — default level pre-selected, handles update on change
+- [ ] **3A-14** | P1 | S | Routine item cards — show level label + handles cost
+- [ ] **3A-15** | P1 | M | Visit detail — show scheduled vs performed level, recommendation notice, "Update going forward" action
+
+### Phase 5: Provider UI
+- [ ] **3A-16** | P0 | M | Job detail header — show level label, planned minutes, scope bullets
+- [ ] **3A-17** | P0 | L | Completion flow — level sufficiency prompt, recommendation form with reason codes, courtesy upgrade option
+
+### Phase 6: Analytics
+- [ ] **3A-18** | P2 | M | Admin ops dashboard — recommendation + courtesy upgrade counts, mismatch table (SKU × zone × rate)
+
+### Pre-requisite Fixes
+- [x] **3A-FIX-01** | P0 | S | Fixed `create-connect-account-link` edge function: changed `npm:@supabase/supabase-js` import to `https://esm.sh/` pattern
