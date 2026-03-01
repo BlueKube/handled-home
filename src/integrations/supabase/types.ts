@@ -3134,6 +3134,7 @@ export type Database = {
         Row: {
           category_key: string
           coverage_status: string
+          created_at: string
           id: string
           property_id: string
           switch_intent: string | null
@@ -3142,6 +3143,7 @@ export type Database = {
         Insert: {
           category_key: string
           coverage_status?: string
+          created_at?: string
           id?: string
           property_id: string
           switch_intent?: string | null
@@ -3150,6 +3152,7 @@ export type Database = {
         Update: {
           category_key?: string
           coverage_status?: string
+          created_at?: string
           id?: string
           property_id?: string
           switch_intent?: string | null
