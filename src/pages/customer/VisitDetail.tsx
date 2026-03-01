@@ -4,6 +4,7 @@ import { useCustomerVisitDetail } from "@/hooks/useCustomerVisitDetail";
 import { useQuickFeedback } from "@/hooks/useQuickFeedback";
 import { usePrivateReview } from "@/hooks/usePrivateReview";
 import { useUpdateRoutineItemLevel } from "@/hooks/useRoutineActions";
+import { useAddRoutineItem } from "@/hooks/useRoutineActions";
 import { useRoutine } from "@/hooks/useRoutine";
 import { useProperty } from "@/hooks/useProperty";
 import { toast } from "sonner";
@@ -14,6 +15,7 @@ import { PhotoGallery } from "@/components/customer/PhotoGallery";
 import { BeforeAfterSlider } from "@/components/customer/BeforeAfterSlider";
 import { ReportIssueSheet } from "@/components/customer/ReportIssueSheet";
 import { ShareCardSheet } from "@/components/customer/ShareCardSheet";
+import { ReceiptSuggestions } from "@/components/customer/ReceiptSuggestions";
 
 import { QuickFeedbackCard } from "@/components/customer/QuickFeedbackCard";
 import { PrivateReviewCard } from "@/components/customer/PrivateReviewCard";
@@ -32,6 +34,7 @@ export default function CustomerVisitDetail() {
   const { property } = useProperty();
   const { data: routineData } = useRoutine(property?.id);
   const updateLevel = useUpdateRoutineItemLevel();
+  const addItem = useAddRoutineItem();
 
   const handleUpdateLevel = (levelId: string, skuId: string) => {
     if (!routineData) {
@@ -51,6 +54,23 @@ export default function CustomerVisitDetail() {
       }
     );
   };
+
+  const handleAddToRoutine = useCallback(async (skuId: string, levelId?: string | null) => {
+    if (!routineData?.version?.id) {
+      toast.error("No active routine found");
+      return;
+    }
+    try {
+      await addItem.mutateAsync({ versionId: routineData.version.id, skuId, levelId });
+    } catch {
+      toast.error("Couldn't add service");
+    }
+  }, [routineData, addItem]);
+
+  const jobCategories = useMemo(() => {
+    if (!data) return [];
+    return [...new Set(data.skus.map((s: any) => s.category).filter(Boolean))];
+  }, [data]);
 
   // Find before/after pair for comparison
   const photos = data?.photos ?? [];
@@ -292,6 +312,15 @@ export default function CustomerVisitDetail() {
         >
           <Share2 className="h-4 w-4" /> Share the after photo
         </Button>
+      )}
+
+      {/* Receipt Growth Surface — suggestions related to completed job */}
+      {job.status === "COMPLETED" && property?.id && (
+        <ReceiptSuggestions
+          propertyId={property.id}
+          jobCategories={jobCategories}
+          onAddToRoutine={handleAddToRoutine}
+        />
       )}
 
       {/* 8.5 Issue / Problem CTA */}
