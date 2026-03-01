@@ -18,6 +18,7 @@ export interface EntitlementZone {
 export interface EntitlementSku {
   sku_id: string;
   sku_name: string;
+  category: string | null;
   status: "included" | "extra_allowed" | "blocked" | "provider_only" | "available";
   provider_only: boolean;
   reason: string | null;
@@ -108,7 +109,7 @@ export function useEntitlements(planId: string | null, zoneId: string | null, en
       // 5. Fetch all active SKUs
       const { data: allSkus } = await supabase
         .from("service_skus")
-        .select("id, name")
+        .select("id, name, category")
         .eq("status", "active");
 
       // Build entitlement payload
@@ -139,6 +140,7 @@ export function useEntitlements(planId: string | null, zoneId: string | null, en
         return {
           sku_id: sku.id,
           sku_name: sku.name,
+          category: sku.category ?? null,
           status,
           provider_only: status === "provider_only",
           reason: rule?.reason ?? null,
