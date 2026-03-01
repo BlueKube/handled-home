@@ -2728,6 +2728,38 @@ export type Database = {
         }
         Relationships: []
       }
+      personalization_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          payload: Json
+          property_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          payload?: Json
+          property_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personalization_events_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       photo_validation_results: {
         Row: {
           checks: Json
@@ -3098,6 +3130,41 @@ export type Database = {
         }
         Relationships: []
       }
+      property_coverage: {
+        Row: {
+          category_key: string
+          coverage_status: string
+          id: string
+          property_id: string
+          switch_intent: string | null
+          updated_at: string
+        }
+        Insert: {
+          category_key: string
+          coverage_status?: string
+          id?: string
+          property_id: string
+          switch_intent?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category_key?: string
+          coverage_status?: string
+          id?: string
+          property_id?: string
+          switch_intent?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_coverage_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_health_scores: {
         Row: {
           computed_at: string
@@ -3144,6 +3211,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "property_health_scores_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_signals: {
+        Row: {
+          home_sqft_tier: string | null
+          property_id: string
+          signals_version: number
+          stories_tier: string | null
+          updated_at: string
+          windows_tier: string | null
+          yard_tier: string | null
+        }
+        Insert: {
+          home_sqft_tier?: string | null
+          property_id: string
+          signals_version?: number
+          stories_tier?: string | null
+          updated_at?: string
+          windows_tier?: string | null
+          yard_tier?: string | null
+        }
+        Update: {
+          home_sqft_tier?: string | null
+          property_id?: string
+          signals_version?: number
+          stories_tier?: string | null
+          updated_at?: string
+          windows_tier?: string | null
+          yard_tier?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_signals_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: true
             referencedRelation: "properties"
