@@ -160,7 +160,7 @@ serve(async (req) => {
         const issuePaths = withPhotos.slice(0, 2).map(i => i.photo_storage_path!).filter(Boolean);
         if (issuePaths.length > 0) {
           const { data: signedData } = await supabase.storage
-            .from("issue-photos")
+            .from("job-photos")
             .createSignedUrls(issuePaths, 600);
           if (signedData) {
             issuePhotoUrls = signedData.map(s => s.signedUrl).filter(Boolean);
@@ -170,20 +170,6 @@ serve(async (req) => {
       }
     }
 
-    // Check for customer issue photos
-    let issuePhotoContext = "";
-    if (ticket.job_id) {
-      const { data: issues } = await supabase
-        .from("customer_issues")
-        .select("photo_storage_path, photo_upload_status, reason, note")
-        .eq("job_id", ticket.job_id)
-        .eq("customer_id", ticket.customer_id);
-      
-      if (issues && issues.length > 0) {
-        const withPhotos = issues.filter(i => i.photo_upload_status === "UPLOADED");
-        issuePhotoContext = `\nCustomer issues: ${issues.length} filed (${withPhotos.length} with photos). Reasons: ${issues.map(i => i.reason).join(", ")}`;
-      }
-    }
 
     // Check for duplicate tickets
     const { data: recentTickets } = await supabase
