@@ -199,14 +199,22 @@ Deno.serve(async (req) => {
                 })
               )
             );
+            let batchHad429 = false;
             for (const r of results) {
               if (r.status === "fulfilled") succeeded++;
               else {
                 failed++;
+                const reason = String(r.reason ?? "");
+                if (reason.includes("429")) batchHad429 = true;
                 console.error("predict-services batch error:", r.reason);
               }
             }
-          }
+
+            // Rate-limit backoff: longer delay on 429, standard delay otherwise
+            if (i + 5 < propertyIds.length) {
+              const delayMs = batchHad429 ? 5000 : 1500;
+              await new Promise(r => setTimeout(r, delayMs));
+            }
 
           return {
             data: { total: propertyIds.length, succeeded, failed },
@@ -215,6 +223,16 @@ Deno.serve(async (req) => {
               : null,
           };
         },
+      );
+    }
+
+    // ── Weekly (Monday): Clean up stale service predictions ──
+    if (job === "stale_predictions_cleanup" || (job === "all" && isMonday)) {
+      subResults.stale_predictions_cleanup = await runSubJob(
+        supabase,
+        "stale_predictions_cleanup",
+        `stale_predictions_cleanup:${today}`,
+        () => supabase.rpc("cleanup_stale_predictions"),
       );
     }
 

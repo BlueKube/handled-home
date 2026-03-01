@@ -670,7 +670,7 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 
 ### Deferred Items
 - [ ] **3D-M2** | MEDIUM | Surface differentiation in get_service_suggestions RPC (predicted vs other types)
-- [ ] **3D-L1** | LOW | Stale prediction cleanup (cron to delete expired predictions)
+- [x] **3D-L1** | LOW | Stale prediction cleanup — `cleanup_stale_predictions` RPC deletes rows expired >30 days, wired into weekly Monday automation
 - [ ] **3D-L2** | LOW | Photo analysis — include actual signed photo URLs for visual AI analysis
 
 *Last updated: 2026-03-01 — Sprint 3D C3/C4 review fixes complete (8 findings addressed). B4, M2, L1, L2 remain.*

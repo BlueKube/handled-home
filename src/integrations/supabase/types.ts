@@ -7672,6 +7672,7 @@ export type Database = {
         }
       }
       cleanup_expired_offers: { Args: never; Returns: Json }
+      cleanup_stale_predictions: { Args: never; Returns: Json }
       complete_job: {
         Args: { p_job_id: string; p_provider_summary?: string }
         Returns: Json
