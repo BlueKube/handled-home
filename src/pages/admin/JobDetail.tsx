@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { DecisionTraceCard } from "@/components/admin/DecisionTraceCard";
+import { AdminPropertyProfileCard } from "@/components/admin/AdminPropertyProfileCard";
 
 export default function AdminJobDetail() {
   const { jobId } = useParams<{ jobId: string }>();
@@ -107,6 +108,7 @@ export default function AdminJobDetail() {
             {job.provider_summary && <div className="pt-2 border-t"><p className="text-xs text-muted-foreground">Provider summary:</p><p>{job.provider_summary}</p></div>}
           </Card>
           <Card className="p-4"><h3 className="text-sm font-semibold mb-2">Services</h3>{skus.map((s) => <p key={s.id} className="text-sm">{s.sku_name_snapshot}{s.duration_minutes_snapshot ? ` (${s.duration_minutes_snapshot} min)` : ""}</p>)}</Card>
+          <AdminPropertyProfileCard propertyId={job.property_id} />
           {job.status !== "COMPLETED" && job.status !== "CANCELED" && (
             <Button variant="outline" className="w-full" onClick={() => setOverrideOpen(true)}><Shield className="h-4 w-4 mr-2" />Override Complete</Button>
           )}

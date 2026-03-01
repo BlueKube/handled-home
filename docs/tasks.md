@@ -595,4 +595,4 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3B-12** | P1 | M | Category eligibility checks — `useCategoryEligibility` hook wrapping profile context. AddServicesSheet now filters out SKUs whose category is marked NA in coverage map.
 
 ### Phase 6: Admin Visibility
-- [ ] **3B-13** | P1 | M | Property detail section showing coverage map + sizing tiers
+- [x] **3B-13** | P1 | M | Property detail section showing coverage map + sizing tiers — `AdminPropertyProfileCard` component with `useAdminPropertyProfile` hook. Integrated into admin JobDetail overview tab. Shows coverage categories with status badges, switch intents, and sizing tiers.
