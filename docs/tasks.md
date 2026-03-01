@@ -617,10 +617,14 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3C-05** | P0 | L | Dashboard.tsx restructured — Section A: Next Up (NextVisitCard + truth banners + start-routine CTA), Section B: This Cycle summary (service pills + handles bar), Section C: Suggested for Your Home (HomeSuggestions), Section D: Recent Receipt (last completed visit or placeholder). Removed redundant stat cards, added FAB + drawer.
 
 ### Phase 5: Routine + Receipt Surfaces
-- [ ] **3C-06** | P1 | M | Routine page — adjacent service suggestion at bottom, per-item upgrade level quick action
-- [ ] **3C-07** | P1 | M | Receipt growth surface — 1-2 suggestion cards at bottom of VisitDetail for completed visits
+- [x] **3C-06** | P1 | M | Routine page — `RoutineSuggestion` component shows 1 adjacent/best_next suggestion at bottom of routine item list, before seasonal boosts
+- [x] **3C-07** | P1 | M | Receipt growth surface — `ReceiptSuggestions` component shows 1-2 category-related suggestion cards at bottom of VisitDetail for completed visits ("While we're here next time")
 
 ### Phase 6: Instrumentation
 - [ ] **3C-08** | P2 | S | Growth event tracking wired through useSuggestionActions (impressions, adds, hides all tracked via Phase 2 hooks)
 
-*Last updated: 2026-03-01 — Sprint 3C Phase 1-4 complete.*
+### Review Fixes (M-1 and M-2)
+- [x] **3C-R1** | S | Removed unused `surface` prop from `SuggestionCard` and all call sites
+- [x] **3C-R2** | S | Removed dead `recordDrawerOpen` no-op mutation from `useSuggestionActions`
+
+*Last updated: 2026-03-01 — Sprint 3C Phase 1-5 complete. Phase 6 deferred (instrumentation polish).*
