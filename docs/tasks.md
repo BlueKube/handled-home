@@ -586,8 +586,8 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3B-07** | P1 | S | Progressive "Complete Home Setup" prompt card on dashboard — `HomeSetupCard` component with coverage + sizing completion tracking.
 
 ### Phase 4: Edit & Settings
-- [ ] **3B-08** | P0 | M | More → Property → Home Setup edit screens for coverage + sizing
-- [ ] **3B-09** | P1 | S | Event logging for setup completion/updates
+- [x] **3B-08** | P0 | M | More → Property → Home Setup edit screens for coverage + sizing — added Home Setup section to Property page with coverage map + sizing links, checkmarks for completed sections, "Why we ask" tooltips.
+- [x] **3B-09** | P1 | S | Event logging for setup completion/updates — coverage and sizing hooks now emit `coverage_map_completed`/`coverage_map_updated` and `property_sizing_completed`/`property_sizing_updated` with completion percentages.
 
 ### Phase 5: Personalization API + Level Integration
 - [ ] **3B-10** | P0 | L | `get_property_profile_context` RPC returning coverage, sizing, computed eligibility

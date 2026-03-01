@@ -63,6 +63,8 @@ export function usePropertyCoverage() {
     mutationFn: async (updates: CoverageUpdate[]) => {
       if (!propertyId) throw new Error("No property");
 
+      const isFirstSave = (query.data?.length ?? 0) === 0;
+
       // Upsert all coverage rows
       const rows = updates.map((u) => ({
         property_id: propertyId,
@@ -76,18 +78,20 @@ export function usePropertyCoverage() {
         .upsert(rows, { onConflict: "property_id,category_key" });
       if (error) throw error;
 
-      // Log personalization event (non-critical — warn on failure)
+      // Log personalization event with completion vs update distinction
+      const counts = {
+        SELF: updates.filter((u) => u.coverage_status === "SELF").length,
+        PROVIDER: updates.filter((u) => u.coverage_status === "PROVIDER").length,
+        NONE: updates.filter((u) => u.coverage_status === "NONE").length,
+        NA: updates.filter((u) => u.coverage_status === "NA").length,
+      };
       const { error: eventError } = await supabase.from("personalization_events").insert({
         property_id: propertyId,
-        event_type: "coverage_map_updated",
+        event_type: isFirstSave ? "coverage_map_completed" : "coverage_map_updated",
         payload: {
           categories_count: updates.length,
-          counts: {
-            SELF: updates.filter((u) => u.coverage_status === "SELF").length,
-            PROVIDER: updates.filter((u) => u.coverage_status === "PROVIDER").length,
-            NONE: updates.filter((u) => u.coverage_status === "NONE").length,
-            NA: updates.filter((u) => u.coverage_status === "NA").length,
-          },
+          counts,
+          completion_pct: Math.round(((updates.length - counts.NONE) / updates.length) * 100),
         },
       });
       if (eventError) console.warn("Failed to log personalization event:", eventError);

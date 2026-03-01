@@ -78,6 +78,8 @@ export function usePropertySignals() {
     mutationFn: async (form: SignalsFormData) => {
       if (!propertyId) throw new Error("No property");
 
+      const isFirstSave = !query.data;
+
       const { error } = await supabase
         .from("property_signals")
         .upsert({
@@ -89,13 +91,18 @@ export function usePropertySignals() {
         }, { onConflict: "property_id" });
       if (error) throw error;
 
-      // Log personalization event (non-critical)
+      // Log personalization event with completion vs update distinction
+      const filledCount = Object.values(form).filter(Boolean).length;
       const { error: eventError } = await supabase
         .from("personalization_events")
         .insert({
           property_id: propertyId,
-          event_type: "sizing_updated",
-          payload: form as unknown as Json,
+          event_type: isFirstSave ? "property_sizing_completed" : "property_sizing_updated",
+          payload: {
+            ...form as unknown as Record<string, unknown>,
+            fields_set: filledCount,
+            completion_pct: Math.round((filledCount / 4) * 100),
+          } as unknown as Json,
         });
       if (eventError) console.warn("Failed to log personalization event:", eventError);
     },
