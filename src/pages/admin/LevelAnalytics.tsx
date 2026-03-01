@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowUpCircle, Lightbulb, BarChart3, AlertTriangle, TrendingUp } from "lucide-react";
+import { ArrowUpCircle, Lightbulb, BarChart3, AlertTriangle } from "lucide-react";
 
 function StatTile({ icon: Icon, label, value, sub, alert }: {
   icon: React.ElementType; label: string; value: string | number; sub?: string; alert?: boolean;
@@ -31,8 +31,8 @@ export default function LevelAnalytics() {
     return (
       <div className="p-6 space-y-6">
         <h1 className="text-h2">Level Analytics</h1>
-        <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-3">
+          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
         </div>
         <Skeleton className="h-64 rounded-xl" />
       </div>
@@ -46,8 +46,8 @@ export default function LevelAnalytics() {
         <p className="text-caption">Last 30 days · Recommendations, courtesy upgrades, and mismatch hotspots</p>
       </div>
 
-      {/* Summary tiles */}
-      <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
+      {/* F4-fix: 3 tiles only — removed duplicate recommendation rate tile */}
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-3">
         <StatTile
           icon={BarChart3}
           label="Jobs with Levels"
@@ -66,12 +66,6 @@ export default function LevelAnalytics() {
           value={data.totalCourtesyUpgrades}
           sub={`${data.courtesyRate}% of leveled jobs`}
           alert={data.courtesyRate > 15}
-        />
-        <StatTile
-          icon={TrendingUp}
-          label="Recommendation Rate"
-          value={`${data.recommendationRate}%`}
-          sub="Higher = more under-leveling"
         />
       </div>
 
