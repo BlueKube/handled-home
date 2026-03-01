@@ -8,7 +8,7 @@ import {
   AlertTriangle, Camera, Clock, ShieldAlert,
   DollarSign, CreditCard, Pause, Gift,
   Bug, RotateCcw, Timer, UserX,
-  Globe, Users, Briefcase, TrendingUp,
+  Globe, Users, Briefcase, TrendingUp, SlidersHorizontal,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -252,6 +252,13 @@ export default function OpsCockpit() {
               value={m.zonesOverCapacity}
               href="/admin/capacity"
               alert={m.zonesOverCapacity > 0}
+            />
+            <DrillTile
+              icon={SlidersHorizontal}
+              label="Level Analytics"
+              value="View"
+              href="/admin/ops/levels"
+              sub="Mismatch & courtesy upgrades"
             />
           </div>
         </div>

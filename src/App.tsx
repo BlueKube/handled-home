@@ -98,6 +98,7 @@ import AdminOpsBilling from "@/pages/admin/OpsBilling";
 import AdminOpsSupport from "@/pages/admin/OpsSupport";
 import AdminOpsGrowth from "@/pages/admin/OpsGrowth";
 import AdminOpsDefinitions from "@/pages/admin/OpsDefinitions";
+import AdminLevelAnalytics from "@/pages/admin/LevelAnalytics";
 import ProviderInsights from "@/pages/provider/Insights";
 import ProviderInsightsHistory from "@/pages/provider/InsightsHistory";
 import AdminServiceDays from "@/pages/admin/ServiceDays";
@@ -253,6 +254,7 @@ const App = () => (
                 <Route path="/admin/ops/support" element={<AdminOpsSupport />} />
                 <Route path="/admin/ops/growth" element={<AdminOpsGrowth />} />
                 <Route path="/admin/ops/definitions" element={<AdminOpsDefinitions />} />
+                <Route path="/admin/ops/levels" element={<AdminLevelAnalytics />} />
                 <Route path="/admin/reports" element={<AdminReports />} />
                 <Route path="/admin/audit" element={<AdminAudit />} />
                 <Route path="/admin/billing" element={<AdminBilling />} />

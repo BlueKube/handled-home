@@ -561,7 +561,7 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3A-17** | P0 | L | Completion flow — level sufficiency prompt per SKU, recommendation form with reason codes, courtesy upgrade option with guardrail
 
 ### Phase 6: Analytics
-- [ ] **3A-18** | P2 | M | Admin ops dashboard — recommendation + courtesy upgrade counts, mismatch table (SKU × zone × rate)
+- [x] **3A-18** | P2 | M | Admin ops dashboard — recommendation + courtesy upgrade counts, mismatch table (SKU × zone × rate), outlier provider detection
 
 ### Pre-requisite Fixes
 - [x] **3A-FIX-01** | P0 | S | Fixed `create-connect-account-link` edge function: changed `npm:@supabase/supabase-js` import to `https://esm.sh/` pattern
