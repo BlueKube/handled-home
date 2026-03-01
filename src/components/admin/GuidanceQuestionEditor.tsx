@@ -24,6 +24,7 @@ interface OptionItem {
   label: string;
   value: string;
   level_bump?: number;
+  minutes_bump?: number;
 }
 
 interface QuestionFormState {
@@ -35,7 +36,7 @@ interface QuestionFormState {
 const defaultForm: QuestionFormState = {
   question_text: "",
   is_mandatory: false,
-  options: [{ label: "", value: "", level_bump: 0 }],
+  options: [{ label: "", value: "", level_bump: 0, minutes_bump: 0 }],
 };
 
 export function GuidanceQuestionEditor({ skuId }: GuidanceQuestionEditorProps) {
@@ -49,7 +50,7 @@ export function GuidanceQuestionEditor({ skuId }: GuidanceQuestionEditorProps) {
   const [form, setForm] = useState<QuestionFormState>({ ...defaultForm });
 
   const resetForm = () => {
-    setForm({ ...defaultForm, options: [{ label: "", value: "", level_bump: 0 }] });
+    setForm({ ...defaultForm, options: [{ label: "", value: "", level_bump: 0, minutes_bump: 0 }] });
     setEditingId(null);
     setAddMode(false);
   };
@@ -61,7 +62,7 @@ export function GuidanceQuestionEditor({ skuId }: GuidanceQuestionEditorProps) {
     setForm({
       question_text: q.question_text,
       is_mandatory: q.is_mandatory,
-      options: opts.length > 0 ? opts : [{ label: "", value: "", level_bump: 0 }],
+      options: opts.length > 0 ? opts : [{ label: "", value: "", level_bump: 0, minutes_bump: 0 }],
     });
   };
 
@@ -148,7 +149,7 @@ export function GuidanceQuestionEditor({ skuId }: GuidanceQuestionEditorProps) {
                   <div className="flex flex-wrap gap-1 mt-1.5">
                     {((q.options as unknown as OptionItem[]) || []).map((o, i) => (
                       <Badge key={i} variant="outline" className="text-xs">
-                        {o.label}{o.level_bump ? ` (+${o.level_bump})` : ""}
+                        {o.label}{o.level_bump ? ` (+${o.level_bump}L)` : ""}{o.minutes_bump ? ` (+${o.minutes_bump}min)` : ""}
                       </Badge>
                     ))}
                   </div>
@@ -190,7 +191,7 @@ export function GuidanceQuestionEditor({ skuId }: GuidanceQuestionEditorProps) {
       )}
 
       {!isEditing && questions.length < 3 && (
-        <Button variant="outline" size="sm" className="gap-1.5 w-full" onClick={() => { setAddMode(true); setEditingId(null); setForm({ ...defaultForm, options: [{ label: "", value: "", level_bump: 0 }] }); }}>
+        <Button variant="outline" size="sm" className="gap-1.5 w-full" onClick={() => { setAddMode(true); setEditingId(null); setForm({ ...defaultForm, options: [{ label: "", value: "", level_bump: 0, minutes_bump: 0 }] }); }}>
           <Plus className="h-3.5 w-3.5" /> Add Question
         </Button>
       )}
@@ -224,7 +225,7 @@ function QuestionForm({
       <div>
         <Label className="text-xs">Options (min 2)</Label>
         {form.options.map((opt, i) => (
-          <div key={i} className="grid grid-cols-[1fr_1fr_60px_32px] gap-1 mt-1 items-end">
+          <div key={i} className="grid grid-cols-[1fr_1fr_60px_60px_32px] gap-1 mt-1 items-end">
             <div>
               <Label className="text-[10px] text-muted-foreground">Label</Label>
               <Input value={opt.label} onChange={e => {
@@ -243,6 +244,12 @@ function QuestionForm({
                 const c = [...form.options]; c[i] = { ...c[i], level_bump: Number(e.target.value) }; setForm({ ...form, options: c });
               }} className="h-8 text-sm" />
             </div>
+            <div>
+              <Label className="text-[10px] text-muted-foreground">+Min</Label>
+              <Input type="number" value={opt.minutes_bump ?? 0} onChange={e => {
+                const c = [...form.options]; c[i] = { ...c[i], minutes_bump: Number(e.target.value) }; setForm({ ...form, options: c });
+              }} className="h-8 text-sm" />
+            </div>
             {form.options.length > 1 && (
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setForm({ ...form, options: form.options.filter((_, j) => j !== i) })}>
                 <Trash2 className="h-3.5 w-3.5" />
@@ -251,7 +258,7 @@ function QuestionForm({
           </div>
         ))}
         {form.options.length < 4 && (
-          <Button variant="ghost" size="sm" className="mt-1 gap-1 text-xs h-7" onClick={() => setForm({ ...form, options: [...form.options, { label: "", value: "", level_bump: 0 }] })}>
+          <Button variant="ghost" size="sm" className="mt-1 gap-1 text-xs h-7" onClick={() => setForm({ ...form, options: [...form.options, { label: "", value: "", level_bump: 0, minutes_bump: 0 }] })}>
             <Plus className="h-3 w-3" /> Add Option
           </Button>
         )}

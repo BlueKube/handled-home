@@ -7525,7 +7525,7 @@ export type Database = {
           p_scheduled_level_id: string
           p_sku_id: string
         }
-        Returns: string
+        Returns: Json
       }
       is_admin_member: { Args: { p_user_id: string }; Returns: boolean }
       is_holiday: { Args: { p_date: string }; Returns: boolean }
@@ -7826,6 +7826,10 @@ export type Database = {
       submit_quick_feedback: {
         Args: { p_job_id: string; p_outcome: string; p_tags?: Json }
         Returns: Json
+      }
+      swap_sku_level_order: {
+        Args: { p_level_a_id: string; p_level_b_id: string }
+        Returns: undefined
       }
       to_date_immutable: { Args: { ts: string }; Returns: string }
       transition_eligible_earnings: { Args: never; Returns: Json }
