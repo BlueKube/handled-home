@@ -578,7 +578,7 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3B-03** | P1 | S | Created `personalization_events` table (append-only analytics, property_id FK, event_type, payload jsonb). RLS: customer insert+read own, admin all.
 
 ### Phase 2: Customer UI — Coverage Map
-- [ ] **3B-04** | P0 | L | Coverage Map screen with ~10 categories and segmented controls, inline switch intent sub-question
+- [x] **3B-04** | P0 | L | Coverage Map screen with ~10 categories and segmented controls, inline switch intent sub-question. Hook: `usePropertyCoverage`. Route: `/customer/coverage-map`.
 - [ ] **3B-05** | P0 | M | Integrate coverage map into onboarding flow
 
 ### Phase 3: Customer UI — Property Sizing
