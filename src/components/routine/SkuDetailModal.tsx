@@ -1,20 +1,22 @@
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, XCircle, Camera, ListChecks, Clock } from "lucide-react";
+import { CheckCircle2, XCircle, Camera } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSkuLevels } from "@/hooks/useSkuLevels";
+import { LevelSelector } from "./LevelSelector";
 import type { EntitlementSku } from "@/hooks/useEntitlements";
 
 interface SkuDetailModalProps {
   sku: EntitlementSku | null;
   onClose: () => void;
-  onAdd: (skuId: string) => void;
+  onAdd: (skuId: string, levelId?: string | null) => void;
   alreadyAdded: boolean;
 }
 
 export function SkuDetailModal({ sku, onClose, onAdd, alreadyAdded }: SkuDetailModalProps) {
-  // L10: Fetch real SKU data
   const { data: skuDetail } = useQuery({
     queryKey: ["sku-detail", sku?.sku_id],
     enabled: !!sku?.sku_id,
@@ -29,14 +31,36 @@ export function SkuDetailModal({ sku, onClose, onAdd, alreadyAdded }: SkuDetailM
     },
   });
 
+  const { data: levels } = useSkuLevels(sku?.sku_id ?? null);
+  const activeLevels = (levels ?? []).filter((l) => l.is_active);
+  const hasLevels = activeLevels.length > 0;
+
+  const [selectedLevelId, setSelectedLevelId] = useState<string | null>(null);
+
+  // Reset selected level when SKU changes
+  useEffect(() => {
+    if (hasLevels) {
+      setSelectedLevelId(activeLevels[0].id);
+    } else {
+      setSelectedLevelId(null);
+    }
+  }, [sku?.sku_id, levels]);
+
   if (!sku) return null;
 
-  const inclusions = skuDetail?.inclusions ?? [];
-  const exclusions = skuDetail?.exclusions ?? [];
+  const selectedLevel = activeLevels.find((l) => l.id === selectedLevelId);
+
+  // Use level data if available, otherwise fall back to SKU defaults
+  const inclusions = hasLevels && selectedLevel
+    ? (selectedLevel.inclusions as string[]) ?? []
+    : skuDetail?.inclusions ?? [];
+  const exclusions = hasLevels && selectedLevel
+    ? (selectedLevel.exclusions as string[]) ?? []
+    : skuDetail?.exclusions ?? [];
 
   return (
     <Dialog open={!!sku} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{sku.sku_name}</DialogTitle>
         </DialogHeader>
@@ -44,13 +68,16 @@ export function SkuDetailModal({ sku, onClose, onAdd, alreadyAdded }: SkuDetailM
           <Badge variant="secondary">{sku.ui_badge}</Badge>
           <p className="text-sm text-muted-foreground">{skuDetail?.description || sku.ui_explainer}</p>
 
-          {skuDetail?.duration_minutes && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Clock className="h-3.5 w-3.5" />
-              <span>~{skuDetail.duration_minutes} minutes</span>
-            </div>
+          {/* Level Selector */}
+          {hasLevels && (
+            <LevelSelector
+              levels={activeLevels}
+              selectedLevelId={selectedLevelId}
+              onSelect={setSelectedLevelId}
+            />
           )}
 
+          {/* Inclusions / Exclusions from selected level or SKU defaults */}
           <div className="space-y-3">
             <div className="flex items-start gap-2">
               <CheckCircle2 className="h-4 w-4 text-success mt-0.5 shrink-0" />
@@ -58,7 +85,7 @@ export function SkuDetailModal({ sku, onClose, onAdd, alreadyAdded }: SkuDetailM
                 <p className="text-sm font-medium">What's included</p>
                 {inclusions.length > 0 ? (
                   <ul className="text-xs text-muted-foreground mt-1 space-y-0.5">
-                    {inclusions.map((item, i) => (
+                    {inclusions.map((item: string, i: number) => (
                       <li key={i}>• {item}</li>
                     ))}
                   </ul>
@@ -73,7 +100,7 @@ export function SkuDetailModal({ sku, onClose, onAdd, alreadyAdded }: SkuDetailM
                 <p className="text-sm font-medium">What's not included</p>
                 {exclusions.length > 0 ? (
                   <ul className="text-xs text-muted-foreground mt-1 space-y-0.5">
-                    {exclusions.map((item, i) => (
+                    {exclusions.map((item: string, i: number) => (
                       <li key={i}>• {item}</li>
                     ))}
                   </ul>
@@ -86,7 +113,11 @@ export function SkuDetailModal({ sku, onClose, onAdd, alreadyAdded }: SkuDetailM
               <Camera className="h-4 w-4 text-accent mt-0.5 shrink-0" />
               <div>
                 <p className="text-sm font-medium">Proof of completion</p>
-                <p className="text-xs text-muted-foreground">Before & after photos submitted by your provider</p>
+                <p className="text-xs text-muted-foreground">
+                  {selectedLevel
+                    ? `${selectedLevel.proof_photo_min} photo${selectedLevel.proof_photo_min !== 1 ? "s" : ""} required`
+                    : "Before & after photos submitted by your provider"}
+                </p>
               </div>
             </div>
           </div>
@@ -94,9 +125,11 @@ export function SkuDetailModal({ sku, onClose, onAdd, alreadyAdded }: SkuDetailM
           <Button
             className="w-full"
             disabled={alreadyAdded}
-            onClick={() => onAdd(sku.sku_id)}
+            onClick={() => onAdd(sku.sku_id, selectedLevelId)}
           >
-            {alreadyAdded ? "Already in Routine" : "Add to Routine"}
+            {alreadyAdded ? "Already in Routine" : hasLevels && selectedLevel
+              ? `Add ${selectedLevel.label} · ${selectedLevel.handles_cost}h`
+              : "Add to Routine"}
           </Button>
         </div>
       </DialogContent>

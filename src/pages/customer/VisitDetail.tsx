@@ -13,7 +13,7 @@ import { ShareCardSheet } from "@/components/customer/ShareCardSheet";
 
 import { QuickFeedbackCard } from "@/components/customer/QuickFeedbackCard";
 import { PrivateReviewCard } from "@/components/customer/PrivateReviewCard";
-import { ArrowLeft, Clock, CheckCircle2, XCircle, AlertTriangle, Share2 } from "lucide-react";
+import { ArrowLeft, Clock, CheckCircle2, XCircle, AlertTriangle, Share2, ArrowUpCircle, Lightbulb } from "lucide-react";
 import { format } from "date-fns";
 
 export default function CustomerVisitDetail() {
@@ -53,9 +53,13 @@ export default function CustomerVisitDetail() {
     );
   }
 
-  const { job, skus, checklistHighlights, issue, timeOnSiteMinutes } = data;
+  const { job, skus, checklistHighlights, issue, timeOnSiteMinutes, courtesyUpgrade, recommendation } = data;
 
-  const skuSummary = skus.map((s) => s.sku_name_snapshot ?? "Service").join(", ") || "Visit";
+  const skuSummary = skus.map((s) => {
+    const name = s.sku_name_snapshot ?? "Service";
+    const level = s.scheduled_level_label;
+    return level ? `${name} (${level})` : name;
+  }).join(", ") || "Visit";
   const visitDate = job.completed_at
     ? format(new Date(job.completed_at), "EEEE, MMM d, yyyy")
     : job.scheduled_date
@@ -160,6 +164,54 @@ export default function CustomerVisitDetail() {
           <p className="text-sm text-muted-foreground">No additional details available.</p>
         )}
       </Card>
+
+      {/* Courtesy Upgrade Notice */}
+      {courtesyUpgrade && (
+        <Card className="p-4 space-y-2 border-primary/30 bg-primary/5">
+          <div className="flex items-start gap-2">
+            <ArrowUpCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium">Courtesy Upgrade Applied</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                We upgraded you from {courtesyUpgrade.scheduled_level_label} to {courtesyUpgrade.performed_level_label} today
+                so your home meets Handled standards.
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Reason: {courtesyUpgrade.reason_code.replace(/_/g, " ")}
+              </p>
+            </div>
+          </div>
+          <Button variant="default" size="sm" className="w-full text-xs mt-2">
+            Update to {courtesyUpgrade.performed_level_label} going forward
+          </Button>
+        </Card>
+      )}
+
+      {/* Provider Recommendation Notice */}
+      {recommendation && !courtesyUpgrade && (
+        <Card className="p-4 space-y-2 border-accent/30 bg-accent/5">
+          <div className="flex items-start gap-2">
+            <Lightbulb className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium">Provider Recommendation</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Your provider recommends upgrading to {recommendation.recommended_level_label} for better results.
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Reason: {recommendation.reason_code.replace(/_/g, " ")}
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2 mt-2">
+            <Button variant="default" size="sm" className="flex-1 text-xs">
+              Update going forward
+            </Button>
+            <Button variant="outline" size="sm" className="flex-1 text-xs">
+              Keep current level
+            </Button>
+          </div>
+        </Card>
+      )}
 
       {/* Quick Feedback — receipt-anchored satisfaction check */}
       {job.status === "COMPLETED" && (
