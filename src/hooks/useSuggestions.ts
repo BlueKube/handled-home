@@ -16,7 +16,7 @@ export interface ServiceSuggestion {
   } | null;
 }
 
-export function useSuggestions(propertyId: string | undefined, surface: "home" | "drawer" = "home") {
+export function useSuggestions(propertyId: string | undefined, surface: "home" | "drawer" | "routine" | "receipt" = "home") {
   return useQuery({
     queryKey: ["service-suggestions", propertyId, surface],
     enabled: !!propertyId,

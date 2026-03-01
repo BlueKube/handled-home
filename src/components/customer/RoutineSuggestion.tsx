@@ -8,16 +8,20 @@ import { toast } from "sonner";
 
 interface RoutineSuggestionProps {
   onAddToRoutine: (skuId: string, levelId?: string | null) => void;
+  /** SKU IDs already in the routine — used to avoid suggesting duplicates */
+  existingSkuIds?: Set<string>;
 }
 
-export function RoutineSuggestion({ onAddToRoutine }: RoutineSuggestionProps) {
+export function RoutineSuggestion({ onAddToRoutine, existingSkuIds }: RoutineSuggestionProps) {
   const { property } = useProperty();
-  const { data: suggestions, isLoading } = useSuggestions(property?.id, "home");
+  const { data: suggestions, isLoading } = useSuggestions(property?.id, "routine");
   const { recordImpression, hideSuggestion, recordAdd } = useSuggestionActions(property?.id);
 
-  // Pick only the first adjacent/best_next suggestion
+  // Pick only the first adjacent/best_next suggestion not already in routine
   const suggestion = (suggestions ?? []).find(
-    (s) => s.suggestion_type === "adjacent" || s.suggestion_type === "best_next"
+    (s) =>
+      (s.suggestion_type === "adjacent" || s.suggestion_type === "best_next") &&
+      (!existingSkuIds || !existingSkuIds.has(s.sku_id))
   );
 
   const handleAdd = useCallback(
@@ -40,7 +44,7 @@ export function RoutineSuggestion({ onAddToRoutine }: RoutineSuggestionProps) {
 
   const handleImpression = useCallback(
     (skuId: string) => {
-      recordImpression.mutate({ skuId, surface: "home" });
+      recordImpression.mutate({ skuId, surface: "routine" });
     },
     [recordImpression]
   );

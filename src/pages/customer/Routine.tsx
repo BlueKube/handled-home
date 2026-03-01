@@ -215,7 +215,7 @@ export default function CustomerRoutine() {
         )}
 
         {/* Suggested Adjacent Service */}
-        <RoutineSuggestion onAddToRoutine={handleAddItem} />
+        <RoutineSuggestion onAddToRoutine={handleAddItem} existingSkuIds={existingSkuIds} />
 
         {/* Seasonal Boosts */}
         <SeasonalBoostsSection propertyId={property?.id} zoneId={zoneId} />
