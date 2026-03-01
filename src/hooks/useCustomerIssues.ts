@@ -91,6 +91,40 @@ export function useSubmitCustomerIssue() {
         .single();
 
       if (error) throw error;
+
+      // C4: Auto-create support ticket and trigger AI classification
+      try {
+        // Look up job to get zone/provider context
+        const { data: job } = await supabase
+          .from("jobs")
+          .select("zone_id, provider_org_id")
+          .eq("id", params.jobId)
+          .single();
+
+        const { data: ticket } = await supabase
+          .from("support_tickets")
+          .insert({
+            customer_id: user.id,
+            job_id: params.jobId,
+            ticket_type: "service_issue" as any,
+            category: params.reason as any,
+            customer_note: params.note,
+            zone_id: job?.zone_id ?? null,
+            provider_org_id: job?.provider_org_id ?? null,
+          })
+          .select("id")
+          .single();
+
+        if (ticket?.id) {
+          // Fire-and-forget AI classification
+          supabase.functions.invoke("support-ai-classify", {
+            body: { ticket_id: ticket.id },
+          }).catch((err) => console.error("AI classify failed (non-fatal):", err));
+        }
+      } catch (ticketErr) {
+        console.error("Auto-ticket creation failed (non-fatal):", ticketErr);
+      }
+
       return data;
     },
     onSuccess: () => {
