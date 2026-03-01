@@ -532,6 +532,85 @@ export type Database = {
           },
         ]
       }
+      courtesy_upgrades: {
+        Row: {
+          created_at: string
+          id: string
+          job_id: string
+          performed_level_id: string
+          property_id: string
+          provider_org_id: string
+          reason_code: string
+          scheduled_level_id: string
+          sku_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_id: string
+          performed_level_id: string
+          property_id: string
+          provider_org_id: string
+          reason_code: string
+          scheduled_level_id: string
+          sku_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_id?: string
+          performed_level_id?: string
+          property_id?: string
+          provider_org_id?: string
+          reason_code?: string
+          scheduled_level_id?: string
+          sku_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "courtesy_upgrades_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "courtesy_upgrades_performed_level_id_fkey"
+            columns: ["performed_level_id"]
+            isOneToOne: false
+            referencedRelation: "sku_levels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "courtesy_upgrades_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "courtesy_upgrades_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "courtesy_upgrades_scheduled_level_id_fkey"
+            columns: ["scheduled_level_id"]
+            isOneToOne: false
+            referencedRelation: "sku_levels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "courtesy_upgrades_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cron_run_log: {
         Row: {
           completed_at: string | null
@@ -1834,6 +1913,8 @@ export type Database = {
           duration_minutes_snapshot: number | null
           id: string
           job_id: string
+          performed_level_id: string | null
+          scheduled_level_id: string | null
           sku_id: string
           sku_name_snapshot: string | null
         }
@@ -1841,6 +1922,8 @@ export type Database = {
           duration_minutes_snapshot?: number | null
           id?: string
           job_id: string
+          performed_level_id?: string | null
+          scheduled_level_id?: string | null
           sku_id: string
           sku_name_snapshot?: string | null
         }
@@ -1848,6 +1931,8 @@ export type Database = {
           duration_minutes_snapshot?: number | null
           id?: string
           job_id?: string
+          performed_level_id?: string | null
+          scheduled_level_id?: string | null
           sku_id?: string
           sku_name_snapshot?: string | null
         }
@@ -1857,6 +1942,20 @@ export type Database = {
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_skus_performed_level_id_fkey"
+            columns: ["performed_level_id"]
+            isOneToOne: false
+            referencedRelation: "sku_levels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_skus_scheduled_level_id_fkey"
+            columns: ["scheduled_level_id"]
+            isOneToOne: false
+            referencedRelation: "sku_levels"
             referencedColumns: ["id"]
           },
           {
@@ -1968,6 +2067,68 @@ export type Database = {
             columns: ["zone_id"]
             isOneToOne: false
             referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      level_recommendations: {
+        Row: {
+          created_at: string
+          id: string
+          job_id: string
+          note: string | null
+          provider_org_id: string
+          reason_code: string
+          recommended_level_id: string
+          scheduled_level_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_id: string
+          note?: string | null
+          provider_org_id: string
+          reason_code: string
+          recommended_level_id: string
+          scheduled_level_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_id?: string
+          note?: string | null
+          provider_org_id?: string
+          reason_code?: string
+          recommended_level_id?: string
+          scheduled_level_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "level_recommendations_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "level_recommendations_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "level_recommendations_recommended_level_id_fkey"
+            columns: ["recommended_level_id"]
+            isOneToOne: false
+            referencedRelation: "sku_levels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "level_recommendations_scheduled_level_id_fkey"
+            columns: ["scheduled_level_id"]
+            isOneToOne: false
+            referencedRelation: "sku_levels"
             referencedColumns: ["id"]
           },
         ]
@@ -4759,6 +4920,7 @@ export type Database = {
           duration_minutes: number | null
           fulfillment_mode: string | null
           id: string
+          level_id: string | null
           proof_photo_count: number | null
           proof_photo_labels: Json | null
           routine_version_id: string
@@ -4773,6 +4935,7 @@ export type Database = {
           duration_minutes?: number | null
           fulfillment_mode?: string | null
           id?: string
+          level_id?: string | null
           proof_photo_count?: number | null
           proof_photo_labels?: Json | null
           routine_version_id: string
@@ -4787,6 +4950,7 @@ export type Database = {
           duration_minutes?: number | null
           fulfillment_mode?: string | null
           id?: string
+          level_id?: string | null
           proof_photo_count?: number | null
           proof_photo_labels?: Json | null
           routine_version_id?: string
@@ -4794,6 +4958,13 @@ export type Database = {
           sku_name?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "routine_items_level_id_fkey"
+            columns: ["level_id"]
+            isOneToOne: false
+            referencedRelation: "sku_levels"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "routine_items_routine_version_id_fkey"
             columns: ["routine_version_id"]
@@ -5386,6 +5557,106 @@ export type Database = {
             columns: ["zone_id"]
             isOneToOne: false
             referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sku_guidance_questions: {
+        Row: {
+          created_at: string
+          id: string
+          is_mandatory: boolean
+          options: Json
+          question_order: number
+          question_text: string
+          sku_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_mandatory?: boolean
+          options?: Json
+          question_order?: number
+          question_text: string
+          sku_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_mandatory?: boolean
+          options?: Json
+          question_order?: number
+          question_text?: string
+          sku_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sku_guidance_questions_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sku_levels: {
+        Row: {
+          created_at: string
+          effective_start_cycle: string | null
+          exclusions: string[]
+          handles_cost: number
+          id: string
+          inclusions: string[]
+          is_active: boolean
+          label: string
+          level_number: number
+          planned_minutes: number
+          proof_checklist_template: Json | null
+          proof_photo_min: number
+          short_description: string | null
+          sku_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          effective_start_cycle?: string | null
+          exclusions?: string[]
+          handles_cost?: number
+          id?: string
+          inclusions?: string[]
+          is_active?: boolean
+          label: string
+          level_number?: number
+          planned_minutes?: number
+          proof_checklist_template?: Json | null
+          proof_photo_min?: number
+          short_description?: string | null
+          sku_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          effective_start_cycle?: string | null
+          exclusions?: string[]
+          handles_cost?: number
+          id?: string
+          inclusions?: string[]
+          is_active?: boolean
+          label?: string
+          level_number?: number
+          planned_minutes?: number
+          proof_checklist_template?: Json | null
+          proof_photo_min?: number
+          short_description?: string | null
+          sku_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sku_levels_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
             referencedColumns: ["id"]
           },
         ]
