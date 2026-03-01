@@ -134,17 +134,51 @@ export default function ProviderJobDetail() {
         {skus.length === 0 ? (
           <p className="text-xs text-muted-foreground">No services assigned</p>
         ) : (
-          <ul className="space-y-1">
+          <div className="space-y-3">
             {skus.map((s) => (
-              <li key={s.id} className="flex items-center gap-2 text-sm">
-                <span className="h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
-                <span>{s.sku_name_snapshot ?? "Service"}</span>
-                {s.duration_minutes_snapshot && (
-                  <span className="text-xs text-muted-foreground">({s.duration_minutes_snapshot} min)</span>
+              <div key={s.id} className="space-y-1">
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
+                  <span className="font-medium">{s.sku_name_snapshot ?? "Service"}</span>
+                  {s.scheduled_level_label && (
+                    <span className="text-xs px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium">
+                      {s.scheduled_level_label}
+                    </span>
+                  )}
+                </div>
+                {/* Level details: planned minutes + scope */}
+                {s.scheduled_level_planned_minutes && (
+                  <div className="ml-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Clock className="h-3 w-3" />
+                    <span>{s.scheduled_level_planned_minutes} min target</span>
+                  </div>
                 )}
-              </li>
+                {s.scheduled_level_inclusions && s.scheduled_level_inclusions.length > 0 && (
+                  <ul className="ml-4 space-y-0.5">
+                    {(s.scheduled_level_inclusions as string[]).slice(0, 6).map((inc, i) => (
+                      <li key={i} className="text-xs text-muted-foreground flex items-start gap-1">
+                        <span className="text-success mt-0.5">✓</span> {inc}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {/* Proof requirements from level */}
+                {s.scheduled_level_proof_photo_min != null && s.scheduled_level_proof_photo_min > 0 && (
+                  <div className="ml-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Camera className="h-3 w-3" />
+                    <span>{s.scheduled_level_proof_photo_min} photo{s.scheduled_level_proof_photo_min !== 1 ? "s" : ""} required</span>
+                  </div>
+                )}
+                {/* Fallback for SKUs without levels */}
+                {!s.scheduled_level_label && s.duration_minutes_snapshot && (
+                  <div className="ml-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Clock className="h-3 w-3" />
+                    <span>{s.duration_minutes_snapshot} min</span>
+                  </div>
+                )}
+              </div>
             ))}
-          </ul>
+          </div>
         )}
       </Card>
 

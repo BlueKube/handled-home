@@ -7,7 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { ChevronLeft, CheckCircle2, Camera, AlertTriangle, Send, PartyPopper } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { LevelSufficiencyForm } from "@/components/provider/LevelSufficiencyForm";
 
 export default function ProviderJobComplete() {
   const { jobId } = useParams<{ jobId: string }>();
@@ -16,6 +17,9 @@ export default function ProviderJobComplete() {
   const actions = useJobActions(jobId);
   const [summary, setSummary] = useState("");
   const [submitted, setSubmitted] = useState(false);
+
+  // Track which SKUs have completed their level feedback
+  const [completedLevelSkus, setCompletedLevelSkus] = useState<Set<string>>(new Set());
 
   if (isLoading || !data) {
     return (
@@ -26,7 +30,7 @@ export default function ProviderJobComplete() {
     );
   }
 
-  const { job, checklist, photos, issues } = data;
+  const { job, skus, checklist, photos, issues } = data;
   const requiredChecklist = checklist.filter((c) => c.is_required);
   const doneChecklist = requiredChecklist.filter((c) => c.status !== "PENDING");
   const requiredPhotos = photos.filter((p) => p.slot_key);
@@ -35,7 +39,17 @@ export default function ProviderJobComplete() {
 
   const checklistReady = doneChecklist.length === requiredChecklist.length;
   const photosReady = uploadedPhotos.length === requiredPhotos.length;
-  const canSubmit = checklistReady && photosReady;
+
+  // SKUs that have levels and need sufficiency feedback
+  const skusWithLevels = skus.filter((s) => !!s.scheduled_level_id);
+  const allLevelFeedbackDone = skusWithLevels.length === 0 ||
+    skusWithLevels.every((s) => completedLevelSkus.has(s.sku_id));
+
+  const canSubmit = checklistReady && photosReady && allLevelFeedbackDone;
+
+  const handleMarkLevelComplete = (skuId: string) => {
+    setCompletedLevelSkus((prev) => new Set([...prev, skuId]));
+  };
 
   const handleSubmit = async () => {
     try {
@@ -111,6 +125,23 @@ export default function ProviderJobComplete() {
         </div>
       </Card>
 
+      {/* Level Sufficiency Forms — one per SKU with levels */}
+      {skusWithLevels.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">Level Feedback</p>
+          {skusWithLevels.map((sku) => (
+            <LevelSufficiencyForm
+              key={sku.sku_id}
+              jobSku={sku}
+              jobId={jobId!}
+              propertyId={job.property_id}
+              providerOrgId={job.provider_org_id}
+              onComplete={() => handleMarkLevelComplete(sku.sku_id)}
+            />
+          ))}
+        </div>
+      )}
+
       {/* Issues summary */}
       {openIssues.length > 0 && (
         <Card className="p-4 border-warning/30 bg-warning/5">
@@ -147,7 +178,11 @@ export default function ProviderJobComplete() {
         disabled={!canSubmit || actions.completeJob.isPending}
       >
         <Send className="h-4 w-4 mr-2" />
-        {openIssues.length > 0 ? "Submit (Partial)" : "Submit Complete"}
+        {!allLevelFeedbackDone
+          ? "Complete level feedback first"
+          : openIssues.length > 0
+            ? "Submit (Partial)"
+            : "Submit Complete"}
       </Button>
     </div>
   );
