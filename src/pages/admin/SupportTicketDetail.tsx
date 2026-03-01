@@ -4,6 +4,7 @@ import { useSupportTicketDetail } from "@/hooks/useSupportTicketDetail";
 import { useTicketActions } from "@/hooks/useTicketActions";
 import { useSupportMacros } from "@/hooks/useSupportMacros";
 import { useSupportAiClassify } from "@/hooks/useSupportAiClassify";
+import { AiInsightsCard } from "@/components/support/AiInsightsCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -239,19 +240,16 @@ export default function AdminSupportTicketDetail() {
         <p className="text-sm">{ticket.customer_note || "No details provided."}</p>
       </Card>
 
-      {/* AI summary */}
-      {ticket.ai_summary && (
-        <Card className="p-4 space-y-2 border-accent/20 bg-accent/5">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-accent flex items-center gap-1">
-            <Shield className="h-3.5 w-3.5" /> AI Summary
-          </h3>
-          <p className="text-sm">{ticket.ai_summary}</p>
-          <div className="flex gap-4 text-xs text-muted-foreground">
-            {ticket.ai_evidence_score != null && <span>Evidence: {ticket.ai_evidence_score}/100</span>}
-            {ticket.ai_risk_score != null && <span>Risk: {ticket.ai_risk_score}/100</span>}
-          </div>
-        </Card>
-      )}
+      {/* AI Insights Card (C3) */}
+      <AiInsightsCard ticket={{
+        id: ticket.id,
+        ai_classification: ticket.ai_classification as Record<string, any> | null,
+        ai_summary: ticket.ai_summary as string | null,
+        ai_evidence_score: ticket.ai_evidence_score as number | null,
+        ai_risk_score: ticket.ai_risk_score as number | null,
+        status: ticket.status as string,
+        customer_id: ticket.customer_id,
+      }} />
 
       {/* Resolution summary */}
       {ticket.resolution_summary && (

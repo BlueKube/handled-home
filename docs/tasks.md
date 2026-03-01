@@ -645,8 +645,8 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 ### 3D-C: Smart Dispute Resolution
 - [x] **3D-C1** | P0 | L | Enhanced `support-ai-classify` — added `auto_resolvable`, `suggested_credit_cents`, `resolution_explanation`, `photo_analysis` to AI tool output. Includes job photo count + customer issue photo context in prompt. Guard criteria: auto_resolvable AND evidence≥75 AND risk<30
 - [x] **3D-C2** | P0 | L | `auto-resolve-dispute` edge function — validates guard criteria, applies credit (capped at $50), resolves ticket, emits CUSTOMER_ISSUE_AUTO_RESOLVED notification, logs to ai_inference_runs
-- [ ] **3D-C3** | P1 | M | Admin AI insights card on ticket detail — classification reasoning, evidence/risk scores, photo analysis, "Apply AI suggestion" button
-- [ ] **3D-C4** | P1 | M | Customer issue auto-classification on insert — trigger or hook calls support-ai-classify immediately
+- [x] **3D-C3** | P1 | M | Admin AI insights card on ticket detail — classification reasoning, evidence/risk scores, photo analysis, "Apply AI suggestion" button with credit override. Replaces old AI summary section
+- [x] **3D-C4** | P1 | M | Customer issue auto-classification on insert — `useSubmitCustomerIssue` auto-creates support ticket from issue context and fires AI classification (fire-and-forget)
 
 ### Schema Changes
 - `property_service_predictions` table (new)
@@ -661,4 +661,4 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [ ] **3D-L1** | LOW | Stale prediction cleanup (cron to delete expired predictions)
 - [ ] **3D-L2** | LOW | Photo analysis — include actual signed photo URLs for visual AI analysis
 
-*Last updated: 2026-03-01 — Sprint 3D review fixes H1-H3, M1 applied.*
+*Last updated: 2026-03-01 — Sprint 3D C3+C4 complete. B4, M2, L1, L2 remain.*
