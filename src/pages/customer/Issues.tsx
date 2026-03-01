@@ -12,6 +12,18 @@ const REASON_LABELS: Record<string, string> = {
   other: "Other",
 };
 
+/** Derive display status from the linked support_ticket when available */
+function deriveDisplayStatus(issue: { status: string; ticket_status?: string | null }) {
+  const ts = issue.ticket_status;
+  if (ts === "resolved") return "resolved";
+  if (ts === "ai_reviewing") return "under_review";
+  if (ts === "in_review" || ts === "awaiting_provider") return "under_review";
+  // Fall back to the customer_issues own status
+  if (issue.status === "resolved") return "resolved";
+  if (issue.status === "under_review") return "under_review";
+  return "submitted";
+}
+
 export default function CustomerIssues() {
   const { data: issues, isLoading } = useCustomerIssues();
   const navigate = useNavigate();
@@ -48,10 +60,10 @@ export default function CustomerIssues() {
               onClick={() => navigate(`/customer/visits/${issue.job_id}`)}
             >
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
+              <div className="flex items-center gap-2 mb-0.5">
                   <span className="text-sm font-medium">{REASON_LABELS[issue.reason] ?? issue.reason}</span>
                   <StatusBadge
-                    status={issue.status === "resolved" ? "resolved" : issue.status === "under_review" ? "under_review" : "submitted"}
+                    status={deriveDisplayStatus(issue)}
                     className="text-[10px] h-5"
                   />
                 </div>
