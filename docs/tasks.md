@@ -590,9 +590,9 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3B-09** | P1 | S | Event logging for setup completion/updates — coverage and sizing hooks now emit `coverage_map_completed`/`coverage_map_updated` and `property_sizing_completed`/`property_sizing_updated` with completion percentages.
 
 ### Phase 5: Personalization API + Level Integration
-- [ ] **3B-10** | P0 | L | `get_property_profile_context` RPC returning coverage, sizing, computed eligibility
-- [ ] **3B-11** | P1 | M | Level-default selection using sizing signals
-- [ ] **3B-12** | P1 | M | Category eligibility checks (suppress NA categories)
+- [x] **3B-10** | P0 | L | `get_property_profile_context` RPC — SECURITY DEFINER, returns coverage map, sizing signals, computed eligibility (eligible/suppressed categories, switch candidates, high-confidence upsells). Hook: `usePropertyProfileContext`.
+- [x] **3B-11** | P1 | M | Level-default selection using sizing signals — `useLevelDefault` hook with deterministic per-category rules (windows, gutters, mowing, power_wash) that bump level based on sqft/yard/stories/windows tiers. Returns `default_level_id`, `default_level_reason`, `confidence`.
+- [x] **3B-12** | P1 | M | Category eligibility checks — `useCategoryEligibility` hook wrapping profile context. AddServicesSheet now filters out SKUs whose category is marked NA in coverage map.
 
 ### Phase 6: Admin Visibility
 - [ ] **3B-13** | P1 | M | Property detail section showing coverage map + sizing tiers
