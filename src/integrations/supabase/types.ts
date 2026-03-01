@@ -7586,6 +7586,10 @@ export type Database = {
         Returns: number
       }
       get_neighborhood_density: { Args: { p_user_id: string }; Returns: Json }
+      get_property_profile_context: {
+        Args: { p_property_id: string }
+        Returns: Json
+      }
       get_share_card_public: { Args: { p_share_code: string }; Returns: Json }
       get_waitlist_summary: {
         Args: never

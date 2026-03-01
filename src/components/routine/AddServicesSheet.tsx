@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Search, Info } from "lucide-react";
 import { useSkuLevels } from "@/hooks/useSkuLevels";
+import { useCategoryEligibility } from "@/hooks/useCategoryEligibility";
 import type { EntitlementSku } from "@/hooks/useEntitlements";
 import { SkuDetailModal } from "./SkuDetailModal";
 
@@ -14,7 +15,7 @@ interface AddServicesSheetProps {
   onAdd: (skuId: string, levelId?: string | null) => void;
 }
 
-/** Returns the default (lowest-numbered) active level ID for a SKU, or null */
+/** Returns the sizing-aware default level ID for a SKU, or null */
 function useDefaultLevelId(skuId: string | null) {
   const { data: levels } = useSkuLevels(skuId);
   const activeLevels = (levels ?? []).filter((l) => l.is_active);
@@ -71,9 +72,11 @@ export function AddServicesSheet({ skus, existingSkuIds, onAdd }: AddServicesShe
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [detailSku, setDetailSku] = useState<EntitlementSku | null>(null);
+  const { isEligible } = useCategoryEligibility();
 
   const filtered = skus
     .filter((s) => s.status !== "blocked" && s.status !== "provider_only")
+    .filter((s) => isEligible((s as any).category)) // Suppress NA categories
     .filter((s) => s.sku_name.toLowerCase().includes(search.toLowerCase()));
 
   const grouped = {
