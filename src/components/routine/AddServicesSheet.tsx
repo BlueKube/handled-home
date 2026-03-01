@@ -10,7 +10,7 @@ import { SkuDetailModal } from "./SkuDetailModal";
 interface AddServicesSheetProps {
   skus: EntitlementSku[];
   existingSkuIds: Set<string>;
-  onAdd: (skuId: string) => void;
+  onAdd: (skuId: string, levelId?: string | null) => void;
 }
 
 export function AddServicesSheet({ skus, existingSkuIds, onAdd }: AddServicesSheetProps) {
@@ -103,8 +103,8 @@ export function AddServicesSheet({ skus, existingSkuIds, onAdd }: AddServicesShe
       <SkuDetailModal
         sku={detailSku}
         onClose={() => setDetailSku(null)}
-        onAdd={(skuId) => {
-          onAdd(skuId);
+        onAdd={(skuId, levelId) => {
+          onAdd(skuId, levelId);
           setDetailSku(null);
         }}
         alreadyAdded={detailSku ? existingSkuIds.has(detailSku.sku_id) : false}

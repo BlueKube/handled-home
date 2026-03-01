@@ -546,15 +546,15 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3A-08** | P1 | S | Created `useLevelRecommendation` and `useCourtesyUpgrade` hooks with 6-month guardrail check
 
 ### Phase 3: Admin UI
-- [ ] **3A-09** | P0 | L | Level editor inside SkuFormSheet — collapsible section to add/edit/reorder/delete levels per SKU
-- [ ] **3A-10** | P1 | M | Guidance questions editor inside SkuFormSheet — configure 0–3 questions per SKU
-- [ ] **3A-11** | P0 | S | SKU detail sheet — show levels summary with scope, planned minutes, handles cost
+- [x] **3A-09** | P0 | L | Level editor inside SkuFormSheet — collapsible section to add/edit/reorder/delete levels per SKU (SkuLevelEditor component)
+- [x] **3A-10** | P1 | M | Guidance questions editor inside SkuFormSheet — configure 0–3 questions per SKU (GuidanceQuestionEditor component)
+- [x] **3A-11** | P0 | S | SKU detail sheet — show levels summary with scope, planned minutes, handles cost
 
 ### Phase 4: Customer UI
-- [ ] **3A-12** | P0 | L | Level selector in SKU detail — side-by-side level comparison, handle delta display
-- [ ] **3A-13** | P0 | M | Level selector in add-to-routine flow — default level pre-selected, handles update on change
-- [ ] **3A-14** | P1 | S | Routine item cards — show level label + handles cost
-- [ ] **3A-15** | P1 | M | Visit detail — show scheduled vs performed level, recommendation notice, "Update going forward" action
+- [x] **3A-12** | P0 | L | Level selector in SKU detail — side-by-side level comparison, handle delta display (LevelSelector + SkuDetailModal rewrite)
+- [x] **3A-13** | P0 | M | Level selector in add-to-routine flow — default level pre-selected, handles update on change (AddServicesSheet + useAddRoutineItem level_id support)
+- [x] **3A-14** | P1 | S | Routine item cards — show level label + handles cost + compact level picker (RoutineItemCard + useUpdateRoutineItemLevel)
+- [x] **3A-15** | P1 | M | Visit detail — show scheduled vs performed level, courtesy upgrade notice, recommendation with "Update going forward" action
 
 ### Phase 5: Provider UI
 - [ ] **3A-16** | P0 | M | Job detail header — show level label, planned minutes, scope bullets

@@ -6,11 +6,12 @@ import { cadenceToWeeklyEquivalent, computeCycleDemand } from "./useRoutinePrevi
 export function useAddRoutineItem() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ versionId, skuId, cadenceType, cadenceDetail }: {
+    mutationFn: async ({ versionId, skuId, cadenceType, cadenceDetail, levelId }: {
       versionId: string;
       skuId: string;
       cadenceType?: CadenceType;
       cadenceDetail?: Record<string, any>;
+      levelId?: string | null;
     }) => {
       // Fetch SKU name for display
       const { data: sku } = await supabase
@@ -18,6 +19,21 @@ export function useAddRoutineItem() {
         .select("name, duration_minutes, fulfillment_mode, required_photos, checklist")
         .eq("id", skuId)
         .single();
+
+      // If a level is selected, fetch level details for duration override
+      let levelDuration: number | null = null;
+      let levelName: string | null = null;
+      if (levelId) {
+        const { data: level } = await supabase
+          .from("sku_levels")
+          .select("planned_minutes, label")
+          .eq("id", levelId)
+          .single();
+        if (level) {
+          levelDuration = level.planned_minutes;
+          levelName = level.label;
+        }
+      }
 
       const { data, error } = await supabase
         .from("routine_items")
@@ -27,10 +43,11 @@ export function useAddRoutineItem() {
           cadence_type: cadenceType ?? "weekly",
           cadence_detail: cadenceDetail ?? {},
           sku_name: sku?.name ?? null,
-          duration_minutes: sku?.duration_minutes ?? null,
+          duration_minutes: levelDuration ?? sku?.duration_minutes ?? null,
           fulfillment_mode: (sku?.fulfillment_mode as string) ?? null,
           proof_photo_count: Array.isArray(sku?.required_photos) ? sku.required_photos.length : 0,
           checklist_count: Array.isArray(sku?.checklist) ? sku.checklist.length : 0,
+          level_id: levelId ?? null,
         })
         .select()
         .single();
@@ -68,6 +85,30 @@ export function useUpdateRoutineItemCadence() {
         .update({
           cadence_type: cadenceType,
           cadence_detail: cadenceDetail ?? {},
+        })
+        .eq("id", itemId);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["routine"] }),
+  });
+}
+
+export function useUpdateRoutineItemLevel() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ itemId, levelId }: { itemId: string; levelId: string }) => {
+      // Fetch level details for duration update
+      const { data: level } = await supabase
+        .from("sku_levels")
+        .select("planned_minutes")
+        .eq("id", levelId)
+        .single();
+
+      const { error } = await supabase
+        .from("routine_items")
+        .update({
+          level_id: levelId,
+          duration_minutes: level?.planned_minutes ?? null,
         })
         .eq("id", itemId);
       if (error) throw error;

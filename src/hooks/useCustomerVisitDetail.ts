@@ -46,11 +46,21 @@ export interface VisitDetail {
     zone_id: string;
     provider_org_id: string;
   };
-  skus: { sku_id: string; sku_name_snapshot: string | null; duration_minutes_snapshot: number | null }[];
+  skus: {
+    sku_id: string;
+    sku_name_snapshot: string | null;
+    duration_minutes_snapshot: number | null;
+    scheduled_level_id: string | null;
+    performed_level_id: string | null;
+    scheduled_level_label: string | null;
+    performed_level_label: string | null;
+  }[];
   photos: VisitPhoto[];
   checklistHighlights: ChecklistHighlight[];
   issue: CustomerIssue | null;
   timeOnSiteMinutes: number | null;
+  courtesyUpgrade: { reason_code: string; performed_level_label: string; scheduled_level_label: string } | null;
+  recommendation: { recommended_level_label: string; reason_code: string } | null;
 }
 
 export function useCustomerVisitDetail(jobId: string | undefined) {
@@ -72,7 +82,7 @@ export function useCustomerVisitDetail(jobId: string | undefined) {
           .single(),
         supabase
           .from("job_skus")
-          .select("sku_id, sku_name_snapshot, duration_minutes_snapshot")
+          .select("sku_id, sku_name_snapshot, duration_minutes_snapshot, scheduled_level_id, performed_level_id")
           .eq("job_id", jobId),
         supabase
           .from("job_photos")
@@ -127,13 +137,67 @@ export function useCustomerVisitDetail(jobId: string | undefined) {
         timeOnSiteMinutes = Math.round(diff / 60000);
       }
 
+      // Fetch level labels for job_skus
+      const rawSkus = skuRes.data ?? [];
+      const levelIds = [
+        ...rawSkus.map((s: any) => s.scheduled_level_id).filter(Boolean),
+        ...rawSkus.map((s: any) => s.performed_level_id).filter(Boolean),
+      ];
+      const levelMap = new Map<string, string>();
+      if (levelIds.length > 0) {
+        const { data: levelsData } = await supabase
+          .from("sku_levels")
+          .select("id, label")
+          .in("id", levelIds);
+        for (const l of levelsData ?? []) {
+          levelMap.set(l.id, l.label);
+        }
+      }
+
+      const skusWithLevels = rawSkus.map((s: any) => ({
+        sku_id: s.sku_id,
+        sku_name_snapshot: s.sku_name_snapshot,
+        duration_minutes_snapshot: s.duration_minutes_snapshot,
+        scheduled_level_id: s.scheduled_level_id ?? null,
+        performed_level_id: s.performed_level_id ?? null,
+        scheduled_level_label: s.scheduled_level_id ? (levelMap.get(s.scheduled_level_id) ?? null) : null,
+        performed_level_label: s.performed_level_id ? (levelMap.get(s.performed_level_id) ?? null) : null,
+      }));
+
+      // Fetch courtesy upgrade for this job
+      const { data: courtesyData } = await supabase
+        .from("courtesy_upgrades")
+        .select("reason_code, scheduled_level_id, performed_level_id")
+        .eq("job_id", jobId)
+        .maybeSingle();
+
+      const courtesyUpgrade = courtesyData ? {
+        reason_code: courtesyData.reason_code,
+        scheduled_level_label: levelMap.get(courtesyData.scheduled_level_id) ?? "Standard",
+        performed_level_label: levelMap.get(courtesyData.performed_level_id) ?? "Upgraded",
+      } : null;
+
+      // Fetch recommendation for this job
+      const { data: recData } = await supabase
+        .from("level_recommendations")
+        .select("recommended_level_id, reason_code")
+        .eq("job_id", jobId)
+        .maybeSingle();
+
+      const recommendation = recData ? {
+        recommended_level_label: levelMap.get(recData.recommended_level_id) ?? "Recommended",
+        reason_code: recData.reason_code,
+      } : null;
+
       return {
         job: jobRes.data,
-        skus: skuRes.data ?? [],
+        skus: skusWithLevels,
         photos,
         checklistHighlights: highlights as ChecklistHighlight[],
         issue: (issueRes.data as CustomerIssue) ?? null,
         timeOnSiteMinutes,
+        courtesyUpgrade,
+        recommendation,
       };
     },
   });

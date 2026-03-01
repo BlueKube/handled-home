@@ -4,7 +4,7 @@ import { useProperty } from "@/hooks/useProperty";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { useRoutine, useCreateRoutine } from "@/hooks/useRoutine";
-import { useAddRoutineItem, useRemoveRoutineItem, useUpdateRoutineItemCadence, computeAutoFit, useAutoFitRoutine } from "@/hooks/useRoutineActions";
+import { useAddRoutineItem, useRemoveRoutineItem, useUpdateRoutineItemCadence, useUpdateRoutineItemLevel, computeAutoFit, useAutoFitRoutine } from "@/hooks/useRoutineActions";
 import { useRoutinePreview, computeCycleDemand } from "@/hooks/useRoutinePreview";
 import { useServiceDayAssignment } from "@/hooks/useServiceDayAssignment";
 import { useBiweeklyOptimizer } from "@/hooks/useBiweeklyOptimizer";
@@ -42,6 +42,7 @@ export default function CustomerRoutine() {
   const removeItem = useRemoveRoutineItem();
   const updateCadence = useUpdateRoutineItemCadence();
   const autoFitMutation = useAutoFitRoutine();
+  const updateLevel = useUpdateRoutineItemLevel();
   const { data: biweeklyRec } = useBiweeklyOptimizer(zoneId);
 
   const items = routineData?.items ?? [];
@@ -79,10 +80,10 @@ export default function CustomerRoutine() {
     }
   }, [property?.id, planId, routineData, routineLoading, autoCreating]);
 
-  const handleAddItem = async (skuId: string) => {
+  const handleAddItem = async (skuId: string, levelId?: string | null) => {
     if (!routineData?.version?.id) return;
     try {
-      await addItem.mutateAsync({ versionId: routineData.version.id, skuId });
+      await addItem.mutateAsync({ versionId: routineData.version.id, skuId, levelId });
       toast.success("Service added");
     } catch {
       toast.error("Couldn't add service");
@@ -103,6 +104,14 @@ export default function CustomerRoutine() {
       await updateCadence.mutateAsync({ itemId, cadenceType: cadence, cadenceDetail: detail });
     } catch {
       toast.error("Couldn't update cadence");
+    }
+  };
+
+  const handleLevelChange = async (itemId: string, levelId: string) => {
+    try {
+      await updateLevel.mutateAsync({ itemId, levelId });
+    } catch {
+      toast.error("Couldn't update level");
     }
   };
 
@@ -189,6 +198,7 @@ export default function CustomerRoutine() {
                 item={item}
                 onRemove={handleRemoveItem}
                 onCadenceChange={handleCadenceChange}
+                onLevelChange={handleLevelChange}
                 allowIndependent={item.fulfillment_mode === "independent_cadence"}
                 biweeklyRecommendation={biweeklyRec?.recommended}
               />
