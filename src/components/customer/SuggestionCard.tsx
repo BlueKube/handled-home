@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { X, Plus, ChevronDown } from "lucide-react";
+import { X, Plus, ChevronDown, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -38,11 +38,19 @@ export function SuggestionCard({ suggestion, onAdd, onHide, onImpression }: Sugg
   const handlesCost = suggestion.default_level?.handles_cost ?? suggestion.handle_cost;
   const levelLabel = suggestion.default_level?.label;
 
+  const isPredicted = suggestion.suggestion_type === "predicted";
+
   return (
-    <Card className="p-3 flex items-start gap-3 group">
+    <Card className={`p-3 flex items-start gap-3 group ${isPredicted ? "border-primary/30 bg-primary/5" : ""}`}>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
           <span className="text-sm font-medium truncate">{suggestion.sku_name}</span>
+          {isPredicted && (
+            <span className="text-[10px] text-primary bg-primary/10 rounded px-1.5 py-0.5 shrink-0 flex items-center gap-0.5">
+              <Brain className="h-2.5 w-2.5" />
+              AI pick
+            </span>
+          )}
           {levelLabel && (
             <span className="text-[10px] text-muted-foreground bg-secondary rounded px-1.5 py-0.5 shrink-0">
               {levelLabel}
