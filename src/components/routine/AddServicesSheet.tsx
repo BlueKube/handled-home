@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Search, Info } from "lucide-react";
+import { useSkuLevels } from "@/hooks/useSkuLevels";
 import type { EntitlementSku } from "@/hooks/useEntitlements";
 import { SkuDetailModal } from "./SkuDetailModal";
 
@@ -11,6 +12,59 @@ interface AddServicesSheetProps {
   skus: EntitlementSku[];
   existingSkuIds: Set<string>;
   onAdd: (skuId: string, levelId?: string | null) => void;
+}
+
+/** Returns the default (lowest-numbered) active level ID for a SKU, or null */
+function useDefaultLevelId(skuId: string | null) {
+  const { data: levels } = useSkuLevels(skuId);
+  const activeLevels = (levels ?? []).filter((l) => l.is_active);
+  return activeLevels.length > 0 ? activeLevels[0].id : null;
+}
+
+function QuickAddButton({ sku, alreadyAdded, onAdd, onDetail }: {
+  sku: EntitlementSku;
+  alreadyAdded: boolean;
+  onAdd: (skuId: string, levelId?: string | null) => void;
+  onDetail: () => void;
+}) {
+  const defaultLevelId = useDefaultLevelId(sku.sku_id);
+  const hasLevels = defaultLevelId !== null;
+
+  return (
+    <div className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium truncate">{sku.sku_name}</p>
+        <Badge variant="secondary" className="text-[10px] mt-0.5">{sku.ui_badge}</Badge>
+      </div>
+      <button
+        onClick={onDetail}
+        className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground"
+      >
+        <Info className="h-4 w-4" />
+      </button>
+      {hasLevels ? (
+        <Button
+          variant={alreadyAdded ? "secondary" : "outline"}
+          size="sm"
+          className="h-8 text-xs"
+          disabled={alreadyAdded}
+          onClick={onDetail}
+        >
+          {alreadyAdded ? "Added" : "Choose Level"}
+        </Button>
+      ) : (
+        <Button
+          variant={alreadyAdded ? "secondary" : "default"}
+          size="sm"
+          className="h-8 text-xs"
+          disabled={alreadyAdded}
+          onClick={() => onAdd(sku.sku_id)}
+        >
+          {alreadyAdded ? "Added" : "Add"}
+        </Button>
+      )}
+    </div>
+  );
 }
 
 export function AddServicesSheet({ skus, existingSkuIds, onAdd }: AddServicesSheetProps) {
@@ -34,34 +88,15 @@ export function AddServicesSheet({ skus, existingSkuIds, onAdd }: AddServicesShe
       <div>
         <p className="text-caption uppercase tracking-wider mb-2">{title}</p>
         <div className="space-y-1">
-          {items.map((sku) => {
-            const alreadyAdded = existingSkuIds.has(sku.sku_id);
-            return (
-              <div key={sku.sku_id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{sku.sku_name}</p>
-                  <Badge variant="secondary" className="text-[10px] mt-0.5">{sku.ui_badge}</Badge>
-                </div>
-                <button
-                  onClick={() => setDetailSku(sku)}
-                  className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground"
-                >
-                  <Info className="h-4 w-4" />
-                </button>
-                <Button
-                  variant={alreadyAdded ? "secondary" : "default"}
-                  size="sm"
-                  className="h-8 text-xs"
-                  disabled={alreadyAdded}
-                  onClick={() => {
-                    onAdd(sku.sku_id);
-                  }}
-                >
-                  {alreadyAdded ? "Added" : "Add"}
-                </Button>
-              </div>
-            );
-          })}
+          {items.map((sku) => (
+            <QuickAddButton
+              key={sku.sku_id}
+              sku={sku}
+              alreadyAdded={existingSkuIds.has(sku.sku_id)}
+              onAdd={onAdd}
+              onDetail={() => setDetailSku(sku)}
+            />
+          ))}
         </div>
       </div>
     );

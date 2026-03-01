@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, XCircle, Camera } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useSkuLevels } from "@/hooks/useSkuLevels";
+import { useSkuLevels, useGuidanceQuestions } from "@/hooks/useSkuLevels";
 import { LevelSelector } from "./LevelSelector";
 import type { EntitlementSku } from "@/hooks/useEntitlements";
 
@@ -32,13 +32,17 @@ export function SkuDetailModal({ sku, onClose, onAdd, alreadyAdded }: SkuDetailM
   });
 
   const { data: levels } = useSkuLevels(sku?.sku_id ?? null);
+  const { data: guidanceQuestions } = useGuidanceQuestions(sku?.sku_id ?? null);
   const activeLevels = (levels ?? []).filter((l) => l.is_active);
   const hasLevels = activeLevels.length > 0;
+  const activeQuestions = guidanceQuestions ?? [];
 
   const [selectedLevelId, setSelectedLevelId] = useState<string | null>(null);
+  const [questionAnswers, setQuestionAnswers] = useState<Record<string, number>>({});
 
-  // Reset selected level when SKU changes
+  // Reset state when SKU changes
   useEffect(() => {
+    setQuestionAnswers({});
     if (hasLevels) {
       setSelectedLevelId(activeLevels[0].id);
     } else {
@@ -46,11 +50,34 @@ export function SkuDetailModal({ sku, onClose, onAdd, alreadyAdded }: SkuDetailM
     }
   }, [sku?.sku_id, levels]);
 
+  // P4-F6: Compute recommended level from guidance question answers
+  const guidanceRecommendedLevelId = useMemo(() => {
+    if (!hasLevels || activeQuestions.length === 0) return null;
+    let maxLevelNumber = 1;
+    for (const q of activeQuestions) {
+      const answerIdx = questionAnswers[q.id];
+      if (answerIdx === undefined) continue;
+      const options = (q.options as any[]) ?? [];
+      const chosen = options[answerIdx];
+      if (chosen?.maps_to_level_number && chosen.maps_to_level_number > maxLevelNumber) {
+        maxLevelNumber = chosen.maps_to_level_number;
+      }
+    }
+    const recommended = activeLevels.find((l) => l.level_number === maxLevelNumber);
+    return recommended?.id ?? null;
+  }, [questionAnswers, activeQuestions, activeLevels, hasLevels]);
+
+  // Auto-select recommended level when guidance answers change
+  useEffect(() => {
+    if (guidanceRecommendedLevelId) {
+      setSelectedLevelId(guidanceRecommendedLevelId);
+    }
+  }, [guidanceRecommendedLevelId]);
+
   if (!sku) return null;
 
   const selectedLevel = activeLevels.find((l) => l.id === selectedLevelId);
 
-  // Use level data if available, otherwise fall back to SKU defaults
   const inclusions = hasLevels && selectedLevel
     ? (selectedLevel.inclusions as string[]) ?? []
     : skuDetail?.inclusions ?? [];
@@ -68,16 +95,49 @@ export function SkuDetailModal({ sku, onClose, onAdd, alreadyAdded }: SkuDetailM
           <Badge variant="secondary">{sku.ui_badge}</Badge>
           <p className="text-sm text-muted-foreground">{skuDetail?.description || sku.ui_explainer}</p>
 
-          {/* Level Selector */}
-          {hasLevels && (
-            <LevelSelector
-              levels={activeLevels}
-              selectedLevelId={selectedLevelId}
-              onSelect={setSelectedLevelId}
-            />
+          {/* P4-F5: Guidance Questions */}
+          {activeQuestions.length > 0 && (
+            <div className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Help us recommend the right level</p>
+              {activeQuestions.map((q) => {
+                const options = (q.options as any[]) ?? [];
+                return (
+                  <div key={q.id} className="space-y-1.5">
+                    <p className="text-sm font-medium">{q.question_text}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {options.map((opt: any, idx: number) => (
+                        <Button
+                          key={idx}
+                          variant={questionAnswers[q.id] === idx ? "default" : "outline"}
+                          size="sm"
+                          className="h-7 text-xs"
+                          onClick={() => setQuestionAnswers((prev) => ({ ...prev, [q.id]: idx }))}
+                        >
+                          {opt.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
 
-          {/* Inclusions / Exclusions from selected level or SKU defaults */}
+          {/* Level Selector */}
+          {hasLevels && (
+            <div>
+              {guidanceRecommendedLevelId && (
+                <p className="text-xs text-primary mb-1">✨ Recommended based on your answers</p>
+              )}
+              <LevelSelector
+                levels={activeLevels}
+                selectedLevelId={selectedLevelId}
+                onSelect={setSelectedLevelId}
+              />
+            </div>
+          )}
+
+          {/* Inclusions / Exclusions */}
           <div className="space-y-3">
             <div className="flex items-start gap-2">
               <CheckCircle2 className="h-4 w-4 text-success mt-0.5 shrink-0" />

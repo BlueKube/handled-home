@@ -59,8 +59,8 @@ export interface VisitDetail {
   checklistHighlights: ChecklistHighlight[];
   issue: CustomerIssue | null;
   timeOnSiteMinutes: number | null;
-  courtesyUpgrade: { reason_code: string; performed_level_label: string; scheduled_level_label: string } | null;
-  recommendation: { recommended_level_label: string; reason_code: string } | null;
+  courtesyUpgrade: { reason_code: string; performed_level_label: string; scheduled_level_label: string; performed_level_id: string; sku_id: string } | null;
+  recommendation: { recommended_level_label: string; reason_code: string; recommended_level_id: string; sku_id: string } | null;
 }
 
 export function useCustomerVisitDetail(jobId: string | undefined) {
@@ -167,7 +167,7 @@ export function useCustomerVisitDetail(jobId: string | undefined) {
       // Fetch courtesy upgrade for this job
       const { data: courtesyData } = await supabase
         .from("courtesy_upgrades")
-        .select("reason_code, scheduled_level_id, performed_level_id")
+        .select("reason_code, scheduled_level_id, performed_level_id, sku_id")
         .eq("job_id", jobId)
         .maybeSingle();
 
@@ -175,6 +175,8 @@ export function useCustomerVisitDetail(jobId: string | undefined) {
         reason_code: courtesyData.reason_code,
         scheduled_level_label: levelMap.get(courtesyData.scheduled_level_id) ?? "Standard",
         performed_level_label: levelMap.get(courtesyData.performed_level_id) ?? "Upgraded",
+        performed_level_id: courtesyData.performed_level_id,
+        sku_id: courtesyData.sku_id,
       } : null;
 
       // Fetch recommendation for this job
@@ -184,10 +186,21 @@ export function useCustomerVisitDetail(jobId: string | undefined) {
         .eq("job_id", jobId)
         .maybeSingle();
 
-      const recommendation = recData ? {
-        recommended_level_label: levelMap.get(recData.recommended_level_id) ?? "Recommended",
-        reason_code: recData.reason_code,
-      } : null;
+      let recommendation: VisitDetail["recommendation"] = null;
+      if (recData) {
+        // Resolve sku_id from the recommended level
+        const { data: recLevel } = await supabase
+          .from("sku_levels")
+          .select("sku_id")
+          .eq("id", recData.recommended_level_id)
+          .single();
+        recommendation = {
+          recommended_level_label: levelMap.get(recData.recommended_level_id) ?? "Recommended",
+          reason_code: recData.reason_code,
+          recommended_level_id: recData.recommended_level_id,
+          sku_id: recLevel?.sku_id ?? "",
+        };
+      }
 
       return {
         job: jobRes.data,
