@@ -596,3 +596,31 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 
 ### Phase 6: Admin Visibility
 - [x] **3B-13** | P1 | M | Property detail section showing coverage map + sizing tiers — `AdminPropertyProfileCard` component with `useAdminPropertyProfile` hook. Integrated into admin JobDetail overview tab. Shows coverage categories with status badges, switch intents, and sizing tiers.
+
+---
+
+## Sprint 3C — Growth Surfaces + Add Service Drawer + Home Restructure
+
+> Turn the Home tab into an active growth engine with smart suggestions, one-tap add, and the Add Service Drawer.
+
+### Phase 1: Suggestion Engine Schema + RPC
+- [x] **3C-01** | P0 | M | Created `suggestion_suppressions`, `suggestion_impressions`, `suggestion_actions` tables with RLS policies, indexes, and validation constraints.
+- [x] **3C-02** | P0 | L | Created `get_service_suggestions` RPC — SECURITY DEFINER, SET search_path = public. Scoring: coverage status (NONE=10, SELF high-pain=7, SELF=3, PROVIDER open=2), seasonality boost (+5 in-season), home sizing boost (+3 large). Filters: existing routine exclusion, active suppressions, impression throttling (≥2 in 14 days), NA exclusion. Returns top 4 (home) or 6 (drawer) with default level info.
+
+### Phase 2: Frontend Hooks + SuggestionCard
+- [x] **3C-03** | P0 | M | `useSuggestions` hook (calls RPC, 5-min stale time), `useSuggestionActions` hook (recordImpression, hideSuggestion, recordAdd mutations), `SuggestionCard` component (name, level label, handles cost, reason, Add button, hide with reason popover, auto-impression on mount).
+
+### Phase 3: Add Service Drawer + FAB
+- [x] **3C-04** | P0 | L | `AddServiceDrawer` (Sheet) — Best Next section (up to 4), Seasonal section (up to 2), Browse All CTA, empty state. `FloatingAddButton` (FAB) with framer-motion entrance animation. One-tap add with success toast + 10-second undo.
+
+### Phase 4: Home Tab Restructure
+- [x] **3C-05** | P0 | L | Dashboard.tsx restructured — Section A: Next Up (NextVisitCard + truth banners + start-routine CTA), Section B: This Cycle summary (service pills + handles bar), Section C: Suggested for Your Home (HomeSuggestions), Section D: Recent Receipt (last completed visit or placeholder). Removed redundant stat cards, added FAB + drawer.
+
+### Phase 5: Routine + Receipt Surfaces
+- [ ] **3C-06** | P1 | M | Routine page — adjacent service suggestion at bottom, per-item upgrade level quick action
+- [ ] **3C-07** | P1 | M | Receipt growth surface — 1-2 suggestion cards at bottom of VisitDetail for completed visits
+
+### Phase 6: Instrumentation
+- [ ] **3C-08** | P2 | S | Growth event tracking wired through useSuggestionActions (impressions, adds, hides all tracked via Phase 2 hooks)
+
+*Last updated: 2026-03-01 — Sprint 3C Phase 1-4 complete.*

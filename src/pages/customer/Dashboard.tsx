@@ -1,27 +1,28 @@
-import { useState } from "react";
-import { CalendarDays, CheckCircle2, Loader2, Sparkles, X, Settings2 } from "lucide-react";
+import { useState, useCallback } from "react";
+import { CalendarDays, Loader2, Sparkles, X, Settings2, Plus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { StatCard } from "@/components/StatCard";
 import { useProperty } from "@/hooks/useProperty";
 import { useServiceDayAssignment } from "@/hooks/useServiceDayAssignment";
 import { useRoutine } from "@/hooks/useRoutine";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
 import { useCustomerJobs } from "@/hooks/useCustomerJobs";
-import { useFourWeekPreview } from "@/hooks/useFourWeekPreview";
 import { useHandleBalance, usePlanHandlesConfig } from "@/hooks/useHandles";
+import { useAddRoutineItem, useRemoveRoutineItem } from "@/hooks/useRoutineActions";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { SeasonalPlanCard } from "@/components/customer/SeasonalPlanCard";
-import { NextVisitCard } from "@/components/customer/NextVisitCard";
-import { WeekTimeline } from "@/components/customer/WeekTimeline";
-import { CrossPollinationCard } from "@/components/customer/CrossPollinationCard";
 import { CustomerNotificationBanners } from "@/components/customer/NotificationBanners";
-import { HandleBalanceBar } from "@/components/customer/HandleBalanceBar";
-import { PropertyHealthWidget } from "@/components/customer/PropertyHealthWidget";
-import { AddonSuggestionsCard } from "@/components/customer/AddonSuggestionsCard";
 import { HomeSetupCard } from "@/components/customer/HomeSetupCard";
-
+import { NextVisitCard } from "@/components/customer/NextVisitCard";
+import { HandleBalanceBar } from "@/components/customer/HandleBalanceBar";
+import { ThisCycleSummary } from "@/components/customer/ThisCycleSummary";
+import { HomeSuggestions } from "@/components/customer/HomeSuggestions";
+import { RecentReceipt } from "@/components/customer/RecentReceipt";
+import { PropertyHealthWidget } from "@/components/customer/PropertyHealthWidget";
+import { FloatingAddButton } from "@/components/customer/FloatingAddButton";
+import { AddServiceDrawer } from "@/components/customer/AddServiceDrawer";
+import { SeasonalPlanCard } from "@/components/customer/SeasonalPlanCard";
+import { toast } from "sonner";
 
 function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -46,56 +47,75 @@ export default function CustomerDashboard() {
   const { data: completedJobs } = useCustomerJobs("completed");
   const { data: handleBalance } = useHandleBalance();
   const { data: planHandles } = usePlanHandlesConfig(subscription?.plan_id);
+  const addItem = useAddRoutineItem();
+  const removeItem = useRemoveRoutineItem();
   const navigate = useNavigate();
   const [nudgeDismissed, setNudgeDismissed] = useState(isNudgeDismissed);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const serviceDayConfirmed = assignment?.status === "confirmed";
   const routineItems = routineData?.items ?? [];
-
-  const previewWeeks = useFourWeekPreview(
-    routineItems,
-    serviceDayConfirmed,
-    upcomingJobs ?? []
-  );
-
-  // Find next visit (first upcoming job or first planned visit from preview)
   const nextJob = upcomingJobs?.[0] ?? null;
+  const lastCompletedJob = completedJobs?.[0] ?? null;
 
-  const serviceDayValue = (() => {
-    if (isLoading) return "…";
-    if (!assignment) return "Not assigned";
-    if (assignment.status === "confirmed") return capitalize(assignment.day_of_week);
-    return "Pending";
-  })();
-
-  const recentVisitCount = completedJobs?.length ?? 0;
-
-  // Truth banners
   const showServiceDayBanner = !isLoading && !assignment;
   const showServiceDayOffer = !isLoading && assignment?.status === "offered";
-  const showRoutineNotEffective = routineData?.routine.status === "active" && routineData?.version?.status === "locked" && routineData?.version?.effective_at && new Date(routineData.version.effective_at) > new Date();
+  const showRoutineNotEffective =
+    routineData?.routine.status === "active" &&
+    routineData?.version?.status === "locked" &&
+    routineData?.version?.effective_at &&
+    new Date(routineData.version.effective_at) > new Date();
 
-  // Gentle nudge: draft routine exists but not confirmed for 24h+
-  const showRoutineNudge = !nudgeDismissed
-    && routineData?.routine.status === "draft"
-    && routineData.items.length > 0
-    && new Date(routineData.routine.updated_at).getTime() < Date.now() - 24 * 60 * 60 * 1000;
+  const showRoutineNudge =
+    !nudgeDismissed &&
+    routineData?.routine.status === "draft" &&
+    routineData.items.length > 0 &&
+    new Date(routineData.routine.updated_at).getTime() < Date.now() - 24 * 60 * 60 * 1000;
 
   const dismissNudge = () => {
     localStorage.setItem(NUDGE_DISMISS_KEY, String(Date.now()));
     setNudgeDismissed(true);
   };
 
-  const hasPreviewContent = previewWeeks.some((w) => w.visits.length > 0);
+  // Add to routine from suggestion
+  const handleAddToRoutine = useCallback(
+    (skuId: string, levelId?: string | null) => {
+      const versionId = routineData?.version?.id;
+      if (!versionId) {
+        toast.error("Set up your routine first");
+        navigate("/customer/routine");
+        return;
+      }
+      addItem.mutate({ versionId, skuId, levelId });
+    },
+    [routineData?.version?.id, addItem, navigate]
+  );
+
+  // Undo last add
+  const handleUndo = useCallback(
+    (skuId: string) => {
+      const item = routineItems.find((i) => i.sku_id === skuId);
+      if (item) {
+        removeItem.mutate(item.id);
+        toast("Service removed");
+      }
+    },
+    [routineItems, removeItem]
+  );
+
+  const serviceNames = routineItems.map((i) => i.sku_name).filter(Boolean) as string[];
 
   return (
-    <div className="p-6 max-w-4xl space-y-4">
+    <div className="p-6 max-w-4xl space-y-4 pb-24">
+      {/* Header */}
       <div>
         <h1 className="text-h2 mb-1">Your home is handled.</h1>
-        <p className="text-caption">Welcome back{user?.user_metadata?.full_name ? `, ${user.user_metadata.full_name}` : ""}.</p>
+        <p className="text-caption">
+          Welcome back{user?.user_metadata?.full_name ? `, ${user.user_metadata.full_name}` : ""}.
+        </p>
       </div>
 
-      {/* Notification Banners (payment failure, weather reschedule) */}
+      {/* Notification Banners */}
       <CustomerNotificationBanners />
 
       {/* Home Setup Prompt */}
@@ -135,7 +155,9 @@ export default function CustomerDashboard() {
             <Sparkles className="h-5 w-5 text-accent" />
             <div>
               <p className="text-sm font-medium">Finish your routine</p>
-              <p className="text-xs text-muted-foreground">You have {routineData!.items.length} service{routineData!.items.length !== 1 ? "s" : ""} ready to confirm.</p>
+              <p className="text-xs text-muted-foreground">
+                You have {routineData!.items.length} service{routineData!.items.length !== 1 ? "s" : ""} ready to confirm.
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-1">
@@ -150,58 +172,63 @@ export default function CustomerDashboard() {
         </Card>
       )}
 
-      {/* Next Visit Card */}
+      {/* No routine CTA */}
+      {routineItems.length === 0 && !showRoutineNudge && (
+        <Card
+          className="p-4 cursor-pointer hover:bg-primary/5 transition-colors border-primary/20"
+          onClick={() => navigate("/customer/routine")}
+        >
+          <div className="flex items-center gap-3">
+            <Plus className="h-5 w-5 text-primary" />
+            <div>
+              <p className="text-sm font-medium">Start your routine</p>
+              <p className="text-xs text-muted-foreground">
+                Choose services to keep your home maintained automatically.
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Section A — Next Up */}
       <NextVisitCard job={nextJob} isLoading={jobsLoading} />
 
       {/* Handles Balance */}
       {handleBalance != null && planHandles && planHandles.handles_per_cycle > 0 && (
-        <HandleBalanceBar
-          balance={handleBalance}
-          perCycle={planHandles.handles_per_cycle}
-        />
+        <HandleBalanceBar balance={handleBalance} perCycle={planHandles.handles_per_cycle} />
       )}
+
+      {/* Section B — This Cycle */}
+      <ThisCycleSummary
+        serviceCount={routineItems.length}
+        serviceNames={serviceNames}
+        handlesUsed={planHandles ? (planHandles.handles_per_cycle - (handleBalance ?? 0)) : undefined}
+        handlesTotal={planHandles?.handles_per_cycle}
+      />
 
       {/* Property Health Score */}
       <PropertyHealthWidget propertyId={property?.id} />
 
-      {/* Stats Row */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <StatCard icon={CalendarDays} label="Service Day" value={serviceDayValue} />
-        <StatCard icon={CheckCircle2} label="Recent Visits" value={String(recentVisitCount)} />
-      </div>
+      {/* Section C — Suggested for Your Home */}
+      <HomeSuggestions onAddToRoutine={handleAddToRoutine} onUndo={handleUndo} />
 
-      {/* 4-Week Preview Timeline */}
-      {hasPreviewContent && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">4-Week Preview</h2>
-            <Button
-              variant="link"
-              size="sm"
-              className="text-accent text-xs h-auto p-0"
-              onClick={() => navigate("/customer/routine")}
-            >
-              Adjust routine →
-            </Button>
-          </div>
-          <div className="space-y-0">
-            {previewWeeks.map((week) => (
-              <WeekTimeline key={week.weekNumber} week={week} defaultOpen={week.weekNumber === 1} />
-            ))}
-          </div>
-          <p className="text-xs text-muted-foreground">Changes take effect next cycle.</p>
-        </div>
-      )}
-
-
-      {/* Cross-Pollination Card */}
-      <CrossPollinationCard zoneId={subscription?.zone_id} propertyId={property?.id} />
-
-      {/* Contextual Add-ons */}
-      <AddonSuggestionsCard />
+      {/* Section D — Recent Receipt */}
+      <RecentReceipt job={lastCompletedJob} />
 
       {/* Seasonal Plan Card */}
       <SeasonalPlanCard propertyId={property?.id} zoneId={subscription?.zone_id} />
+
+      {/* Floating Add Button */}
+      <FloatingAddButton onClick={() => setDrawerOpen(true)} />
+
+      {/* Add Service Drawer */}
+      <AddServiceDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        onBrowseAll={() => navigate("/customer/routine")}
+        onAddToRoutine={handleAddToRoutine}
+        onUndo={handleUndo}
+      />
     </div>
   );
 }

@@ -6058,6 +6058,135 @@ export type Database = {
           },
         ]
       }
+      suggestion_actions: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          metadata: Json
+          property_id: string
+          reason: string | null
+          sku_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          property_id: string
+          reason?: string | null
+          sku_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          property_id?: string
+          reason?: string | null
+          sku_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suggestion_actions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suggestion_actions_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suggestion_impressions: {
+        Row: {
+          created_at: string
+          id: string
+          property_id: string
+          sku_id: string
+          surface: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          property_id: string
+          sku_id: string
+          surface: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          property_id?: string
+          sku_id?: string
+          surface?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suggestion_impressions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suggestion_impressions_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suggestion_suppressions: {
+        Row: {
+          category: string | null
+          created_at: string
+          id: string
+          property_id: string
+          reason: string
+          sku_id: string | null
+          suppressed_until: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          property_id: string
+          reason: string
+          sku_id?: string | null
+          suppressed_until?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          property_id?: string
+          reason?: string
+          sku_id?: string | null
+          suppressed_until?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suggestion_suppressions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suggestion_suppressions_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_attachments: {
         Row: {
           created_at: string
@@ -7588,6 +7717,10 @@ export type Database = {
       get_neighborhood_density: { Args: { p_user_id: string }; Returns: Json }
       get_property_profile_context: {
         Args: { p_property_id: string }
+        Returns: Json
+      }
+      get_service_suggestions: {
+        Args: { p_property_id: string; p_surface?: string }
         Returns: Json
       }
       get_share_card_public: { Args: { p_share_code: string }; Returns: Json }
