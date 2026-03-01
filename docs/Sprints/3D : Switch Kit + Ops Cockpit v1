@@ -1,0 +1,379 @@
+```md
+# Handled Home — PRD (Sprint 3D): Switch Kit + Ops Cockpit v1
+**Sprint:** 3D  
+**Depends on:** 3A Levels + 3B Coverage Map & Signals + 3C Growth Surfaces/Add Drawer/Home restructure  
+**Product:** Handled Home (mobile-only iOS/Android)  
+**Core thesis alignment:** Convert “already-handled” households by making switching **safe and frictionless**, while giving Ops a **control tower** to protect reliability, margins, and quality at launch.
+
+---
+
+## 0) Executive Summary (What 3D really does)
+Sprint 3D operationalizes two critical scale levers:
+
+1) **Switch Kit**: A premium, low-risk way for customers to replace incumbent providers (pool/lawn/cleaning/etc.) without confrontation, surprise pricing, or schedule chaos.  
+2) **Ops Cockpit v1**: A single page that shows whether the business is healthy in a zone (capacity, proof, issues, attach rate) and what to do next.
+
+If 3C is how you expand within households, 3D is how you **steal households** that already have vendors and run launch markets without entropy.
+
+---
+
+## 1) Goals
+
+### 1.1 Customer goals (Switch)
+- Switching feels safe, reversible, and non-awkward.
+- I can set a **future start date** (default next cycle).
+- I understand what changes (schedule, scope, proof).
+- I can “trial” Handled Home without burning bridges.
+
+### 1.2 Business goals
+- Increase conversion of “I already have someone” households.
+- Reduce churn risk by preventing messy handoffs.
+- Increase ARR by capturing high-value incumbent categories (pool/lawn/cleaning).
+
+### 1.3 Operational goals (Cockpit)
+- Prevent overselling: zone capacity is visible and enforceable.
+- Detect quality problems early via proof compliance + issue rates.
+- Detect pricing/level mismatch via recommendation/courtesy upgrade patterns.
+- Provide a single “what do we do next” view for launch execution.
+
+---
+
+## 2) Non-goals (v1 of 3D)
+- Full provider marketplace recruiting flows (covered elsewhere)
+- Automated cancellation messaging to old providers (can be v1.5)
+- Advanced forecasting and predictive capacity (keep cockpit simple)
+- Complex multi-provider “choose your provider” consumer feature (stay curated)
+
+---
+
+## 3) Part A — Switch Kit (Customer-Facing)
+
+## 3.1 When Switch Kit appears (targeting rules)
+Switch Kit should only surface when it’s appropriate. Sources:
+- Coverage Map = PROVIDER for that category
+- Switch intent = OPEN_NOW or OPEN_LATER
+- Service category is eligible in customer’s zone
+
+Entry points:
+- Add Service Drawer: “Switch a service”
+- Coverage Map edit screen: “Switch this to Handled Home”
+- SKU detail page for incumbent-heavy categories (pool/lawn/cleaning)
+- Home: subtle card only if customer has OPEN_NOW candidates
+
+**Never show Switch Kit** for categories marked NA.
+
+---
+
+## 3.2 Switch Kit UX (flow)
+**Design principle:** A Switch is a planned transition, not an on-demand replacement.
+
+### Step 1 — Confirm intent (light)
+Screen: “Switch [Service] to Handled Home”
+- Microcopy: “We’ll start on a date you choose. No awkward conversations.”
+- Choice:
+  - Start next cycle (default)
+  - Choose a date
+
+### Step 2 — Collect minimum setup inputs (fast)
+Only ask what is needed for execution + quality:
+- Access notes (toggle + short text)
+- 1 photo upload if relevant (pool equipment, gate, special area)
+- For some SKUs, 1–3 sizing questions (reuse your Levels question framework)
+
+### Step 3 — Choose transition style
+Options:
+- **Soft transition (recommended)**: “Keep my current provider until Handled Home starts”
+- Optional (v1.5): “I want Handled Home to handle the cancellation message”
+
+### Step 4 — Confirm plan
+Confirmation page:
+- “Start date: ____”
+- “Your first Handled visit will be on: ____ (estimate)”
+- “What to expect” bullets:
+  - Proof receipts
+  - Scope + level standardized
+  - Adjustments happen next cycle
+
+CTA: **Confirm Switch**
+
+### After confirmation
+- Show as a scheduled “Switch Pending” item (not an active routine service yet)
+- Home screen shows a calm status: “Switch scheduled for next cycle”
+
+---
+
+## 3.3 Switch States + Behavior
+Each Switch Request has a lifecycle:
+
+- **DRAFT** (started, not confirmed)
+- **PENDING_START** (confirmed, future start date)
+- **READY_TO_SCHEDULE** (within scheduling horizon)
+- **ACTIVE** (now part of routine)
+- **PAUSED** (customer postponed)
+- **CANCELLED** (customer cancelled before start)
+- **FAILED** (ops cancelled due to capacity/coverage constraints)
+
+Rules:
+- Default activation is **next cycle**.
+- If capacity or zone coverage changes, Switch may be delayed:
+  - Customer gets a premium message explaining timing.
+
+---
+
+## 3.4 Switching + Levels (critical integration)
+When switching an incumbent service, Levels must be explicit to prevent confusion:
+- “We recommend Level 2 for your home” with reason
+- Customer can choose Level 1/2/3
+- Any provider “recommendations” post-first visit update default next cycle (3A loop)
+
+Optional “trial” mechanic (powerful):
+- For first visit only, allow “Trial at recommended level” with a clear future adjustment:
+  - “We’ll ensure Handled standards on the first visit. If a higher level is required, we’ll recommend it for next cycle.”
+
+Do **not** use surprise pricing. Always next-cycle changes.
+
+---
+
+## 3.5 Switching Guardrails (protect brand + ops)
+- If customer tries to switch into a zone/category that is WAITLIST/CLOSED:
+  - Allow a “Join switch waitlist” flow with ETA messaging
+- If customer requests same-week start:
+  - Only allow if capacity exists and ops rules permit
+  - Otherwise default to next cycle
+
+---
+
+## 3.6 Switch Kit Messaging (premium tone)
+Copy should emphasize calm, safety, control:
+- “No awkward conversations.”
+- “Start on your schedule.”
+- “We’ll keep your service consistent.”
+- “Proof receipts every visit.”
+
+Avoid:
+- competitor bashing
+- price war messaging
+- “cancel your old provider now” pressure
+
+---
+
+## 3.7 Data model (Switch Kit)
+### `switch_requests`
+- `id` uuid pk
+- `property_id` uuid fk
+- `customer_id` uuid fk
+- `category_key` text
+- `sku_id` uuid (target service)
+- `requested_start_date` date
+- `start_cycle_id` uuid (or derived)
+- `status` enum (DRAFT/PENDING_START/READY_TO_SCHEDULE/ACTIVE/PAUSED/CANCELLED/FAILED)
+- `selected_level_id` uuid (defaulted + editable)
+- `answers` jsonb (guidance questions)
+- `access_notes` text
+- `photo_urls` text[]
+- `created_at`, `updated_at`
+
+### `switch_events` (optional event log)
+- `switch_request_id`
+- `event_type` (created, confirmed, postponed, activated, cancelled, failed)
+- `payload` jsonb
+- `created_at`
+
+RLS:
+- customer can only read/write their own switch requests
+- providers cannot access
+- admin full access
+
+---
+
+## 3.8 Instrumentation (Switch)
+Track:
+- Switch Kit opens
+- Switch confirmed
+- Switch cancelled before start
+- Switch activated
+- Time from confirm → active
+- % of PROVIDER-covered categories that convert to switches
+- Retention impact of switches (later)
+
+---
+
+## 4) Part B — Ops Cockpit v1 (Admin/Dispatcher)
+
+## 4.1 The “15-second truth” requirement
+Ops Cockpit must answer in 15 seconds:
+- Are we over capacity?
+- Are we delivering quality?
+- Are we growing wallet share?
+- Are support issues spiking?
+- What should we do next?
+
+This is not a data warehouse. It’s a decision console.
+
+---
+
+## 4.2 Cockpit layout (one page)
+### Section A — Market Selector
+- Zone dropdown
+- Category filter (optional)
+- Time range (default last 7 days)
+
+### Section B — Health KPIs (top row)
+Show 6–8 tiles max:
+1) **Capacity Utilization** (scheduled minutes / available minutes)
+2) **Stops per Service Day** (density proxy)
+3) **Proof Compliance %** (photos + checklist completion)
+4) **Issues per 100 Jobs** (support burden proxy)
+5) **Courtesy Upgrade Rate** (levels mismatch proxy)
+6) **Level Recommendation Rate** (levels mismatch proxy)
+7) **Attach Rate** (services/household/cycle) *(if available yet)*
+8) **On-time/Completion Rate** (if tracked)
+
+Each KPI tile is clickable to a drilldown list.
+
+---
+
+## 4.3 Drilldowns (must exist, even if basic)
+### 4.3.1 Capacity drilldown
+- List of upcoming service days
+- Scheduled minutes vs cap
+- Overbooked warnings
+- “Close/Waitlist category” action (if you support it)
+
+### 4.3.2 Quality drilldown
+- Jobs with missing proof
+- Providers with low proof compliance
+- Top SKUs with proof failures
+
+### 4.3.3 Issues drilldown
+- Open issues by category
+- Issue types distribution
+- Providers with highest issue rates
+
+### 4.3.4 Levels mismatch drilldown
+- Courtesy upgrades list (by provider/SKU/property)
+- Level recommendations list
+- Heatmap-like list: “Top mismatch SKUs”
+
+### 4.3.5 Growth drilldown (attach)
+- Suggested adds → added conversion
+- Top suggested SKUs by conversion
+- Households with high expansion potential (optional later)
+
+---
+
+## 4.4 “Next Best Actions” panel (the operator magic)
+A right-side panel that suggests actions based on thresholds:
+
+Examples:
+- “Zone is at 92% capacity → consider waitlisting pressure washing.”
+- “Proof compliance dropped to 84% → review provider X.”
+- “Window cleaning has 18% courtesy upgrades → consider increasing default level or adjusting sizing questions.”
+
+These are simple if/then rules. No AI needed in v1.
+
+---
+
+## 4.5 Admin Controls included in Cockpit (minimal)
+From the cockpit, allow:
+- Toggle category state by zone: OPEN / WAITLIST / CLOSED
+- Adjust capacity buffer % (if you have it)
+- View provider coverage mapping (primary/backup)
+- Flag provider for review
+
+Avoid deep editing. Cockpit is for monitoring + quick actions.
+
+---
+
+## 4.6 Data sources needed
+Cockpit pulls from:
+- `jobs` (status, scheduled time, completion)
+- `job_proof` (photos/checklist status)
+- `issues` / `disputes`
+- `zone_capacity` / `service_day_capacity`
+- `job_level_feedback` (recommendations, courtesy upgrades)
+- `routine_items` or `subscriptions` for attach rate calculations (basic)
+
+---
+
+## 4.7 Metrics definitions (v1)
+- **Capacity Utilization** = total planned minutes scheduled / total capacity minutes available
+- **Proof Compliance %** = jobs meeting minimum photos + checklist completion / jobs completed
+- **Issues per 100 jobs** = (# issues created) / (# completed jobs) * 100
+- **Courtesy Upgrade Rate** = courtesy upgrades / completed jobs
+- **Recommendation Rate** = “level insufficient” / completed jobs
+- **Attach Rate** = avg active services per household (or per active subscriber)
+
+---
+
+## 4.8 Alert thresholds (starting defaults)
+- Capacity Utilization:
+  - Yellow: > 85%
+  - Red: > 95%
+- Proof Compliance:
+  - Yellow: < 92%
+  - Red: < 88%
+- Issues per 100:
+  - Yellow: > 6
+  - Red: > 10
+- Courtesy Upgrades:
+  - Yellow: > 8%
+  - Red: > 15%
+
+These should be configurable later.
+
+---
+
+## 4.9 Acceptance Criteria (Ops Cockpit)
+- Single page displays KPI tiles for selected zone.
+- Each KPI tile drills into a basic list view.
+- Next Best Actions panel populates from thresholds.
+- Quick actions to set zone/category OPEN/WAITLIST/CLOSED.
+- RLS: Admin-only.
+
+---
+
+## 5) Implementation Plan (Task Breakdown)
+
+### 5.1 Switch Kit (Customer)
+1. Create `switch_requests` table + RLS
+2. Add Switch entry points (Coverage Map + Drawer + SKU detail)
+3. Build Switch Kit flow screens (4 steps)
+4. Integrate Levels selection + sizing questions reuse
+5. Create “Switch Pending” UI state on Home/Routine
+6. Hook switch activation into scheduling at cycle boundary
+7. Instrument events
+
+### 5.2 Ops Cockpit
+8. Create Cockpit page + zone selector
+9. Implement KPI calculations (server-side queries)
+10. Build drilldown list pages (capacity, proof, issues, mismatch)
+11. Next Best Actions rules (simple threshold engine)
+12. Add quick actions (zone/category state toggles)
+13. Instrument ops interactions
+
+---
+
+## 6) Opinionated Notes (to make 3D excellent)
+
+### Switch Kit
+- Make start date selection default to **next cycle** (low chaos).
+- Keep it premium: “We’ll take it from here.”
+- Never surprise-charge. Always next-cycle adjustments.
+- Don’t ask for vendor info. That’s not needed and adds friction.
+
+### Ops Cockpit
+- Keep it brutally simple. Operators need decisions, not charts.
+- Use drilldowns instead of overbuilt dashboards.
+- Make every KPI clickable to the underlying jobs/properties/providers.
+- Focus on keeping support cost low: proof + issues matter most.
+
+---
+
+## 7) What 3D unlocks
+- Capturing households who already have incumbents (the biggest TAM segment)
+- Turning Handled Home into an operator-grade business (not a “pretty app”)
+- Strong partner/investor confidence: you can scale without chaos
+
+**End of Sprint 3D PRD**
+```
