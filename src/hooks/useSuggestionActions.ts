@@ -56,13 +56,5 @@ export function useSuggestionActions(propertyId: string | undefined) {
     },
   });
 
-  const recordDrawerOpen = useMutation({
-    mutationFn: async () => {
-      if (!propertyId) return;
-      // Use a placeholder sku_id — we need one for the NOT NULL constraint
-      // Instead, we'll just skip this for now since drawer_open doesn't have a sku_id
-    },
-  });
-
-  return { recordImpression, hideSuggestion, recordAdd, recordDrawerOpen };
+  return { recordImpression, hideSuggestion, recordAdd };
 }
