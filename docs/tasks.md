@@ -557,8 +557,8 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3A-15** | P1 | M | Visit detail — show scheduled vs performed level, courtesy upgrade notice, recommendation with "Update going forward" action
 
 ### Phase 5: Provider UI
-- [ ] **3A-16** | P0 | M | Job detail header — show level label, planned minutes, scope bullets
-- [ ] **3A-17** | P0 | L | Completion flow — level sufficiency prompt, recommendation form with reason codes, courtesy upgrade option
+- [x] **3A-16** | P0 | M | Job detail header — show level label, planned minutes, scope bullets, proof requirements per SKU
+- [x] **3A-17** | P0 | L | Completion flow — level sufficiency prompt per SKU, recommendation form with reason codes, courtesy upgrade option with guardrail
 
 ### Phase 6: Analytics
 - [ ] **3A-18** | P2 | M | Admin ops dashboard — recommendation + courtesy upgrade counts, mismatch table (SKU × zone × rate)

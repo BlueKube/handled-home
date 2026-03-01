@@ -27,6 +27,12 @@ export interface JobSku {
   sku_id: string;
   sku_name_snapshot: string | null;
   duration_minutes_snapshot: number | null;
+  scheduled_level_id: string | null;
+  performed_level_id: string | null;
+  scheduled_level_label: string | null;
+  scheduled_level_inclusions: string[] | null;
+  scheduled_level_planned_minutes: number | null;
+  scheduled_level_proof_photo_min: number | null;
 }
 
 export interface JobChecklistItem {
@@ -95,7 +101,7 @@ export function useJobDetail(jobId: string | undefined) {
 
       const [jobRes, skusRes, checklistRes, photosRes, issuesRes, eventsRes] = await Promise.all([
         supabase.from("jobs").select("*, property:properties(street_address, city, zip_code, gate_code, pets, parking_instructions, access_instructions)").eq("id", jobId).single(),
-        supabase.from("job_skus").select("*").eq("job_id", jobId),
+        supabase.from("job_skus").select("id, job_id, sku_id, sku_name_snapshot, duration_minutes_snapshot, scheduled_level_id, performed_level_id").eq("job_id", jobId),
         supabase.from("job_checklist_items").select("*").eq("job_id", jobId).order("created_at"),
         supabase.from("job_photos").select("*").eq("job_id", jobId).order("created_at"),
         supabase.from("job_issues").select("*").eq("job_id", jobId).order("created_at", { ascending: false }),
@@ -106,9 +112,43 @@ export function useJobDetail(jobId: string | undefined) {
 
       const { property, ...jobData } = jobRes.data as any;
 
+      // Resolve level labels and details for job_skus
+      const rawSkus = skusRes.data ?? [];
+      const levelIds = rawSkus
+        .flatMap((s: any) => [s.scheduled_level_id, s.performed_level_id])
+        .filter(Boolean);
+
+      const levelMap = new Map<string, any>();
+      if (levelIds.length > 0) {
+        const { data: levelsData } = await supabase
+          .from("sku_levels")
+          .select("id, label, inclusions, planned_minutes, proof_photo_min")
+          .in("id", levelIds);
+        for (const l of levelsData ?? []) {
+          levelMap.set(l.id, l);
+        }
+      }
+
+      const enrichedSkus: JobSku[] = rawSkus.map((s: any) => {
+        const scheduledLevel = s.scheduled_level_id ? levelMap.get(s.scheduled_level_id) : null;
+        return {
+          id: s.id,
+          job_id: s.job_id,
+          sku_id: s.sku_id,
+          sku_name_snapshot: s.sku_name_snapshot,
+          duration_minutes_snapshot: s.duration_minutes_snapshot,
+          scheduled_level_id: s.scheduled_level_id ?? null,
+          performed_level_id: s.performed_level_id ?? null,
+          scheduled_level_label: scheduledLevel?.label ?? null,
+          scheduled_level_inclusions: scheduledLevel?.inclusions ?? null,
+          scheduled_level_planned_minutes: scheduledLevel?.planned_minutes ?? null,
+          scheduled_level_proof_photo_min: scheduledLevel?.proof_photo_min ?? null,
+        };
+      });
+
       return {
         job: jobData as JobDetail,
-        skus: (skusRes.data ?? []) as JobSku[],
+        skus: enrichedSkus,
         checklist: (checklistRes.data ?? []) as JobChecklistItem[],
         photos: (photosRes.data ?? []) as JobPhoto[],
         issues: (issuesRes.data ?? []) as JobIssue[],
