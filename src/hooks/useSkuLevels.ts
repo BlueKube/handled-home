@@ -1,63 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 
-// Manual types until types.ts regenerates
-export interface SkuLevel {
-  id: string;
-  sku_id: string;
-  level_number: number;
-  label: string;
-  short_description: string | null;
-  inclusions: string[];
-  exclusions: string[];
-  planned_minutes: number;
-  proof_photo_min: number;
-  proof_checklist_template: any[];
-  handles_cost: number;
-  is_active: boolean;
-  effective_start_cycle: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface SkuLevelInsert {
-  sku_id: string;
-  level_number: number;
-  label: string;
-  short_description?: string | null;
-  inclusions?: string[];
-  exclusions?: string[];
-  planned_minutes?: number;
-  proof_photo_min?: number;
-  proof_checklist_template?: any[];
-  handles_cost?: number;
-  is_active?: boolean;
-  effective_start_cycle?: string | null;
-}
-
-export interface SkuLevelUpdate {
-  label?: string;
-  short_description?: string | null;
-  inclusions?: string[];
-  exclusions?: string[];
-  planned_minutes?: number;
-  proof_photo_min?: number;
-  proof_checklist_template?: any[];
-  handles_cost?: number;
-  is_active?: boolean;
-  effective_start_cycle?: string | null;
-  level_number?: number;
-}
-
-export interface GuidanceQuestion {
-  id: string;
-  sku_id: string;
-  question_order: number;
-  question_text: string;
-  is_mandatory: boolean;
-  options: any[];
-  created_at: string;
-}
+export type SkuLevel = Tables<"sku_levels">;
+export type SkuLevelInsert = TablesInsert<"sku_levels">;
+export type SkuLevelUpdate = TablesUpdate<"sku_levels">;
+export type GuidanceQuestion = Tables<"sku_guidance_questions">;
 
 // ─── Levels ───
 
@@ -66,13 +14,13 @@ export function useSkuLevels(skuId: string | null) {
     queryKey: ["sku_levels", skuId],
     enabled: !!skuId,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("sku_levels")
         .select("*")
         .eq("sku_id", skuId!)
         .order("level_number");
       if (error) throw error;
-      return data as SkuLevel[];
+      return data;
     },
   });
 }
@@ -81,15 +29,15 @@ export function useCreateLevel() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (level: SkuLevelInsert) => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("sku_levels")
         .insert(level)
         .select()
         .single();
       if (error) throw error;
-      return data as SkuLevel;
+      return data;
     },
-    onSuccess: (_d: any, vars: SkuLevelInsert) =>
+    onSuccess: (_d, vars) =>
       qc.invalidateQueries({ queryKey: ["sku_levels", vars.sku_id] }),
   });
 }
@@ -106,16 +54,16 @@ export function useUpdateLevel() {
       skuId: string;
       updates: SkuLevelUpdate;
     }) => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("sku_levels")
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq("id", id)
         .select()
         .single();
       if (error) throw error;
-      return data as SkuLevel;
+      return data;
     },
-    onSuccess: (_d: any, vars) =>
+    onSuccess: (_d, vars) =>
       qc.invalidateQueries({ queryKey: ["sku_levels", vars.skuId] }),
   });
 }
@@ -124,13 +72,13 @@ export function useDeleteLevel() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, skuId }: { id: string; skuId: string }) => {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("sku_levels")
         .delete()
         .eq("id", id);
       if (error) throw error;
     },
-    onSuccess: (_d: any, vars) =>
+    onSuccess: (_d, vars) =>
       qc.invalidateQueries({ queryKey: ["sku_levels", vars.skuId] }),
   });
 }
@@ -142,13 +90,13 @@ export function useGuidanceQuestions(skuId: string | null) {
     queryKey: ["sku_guidance_questions", skuId],
     enabled: !!skuId,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("sku_guidance_questions")
         .select("*")
         .eq("sku_id", skuId!)
         .order("question_order");
       if (error) throw error;
-      return data as GuidanceQuestion[];
+      return data;
     },
   });
 }
@@ -156,16 +104,16 @@ export function useGuidanceQuestions(skuId: string | null) {
 export function useCreateGuidanceQuestion() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (q: Omit<GuidanceQuestion, "id" | "created_at">) => {
-      const { data, error } = await (supabase as any)
+    mutationFn: async (q: TablesInsert<"sku_guidance_questions">) => {
+      const { data, error } = await supabase
         .from("sku_guidance_questions")
         .insert(q)
         .select()
         .single();
       if (error) throw error;
-      return data as GuidanceQuestion;
+      return data;
     },
-    onSuccess: (_d: any, vars) =>
+    onSuccess: (_d, vars) =>
       qc.invalidateQueries({ queryKey: ["sku_guidance_questions", vars.sku_id] }),
   });
 }
@@ -180,18 +128,18 @@ export function useUpdateGuidanceQuestion() {
     }: {
       id: string;
       skuId: string;
-      updates: Partial<GuidanceQuestion>;
+      updates: TablesUpdate<"sku_guidance_questions">;
     }) => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("sku_guidance_questions")
         .update(updates)
         .eq("id", id)
         .select()
         .single();
       if (error) throw error;
-      return data as GuidanceQuestion;
+      return data;
     },
-    onSuccess: (_d: any, vars) =>
+    onSuccess: (_d, vars) =>
       qc.invalidateQueries({ queryKey: ["sku_guidance_questions", vars.skuId] }),
   });
 }
@@ -200,13 +148,13 @@ export function useDeleteGuidanceQuestion() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, skuId }: { id: string; skuId: string }) => {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("sku_guidance_questions")
         .delete()
         .eq("id", id);
       if (error) throw error;
     },
-    onSuccess: (_d: any, vars) =>
+    onSuccess: (_d, vars) =>
       qc.invalidateQueries({ queryKey: ["sku_guidance_questions", vars.skuId] }),
   });
 }
@@ -215,15 +163,8 @@ export function useDeleteGuidanceQuestion() {
 
 export function useLevelRecommendation() {
   return useMutation({
-    mutationFn: async (rec: {
-      job_id: string;
-      provider_org_id: string;
-      scheduled_level_id: string;
-      recommended_level_id: string;
-      reason_code: string;
-      note?: string;
-    }) => {
-      const { data, error } = await (supabase as any)
+    mutationFn: async (rec: TablesInsert<"level_recommendations">) => {
+      const { data, error } = await supabase
         .from("level_recommendations")
         .insert(rec)
         .select()
@@ -234,7 +175,7 @@ export function useLevelRecommendation() {
   });
 }
 
-// ─── Courtesy Upgrades (Provider) ───
+// ─── Courtesy Upgrades (Provider) — uses SECURITY DEFINER RPC ───
 
 export function useCourtesyUpgrade() {
   return useMutation({
@@ -247,30 +188,15 @@ export function useCourtesyUpgrade() {
       reason_code: string;
       provider_org_id: string;
     }) => {
-      // Guardrail: check for existing courtesy upgrade within 6 months
-      const sixMonthsAgo = new Date();
-      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-      const { data: existing, error: checkErr } = await (supabase as any)
-        .from("courtesy_upgrades")
-        .select("id")
-        .eq("property_id", upgrade.property_id)
-        .eq("sku_id", upgrade.sku_id)
-        .gte("created_at", sixMonthsAgo.toISOString())
-        .limit(1);
-
-      if (checkErr) throw checkErr;
-      if (existing && existing.length > 0) {
-        throw new Error(
-          "A courtesy upgrade was already given for this service at this property in the last 6 months."
-        );
-      }
-
-      const { data, error } = await (supabase as any)
-        .from("courtesy_upgrades")
-        .insert(upgrade)
-        .select()
-        .single();
+      const { data, error } = await supabase.rpc("insert_courtesy_upgrade", {
+        p_job_id: upgrade.job_id,
+        p_property_id: upgrade.property_id,
+        p_sku_id: upgrade.sku_id,
+        p_scheduled_level_id: upgrade.scheduled_level_id,
+        p_performed_level_id: upgrade.performed_level_id,
+        p_reason_code: upgrade.reason_code,
+        p_provider_org_id: upgrade.provider_org_id,
+      });
       if (error) throw error;
       return data;
     },
