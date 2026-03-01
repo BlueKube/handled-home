@@ -161,6 +161,63 @@ Deno.serve(async (req) => {
       );
     }
 
+    // ── Weekly (Monday): Predict services for all active properties ──
+    if (job === "predict_services_weekly" || (job === "all" && isMonday)) {
+      subResults.predict_services_weekly = await runSubJob(
+        supabase,
+        "predict_services_weekly",
+        `predict_services_weekly:${today}`,
+        async () => {
+          // Fetch all property IDs with active subscriptions
+          const { data: properties, error: propErr } = await supabase
+            .from("subscriptions")
+            .select("property_id")
+            .in("status", ["active", "paused"])
+            .not("property_id", "is", null);
+
+          if (propErr) return { data: null, error: propErr };
+
+          const propertyIds = [...new Set((properties ?? []).map((p: any) => p.property_id).filter(Boolean))];
+          let succeeded = 0;
+          let failed = 0;
+
+          // Process in batches of 5 to avoid overwhelming the AI gateway
+          for (let i = 0; i < propertyIds.length; i += 5) {
+            const batch = propertyIds.slice(i, i + 5);
+            const results = await Promise.allSettled(
+              batch.map((pid: string) =>
+                fetch(`${supabaseUrl}/functions/v1/predict-services`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${serviceKey}`,
+                  },
+                  body: JSON.stringify({ property_id: pid }),
+                }).then(async (r) => {
+                  if (!r.ok) throw new Error(`${r.status}: ${await r.text()}`);
+                  return r.json();
+                })
+              )
+            );
+            for (const r of results) {
+              if (r.status === "fulfilled") succeeded++;
+              else {
+                failed++;
+                console.error("predict-services batch error:", r.reason);
+              }
+            }
+          }
+
+          return {
+            data: { total: propertyIds.length, succeeded, failed },
+            error: failed > 0 && succeeded === 0
+              ? { message: `All ${failed} predictions failed` }
+              : null,
+          };
+        },
+      );
+    }
+
     // Determine orchestrator outcome
     const entries = Object.entries(subResults);
     const failedSubs = entries.filter(([, v]) => v.status === "failed");
