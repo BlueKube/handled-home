@@ -286,6 +286,8 @@ export type Database = {
           classification: Json | null
           created_at: string
           duplicate_ticket_id: string | null
+          entity_id: string | null
+          entity_type: string | null
           evidence_score: number | null
           id: string
           input_summary: string | null
@@ -293,12 +295,14 @@ export type Database = {
           model_name: string
           output: Json | null
           risk_score: number | null
-          ticket_id: string
+          ticket_id: string | null
         }
         Insert: {
           classification?: Json | null
           created_at?: string
           duplicate_ticket_id?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
           evidence_score?: number | null
           id?: string
           input_summary?: string | null
@@ -306,12 +310,14 @@ export type Database = {
           model_name: string
           output?: Json | null
           risk_score?: number | null
-          ticket_id: string
+          ticket_id?: string | null
         }
         Update: {
           classification?: Json | null
           created_at?: string
           duplicate_ticket_id?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
           evidence_score?: number | null
           id?: string
           input_summary?: string | null
@@ -319,7 +325,7 @@ export type Database = {
           model_name?: string
           output?: Json | null
           risk_score?: number | null
-          ticket_id?: string
+          ticket_id?: string | null
         }
         Relationships: [
           {
@@ -3217,6 +3223,57 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: true
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_service_predictions: {
+        Row: {
+          confidence: number
+          expires_at: string
+          id: string
+          model_version: string
+          predicted_at: string
+          property_id: string
+          reason: string
+          sku_id: string
+          timing_hint: string
+        }
+        Insert: {
+          confidence: number
+          expires_at?: string
+          id?: string
+          model_version?: string
+          predicted_at?: string
+          property_id: string
+          reason: string
+          sku_id: string
+          timing_hint?: string
+        }
+        Update: {
+          confidence?: number
+          expires_at?: string
+          id?: string
+          model_version?: string
+          predicted_at?: string
+          property_id?: string
+          reason?: string
+          sku_id?: string
+          timing_hint?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_service_predictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_service_predictions_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
             referencedColumns: ["id"]
           },
         ]

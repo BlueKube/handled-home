@@ -53,3 +53,9 @@ verify_jwt = false
 
 [functions.run-scheduled-jobs]
 verify_jwt = false
+
+[functions.predict-services]
+verify_jwt = false
+
+[functions.auto-resolve-dispute]
+verify_jwt = false

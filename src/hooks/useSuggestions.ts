@@ -7,7 +7,7 @@ export interface ServiceSuggestion {
   category: string | null;
   handle_cost: number;
   score: number;
-  suggestion_type: "best_next" | "seasonal" | "adjacent";
+  suggestion_type: "best_next" | "seasonal" | "adjacent" | "predicted";
   reason: string;
   default_level: {
     id: string;
