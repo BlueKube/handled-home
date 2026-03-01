@@ -3,6 +3,7 @@ import { useAdminPropertyProfile } from "@/hooks/useAdminPropertyProfile";
 import { COVERAGE_CATEGORIES } from "@/hooks/usePropertyCoverage";
 import { SQFT_OPTIONS, YARD_OPTIONS, WINDOWS_OPTIONS, STORIES_OPTIONS } from "@/hooks/usePropertySignals";
 import { Home, Leaf, Waves, Sparkles, Bug, Trash2, PawPrint, AppWindow, Droplets, Wrench } from "lucide-react";
+import { format } from "date-fns";
 
 const ICON_MAP: Record<string, React.ReactNode> = {
   Leaf: <Leaf className="h-3.5 w-3.5" />,
@@ -41,6 +42,9 @@ export function AdminPropertyProfileCard({ propertyId }: Props) {
   if (!data || (data.coverage.length === 0 && !data.signals)) return null;
 
   const coverageMap = new Map(data.coverage.map((c) => [c.category_key, c]));
+  const latestCoverageUpdate = data.coverage.length > 0
+    ? data.coverage.reduce((latest, c) => c.updated_at > latest ? c.updated_at : latest, data.coverage[0].updated_at)
+    : null;
 
   return (
     <Card className="p-4 space-y-4">
@@ -49,7 +53,14 @@ export function AdminPropertyProfileCard({ propertyId }: Props) {
       {/* Coverage map */}
       {data.coverage.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs font-medium text-muted-foreground">Coverage Map</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium text-muted-foreground">Coverage Map</p>
+            {latestCoverageUpdate && (
+              <span className="text-[10px] text-muted-foreground">
+                Updated {format(new Date(latestCoverageUpdate), "MMM d, h:mm a")}
+              </span>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-1.5">
             {COVERAGE_CATEGORIES.map((cat) => {
               const row = coverageMap.get(cat.key);
@@ -86,7 +97,14 @@ export function AdminPropertyProfileCard({ propertyId }: Props) {
       {/* Sizing signals */}
       {data.signals && (
         <div className="space-y-2">
-          <p className="text-xs font-medium text-muted-foreground">Property Sizing</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium text-muted-foreground">Property Sizing</p>
+            {data.signals.updated_at && (
+              <span className="text-[10px] text-muted-foreground">
+                Updated {format(new Date(data.signals.updated_at), "MMM d, h:mm a")}
+              </span>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div>
               <span className="text-muted-foreground">Sqft:</span>{" "}
