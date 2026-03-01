@@ -579,7 +579,7 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 
 ### Phase 2: Customer UI — Coverage Map
 - [x] **3B-04** | P0 | L | Coverage Map screen with ~10 categories and segmented controls, inline switch intent sub-question. Hook: `usePropertyCoverage`. Route: `/customer/coverage-map`.
-- [ ] **3B-05** | P0 | M | Integrate coverage map into onboarding flow
+- [x] **3B-05** | P0 | M | Integrate coverage map + property sizing into onboarding flow — added `home_setup` step after zone_check with inline coverage map (10 categories) and sizing (4 tiers) in a 2-phase flow. Skippable.
 
 ### Phase 3: Customer UI — Property Sizing
 - [x] **3B-06** | P0 | M | Property Sizing screen with tier selectors (sqft, yard, windows, stories). Hook: `usePropertySignals`. Route: `/customer/property-sizing`.
@@ -592,7 +592,7 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 ### Phase 5: Personalization API + Level Integration
 - [x] **3B-10** | P0 | L | `get_property_profile_context` RPC — SECURITY DEFINER, returns coverage map, sizing signals, computed eligibility (eligible/suppressed categories, switch candidates, high-confidence upsells). Hook: `usePropertyProfileContext`.
 - [x] **3B-11** | P1 | M | Level-default selection using sizing signals — `useLevelDefault` hook with deterministic per-category rules (windows, gutters, mowing, power_wash) that bump level based on sqft/yard/stories/windows tiers. Returns `default_level_id`, `default_level_reason`, `confidence`.
-- [x] **3B-12** | P1 | M | Category eligibility checks — `useCategoryEligibility` hook wrapping profile context. AddServicesSheet now filters out SKUs whose category is marked NA in coverage map.
+- [x] **3B-12** | P1 | M | Category eligibility checks — `useCategoryEligibility` hook wrapping profile context. AddServicesSheet filters SKUs using `eligible_categories` as allowlist when coverage data exists (not just `suppressed_categories` blocklist). Correctly handles SELF/non-high-pain and PROVIDER/NOT_OPEN filtering.
 
 ### Phase 6: Admin Visibility
 - [x] **3B-13** | P1 | M | Property detail section showing coverage map + sizing tiers — `AdminPropertyProfileCard` component with `useAdminPropertyProfile` hook. Integrated into admin JobDetail overview tab. Shows coverage categories with status badges, switch intents, and sizing tiers.

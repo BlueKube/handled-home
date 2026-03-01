@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 export const ONBOARDING_STEPS = [
   "property",
   "zone_check",
+  "home_setup",
   "plan",
   "subscribe",
   "service_day",
