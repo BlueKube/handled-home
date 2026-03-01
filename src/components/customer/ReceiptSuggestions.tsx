@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { Sparkles } from "lucide-react";
 import { useSuggestions, type ServiceSuggestion } from "@/hooks/useSuggestions";
 import { useSuggestionActions } from "@/hooks/useSuggestionActions";
@@ -7,24 +7,15 @@ import { toast } from "sonner";
 
 interface ReceiptSuggestionsProps {
   propertyId: string;
-  /** Categories from completed job SKUs — used to filter related suggestions */
-  jobCategories: string[];
   onAddToRoutine: (skuId: string, levelId?: string | null) => void;
 }
 
-export function ReceiptSuggestions({ propertyId, jobCategories, onAddToRoutine }: ReceiptSuggestionsProps) {
-  const { data: suggestions, isLoading } = useSuggestions(propertyId, "home");
+export function ReceiptSuggestions({ propertyId, onAddToRoutine }: ReceiptSuggestionsProps) {
+  const { data: suggestions, isLoading } = useSuggestions(propertyId, "receipt");
   const { recordImpression, hideSuggestion, recordAdd } = useSuggestionActions(propertyId);
 
-  // Filter to suggestions related to the job's categories, take up to 2
-  const filtered = useMemo(() => {
-    if (!suggestions || jobCategories.length === 0) return suggestions?.slice(0, 2) ?? [];
-    const related = suggestions.filter(
-      (s) => s.category && jobCategories.includes(s.category)
-    );
-    // If no category matches, fall back to top 2 from any category
-    return (related.length > 0 ? related : suggestions).slice(0, 2);
-  }, [suggestions, jobCategories]);
+  // Take up to 2 top-ranked suggestions (ranking handled by RPC)
+  const filtered = suggestions?.slice(0, 2) ?? [];
 
   const handleAdd = useCallback(
     (s: ServiceSuggestion) => {

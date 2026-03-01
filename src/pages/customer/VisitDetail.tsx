@@ -67,10 +67,6 @@ export default function CustomerVisitDetail() {
     }
   }, [routineData, addItem]);
 
-  const jobCategories = useMemo(() => {
-    if (!data) return [];
-    return [...new Set(data.skus.map((s: any) => s.category).filter(Boolean))];
-  }, [data]);
 
   // Find before/after pair for comparison
   const photos = data?.photos ?? [];
@@ -318,7 +314,6 @@ export default function CustomerVisitDetail() {
       {job.status === "COMPLETED" && property?.id && (
         <ReceiptSuggestions
           propertyId={property.id}
-          jobCategories={jobCategories}
           onAddToRoutine={handleAddToRoutine}
         />
       )}
