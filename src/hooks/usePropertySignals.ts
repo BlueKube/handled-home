@@ -5,10 +5,10 @@ import { useProperty } from "@/hooks/useProperty";
 import { Json } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 
-export type SqftTier = "UNDER_1500" | "1500_2500" | "2500_3500" | "3500_5000" | "OVER_5000";
-export type YardTier = "NONE" | "SMALL" | "MED" | "LARGE";
-export type WindowsTier = "UNDER_15" | "15_30" | "OVER_30";
-export type StoriesTier = "1" | "2" | "3_PLUS";
+export type SqftTier = "lt_1500" | "1500_2500" | "2500_3500" | "3500_5000" | "5000_plus";
+export type YardTier = "NONE" | "SMALL" | "MEDIUM" | "LARGE";
+export type WindowsTier = "lt_15" | "15_30" | "30_plus";
+export type StoriesTier = "1" | "2" | "3_plus";
 
 export interface SignalsRow {
   property_id: string;
@@ -28,30 +28,30 @@ export interface SignalsFormData {
 }
 
 export const SQFT_OPTIONS: { value: SqftTier; label: string }[] = [
-  { value: "UNDER_1500", label: "< 1,500" },
+  { value: "lt_1500", label: "< 1,500" },
   { value: "1500_2500", label: "1,500–2,500" },
   { value: "2500_3500", label: "2,500–3,500" },
   { value: "3500_5000", label: "3,500–5,000" },
-  { value: "OVER_5000", label: "5,000+" },
+  { value: "5000_plus", label: "5,000+" },
 ];
 
 export const YARD_OPTIONS: { value: YardTier; label: string }[] = [
   { value: "NONE", label: "None" },
   { value: "SMALL", label: "Small" },
-  { value: "MED", label: "Medium" },
+  { value: "MEDIUM", label: "Medium" },
   { value: "LARGE", label: "Large" },
 ];
 
 export const WINDOWS_OPTIONS: { value: WindowsTier; label: string }[] = [
-  { value: "UNDER_15", label: "< 15" },
+  { value: "lt_15", label: "< 15" },
   { value: "15_30", label: "15–30" },
-  { value: "OVER_30", label: "30+" },
+  { value: "30_plus", label: "30+" },
 ];
 
 export const STORIES_OPTIONS: { value: StoriesTier; label: string }[] = [
   { value: "1", label: "1 story" },
   { value: "2", label: "2 stories" },
-  { value: "3_PLUS", label: "3+" },
+  { value: "3_plus", label: "3+" },
 ];
 
 export function usePropertySignals() {
