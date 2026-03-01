@@ -101,6 +101,7 @@ serve(async (req) => {
     // Fetch job context + photos if available
     let jobContext = "";
     let photoContext = "";
+    let photoUrls: string[] = [];
     if (ticket.job_id) {
       const [jobRes, photoRes] = await Promise.all([
         supabase
@@ -110,7 +111,7 @@ serve(async (req) => {
           .single(),
         supabase
           .from("job_photos")
-          .select("id, slot_key, upload_status, captured_at")
+          .select("id, slot_key, upload_status, captured_at, storage_path")
           .eq("job_id", ticket.job_id)
           .eq("upload_status", "UPLOADED"),
       ]);
@@ -126,6 +127,46 @@ serve(async (req) => {
       const photos = photoRes.data ?? [];
       if (photos.length > 0) {
         photoContext = `\nJob photos: ${photos.length} uploaded (slots: ${photos.map(p => p.slot_key || "unknown").join(", ")})`;
+        
+        // Generate signed URLs for up to 4 photos (limit to avoid token overflow)
+        const photoPaths = photos.slice(0, 4).map(p => p.storage_path).filter(Boolean);
+        if (photoPaths.length > 0) {
+          const { data: signedData } = await supabase.storage
+            .from("job-photos")
+            .createSignedUrls(photoPaths, 600); // 10 min expiry
+          if (signedData) {
+            photoUrls = signedData.map(s => s.signedUrl).filter(Boolean);
+            photoContext += `\nSigned photo URLs available for visual analysis: ${photoUrls.length}`;
+          }
+        }
+      }
+    }
+
+    // Check for customer issue photos
+    let issuePhotoContext = "";
+    let issuePhotoUrls: string[] = [];
+    if (ticket.job_id) {
+      const { data: issues } = await supabase
+        .from("customer_issues")
+        .select("photo_storage_path, photo_upload_status, reason, note")
+        .eq("job_id", ticket.job_id)
+        .eq("customer_id", ticket.customer_id);
+      
+      if (issues && issues.length > 0) {
+        const withPhotos = issues.filter(i => i.photo_upload_status === "UPLOADED" && i.photo_storage_path);
+        issuePhotoContext = `\nCustomer issues: ${issues.length} filed (${withPhotos.length} with photos). Reasons: ${issues.map(i => i.reason).join(", ")}`;
+        
+        // Generate signed URLs for customer issue photos (up to 2)
+        const issuePaths = withPhotos.slice(0, 2).map(i => i.photo_storage_path!).filter(Boolean);
+        if (issuePaths.length > 0) {
+          const { data: signedData } = await supabase.storage
+            .from("issue-photos")
+            .createSignedUrls(issuePaths, 600);
+          if (signedData) {
+            issuePhotoUrls = signedData.map(s => s.signedUrl).filter(Boolean);
+            issuePhotoContext += `\nCustomer issue photo URLs available: ${issuePhotoUrls.length}`;
+          }
+        }
       }
     }
 
@@ -186,11 +227,26 @@ Do NOT auto-resolve:
           },
           {
             role: "user",
-            content: `Classify this support ticket and determine if it can be auto-resolved:
+            content: [
+              {
+                type: "text",
+                text: `Classify this support ticket and determine if it can be auto-resolved:
 Type: ${ticket.ticket_type}
 Category: ${ticket.category || "none"}
 Severity (customer-reported): ${ticket.severity}
 Customer note: "${ticket.customer_note || "none"}"${jobContext}${photoContext}${issuePhotoContext}${historyContext}`,
+              },
+              // Include job photos for visual analysis
+              ...photoUrls.map(url => ({
+                type: "image_url" as const,
+                image_url: { url },
+              })),
+              // Include customer issue photos
+              ...issuePhotoUrls.map(url => ({
+                type: "image_url" as const,
+                image_url: { url },
+              })),
+            ],
           },
         ],
         tools: [

@@ -669,8 +669,8 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3D-R2-L3** | LOW | Extended useSupportAiClassify return type with auto_resolvable, suggested_credit_cents, photo_analysis, should_auto_resolve, auto_resolve_result
 
 ### Deferred Items
-- [ ] **3D-M2** | MEDIUM | Surface differentiation in get_service_suggestions RPC (predicted vs other types)
+- [x] **3D-M2** | MEDIUM | Surface differentiation — AddServiceDrawer now shows "AI Picks for You" section for predicted suggestions; SuggestionCard shows "AI pick" badge with Brain icon and primary accent border for predicted type
 - [x] **3D-L1** | LOW | Stale prediction cleanup — `cleanup_stale_predictions` RPC deletes rows expired >30 days, wired into weekly Monday automation
-- [ ] **3D-L2** | LOW | Photo analysis — include actual signed photo URLs for visual AI analysis
+- [x] **3D-L2** | LOW | Photo analysis — support-ai-classify generates signed URLs (up to 4 job photos + 2 issue photos, 10-min expiry) and includes them as multimodal image_url content parts for Gemini visual analysis
 
-*Last updated: 2026-03-01 — Sprint 3D C3/C4 review fixes complete (8 findings addressed). B4, M2, L1, L2 remain.*
+*Last updated: 2026-03-01 — Sprint 3D 100% complete. All deferred items resolved.*

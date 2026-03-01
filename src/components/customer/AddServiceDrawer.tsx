@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Sparkles, ArrowRight, RefreshCw } from "lucide-react";
+import { Sparkles, ArrowRight, Brain } from "lucide-react";
 import { useProperty } from "@/hooks/useProperty";
 import { useSuggestions, type ServiceSuggestion } from "@/hooks/useSuggestions";
 import { useSuggestionActions } from "@/hooks/useSuggestionActions";
@@ -27,6 +27,7 @@ export function AddServiceDrawer({
   const { data: suggestions, isLoading } = useSuggestions(property?.id, "drawer");
   const { recordImpression, hideSuggestion, recordAdd } = useSuggestionActions(property?.id);
 
+  const predicted = (suggestions ?? []).filter((s) => s.suggestion_type === "predicted").slice(0, 3);
   const bestNext = (suggestions ?? []).filter((s) => s.suggestion_type === "best_next").slice(0, 4);
   const seasonal = (suggestions ?? []).filter((s) => s.suggestion_type === "seasonal").slice(0, 2);
 
@@ -75,6 +76,29 @@ export function AddServiceDrawer({
           </p>
         </SheetHeader>
         <div className="mt-4 space-y-5 overflow-y-auto max-h-[calc(85vh-120px)] pb-8">
+          {/* AI Predicted */}
+          {predicted.length > 0 && (
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <Brain className="h-3.5 w-3.5 text-primary" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  AI Picks for You
+                </p>
+              </div>
+              <div className="space-y-2">
+                {predicted.map((s) => (
+                  <SuggestionCard
+                    key={s.sku_id}
+                    suggestion={s}
+                    onAdd={handleAdd}
+                    onHide={handleHide}
+                    onImpression={handleImpression}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Best Next */}
           {bestNext.length > 0 && (
             <div>
