@@ -111,12 +111,19 @@ export function useSubmitCustomerIssue() {
             customer_note: params.note,
             zone_id: job?.zone_id ?? null,
             provider_org_id: job?.provider_org_id ?? null,
+            status: "ai_reviewing" as any,
           })
           .select("id")
           .single();
 
         if (ticket?.id) {
-          // Fire-and-forget AI classification
+          // M-2: Link customer_issue to support_ticket
+          await supabase
+            .from("customer_issues")
+            .update({ support_ticket_id: ticket.id } as any)
+            .eq("id", data.id);
+
+          // Fire-and-forget AI classification (H-2: server-side chains to auto-resolve)
           supabase.functions.invoke("support-ai-classify", {
             body: { ticket_id: ticket.id },
           }).catch((err) => console.error("AI classify failed (non-fatal):", err));

@@ -338,15 +338,54 @@ Customer note: "${ticket.customer_note || "none"}"${jobContext}${photoContext}${
       latency_ms: latencyMs,
     });
 
-    // If auto-resolvable and meets guard criteria, trigger auto-resolution
+    // H-2: If auto-resolvable and meets guard criteria, chain to auto-resolve server-side
     const shouldAutoResolve = result.auto_resolvable === true
       && (result.evidence_score ?? 0) >= 75
       && (result.risk_score ?? 100) < 30;
+
+    let autoResolveResult = null;
+    if (shouldAutoResolve) {
+      try {
+        // Update ticket status to ai_reviewing before attempting resolution
+        await supabase
+          .from("support_tickets")
+          .update({ status: "ai_reviewing" })
+          .eq("id", ticket_id);
+
+        // Call auto-resolve-dispute internally using service_role
+        const resolveResponse = await fetch(
+          `${supabaseUrl}/functions/v1/auto-resolve-dispute`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${serviceKey}`,
+            },
+            body: JSON.stringify({ ticket_id }),
+          }
+        );
+        autoResolveResult = await resolveResponse.json();
+      } catch (resolveErr) {
+        console.error("Auto-resolve chain failed (non-fatal):", resolveErr);
+        // If auto-resolve fails, set ticket to open for human review
+        await supabase
+          .from("support_tickets")
+          .update({ status: "open" })
+          .eq("id", ticket_id);
+      }
+    } else {
+      // Not auto-resolvable — set to open for human review
+      await supabase
+        .from("support_tickets")
+        .update({ status: "open" })
+        .eq("id", ticket_id);
+    }
 
     return new Response(JSON.stringify({
       success: true,
       ...result,
       should_auto_resolve: shouldAutoResolve,
+      auto_resolve_result: autoResolveResult,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

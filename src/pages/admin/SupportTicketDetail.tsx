@@ -248,7 +248,6 @@ export default function AdminSupportTicketDetail() {
         ai_evidence_score: ticket.ai_evidence_score as number | null,
         ai_risk_score: ticket.ai_risk_score as number | null,
         status: ticket.status as string,
-        customer_id: ticket.customer_id,
       }} />
 
       {/* Resolution summary */}

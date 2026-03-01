@@ -15,7 +15,6 @@ interface AiInsightsCardProps {
     ai_evidence_score: number | null;
     ai_risk_score: number | null;
     status: string;
-    customer_id: string;
   };
 }
 
@@ -43,7 +42,8 @@ export function AiInsightsCard({ ticket }: AiInsightsCardProps) {
   const handleApplyResolution = async () => {
     setApplying(true);
     try {
-      const overrideCents = creditOverride ? Math.round(parseFloat(creditOverride) * 100) : null;
+      const parsed = parseFloat(creditOverride);
+      const overrideCents = creditOverride && !isNaN(parsed) ? Math.round(parsed * 100) : null;
       const { data, error } = await supabase.functions.invoke("auto-resolve-dispute", {
         body: { ticket_id: ticket.id, ...(overrideCents != null ? { credit_override_cents: overrideCents } : {}) },
       });

@@ -814,6 +814,7 @@ export type Database = {
           resolved_at: string | null
           resolved_by_admin_user_id: string | null
           status: string
+          support_ticket_id: string | null
           updated_at: string
         }
         Insert: {
@@ -829,6 +830,7 @@ export type Database = {
           resolved_at?: string | null
           resolved_by_admin_user_id?: string | null
           status?: string
+          support_ticket_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -844,6 +846,7 @@ export type Database = {
           resolved_at?: string | null
           resolved_by_admin_user_id?: string | null
           status?: string
+          support_ticket_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -852,6 +855,13 @@ export type Database = {
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_issues_support_ticket_id_fkey"
+            columns: ["support_ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
             referencedColumns: ["id"]
           },
         ]
