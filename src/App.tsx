@@ -43,6 +43,7 @@ import CustomerRoutineConfirm from "@/pages/customer/RoutineConfirm";
 import CustomerOnboardingWizard from "@/pages/customer/OnboardingWizard";
 import CustomerPhotoTimeline from "@/pages/customer/PhotoTimeline";
 import CustomerHomeAssistant from "@/pages/customer/HomeAssistant";
+import CustomerCoverageMap from "@/pages/customer/CoverageMap";
 // Provider pages
 import ProviderDashboard from "@/pages/provider/Dashboard";
 import ProviderJobs from "@/pages/provider/Jobs";
@@ -154,6 +155,7 @@ const App = () => (
               <Route element={<ProtectedRoute requiredRole="customer"><AppLayout /></ProtectedRoute>}>
                 <Route path="/customer/onboarding" element={<CustomerOnboardingWizard />} />
                 <Route path="/customer/property" element={<CustomerProperty />} />
+                <Route path="/customer/coverage-map" element={<CustomerCoverageMap />} />
                 <Route path="/customer/plans" element={<CustomerPlans />} />
                 <Route path="/customer/plans/:planId" element={<CustomerPlanDetail />} />
                 <Route path="/customer/routine" element={<CustomerPropertyGate><CustomerRoutine /></CustomerPropertyGate>} />
