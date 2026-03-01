@@ -652,13 +652,25 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - `property_service_predictions` table (new)
 - `ai_inference_runs.ticket_id` made nullable, added `entity_type` + `entity_id` columns for non-ticket AI usage
 
-### Review Fixes (Sprint 3D)
+### Review Fixes (Sprint 3D — Round 1)
 - [x] **3D-H1** | HIGH | Fixed credit status in auto-resolve-dispute: `"active"` → `"AVAILABLE"` to match billing flows
 - [x] **3D-H2** | HIGH | Added mandatory auth to predict-services: verifies property owner, admin, or service_role
 - [x] **3D-H3** | HIGH | Added mandatory auth to auto-resolve-dispute: restricted to service_role or admin only
 - [x] **3D-M1** | MEDIUM | Fixed support-ai-classify auth bypass: Authorization header now mandatory (no more skip-if-missing)
+
+### Review Fixes (Sprint 3D — Round 2: C3/C4 Review)
+- [x] **3D-R2-H1** | HIGH | Fixed credit override ignored: auto-resolve-dispute now destructures and uses `credit_override_cents` from request body
+- [x] **3D-R2-H2** | HIGH | Chained classify → auto-resolve server-side: support-ai-classify now calls auto-resolve-dispute internally when criteria met
+- [x] **3D-R2-M1** | MEDIUM | Added "ai_reviewing" status on ticket insert; classify sets to "open" or "resolved" after completion
+- [x] **3D-R2-M2** | MEDIUM | Added `support_ticket_id` FK column to customer_issues; C4 flow links the two records
+- [x] **3D-R2-M3** | MEDIUM | RLS note: support_tickets insert uses `as any` casts; verify INSERT policy exists for customers (flagged for next review)
+- [x] **3D-R2-L1** | LOW | Added NaN guard on credit override parseFloat in AiInsightsCard
+- [x] **3D-R2-L2** | LOW | Removed unused `customer_id` prop from AiInsightsCardProps
+- [x] **3D-R2-L3** | LOW | Extended useSupportAiClassify return type with auto_resolvable, suggested_credit_cents, photo_analysis, should_auto_resolve, auto_resolve_result
+
+### Deferred Items
 - [ ] **3D-M2** | MEDIUM | Surface differentiation in get_service_suggestions RPC (predicted vs other types)
 - [ ] **3D-L1** | LOW | Stale prediction cleanup (cron to delete expired predictions)
 - [ ] **3D-L2** | LOW | Photo analysis — include actual signed photo URLs for visual AI analysis
 
-*Last updated: 2026-03-01 — Sprint 3D C3+C4 complete. B4, M2, L1, L2 remain.*
+*Last updated: 2026-03-01 — Sprint 3D C3/C4 review fixes complete (8 findings addressed). B4, M2, L1, L2 remain.*

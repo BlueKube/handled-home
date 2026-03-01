@@ -21,6 +21,20 @@ export function useSupportAiClassify() {
           reasoning: string;
         };
         duplicate_ticket_id?: string;
+        auto_resolvable: boolean;
+        suggested_credit_cents: number;
+        resolution_explanation: string;
+        photo_analysis: {
+          has_evidence: boolean;
+          evidence_description: string;
+        } | null;
+        should_auto_resolve: boolean;
+        auto_resolve_result?: {
+          success: boolean;
+          credit_cents?: number;
+          resolution?: string;
+          reason?: string;
+        } | null;
       };
     },
   });

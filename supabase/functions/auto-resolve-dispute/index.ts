@@ -55,7 +55,7 @@ serve(async (req) => {
       }
     }
 
-    const { ticket_id } = await req.json();
+    const { ticket_id, credit_override_cents } = await req.json();
     if (!ticket_id) {
       return new Response(JSON.stringify({ error: "ticket_id required" }), {
         status: 400,
@@ -106,8 +106,11 @@ serve(async (req) => {
       });
     }
 
-    // Cap auto-credit at $50 (5000 cents) for safety
-    const creditCents = Math.min(suggestedCreditCents, 5000);
+    // H-1: Use admin override if provided, otherwise AI suggestion. Cap at $50 (5000 cents).
+    const baseCreditCents = (typeof credit_override_cents === "number" && !isNaN(credit_override_cents))
+      ? credit_override_cents
+      : suggestedCreditCents;
+    const creditCents = Math.min(Math.max(0, baseCreditCents), 5000);
 
     // Apply credit if suggested
     if (creditCents > 0) {
