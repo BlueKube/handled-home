@@ -94,7 +94,7 @@ export default function ByocCenter() {
       <div className="grid grid-cols-3 gap-3">
         <StatCard label="Active Links" value={activeLinks.length} icon={<Link2 className="h-4 w-4" />} />
         <StatCard label="Activations" value={totalActivations} icon={<Users className="h-4 w-4" />} />
-        <StatCard label="Events" value={recentEvents.length} icon={<Gift className="h-4 w-4" />} />
+        <StatCard label="Recent Events" value={recentEvents.length} icon={<Gift className="h-4 w-4" />} />
       </div>
 
       {/* Invite Scripts */}
