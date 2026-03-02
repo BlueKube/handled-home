@@ -6,8 +6,11 @@ import { useInviteScripts } from "@/hooks/useInviteScripts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Plus, Copy, Link2, Users, Gift, ChevronRight, CheckCircle, XCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Loader2, Plus, Copy, Link2, Users, Gift, ChevronDown, CheckCircle, XCircle, AlertTriangle, Info } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 export default function ByocCenter() {
   const navigate = useNavigate();
@@ -64,6 +67,29 @@ export default function ByocCenter() {
         </Button>
       </div>
 
+      {/* How BYOC Works */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Info className="h-4 w-4" />
+            How BYOC Works
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm text-muted-foreground">
+          <div className="flex gap-2"><span className="font-semibold text-foreground">1.</span> Create an invite link for your service category and zone.</div>
+          <div className="flex gap-2"><span className="font-semibold text-foreground">2.</span> Share the link with your existing customers via text or email.</div>
+          <div className="flex gap-2"><span className="font-semibold text-foreground">3.</span> When they sign up, you earn BYOC bonuses and keep servicing them.</div>
+        </CardContent>
+      </Card>
+
+      {/* Compliance Reminder */}
+      <Alert>
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          Do not promise permanent pricing. Transition credits may apply. All pricing is set by Handled Home.
+        </AlertDescription>
+      </Alert>
+
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         <StatCard label="Active Links" value={activeLinks.length} icon={<Link2 className="h-4 w-4" />} />
@@ -113,6 +139,36 @@ export default function ByocCenter() {
           )}
         </CardContent>
       </Card>
+
+      {/* Recent Events */}
+      {recentEvents.length > 0 && (
+        <Collapsible>
+          <Card>
+            <CardHeader>
+              <CollapsibleTrigger className="flex items-center justify-between w-full">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Gift className="h-4 w-4" />
+                  Recent Activity ({recentEvents.length})
+                </CardTitle>
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              </CollapsibleTrigger>
+            </CardHeader>
+            <CollapsibleContent>
+              <CardContent className="space-y-2 pt-0">
+                {recentEvents.map((event: any) => (
+                  <div key={event.id} className="flex items-center justify-between text-sm border-b pb-2 last:border-0">
+                    <div>
+                      <Badge variant="outline" className="text-xs mr-2">{event.event_type}</Badge>
+                      <span className="text-muted-foreground">{event.actor}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">{format(new Date(event.created_at), "MMM d, h:mm a")}</span>
+                  </div>
+                ))}
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
+      )}
 
       {/* Inactive Links */}
       {inactiveLinks.length > 0 && (
@@ -192,7 +248,7 @@ function InviteLinkCard({
           {inactive ? (
             <XCircle className="h-3 w-3 text-muted-foreground" />
           ) : (
-            <CheckCircle className="h-3 w-3 text-success" />
+            <CheckCircle className="h-3 w-3 text-green-500" />
           )}
         </div>
         <span className="text-xs text-muted-foreground font-mono">{link.token}</span>

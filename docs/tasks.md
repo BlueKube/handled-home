@@ -736,6 +736,17 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3FG-P5-04** | P1 | S | Wire invite scripts from `invite_scripts` table into copy buttons
 - [x] **3FG-P5-05** | P1 | S | Gate BYOC Center access to approved provider orgs only
 
+### Phase 5 Review — Fixes
+- [x] **3FG-P5-R1** | P0 | S | Fix `category_key` → `capability_key` in ByocCreateLink (categories were always empty)
+- [x] **3FG-P5-R2** | P0 | S | Fix `sku_name` → `service_skus?.name` in ByocCreateLink (SKU names showed UUIDs)
+- [x] **3FG-P5-R3** | P1 | S | Add UPDATE RLS policy on `byoc_invite_links` (deactivation was silently failing)
+- [x] **3FG-P5-R4** | P2 | S | Fix zone picker to use `zones?.name` instead of UUID
+- [x] **3FG-P5-R5** | P2 | S | Add "ONCE" cadence option to invite link creation
+- [x] **3FG-P5-R6** | P2 | S | Add "How BYOC Works" explainer card to ByocCenter
+- [x] **3FG-P5-R7** | P2 | S | Add compliance reminder alert to ByocCenter
+- [x] **3FG-P5-R8** | P3 | S | Render recent events as collapsible activity feed in ByocCenter
+- [x] **3FG-P5-R9** | P3 | S | Fix `text-success` → `text-green-500` in InviteLinkCard
+
 ### Phase 6 — Customer BYOC Activation
 - [ ] **3FG-P6-01** | P0 | L | Build `/byoc/activate/:token` page (ProviderIntroCard, service summary, property confirm, payment, confirm)
 - [ ] **3FG-P6-02** | P0 | L | Create `activate-byoc-invite` edge function (validate token, create activation, link provider)
@@ -752,4 +763,4 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3FG-P1-R2** | S | Verify support-ai-classify bucket bug — confirmed already fixed (uses job-photos, single issuePhotoContext)
 - [x] **3FG-P1-R3** | S | Document provider systems reconciliation (Flow A: application → Flow B: invite-code onboarding) in claude-implementation-notes.md
 
-*Last updated: 2026-03-02 — Phase 4 review fixes + Phase 5 complete. Ready for Phase 6.*
+*Last updated: 2026-03-02 — Phase 5 review fixes complete. Ready for Phase 6.*
