@@ -708,12 +708,20 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3FG-P3-04** | P1 | M | Add BYOC intake step (estimated count, willingness, relationship type, willing to invite)
 - [x] **3FG-P3-05** | P1 | S | Update `useProviderApplication` for multi-category, byoc_estimate_json, pitch_variant_seen
 
+### Phase 3 Review — Fixes
+- [x] **3FG-P3-R1** | P1 | S | Fix post-submit navigation — use mutateAsync + navigate on success
+- [x] **3FG-P3-R2** | P1 | S | Fix draft application re-entry — skip status screen for draft status
+- [x] **3FG-P3-R3** | P2 | S | Add loading spinner while application query resolves
+- [x] **3FG-P3-R4** | P1 | S | Add try/catch + error toast around checkReadiness
+- [x] **3FG-P3-R5** | P1 | S | Add TODO comments for hasFoundingSlots/categoriesFilled (needs RPC update)
+- [x] **3FG-P3-R6** | P2 | S | Consolidate duplicate approved/approved_conditional CTA buttons
+
 ### Phase 4 — Category-Driven Compliance
-- [ ] **3FG-P4-01** | P0 | M | Create `useCategoryRequirements` hook
-- [ ] **3FG-P4-02** | P0 | L | Build `DynamicComplianceRenderer` component (insurance, license, background check fields by risk tier)
-- [ ] **3FG-P4-03** | P1 | M | Add COI upload to `provider_compliance_documents`
-- [ ] **3FG-P4-04** | P1 | M | Add CSLB license fields for Tier 3 categories
-- [ ] **3FG-P4-05** | P1 | S | Replace static OnboardingCompliance with dynamic version
+- [x] **3FG-P4-01** | P0 | M | Create `useCategoryRequirements` hook — fetches category_requirements, merges max risk tier + all requirement flags
+- [x] **3FG-P4-02** | P0 | L | Build `DynamicComplianceRenderer` component (insurance, license, background check fields by risk tier)
+- [x] **3FG-P4-03** | P1 | M | Add COI upload to `provider_compliance_documents` — upsert with doc_type, storage_path, status
+- [x] **3FG-P4-04** | P1 | M | Add CSLB license fields for Tier 3 categories — license number + state inputs, license doc upload
+- [x] **3FG-P4-05** | P1 | S | Replace static OnboardingCompliance with dynamic version — driven by application's requested_categories
 
 ### Phase 5 — BYOC Center + Invite Links
 - [ ] **3FG-P5-01** | P0 | L | Build `/provider/byoc` page (incentives summary, copy scripts, share link, invite stats)
@@ -738,4 +746,4 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3FG-P1-R2** | S | Verify support-ai-classify bucket bug — confirmed already fixed (uses job-photos, single issuePhotoContext)
 - [x] **3FG-P1-R3** | S | Document provider systems reconciliation (Flow A: application → Flow B: invite-code onboarding) in claude-implementation-notes.md
 
-*Last updated: 2026-03-02 — Sprint 3F/3G Phase 1 Review complete. Ready for Phase 2.*
+*Last updated: 2026-03-02 — Phase 3 review fixes + Phase 4 complete. Ready for Phase 5.*
