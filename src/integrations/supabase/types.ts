@@ -422,6 +422,84 @@ export type Database = {
         }
         Relationships: []
       }
+      byoc_activations: {
+        Row: {
+          activated_at: string
+          cadence: string
+          created_at: string
+          customer_user_id: string
+          id: string
+          invite_id: string
+          level_id: string | null
+          property_id: string | null
+          provider_org_id: string
+          sku_id: string | null
+          status: string
+        }
+        Insert: {
+          activated_at?: string
+          cadence?: string
+          created_at?: string
+          customer_user_id: string
+          id?: string
+          invite_id: string
+          level_id?: string | null
+          property_id?: string | null
+          provider_org_id: string
+          sku_id?: string | null
+          status?: string
+        }
+        Update: {
+          activated_at?: string
+          cadence?: string
+          created_at?: string
+          customer_user_id?: string
+          id?: string
+          invite_id?: string
+          level_id?: string | null
+          property_id?: string | null
+          provider_org_id?: string
+          sku_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "byoc_activations_invite_id_fkey"
+            columns: ["invite_id"]
+            isOneToOne: false
+            referencedRelation: "byoc_invite_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "byoc_activations_level_id_fkey"
+            columns: ["level_id"]
+            isOneToOne: false
+            referencedRelation: "sku_levels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "byoc_activations_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "byoc_activations_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "byoc_activations_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       byoc_attributions: {
         Row: {
           bonus_end_at: string | null
@@ -537,6 +615,157 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      byoc_invite_events: {
+        Row: {
+          actor: string
+          created_at: string
+          event_type: string
+          id: string
+          invite_id: string
+          payload: Json | null
+        }
+        Insert: {
+          actor?: string
+          created_at?: string
+          event_type: string
+          id?: string
+          invite_id: string
+          payload?: Json | null
+        }
+        Update: {
+          actor?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          invite_id?: string
+          payload?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "byoc_invite_events_invite_id_fkey"
+            columns: ["invite_id"]
+            isOneToOne: false
+            referencedRelation: "byoc_invite_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      byoc_invite_links: {
+        Row: {
+          category_key: string
+          created_at: string
+          default_cadence: string
+          default_level_id: string | null
+          id: string
+          is_active: boolean
+          org_id: string
+          sku_id: string | null
+          token: string
+          zone_id: string
+        }
+        Insert: {
+          category_key: string
+          created_at?: string
+          default_cadence?: string
+          default_level_id?: string | null
+          id?: string
+          is_active?: boolean
+          org_id: string
+          sku_id?: string | null
+          token: string
+          zone_id: string
+        }
+        Update: {
+          category_key?: string
+          created_at?: string
+          default_cadence?: string
+          default_level_id?: string | null
+          id?: string
+          is_active?: boolean
+          org_id?: string
+          sku_id?: string | null
+          token?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "byoc_invite_links_default_level_id_fkey"
+            columns: ["default_level_id"]
+            isOneToOne: false
+            referencedRelation: "sku_levels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "byoc_invite_links_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "byoc_invite_links_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "byoc_invite_links_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      category_requirements: {
+        Row: {
+          category_key: string
+          created_at: string
+          id: string
+          license_authority: string | null
+          ops_review_required: boolean
+          requires_background_check: boolean
+          requires_coi_upload: boolean
+          requires_gl_insurance: boolean
+          requires_in_home_access: boolean
+          requires_license: boolean
+          requires_workers_comp_if_employees: boolean
+          risk_tier: number
+          updated_at: string
+        }
+        Insert: {
+          category_key: string
+          created_at?: string
+          id?: string
+          license_authority?: string | null
+          ops_review_required?: boolean
+          requires_background_check?: boolean
+          requires_coi_upload?: boolean
+          requires_gl_insurance?: boolean
+          requires_in_home_access?: boolean
+          requires_license?: boolean
+          requires_workers_comp_if_employees?: boolean
+          risk_tier?: number
+          updated_at?: string
+        }
+        Update: {
+          category_key?: string
+          created_at?: string
+          id?: string
+          license_authority?: string | null
+          ops_review_required?: boolean
+          requires_background_check?: boolean
+          requires_coi_upload?: boolean
+          requires_gl_insurance?: boolean
+          requires_in_home_access?: boolean
+          requires_license?: boolean
+          requires_workers_comp_if_employees?: boolean
+          risk_tier?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       courtesy_upgrades: {
         Row: {
@@ -2245,6 +2474,8 @@ export type Database = {
           category: string
           config: Json
           created_at: string
+          founding_partner_slots_filled: number | null
+          founding_partner_slots_total: number | null
           id: string
           lock_reason: string | null
           locked_by_admin_user_id: string | null
@@ -2257,6 +2488,8 @@ export type Database = {
           category: string
           config?: Json
           created_at?: string
+          founding_partner_slots_filled?: number | null
+          founding_partner_slots_total?: number | null
           id?: string
           lock_reason?: string | null
           locked_by_admin_user_id?: string | null
@@ -2269,6 +2502,8 @@ export type Database = {
           category?: string
           config?: Json
           created_at?: string
+          founding_partner_slots_filled?: number | null
+          founding_partner_slots_total?: number | null
           id?: string
           lock_reason?: string | null
           locked_by_admin_user_id?: string | null
@@ -3326,50 +3561,109 @@ export type Database = {
           },
         ]
       }
+      provider_agreement_acceptance: {
+        Row: {
+          accepted_at: string
+          application_id: string
+          clause_key: string
+          device_id: string | null
+          id: string
+          ip_address: string | null
+        }
+        Insert: {
+          accepted_at?: string
+          application_id: string
+          clause_key: string
+          device_id?: string | null
+          id?: string
+          ip_address?: string | null
+        }
+        Update: {
+          accepted_at?: string
+          application_id?: string
+          clause_key?: string
+          device_id?: string | null
+          id?: string
+          ip_address?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_agreement_acceptance_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "provider_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       provider_applications: {
         Row: {
+          byoc_estimate_json: Json | null
           category: string
           cohort_id: string | null
+          compliance_json: Json | null
           created_at: string
+          decision_reason: string | null
           founding_partner: boolean
           id: string
           launch_path_target: number | null
           metadata: Json | null
+          pitch_variant_seen: string | null
           program_id: string | null
           provider_org_id: string | null
+          requested_categories: string[] | null
+          requested_zone_ids: string[] | null
+          reviewed_at: string | null
           status: Database["public"]["Enums"]["provider_application_status"]
+          submitted_at: string | null
           updated_at: string
           user_id: string
           waitlist_reason: string | null
           zip_codes: string[]
         }
         Insert: {
+          byoc_estimate_json?: Json | null
           category: string
           cohort_id?: string | null
+          compliance_json?: Json | null
           created_at?: string
+          decision_reason?: string | null
           founding_partner?: boolean
           id?: string
           launch_path_target?: number | null
           metadata?: Json | null
+          pitch_variant_seen?: string | null
           program_id?: string | null
           provider_org_id?: string | null
+          requested_categories?: string[] | null
+          requested_zone_ids?: string[] | null
+          reviewed_at?: string | null
           status?: Database["public"]["Enums"]["provider_application_status"]
+          submitted_at?: string | null
           updated_at?: string
           user_id: string
           waitlist_reason?: string | null
           zip_codes?: string[]
         }
         Update: {
+          byoc_estimate_json?: Json | null
           category?: string
           cohort_id?: string | null
+          compliance_json?: Json | null
           created_at?: string
+          decision_reason?: string | null
           founding_partner?: boolean
           id?: string
           launch_path_target?: number | null
           metadata?: Json | null
+          pitch_variant_seen?: string | null
           program_id?: string | null
           provider_org_id?: string | null
+          requested_categories?: string[] | null
+          requested_zone_ids?: string[] | null
+          reviewed_at?: string | null
           status?: Database["public"]["Enums"]["provider_application_status"]
+          submitted_at?: string | null
           updated_at?: string
           user_id?: string
           waitlist_reason?: string | null
@@ -3545,6 +3839,56 @@ export type Database = {
             foreignKeyName: "provider_compliance_provider_org_id_fkey"
             columns: ["provider_org_id"]
             isOneToOne: true
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_compliance_documents: {
+        Row: {
+          created_at: string
+          doc_type: string
+          expires_at: string | null
+          id: string
+          org_id: string
+          rejection_reason: string | null
+          status: string
+          storage_path: string
+          updated_at: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          doc_type: string
+          expires_at?: string | null
+          id?: string
+          org_id: string
+          rejection_reason?: string | null
+          status?: string
+          storage_path: string
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          doc_type?: string
+          expires_at?: string | null
+          id?: string
+          org_id?: string
+          rejection_reason?: string | null
+          status?: string
+          storage_path?: string
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_compliance_documents_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
             referencedRelation: "provider_orgs"
             referencedColumns: ["id"]
           },
@@ -8189,6 +8533,8 @@ export type Database = {
         | "approved"
         | "waitlisted"
         | "rejected"
+        | "under_review"
+        | "approved_conditional"
       provider_contract_type:
         | "partner_flat"
         | "partner_time_guarded"
@@ -8438,6 +8784,8 @@ export const Constants = {
         "approved",
         "waitlisted",
         "rejected",
+        "under_review",
+        "approved_conditional",
       ],
       provider_contract_type: [
         "partner_flat",
