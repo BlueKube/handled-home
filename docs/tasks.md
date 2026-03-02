@@ -691,10 +691,10 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3FG-P1-07** | P1 | S | Add `founding_partner_slots_total` / `founding_partner_slots_filled` to `market_zone_category_state`
 
 ### Phase 2 — Clause-by-Clause Agreement Flow
-- [ ] **3FG-P2-01** | P0 | M | Create `useProviderAgreement` hook (query accepted clauses, insert acceptance)
-- [ ] **3FG-P2-02** | P0 | L | Build `/provider/apply/agreement` page with ClauseCard component (12 clauses, progress indicator)
-- [ ] **3FG-P2-03** | P1 | S | Define clause content as static config array (12 clause keys from spec Part B)
-- [ ] **3FG-P2-04** | P1 | S | Update OnboardingReview to check all required clauses accepted before submit
+- [x] **3FG-P2-01** | P0 | M | Create `useProviderAgreement` hook (query accepted clauses, insert acceptance)
+- [x] **3FG-P2-02** | P0 | L | Build `/provider/onboarding/agreement` page with ClauseCard component (12 clauses, progress indicator)
+- [x] **3FG-P2-03** | P1 | S | Define clause content as static config array (12 clause keys from spec Part B)
+- [x] **3FG-P2-04** | P1 | S | Update OnboardingReview to check all required clauses accepted before submit
 
 ### Phase 3 — Enhanced Application + Opportunity Banners
 - [ ] **3FG-P3-01** | P0 | L | Rewrite `Apply.tsx` for multi-category selection + home base ZIP + service ZIPs
