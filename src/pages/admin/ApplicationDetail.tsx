@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAdminApplications } from "@/hooks/useAdminApplications";
+import { useAdminApplications, useApplicationDetail } from "@/hooks/useAdminApplications";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
   ArrowLeft, Loader2, CheckCircle, XCircle, Clock, FileText,
-  Shield, MapPin, Users, AlertTriangle, Briefcase,
+  Shield, Users, AlertTriangle, Briefcase,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -33,8 +33,8 @@ const CLAUSE_LABELS: Record<string, string> = {
 export default function AdminApplicationDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { applicationDetail, reviewApplication } = useAdminApplications();
-  const query = applicationDetail(id!);
+  const { reviewApplication } = useAdminApplications();
+  const query = useApplicationDetail(id!);
   const [decisionDialog, setDecisionDialog] = useState<string | null>(null);
   const [reason, setReason] = useState("");
 
@@ -59,10 +59,10 @@ export default function AdminApplicationDetail() {
 
   const app = query.data;
   const categories = app.requested_categories || [app.category];
-  const byoc = app.byoc_estimate_json as any;
+  const byoc = app.byoc_estimate_json as Record<string, unknown> | null;
   const isActionable = ["submitted", "under_review", "approved_conditional"].includes(app.status);
-  const clausesAccepted = (app as any).agreement_clauses?.length || 0;
-  const complianceDocs = (app as any).compliance_docs || [];
+  const clausesAccepted = app.agreement_clauses?.length || 0;
+  const complianceDocs = app.compliance_docs || [];
 
   const handleDecision = async () => {
     if (!decisionDialog) return;
@@ -110,8 +110,8 @@ export default function AdminApplicationDetail() {
             )}
             <Row label="Founding Partner" value={app.founding_partner ? "Yes" : "No"} />
             {app.pitch_variant_seen && <Row label="Pitch Variant" value={app.pitch_variant_seen} />}
-            {(app.provider_orgs as any)?.name && (
-              <Row label="Linked Org" value={(app.provider_orgs as any).name} />
+            {app.provider_orgs?.name && (
+              <Row label="Linked Org" value={app.provider_orgs.name} />
             )}
           </CardContent>
         </Card>
@@ -121,9 +121,9 @@ export default function AdminApplicationDetail() {
           <Card>
             <CardHeader><CardTitle className="text-base flex items-center gap-2"><Users className="h-4 w-4" /> BYOC Estimate</CardTitle></CardHeader>
             <CardContent className="space-y-2 text-sm">
-              <Row label="Estimated Customers" value={byoc.estimated_count || "—"} />
-              <Row label="Willingness" value={byoc.willingness || "—"} />
-              <Row label="Relationship Type" value={byoc.relationship_type || "—"} />
+              <Row label="Estimated Customers" value={String(byoc.estimated_count ?? "—")} />
+              <Row label="Willingness" value={String(byoc.willingness ?? "—")} />
+              <Row label="Relationship Type" value={String(byoc.relationship_type ?? "—")} />
               <Row label="Willing to Invite" value={byoc.willing_to_invite ? "Yes" : "No"} />
             </CardContent>
           </Card>
@@ -139,7 +139,7 @@ export default function AdminApplicationDetail() {
           <CardContent>
             <div className="grid grid-cols-2 gap-2">
               {Object.entries(CLAUSE_LABELS).map(([key, label]) => {
-                const accepted = (app as any).agreement_clauses?.some((c: any) => c.clause_key === key);
+                const accepted = app.agreement_clauses?.some((c) => c.clause_key === key);
                 return (
                   <div key={key} className="flex items-center gap-2 text-sm">
                     {accepted ? (
@@ -167,7 +167,7 @@ export default function AdminApplicationDetail() {
               <p className="text-sm text-muted-foreground">No compliance documents uploaded yet.</p>
             ) : (
               <div className="space-y-2">
-                {complianceDocs.map((doc: any) => (
+                {complianceDocs.map((doc) => (
                   <div key={doc.id} className="flex items-center justify-between text-sm border-b pb-2 last:border-0">
                     <div>
                       <span className="font-medium capitalize">{doc.doc_type.replace(/_/g, " ")}</span>
