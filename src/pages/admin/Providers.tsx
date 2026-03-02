@@ -45,6 +45,7 @@ export default function AdminProviders() {
         <TabsList className="mb-4">
           <TabsTrigger value="providers">Providers</TabsTrigger>
           <TabsTrigger value="invites">Invites</TabsTrigger>
+          <TabsTrigger value="applications" onClick={() => navigate("/admin/providers/applications")}>Applications</TabsTrigger>
         </TabsList>
 
         <TabsContent value="providers">

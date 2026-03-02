@@ -8350,6 +8350,14 @@ export type Database = {
         Args: { p_decision: string; p_note?: string; p_suggestion_id: string }
         Returns: undefined
       }
+      review_provider_application: {
+        Args: {
+          p_application_id: string
+          p_decision: string
+          p_reason?: string
+        }
+        Returns: Json
+      }
       revoke_share_card: {
         Args: { p_share_card_id: string }
         Returns: undefined

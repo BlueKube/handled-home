@@ -753,14 +753,14 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3FG-P6-03** | P1 | S | Track activation events in `byoc_invite_events` (activated + link_used events logged by edge function)
 
 ### Phase 7 — Admin Application Review Queue
-- [ ] **3FG-P7-01** | P0 | L | Build `/admin/providers/applications` with ApplicationsTable (filters by status, zone, category)
-- [ ] **3FG-P7-02** | P0 | XL | Build `/admin/providers/applications/:id` (full detail view, compliance checklist, agreement log, decision buttons)
-- [ ] **3FG-P7-03** | P0 | L | Create `review_provider_application` RPC (set status, notify provider, update org on approval)
-- [ ] **3FG-P7-04** | P1 | S | Wire notifications to provider on decision
+- [x] **3FG-P7-01** | P0 | L | Build `/admin/providers/applications` with ApplicationsTable (filters by status, category, actionable count badge)
+- [x] **3FG-P7-02** | P0 | XL | Build `/admin/providers/applications/:id` (full detail view, BYOC estimate, agreement clause checklist, compliance docs, decision buttons with confirmation dialog)
+- [x] **3FG-P7-03** | P0 | L | Create `review_provider_application` RPC (SECURITY DEFINER, admin-only, validates transitions, creates org on approval, adds owner member, emits notification, audit logs)
+- [x] **3FG-P7-04** | P1 | S | Wire notifications to provider on decision (via emit_notification_event in RPC — APPROVED/CONDITIONAL/REJECTED/WAITLISTED events)
 
 ### Phase 1 Review — Findings & Fixes
 - [x] **3FG-P1-R1** | S | Add 4 missing composite indexes (byoc_invite_events, byoc_activations, provider_compliance_documents, provider_coverage)
 - [x] **3FG-P1-R2** | S | Verify support-ai-classify bucket bug — confirmed already fixed (uses job-photos, single issuePhotoContext)
 - [x] **3FG-P1-R3** | S | Document provider systems reconciliation (Flow A: application → Flow B: invite-code onboarding) in claude-implementation-notes.md
 
-*Last updated: 2026-03-02 — Phase 6 complete. Ready for Phase 7 (Admin Application Review Queue).*
+*Last updated: 2026-03-02 — Sprint 3F/3G fully complete (all 7 phases).*

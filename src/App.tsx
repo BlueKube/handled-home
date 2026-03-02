@@ -88,6 +88,8 @@ import AdminPlans from "@/pages/admin/Plans";
 import AdminSubscriptions from "@/pages/admin/Subscriptions";
 import AdminProviders from "@/pages/admin/Providers";
 import AdminProviderDetail from "@/pages/admin/ProviderDetail";
+import AdminApplications from "@/pages/admin/Applications";
+import AdminApplicationDetail from "@/pages/admin/ApplicationDetail";
 import AdminScheduling from "@/pages/admin/Scheduling";
 import AdminSupport from "@/pages/admin/Support";
 import AdminSupportTicketDetail from "@/pages/admin/SupportTicketDetail";
@@ -242,6 +244,8 @@ const App = () => (
                 <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
                 <Route path="/admin/providers" element={<AdminProviders />} />
                 <Route path="/admin/providers/:id" element={<AdminProviderDetail />} />
+                <Route path="/admin/providers/applications" element={<AdminApplications />} />
+                <Route path="/admin/providers/applications/:id" element={<AdminApplicationDetail />} />
                 <Route path="/admin/jobs" element={<AdminJobs />} />
                 <Route path="/admin/jobs/:jobId" element={<AdminJobDetail />} />
                 <Route path="/admin/scheduling" element={<AdminScheduling />} />
