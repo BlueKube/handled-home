@@ -1,0 +1,422 @@
+# Handled Home — PRD: Provider Onboarding (Mobile-First) + Founding Partner Intake + Agreement Acceptance
+**Sprint Name:** Provider Onboarding (Round 3 — next sprint)  
+**Launch State:** California-first  
+**Users:** Providers (individual + provider org), Ops/Admin, (later) Compliance/Support  
+**Purpose:** Funnel *every* provider through a standardized onboarding + eligibility + quality gate, while pitching the right opportunity message based on zone/category market state.
+
+---
+
+## 0) Executive Summary
+
+Provider onboarding is a **mobile-first acquisition and compliance funnel** that:
+1) Markets the *right* opportunity (“Founding Partner” vs “Growing Fast” vs “Early Waitlist”) based on zone/category state  
+2) Collects the minimum required business info (identity, service categories, coverage, availability, BYOC potential)  
+3) Collects and verifies compliance signals (license/insurance where relevant, W-9, etc.)  
+4) Captures explicit acceptance of a **Founding Partner Agreement** clause-by-clause  
+5) Sends the provider into an **Ops Review Queue** (manual approval initially), with a future path toward automated approvals.
+
+The onboarding should maximize conversion while preserving the platform’s core promise: **Your home is handled** (quality + proof + standards + reliability).
+
+---
+
+## 1) Goals
+
+### 1.1 Growth goals (provider supply)
+- Get qualified providers to **download the app**, self-identify category + zone, and apply.
+- Enable **BYOC** migration as a primary “zone-entry starter motor.”
+- Create “first-mover advantage” urgency without sounding scammy.
+
+### 1.2 Quality + operational goals
+- Enforce non-negotiables: **SKUs + Levels + Proof + No Side Deals**
+- Collect enough data to avoid onboarding providers who will create support issues.
+- Ensure every provider is trackable and accountable (identity, business entity, payout setup, agreement acceptance).
+
+### 1.3 Compliance goals (California launch)
+- Capture and store relevant signals for California service work:
+  - Contractors State License Board (CSLB) license where applicable
+  - Insurance where applicable
+  - Bond signals where applicable (contractors bond amounts exist; see CSLB info) :contentReference[oaicite:0]{index=0}
+- Provide a framework for “Category Compliance Requirements” so you can add other states later.
+
+> Note: Handled Home should not provide legal advice; the system should implement “requirements by category” and route uncertain cases to Ops review.
+
+---
+
+## 2) Non-goals (v1)
+- Fully automated approval without ops involvement
+- Real-time verification integrations for every insurance carrier
+- Complex commission structures beyond BYOC + founding partner bonus
+- Multi-language onboarding (can be later)
+
+---
+
+## 3) Core Concepts
+
+### 3.1 Provider Identity Types
+- **Individual provider** (sole prop)
+- **Provider business / org** (company with multiple techs)
+- Each provider org may have multiple categories and zones.
+
+### 3.2 Market State (Zone × Category)
+Market state drives messaging + eligibility:
+- **EARLY (Founding Partner)**: zone is opening, categories still being filled
+- **OPEN (Growing fast)**: zone has demand and active growth
+- **WAITLIST**: zone/category not ready; accept applications but hold
+- **CLOSED**: no acceptance; capture contact for future expansion
+
+### 3.3 “Founding Partner” status
+A time-limited designation that includes:
+- early job priority (within routing constraints)
+- BYOC incentives
+- preferred placement (if applicable)
+- ability to shape standards early (limited)
+
+### 3.4 Clause-by-clause agreement acceptance
+Instead of one giant “Agree,” require one-tap acceptance of key clauses:
+- Non-circumvention
+- No side payments
+- Proof requirements
+- SKU + Level compliance
+- Background check consent (if required)
+- Insurance/law compliance attestations
+
+---
+
+## 4) High-Level UX Flow (Provider App)
+
+### 4.1 Entry: Provider self-identification
+On first open / role selection:
+- “I’m a customer” / “I’m a provider”
+If provider:
+- Select: primary categories (multi-select)
+- Enter: ZIP code(s) served (or choose zone if you already map)
+- Optional: “I already have customers in this area” toggle
+
+### 4.2 Dynamic Opportunity Banner (driven by market state)
+Immediately show one of these “Good News!” banners:
+
+**A) Founding Partner / Early Market**
+> “Good news — we’re launching in your area soon. We’re offering Founding Partner programs to qualified providers. Apply now to get early priority and BYOC incentives.”
+
+**B) Open / Growing Market**
+> “Good news — we’re growing fast in your area. We’re looking for quality providers like you. Apply now to get steady work and optimized routes.”
+
+**C) You’re early, but categories still needed**
+> “Good news — you’re one of the first in your area. Apply now. Once we fill a few more categories, Founding Partner spots will be awarded first-come, first-approved.”
+
+**D) Waitlist**
+> “We’re not live in your area yet — but you can apply now. We’ll review your application and contact you as soon as your zone opens.”
+
+**E) Closed**
+> “We’re currently full in your area. Join the provider waitlist and we’ll notify you when openings appear.”
+
+### 4.3 Application CTA
+- “Apply Now” button → enters onboarding wizard
+
+---
+
+## 5) Onboarding Wizard (Stages)
+
+### Stage 1 — Pitch + What You Get (conversion-focused)
+**Goal:** Make the provider *want* to complete the application.
+Content:
+- “Fill your schedule. Skip door knocking.”
+- “Dense routes → less driving → more earnings/month”
+- “We handle billing + receipts + scheduling workflows”
+- “Proof-of-work reduces disputes”
+- “Founding Partner bonuses + BYOC incentives”
+
+Include short “How it works”:
+- You select zones + categories
+- We standardize scope (SKUs + Levels)
+- You complete jobs with photos/checklists
+- You get paid automatically
+- You can bring customers (BYOC) and earn bonuses
+
+CTA: “Continue application”
+
+---
+
+### Stage 2 — Provider Profile (identity + business)
+Collect:
+- Legal name
+- Business name (if any)
+- Phone
+- Email
+- Business type (sole prop / LLC / corp)
+- EIN (optional)
+- Address (optional)
+- Headcount (solo, 2–5, 6–20, 20+)
+- Years in business
+- Primary language (optional)
+
+**Design note:** Keep it fast; most fields should be “required only if needed for payout/compliance.”
+
+---
+
+### Stage 3 — Services + Coverage (categories, zones, availability)
+Collect:
+- Categories offered (multi-select)
+- Services within category (optional; can be mapped to SKUs later)
+- Coverage: ZIPs served OR zone picker
+- Days available and time windows
+- “Home base” ZIP (for routing efficiency)
+- Equipment capability flags (category-specific; optional v1)
+
+**Important:** If they choose a category that is regulated (e.g., trades requiring CSLB), trigger compliance stage.
+
+---
+
+### Stage 4 — BYOC Intake (the growth lever)
+Collect:
+- “Do you have existing customers in these zones?” (yes/no)
+If yes:
+- Estimated count by category (ranges: 1–10, 11–50, 51–200, 200+)
+- % willing to migrate (low/med/high)
+- Relationship type (recurring vs one-time)
+- “Would you be willing to invite them via a script we provide?” (yes/no)
+
+**Note:** Do not import customer data here. Just gather intent and volume.
+
+---
+
+### Stage 5 — Compliance Requirements (category-driven)
+This stage is dynamically generated by category and state (California).
+
+#### 5.1 CSLB license (when applicable)
+If provider is performing work that requires a CSLB contractor license:
+- Require license number input
+- “License type/classification” (picklist)
+- Attest “license is active and in good standing”
+- Optional: upload proof
+
+CSLB requires a contractor bond for an active license; CSLB states the contractor license bond amount is $25,000 (since 1/1/2023). :contentReference[oaicite:1]{index=1}
+
+#### 5.2 Insurance
+- General liability coverage (minimum threshold configurable per category)
+- Workers comp (if they have employees)
+- Upload certificate of insurance (COI) OR enter carrier + policy number (ops verification)
+
+#### 5.3 Background check (optional per category)
+- Consent screen + authorization
+- Collect SSN only through a compliant vendor flow (do not store raw SSN in Supabase)
+
+#### 5.4 Specialty compliance notes (optional)
+Some categories have unique safety/regulatory requirements. Keep v1 simple:
+- Use a “category compliance rules” table to specify required fields and docs per category.
+
+> Note on Home Improvement Salesperson (HIS): CSLB defines when an HIS registration is required for persons soliciting/selling home improvement contracts on behalf of a licensed contractor. :contentReference[oaicite:2]{index=2}  
+Your model is not “providers selling on behalf of a contractor”; it’s providers applying to a platform. Still, the system should surface “HIS may apply depending on your business structure; Ops will confirm if required.”
+
+---
+
+### Stage 6 — Standards & Operating Rules (your non-negotiables)
+This is where you protect the brand. Each item is presented as a short clause + one-tap acceptance:
+
+Required “tap to accept” clauses:
+1) **SKU + Levels compliance**  
+   “I will perform services according to Handled Home SKUs and Levels. No off-platform scope negotiation for Platform jobs.”
+
+2) **Proof-of-work**  
+   “I will complete required photos and checklists for every job.”
+
+3) **No side payments**  
+   “I will not accept cash/check/side payments for Platform jobs or add-ons.”
+
+4) **No customer poaching / non-circumvention** (California)  
+   “I will not solicit Platform customers off-platform for the same service categories during the term and for a defined period after last Platform job.”  
+   (Have counsel tune enforceability; California is strict on restraints.)
+
+5) **Route + schedule discipline**  
+   “I will adhere to assigned routes and job windows. I will follow reschedule/cancel policies.”
+
+6) **Courtesy upgrades policy** (if you enable it)  
+   “I will only use courtesy upgrades according to policy and with evidence and reason codes.”
+
+7) **Communications standards**  
+   “I will keep messaging professional and use Platform tools.”
+
+8) **BYOC integrity**  
+   “I will not misrepresent incentives or create fraudulent signups.”
+
+Each clause requires a tap “Agree.” If they don’t agree, onboarding stops.
+
+---
+
+### Stage 7 — Payout Setup (minimum viable)
+- Choose payout method (Stripe Connect / ACH)
+- W-9 collection (via Stripe or secure provider flow)
+- Tax classification
+
+**Important:** Avoid storing sensitive tax data in your DB; use Stripe’s flows.
+
+---
+
+### Stage 8 — Review + Submit
+- Summary of everything entered
+- “Submit Application”
+- Confirmation screen:
+  - Status: “Under review”
+  - Estimated time: avoid time promises; just “Ops will review soon”
+  - “You’ll be notified in-app”
+
+---
+
+## 6) Ops/Admin Workflow (Manual Approval v1)
+
+### 6.1 Provider Review Queue
+Admin sees:
+- Applicant summary
+- Zone/category requested
+- BYOC estimate
+- Compliance checklist (license/insurance uploaded or not)
+- Risk flags (missing docs, category mismatch)
+- Agreement acceptance audit log
+Actions:
+- Approve
+- Approve with conditions (e.g., “no courtesy upgrade”)
+- Waitlist
+- Reject (with reason template)
+
+### 6.2 Post-approval activation
+When approved:
+- Provider gets a “Welcome — you’re approved” screen
+- Next steps:
+  - “Complete your first test job” (optional)
+  - “Invite BYOC customers” (script + link)
+  - “Set availability” (if missing)
+
+### 6.3 Ops-configurable controls
+- Enable/disable categories in zone
+- Cap number of providers per category
+- Founding Partner slots remaining counter
+- Incentive plan assignment
+
+---
+
+## 7) Messaging Logic (Opportunity banners)
+Implement a deterministic copy engine:
+
+Inputs:
+- provider ZIP → mapped zone
+- categories selected
+- `market_zone_category_state` (OPEN / WAITLIST / CLOSED / EARLY)
+- number of existing providers in that category in that zone
+- founding partner slot availability
+
+Outputs:
+- Banner variant A/B/C/D/E
+- CTA label: Apply / Join waitlist / Not accepting
+
+---
+
+## 8) Data Model (Suggested)
+
+### `provider_applications`
+- id
+- provider_user_id
+- provider_org_id (nullable)
+- status (DRAFT, SUBMITTED, UNDER_REVIEW, APPROVED, WAITLISTED, REJECTED)
+- requested_zones (array)
+- requested_categories (array)
+- byoc_estimate_json
+- compliance_json (license, insurance, background_check)
+- submitted_at, reviewed_at, decision_reason
+
+### `provider_agreement_acceptance`
+- id
+- provider_application_id
+- clause_key
+- accepted_at
+- ip_address (optional)
+- device_id (optional)
+
+### `provider_compliance_documents`
+- id
+- provider_org_id
+- doc_type (COI, license_proof, etc.)
+- storage_url
+- expires_at (for insurance)
+- verified_by_admin_id
+- verified_at
+- status (UPLOADED, VERIFIED, REJECTED)
+
+### `provider_onboarding_events` (analytics)
+- event_type, timestamp, payload
+
+---
+
+## 9) Security / RLS
+- Providers can read/write only their own application + documents.
+- Admin can read/write all.
+- Provider cannot see other providers’ data.
+- Never store raw SSN in Supabase.
+
+---
+
+## 10) Instrumentation / Success Metrics
+
+Funnel:
+- Provider role selected → onboarding started → submitted → approved → first job completed → BYOC invites sent → BYOC activated
+
+Key metrics:
+- Application completion rate
+- Approval rate by category/zone
+- Time-to-approval (internal)
+- BYOC activation rate
+- Proof compliance for first 10 jobs (predictive of long-term quality)
+- Early provider retention (30/60/90)
+
+---
+
+## 11) Acceptance Criteria (Must Pass)
+
+**Provider UX**
+- Provider can download app, select provider role, and see opportunity messaging that matches zone/category state.
+- Provider can complete onboarding with clause-by-clause agreement acceptance.
+- Provider can submit application and see status updates.
+
+**Ops UX**
+- Ops can review applications, verify docs, and approve/waitlist/reject.
+- Ops sees agreement acceptance log and compliance checklist.
+
+**Compliance**
+- License and insurance fields are category-driven.
+- Sensitive data is handled via compliant vendor flows.
+
+---
+
+## 12) Recommended Rollout Plan (California)
+Phase 1 (manual):
+- Category compliance rules are conservative
+- Ops approves all providers
+- Founding Partner slots are scarce and explicit
+- BYOC incentives require retention gates
+
+Phase 2 (semi-automated):
+- Auto-approve low-risk categories (trash bins, poop scoop) with proof compliance gating
+- Keep CSLB-licensed trades as ops-reviewed only
+- Add insurance expiration tracking + reminders
+
+---
+
+## 13) Opinionated “Make it Win” Notes
+- The opening “Good news” opportunity banners are a *sales page*. Make them feel like:
+  - “We will fill your schedule locally”
+  - “You’ll earn more per month by wasting less time”
+  - “Your routes are optimized”
+  - “No more door knocking”
+- Clause-by-clause acceptance should be short and plain-English, not legalese.
+- BYOC is your best launch motor, but only if you keep standards:
+  - SKU/Level mapping is mandatory
+  - proof is mandatory
+  - no side deals is mandatory
+
+---
+
+## 14) California Notes (for internal alignment)
+- CSLB bond requirements exist and the contractor license bond amount is $25,000 (as stated by CSLB). :contentReference[oaicite:3]{index=3}
+- HIS registration rules exist for salespersons soliciting/executing home improvement contracts on behalf of a licensed contractor; treat as an ops-reviewed compliance topic depending on provider structure. :contentReference[oaicite:4]{index=4}
+- California is sensitive about worker classification and restrictive covenants; have counsel tune non-circumvention and relationship language for enforceability.
+
+---
