@@ -13,9 +13,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
-import { Shield, AlertTriangle, CheckCircle, Clock, Eye, Plus, Loader2, MapPin, Users } from "lucide-react";
+import { Shield, AlertTriangle, CheckCircle, Clock, Eye, Plus, Loader2, MapPin, Users, FileText } from "lucide-react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const STATUS_COLORS: Record<string, string> = {
   DRAFT: "bg-muted text-muted-foreground",
@@ -41,12 +41,19 @@ export default function AdminProviders() {
       </div>
       <p className="text-caption mb-4">Review and manage provider organizations.</p>
 
-      <Tabs defaultValue="providers">
-        <TabsList className="mb-4">
+      <div className="flex items-center gap-2 mb-4">
+        <Tabs defaultValue="providers" className="flex-1">
+        <div className="flex items-center gap-2">
+        <TabsList>
           <TabsTrigger value="providers">Providers</TabsTrigger>
           <TabsTrigger value="invites">Invites</TabsTrigger>
-          <TabsTrigger value="applications" onClick={() => navigate("/admin/providers/applications")}>Applications</TabsTrigger>
         </TabsList>
+        <Link to="/admin/providers/applications">
+          <Button variant="outline" size="sm" className="gap-1">
+            <FileText className="h-3.5 w-3.5" /> Applications
+          </Button>
+        </Link>
+        </div>
 
         <TabsContent value="providers">
           <div className="mb-4">
@@ -102,6 +109,7 @@ export default function AdminProviders() {
           <InvitesPanel />
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 }
