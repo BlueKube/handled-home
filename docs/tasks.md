@@ -748,9 +748,9 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3FG-P5-R9** | P3 | S | Fix `text-success` → `text-green-500` in InviteLinkCard
 
 ### Phase 6 — Customer BYOC Activation
-- [ ] **3FG-P6-01** | P0 | L | Build `/byoc/activate/:token` page (ProviderIntroCard, service summary, property confirm, payment, confirm)
-- [ ] **3FG-P6-02** | P0 | L | Create `activate-byoc-invite` edge function (validate token, create activation, link provider)
-- [ ] **3FG-P6-03** | P1 | S | Track activation events in `byoc_invite_events`
+- [x] **3FG-P6-01** | P0 | L | Build `/byoc/activate/:token` page (ProviderIntroCard, service summary, cadence picker, activate CTA, auth redirect)
+- [x] **3FG-P6-02** | P0 | L | Create `activate-byoc-invite` edge function (validate token, dedupe check, create activation, link provider)
+- [x] **3FG-P6-03** | P1 | S | Track activation events in `byoc_invite_events` (activated + link_used events logged by edge function)
 
 ### Phase 7 — Admin Application Review Queue
 - [ ] **3FG-P7-01** | P0 | L | Build `/admin/providers/applications` with ApplicationsTable (filters by status, zone, category)
@@ -763,4 +763,4 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3FG-P1-R2** | S | Verify support-ai-classify bucket bug — confirmed already fixed (uses job-photos, single issuePhotoContext)
 - [x] **3FG-P1-R3** | S | Document provider systems reconciliation (Flow A: application → Flow B: invite-code onboarding) in claude-implementation-notes.md
 
-*Last updated: 2026-03-02 — Phase 5 review fixes complete. Ready for Phase 6.*
+*Last updated: 2026-03-02 — Phase 6 complete. Ready for Phase 7 (Admin Application Review Queue).*

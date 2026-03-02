@@ -77,6 +77,7 @@ import ProviderByocCenter from "@/pages/provider/ByocCenter";
 import ProviderByocCreateLink from "@/pages/provider/ByocCreateLink";
 import InviteLanding from "@/pages/InviteLanding";
 import ShareLanding from "@/pages/ShareLanding";
+import ByocActivate from "@/pages/ByocActivate";
 
 // Admin pages
 import AdminDashboard from "@/pages/admin/Dashboard";
@@ -153,6 +154,7 @@ const App = () => (
               <Route path="/" element={<RootRedirect />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/invite/:code" element={<InviteLanding />} />
+              <Route path="/byoc/activate/:token" element={<ByocActivate />} />
               <Route path="/share/:shareCode" element={<ShareLanding />} />
 
               {/* Customer App */}
