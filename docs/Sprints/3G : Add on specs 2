@@ -1,0 +1,322 @@
+# Handled Home — Add-on Specs: Category Requirements Matrix + Opportunity Banner Decision Tree (v1)
+
+This document adds:
+1) A **field-by-field required/optional matrix** per category (California launch, v1)
+2) A deterministic **opportunity banner decision tree** (when multiple categories are selected)
+
+---
+
+# PART A — Category Requirements Matrix (CA v1)
+
+## A0) Design philosophy (do this or onboarding will collapse)
+- Only require what is needed for **safety, legality, payouts, and trust**.
+- Treat most compliance as **ops-verified** initially.
+- Use a config table to drive the UI dynamically.
+
+### Core fields (always required for all providers)
+**Identity / business**
+- Legal name
+- Phone
+- Email
+- Business type (sole prop / LLC / corp)
+- Home base ZIP
+- Service area ZIPs/zones
+- Categories selected
+- Availability (days/hours)
+- Agreement clauses accepted
+- Payout setup complete (Stripe Connect)
+
+**Operational commitment**
+- Proof-of-work acceptance
+- No side payments acceptance
+- SKU + Levels compliance acceptance
+
+---
+
+## A1) Category Risk Tiers (simplifies compliance logic)
+
+### Tier 0 — Low risk / no license expected
+Examples:
+- Trash bin concierge
+- Dog poop scoop / pet yard sanitation
+- Basic exterior sweep / cobweb removal (if you offer)
+- (Possibly) simple “yard waste pickup” if not using power tools
+
+**Default required**
+- General liability: recommended, not required at application (but can be required for activation)
+- Background check: not required
+- License: not required
+
+### Tier 1 — Medium risk / insurance strongly recommended
+Examples:
+- Window cleaning (outside)
+- Pressure washing
+- Gutter cleaning (height risk)
+- Yard cleanup / hauling
+
+**Default required**
+- General liability: REQUIRED (upload COI or enter carrier/policy; ops verifies)
+- Background check: optional (enable for “premium” tier later)
+- License: not required unless work crosses into regulated trade work
+
+### Tier 2 — Higher risk / trade-adjacent / higher dispute potential
+Examples:
+- Lawn mowing/landscaping (power tools, property damage risk)
+- Regular house cleaning (in-home access, trust/safety risk)
+- Handyman “fix list” (scope creep + potential regulated work)
+
+**Default required**
+- General liability: REQUIRED
+- Workers comp: REQUIRED if employees (attestation + COI)
+- Background check: REQUIRED for any in-home category (cleaning/handyman) in v1 if you want premium trust
+- License: “may be required depending on scope” → ops review gating
+
+### Tier 3 — Licensed contractor likely required (regulated)
+Examples (depending on scope):
+- Certain handyman tasks beyond minor repairs
+- Trades that clearly require CSLB license (electrical/plumbing/HVAC/etc.)
+
+**Default required**
+- CSLB license number: REQUIRED
+- General liability: REQUIRED
+- Workers comp if employees: REQUIRED
+- Background check: REQUIRED
+- Ops review only (no auto-approval)
+
+---
+
+## A2) Field Requirements Table (Implement as config)
+Represent as `category_requirements` config rows:
+
+Fields you can toggle per category:
+- `requires_gl_insurance` (bool)
+- `requires_coi_upload` (bool)
+- `requires_workers_comp_if_employees` (bool)
+- `requires_background_check` (bool)
+- `requires_license` (bool)
+- `license_authority` (text, e.g., CSLB)
+- `requires_in_home_access` (bool) (drives trust flows)
+- `ops_review_required` (bool)
+
+---
+
+## A3) Recommended v1 Matrix by Category (California launch)
+> Adjust categories to match your actual list.
+
+### Trash Bins (Tier 0)
+- GL insurance: Optional at apply; REQUIRED before first paid job (recommended)
+- Background check: No
+- License: No
+- Ops review: Yes (v1), auto later
+
+### Dog Poop / Pet Yard (Tier 0)
+- GL insurance: Optional at apply; REQUIRED before first job (recommended)
+- Background check: No (unless entering home)
+- License: No
+- Ops review: Yes (v1)
+
+### Windows (Tier 1)
+- GL insurance: REQUIRED (COI upload or carrier/policy)
+- Background check: Optional
+- License: No
+- Ops review: Yes (v1)
+
+### Gutters (Tier 1/2 due to height)
+- GL insurance: REQUIRED
+- Background check: Optional
+- License: No
+- Ops review: Yes (v1)
+
+### Pressure Washing (Tier 1)
+- GL insurance: REQUIRED
+- Background check: Optional
+- License: No
+- Ops review: Yes (v1)
+
+### Yard Cleanup (Tier 1)
+- GL insurance: REQUIRED
+- Background check: Optional
+- License: No
+- Ops review: Yes (v1)
+
+### Lawn / Landscaping (Tier 2)
+- GL insurance: REQUIRED
+- Workers comp if employees: REQUIRED (attest + COI)
+- Background check: Optional
+- License: Usually no (unless contracting for regulated work)
+- Ops review: Yes (v1)
+
+### House Cleaning (Tier 2, in-home)
+- GL insurance: REQUIRED
+- Background check: REQUIRED (recommended for premium trust; can be “consent + ops verification” in v1)
+- Ops review: Yes (v1)
+
+### Handyman Fix List (Tier 2/3 depending on scope)
+- GL insurance: REQUIRED
+- Background check: REQUIRED
+- License: “Depends on scope” → ask:
+  - “Do you perform work that requires a CSLB license?” (Yes/No/Not sure)
+  - If Yes → require CSLB license number
+- Ops review: REQUIRED
+
+### Pool Service (Tier 1/2)
+- GL insurance: REQUIRED
+- Background check: Optional (in-yard access only)
+- License: No
+- Ops review: Yes (v1)
+
+---
+
+## A4) Dynamic Question Prompts (Category-driven)
+Use short, branch-triggering prompts:
+
+### Employees question (drives workers comp)
+- “Do you have employees?” Yes/No  
+If Yes → require workers comp evidence/attestation.
+
+### In-home access question (drives background check trust)
+- “Will you enter the customer’s home?” Yes/No  
+If Yes → require background check consent.
+
+### License question (for handyman/trades)
+- “Does your work require a California contractor license?” Yes/No/Not sure  
+If Yes/Not sure → ops review + request CSLB number (or ask for clarification).
+
+---
+
+## A5) Enforcement policy (v1)
+- **No provider receives jobs** until:
+  - agreement clauses accepted
+  - payouts connected
+  - required compliance items uploaded/attested for their categories
+  - ops approval complete
+- Auto-approval comes later only for Tier 0 categories after strong proof compliance history.
+
+---
+
+# PART B — Opportunity Banner Decision Tree (Deterministic)
+
+## B0) Problem
+Providers can select multiple categories and multiple ZIPs. You need:
+- One “primary” opportunity message
+- Clear next step (apply vs waitlist)
+- Avoid confusion and loss of conversion
+
+---
+
+## B1) Inputs
+For each provider:
+- Selected categories: `C = {c1..cn}`
+- Resolved zones from ZIPs: `Z = {z1..zm}`
+For each (zone, category):
+- Market state: `S(z,c) ∈ {EARLY, OPEN, WAITLIST, CLOSED}`
+- Provider supply counts (optional): active providers in that category/zone
+- Founding partner slots remaining (optional): `FP_slots(z,c)`
+
+---
+
+## B2) Output
+- Primary banner variant: A/B/C/D/E
+- Primary “target” zone/category pair used for headline
+- CTA: Apply Now / Join Waitlist / Join Provider Waitlist
+
+---
+
+## B3) Decision Algorithm (v1)
+### Step 1 — Compute best opportunity per (z,c)
+Assign a score per pair:
+- EARLY: 100 + (FP_slots bonus if >0)
+- OPEN: 80
+- WAITLIST: 40
+- CLOSED: 0
+
+Optional modifiers:
+- If provider category is under-supplied in zone (you need it): +10
+- If provider home base is inside zone core: +5
+
+Select the best pair: `(z*, c*)` with max score.
+
+### Step 2 — Choose banner variant based on `S(z*, c*)`
+- If EARLY and FP_slots(z*,c*) > 0 → **Variant A (Founding Partner)**
+- If EARLY but FP_slots unknown/0 → **Variant C (You’re early; categories filling)**
+- If OPEN → **Variant B (Growing fast)**
+- If WAITLIST → **Variant D (Waitlist)**
+- If CLOSED → **Variant E (Closed)**
+
+### Step 3 — Tie-breakers
+If multiple pairs tie:
+1) Prefer EARLY over OPEN over WAITLIST over CLOSED
+2) Prefer category with higher expected demand (config)
+3) Prefer the zone closest to provider home base ZIP centroid (if you compute)
+4) Prefer zones where you have fewer active providers in that category
+
+### Step 4 — Secondary messaging (optional)
+Under the primary banner, show a compact list:
+- “Other categories in your area:” with status pills (Open / Early / Waitlist / Closed)
+This helps providers understand why they see a certain banner.
+
+---
+
+## B4) CTA Rules (avoid dead ends)
+- If primary is EARLY or OPEN → CTA = Apply Now
+- If primary is WAITLIST → CTA = Join Waitlist
+- If primary is CLOSED but ANY other pair is WAITLIST → CTA = Join Waitlist
+- If all pairs are CLOSED → CTA = Join Provider Waitlist
+
+---
+
+## B5) Founding Partner slot logic (recommended)
+Add a simple counter per (zone, category):
+- `founding_partner_slots_total`
+- `founding_partner_slots_filled`
+
+When slots available:
+- show scarcity line: “Founding Partner spots remaining: X”
+When not:
+- use Variant C (early but no slots) or OPEN messaging
+
+---
+
+## B6) Acceptance Criteria
+- Provider selecting categories and ZIPs always sees:
+  - a clear opportunity banner
+  - a clear CTA (apply or waitlist)
+- When multiple categories exist, banner is deterministic and repeatable.
+- Providers can still apply even if some categories are waitlisted; the application should record all requested categories and let ops approve subset.
+
+---
+
+# PART C — Config Tables (Recommended Implementation)
+
+## C1) `category_requirements` (drives compliance UI)
+Columns:
+- `category_key`
+- `risk_tier` (0–3)
+- `requires_gl_insurance`
+- `requires_workers_comp_if_employees`
+- `requires_background_check`
+- `requires_license`
+- `license_authority`
+- `requires_in_home_access`
+- `ops_review_required`
+
+## C2) `category_priority` (drives tie-breakers)
+- `category_key`
+- `demand_priority_score` (int)
+- `undersupply_bonus_enabled` (bool)
+
+## C3) `market_zone_category_state` (already likely exists)
+- `zone_id`
+- `category_key`
+- `status` (EARLY/OPEN/WAITLIST/CLOSED)
+- `founding_partner_slots_total` (optional)
+- `founding_partner_slots_filled` (optional)
+
+---
+
+# PART D — Opinionated Defaults (California v1)
+- Do **not** auto-approve any providers in v1.
+- Require GL insurance for Tier 1+ categories before first paid job.
+- Require background check consent for in-home categories (cleaning/handyman).
+- Keep license questions only where it matters to reduce friction.
+- Use “Founding Partner” scarcity honestly; never fake it.
