@@ -674,3 +674,58 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3D-L2** | LOW | Photo analysis — support-ai-classify generates signed URLs (up to 4 job photos + 2 issue photos, 10-min expiry) and includes them as multimodal image_url content parts for Gemini visual analysis
 
 *Last updated: 2026-03-01 — Sprint 3D 100% complete. All deferred items resolved.*
+
+---
+
+## Sprint 3F/3G — Provider Onboarding + BYOC
+
+> Provider acquisition funnel: application, agreement, compliance, BYOC invite links, customer activation, admin review.
+
+### Phase 1 — Schema Foundation
+- [x] **3FG-P1-01** | P0 | M | Add `under_review` and `approved_conditional` to `provider_application_status` enum
+- [x] **3FG-P1-02** | P0 | M | Add new columns to `provider_applications` (requested_categories, requested_zone_ids, byoc_estimate_json, pitch_variant_seen, compliance_json, submitted_at, reviewed_at, decision_reason)
+- [x] **3FG-P1-03** | P0 | M | Create `provider_agreement_acceptance` table with RLS + indexes
+- [x] **3FG-P1-04** | P0 | M | Create `category_requirements` config table with RLS + seed CA v1 defaults (10 categories, Tier 0-3)
+- [x] **3FG-P1-05** | P0 | M | Create `provider_compliance_documents` table with RLS + indexes
+- [x] **3FG-P1-06** | P0 | M | Create `byoc_invite_links`, `byoc_invite_events`, `byoc_activations` tables with RLS + indexes
+- [x] **3FG-P1-07** | P1 | S | Add `founding_partner_slots_total` / `founding_partner_slots_filled` to `market_zone_category_state`
+
+### Phase 2 — Clause-by-Clause Agreement Flow
+- [ ] **3FG-P2-01** | P0 | M | Create `useProviderAgreement` hook (query accepted clauses, insert acceptance)
+- [ ] **3FG-P2-02** | P0 | L | Build `/provider/apply/agreement` page with ClauseCard component (12 clauses, progress indicator)
+- [ ] **3FG-P2-03** | P1 | S | Define clause content as static config array (12 clause keys from spec Part B)
+- [ ] **3FG-P2-04** | P1 | S | Update OnboardingReview to check all required clauses accepted before submit
+
+### Phase 3 — Enhanced Application + Opportunity Banners
+- [ ] **3FG-P3-01** | P0 | L | Rewrite `Apply.tsx` for multi-category selection + home base ZIP + service ZIPs
+- [ ] **3FG-P3-02** | P0 | L | Build `OpportunityBanner` component (5 variants: EARLY/OPEN/EARLY-2/WAITLIST/CLOSED)
+- [ ] **3FG-P3-03** | P1 | M | Implement banner decision algorithm (score zone×category pairs, pick best variant)
+- [ ] **3FG-P3-04** | P1 | M | Add BYOC intake step (estimated count, willingness, relationship type)
+- [ ] **3FG-P3-05** | P1 | S | Update `useProviderApplication` for multi-category and new fields
+
+### Phase 4 — Category-Driven Compliance
+- [ ] **3FG-P4-01** | P0 | M | Create `useCategoryRequirements` hook
+- [ ] **3FG-P4-02** | P0 | L | Build `DynamicComplianceRenderer` component (insurance, license, background check fields by risk tier)
+- [ ] **3FG-P4-03** | P1 | M | Add COI upload to `provider_compliance_documents`
+- [ ] **3FG-P4-04** | P1 | M | Add CSLB license fields for Tier 3 categories
+- [ ] **3FG-P4-05** | P1 | S | Replace static OnboardingCompliance with dynamic version
+
+### Phase 5 — BYOC Center + Invite Links
+- [ ] **3FG-P5-01** | P0 | L | Build `/provider/byoc` page (incentives summary, copy scripts, share link, invite stats)
+- [ ] **3FG-P5-02** | P1 | M | Build `/provider/byoc/create-link` (category picker, SKU+Level+cadence, generate link)
+- [ ] **3FG-P5-03** | P1 | M | Create `useByocInviteLinks` hook (CRUD for invite links, query events)
+- [ ] **3FG-P5-04** | P1 | S | Wire invite scripts from `invite_scripts` table into copy buttons
+- [ ] **3FG-P5-05** | P1 | S | Gate BYOC Center access to approved provider orgs only
+
+### Phase 6 — Customer BYOC Activation
+- [ ] **3FG-P6-01** | P0 | L | Build `/byoc/activate/:token` page (ProviderIntroCard, service summary, property confirm, payment, confirm)
+- [ ] **3FG-P6-02** | P0 | L | Create `activate-byoc-invite` edge function (validate token, create activation, link provider)
+- [ ] **3FG-P6-03** | P1 | S | Track activation events in `byoc_invite_events`
+
+### Phase 7 — Admin Application Review Queue
+- [ ] **3FG-P7-01** | P0 | L | Build `/admin/providers/applications` with ApplicationsTable (filters by status, zone, category)
+- [ ] **3FG-P7-02** | P0 | XL | Build `/admin/providers/applications/:id` (full detail view, compliance checklist, agreement log, decision buttons)
+- [ ] **3FG-P7-03** | P0 | L | Create `review_provider_application` RPC (set status, notify provider, update org on approval)
+- [ ] **3FG-P7-04** | P1 | S | Wire notifications to provider on decision
+
+*Last updated: 2026-03-02 — Sprint 3F/3G Phase 1 (Schema Foundation) complete.*
