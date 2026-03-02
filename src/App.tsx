@@ -66,6 +66,7 @@ import ProviderOnboardingOrg from "@/pages/provider/OnboardingOrg";
 import ProviderOnboardingCoverage from "@/pages/provider/OnboardingCoverage";
 import ProviderOnboardingCapabilities from "@/pages/provider/OnboardingCapabilities";
 import ProviderOnboardingCompliance from "@/pages/provider/OnboardingCompliance";
+import ProviderOnboardingAgreement from "@/pages/provider/OnboardingAgreement";
 import ProviderOnboardingReview from "@/pages/provider/OnboardingReview";
 import ProviderSupport from "@/pages/provider/Support";
 import ProviderSupportTicketDetail from "@/pages/provider/SupportTicketDetail";
@@ -197,6 +198,7 @@ const App = () => (
                 <Route path="/provider/onboarding/coverage" element={<ProviderOnboardingCoverage />} />
                 <Route path="/provider/onboarding/capabilities" element={<ProviderOnboardingCapabilities />} />
                 <Route path="/provider/onboarding/compliance" element={<ProviderOnboardingCompliance />} />
+                <Route path="/provider/onboarding/agreement" element={<ProviderOnboardingAgreement />} />
                 <Route path="/provider/onboarding/review" element={<ProviderOnboardingReview />} />
                 <Route path="/provider/jobs" element={<ProviderJobs />} />
                 <Route path="/provider/jobs/:jobId" element={<ProviderJobDetail />} />

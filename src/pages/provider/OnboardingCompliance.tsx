@@ -93,7 +93,7 @@ export default function OnboardingCompliance() {
         otherDocUrl,
       });
       toast.success("Compliance details saved");
-      navigate("/provider/onboarding/review", { state: { orgId, allowedZoneIds } });
+      navigate("/provider/onboarding/agreement", { state: { orgId, allowedZoneIds } });
     } catch (err: any) {
       toast.error(err.message);
     } finally {

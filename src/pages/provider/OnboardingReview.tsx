@@ -5,6 +5,8 @@ import { useProviderCoverage } from "@/hooks/useProviderCoverage";
 import { useProviderCapabilities } from "@/hooks/useProviderCapabilities";
 import { useProviderCompliance } from "@/hooks/useProviderCompliance";
 import { useProviderMembers } from "@/hooks/useProviderMembers";
+import { useProviderApplication } from "@/hooks/useProviderApplication";
+import { useProviderAgreement } from "@/hooks/useProviderAgreement";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, AlertCircle, Loader2, Send } from "lucide-react";
@@ -22,12 +24,14 @@ export default function OnboardingReview() {
   const { coverage } = useProviderCoverage(effectiveOrgId);
   const { capabilities } = useProviderCapabilities(effectiveOrgId);
   const { compliance } = useProviderCompliance(effectiveOrgId);
+  const { application } = useProviderApplication();
+  const { allAccepted, acceptedCount, totalClauses } = useProviderAgreement(application.data?.id);
   const [submitting, setSubmitting] = useState(false);
 
   const effectiveOrg = org;
   const enabledCaps = capabilities.filter((c: any) => c.is_enabled);
   const hasCompliance = compliance?.terms_accepted_at;
-  const isReady = effectiveOrg?.name && coverage.length > 0 && enabledCaps.length > 0 && hasCompliance;
+  const isReady = effectiveOrg?.name && coverage.length > 0 && enabledCaps.length > 0 && hasCompliance && allAccepted;
 
   const handleSubmit = async () => {
     if (!effectiveOrgId) return;
@@ -49,9 +53,9 @@ export default function OnboardingReview() {
 
   return (
     <div className="p-4 max-w-lg mx-auto animate-fade-in">
-      <p className="text-caption mb-1">Step 5 of 5</p>
+      <p className="text-caption mb-1">Step 6 of 6</p>
       <h1 className="text-h2 mb-1">Review & Submit</h1>
-      <p className="text-caption mb-6">Review your application before submitting.</p>
+      <p className="text-caption mb-6">Review your application before submitting. All sections must be complete.</p>
 
       <div className="space-y-4 mb-6">
         <SummaryCard
@@ -84,6 +88,15 @@ export default function OnboardingReview() {
             compliance?.tax_form_attested ? "Tax form attested ✓" : null,
             compliance?.tax_doc_url ? "Tax doc uploaded ✓" : compliance?.tax_form_attested ? "⚠ Tax doc not uploaded" : null,
           ].filter(Boolean)}
+        />
+        <SummaryCard
+          title="Agreement"
+          ok={allAccepted}
+          details={[
+            allAccepted
+              ? `All ${totalClauses} clauses accepted ✓`
+              : `${acceptedCount} of ${totalClauses} clauses accepted`,
+          ]}
         />
       </div>
 

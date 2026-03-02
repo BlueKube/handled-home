@@ -174,7 +174,7 @@ function DraftResumeScreen({ org }: { org: any }) {
   if (hasOrg && !hasCoverage) nextStep = "/provider/onboarding/coverage";
   else if (hasOrg && hasCoverage && !hasCapabilities) nextStep = "/provider/onboarding/capabilities";
   else if (hasOrg && hasCoverage && hasCapabilities && !hasCompliance) nextStep = "/provider/onboarding/compliance";
-  else if (hasOrg && hasCoverage && hasCapabilities && hasCompliance) nextStep = "/provider/onboarding/review";
+  else if (hasOrg && hasCoverage && hasCapabilities && hasCompliance) nextStep = "/provider/onboarding/agreement";
 
   return (
     <div className="p-4 max-w-lg mx-auto animate-fade-in">
