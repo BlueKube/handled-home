@@ -702,11 +702,11 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3FG-P2-R3** | P1 | S | DraftResumeScreen checks agreement status — routes to /review when all 12 accepted
 
 ### Phase 3 — Enhanced Application + Opportunity Banners
-- [ ] **3FG-P3-01** | P0 | L | Rewrite `Apply.tsx` for multi-category selection + home base ZIP + service ZIPs
-- [ ] **3FG-P3-02** | P0 | L | Build `OpportunityBanner` component (5 variants: EARLY/OPEN/EARLY-2/WAITLIST/CLOSED)
-- [ ] **3FG-P3-03** | P1 | M | Implement banner decision algorithm (score zone×category pairs, pick best variant)
-- [ ] **3FG-P3-04** | P1 | M | Add BYOC intake step (estimated count, willingness, relationship type)
-- [ ] **3FG-P3-05** | P1 | S | Update `useProviderApplication` for multi-category and new fields
+- [x] **3FG-P3-01** | P0 | L | Rewrite `Apply.tsx` for multi-category selection + home base ZIP + service ZIPs
+- [x] **3FG-P3-02** | P0 | L | Build `OpportunityBanner` component (5 variants: EARLY/OPEN/EARLY_2/WAITLIST/CLOSED)
+- [x] **3FG-P3-03** | P1 | M | Implement banner decision algorithm (`mapStateToBannerVariant` maps zone state → variant)
+- [x] **3FG-P3-04** | P1 | M | Add BYOC intake step (estimated count, willingness, relationship type, willing to invite)
+- [x] **3FG-P3-05** | P1 | S | Update `useProviderApplication` for multi-category, byoc_estimate_json, pitch_variant_seen
 
 ### Phase 4 — Category-Driven Compliance
 - [ ] **3FG-P4-01** | P0 | M | Create `useCategoryRequirements` hook
