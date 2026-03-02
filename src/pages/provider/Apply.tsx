@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, MapPin, CheckCircle, Clock, AlertCircle, Sparkles, Users } from "lucide-react";
+import { ArrowLeft, MapPin, CheckCircle, Clock, AlertCircle, Sparkles, Users, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -98,24 +99,33 @@ export default function ProviderApply() {
   }, [zipCodes, homeBaseZip]);
 
   const checkReadiness = async () => {
-    const primaryCategory = selectedCategories[0];
-    const result = await zoneCheck.mutateAsync({
-      zip_codes: allZips,
-      category: primaryCategory,
-    });
-    setReadiness(result);
+    try {
+      const primaryCategory = selectedCategories[0];
+      const result = await zoneCheck.mutateAsync({
+        zip_codes: allZips,
+        category: primaryCategory,
+      });
+      setReadiness(result);
 
-    // Determine banner variant from zone state
-    const bestZone = result.matched_zones?.[0];
-    if (bestZone) {
-      const variant = mapStateToBannerVariant(
-        bestZone.launch_status,
-        true, // assume founding slots available
-        result.matched_zones.length > 1
-      );
-      setBannerVariant(variant);
-    } else {
-      setBannerVariant(result.status === "not_supported" ? "CLOSED" : "WAITLIST");
+      // Determine banner variant from zone state
+      const bestZone = result.matched_zones?.[0];
+      if (bestZone) {
+        // TODO: hasFoundingSlots and categoriesFilled should come from
+        // check_zone_readiness RPC once it returns founding_partner_slots data.
+        // For now, use safe defaults that show the most relevant variant.
+        const hasFoundingSlots = true;
+        const categoriesFilled = false;
+        const variant = mapStateToBannerVariant(
+          bestZone.launch_status,
+          hasFoundingSlots,
+          categoriesFilled,
+        );
+        setBannerVariant(variant);
+      } else {
+        setBannerVariant(result.status === "not_supported" ? "CLOSED" : "WAITLIST");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Could not check zone availability. Please try again.");
     }
   };
 
@@ -131,17 +141,32 @@ export default function ProviderApply() {
           }
         : undefined;
 
-    submitApplication.mutate({
-      category: primaryCategory,
-      zip_codes: allZips,
-      requested_categories: selectedCategories,
-      byoc_estimate_json: byocEstimate,
-      pitch_variant_seen: bannerVariant ?? undefined,
-    });
+    try {
+      await submitApplication.mutateAsync({
+        category: primaryCategory,
+        zip_codes: allZips,
+        requested_categories: selectedCategories,
+        byoc_estimate_json: byocEstimate,
+        pitch_variant_seen: bannerVariant ?? undefined,
+      });
+      // Navigate to status screen after successful submission
+      navigate("/provider/apply", { replace: true });
+    } catch {
+      // Error toast handled by hook's onError
+    }
   };
 
-  // ─── Existing application status screen ───
-  if (application.data && !readiness) {
+  // ─── Loading state ───
+  if (application.isLoading) {
+    return (
+      <div className="p-4 flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // ─── Existing application status screen (skip draft — let them re-enter wizard) ───
+  if (application.data && !readiness && application.data.status !== "draft") {
     const app = application.data;
     const status = app.status as string;
     const msg = STATUS_MESSAGES[status] ?? STATUS_MESSAGES.submitted;
@@ -170,15 +195,7 @@ export default function ProviderApply() {
                 ))}
               </div>
             )}
-            {status === "approved" && (
-              <Button
-                onClick={() => navigate("/provider/onboarding")}
-                className="w-full mt-4"
-              >
-                Start Onboarding
-              </Button>
-            )}
-            {status === "approved_conditional" && (
+            {(status === "approved" || status === "approved_conditional") && (
               <Button
                 onClick={() => navigate("/provider/onboarding")}
                 className="w-full mt-4"
