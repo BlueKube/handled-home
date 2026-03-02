@@ -723,12 +723,18 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3FG-P4-04** | P1 | M | Add CSLB license fields for Tier 3 categories — license number + state inputs, license doc upload
 - [x] **3FG-P4-05** | P1 | S | Replace static OnboardingCompliance with dynamic version — driven by application's requested_categories
 
+### Phase 4 Review — Fixes
+- [x] **3FG-P4-R1** | P1 | S | Add UNIQUE(org_id, doc_type) constraint on provider_compliance_documents for upsert support
+- [x] **3FG-P4-R2** | P1 | S | Fix .limit(1) on UPDATE — use application.data.id instead of user_id + order + limit
+- [x] **3FG-P4-R3** | P1 | S | Add application.isLoading to loading guard in OnboardingCompliance
+- [x] **3FG-P4-R4** | P1 | S | Add UPDATE RLS policy for providers on provider_compliance_documents
+
 ### Phase 5 — BYOC Center + Invite Links
-- [ ] **3FG-P5-01** | P0 | L | Build `/provider/byoc` page (incentives summary, copy scripts, share link, invite stats)
-- [ ] **3FG-P5-02** | P1 | M | Build `/provider/byoc/create-link` (category picker, SKU+Level+cadence, generate link)
-- [ ] **3FG-P5-03** | P1 | M | Create `useByocInviteLinks` hook (CRUD for invite links, query events)
-- [ ] **3FG-P5-04** | P1 | S | Wire invite scripts from `invite_scripts` table into copy buttons
-- [ ] **3FG-P5-05** | P1 | S | Gate BYOC Center access to approved provider orgs only
+- [x] **3FG-P5-01** | P0 | L | Build `/provider/byoc` page (incentives summary, copy scripts, share link, invite stats)
+- [x] **3FG-P5-02** | P1 | M | Build `/provider/byoc/create-link` (category picker, SKU+Level+cadence, generate link)
+- [x] **3FG-P5-03** | P1 | M | Create `useByocInviteLinks` hook (CRUD for invite links, query events)
+- [x] **3FG-P5-04** | P1 | S | Wire invite scripts from `invite_scripts` table into copy buttons
+- [x] **3FG-P5-05** | P1 | S | Gate BYOC Center access to approved provider orgs only
 
 ### Phase 6 — Customer BYOC Activation
 - [ ] **3FG-P6-01** | P0 | L | Build `/byoc/activate/:token` page (ProviderIntroCard, service summary, property confirm, payment, confirm)
@@ -746,4 +752,4 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3FG-P1-R2** | S | Verify support-ai-classify bucket bug — confirmed already fixed (uses job-photos, single issuePhotoContext)
 - [x] **3FG-P1-R3** | S | Document provider systems reconciliation (Flow A: application → Flow B: invite-code onboarding) in claude-implementation-notes.md
 
-*Last updated: 2026-03-02 — Phase 3 review fixes + Phase 4 complete. Ready for Phase 5.*
+*Last updated: 2026-03-02 — Phase 4 review fixes + Phase 5 complete. Ready for Phase 6.*

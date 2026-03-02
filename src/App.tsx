@@ -73,6 +73,8 @@ import ProviderSupportTicketDetail from "@/pages/provider/SupportTicketDetail";
 import ProviderReferrals from "@/pages/provider/Referrals";
 import ProviderInviteCustomers from "@/pages/provider/InviteCustomers";
 import ProviderApply from "@/pages/provider/Apply";
+import ProviderByocCenter from "@/pages/provider/ByocCenter";
+import ProviderByocCreateLink from "@/pages/provider/ByocCreateLink";
 import InviteLanding from "@/pages/InviteLanding";
 import ShareLanding from "@/pages/ShareLanding";
 
@@ -221,6 +223,8 @@ const App = () => (
                 <Route path="/provider/insights" element={<ProviderInsights />} />
                 <Route path="/provider/insights/history" element={<ProviderInsightsHistory />} />
                 <Route path="/provider/apply" element={<ProviderApply />} />
+                <Route path="/provider/byoc" element={<ProviderByocCenter />} />
+                <Route path="/provider/byoc/create-link" element={<ProviderByocCreateLink />} />
                 <Route path="/provider/quality" element={<ProviderQualityScore />} />
                 <Route path="/provider/more" element={<MoreMenuPage />} />
                 <Route path="/provider/notifications" element={<SharedNotifications />} />
