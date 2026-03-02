@@ -728,4 +728,9 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [ ] **3FG-P7-03** | P0 | L | Create `review_provider_application` RPC (set status, notify provider, update org on approval)
 - [ ] **3FG-P7-04** | P1 | S | Wire notifications to provider on decision
 
-*Last updated: 2026-03-02 — Sprint 3F/3G Phase 1 (Schema Foundation) complete.*
+### Phase 1 Review — Findings & Fixes
+- [x] **3FG-P1-R1** | S | Add 4 missing composite indexes (byoc_invite_events, byoc_activations, provider_compliance_documents, provider_coverage)
+- [x] **3FG-P1-R2** | S | Verify support-ai-classify bucket bug — confirmed already fixed (uses job-photos, single issuePhotoContext)
+- [x] **3FG-P1-R3** | S | Document provider systems reconciliation (Flow A: application → Flow B: invite-code onboarding) in claude-implementation-notes.md
+
+*Last updated: 2026-03-02 — Sprint 3F/3G Phase 1 Review complete. Ready for Phase 2.*

@@ -215,3 +215,47 @@ See `docs/edge-function-inventory.md` for the complete inventory with triggers, 
 - No desktop breakpoints
 - Bottom tab bar navigation
 - Safe area insets via `env(safe-area-inset-*)`
+
+---
+
+## 8) Provider Systems Reconciliation (Sprint 3F/3G)
+
+### Two Parallel Provider Flows — How They Relate
+
+#### Flow A: Public Application (`provider_applications`)
+- **Entry:** Any provider visits `/provider/apply`
+- **Data:** `provider_applications` — stores category, zip_codes, status (draft → submitted → under_review → approved/waitlisted/rejected/approved_conditional)
+- **New fields (3F):** `requested_categories[]`, `requested_zone_ids[]`, `byoc_estimate_json`, `pitch_variant_seen`
+- **Agreement:** `provider_agreement_acceptance` — clause-by-clause acceptance linked to `application_id`
+- **Purpose:** Intake + screening + agreement. No org created yet.
+
+#### Flow B: Invite-Code Onboarding (`provider_orgs` + `provider_members`)
+- **Entry:** Provider receives an invite code → visits `/provider/onboard/:code`
+- **Data:** `provider_orgs` (org profile), `provider_members` (team), `provider_coverage` (zones), `provider_capabilities` (SKUs), `provider_compliance` (insurance/license attestations)
+- **Purpose:** Full operational setup. Org is created, compliance docs uploaded, coverage configured.
+
+#### Lifecycle Connection (Phase 2+ Design Rule)
+
+```
+Application (Flow A) ──[approved]──► Invite Code Generated ──► Onboarding (Flow B)
+```
+
+1. Provider submits application (Flow A)
+2. Admin reviews → approves → system generates invite code
+3. Provider uses invite code to complete onboarding (Flow B)
+4. `provider_applications.id` is linked to `provider_orgs.invite_id` (already exists in schema)
+
+#### Key Implications for Phase 2+ UI:
+- **Agreement UI (Phase 2)** attaches to `provider_applications` via `application_id` — happens BEFORE org creation
+- **Compliance docs (Phase 4)** go to `provider_compliance_documents` — happens DURING onboarding (Flow B), linked to `org_id`
+- **BYOC Center (Phase 5)** requires an active `provider_org` — only accessible after onboarding complete
+- **Admin Review (Phase 7)** reviews applications (Flow A), then triggers invite-code generation bridging to Flow B
+
+#### Tables by Flow:
+| Flow A (Application) | Flow B (Onboarding) | Shared |
+|---|---|---|
+| provider_applications | provider_orgs | category_requirements |
+| provider_agreement_acceptance | provider_members | provider_compliance_documents |
+| | provider_coverage | byoc_invite_links |
+| | provider_capabilities | byoc_activations |
+| | provider_compliance | |
