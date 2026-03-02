@@ -7,8 +7,7 @@ import { useByocInviteLinks } from "@/hooks/useByocInviteLinks";
 import { useSkuLevels } from "@/hooks/useSkuLevels";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { ArrowLeft, ArrowRight, Loader2, Link2 } from "lucide-react";
+import { ArrowLeft, Loader2, Link2 } from "lucide-react";
 import { toast } from "sonner";
 
 const CADENCES = [
@@ -128,7 +127,7 @@ export default function ByocCreateLink() {
                 size="sm"
                 onClick={() => setSelectedZone(zone.id)}
               >
-                {zone.name.substring(0, 12)}
+                {zone.name}
               </Button>
             ))}
           </div>
@@ -172,7 +171,12 @@ export default function ByocCreateLink() {
       )}
 
       {/* Level (optional, if SKU selected) */}
-      {selectedSku && levels && levels.length > 0 && (
+      {selectedSku && levelsQuery.isLoading && (
+        <div className="flex justify-center py-4">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        </div>
+      )}
+      {selectedSku && !levelsQuery.isLoading && levels && levels.length > 0 && (
         <Card className="animate-fade-in">
           <CardHeader>
             <CardTitle className="text-base">Default Level (optional)</CardTitle>
