@@ -20,13 +20,14 @@ export default function AuthPage() {
   const [searchParams] = useSearchParams();
   const refCode = searchParams.get("ref");
   const shareCode = searchParams.get("share");
+  const redirectTo = searchParams.get("redirect");
   const { toast } = useToast();
   const { recordEvent } = useGrowthEvents();
 
-  // If arriving with a ref code, default to signup tab
+  // If arriving with a ref or redirect code, default to signup tab
   useEffect(() => {
-    if (refCode) setTab("signup");
-  }, [refCode]);
+    if (refCode || redirectTo) setTab("signup");
+  }, [refCode, redirectTo]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +37,7 @@ export default function AuthPage() {
     if (error) {
       toast({ title: "Error", description: "Invalid email or password.", variant: "destructive" });
     } else {
-      navigate("/");
+      navigate(redirectTo || "/");
     }
   };
 
@@ -102,7 +103,7 @@ export default function AuthPage() {
 
     setLoading(false);
     toast({ title: "Success", description: "Account created! Redirecting..." });
-    navigate("/");
+    navigate(redirectTo || "/");
   };
 
   return (
