@@ -1,175 +1,106 @@
 
-# Sprint 3C — Growth Surfaces + Add Service Drawer + Home Restructure
 
-## What & Why
+# Sprint 3F/3G Implementation Plan
 
-Sprint 3C transforms the customer Home tab from a passive dashboard into an active growth engine. It adds a **suggestion system** (smart, throttled, suppressible), an **Add Service Drawer** (universal entry point from Home/Routine/Membership), and restructures the Home stack to always show an action path. This is the conversion layer that drives attach rate (services per household per cycle).
+## Current State
 
-**Depends on:** 3A (Levels) + 3B (Coverage Map + Property Signals) — both complete.
+**What already exists:**
+- `provider_applications` table (simple: category, zip_codes, status enum with draft/submitted/approved/waitlisted/rejected)
+- Basic `Apply.tsx` — 3-step flow (pick category → enter ZIPs → submit)
+- Full invite-code onboarding wizard: Org → Coverage → Capabilities → Compliance → Review
+- `provider_orgs`, `provider_coverage`, `provider_capabilities`, `provider_compliance` tables
+- `useProviderApplication`, `useProviderOrg`, `useProviderInvite` hooks
+- `market_zone_category_state` table (status: CLOSED/SOFT_LAUNCH/OPEN/PROTECT_QUALITY)
+- `byoc_attributions` + `byoc_bonus_ledger` tables (existing BYOC tracking)
+- `invite_scripts` table (admin-managed scripts)
+- `useByocAttributions` hook
 
----
-
-## Phase 1: Suggestion Engine Schema + RPC (Database)
-
-### Migration 1: Suggestion tables
-
-**Table: `suggestion_suppressions`**
-- `id` uuid PK default gen_random_uuid()
-- `property_id` uuid FK → properties(id) ON DELETE CASCADE
-- `sku_id` uuid FK → service_skus(id) ON DELETE CASCADE (nullable — null means suppress whole category)
-- `category` text (nullable — for category-level suppression)
-- `reason` text NOT NULL (already_have_someone, not_relevant, too_expensive, not_now)
-- `suppressed_until` timestamptz NOT NULL (default now() + 90 days)
-- `created_at` timestamptz default now()
-- Unique constraint on (property_id, sku_id) WHERE sku_id IS NOT NULL
-- RLS: customer own-property INSERT/SELECT/DELETE, admin all
-
-**Table: `suggestion_impressions`**
-- `id` uuid PK default gen_random_uuid()
-- `property_id` uuid FK → properties(id) ON DELETE CASCADE
-- `sku_id` uuid FK → service_skus(id) ON DELETE CASCADE
-- `surface` text NOT NULL (home, drawer, routine, receipt)
-- `created_at` timestamptz default now()
-- RLS: customer own-property INSERT/SELECT, admin all
-- Index on (property_id, sku_id, created_at DESC)
-
-**Table: `suggestion_actions`**
-- `id` uuid PK default gen_random_uuid()
-- `property_id` uuid FK → properties(id) ON DELETE CASCADE
-- `sku_id` uuid FK → service_skus(id) ON DELETE CASCADE
-- `action` text NOT NULL (added, dismissed, hidden)
-- `reason` text (for hidden: already_have_someone, not_relevant, too_expensive, not_now)
-- `metadata` jsonb default '{}'
-- `created_at` timestamptz default now()
-- RLS: customer own-property INSERT/SELECT, admin all
-
-### Migration 2: `get_service_suggestions` RPC
-
-SECURITY DEFINER RPC accepting `p_property_id uuid, p_surface text` returning jsonb array of suggestions.
-
-Logic:
-1. Get property coverage (eligible categories from `get_property_profile_context`)
-2. Get property sizing signals
-3. Get existing routine SKU IDs (exclude from suggestions)
-4. Get active suppressions (exclude suppressed SKUs)
-5. Get impression counts (exclude SKUs with ≥2 impressions in last 14 days)
-6. Score remaining SKUs by:
-   - Coverage status: NONE = 10, SELF (high-pain) = 7, SELF (other) = 3, PROVIDER = 1
-   - Seasonality: month-based boost for windows/gutters/power_wash (+5 in season)
-   - Home sizing: large home + outdoor category = +3
-7. Return top N (4 for home, 6 for drawer) with:
-   - sku_id, sku_name, category, default_level (id, label, handles_cost), reason string, suggestion_type (best_next / seasonal / adjacent)
+**What's missing (from the 5 specs):**
+- Provider agreement acceptance (clause-by-clause) — no table, no UI
+- Category requirements config table (risk tiers, compliance rules per category)
+- Opportunity banner system (dynamic variant A-E based on zone/category state)
+- BYOC invite links with SKU/Level mapping + customer activation flow
+- BYOC Center for providers (copy scripts, share links, track invites)
+- Enhanced provider application with BYOC intake, multi-category support
+- Admin application review queue with agreement audit log
+- Provider compliance documents table (structured COI/license uploads)
 
 ---
 
-## Phase 2: Frontend Hooks + Suggestion Infrastructure
+## Phased Implementation
 
-### 2a. `useSuggestions` hook
-- Calls `get_service_suggestions` RPC
-- Accepts surface param (home/drawer)
-- Returns typed suggestion array
-- `useQuery` with 5-min stale time
+### Phase 1 — Schema Foundation (1 session)
+**Goal:** Create all new tables and extend existing ones so subsequent phases have a stable data layer.
 
-### 2b. `useSuggestionActions` hook
-- `recordImpression(skuId, surface)` — inserts to suggestion_impressions
-- `hideSuggestion(skuId, reason)` — inserts to suggestion_suppressions + suggestion_actions
-- `recordAdd(skuId)` — inserts to suggestion_actions with action='added'
-- All mutations invalidate suggestions query
+- **Migration 1a:** Create `provider_agreement_acceptance` table (application_id, clause_key, accepted_at, ip_address). Unique constraint on (application_id, clause_key).
+- **Migration 1b:** Create `category_requirements` config table (category_key, risk_tier, requires_gl_insurance, requires_workers_comp_if_employees, requires_background_check, requires_license, license_authority, ops_review_required).
+- **Migration 1c:** Create `provider_compliance_documents` table (org_id, doc_type, storage_path, expires_at, status, verified_by, verified_at, rejection_reason).
+- **Migration 1d:** Create `byoc_invite_links` table (org_id, zone_id, category_key, sku_id, default_level_id, default_cadence, token unique, created_at). Create `byoc_invite_events` table (invite_id, event_type, actor, payload). Create `byoc_activations` table (invite_id, customer_user_id, property_id, provider_org_id, sku_id, level_id, cadence, status, activated_at).
+- **Migration 1e:** Add `under_review` and `approved_conditional` to `provider_application_status` enum. Add `requested_categories` (text[]), `requested_zone_ids` (uuid[]), `byoc_estimate_json` (jsonb), `pitch_variant_seen` (text) columns to `provider_applications` if not present. Add founding_partner_slots_total/filled to `market_zone_category_state`.
+- **Migration 1f:** Seed `category_requirements` with CA v1 defaults (Tier 0-3 per the spec matrix).
+- **RLS policies** for all new tables following spec Part C rules.
+- **Indexes** per spec Part D.
 
-### 2c. `SuggestionCard` component
-- Compact card: SKU name, default level label, handles cost, one-line reason
-- "Add" button (primary, one-tap)
-- "×" dismiss with reason popover (already_have_someone, not_relevant, too_expensive, not_now)
-- Records impression on mount (once per session per SKU)
+### Phase 2 — Clause-by-Clause Agreement Flow (1 session)
+**Goal:** Provider can accept 12 clauses one-by-one during onboarding.
 
----
+- Create `useProviderAgreement` hook (query accepted clauses, insert acceptance).
+- Build `/provider/apply/agreement` page — ClauseCard component with title, plain-English text, "I Agree" button, progress indicator (e.g., 3/12).
+- Define clause content as a static config array (12 clauses from Part B of the screen copy spec).
+- Wire into existing onboarding flow: insert between Compliance and Review steps.
+- Update OnboardingReview to check all required clauses accepted before submit.
 
-## Phase 3: Add Service Drawer
+### Phase 3 — Enhanced Application + Opportunity Banners (1 session)
+**Goal:** Multi-category apply flow with dynamic opportunity messaging.
 
-### 3a. `AddServiceDrawer` component (Sheet/Drawer)
-- Header: "Add a service" / "Recommendations are tailored to your home."
-- Section 1 — Best Next: top 4 SuggestionCards from useSuggestions(surface='drawer')
-- Section 2 — Seasonal: up to 2 seasonal suggestions (filtered by type)
-- Section 3 — Browse All: CTA button → opens existing AddServicesSheet catalog
-- Section 4 — Switch placeholder: if coverage shows PROVIDER + OPEN_NOW/LATER, show "Switch a service" info link (routes to informational page, full switch flow deferred to 3D)
+- Rewrite `Apply.tsx` to support multi-category selection (chips from spec A0).
+- Add home base ZIP + service ZIPs step (spec A1).
+- Build `OpportunityBanner` component — 5 variants (EARLY/OPEN/EARLY-2/WAITLIST/CLOSED) driven by `market_zone_category_state`.
+- Implement banner decision algorithm (spec B3): score each (zone, category) pair, pick best, select variant.
+- Add BYOC intake step (optional): estimated customer count, willingness, relationship type (spec A6/Stage 4).
+- Update `useProviderApplication` to handle multi-category and new fields.
 
-### 3b. Floating "+ Add" button
-- Fixed bottom-right FAB on Home, Routine, Membership pages
-- Opens AddServiceDrawer
-- Uses framer-motion for entrance animation
+### Phase 4 — Category-Driven Compliance (1 session)
+**Goal:** Compliance requirements adapt dynamically based on selected categories.
 
-### 3c. One-tap add flow
-- Tap "Add" on suggestion → compact confirmation sheet:
-  - SKU name, what's included, handles cost
-  - Level selector (pre-selected to default)
-  - Cadence selector (if routine service)
-  - "Add to Routine" confirm button
-- On confirm: add to routine via existing `useAddRoutineItem`, show success toast with 10-second undo
-- Undo: remove the just-added item
+- Create `useCategoryRequirements` hook (fetch from `category_requirements` config table).
+- Build `DynamicComplianceRenderer` component — shows/hides license, insurance, background check fields based on category risk tier.
+- Add COI upload to `provider_compliance_documents` (using existing storage bucket pattern).
+- Add CSLB license fields for Tier 3 categories (license number, classification, attestation).
+- Replace existing static OnboardingCompliance with dynamic version.
 
----
+### Phase 5 — BYOC Center + Invite Links (1 session)
+**Goal:** Approved providers can generate invite links, copy scripts, and track invites.
 
-## Phase 4: Home Tab Restructure
+- Build `/provider/byoc` page — BYOC Center with incentives summary, copy SMS/email script buttons, share invite link, invite stats.
+- Build `/provider/byoc/create-link` — category picker, default SKU+Level+cadence review, generate link button.
+- Create `useByocInviteLinks` hook (CRUD for invite links, query events).
+- Wire invite scripts from existing `invite_scripts` table into copy buttons.
+- Track invite events (CREATED, SHARED) in `byoc_invite_events`.
+- Gate access: only show BYOC Center if provider org status is ACTIVE/APPROVED.
 
-### 4a. Restructure Dashboard.tsx into the new stack:
+### Phase 6 — Customer BYOC Activation (1 session)
+**Goal:** Customer clicks invite link and activates service with their provider.
 
-**Section A — Next Up (always first)**
-- Service day assigned + upcoming job: NextVisitCard (already exists)
-- Service day not assigned: "We're preparing your Service Day" (already exists as banner)
-- No routine: "Start your routine" CTA card
+- Build `/byoc/activate/:token` page — ProviderIntroCard, service summary (SKU+Level+cadence), property confirm, payment method, confirm activation.
+- Create `activate-byoc-invite` edge function — validates token, creates activation record, links provider to customer, creates subscription/routine item.
+- Track activation events (OPENED, ACTIVATION_STARTED, PAYMENT_ADDED, ACTIVATED).
+- Success screen: "Your home is handled."
 
-**Section B — This Cycle: Your Routine**
-- Compact summary: # services active, handles usage bar, top 3 routine service pills
-- CTA: "Edit routine" → /customer/routine
+### Phase 7 — Admin Application Review Queue (1 session)
+**Goal:** Ops can review, approve, waitlist, or reject provider applications.
 
-**Section C — Suggested for Your Home**
-- 2–4 SuggestionCards from useSuggestions(surface='home')
-- Section header: "Suggested for Your Home"
-
-**Section D — Recent Receipt**
-- Last completed job receipt card (or mocked preview if none)
-
-### 4b. Remove from Home
-- Redundant stat cards that duplicate info in the new sections
-- Empty-state cards that say "wait" with no action
+- Build `/admin/providers/applications` — ApplicationsTable with filters (status, zone, category).
+- Build `/admin/providers/applications/:id` — full applicant detail view: summary, coverage/categories, compliance checklist, agreement acceptance audit log, decision buttons (Approve/Approve w Conditions/Waitlist/Reject), notes field.
+- Create `review_provider_application` RPC — sets status, sends notification, updates provider_org status on approval.
+- Wire notifications to provider on decision.
 
 ---
 
-## Phase 5: Routine + Receipt Surfaces
+## Technical Notes
 
-### 5a. Routine page
-- Add "Suggested adjacent service" card at bottom of routine item list (1 suggestion)
-- Per-item "Upgrade level" quick action (already partially exists from 3A-14)
+- The existing `market_zone_category_state.status` enum uses CLOSED/SOFT_LAUNCH/OPEN/PROTECT_QUALITY. The specs reference EARLY/OPEN/WAITLIST/CLOSED. We'll map SOFT_LAUNCH→EARLY and add WAITLIST if needed, or use the existing enum with a mapping layer in the banner logic.
+- The existing `provider_application_status` enum has: draft/submitted/approved/waitlisted/rejected. We need to add `under_review` and `approved_conditional`.
+- Payout setup (Stripe Connect) is listed in the specs but will be stubbed as "Coming Soon" — actual Stripe integration is a separate workstream.
+- All new tables get RLS enabled with provider-owns-own + admin-full-access policies.
 
-### 5b. Receipt growth surface
-- At bottom of VisitDetail: 1–2 suggestion cards ("While we're here next time")
-- Only for completed visits, tightly related to completed SKU category
-
----
-
-## Phase 6: Instrumentation
-
-### 6a. Growth event tracking
-- Drawer opens → suggestion_actions (action='drawer_open')
-- Suggestion impressions → suggestion_impressions table
-- Suggestion adds → suggestion_actions (action='added')
-- Suggestion hides → suggestion_actions (action='hidden', reason)
-- All via useSuggestionActions hook (already wired in Phase 2)
-
----
-
-## Implementation Order
-
-1. **Phase 1** — DB migration (tables + RPC) — must be first
-2. **Phase 2** — Hooks + SuggestionCard component
-3. **Phase 3** — Add Service Drawer + FAB + one-tap add
-4. **Phase 4** — Home restructure
-5. **Phase 5** — Routine + Receipt surfaces
-6. **Phase 6** — Instrumentation (mostly done via Phase 2 hooks)
-
----
-
-## Deferred to 3D
-- Full switch flow (Switch Kit)
-- Ops Cockpit integration for suggestion analytics
-- Advanced experimentation / A/B framework
