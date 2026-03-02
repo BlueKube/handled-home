@@ -5,6 +5,8 @@ import { useProviderInvite } from "@/hooks/useProviderInvite";
 import { useProviderCoverage } from "@/hooks/useProviderCoverage";
 import { useProviderCapabilities } from "@/hooks/useProviderCapabilities";
 import { useProviderCompliance } from "@/hooks/useProviderCompliance";
+import { useProviderApplication } from "@/hooks/useProviderApplication";
+import { useProviderAgreement } from "@/hooks/useProviderAgreement";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -170,11 +172,17 @@ function DraftResumeScreen({ org }: { org: any }) {
   const hasCapabilities = capabilities.filter((c: any) => c.is_enabled).length > 0;
   const hasCompliance = compliance?.terms_accepted_at;
 
+  // Check agreement status via application
+  const { application: appQuery } = useProviderApplication();
+  const appId = appQuery.data?.id;
+  const { allAccepted: hasAgreement } = useProviderAgreement(appId);
+
   let nextStep = "/provider/onboarding/org";
   if (hasOrg && !hasCoverage) nextStep = "/provider/onboarding/coverage";
   else if (hasOrg && hasCoverage && !hasCapabilities) nextStep = "/provider/onboarding/capabilities";
   else if (hasOrg && hasCoverage && hasCapabilities && !hasCompliance) nextStep = "/provider/onboarding/compliance";
-  else if (hasOrg && hasCoverage && hasCapabilities && hasCompliance) nextStep = "/provider/onboarding/agreement";
+  else if (hasOrg && hasCoverage && hasCapabilities && hasCompliance && !hasAgreement) nextStep = "/provider/onboarding/agreement";
+  else if (hasOrg && hasCoverage && hasCapabilities && hasCompliance && hasAgreement) nextStep = "/provider/onboarding/review";
 
   return (
     <div className="p-4 max-w-lg mx-auto animate-fade-in">

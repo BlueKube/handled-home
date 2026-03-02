@@ -696,6 +696,11 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3FG-P2-03** | P1 | S | Define clause content as static config array (12 clause keys from spec Part B)
 - [x] **3FG-P2-04** | P1 | S | Update OnboardingReview to check all required clauses accepted before submit
 
+### Phase 2 Review — Fixes
+- [x] **3FG-P2-R1** | P0 | S | Fix step counters across all onboarding pages (was "of 5", now "of 6")
+- [x] **3FG-P2-R2** | P1 | S | Add CHECK constraint on clause_key column (only 12 valid values)
+- [x] **3FG-P2-R3** | P1 | S | DraftResumeScreen checks agreement status — routes to /review when all 12 accepted
+
 ### Phase 3 — Enhanced Application + Opportunity Banners
 - [ ] **3FG-P3-01** | P0 | L | Rewrite `Apply.tsx` for multi-category selection + home base ZIP + service ZIPs
 - [ ] **3FG-P3-02** | P0 | L | Build `OpportunityBanner` component (5 variants: EARLY/OPEN/EARLY-2/WAITLIST/CLOSED)
