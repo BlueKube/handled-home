@@ -161,7 +161,7 @@ export default function OnboardingCompliance() {
       });
 
       // Save license info into application compliance_json if present
-      if (merged?.requiresLicense && licenseNumber) {
+      if (merged?.requiresLicense && licenseNumber && application.data?.id) {
         await supabase
           .from("provider_applications")
           .update({
@@ -172,9 +172,7 @@ export default function OnboardingCompliance() {
               workers_comp_attested: workersCompAttested,
             } as any,
           })
-          .eq("user_id", (await supabase.auth.getUser()).data.user?.id ?? "")
-          .order("created_at", { ascending: false })
-          .limit(1);
+          .eq("id", application.data.id);
       }
 
       toast.success("Compliance details saved");
@@ -188,7 +186,7 @@ export default function OnboardingCompliance() {
     }
   };
 
-  if (orgLoading || reqLoading) {
+  if (orgLoading || reqLoading || application.isLoading) {
     return (
       <div className="p-4 flex items-center justify-center min-h-[60vh]">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
