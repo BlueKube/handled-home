@@ -1,0 +1,479 @@
+# Handled Home — Complete Feature List
+
+> **"Your home is handled."**
+>
+> This document catalogs every feature built into Handled Home — a subscription-based home maintenance platform that replaces fragmented vendor relationships with a single, intelligent, density-optimized operating system for your home. Every item below is implemented and deployed.
+
+---
+
+## I. Authentication & Identity
+
+1. Email/password signup and login with secure session persistence across app restarts — DONE
+2. Automatic profile creation and default customer role assignment on signup — DONE
+3. Multi-role support: users can hold customer, provider, and admin roles simultaneously — DONE
+4. One-tap role switching without logout for multi-role users — DONE
+5. Admin Preview Mode: admins can view the app as any role without needing that role in the database — DONE
+6. "Account Not Configured" safety screen for users with no assigned roles — DONE
+7. Role-based route protection preventing cross-role access (typing `/admin` as a customer always redirects) — DONE
+8. Bootstrap RPC that repairs partial signups on next login (idempotent, never leaves orphaned accounts) — DONE
+
+---
+
+## II. Property Profiles & Home Intelligence
+
+9. Single-screen property profile with structured address, access notes, gate codes, parking, and pet info — DONE
+10. Real-time zone coverage indicator as the customer types their ZIP code — DONE
+11. Property gate: new customers are guided to add their home before accessing any other feature — DONE
+12. Coverage Map: 10-category self-assessment (Self / Have Someone / None / N/A) with switch intent tracking — DONE
+13. Property Sizing Tiers: sqft, yard, windows, and stories — used to auto-select correct service levels — DONE
+14. Progressive "Complete Home Setup" card on dashboard that tracks coverage + sizing completion — DONE
+15. `get_property_profile_context` RPC: returns computed eligibility, switch candidates, and high-confidence upsells — DONE
+16. Personalization event logging for every setup completion and update — DONE
+
+---
+
+## III. Zones, Regions & Capacity Governance
+
+17. Region hierarchy for organizational grouping (e.g., "Los Angeles County") — DONE
+18. ZIP-code-based zone definitions with instant coverage lookups — DONE
+19. Per-zone capacity settings: max homes/day, max minutes/day, buffer percentage — DONE
+20. Zone Health Score: Green / Yellow / Red advisory based on utilization ratio — DONE
+21. Smart adjacent-ZIP suggestions when creating zones (prefix-matching heuristic) — DONE
+22. Expansion Signal Dashboard: non-serviced ZIP demand ranked by signup count — DONE
+23. Primary + Backup provider model per zone and category (franchise-style territory) — DONE
+24. Zone launch lifecycle: planning → recruiting → soft_launch → live → paused — DONE
+25. Market zone category state: open / waitlist_only / closed / provider_recruiting per category — DONE
+26. Founding Partner slot tracking per zone and category — DONE
+
+---
+
+## IV. Service Catalog (SKU System)
+
+27. Standardized Service SKUs with inclusions, exclusions, duration, and edge-case notes — DONE
+28. Fulfillment mode governance: same_day_preferred / same_week_allowed / independent_cadence — DONE
+29. Structured proof requirements per SKU: labeled photo slots (before/after/both) with counts — DONE
+30. Checklist templates per SKU with required/optional flags — DONE
+31. SKU lifecycle: draft → active → paused → archived (never hard-deleted) — DONE
+32. Visual service catalog with hero images, featured flags, and category grouping — DONE
+33. Customer-facing catalog with horizontal featured scroll, category groups, and search — DONE
+34. Admin duplicate-SKU action for safe scope changes — DONE
+35. Weather sensitivity flag per SKU — DONE
+
+---
+
+## V. SKU Levels (Service Variants)
+
+36. Multi-level variants per SKU (e.g., Maintenance / Standard / Deep) with different scope, time, and cost — DONE
+37. Side-by-side level comparison UI with handle delta display — DONE
+38. Guidance questions (0–3 per SKU) for logic-based level selection — DONE
+39. Smart level defaults based on property sizing signals (sqft, yard, windows, stories) — DONE
+40. Provider level sufficiency prompt at job completion — DONE
+41. Level recommendation system with reason codes for providers to suggest the correct level — DONE
+42. Courtesy upgrade: provider performs a higher level for free, once per property/SKU/6 months — DONE
+43. Admin analytics: recommendation + courtesy upgrade counts, mismatch detection by zone — DONE
+
+---
+
+## VI. Subscription Engine
+
+44. Membership-first tiered plans: Essential / Plus / Premium — DONE
+45. 28-day billing cycles ("Billed every 4 weeks") for predictability without calendar-month complexity — DONE
+46. Dual-clock model: billing cadence (28-day) + operational rhythm (weekly service weeks) — DONE
+47. Stripe integration as payment rail; entitlements owned by Supabase (not Stripe-derived) — DONE
+48. Soft onboarding: browse plans, preview SKUs, build draft routine — all before paying — DONE
+49. Plan zone availability: plans can be enabled/disabled per zone — DONE
+50. Entitlement versioning: plan entitlement rules are version-tracked and immutable — DONE
+51. No-rollover policy: unused service weeks expire at billing cycle end — DONE
+
+---
+
+## VII. Handles Currency System
+
+52. Handles as the internal unit of value — simple "Used / Remaining" bar for customers — DONE
+53. Handle transaction ledger: grant / spend / expire / rollover / refund — append-only, reconcilable — DONE
+54. Cached balance on subscription with `recalc_handles_balance()` RPC for reconciliation — DONE
+55. Per-SKU handle cost display ("Costs 3 handles") at point of selection — DONE
+56. Rollover with configurable cap and expiry days per plan — DONE
+57. Refund handles preserving original expiry date on system/provider cancellations — DONE
+58. Idempotency key indexing on handle transactions to prevent duplicate grants — DONE
+
+---
+
+## VIII. Service Day System
+
+59. System-assigned recurring Service Day based on zone, capacity, and route optimization — DONE
+60. Customer confirm/reject flow with exactly one rejection token — DONE
+61. 2–3 controlled alternative day offers on rejection (never infinite cycling) — DONE
+62. Atomic capacity reservation: capacity is reserved when an offer is created, moved on alternative selection — DONE
+63. "System Recommended" badge with efficiency-framed reason text — DONE
+64. "Must be home" toggle with time window selector (morning/afternoon) — DONE
+65. "Try to align days" preference toggle with tradeoff messaging — DONE
+66. Admin utilization view: Mon–Sun assignment counts per zone with stability indicators — DONE
+67. Admin override with mandatory reason, capacity warnings, and full audit logging — DONE
+
+---
+
+## IX. Routine & Bundle Builder
+
+68. 3-step progressive flow: Build Routine → Review Scope + Proof → Confirm Lock — DONE
+69. Per-SKU cadence picker: weekly / biweekly / every 4 weeks / independent — DONE
+70. Live 4-week preview timeline that updates instantly on every change — DONE
+71. Entitlement-aware guardrails: routine demand vs. plan allowance with calm warning panel — DONE
+72. "Auto-fit to my plan" one-tap automation that adjusts cadences to fit entitlements — DONE
+73. Biweekly pattern optimizer (Weeks 1&3 vs 2&4) based on zone load + geo clustering — DONE
+74. Bounded "Swap pattern" option for biweekly items with feasibility check — DONE
+75. Confusion detector: inline help when a customer changes cadence 3+ times — DONE
+76. Versioned routine locking with effective date policy (next billing cycle start) — DONE
+77. Review step: per-service scope + proof expectations to prevent disputes — DONE
+
+---
+
+## X. Guided Customer Onboarding
+
+78. 6-step onboarding wizard: Property → ZIP/Zone Check → Plan Selection → Subscribe → Service Day → Build Routine — DONE
+79. Zone availability check with automatic waitlist signup if no zone covers the ZIP — DONE
+80. Onboarding progress persistence: auto-resumes at the exact step on return — DONE
+81. Checkout success polling with auto-advance when subscription appears — DONE
+82. Property gate distinguishes truly new users from churned customers returning — DONE
+
+---
+
+## XI. Job Execution & Provider Workflow
+
+83. Provider daily job list optimized for "today → next" with route-ordered stops — DONE
+84. Job detail with Level, scope bullets, access notes, proof requirements, and planned minutes — DONE
+85. Guided checklist completion: required items must end in Done or Not-Done-With-Reason — DONE
+86. Photo proof capture with offline/poor-signal resilience: queue uploads automatically — DONE
+87. Server-validated atomic job completion: `complete_job` RPC validates all proof before marking done — DONE
+88. Structured issue reporting with type, severity, and evidence — no chat threads — DONE
+89. Admin override completion with mandatory reason and audit logging — DONE
+90. Job event timeline: append-only log of every state change (started, arrived, departed, completed) — DONE
+
+---
+
+## XII. Provider Day Command Center
+
+91. Route plan locking: "Start Route" freezes route order and computes projected earnings — DONE
+92. Projected earnings banner based on completed + (historical avg × remaining stops) — DONE
+93. Estimated drive and work time stats on provider dashboard — DONE
+94. Route reorder controls disabled when route is locked — DONE
+
+---
+
+## XIII. Route Optimization
+
+95. Nearest-neighbor route optimization using geohash/lat-lng from properties — DONE
+96. Provider manual reorder with up/down controls and audit logging — DONE
+97. Minimum-jobs guard: skip optimization for routes with < 3 stops — DONE
+98. IN_PROGRESS freeze: in-progress jobs are pinned and excluded from reorder — DONE
+
+---
+
+## XIV. Photo Proof & Visit Receipts
+
+99. Before/after comparison slider with pointer-drag interaction — DONE
+100. Photo timeline: chronological gallery of all visit photos per property — DONE
+101. Photo quality validation edge function: sharpness, brightness, duplicate hash, orientation — DONE
+102. Canvas-based image compression for upload performance — DONE
+103. Signed URL display for secure photo viewing — DONE
+104. "Handled Receipt" per visit: photos + timestamps + checklist + provider summary — DONE
+
+---
+
+## XV. Billing & Payments
+
+105. Tokenized payment method management with add/remove/default — DONE
+106. Subscription autopay with 28-day cycle invoicing — DONE
+107. Invoice line items: plan, add-ons, credits, taxes/fees — DONE
+108. Receipt view with cycle period, payment status, and method (masked) — DONE
+109. Billing health states: Healthy / Action Required / Past Due / Service Paused — DONE
+110. Customer credits with fixed tiers ($10/$25/$50/custom) and auto-application to next invoice — DONE
+111. Idempotent invoice generation via idempotency keys — DONE
+
+---
+
+## XVI. Provider Payouts
+
+112. Provider payout onboarding via Stripe Connect Express — DONE
+113. Weekly automated payout runs with minimum threshold enforcement — DONE
+114. Per-job earnings detail: base pay + modifiers + hold status + net — DONE
+115. "At current pace" monthly earnings projection — DONE
+116. Hold reasons with explicit explanations and expected release countdown — DONE
+117. Severity-based earning holds: LOW (no hold), MED (24–48h soft), HIGH (hard hold + exception) — DONE
+118. Payout webhook confirmation: earnings only marked PAID on processor confirmation — DONE
+
+---
+
+## XVII. Dunning & Payment Recovery
+
+119. 5-step automated dunning sequence: +1d, +3d, +5d retry with escalating notifications — DONE
+120. Calm in-app banner: "We couldn't process your payment. Update your card." — DONE
+121. Auto-pause subscription scheduling after N failures (preserves receipt/history access) — DONE
+122. Auto-apply earned referral credits to offset failed payments — DONE
+123. Auto-release provider earning holds on schedule — DONE
+
+---
+
+## XVIII. Plan Self-Service
+
+124. Plan upgrade/downgrade with next-cycle default and direction detection — DONE
+125. Pending plan change banner with effective date — DONE
+126. Cancel pending plan change — DONE
+127. Cancellation flow: reason survey → 5-handle retention offer → confirm — DONE
+128. Subscription pause (1–4 weeks) with frozen handles messaging — DONE
+
+---
+
+## XIX. Add-ons & Contextual Services
+
+129. SKUs flagged as add-ons with contextual surfacing triggers (season, weather, time-since-last) — DONE
+130. One-tap add-on purchase: deduct handles or charge card — DONE
+131. Add-on gate: only surfaced after first completed visit or user-initiated browse — DONE
+132. Refund hooks for system/provider cancellations — DONE
+133. Add-on orders table with status tracking and payment method — DONE
+
+---
+
+## XX. Home Assistant Category
+
+134. Time-boxed SKUs: 30 / 60 / 90-minute sessions with clear boundaries — DONE
+135. Customer prep requirements and privacy-safe proof rules — DONE
+136. Members-only gate with trust banner — DONE
+137. Constrained booking: "next available 2–3 windows" (not Uber-style dispatch) — DONE
+138. 5 starter SKUs: Kitchen Reset, Laundry Folding Sprint, Quick Tidy Sprint, Post-Party Reset, Bed + Bath Reset — DONE
+
+---
+
+## XXI. Support & Disputes
+
+139. Self-resolution target: ≥80% of issues resolved without human involvement — DONE
+140. Receipt-anchored issue reporting: every receipt has "Report an issue" — DONE
+141. Guided Resolver: structured category → evidence → instant resolution offer → accept → done — DONE
+142. Policy engine with 5-level precedence: provider → SKU → category → zone → global — DONE
+143. AI-powered ticket classification with severity, evidence scoring, and risk scoring — DONE
+144. Evidence replay: before/after photos + checklist + time-on-site presented to customer — DONE
+145. Chargeback intercept: proof + cheaper off-ramps (credits, plan changes) before escalation — DONE
+146. Duplicate ticket suppression: second attempt links to existing ticket — DONE
+147. Response macros for admin one-click resolutions — DONE
+148. Policy preview simulator: test scenario inputs and see what offers would be shown — DONE
+149. No chat threads anywhere — all disputes are structured, bounded, and auditable — DONE
+
+---
+
+## XXII. Notifications & Messaging
+
+150. Event bus architecture: `notification_events` → processor → inbox + push + email — DONE
+151. 3-tier priority model: Critical (always delivered), Service (default on), Marketing (default off) — DONE
+152. Quiet hours (9pm–8am default) with Critical override — DONE
+153. Rate limits per priority tier per day/hour — DONE
+154. 19 seeded notification templates with premium concierge copy — DONE
+155. In-app notification center with unread badge, priority tabs, and CTA deep links — DONE
+156. Push notification pipeline via Capacitor + FCM/APNs — DONE
+157. Email delivery via Resend integration — DONE
+158. Device token registration with automatic cleanup on logout — DONE
+159. User notification preferences: per-tier toggles + quiet hours + timezone — DONE
+160. Digest infrastructure for batching non-critical notifications — DONE
+161. PII scrubber utility: regex-based phone/email/URL detection + replacement — DONE
+162. Admin notification health dashboard: delivery stats, deadletters, processing latency — DONE
+
+---
+
+## XXIII. Customer Feedback & Provider Quality
+
+163. Immediate satisfaction check on receipt view: "How did today's visit go?" (< 5 seconds) — DONE
+164. Delayed private provider review: 7–21 day randomized delay, "Providers won't know it's you" — DONE
+165. Confidential notes: admin-only field never shared with providers — DONE
+166. Weekly provider feedback rollups with minimum aggregation threshold (N_min=5) to prevent source deduction — DONE
+167. Provider Quality Score: rolling 28-day composite (rating 35%, issues 25%, photos 20%, on-time 20%) — DONE
+168. Quality Score bands: GREEN (85–100), YELLOW (70–84), ORANGE (55–69), RED (<55) — DONE
+169. Provider Quality Score page with coaching themes and "improve next week" targets — DONE
+170. Admin feedback transparency page with full quick feedback + private ratings + confidential notes — DONE
+
+---
+
+## XXIV. Ratings & Reviews
+
+171. Post-visit 1–5 star rating anchored to receipt view (not immediate post-job) — DONE
+172. Smart rating suppression: first visit or if issue already reported — DONE
+173. Provider rating summary view for admin with avg rating, total reviews, positive/negative counts — DONE
+
+---
+
+## XXV. Property Health Score
+
+174. Composite health score (0–100): regularity 40%, coverage 25%, seasonal 15%, issues 20% — DONE
+175. Dashboard widget with SVG score ring, color-coded labels, and trend arrow — DONE
+176. Auto-compute on load if stale >24 hours — DONE
+177. Health score drop notification nudge via event bus — DONE
+
+---
+
+## XXVI. Referrals & Attribution
+
+178. First-touch deterministic attribution via referral link or code — DONE
+179. Milestone-based reward system: signup → subscribe → first visit → paid cycle — DONE
+180. Idempotent reward creation: unique per (program, user, milestone, type) — DONE
+181. Customer credits and provider bonuses flow through Module 11 ledgers — DONE
+182. Fraud controls: hold-until-milestone, caps per referrer, risk flags, admin exception queue — DONE
+183. Admin end-to-end audit: referral → milestones → reward → ledger → invoice/payout — DONE
+
+---
+
+## XXVII. Founding Partner & BYOC (Bring Your Own Customers)
+
+184. Provider application funnel with category/ZIP intake and opportunity banners (5 variants) — DONE
+185. 12-clause legal agreement with per-clause acceptance tracking and timestamps — DONE
+186. Compliance document upload system (GL insurance, COI, background checks, licenses) — DONE
+187. Category requirements config: risk tiers 0–3 with per-category compliance rules — DONE
+188. BYOC invite link generation with token-based customer activation — DONE
+189. BYOC attribution tracking: invited → installed → subscribed → first visit → bonus window — DONE
+190. BYOC bonus ledger: weekly batch computation with per-attribution progress tracking — DONE
+191. Admin provider application review queue with approve/reject/conditional RPC — DONE
+192. Automatic `provider_orgs` + `provider_members` bootstrap on application approval — DONE
+
+---
+
+## XXVIII. Growth Autopilot & Market Launch
+
+193. Market health snapshots per zone — DONE
+194. Growth event bus for viral surface tracking — DONE
+195. Growth surface configuration: share link expiry, prompt frequency caps, surface weights per zone — DONE
+196. Waitlist system: public signup with zone auto-match, admin notify on launch — DONE
+197. Zone expansion suggestions: capacity utilization, waitlist pressure, ticket rate analysis — DONE
+
+---
+
+## XXIX. Seasonal Services
+
+198. Seasonal service templates per zone with time windows — DONE
+199. Customer seasonal selections with window preference tracking — DONE
+200. Seasonal plan card on customer dashboard — DONE
+
+---
+
+## XXX. AI Intelligence Layer
+
+201. Predictive service recommendations via Gemini AI: property signals → SKU predictions with confidence scores — DONE
+202. "AI Picks for You" section in Add Service Drawer with brain icon badge — DONE
+203. Smart dispute resolution: AI classifies severity, scores evidence, suggests credits — DONE
+204. Auto-resolve disputes meeting guard criteria (evidence ≥75, risk <30, credit ≤$50) — DONE
+205. AI photo analysis: signed URL multimodal analysis of job + issue photos — DONE
+206. Stale prediction cleanup: automated weekly purge of expired predictions — DONE
+
+---
+
+## XXXI. Ops Cockpit & Admin Analytics
+
+207. Real-time ops dashboard: today's jobs, capacity pressure, quality metrics, revenue, growth — DONE
+208. Zone health drilldowns: capacity, demand, quality, provider coverage, actions — DONE
+209. Service Day health: offer backlog, rejection rate, overrides, capacity exceptions — DONE
+210. Jobs & proof health: search + filter by status, missing proof, zone, provider, date range — DONE
+211. Billing health: past due, failed payments, credits, refunds, disputes — DONE
+212. Support health: open tickets, SLA breach risk, self-resolve rate, median time-to-resolution — DONE
+213. Growth health: referrals, provider invites, applications, fraud holds — DONE
+214. KPI definitions page with formulas, time windows, data sources, and caveats — DONE
+215. Daily snapshot rollup via `snapshot-rollup` edge function — DONE
+
+---
+
+## XXXII. Provider Insights
+
+216. Provider performance page: jobs completed, proof compliance %, issue rate, avg time on site — DONE
+217. Template-based coaching cues: "Add more after photos to improve proof score" — DONE
+218. Weekly trend history — DONE
+
+---
+
+## XXXIII. Admin Controls & Governance
+
+219. Pricing & payout engine with zone multipliers and SKU-specific overrides — DONE
+220. Governance audit trail: every money, access, scheduling, and policy change is logged — DONE
+221. Admin system config table with 18+ configurable parameters (dunning steps, bonus caps, thresholds) — DONE
+222. Admin change request system with requester/reviewer workflow — DONE
+223. Admin adjustment records for manual financial corrections — DONE
+
+---
+
+## XXXIV. Automation Engine
+
+224. Auto-assign jobs to providers: Primary-first → Backup fallback with explainability — DONE
+225. Provider no-show detection (hourly) with auto-reassign and calm customer notification — DONE
+226. SLA enforcement automation: daily evaluation, 4-level threshold ladder, auto-generate actions — DONE
+227. Auto-flag and suspend low-quality providers after sustained RED status — DONE
+228. Auto-promote highest-performing backup when primary is suspended — DONE
+229. Weather mode: auto-detection via WeatherAPI.com, admin approval, job rescheduling — DONE
+230. Holiday calendar: pre-seeded US federal holidays 2026–2027, job skip support — DONE
+231. Provider availability blocks: day-off/vacation with auto-skip in job assignment — DONE
+232. Lead-time warnings for availability blocks starting within 48 hours — DONE
+
+---
+
+## XXXV. Billing Automation
+
+233. Automated invoice generation with cycle-based idempotency — DONE
+234. Automated dunning with 5-step escalation ladder — DONE
+235. Auto-apply referral credits to invoices — DONE
+236. Auto-release provider earning holds nightly — DONE
+237. Weekly payout runs with threshold enforcement and rollover — DONE
+
+---
+
+## XXXVI. Exception Management
+
+238. Unified exception queue: failed payments, disputes, payout failures, held earnings, reconciliation mismatches — DONE
+239. Per-exception "next best action" CTA with audit trail link — DONE
+240. Severity-sorted display with one-tap resolution actions — DONE
+
+---
+
+## XXXVII. Edge Functions & Scheduled Automation
+
+241. 20+ deployed edge functions covering assignment, billing, weather, payouts, notifications, AI — DONE
+242. Cron-based orchestrator (`run-scheduled-jobs`) with per-sub-job idempotency keys — DONE
+243. `cron_run_log` for full observability of every automated run — DONE
+
+---
+
+## XXXVIII. Standard Operating Procedures
+
+244. Emergency pricing override SOP with rollback capability — DONE
+245. End-of-day reconciliation SOP — DONE
+246. Missing proof handling SOP — DONE
+247. No-show escalation SOP — DONE
+248. Provider probation ladder SOP — DONE
+249. Zone pause workflow SOP — DONE
+
+---
+
+## XXXIX. Platform & Infrastructure
+
+250. Native iOS + Android via Capacitor — DONE
+251. Supabase backend: Auth + Postgres + Storage + Edge Functions — DONE
+252. Row-Level Security on every table with default-deny posture — DONE
+253. Append-only event logs for all state changes (jobs, tickets, ledgers, notifications) — DONE
+254. Signed URLs for all media access — DONE
+255. WCAG AA accessible: semantic headings, visible focus states, proper contrast ratios — DONE
+256. HSL-based design token system with light + dark mode — DONE
+257. 8pt grid spacing system with 44px minimum tap targets — DONE
+258. Glassmorphism bottom tab bar with active teal dot indicators — DONE
+259. Shimmer skeleton loading states across all data-driven pages — DONE
+260. Premium "calm concierge" copy voice throughout — DONE
+
+---
+
+## XL. Simplicity by Design
+
+261. No calendar browsing anywhere — scheduling is automatic and routine-based — DONE
+262. One-tap "Add to routine" from any suggestion surface with 10-second undo — DONE
+263. Smart defaults everywhere: level auto-selected from property size, pattern auto-optimized — DONE
+264. Suggestion throttling: max 2–4 suggestions, "hide / not interested" feedback respected — DONE
+265. One primary CTA per screen — never overwhelm — DONE
+266. Three-tap issue resolution: category → evidence → accept offer → done — DONE
+267. Provider job completion in under 2 minutes: checklist + photos + submit — DONE
+268. Admin can launch a new city in under 10 minutes — DONE
+269. Customer can add a new service in under 5 seconds — DONE
+270. Zero-configuration payout setup: processor-hosted onboarding with one CTA — DONE
+
+---
+
+*Total features: 270 | Last updated: 2026-03-02*
