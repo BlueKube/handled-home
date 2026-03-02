@@ -15,6 +15,7 @@ const CADENCES = [
   { value: "weekly", label: "Weekly" },
   { value: "biweekly", label: "Bi-weekly" },
   { value: "monthly", label: "Monthly" },
+  { value: "once", label: "Once" },
 ];
 
 export default function ByocCreateLink() {
@@ -33,13 +34,13 @@ export default function ByocCreateLink() {
   // Derive available categories from enabled capabilities
   const enabledCategories = capabilities
     .filter((c: any) => c.is_enabled)
-    .map((c: any) => c.category_key)
+    .map((c: any) => c.capability_key)
     .filter((v: string, i: number, a: string[]) => a.indexOf(v) === i);
 
   // Derive available zones from coverage
   const availableZones = coverage.map((c: any) => ({
     id: c.zone_id,
-    name: c.zone_id, // zone name would come from join, use ID as fallback
+    name: c.zones?.name || c.zone_id,
   }));
   const uniqueZones = availableZones.filter(
     (z: any, i: number, a: any[]) => a.findIndex((x) => x.id === z.id) === i
@@ -47,8 +48,8 @@ export default function ByocCreateLink() {
 
   // Get SKUs for selected category
   const skusForCategory = capabilities
-    .filter((c: any) => c.is_enabled && c.category_key === selectedCategory)
-    .map((c: any) => ({ id: c.sku_id, name: c.sku_name || c.sku_id }));
+    .filter((c: any) => c.is_enabled && c.capability_key === selectedCategory)
+    .map((c: any) => ({ id: c.sku_id, name: c.service_skus?.name || c.sku_id }));
 
   // Get levels for selected SKU
   const levelsQuery = useSkuLevels(selectedSku || null);
