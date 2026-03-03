@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useZones, type ZoneWithRegion } from "@/hooks/useZones";
 import { useRegions } from "@/hooks/useRegions";
 import { useZoneCategoryProviders } from "@/hooks/useZoneProviders";
@@ -10,8 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, MapPin, Calendar, Users } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { Plus, MapPin, Calendar, Users, Wand2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 function ProviderSummary({ zoneId }: { zoneId: string }) {
@@ -23,6 +23,7 @@ function ProviderSummary({ zoneId }: { zoneId: string }) {
 }
 
 export function ZonesTab() {
+  const nav = useNavigate();
   const [regionFilter, setRegionFilter] = useState<string>("all");
   const [createOpen, setCreateOpen] = useState(false);
   const [detailZoneId, setDetailZoneId] = useState<string | null>(null);
@@ -52,9 +53,14 @@ export function ZonesTab() {
             ))}
           </SelectContent>
         </Select>
-        <Button size="sm" onClick={() => openCreate()}>
-          <Plus className="h-4 w-4 mr-1" /> New Zone
-        </Button>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={() => nav("/admin/zones/builder")}>
+            <Wand2 className="h-4 w-4 mr-1" /> Zone Builder
+          </Button>
+          <Button size="sm" onClick={() => openCreate()}>
+            <Plus className="h-4 w-4 mr-1" /> New Zone
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (

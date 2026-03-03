@@ -84,6 +84,7 @@ import ByocActivate from "@/pages/ByocActivate";
 // Admin pages
 import AdminDashboard from "@/pages/admin/Dashboard";
 import AdminZones from "@/pages/admin/Zones";
+import AdminZoneBuilder from "@/pages/admin/ZoneBuilder";
 import AdminCapacity from "@/pages/admin/Capacity";
 import AdminSKUs from "@/pages/admin/SKUs";
 import AdminPlans from "@/pages/admin/Plans";
@@ -243,6 +244,7 @@ const App = () => (
               <Route element={<ProtectedRoute requiredRole="admin"><AdminShell /></ProtectedRoute>}>
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/admin/zones" element={<AdminZones />} />
+                <Route path="/admin/zones/builder" element={<AdminZoneBuilder />} />
                 <Route path="/admin/capacity" element={<AdminCapacity />} />
                 <Route path="/admin/skus" element={<AdminSKUs />} />
                 <Route path="/admin/plans" element={<AdminPlans />} />
