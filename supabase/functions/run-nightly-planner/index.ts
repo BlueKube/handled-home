@@ -195,10 +195,11 @@ Deno.serve(async (req) => {
   };
   const conflicts: Conflict[] = [];
 
+  const runStartedAt = new Date().toISOString();
+
   try {
     // ── STEP A: Gather Inputs ──
     const lockedEnd = addDays(today, 6); // T0+0 through T0+6 = LOCKED
-    const draftStart = addDays(today, 7); // T0+7
     const draftEnd = addDays(today, 13); // T0+13
     const horizonEnd = draftEnd;
 
@@ -539,6 +540,26 @@ Deno.serve(async (req) => {
 
     // ── STEP F: Write outputs ──
 
+    // F1 FIX: Cancel stale DRAFT visits beyond the horizon
+    const { data: staleVisits } = await supabase
+      .from("visits")
+      .select("id")
+      .gt("scheduled_date", toDateStr(horizonEnd))
+      .eq("schedule_state", "planning")
+      .eq("plan_window", "draft");
+
+    if (staleVisits && staleVisits.length > 0) {
+      const staleIds = staleVisits.map((v: any) => v.id);
+      for (let i = 0; i < staleIds.length; i += 500) {
+        const chunk = staleIds.slice(i, i + 500);
+        await supabase
+          .from("visits")
+          .update({ schedule_state: "canceled", updated_at: new Date().toISOString() })
+          .in("id", chunk);
+      }
+      summary.draft_visits_removed += staleIds.length;
+    }
+
     // Insert new visits (batch in chunks)
     for (let i = 0; i < visitsToInsert.length; i += 200) {
       const chunk = visitsToInsert.slice(i, i + 200);
@@ -596,7 +617,7 @@ Deno.serve(async (req) => {
     await supabase.from("cron_run_log").insert({
       function_name: "run-nightly-planner",
       idempotency_key: idempotencyKey,
-      started_at: new Date().toISOString(),
+      started_at: runStartedAt,
       completed_at: new Date().toISOString(),
       status: "success",
       result_summary: summary as any,
@@ -628,7 +649,7 @@ Deno.serve(async (req) => {
     await supabase.from("cron_run_log").insert({
       function_name: "run-nightly-planner",
       idempotency_key: idempotencyKey,
-      started_at: new Date().toISOString(),
+      started_at: runStartedAt,
       completed_at: new Date().toISOString(),
       status: "failed",
       error_message: err.message ?? "Unknown error",
