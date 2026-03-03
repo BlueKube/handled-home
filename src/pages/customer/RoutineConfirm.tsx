@@ -98,9 +98,7 @@ export default function RoutineConfirm() {
   effectiveDateObj.setDate(effectiveDateObj.getDate() + 7);
   const effectiveDateFormatted = effectiveDateObj.toLocaleDateString("en-US", { month: "long", day: "numeric" });
 
-  const effectiveDateLabel = subscription?.billing_cycle_end_at
-    ? new Date(subscription.billing_cycle_end_at).toLocaleDateString("en-US", { month: "long", day: "numeric" })
-    : "your next billing cycle";
+
 
   const handleConfirm = async () => {
     if (!routineData?.routine.id) return;
@@ -148,7 +146,7 @@ export default function RoutineConfirm() {
             <span className="text-sm text-muted-foreground">Effective</span>
             <span className="text-sm font-medium flex items-center gap-1">
               <CalendarDays className="h-3.5 w-3.5" />
-              {effectiveDateLabel}
+              {effectiveDateFormatted}
             </span>
           </div>
           <div className="flex items-center justify-between">
