@@ -15,10 +15,13 @@ export interface VisitTask {
   sku_name?: string;
 }
 
+export type PlanWindow = "locked" | "draft" | null;
+
 export interface UpcomingVisit {
   id: string;
   scheduled_date: string;
   schedule_state: VisitScheduleState;
+  plan_window: PlanWindow;
   eta_range_start: string | null;
   eta_range_end: string | null;
   time_window_start: string | null;
@@ -26,6 +29,26 @@ export interface UpcomingVisit {
   provider_org_id: string | null;
   created_at: string;
   tasks: VisitTask[];
+}
+
+/**
+ * Returns a customer-friendly label that accounts for plan_window.
+ * LOCKED visits in "planning" state → "Scheduled" (commitment)
+ * DRAFT visits in "planning" state → "Planned" (subject to minor adjustments)
+ */
+export function getVisitLabel(visit: UpcomingVisit): string {
+  if (visit.schedule_state === "planning") {
+    return visit.plan_window === "draft" ? "Planned" : "Scheduled";
+  }
+  return SCHEDULE_STATE_LABELS[visit.schedule_state];
+}
+
+/** Returns pill style accounting for plan_window */
+export function getVisitStyle(visit: UpcomingVisit): { pill: string; dot: string } {
+  if (visit.schedule_state === "planning" && visit.plan_window === "draft") {
+    return { pill: "bg-secondary text-secondary-foreground", dot: "bg-secondary-foreground" };
+  }
+  return SCHEDULE_STATE_STYLES[visit.schedule_state];
 }
 
 /** Calm customer-facing labels for each schedule state */
@@ -74,7 +97,7 @@ export function useUpcomingVisits() {
       // Fetch visits for customer's property in upcoming states
       const { data: visits, error } = await supabase
         .from("visits")
-        .select("id, scheduled_date, schedule_state, eta_range_start, eta_range_end, time_window_start, time_window_end, provider_org_id, created_at")
+        .select("id, scheduled_date, schedule_state, plan_window, eta_range_start, eta_range_end, time_window_start, time_window_end, provider_org_id, created_at")
         .eq("property_id", property.id)
         .in("schedule_state", UPCOMING_STATES)
         .order("scheduled_date", { ascending: true })

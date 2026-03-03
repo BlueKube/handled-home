@@ -4,8 +4,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { QueryErrorCard } from "@/components/QueryErrorCard";
 import {
   useUpcomingVisits,
-  SCHEDULE_STATE_LABELS,
-  SCHEDULE_STATE_STYLES,
+  getVisitLabel,
+  getVisitStyle,
   type UpcomingVisit,
 } from "@/hooks/useUpcomingVisits";
 import { format, isToday, isTomorrow, isThisWeek, parseISO } from "date-fns";
@@ -36,8 +36,8 @@ function formatTimeWindow(start: string | null, end: string | null): string | nu
 }
 
 function VisitCard({ visit }: { visit: UpcomingVisit }) {
-  const stateLabel = SCHEDULE_STATE_LABELS[visit.schedule_state];
-  const stateStyle = SCHEDULE_STATE_STYLES[visit.schedule_state];
+  const stateLabel = getVisitLabel(visit);
+  const stateStyle = getVisitStyle(visit);
   const dateLabel = formatVisitDate(visit.scheduled_date);
   const timeWindow = formatTimeWindow(visit.time_window_start, visit.time_window_end);
   const etaWindow = formatTimeWindow(visit.eta_range_start, visit.eta_range_end);

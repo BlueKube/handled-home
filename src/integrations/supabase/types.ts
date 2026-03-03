@@ -3211,6 +3211,45 @@ export type Database = {
           },
         ]
       }
+      plan_runs: {
+        Row: {
+          completed_at: string | null
+          conflicts: Json
+          created_at: string
+          id: string
+          idempotency_key: string | null
+          run_date: string
+          started_at: string | null
+          status: string
+          summary: Json
+          triggered_by: string
+        }
+        Insert: {
+          completed_at?: string | null
+          conflicts?: Json
+          created_at?: string
+          id?: string
+          idempotency_key?: string | null
+          run_date?: string
+          started_at?: string | null
+          status?: string
+          summary?: Json
+          triggered_by?: string
+        }
+        Update: {
+          completed_at?: string | null
+          conflicts?: Json
+          created_at?: string
+          id?: string
+          idempotency_key?: string | null
+          run_date?: string
+          started_at?: string | null
+          status?: string
+          summary?: Json
+          triggered_by?: string
+        }
+        Relationships: []
+      }
       plan_zone_availability: {
         Row: {
           created_at: string
@@ -5569,6 +5608,7 @@ export type Database = {
         Row: {
           created_at: string
           effective_at: string | null
+          effective_date: string | null
           id: string
           locked_at: string | null
           routine_id: string
@@ -5578,6 +5618,7 @@ export type Database = {
         Insert: {
           created_at?: string
           effective_at?: string | null
+          effective_date?: string | null
           id?: string
           locked_at?: string | null
           routine_id: string
@@ -5587,6 +5628,7 @@ export type Database = {
         Update: {
           created_at?: string
           effective_at?: string | null
+          effective_date?: string | null
           id?: string
           locked_at?: string | null
           routine_id?: string
@@ -5605,6 +5647,7 @@ export type Database = {
       }
       routines: {
         Row: {
+          cadence_anchor_date: string | null
           created_at: string
           customer_id: string
           effective_at: string | null
@@ -5617,6 +5660,7 @@ export type Database = {
           zone_id: string | null
         }
         Insert: {
+          cadence_anchor_date?: string | null
           created_at?: string
           customer_id: string
           effective_at?: string | null
@@ -5629,6 +5673,7 @@ export type Database = {
           zone_id?: string | null
         }
         Update: {
+          cadence_anchor_date?: string | null
           created_at?: string
           customer_id?: string
           effective_at?: string | null
@@ -7373,6 +7418,8 @@ export type Database = {
           eta_range_start: string | null
           id: string
           locked_at: string | null
+          plan_run_id: string | null
+          plan_window: Database["public"]["Enums"]["plan_window"] | null
           property_id: string
           provider_org_id: string | null
           route_plan_version: number | null
@@ -7389,6 +7436,8 @@ export type Database = {
           eta_range_start?: string | null
           id?: string
           locked_at?: string | null
+          plan_run_id?: string | null
+          plan_window?: Database["public"]["Enums"]["plan_window"] | null
           property_id: string
           provider_org_id?: string | null
           route_plan_version?: number | null
@@ -7405,6 +7454,8 @@ export type Database = {
           eta_range_start?: string | null
           id?: string
           locked_at?: string | null
+          plan_run_id?: string | null
+          plan_window?: Database["public"]["Enums"]["plan_window"] | null
           property_id?: string
           provider_org_id?: string | null
           route_plan_version?: number | null
@@ -7415,6 +7466,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "visits_plan_run_id_fkey"
+            columns: ["plan_run_id"]
+            isOneToOne: false
+            referencedRelation: "plan_runs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "visits_property_id_fkey"
             columns: ["property_id"]
@@ -9045,6 +9103,7 @@ export type Database = {
         | "PROTECT_QUALITY"
         | "WAITLIST_ONLY"
         | "PROVIDER_RECRUITING"
+      plan_window: "locked" | "draft"
       provider_application_status:
         | "draft"
         | "submitted"
@@ -9316,6 +9375,7 @@ export const Constants = {
         "WAITLIST_ONLY",
         "PROVIDER_RECRUITING",
       ],
+      plan_window: ["locked", "draft"],
       provider_application_status: [
         "draft",
         "submitted",
