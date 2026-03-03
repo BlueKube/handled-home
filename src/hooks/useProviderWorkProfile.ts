@@ -22,6 +22,21 @@ export interface ProviderWorkProfile {
 
 const WEEKDAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] as const;
 
+const ABBREV_TO_FULL: Record<string, string> = {
+  mon: "monday", tue: "tuesday", wed: "wednesday", thu: "thursday",
+  fri: "friday", sat: "saturday", sun: "sunday",
+};
+
+/** Normalize DB-default abbreviated keys (mon/tue/…) to full names (monday/tuesday/…). */
+export function normalizeWorkingHours(raw: WorkingHours): WorkingHours {
+  const out: WorkingHours = {};
+  for (const [key, val] of Object.entries(raw)) {
+    const fullKey = ABBREV_TO_FULL[key] ?? key;
+    out[fullKey] = val;
+  }
+  return out;
+}
+
 export const DEFAULT_WORKING_HOURS: WorkingHours = Object.fromEntries(
   WEEKDAYS.map((d) =>
     ["saturday", "sunday"].includes(d)

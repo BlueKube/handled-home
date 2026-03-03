@@ -13,6 +13,7 @@ import { useProviderOrg } from "@/hooks/useProviderOrg";
 import {
   useProviderWorkProfile,
   useUpsertWorkProfile,
+  normalizeWorkingHours,
   DEFAULT_WORKING_HOURS,
   type WorkingHours,
 } from "@/hooks/useProviderWorkProfile";
@@ -75,9 +76,9 @@ export default function ProviderWorkSetup() {
   const [categories, setCategories] = useState<string[]>([]);
   const [equipment, setEquipment] = useState<string[]>([]);
   const [hours, setHours] = useState<WorkingHours>(DEFAULT_WORKING_HOURS);
-  const [maxJobs, setMaxJobs] = useState(8);
+  const [maxJobs, setMaxJobs] = useState(12);
 
-  // Seed form from existing profile
+  // Seed form from existing profile — normalize abbreviated day keys from DB default
   useEffect(() => {
     if (profile) {
       setHomeLabel(profile.home_address_label ?? "");
@@ -85,8 +86,9 @@ export default function ProviderWorkSetup() {
       setHomeLng(profile.home_lng?.toString() ?? "");
       setCategories(profile.service_categories ?? []);
       setEquipment(profile.equipment_kits ?? []);
-      setHours((profile.working_hours as WorkingHours) ?? DEFAULT_WORKING_HOURS);
-      setMaxJobs(profile.max_jobs_per_day ?? 8);
+      const rawHours = (profile.working_hours as WorkingHours) ?? DEFAULT_WORKING_HOURS;
+      setHours(normalizeWorkingHours(rawHours));
+      setMaxJobs(profile.max_jobs_per_day ?? 12);
     }
   }, [profile]);
 
