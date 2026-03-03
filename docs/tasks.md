@@ -873,10 +873,10 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S3-P2-04** | P0 | S | Idempotency via cron_run_log + idempotency_key on recommendations.
 
 ### Phase 3: Admin UI — Matrix + Recommendations Inbox
-- [ ] **S3-P3-01** | P0 | XL | Zone × Category Matrix page at `/admin/growth/matrix` (rows=zones, cols=categories, cells=state badge + recommended state + at-a-glance metrics).
-- [ ] **S3-P3-02** | P0 | L | Cell detail side panel (current state, recommendation, metrics, approve/reject/snooze/override actions, audit log).
-- [ ] **S3-P3-03** | P0 | L | Recommendations Inbox at `/admin/growth/recommendations` (filterable queue, bulk approve/snooze, urgency sort).
-- [ ] **S3-P3-04** | P1 | M | Threshold Dials page at `/admin/growth/thresholds` (edit all threshold configs with audit trail).
+- [x] **S3-P3-01** | P0 | XL | Zone × Category Matrix — enhanced ZoneMatrixTab with all 6 states, recommendation badges (→ recommended state), clickable cells opening detail panel.
+- [x] **S3-P3-02** | P0 | L | Cell detail side panel (`ZoneCategoryDetailPanel`) — current state + lock info, pending recommendations with approve/reject/snooze, manual override form, change history audit log.
+- [x] **S3-P3-03** | P0 | L | Recommendations Inbox tab (`RecommendationsInbox`) — filterable by status/confidence/category, urgency-sorted, bulk snooze, per-card approve/reject/snooze with rejection notes.
+- [x] **S3-P3-04** | P1 | M | Threshold Dials tab (`ThresholdDials`) — grouped by utilization/coverage/general, percent-aware input, save per threshold, last-updated timestamps.
 
 ### Phase 4: Customer Gating + Category Waitlist
 - [ ] **S3-P4-01** | P0 | L | Catalog gating — filter customer-visible categories based on (zone, category) state. OPEN/SOFT_LAUNCH = show, PROTECT_QUALITY/PROVIDER_RECRUITING/WAITLIST_ONLY = waitlist CTA, CLOSED = hidden.
@@ -889,4 +889,4 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [ ] **S3-P5-02** | P1 | M | Provider onboarding tie-in (reinforce early positioning when category is PROVIDER_RECRUITING in nearby zones).
 - [ ] **S3-P5-03** | P2 | S | Analytics events: recommendation_created, approved/rejected/snoozed, state_changed, waitlist_joined, subscribe_blocked_by_state.
 
-*Last updated: 2026-03-03 — Phase 2 complete.*
+*Last updated: 2026-03-03 — Phase 3 complete.*
