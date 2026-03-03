@@ -822,11 +822,15 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S2-P2-07** | P0 | S | Write results to zone_builder_results, update run status to preview.
 
 ### Phase 3: Admin Wizard UI — Screens 1–3
-- [ ] **S2-P3-01** | P0 | M | ZoneBuilderWizard route + stepper component.
-- [ ] **S2-P3-02** | P0 | M | Screen 1 — Region Selection with map preview.
-- [ ] **S2-P3-03** | P0 | M | Screen 2 — Generation Settings (dials, seed strategy).
-- [ ] **S2-P3-04** | P0 | L | Screen 3 — Zone Preview (Mapbox + metrics sidebar).
-- [ ] **S2-P3-05** | P0 | M | useZoneBuilderRun hook.
+- [x] **S2-P3-01** | P0 | M | ZoneBuilderWizard route + stepper component.
+- [x] **S2-P3-02** | P0 | M | Screen 1 — Region Selection with map preview.
+- [x] **S2-P3-03** | P0 | M | Screen 2 — Generation Settings (dials, seed strategy).
+- [x] **S2-P3-04** | P0 | L | Screen 3 — Zone Preview (Mapbox + metrics sidebar).
+- [x] **S2-P3-05** | P0 | M | useZoneBuilderRun hook.
+
+### Phase 2 Review Fixes
+- [x] **S2-P2-F1** | LOW | Removed unused routine_items + service_skus queries.
+- [x] **S2-P2-F3** | LOW | Added auth guard — rejects unauthenticated requests with 401.
 
 ### Phase 4: Editing Tools + Commit — Screens 4–5
 - [ ] **S2-P4-01** | P0 | L | Screen 4 — Editing Tools (rename, merge, split).
@@ -840,4 +844,4 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [ ] **S2-P5-03** | P1 | M | backfill-property-zones edge function.
 - [ ] **S2-P5-04** | P2 | S | Zone generation history in ZonesTab.
 
-*Last updated: 2026-03-03 — Sprint 2 Phase 2 complete.*
+*Last updated: 2026-03-03 — Sprint 2 Phase 3 complete. P2 review findings F1+F3 fixed.*

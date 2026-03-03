@@ -149,29 +149,18 @@ async function aggregateCells(
     .select("customer_id, property_id, plan_id, status")
     .eq("status", "active");
 
-  // Get routine items for duration estimates
-  const { data: routineItems } = await supabase
-    .from("routine_items")
-    .select("routine_version_id, sku_id, duration_minutes, cadence_type");
+    // NOTE: routine_items query removed in v1 review — demand uses AVG_SERVICE_MINUTES constant.
+    // Wire up actual per-SKU durations in v2 when category-specific demand is needed.
 
-  // Get provider work profiles
+    // Get provider work profiles
   const { data: providers } = await supabase
     .from("provider_work_profiles")
     .select("provider_org_id, home_lat, home_lng, max_jobs_per_day, service_categories, working_hours")
     .not("home_lat", "is", null)
     .not("home_lng", "is", null);
 
-  // Get service_skus for category mapping
-  const { data: skus } = await supabase
-    .from("service_skus")
-    .select("id, category_key");
-
-  const skuCategoryMap: Record<string, string> = {};
-  if (skus) {
-    for (const s of skus) {
-      skuCategoryMap[s.id] = s.category_key;
-    }
-  }
+    // NOTE: service_skus category map removed in v1 review — all demand assigned to "lawn_care".
+    // Wire up per-SKU category mapping in v2.
 
   // Build cell map
   const cellMap = new Map<string, CellData>();
@@ -596,17 +585,28 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Extract user from auth header if available
+    // Auth guard: require valid auth token (admin-only feature)
     const authHeader = req.headers.get("authorization");
-    let userId: string | null = null;
-    if (authHeader) {
-      const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-      const userClient = createClient(supabaseUrl, anonKey, {
-        global: { headers: { Authorization: authHeader } },
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Authorization required" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-      const { data: { user } } = await userClient.auth.getUser();
-      userId = user?.id || null;
     }
+
+    let userId: string | null = null;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user }, error: authErr } = await userClient.auth.getUser();
+    if (authErr || !user) {
+      return new Response(JSON.stringify({ error: "Invalid or expired token" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    userId = user.id;
 
     const body = await req.json();
     const { region_id, config: userConfig } = body;
