@@ -7567,6 +7567,88 @@ export type Database = {
           },
         ]
       }
+      zone_builder_results: {
+        Row: {
+          cell_indices: string[]
+          created_at: string
+          id: string
+          metrics: Json
+          neighbor_zone_labels: string[]
+          run_id: string
+          warnings: string[]
+          zone_label: string
+        }
+        Insert: {
+          cell_indices?: string[]
+          created_at?: string
+          id?: string
+          metrics?: Json
+          neighbor_zone_labels?: string[]
+          run_id: string
+          warnings?: string[]
+          zone_label: string
+        }
+        Update: {
+          cell_indices?: string[]
+          created_at?: string
+          id?: string
+          metrics?: Json
+          neighbor_zone_labels?: string[]
+          run_id?: string
+          warnings?: string[]
+          zone_label?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zone_builder_results_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "zone_builder_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zone_builder_runs: {
+        Row: {
+          committed_at: string | null
+          config: Json
+          created_at: string
+          created_by: string
+          id: string
+          region_id: string
+          status: Database["public"]["Enums"]["zone_builder_run_status"]
+          updated_at: string
+        }
+        Insert: {
+          committed_at?: string | null
+          config?: Json
+          created_at?: string
+          created_by: string
+          id?: string
+          region_id: string
+          status?: Database["public"]["Enums"]["zone_builder_run_status"]
+          updated_at?: string
+        }
+        Update: {
+          committed_at?: string | null
+          config?: Json
+          created_at?: string
+          created_by?: string
+          id?: string
+          region_id?: string
+          status?: Database["public"]["Enums"]["zone_builder_run_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zone_builder_runs_region_id_fkey"
+            columns: ["region_id"]
+            isOneToOne: false
+            referencedRelation: "regions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       zone_category_providers: {
         Row: {
           assigned_at: string
@@ -7623,6 +7705,63 @@ export type Database = {
           },
           {
             foreignKeyName: "zone_category_providers_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zone_cells: {
+        Row: {
+          category_demand: Json
+          category_supply: Json
+          created_at: string
+          customer_count: number
+          demand_minutes_week: number
+          h3_index: string
+          provider_count: number
+          run_id: string | null
+          supply_minutes_week: number
+          updated_at: string
+          zone_id: string | null
+        }
+        Insert: {
+          category_demand?: Json
+          category_supply?: Json
+          created_at?: string
+          customer_count?: number
+          demand_minutes_week?: number
+          h3_index: string
+          provider_count?: number
+          run_id?: string | null
+          supply_minutes_week?: number
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Update: {
+          category_demand?: Json
+          category_supply?: Json
+          created_at?: string
+          customer_count?: number
+          demand_minutes_week?: number
+          h3_index?: string
+          provider_count?: number
+          run_id?: string | null
+          supply_minutes_week?: number
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zone_cells_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "zone_builder_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zone_cells_zone_id_fkey"
             columns: ["zone_id"]
             isOneToOne: false
             referencedRelation: "zones"
@@ -8822,7 +8961,9 @@ export type Database = {
         | "exception_pending"
         | "canceled"
         | "rescheduled"
+      zone_builder_run_status: "draft" | "preview" | "committed" | "archived"
       zone_launch_status: "open" | "soft_launch" | "waitlist" | "not_supported"
+      zone_seed_strategy: "auto" | "demand_first" | "provider_first"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -9093,7 +9234,9 @@ export const Constants = {
         "canceled",
         "rescheduled",
       ],
+      zone_builder_run_status: ["draft", "preview", "committed", "archived"],
       zone_launch_status: ["open", "soft_launch", "waitlist", "not_supported"],
+      zone_seed_strategy: ["auto", "demand_first", "provider_first"],
     },
   },
 } as const

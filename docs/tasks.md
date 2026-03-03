@@ -797,4 +797,47 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **3FG-P1-R2** | S | Verify support-ai-classify bucket bug — confirmed already fixed (uses job-photos, single issuePhotoContext)
 - [x] **3FG-P1-R3** | S | Document provider systems reconciliation (Flow A: application → Flow B: invite-code onboarding) in claude-implementation-notes.md
 
-*Last updated: 2026-03-02 — Sprint 3F/3G fully complete (all 7 phases).*
+---
+
+## PRD-300 Sprint 2 — Zone Builder v1
+
+> **Plan:** `docs/plans/prd-300-sprint-2-zone-builder-plan.md`
+> **Complexity:** XL (5 phases)
+
+### Phase 1: Schema + H3 Geo Infrastructure
+- [x] **S2-P1-01** | P0 | M | Create `zone_builder_runs` table (region_id, config JSONB, status enum, created_by, committed_at). RLS: admin only.
+- [x] **S2-P1-02** | P0 | M | Create `zone_cells` table (h3_index PK, zone_id FK, demand/supply aggregates, category JSONB). RLS: admin read.
+- [x] **S2-P1-03** | P0 | M | Create `zone_builder_results` table (run_id FK, zone_label, cell_indices, metrics, warnings, neighbors). RLS: admin only.
+- [x] **S2-P1-04** | P0 | S | Install `h3-js`. Create `src/lib/h3Utils.ts` — wrappers for latLngToCell, cellToLatLng, cellToBoundary, gridDisk, gridDistance, cellArea.
+- [x] **S2-P1-05** | P0 | M | Create `src/lib/zoneScoringUtils.ts` — scoreCellDemand, scoreCellSupply, computeSeedScore (0.55·D + 0.35·S + 0.10·W), computeZoneMetrics, checkFeasibility, selectSeeds.
+- [x] **S2-P1-06** | P0 | S | Create `src/lib/driveTimeProxy.ts` — Mode 1: haversine × 1.4 city multiplier. Mode 2: TravelTimeProvider interface stub.
+
+### Phase 2: Zone Generation Algorithm — Edge Function
+- [ ] **S2-P2-01** | P0 | M | Create `generate-zones` edge function — accepts region_id + config dials, creates run row.
+- [ ] **S2-P2-02** | P0 | L | Cell aggregation — query properties + provider_work_profiles → H3 cells → demand/supply per cell.
+- [ ] **S2-P2-03** | P0 | M | Cell scoring + seed selection via zoneScoringUtils.
+- [ ] **S2-P2-04** | P0 | XL | Region-growing algorithm — constrained growth loop with cost function.
+- [ ] **S2-P2-05** | P0 | M | Feasibility constraints — flag zones, compute per-zone metrics.
+- [ ] **S2-P2-06** | P1 | L | Refinement pass — boundary swaps, merge tiny, split oversized.
+- [ ] **S2-P2-07** | P0 | S | Write results to zone_builder_results, update run status to preview.
+
+### Phase 3: Admin Wizard UI — Screens 1–3
+- [ ] **S2-P3-01** | P0 | M | ZoneBuilderWizard route + stepper component.
+- [ ] **S2-P3-02** | P0 | M | Screen 1 — Region Selection with map preview.
+- [ ] **S2-P3-03** | P0 | M | Screen 2 — Generation Settings (dials, seed strategy).
+- [ ] **S2-P3-04** | P0 | L | Screen 3 — Zone Preview (Mapbox + metrics sidebar).
+- [ ] **S2-P3-05** | P0 | M | useZoneBuilderRun hook.
+
+### Phase 4: Editing Tools + Commit — Screens 4–5
+- [ ] **S2-P4-01** | P0 | L | Screen 4 — Editing Tools (rename, merge, split).
+- [ ] **S2-P4-02** | P0 | L | commit-zones edge function.
+- [ ] **S2-P4-03** | P0 | M | Screen 5 — Commit Confirmation.
+- [ ] **S2-P4-04** | P1 | S | Add Zone Builder button to ZonesTab.
+
+### Phase 5: Property Resolution + Debug Surfaces
+- [ ] **S2-P5-01** | P0 | M | resolve_property_zone RPC (H3 cell → zone lookup + fallback).
+- [ ] **S2-P5-02** | P1 | M | Address Lookup tool on admin Zones page.
+- [ ] **S2-P5-03** | P1 | M | backfill-property-zones edge function.
+- [ ] **S2-P5-04** | P2 | S | Zone generation history in ZonesTab.
+
+*Last updated: 2026-03-03 — Sprint 2 Phase 1 complete.*
