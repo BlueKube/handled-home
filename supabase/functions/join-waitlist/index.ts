@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { email, full_name, zip_code, source, referral_code } = await req.json();
+    const { email, full_name, zip_code, source, referral_code, metadata } = await req.json();
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -74,6 +74,7 @@ Deno.serve(async (req) => {
         zone_id: zoneId,
         source: source || "website",
         referral_code: referral_code || null,
+        metadata: metadata || null,
       });
 
     if (insertError) {

@@ -17,7 +17,7 @@ const THRESHOLD_LABELS: Record<string, { label: string; description: string; for
   protect_quality_utilization_exit: { label: "Protect Quality (Exit)", description: "Utilization below this exits PROTECT_QUALITY", format: "percent" },
   coverage_risk_waitlist_threshold: { label: "Coverage Risk → Waitlist", description: "Coverage risk above this → WAITLIST_ONLY", format: "percent" },
   coverage_risk_recruiting_threshold: { label: "Coverage Risk → Recruiting", description: "Coverage risk above this → PROVIDER_RECRUITING", format: "percent" },
-  provider_recruiting_utilization: { label: "Recruiting Utilization", description: "Utilization above this → PROVIDER_RECRUITING", format: "percent" },
+  provider_recruiting_utilization_trigger: { label: "Recruiting Utilization", description: "Utilization above this → PROVIDER_RECRUITING", format: "percent" },
   min_time_in_state_days: { label: "Min Time in State", description: "Minimum days before non-emergency state change", format: "days" },
   soft_launch_intake_cap_per_week: { label: "Soft Launch Intake Cap", description: "Max new subscriptions per week during SOFT_LAUNCH", format: "number" },
 };
