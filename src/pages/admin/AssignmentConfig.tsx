@@ -7,12 +7,18 @@ import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { useAssignmentConfig, useUpdateAssignmentConfig, DIAL_META, type AssignmentConfigRow } from "@/hooks/useAssignmentConfig";
 import { toast } from "sonner";
-import { Save, RotateCcw, SlidersHorizontal, Target, Gauge } from "lucide-react";
+import { Save, RotateCcw, SlidersHorizontal, Target, Gauge, Package, Route, Clock, Calendar, Anchor, Timer } from "lucide-react";
 
 const GROUP_META = {
   weights: { label: "Scoring Weights", icon: SlidersHorizontal, description: "How much each factor matters in the assignment score (lower score = better match)" },
   thresholds: { label: "Thresholds", icon: Target, description: "Limits and stability rules for reassignment decisions" },
   capacity: { label: "Capacity & Timing", icon: Gauge, description: "Provider capacity targets, task defaults, and buffers" },
+  bundling: { label: "Bundling", icon: Package, description: "Setup time discounts when multiple tasks are grouped at one stop" },
+  sequencing: { label: "Sequencing", icon: Route, description: "Route optimization objective weights and improvement thresholds" },
+  eta: { label: "ETA Ranges", icon: Clock, description: "Customer-facing arrival window widths by stop position" },
+  availability: { label: "Availability", icon: Calendar, description: "Provider availability requirements and fragmentation limits" },
+  anchored: { label: "Anchored Stops", icon: Anchor, description: "Constraints for blocked-window location stops" },
+  late: { label: "Late Detection", icon: Timer, description: "Grace periods for provider lateness tracking" },
 } as const;
 
 function DialCard({
@@ -128,7 +134,7 @@ export default function AssignmentConfig() {
         <p className="text-sm text-muted-foreground">Adjust weights, thresholds, and capacity parameters for the assignment engine</p>
       </div>
 
-      {(["weights", "thresholds", "capacity"] as const).map((group) => {
+      {(["weights", "thresholds", "capacity", "bundling", "sequencing", "eta", "availability", "anchored", "late"] as const).map((group) => {
         const meta = GROUP_META[group];
         const dials = DIAL_META.filter((d) => d.group === group);
 

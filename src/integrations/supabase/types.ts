@@ -3854,6 +3854,59 @@ export type Database = {
           },
         ]
       }
+      provider_blocked_windows: {
+        Row: {
+          created_at: string
+          day_of_week: number | null
+          end_time: string
+          id: string
+          is_recurring: boolean
+          label: string
+          location_lat: number | null
+          location_lng: number | null
+          provider_org_id: string
+          specific_date: string | null
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week?: number | null
+          end_time: string
+          id?: string
+          is_recurring?: boolean
+          label?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          provider_org_id: string
+          specific_date?: string | null
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number | null
+          end_time?: string
+          id?: string
+          is_recurring?: boolean
+          label?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          provider_org_id?: string
+          specific_date?: string | null
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_blocked_windows_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       provider_capabilities: {
         Row: {
           capability_key: string
@@ -5597,6 +5650,59 @@ export type Database = {
         }
         Relationships: []
       }
+      route_sequence_runs: {
+        Row: {
+          created_at: string
+          estimated_finish_time: string | null
+          id: string
+          infeasible_reason: string | null
+          is_feasible: boolean
+          provider_org_id: string
+          run_date: string
+          status: string
+          summary: Json | null
+          total_service_minutes: number
+          total_stops: number
+          total_travel_minutes: number
+        }
+        Insert: {
+          created_at?: string
+          estimated_finish_time?: string | null
+          id?: string
+          infeasible_reason?: string | null
+          is_feasible?: boolean
+          provider_org_id: string
+          run_date: string
+          status?: string
+          summary?: Json | null
+          total_service_minutes?: number
+          total_stops?: number
+          total_travel_minutes?: number
+        }
+        Update: {
+          created_at?: string
+          estimated_finish_time?: string | null
+          id?: string
+          infeasible_reason?: string | null
+          is_feasible?: boolean
+          provider_org_id?: string
+          run_date?: string
+          status?: string
+          summary?: Json | null
+          total_service_minutes?: number
+          total_stops?: number
+          total_travel_minutes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_sequence_runs_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       routine_items: {
         Row: {
           cadence_detail: Json
@@ -6109,6 +6215,7 @@ export type Database = {
           pricing_notes: string | null
           proof_rules: Json
           provider_category: string
+          required_equipment: string[]
           required_photos: Json
           requires_training_gate: boolean
           status: string
@@ -6141,6 +6248,7 @@ export type Database = {
           pricing_notes?: string | null
           proof_rules?: Json
           provider_category?: string
+          required_equipment?: string[]
           required_photos?: Json
           requires_training_gate?: boolean
           status?: string
@@ -6173,6 +6281,7 @@ export type Database = {
           pricing_notes?: string | null
           proof_rules?: Json
           provider_category?: string
+          required_equipment?: string[]
           required_photos?: Json
           requires_training_gate?: boolean
           status?: string
@@ -7544,17 +7653,21 @@ export type Database = {
           backup_provider_org_id: string | null
           created_at: string
           draft_generated_at: string | null
+          equipment_required: string[]
           eta_range_end: string | null
           eta_range_start: string | null
           id: string
           locked_at: string | null
           plan_run_id: string | null
           plan_window: Database["public"]["Enums"]["plan_window"] | null
+          planned_arrival_time: string | null
           property_id: string
           provider_org_id: string | null
+          route_order: number | null
           route_plan_version: number | null
           schedule_state: Database["public"]["Enums"]["visit_schedule_state"]
           scheduled_date: string
+          stop_duration_minutes: number | null
           time_window_end: string | null
           time_window_start: string | null
           unassigned_reason: string | null
@@ -7569,17 +7682,21 @@ export type Database = {
           backup_provider_org_id?: string | null
           created_at?: string
           draft_generated_at?: string | null
+          equipment_required?: string[]
           eta_range_end?: string | null
           eta_range_start?: string | null
           id?: string
           locked_at?: string | null
           plan_run_id?: string | null
           plan_window?: Database["public"]["Enums"]["plan_window"] | null
+          planned_arrival_time?: string | null
           property_id: string
           provider_org_id?: string | null
+          route_order?: number | null
           route_plan_version?: number | null
           schedule_state?: Database["public"]["Enums"]["visit_schedule_state"]
           scheduled_date: string
+          stop_duration_minutes?: number | null
           time_window_end?: string | null
           time_window_start?: string | null
           unassigned_reason?: string | null
@@ -7594,17 +7711,21 @@ export type Database = {
           backup_provider_org_id?: string | null
           created_at?: string
           draft_generated_at?: string | null
+          equipment_required?: string[]
           eta_range_end?: string | null
           eta_range_start?: string | null
           id?: string
           locked_at?: string | null
           plan_run_id?: string | null
           plan_window?: Database["public"]["Enums"]["plan_window"] | null
+          planned_arrival_time?: string | null
           property_id?: string
           provider_org_id?: string | null
+          route_order?: number | null
           route_plan_version?: number | null
           schedule_state?: Database["public"]["Enums"]["visit_schedule_state"]
           scheduled_date?: string
+          stop_duration_minutes?: number | null
           time_window_end?: string | null
           time_window_start?: string | null
           unassigned_reason?: string | null
