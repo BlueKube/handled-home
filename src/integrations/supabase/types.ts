@@ -2477,9 +2477,12 @@ export type Database = {
           founding_partner_slots_filled: number | null
           founding_partner_slots_total: number | null
           id: string
+          last_state_change_at: string | null
+          last_state_change_by: string | null
           lock_reason: string | null
           locked_by_admin_user_id: string | null
           locked_until: string | null
+          previous_status: string | null
           status: Database["public"]["Enums"]["market_zone_category_status"]
           updated_at: string
           zone_id: string
@@ -2491,9 +2494,12 @@ export type Database = {
           founding_partner_slots_filled?: number | null
           founding_partner_slots_total?: number | null
           id?: string
+          last_state_change_at?: string | null
+          last_state_change_by?: string | null
           lock_reason?: string | null
           locked_by_admin_user_id?: string | null
           locked_until?: string | null
+          previous_status?: string | null
           status?: Database["public"]["Enums"]["market_zone_category_status"]
           updated_at?: string
           zone_id: string
@@ -2505,9 +2511,12 @@ export type Database = {
           founding_partner_slots_filled?: number | null
           founding_partner_slots_total?: number | null
           id?: string
+          last_state_change_at?: string | null
+          last_state_change_by?: string | null
           lock_reason?: string | null
           locked_by_admin_user_id?: string | null
           locked_until?: string | null
+          previous_status?: string | null
           status?: Database["public"]["Enums"]["market_zone_category_status"]
           updated_at?: string
           zone_id?: string
@@ -8031,6 +8040,161 @@ export type Database = {
           },
         ]
       }
+      zone_state_change_log: {
+        Row: {
+          actor_user_id: string | null
+          category: string
+          change_source: string
+          created_at: string
+          id: string
+          metrics_snapshot: Json | null
+          new_state: string
+          previous_state: string | null
+          reason: string | null
+          reason_codes: string[] | null
+          recommendation_id: string | null
+          zone_id: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          category: string
+          change_source?: string
+          created_at?: string
+          id?: string
+          metrics_snapshot?: Json | null
+          new_state: string
+          previous_state?: string | null
+          reason?: string | null
+          reason_codes?: string[] | null
+          recommendation_id?: string | null
+          zone_id: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          category?: string
+          change_source?: string
+          created_at?: string
+          id?: string
+          metrics_snapshot?: Json | null
+          new_state?: string
+          previous_state?: string | null
+          reason?: string | null
+          reason_codes?: string[] | null
+          recommendation_id?: string | null
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zone_state_change_log_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "zone_state_recommendations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zone_state_change_log_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zone_state_recommendations: {
+        Row: {
+          category: string
+          confidence: string
+          created_at: string
+          current_state: string
+          id: string
+          idempotency_key: string | null
+          metrics_snapshot: Json
+          reasons: string[]
+          recommended_state: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by_admin_user_id: string | null
+          snoozed_until: string | null
+          status: string
+          updated_at: string
+          zone_id: string
+        }
+        Insert: {
+          category: string
+          confidence?: string
+          created_at?: string
+          current_state: string
+          id?: string
+          idempotency_key?: string | null
+          metrics_snapshot?: Json
+          reasons?: string[]
+          recommended_state: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by_admin_user_id?: string | null
+          snoozed_until?: string | null
+          status?: string
+          updated_at?: string
+          zone_id: string
+        }
+        Update: {
+          category?: string
+          confidence?: string
+          created_at?: string
+          current_state?: string
+          id?: string
+          idempotency_key?: string | null
+          metrics_snapshot?: Json
+          reasons?: string[]
+          recommended_state?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by_admin_user_id?: string | null
+          snoozed_until?: string | null
+          status?: string
+          updated_at?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zone_state_recommendations_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zone_state_threshold_configs: {
+        Row: {
+          config_key: string
+          config_value: Json
+          created_at: string
+          description: string | null
+          id: string
+          updated_at: string
+          updated_by_admin_user_id: string | null
+        }
+        Insert: {
+          config_key: string
+          config_value?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          updated_at?: string
+          updated_by_admin_user_id?: string | null
+        }
+        Update: {
+          config_key?: string
+          config_value?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          updated_at?: string
+          updated_by_admin_user_id?: string | null
+        }
+        Relationships: []
+      }
       zones: {
         Row: {
           alternative_strategy: string
@@ -8214,7 +8378,7 @@ export type Database = {
           p_reason: string
           p_zone_id: string
         }
-        Returns: undefined
+        Returns: Json
       }
       admin_provider_action: {
         Args: {
@@ -8256,6 +8420,10 @@ export type Database = {
             Returns: undefined
           }
       approve_weather_event: { Args: { p_event_id: string }; Returns: Json }
+      approve_zone_state_recommendation: {
+        Args: { p_note?: string; p_recommendation_id: string }
+        Returns: Json
+      }
       attribute_referral_signup: {
         Args: { p_referral_code: string }
         Returns: undefined
@@ -8623,6 +8791,10 @@ export type Database = {
         Args: { p_assignment_id: string }
         Returns: Json
       }
+      reject_zone_state_recommendation: {
+        Args: { p_note: string; p_recommendation_id: string }
+        Returns: Json
+      }
       release_eligible_earning_holds: { Args: never; Returns: Json }
       release_expired_referral_holds: { Args: never; Returns: number }
       release_referral_hold: {
@@ -8763,6 +8935,14 @@ export type Database = {
         }
         Returns: Json
       }
+      snooze_zone_state_recommendation: {
+        Args: {
+          p_note?: string
+          p_recommendation_id: string
+          p_snooze_days?: number
+        }
+        Returns: Json
+      }
       spend_handles:
         | {
             Args: {
@@ -8863,6 +9043,8 @@ export type Database = {
         | "SOFT_LAUNCH"
         | "OPEN"
         | "PROTECT_QUALITY"
+        | "WAITLIST_ONLY"
+        | "PROVIDER_RECRUITING"
       provider_application_status:
         | "draft"
         | "submitted"
@@ -8967,7 +9149,14 @@ export type Database = {
         | "canceled"
         | "rescheduled"
       zone_builder_run_status: "draft" | "preview" | "committed" | "archived"
-      zone_launch_status: "open" | "soft_launch" | "waitlist" | "not_supported"
+      zone_launch_status:
+        | "open"
+        | "soft_launch"
+        | "waitlist"
+        | "not_supported"
+        | "closed"
+        | "provider_recruiting"
+        | "protect_quality"
       zone_seed_strategy: "auto" | "demand_first" | "provider_first"
     }
     CompositeTypes: {
@@ -9124,6 +9313,8 @@ export const Constants = {
         "SOFT_LAUNCH",
         "OPEN",
         "PROTECT_QUALITY",
+        "WAITLIST_ONLY",
+        "PROVIDER_RECRUITING",
       ],
       provider_application_status: [
         "draft",
@@ -9240,7 +9431,15 @@ export const Constants = {
         "rescheduled",
       ],
       zone_builder_run_status: ["draft", "preview", "committed", "archived"],
-      zone_launch_status: ["open", "soft_launch", "waitlist", "not_supported"],
+      zone_launch_status: [
+        "open",
+        "soft_launch",
+        "waitlist",
+        "not_supported",
+        "closed",
+        "provider_recruiting",
+        "protect_quality",
+      ],
       zone_seed_strategy: ["auto", "demand_first", "provider_first"],
     },
   },

@@ -44,7 +44,7 @@ export default function TestToggles() {
   const handleStateChange = (newState: string) => {
     if (!selectedZoneId) return;
     overrideState.mutate(
-      { zoneId: selectedZoneId, category: selectedCategory, newState, reason: "test toggle" },
+      { zoneId: selectedZoneId, category: selectedCategory, newState: newState as any, reason: "test toggle" },
       { onSuccess: () => toast.success(`Market state → ${newState}`) }
     );
   };

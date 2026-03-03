@@ -845,3 +845,48 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S2-P5-04** | P2 | S | Zone Builder History collapsible section on ZonesTab (past runs with region, zone count, status, date).
 
 *Last updated: 2026-03-03 — Sprint 2 Phase 5 complete. Zone Builder v1 fully operational.*
+
+---
+
+## PRD-300 Sprint 3 — Market Zone Category States Integration
+
+> **PRD:** `docs/prds/unfinished/PRD 300 - sprint_3_prd_market_zone_category_states_integration.md`
+> **Goal:** Wire operational market states at (zone, category) level into product for safe scaling.
+> **Complexity:** XL (5 phases)
+
+### Phase 1: Schema + Enum Expansion
+- [x] **S3-P1-01** | P0 | M | Expand `market_zone_category_status` enum: add WAITLIST_ONLY, PROVIDER_RECRUITING
+- [x] **S3-P1-02** | P0 | M | Expand `zone_launch_status` enum: add closed, provider_recruiting, protect_quality
+- [x] **S3-P1-03** | P0 | S | Add tracking columns to `market_zone_category_state`: last_state_change_at, last_state_change_by, previous_status
+- [x] **S3-P1-04** | P0 | L | Create `zone_state_recommendations` table (approval-gated, pending/approved/rejected/snoozed/superseded, confidence, reasons, metrics_snapshot). RLS: admin only.
+- [x] **S3-P1-05** | P0 | M | Create `zone_state_threshold_configs` table (admin-editable dials). Seed 10 defaults (min_providers, utilization thresholds, coverage risk, time-in-state, intake caps).
+- [x] **S3-P1-06** | P0 | M | Create `zone_state_change_log` table (audit trail: change_source manual/approved_recommendation/system_emergency, reason_codes, metrics_snapshot). RLS: admin only.
+- [x] **S3-P1-07** | P0 | M | Enhanced `admin_override_zone_state` RPC — returns jsonb, supersedes pending recommendations, logs to zone_state_change_log + growth_autopilot_actions + admin_audit_log.
+- [x] **S3-P1-08** | P0 | M | Create `approve_zone_state_recommendation`, `reject_zone_state_recommendation`, `snooze_zone_state_recommendation` RPCs (SECURITY DEFINER, admin-only, audit logged).
+- [x] **S3-P1-09** | P0 | M | Update `check_zone_readiness` RPC to use `market_zone_category_state` instead of `market_cohorts`. 6-state hierarchy: OPEN > SOFT_LAUNCH > WAITLIST_ONLY > PROVIDER_RECRUITING > PROTECT_QUALITY > CLOSED.
+- [x] **S3-P1-10** | P0 | S | Create hooks: `useZoneStateRecommendations`, `useZoneStateThresholds`, `useZoneStateChangeLog`. Update `useMarketZoneState` with new type + jsonb return.
+
+### Phase 2: Recommendation Engine (Edge Function)
+- [ ] **S3-P2-01** | P0 | L | Create `compute-zone-state-recommendations` edge function — nightly compute of DemandMinutes, SupplyMinutes, Utilization, QualifiedProviderCount, CoverageRisk per (zone, category).
+- [ ] **S3-P2-02** | P0 | M | Implement deterministic recommendation logic (PRD §9 thresholds) with hysteresis + min time-in-state.
+- [ ] **S3-P2-03** | P0 | S | Confidence scoring (high/medium/low based on distance from thresholds + data density).
+- [ ] **S3-P2-04** | P0 | S | Idempotency via cron_run_log + idempotency_key on recommendations.
+
+### Phase 3: Admin UI — Matrix + Recommendations Inbox
+- [ ] **S3-P3-01** | P0 | XL | Zone × Category Matrix page at `/admin/growth/matrix` (rows=zones, cols=categories, cells=state badge + recommended state + at-a-glance metrics).
+- [ ] **S3-P3-02** | P0 | L | Cell detail side panel (current state, recommendation, metrics, approve/reject/snooze/override actions, audit log).
+- [ ] **S3-P3-03** | P0 | L | Recommendations Inbox at `/admin/growth/recommendations` (filterable queue, bulk approve/snooze, urgency sort).
+- [ ] **S3-P3-04** | P1 | M | Threshold Dials page at `/admin/growth/thresholds` (edit all threshold configs with audit trail).
+
+### Phase 4: Customer Gating + Category Waitlist
+- [ ] **S3-P4-01** | P0 | L | Catalog gating — filter customer-visible categories based on (zone, category) state. OPEN/SOFT_LAUNCH = show, PROTECT_QUALITY/PROVIDER_RECRUITING/WAITLIST_ONLY = waitlist CTA, CLOSED = hidden.
+- [ ] **S3-P4-02** | P0 | M | Subscribe eligibility check — block checkout unless state is OPEN or SOFT_LAUNCH. Route to waitlist flow.
+- [ ] **S3-P4-03** | P0 | L | Category-level waitlist flow (address confirm, contact info, preferences, submit → existing waitlist_entries).
+- [ ] **S3-P4-04** | P1 | M | Customer messaging by state (copy variants per PRD §4D).
+
+### Phase 5: Provider Surfaces
+- [ ] **S3-P5-01** | P1 | M | Market heat signals on provider dashboard (PROVIDER_RECRUITING zones/categories show opportunity badges).
+- [ ] **S3-P5-02** | P1 | M | Provider onboarding tie-in (reinforce early positioning when category is PROVIDER_RECRUITING in nearby zones).
+- [ ] **S3-P5-03** | P2 | S | Analytics events: recommendation_created, approved/rejected/snoozed, state_changed, waitlist_joined, subscribe_blocked_by_state.
+
+*Last updated: 2026-03-03 — Phase 1 complete.*
