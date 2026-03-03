@@ -59,6 +59,7 @@ const navGroups: NavGroup[] = [
       { title: "Jobs", url: "/admin/jobs", icon: ListChecks },
       { title: "Service Days", url: "/admin/service-days", icon: CalendarClock },
       { title: "Scheduling", url: "/admin/scheduling", icon: CalendarDays },
+      { title: "Scheduling Policy", url: "/admin/scheduling/policy", icon: CalendarClock, roles: ["superuser", "ops"] },
       { title: "Exceptions", url: "/admin/exceptions", icon: AlertTriangle },
     ],
   },

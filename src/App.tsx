@@ -134,6 +134,7 @@ import AdminControlChangeLog from "@/pages/admin/ControlChangeLog";
 import AdminControlConfig from "@/pages/admin/ControlConfig";
 import AdminPlaybooks from "@/pages/admin/Playbooks";
 import AdminCronHealth from "@/pages/admin/CronHealth";
+import AdminSchedulingPolicy from "@/pages/admin/SchedulingPolicy";
 
 const queryClient = new QueryClient();
 
@@ -249,6 +250,7 @@ const App = () => (
                 <Route path="/admin/jobs" element={<AdminJobs />} />
                 <Route path="/admin/jobs/:jobId" element={<AdminJobDetail />} />
                 <Route path="/admin/scheduling" element={<AdminScheduling />} />
+                <Route path="/admin/scheduling/policy" element={<AdminSchedulingPolicy />} />
                 <Route path="/admin/service-days" element={<AdminServiceDays />} />
                 <Route path="/admin/bundles" element={<AdminBundles />} />
                 <Route path="/admin/support" element={<AdminSupport />} />
