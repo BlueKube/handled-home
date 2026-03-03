@@ -813,13 +813,13 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S2-P1-06** | P0 | S | Create `src/lib/driveTimeProxy.ts` — Mode 1: haversine × 1.4 city multiplier. Mode 2: TravelTimeProvider interface stub.
 
 ### Phase 2: Zone Generation Algorithm — Edge Function
-- [ ] **S2-P2-01** | P0 | M | Create `generate-zones` edge function — accepts region_id + config dials, creates run row.
-- [ ] **S2-P2-02** | P0 | L | Cell aggregation — query properties + provider_work_profiles → H3 cells → demand/supply per cell.
-- [ ] **S2-P2-03** | P0 | M | Cell scoring + seed selection via zoneScoringUtils.
-- [ ] **S2-P2-04** | P0 | XL | Region-growing algorithm — constrained growth loop with cost function.
-- [ ] **S2-P2-05** | P0 | M | Feasibility constraints — flag zones, compute per-zone metrics.
-- [ ] **S2-P2-06** | P1 | L | Refinement pass — boundary swaps, merge tiny, split oversized.
-- [ ] **S2-P2-07** | P0 | S | Write results to zone_builder_results, update run status to preview.
+- [x] **S2-P2-01** | P0 | M | Create `generate-zones` edge function — accepts region_id + config dials, creates run row.
+- [x] **S2-P2-02** | P0 | L | Cell aggregation — query properties + provider_work_profiles → H3 cells → demand/supply per cell.
+- [x] **S2-P2-03** | P0 | M | Cell scoring + seed selection via zoneScoringUtils.
+- [x] **S2-P2-04** | P0 | XL | Region-growing algorithm — constrained growth loop with cost function.
+- [x] **S2-P2-05** | P0 | M | Feasibility constraints — flag zones, compute per-zone metrics.
+- [x] **S2-P2-06** | P1 | L | Refinement pass — boundary swaps, merge tiny, split oversized.
+- [x] **S2-P2-07** | P0 | S | Write results to zone_builder_results, update run status to preview.
 
 ### Phase 3: Admin Wizard UI — Screens 1–3
 - [ ] **S2-P3-01** | P0 | M | ZoneBuilderWizard route + stepper component.
@@ -840,4 +840,4 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [ ] **S2-P5-03** | P1 | M | backfill-property-zones edge function.
 - [ ] **S2-P5-04** | P2 | S | Zone generation history in ZonesTab.
 
-*Last updated: 2026-03-03 — Sprint 2 Phase 1 complete.*
+*Last updated: 2026-03-03 — Sprint 2 Phase 2 complete.*
