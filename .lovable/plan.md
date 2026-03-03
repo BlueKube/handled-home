@@ -1,121 +1,90 @@
 
 
-This is Lovable's reply after committing to the main branch...
+# PRD-300 Sprint 1 — Foundations: Data Model + Geo Index + Schedule States
 
-# Phase 7 — Code Review (Thorough)
+## What We Are Building
+The scheduling and routing foundation: visits with bundled tasks, a schedule state machine, provider capability expansion (home base geo, equipment, working hours, capacity), geo indexing for providers, scheduling policy dials in admin, and customer-facing visit status labels.
 
-## VERDICT: FAIL — 1 Critical (P0), 2 Serious (P1), 2 Moderate (P2)
+## Existing Assets We Reuse
+- `properties.lat`, `properties.lng`, `properties.geohash` — already exist
+- `provider_capabilities` — extend, don't replace
+- `admin_system_config` — use for scheduling policy dials
+- `jobs` table — remains as-is; visits layer on top
+- `service_skus.duration_minutes` — already exists
 
----
+## What Is New
 
-## P0 — CRITICAL: `review_provider_application` RPC will crash at runtime
+### Database (new tables + columns)
+1. **`visits`** table — groups tasks at one property on one date; has schedule state, optional time window, ETA range, plan version
+2. **`visit_tasks`** table — one per service task within a visit; links to SKU, has duration estimate and presence_required flag
+3. **`visit_schedule_state` enum** — `planning`, `scheduled`, `dispatched`, `in_progress`, `complete`, `exception_pending`, `canceled`, `rescheduled`
+4. **`provider_work_profiles`** table — home base lat/lng/geohash, max_jobs_per_day, working_hours (jsonb), equipment_kits (text[])
+5. **`service_skus` column addition** — `presence_required boolean default false`
+6. **Scheduling policy config rows** seeded into `admin_system_config` — `scheduling.appointment_window_minutes`, `scheduling.eta_range_display`, `scheduling.arrival_notification_minutes`, `scheduling.preference_pricing_mode`
 
-**File:** `supabase/migrations/20260302154707_...sql`, lines 75-100
-
-The RPC calls `emit_notification_event` with parameters that **do not exist** on the function:
-
-```sql
--- What the RPC passes:
-PERFORM public.emit_notification_event(
-  p_event_type := '...',
-  p_audience_type := 'USER',        -- ← should be valid audience type
-  p_audience_user_id := v_app.user_id,
-  p_priority := 'critical',         -- ← should be uppercase 'CRITICAL'
-  p_title := '...',                  -- ← DOES NOT EXIST
-  p_body := '...',                   -- ← DOES NOT EXIST
-  p_data := jsonb_build_object(...), -- ← DOES NOT EXIST (param is p_payload)
-  p_idempotency_key := '...'
-);
-```
-
-**Actual `emit_notification_event` signature** (from migration `20260225072206`):
-```
-p_event_type text, p_idempotency_key text, p_audience_type text,
-p_audience_user_id uuid, p_audience_org_id uuid, p_audience_zone_id uuid,
-p_priority text, p_payload jsonb, p_scheduled_for timestamptz
-```
-
-Three phantom parameters (`p_title`, `p_body`, `p_data`) will cause a Postgres error every time an admin tries to approve/reject an application. Additionally, `p_priority` uses lowercase `'critical'` but the rate limits table uses uppercase `'CRITICAL'`.
-
-**Fix:** Replace the `PERFORM` call with correct parameters, packing title/body into `p_payload`:
-```sql
-PERFORM public.emit_notification_event(
-  p_event_type := 'PROVIDER_APPLICATION_APPROVED',
-  p_idempotency_key := 'app_review_' || p_application_id || '_' || p_decision,
-  p_audience_type := 'PROVIDER',
-  p_audience_user_id := v_app.user_id,
-  p_priority := 'CRITICAL',
-  p_payload := jsonb_build_object(
-    'title', 'Application Approved!',
-    'body', COALESCE(p_reason, 'Your provider application status has been updated.'),
-    'application_id', p_application_id,
-    'decision', p_decision,
-    'org_id', v_org_id
-  )
-);
-```
+### Frontend
+7. **Admin → Settings → Scheduling tab** — policy cards for the 4 dials with audit reason on save
+8. **Provider → Work Setup page** — 3-step stepper (Location → Services → Schedule) for home base, categories, equipment, hours
+9. **Customer → Upcoming visits** — list cards with date + ETA range + customer-friendly status labels + "How scheduling works" disclosure
 
 ---
 
-## P1-1 — Rules of Hooks violation in `useAdminApplications`
+## Phases
 
-**File:** `src/hooks/useAdminApplications.ts`, lines 19-50
+### Phase 1 — Schema Migration
+- Create `visit_schedule_state` enum
+- Create `visits` table (id, property_id, provider_org_id, scheduled_date, schedule_state, time_window_start, time_window_end, eta_range_start, eta_range_end, route_plan_version, locked_at, draft_generated_at, created_at, updated_at)
+- Create `visit_tasks` table (id, visit_id FK, sku_id FK, duration_estimate_minutes, presence_required, status, notes, created_at)
+- Create `provider_work_profiles` table (provider_org_id PK FK, home_lat, home_lng, home_geohash, home_address_label, max_jobs_per_day, working_hours jsonb, equipment_kits text[], created_at, updated_at)
+- Add `presence_required` column to `service_skus`
+- Seed 4 scheduling config rows into `admin_system_config`
+- RLS policies for all new tables
+- Indexes: visits(property_id, scheduled_date), visits(provider_org_id, scheduled_date), visit_tasks(visit_id), provider_work_profiles(home_geohash)
 
-`applicationDetail` is a plain function (not prefixed with `use`) that internally calls `useQuery`. This violates React's Rules of Hooks. ESLint would flag it, and it could cause issues with hot-reload or strict mode.
+### Phase 2 — Admin Scheduling Policy UI
+- New scheduling settings tab at Admin → Settings (or dedicated route)
+- Policy cards: appointment window length (dropdown), ETA range display (toggle), arrival notification minutes (numeric input), preference pricing mode (badge/toggle)
+- Each card has "what it affects" + "when it takes effect" + tooltip
+- Save requires audit reason modal
+- Wired to `admin_system_config` upsert with `updated_by_user_id`
+- Hook: `useSchedulingPolicy` — reads resolved values
 
-**Fix:** Rename to `useApplicationDetail` and export it as a separate hook, or restructure the hook so the caller passes `id` and the query is called unconditionally at the top level of `useAdminApplications`.
+### Phase 3 — Provider Work Setup Page
+- New route: `/provider/work-setup`
+- 3-step stepper: Location (address/map pin → lat/lng/geohash) → Services (multi-select categories + equipment kits) → Schedule (weekly hours builder + max jobs/day)
+- "Why we ask" microcopy on each step
+- Wired to `provider_work_profiles` upsert
+- Accessible from Provider Profile nav
+
+### Phase 4 — Customer Upcoming Visits View
+- Update customer dashboard or create `/customer/upcoming` route
+- List cards: date, ETA range (placeholder if not computed), customer-friendly status label (Planning / Scheduled / Today / In Progress / Completed)
+- "How scheduling works" expandable disclosure with calm messaging
+- Query `visits` + `visit_tasks` for the logged-in customer's properties
+- Provider home base never exposed
 
 ---
 
-## P1-2 — Applications tab is a navigation hack
+## Technical Details
 
-**File:** `src/pages/admin/Providers.tsx`, line 48
-
-```tsx
-<TabsTrigger value="applications" onClick={() => navigate("/admin/providers/applications")}>
+### Visit State Machine Transitions
+```text
+planning → scheduled → dispatched → in_progress → complete
+planning → canceled
+scheduled → canceled | rescheduled | exception_pending
+dispatched → in_progress | exception_pending
+exception_pending → rescheduled | canceled
 ```
 
-This tab has no `TabsContent`. Clicking it navigates away but also selects the tab value, causing a flash of empty content before navigation fires. If the user is already on `/admin/providers/applications` and navigates back, the tab state won't reflect correctly.
+### Privacy
+- `provider_work_profiles` RLS: provider reads/writes own org; admin reads all; no customer access
+- `visits` RLS: customer reads own (via property_id → user_id join); provider reads assigned; admin reads all
 
-**Fix:** Replace the tab approach with a `Button` or `Link` styled consistently with the other tabs, or use a proper `TabsContent` that renders an inline version.
-
----
-
-## P2-1 — `p_audience_type` uses `'USER'` but system expects `'CUSTOMER'` or `'PROVIDER'`
-
-**File:** `supabase/migrations/20260302154707_...sql`, line 83
-
-The `notification_rate_limits` seed data only has entries for `CUSTOMER`, `PROVIDER`, and `ADMIN`. Passing `'USER'` as `p_audience_type` means the notification won't match any rate limit and could be silently dropped or error depending on downstream logic.
-
-**Fix:** Use `'PROVIDER'` since the applicant is becoming a provider.
-
----
-
-## P2-2 — Excessive `as any` casts in `ApplicationDetail.tsx`
-
-**File:** `src/pages/admin/ApplicationDetail.tsx`, lines 62-65
-
-```tsx
-const byoc = app.byoc_estimate_json as any;
-const clausesAccepted = (app as any).agreement_clauses?.length || 0;
-const complianceDocs = (app as any).compliance_docs || [];
-```
-
-The `agreement_clauses` and `compliance_docs` properties are appended in the hook's queryFn but aren't typed, forcing `as any` throughout. This masks potential property name mismatches.
-
-**Fix:** Define a return type in the hook that extends the base row type with `agreement_clauses` and `compliance_docs`.
-
----
-
-## Summary of Required Fixes
-
-| # | Severity | Issue | Effort |
-|---|----------|-------|--------|
-| 1 | **P0** | `emit_notification_event` called with 3 non-existent params — RPC crashes | Migration patch |
-| 2 | **P1** | Rules of Hooks violation in `applicationDetail` | Rename/restructure hook |
-| 3 | **P1** | Tab navigation hack causes UX flash | Replace with link/button |
-| 4 | **P2** | `audience_type = 'USER'` not in rate limits | Change to `'PROVIDER'` |
-| 5 | **P2** | Untyped `as any` casts in detail page | Add return type to hook |
-
-Shall I fix all five?
+### Scheduling Policy Config Keys
+| Key | Default | Type |
+|-----|---------|------|
+| `scheduling.appointment_window_minutes` | `120` | number |
+| `scheduling.eta_range_display` | `"day_plus_range"` | string |
+| `scheduling.arrival_notification_minutes` | `15` | number |
+| `scheduling.preference_pricing_mode` | `"scarcity"` | string |
 
