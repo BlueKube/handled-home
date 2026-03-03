@@ -344,6 +344,69 @@ export type Database = {
           },
         ]
       }
+      assignment_config: {
+        Row: {
+          config_key: string
+          config_value: Json
+          description: string | null
+          id: string
+          updated_at: string | null
+          updated_by_user_id: string | null
+        }
+        Insert: {
+          config_key: string
+          config_value: Json
+          description?: string | null
+          id?: string
+          updated_at?: string | null
+          updated_by_user_id?: string | null
+        }
+        Update: {
+          config_key?: string
+          config_value?: Json
+          description?: string | null
+          id?: string
+          updated_at?: string | null
+          updated_by_user_id?: string | null
+        }
+        Relationships: []
+      }
+      assignment_runs: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          idempotency_key: string | null
+          run_date: string
+          started_at: string | null
+          status: string
+          summary: Json | null
+          triggered_by: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          idempotency_key?: string | null
+          run_date: string
+          started_at?: string | null
+          status?: string
+          summary?: Json | null
+          triggered_by?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          idempotency_key?: string | null
+          run_date?: string
+          started_at?: string | null
+          status?: string
+          summary?: Json | null
+          triggered_by?: string | null
+        }
+        Relationships: []
+      }
       billing_exceptions: {
         Row: {
           created_at: string
@@ -7177,6 +7240,67 @@ export type Database = {
         }
         Relationships: []
       }
+      visit_assignment_log: {
+        Row: {
+          action: string
+          candidates: Json | null
+          created_at: string | null
+          id: string
+          performed_by: string | null
+          previous_provider_org_id: string | null
+          provider_org_id: string | null
+          reason: string | null
+          score_breakdown: Json | null
+          visit_id: string
+        }
+        Insert: {
+          action: string
+          candidates?: Json | null
+          created_at?: string | null
+          id?: string
+          performed_by?: string | null
+          previous_provider_org_id?: string | null
+          provider_org_id?: string | null
+          reason?: string | null
+          score_breakdown?: Json | null
+          visit_id: string
+        }
+        Update: {
+          action?: string
+          candidates?: Json | null
+          created_at?: string | null
+          id?: string
+          performed_by?: string | null
+          previous_provider_org_id?: string | null
+          provider_org_id?: string | null
+          reason?: string | null
+          score_breakdown?: Json | null
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visit_assignment_log_previous_provider_org_id_fkey"
+            columns: ["previous_provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visit_assignment_log_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visit_assignment_log_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       visit_feedback_quick: {
         Row: {
           category: string | null
@@ -7412,6 +7536,12 @@ export type Database = {
       }
       visits: {
         Row: {
+          assignment_confidence: string | null
+          assignment_locked: boolean | null
+          assignment_reasons: Json | null
+          assignment_run_id: string | null
+          assignment_score: number | null
+          backup_provider_org_id: string | null
           created_at: string
           draft_generated_at: string | null
           eta_range_end: string | null
@@ -7427,9 +7557,16 @@ export type Database = {
           scheduled_date: string
           time_window_end: string | null
           time_window_start: string | null
+          unassigned_reason: string | null
           updated_at: string
         }
         Insert: {
+          assignment_confidence?: string | null
+          assignment_locked?: boolean | null
+          assignment_reasons?: Json | null
+          assignment_run_id?: string | null
+          assignment_score?: number | null
+          backup_provider_org_id?: string | null
           created_at?: string
           draft_generated_at?: string | null
           eta_range_end?: string | null
@@ -7445,9 +7582,16 @@ export type Database = {
           scheduled_date: string
           time_window_end?: string | null
           time_window_start?: string | null
+          unassigned_reason?: string | null
           updated_at?: string
         }
         Update: {
+          assignment_confidence?: string | null
+          assignment_locked?: boolean | null
+          assignment_reasons?: Json | null
+          assignment_run_id?: string | null
+          assignment_score?: number | null
+          backup_provider_org_id?: string | null
           created_at?: string
           draft_generated_at?: string | null
           eta_range_end?: string | null
@@ -7463,9 +7607,24 @@ export type Database = {
           scheduled_date?: string
           time_window_end?: string | null
           time_window_start?: string | null
+          unassigned_reason?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "visits_assignment_run_id_fkey"
+            columns: ["assignment_run_id"]
+            isOneToOne: false
+            referencedRelation: "assignment_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visits_backup_provider_org_id_fkey"
+            columns: ["backup_provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "visits_plan_run_id_fkey"
             columns: ["plan_run_id"]
