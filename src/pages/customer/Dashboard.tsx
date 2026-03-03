@@ -191,7 +191,15 @@ export default function CustomerDashboard() {
       )}
 
       {/* Section A — Next Up */}
-      <NextVisitCard job={nextJob} isLoading={jobsLoading} />
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Next Up</p>
+          <Button variant="link" size="sm" className="text-xs h-auto p-0" onClick={() => navigate("/customer/upcoming")}>
+            View all upcoming →
+          </Button>
+        </div>
+        <NextVisitCard job={nextJob} isLoading={jobsLoading} />
+      </div>
 
       {/* Handles Balance */}
       {handleBalance != null && planHandles && planHandles.handles_per_cycle > 0 && (

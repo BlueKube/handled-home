@@ -700,8 +700,14 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **PRD300-P3-01** | P0 | M | Created `useProviderWorkProfile` hook (query + upsert)
 - [x] **PRD300-P3-02** | P0 | L | Built `/provider/work-setup` — 3-step stepper (Location → Services → Schedule) with home base, category multi-select, equipment toggles, weekly hours, max jobs/day
 - [x] **PRD300-P3-03** | P0 | S | Wired route in App.tsx + "Work Setup" link in provider More menu
+- [x] **PRD300-P3-04** | P0 | S | Fixed working_hours day-key mismatch (normalizer maps mon→monday on read) + aligned max_jobs default to 12
 
-*Last updated: 2026-03-03 — Phase 3 complete. Phase 4 (Customer Upcoming) next.*
+### Phase 4: Customer Upcoming Visits
+- [x] **PRD300-P4-01** | P0 | M | Created `useUpcomingVisits` hook — queries visits table with visit_tasks join, filters by upcoming schedule states, includes SKU names
+- [x] **PRD300-P4-02** | P0 | L | Built `/customer/upcoming` page — visit cards with calm scheduling labels (Planning/Scheduled/Today/In Progress/Needs Attention), ETA windows, task pills, presence-required indicators, exception + dispatched contextual hints
+- [x] **PRD300-P4-03** | P0 | S | Wired route in App.tsx, added "View all upcoming →" link on Dashboard next to NextVisitCard
+
+*Last updated: 2026-03-03 — Phase 4 complete.*
 
 ---
 
