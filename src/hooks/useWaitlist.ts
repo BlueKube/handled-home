@@ -60,7 +60,7 @@ export function useWaitlistSummary() {
 /** Public: join waitlist via edge function (rate-limited, server-side zone lookup) */
 export function useJoinWaitlist() {
   return useMutation({
-    mutationFn: async (entry: { email: string; full_name?: string; zip_code: string; source?: string; referral_code?: string }) => {
+    mutationFn: async (entry: { email: string; full_name?: string; zip_code: string; source?: string; referral_code?: string; metadata?: Record<string, unknown> }) => {
       const { data, error } = await supabase.functions.invoke("join-waitlist", {
         body: {
           email: entry.email,
@@ -68,6 +68,7 @@ export function useJoinWaitlist() {
           zip_code: entry.zip_code,
           source: entry.source,
           referral_code: entry.referral_code,
+          metadata: entry.metadata,
         },
       });
 

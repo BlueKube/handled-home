@@ -70,6 +70,7 @@ export function CategoryWaitlistSheet({
         zip_code: property?.zip_code ?? "00000",
         source: `category_waitlist_${category}`,
         referral_code: undefined,
+        metadata: { category, preferences: selectedChips },
       });
       setSubmitted(true);
       if (user) emitStateAnalyticsEvent({ eventType: "waitlist_joined", actorId: user.id, actorRole: "customer", category, sourceSurface: "category_waitlist_sheet" });
