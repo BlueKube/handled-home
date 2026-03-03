@@ -885,8 +885,8 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S3-P4-04** | P1 | M | Customer messaging by state — `src/lib/categoryStateMessaging.ts` provides `getStateMessage(rawState, category)` returning headline/subtext/badge/ctaLabel per PRD §4D. Used in AddServicesSheet waitlist cards and CategoryWaitlistSheet header.
 
 ### Phase 5: Provider Surfaces
-- [ ] **S3-P5-01** | P1 | M | Market heat signals on provider dashboard (PROVIDER_RECRUITING zones/categories show opportunity badges).
-- [ ] **S3-P5-02** | P1 | M | Provider onboarding tie-in (reinforce early positioning when category is PROVIDER_RECRUITING in nearby zones).
-- [ ] **S3-P5-03** | P2 | S | Analytics events: recommendation_created, approved/rejected/snoozed, state_changed, waitlist_joined, subscribe_blocked_by_state.
+- [x] **S3-P5-01** | P1 | M | Market heat signals on provider dashboard — `MarketHeatBanner` component queries `market_zone_category_state` for PROVIDER_RECRUITING in provider's covered zones. Shows opportunity badges grouped by category with zone counts. Links to coverage page.
+- [x] **S3-P5-02** | P1 | M | Provider onboarding tie-in — `OnboardingRecruitingSignals` component shows high-demand category chips on DraftResumeScreen when PROVIDER_RECRUITING states exist in the provider's allowed zones.
+- [x] **S3-P5-03** | P2 | S | Analytics events — `emitStateAnalyticsEvent()` utility emits to `growth_events` table. Wired into: recommendation approve/reject/snooze (admin), waitlist_joined (customer), subscribe_blocked_by_state (customer). Fire-and-forget with timestamp-based idempotency keys.
 
-*Last updated: 2026-03-03 — Phase 4 complete.*
+*Last updated: 2026-03-03 — Sprint 3 Phase 5 complete. Market Zone Category States Integration fully operational.*

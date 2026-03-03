@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { emitStateAnalyticsEvent } from "@/lib/analyticsEvents";
 
 export interface ZoneStateRecommendation {
   id: string;
@@ -24,6 +26,7 @@ export function useZoneStateRecommendations(filters?: {
   zoneId?: string;
   category?: string;
 }) {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const recommendations = useQuery({
@@ -51,9 +54,10 @@ export function useZoneStateRecommendations(filters?: {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (_data, vars) => {
       queryClient.invalidateQueries({ queryKey: ["zone_state_recommendations"] });
       queryClient.invalidateQueries({ queryKey: ["market_zone_category_state"] });
+      if (user) emitStateAnalyticsEvent({ eventType: "recommendation_approved", actorId: user.id, actorRole: "admin", sourceSurface: "admin_recommendations_inbox", context: { recommendation_id: vars.recommendationId } });
     },
   });
 
@@ -66,7 +70,10 @@ export function useZoneStateRecommendations(filters?: {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["zone_state_recommendations"] }),
+    onSuccess: (_data, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["zone_state_recommendations"] });
+      if (user) emitStateAnalyticsEvent({ eventType: "recommendation_rejected", actorId: user.id, actorRole: "admin", sourceSurface: "admin_recommendations_inbox", context: { recommendation_id: vars.recommendationId } });
+    },
   });
 
   const snooze = useMutation({
@@ -79,7 +86,10 @@ export function useZoneStateRecommendations(filters?: {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["zone_state_recommendations"] }),
+    onSuccess: (_data, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["zone_state_recommendations"] });
+      if (user) emitStateAnalyticsEvent({ eventType: "recommendation_snoozed", actorId: user.id, actorRole: "admin", sourceSurface: "admin_recommendations_inbox", context: { recommendation_id: vars.recommendationId, snooze_days: vars.snoozeDays ?? 7 } });
+    },
   });
 
   return { recommendations, approve, reject, snooze };
