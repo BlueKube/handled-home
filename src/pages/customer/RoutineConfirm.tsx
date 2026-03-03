@@ -93,6 +93,10 @@ export default function RoutineConfirm() {
       </div>
     );
   }
+  // Compute effective date = T0+7 (first DRAFT day)
+  const effectiveDateObj = new Date();
+  effectiveDateObj.setDate(effectiveDateObj.getDate() + 7);
+  const effectiveDateFormatted = effectiveDateObj.toLocaleDateString("en-US", { month: "long", day: "numeric" });
 
   const effectiveDateLabel = subscription?.billing_cycle_end_at
     ? new Date(subscription.billing_cycle_end_at).toLocaleDateString("en-US", { month: "long", day: "numeric" })
@@ -121,9 +125,17 @@ export default function RoutineConfirm() {
           <Lock className="h-8 w-8 mx-auto text-accent" />
           <h1 className="text-h2">Lock in Your Routine</h1>
           <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-            Once confirmed, your routine takes effect {effectiveDateLabel}.
-            You can update it before your next billing cycle.
+            Changes take effect on <span className="font-semibold text-foreground">{effectiveDateFormatted}</span>.
+            Your next 7 days are already scheduled and won't change.
           </p>
+        </div>
+
+        {/* Effective date badge */}
+        <div className="flex items-center justify-center">
+          <div className="inline-flex items-center gap-2 rounded-full bg-accent/10 px-4 py-2 text-sm font-medium text-accent">
+            <CalendarDays className="h-4 w-4" />
+            Effective {effectiveDateFormatted}
+          </div>
         </div>
 
         {/* Summary */}

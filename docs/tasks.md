@@ -890,3 +890,46 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S3-P5-03** | P2 | S | Analytics events — `emitStateAnalyticsEvent()` utility emits to `growth_events` table. Wired into: recommendation approve/reject/snooze (admin), waitlist_joined (customer), subscribe_blocked_by_state (customer). Fire-and-forget with timestamp-based idempotency keys.
 
 *Last updated: 2026-03-03 — Sprint 3 Phase 5 complete. Market Zone Category States Integration fully operational.*
+
+---
+
+## PRD-300 Sprint 4 — Rolling Horizon Planner (14-Day Plan + 7-Day Freeze)
+
+> **PRD:** `docs/prds/unfinished/PRD 300 - sprint_4_prd_rolling_horizon_planner_14_day_plan_7_day_freeze.md`
+> **Goal:** Nightly planner maintaining a stable 14-day schedule with 7-day freeze + customer effective date policy.
+> **Complexity:** XL (5 phases)
+
+### Phase 1: Schema Foundation
+- [x] **S4-P1-01** | P0 | M | Create `plan_runs` table (status, triggered_by, run_date, summary jsonb, conflicts jsonb, idempotency_key unique). RLS: admin only.
+- [x] **S4-P1-02** | P0 | S | Create `plan_window` enum (locked, draft). Add `plan_window` + `plan_run_id` FK to `visits`.
+- [x] **S4-P1-03** | P0 | S | Add `cadence_anchor_date` to `routines` (stable offset for cadence math).
+- [x] **S4-P1-04** | P0 | S | Add `effective_date` to `routine_versions` (when changes take effect in plan).
+- [x] **S4-P1-05** | P0 | S | Indexes: `(property_id, scheduled_date)` on visits, `(status)` on plan_runs, `(plan_window)` filtered.
+- [x] **S4-P1-06** | P0 | S | Auto-complete trigger on plan_runs (sets completed_at when status transitions to completed/failed).
+
+### Phase 2: Nightly Planner Edge Function
+- [x] **S4-P2-01** | P0 | XL | Create `run-nightly-planner` edge function — Steps A–F from PRD §6.
+- [x] **S4-P2-02** | P0 | L | Step A: Parallel data loading (subscriptions, service days, routines, existing visits, market states, SKU categories).
+- [x] **S4-P2-03** | P0 | L | Steps C+D: Service day date generation, cadence math (k mod N occurrence-based), zone/category gating filter.
+- [x] **S4-P2-04** | P0 | M | Step E: LOCKED preservation — existing locked visits untouched, window classification update only.
+- [x] **S4-P2-05** | P0 | M | Stability: DRAFT diff-based updates (add new tasks, remove stale, preserve unchanged).
+- [x] **S4-P2-06** | P0 | S | Bundling: all due tasks per property/date → single visit with additive duration.
+- [x] **S4-P2-07** | P0 | S | Idempotency: daily key `planner:YYYY-MM-DD:mode`, skip if already completed. cron_run_log integration.
+- [x] **S4-P2-08** | P0 | S | Plan run summary (locked/draft counts, tasks created/removed, properties processed/skipped) + conflict tracking.
+
+### Phase 3: Customer UX — Effective Date + Visit Labels
+- [x] **S4-P3-01** | P0 | M | RoutineConfirm shows "Changes take effect on {T0+7}" badge with accent styling.
+- [x] **S4-P3-02** | P0 | M | `useUpcomingVisits` updated to fetch `plan_window`. New `getVisitLabel()` and `getVisitStyle()` helpers.
+- [x] **S4-P3-03** | P0 | S | UpcomingVisits page uses plan_window-aware labels: LOCKED planning → "Scheduled", DRAFT planning → "Planned".
+
+### Phase 4: Admin Planner Dashboard
+- [x] **S4-P4-01** | P0 | L | `/admin/scheduling/planner` page — plan runs list with status badges, trigger info, delta counts.
+- [x] **S4-P4-02** | P0 | M | Run detail panel — summary stats grid, duration, conflict list with property IDs.
+- [x] **S4-P4-03** | P0 | M | "Run Planner" (full) + "Rebuild DRAFT" (draft_only) manual controls with confirmation dialogs.
+- [x] **S4-P4-04** | P0 | S | Planner link added to AdminShell sidebar (Operations → Planner, superuser/ops only).
+
+### Phase 5: Hooks + Wiring
+- [x] **S4-P5-01** | P0 | M | `usePlanRuns` hook (list query, detail query, trigger mutation).
+- [x] **S4-P5-02** | P0 | S | Route added to App.tsx, import wired.
+
+*Last updated: 2026-03-03 — Sprint 4 complete. Rolling Horizon Planner operational.*
