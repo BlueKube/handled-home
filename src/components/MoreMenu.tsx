@@ -51,6 +51,7 @@ const providerSections: MenuSection[] = [
     title: "Business",
     items: [
       { label: "Organization", icon: Building2, path: "/provider/organization" },
+      { label: "Work Setup", icon: MapPin, path: "/provider/work-setup" },
     ],
   },
   {

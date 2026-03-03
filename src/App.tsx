@@ -68,6 +68,7 @@ import ProviderOnboardingCapabilities from "@/pages/provider/OnboardingCapabilit
 import ProviderOnboardingCompliance from "@/pages/provider/OnboardingCompliance";
 import ProviderOnboardingAgreement from "@/pages/provider/OnboardingAgreement";
 import ProviderOnboardingReview from "@/pages/provider/OnboardingReview";
+import ProviderWorkSetup from "@/pages/provider/WorkSetup";
 import ProviderSupport from "@/pages/provider/Support";
 import ProviderSupportTicketDetail from "@/pages/provider/SupportTicketDetail";
 import ProviderReferrals from "@/pages/provider/Referrals";
@@ -231,6 +232,7 @@ const App = () => (
                 <Route path="/provider/byoc" element={<ProviderByocCenter />} />
                 <Route path="/provider/byoc/create-link" element={<ProviderByocCreateLink />} />
                 <Route path="/provider/quality" element={<ProviderQualityScore />} />
+                <Route path="/provider/work-setup" element={<ProviderWorkSetup />} />
                 <Route path="/provider/more" element={<MoreMenuPage />} />
                 <Route path="/provider/notifications" element={<SharedNotifications />} />
               </Route>
