@@ -103,7 +103,9 @@ export default function ZoneBuilder() {
       const color = ZONE_COLORS[zi % ZONE_COLORS.length];
       for (const cellIdx of zone.cell_indices) {
         try {
-          const boundary = cellToBoundary(cellIdx, true); // [lng, lat]
+          const boundary = cellToBoundary(cellIdx, true); // true = GeoJSON [lng, lat] order
+          // Close the polygon ring (GeoJSON requires first === last)
+          const ring = [...boundary, boundary[0]];
           features.push({
             type: "Feature",
             properties: {
@@ -113,7 +115,7 @@ export default function ZoneBuilder() {
             },
             geometry: {
               type: "Polygon",
-              coordinates: [boundary.map(([lat, lng]) => [lng, lat])],
+              coordinates: [ring],
             },
           });
         } catch {

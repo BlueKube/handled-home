@@ -121,11 +121,9 @@ export function h3CellsToGeoJsonFeatures(
   properties: Record<string, unknown> = {}
 ): GeoJSON.Feature[] {
   return h3Indices.map((h3Index) => {
-    const boundary = h3ToBoundary(h3Index);
-    // H3 returns [lat, lng], GeoJSON needs [lng, lat]
-    const coordinates = boundary.map(([lat, lng]) => [lng, lat]);
-    // Close the polygon
-    coordinates.push(coordinates[0]);
+    const boundary = cellToBoundary(h3Index, true); // true = GeoJSON [lng, lat] order
+    // Close the polygon ring
+    const coordinates = [...boundary, boundary[0]];
 
     return {
       type: 'Feature' as const,
