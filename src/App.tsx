@@ -139,6 +139,8 @@ import AdminPlaybooks from "@/pages/admin/Playbooks";
 import AdminCronHealth from "@/pages/admin/CronHealth";
 import AdminSchedulingPolicy from "@/pages/admin/SchedulingPolicy";
 import AdminPlannerDashboard from "@/pages/admin/PlannerDashboard";
+import AdminAssignmentDashboard from "@/pages/admin/AssignmentDashboard";
+import AdminAssignmentConfig from "@/pages/admin/AssignmentConfig";
 
 const queryClient = new QueryClient();
 
@@ -259,6 +261,8 @@ const App = () => (
                 <Route path="/admin/scheduling" element={<AdminScheduling />} />
                 <Route path="/admin/scheduling/policy" element={<AdminSchedulingPolicy />} />
                 <Route path="/admin/scheduling/planner" element={<AdminPlannerDashboard />} />
+                <Route path="/admin/assignments" element={<AdminAssignmentDashboard />} />
+                <Route path="/admin/assignments/config" element={<AdminAssignmentConfig />} />
                 <Route path="/admin/service-days" element={<AdminServiceDays />} />
                 <Route path="/admin/bundles" element={<AdminBundles />} />
                 <Route path="/admin/support" element={<AdminSupport />} />
