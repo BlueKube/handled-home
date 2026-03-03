@@ -9,9 +9,10 @@ import { useProviderOrg } from "@/hooks/useProviderOrg";
 import { useProviderRoutePlan } from "@/hooks/useProviderRoutePlan";
 import { useOptimizeRoute, useReorderRoute } from "@/hooks/useRouteOptimization";
 import { ProviderMapView } from "@/components/provider/ProviderMapView";
-import { MapPin, Clock, ChevronRight, ArrowUp, ArrowDown, Route, Loader2, Lock, Map as MapIcon, List } from "lucide-react";
+import { MapPin, Clock, ChevronRight, ArrowUp, ArrowDown, Route, Loader2, Lock, Map as MapIcon, List, ShieldCheck, Timer } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
+import { format, differenceInDays, parseISO } from "date-fns";
 import { toast } from "sonner";
 
 function JobCard({ job, index, total, onMoveUp, onMoveDown, showReorder, isSelected, onSelect }: {
@@ -26,8 +27,16 @@ function JobCard({ job, index, total, onMoveUp, onMoveDown, showReorder, isSelec
 }) {
   const navigate = useNavigate();
   const skuNames = job.job_skus?.map((s) => s.sku_name_snapshot).filter(Boolean).join(", ") || "No services listed";
+  const totalMinutes = job.job_skus?.reduce((sum, s) => sum + (s.duration_minutes_snapshot ?? 0), 0) ?? 0;
   const addr = job.property;
   const isNext = index === 0 && job.status !== "IN_PROGRESS";
+
+  // Determine if job is in freeze window (≤7 days) or planning horizon (>7 days)
+  const daysUntil = job.scheduled_date
+    ? differenceInDays(parseISO(job.scheduled_date), new Date())
+    : 0;
+  const isScheduledWindow = daysUntil <= 7;
+  const planLabel = isScheduledWindow ? "Scheduled" : "Planned";
 
   return (
     <Card
@@ -64,6 +73,18 @@ function JobCard({ job, index, total, onMoveUp, onMoveDown, showReorder, isSelec
               {isNext ? "Next" : `#${index + 1}`}
             </span>
             <StatusBadge status={job.status.toLowerCase()} />
+            {!showReorder && (
+              <Badge
+                variant={isScheduledWindow ? "default" : "outline"}
+                className="text-[10px] px-1.5 py-0"
+              >
+                {planLabel}
+              </Badge>
+            )}
+            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+              <ShieldCheck className="h-2.5 w-2.5 mr-0.5" />
+              Primary
+            </Badge>
             {job.status === "IN_PROGRESS" && (
               <span className="text-xs text-warning font-medium">Resume</span>
             )}
@@ -72,12 +93,20 @@ function JobCard({ job, index, total, onMoveUp, onMoveDown, showReorder, isSelec
             {addr ? `${addr.street_address}, ${addr.city}` : "Property"}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5 truncate">{skuNames}</p>
-          {job.scheduled_date && (
-            <div className="flex items-center gap-1 mt-1.5 text-xs text-muted-foreground">
-              <Clock className="h-3 w-3" />
-              <span>{format(new Date(job.scheduled_date), "EEE, MMM d")}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-3 mt-1.5">
+            {job.scheduled_date && (
+              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                <Clock className="h-3 w-3" />
+                {format(new Date(job.scheduled_date), "EEE, MMM d")}
+              </span>
+            )}
+            {totalMinutes > 0 && (
+              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                <Timer className="h-3 w-3" />
+                ~{totalMinutes} min
+              </span>
+            )}
+          </div>
         </div>
         <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 mt-1" />
       </div>

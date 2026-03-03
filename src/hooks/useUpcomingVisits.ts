@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useProperty } from "@/hooks/useProperty";
-import type { Database } from "@/integrations/supabase/types";
+import type { Database, Json } from "@/integrations/supabase/types";
 
 type VisitScheduleState = Database["public"]["Enums"]["visit_schedule_state"];
 
@@ -27,6 +27,10 @@ export interface UpcomingVisit {
   time_window_start: string | null;
   time_window_end: string | null;
   provider_org_id: string | null;
+  assignment_confidence: string | null;
+  assignment_reasons: Json | null;
+  backup_provider_org_id: string | null;
+  unassigned_reason: string | null;
   created_at: string;
   tasks: VisitTask[];
 }
@@ -97,7 +101,7 @@ export function useUpcomingVisits() {
       // Fetch visits for customer's property in upcoming states
       const { data: visits, error } = await supabase
         .from("visits")
-        .select("id, scheduled_date, schedule_state, plan_window, eta_range_start, eta_range_end, time_window_start, time_window_end, provider_org_id, created_at")
+        .select("id, scheduled_date, schedule_state, plan_window, eta_range_start, eta_range_end, time_window_start, time_window_end, provider_org_id, assignment_confidence, assignment_reasons, backup_provider_org_id, unassigned_reason, created_at")
         .eq("property_id", property.id)
         .in("schedule_state", UPCOMING_STATES)
         .order("scheduled_date", { ascending: true })
