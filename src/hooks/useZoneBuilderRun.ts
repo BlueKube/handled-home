@@ -133,6 +133,49 @@ export function useZoneBuilderRun(runId?: string | null) {
     },
   });
 
+  // Commit zones mutation
+  const commitMutation = useMutation({
+    mutationFn: async ({
+      runId,
+      zoneNames,
+    }: {
+      runId: string;
+      zoneNames?: Record<string, string>;
+    }) => {
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      if (!token) throw new Error("Not authenticated");
+
+      const res = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/commit-zones`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ run_id: runId, zone_names: zoneNames }),
+        }
+      );
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Commit failed" }));
+        throw new Error(err.error || "Commit failed");
+      }
+
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["zones"] });
+      toast.success("Zones committed successfully");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message);
+    },
+  });
+
   return {
     run: runQuery.data,
     runLoading: runQuery.isLoading,
@@ -140,6 +183,8 @@ export function useZoneBuilderRun(runId?: string | null) {
     resultsLoading: resultsQuery.isLoading,
     generate: generateMutation.mutateAsync,
     generating: generateMutation.isPending,
+    commit: commitMutation.mutateAsync,
+    committing: commitMutation.isPending,
     defaultConfig: DEFAULT_CONFIG,
   };
 }
