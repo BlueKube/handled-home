@@ -9,7 +9,7 @@ import {
   type UpcomingVisit,
 } from "@/hooks/useUpcomingVisits";
 import { format, isToday, isTomorrow, isThisWeek, parseISO } from "date-fns";
-import { CalendarDays, Clock, User, AlertTriangle } from "lucide-react";
+import { CalendarDays, Clock, User, AlertTriangle, ShieldCheck, Sparkles } from "lucide-react";
 
 function formatVisitDate(dateStr: string): string {
   const date = parseISO(dateStr);
@@ -101,6 +101,29 @@ function VisitCard({ visit }: { visit: UpcomingVisit }) {
         <div className="flex items-center gap-2 p-2.5 rounded-lg bg-destructive/10 text-xs text-destructive">
           <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
           <span>We're working on rescheduling this visit. We'll update you soon.</span>
+        </div>
+      )}
+
+      {/* Assignment status messaging */}
+      {!isException && !isActive && visit.provider_org_id && (
+        visit.plan_window === "draft" ? (
+          <div className="flex items-center gap-2 p-2.5 rounded-lg bg-secondary/50 text-xs text-muted-foreground">
+            <Sparkles className="h-3.5 w-3.5 shrink-0" />
+            <span>We're planning your visit. Details may adjust until scheduled.</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 p-2.5 rounded-lg bg-primary/10 text-xs text-primary">
+            <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
+            <span>Your pro is scheduled. We'll send a reminder before your visit.</span>
+          </div>
+        )
+      )}
+
+      {/* Unassigned visit */}
+      {!isException && !isActive && !visit.provider_org_id && visit.schedule_state !== "canceled" && (
+        <div className="flex items-center gap-2 p-2.5 rounded-lg bg-secondary/50 text-xs text-muted-foreground">
+          <Sparkles className="h-3.5 w-3.5 shrink-0" />
+          <span>We're matching the best pro for your visit.</span>
         </div>
       )}
 

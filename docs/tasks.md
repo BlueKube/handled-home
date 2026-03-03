@@ -933,3 +933,37 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S4-P5-02** | P0 | S | Route added to App.tsx, import wired.
 
 *Last updated: 2026-03-03 — Sprint 4 complete. Rolling Horizon Planner operational.*
+
+---
+
+## PRD-300 Sprint 5 — Provider Assignment v1 (Clustered, Capacity-Constrained)
+
+> **PRD:** `docs/prds/unfinished/PRD_300_sprint_5_provider_assignment_v1.md`
+> **Goal:** Assign Primary + Backup provider to each visit using a greedy clustered solver.
+> **Complexity:** XL (4 phases)
+
+### Phase 1: Schema & Config Foundation
+- [x] **S5-P1-01** | P0 | M | Add 7 assignment columns to `visits` (backup_provider_org_id, assignment_confidence, assignment_reasons, assignment_locked, assignment_run_id, assignment_score, unassigned_reason). FK for backup_provider_org_id → provider_orgs.
+- [x] **S5-P1-02** | P0 | M | Create `assignment_runs` table (status, triggered_by, run_date, summary, idempotency_key). RLS: admin + service role.
+- [x] **S5-P1-03** | P0 | M | Create `assignment_config` table (config_key, config_value, description). Seeded with 13 tuning dials. RLS: admin full + service role read.
+- [x] **S5-P1-04** | P0 | M | Create `visit_assignment_log` table (visit_id, provider_org_id, action, reason, score_breakdown, candidates_considered). RLS: admin + service role.
+- [x] **S5-P1-05** | P0 | S | Indexes on assignment_run_id, backup_provider_org_id, assignment_locked, visit_assignment_log (run_date, status, visit_id, created_at).
+
+### Phase 2: Assignment Engine (Edge Function)
+- [x] **S5-P2-01** | P0 | XL | `assign-visits` edge function — greedy most-constrained-first solver with 14-day horizon. Hard constraints (skills, working day, capacity, geographic feasibility). Soft scoring (w_distance × GeoCost + w_balance + w_spread − w_familiarity − w_zone_affinity). Backup assignment. Stability rules (2× threshold in freeze window). Audit logging to visit_assignment_log. Notification emission (best-effort try/catch).
+
+#### Phase 2 Review Fixes
+- [x] **S5-F1** | BUG | Dashboard summary key mismatch — reads `assigned_primary`/`assigned_backup` (was `assigned`/`with_backup`)
+- [x] **S5-F2** | MINOR | Replaced non-existent "Near Capacity" card with "Locked (Skipped)" using actual `locked_skipped` data
+- [x] **S5-F5** | MINOR | Notification emission wrapped in try/catch — failure no longer marks entire run as failed
+
+### Phase 3: Admin UX (Dashboard + Config)
+- [x] **S5-P3-01** | P0 | L | `/admin/assignments` dashboard — run history list, detail panel with summary stats (total, assigned primary %, backup %, unassigned, long drive, locked skipped), manual trigger with confirmation dialog.
+- [x] **S5-P3-02** | P0 | M | `/admin/assignments/config` — slider-based dial editing for 13 tuning dials (weights/thresholds/capacity), dirty detection, per-dial save/reset.
+- [x] **S5-P3-03** | P0 | S | Hooks: `useAssignmentRuns`, `useAssignmentConfig`, `useVisitAssignmentLog`. Routes + AdminShell nav links with role gating.
+
+### Phase 4: Provider & Customer UX Updates
+- [x] **S5-P4-01** | P0 | M | Customer UpcomingVisits: assignment context messaging — "Your pro is scheduled" (locked) vs "We're planning your visit" (draft) vs "We're matching the best pro" (unassigned). Hides provider identity for draft visits.
+- [x] **S5-P4-02** | P0 | M | Provider Jobs: Scheduled/Planned labels (≤7 days = Scheduled, >7 = Planned), "Primary" badge, expected minutes from job_skus.
+
+*Last updated: 2026-03-03 — Sprint 5 complete. Provider Assignment v1 operational.*
