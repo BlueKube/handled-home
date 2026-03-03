@@ -102,7 +102,7 @@ function ZoneMatrixTab({ selectedZone, setSelectedZone }: { selectedZone: string
       {
         zoneId: overrideDialog.zoneId,
         category: overrideDialog.category,
-        newState: overrideForm.newState,
+        newState: overrideForm.newState as any,
         reason: overrideForm.reason,
         lockDays: overrideForm.lockDays ? parseInt(overrideForm.lockDays) : undefined,
       },

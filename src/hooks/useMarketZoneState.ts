@@ -1,15 +1,28 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+export type MarketZoneCategoryStatus =
+  | "CLOSED"
+  | "WAITLIST_ONLY"
+  | "PROVIDER_RECRUITING"
+  | "SOFT_LAUNCH"
+  | "OPEN"
+  | "PROTECT_QUALITY";
+
 export interface ZoneCategoryState {
   id: string;
   zone_id: string;
   category: string;
-  status: "CLOSED" | "SOFT_LAUNCH" | "OPEN" | "PROTECT_QUALITY";
+  status: MarketZoneCategoryStatus;
   locked_until: string | null;
   locked_by_admin_user_id: string | null;
   lock_reason: string | null;
   config: Record<string, any>;
+  last_state_change_at: string | null;
+  last_state_change_by: string | null;
+  previous_status: string | null;
+  founding_partner_slots_total: number | null;
+  founding_partner_slots_filled: number | null;
   updated_at: string;
   created_at: string;
 }
@@ -24,7 +37,7 @@ export function useMarketZoneState(zoneId?: string) {
       if (zoneId) q = q.eq("zone_id", zoneId);
       const { data, error } = await q;
       if (error) throw error;
-      return data as ZoneCategoryState[];
+      return data as unknown as ZoneCategoryState[];
     },
   });
 
@@ -32,11 +45,11 @@ export function useMarketZoneState(zoneId?: string) {
     mutationFn: async (params: {
       zoneId: string;
       category: string;
-      newState: string;
+      newState: MarketZoneCategoryStatus;
       reason: string;
       lockDays?: number;
     }) => {
-      const { error } = await supabase.rpc("admin_override_zone_state", {
+      const { data, error } = await supabase.rpc("admin_override_zone_state", {
         p_zone_id: params.zoneId,
         p_category: params.category,
         p_new_state: params.newState,
@@ -44,6 +57,7 @@ export function useMarketZoneState(zoneId?: string) {
         p_lock_days: params.lockDays ?? null,
       });
       if (error) throw error;
+      return data as unknown as { success: boolean; previous_state: string; new_state: string; was_locked: boolean };
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["market_zone_category_state"] }),
   });
