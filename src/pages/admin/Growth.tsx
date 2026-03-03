@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Activity, Shield, TrendingUp, AlertTriangle, Lock, RefreshCw, ChevronRight, Sliders, BarChart3 } from "lucide-react";
+import { Activity, Shield, TrendingUp, AlertTriangle, Lock, RefreshCw, ChevronRight, Sliders, BarChart3, Inbox, Settings2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,12 +20,18 @@ import { useMarketHealth, type HealthSnapshot } from "@/hooks/useMarketHealth";
 import { useAutopilotActions } from "@/hooks/useAutopilotActions";
 import { useGrowthSurfaceConfig } from "@/hooks/useGrowthSurfaceConfig";
 import { useGrowthEventStats } from "@/hooks/useGrowthEvents";
+import { useZoneStateRecommendations } from "@/hooks/useZoneStateRecommendations";
+import { ZoneCategoryDetailPanel } from "@/components/admin/ZoneCategoryDetailPanel";
+import { RecommendationsInbox } from "@/components/admin/RecommendationsInbox";
+import { ThresholdDials } from "@/components/admin/ThresholdDials";
 
-const STATES = ["CLOSED", "SOFT_LAUNCH", "OPEN", "PROTECT_QUALITY"] as const;
+const STATES = ["CLOSED", "WAITLIST_ONLY", "PROVIDER_RECRUITING", "SOFT_LAUNCH", "OPEN", "PROTECT_QUALITY"] as const;
 const CATEGORIES = ["lawn_care", "cleaning", "landscaping", "pest_control", "pool_care"];
 
 const STATE_COLORS: Record<string, string> = {
   CLOSED: "bg-muted text-muted-foreground",
+  WAITLIST_ONLY: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300",
+  PROVIDER_RECRUITING: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
   SOFT_LAUNCH: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
   OPEN: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
   PROTECT_QUALITY: "bg-destructive/10 text-destructive",
@@ -50,14 +56,22 @@ export default function AdminGrowth() {
       </div>
 
       <Tabs defaultValue="matrix">
-        <TabsList className="w-full">
-          <TabsTrigger value="matrix" className="flex-1">Zone Matrix</TabsTrigger>
+        <TabsList className="w-full flex-wrap h-auto gap-1">
+          <TabsTrigger value="matrix" className="flex-1">Matrix</TabsTrigger>
+          <TabsTrigger value="recommendations" className="flex-1">
+            <Inbox className="h-3.5 w-3.5 mr-1" /> Recs
+          </TabsTrigger>
+          <TabsTrigger value="thresholds" className="flex-1">
+            <Settings2 className="h-3.5 w-3.5 mr-1" /> Dials
+          </TabsTrigger>
           <TabsTrigger value="health" className="flex-1">Health</TabsTrigger>
           <TabsTrigger value="actions" className="flex-1">Actions</TabsTrigger>
           <TabsTrigger value="surfaces" className="flex-1">Surfaces</TabsTrigger>
           <TabsTrigger value="events" className="flex-1">Events</TabsTrigger>
         </TabsList>
         <TabsContent value="matrix"><ZoneMatrixTab selectedZone={selectedZone} setSelectedZone={setSelectedZone} /></TabsContent>
+        <TabsContent value="recommendations"><RecommendationsInbox /></TabsContent>
+        <TabsContent value="thresholds"><ThresholdDials /></TabsContent>
         <TabsContent value="health"><HealthTab selectedZone={selectedZone} setSelectedZone={setSelectedZone} /></TabsContent>
         <TabsContent value="actions"><ActionsTab selectedZone={selectedZone} setSelectedZone={setSelectedZone} /></TabsContent>
         <TabsContent value="surfaces"><SurfacesTab selectedZone={selectedZone} setSelectedZone={setSelectedZone} /></TabsContent>
@@ -90,11 +104,20 @@ function ZoneMatrixTab({ selectedZone, setSelectedZone }: { selectedZone: string
   const zones = zonesQuery.data;
   const { states, overrideState } = useMarketZoneState(selectedZone === "__all__" ? undefined : selectedZone);
   const { computeHealth } = useMarketHealth();
+  const { recommendations: pendingRecs } = useZoneStateRecommendations({ status: "pending" });
   const [overrideDialog, setOverrideDialog] = useState<{ zoneId: string; category: string; currentState: string } | null>(null);
   const [overrideForm, setOverrideForm] = useState({ newState: "CLOSED", reason: "", lockDays: "" });
+  const [detailCell, setDetailCell] = useState<{ zoneId: string; category: string; zoneName: string } | null>(null);
 
   const stateMap = new Map<string, ZoneCategoryState>();
   states.data?.forEach((s) => stateMap.set(`${s.zone_id}:${s.category}`, s));
+
+  // Build recommendation lookup: zone_id:category → recommendation
+  const recMap = new Map<string, { recommended_state: string; confidence: string }>();
+  pendingRecs.data?.forEach((r) => {
+    const key = `${r.zone_id}:${r.category}`;
+    if (!recMap.has(key)) recMap.set(key, { recommended_state: r.recommended_state, confidence: r.confidence });
+  });
 
   const handleOverride = () => {
     if (!overrideDialog) return;
@@ -142,28 +165,38 @@ function ZoneMatrixTab({ selectedZone, setSelectedZone }: { selectedZone: string
               const state = stateMap.get(`${zone.id}:${cat}`);
               const currentStatus = state?.status ?? "CLOSED";
               const isLocked = state?.locked_until && new Date(state.locked_until) > new Date();
+              const rec = recMap.get(`${zone.id}:${cat}`);
 
               return (
-                <div key={cat} className="flex items-center justify-between py-1.5 border-b border-border/50 last:border-0">
-                  <div className="flex items-center gap-2">
+                <div
+                  key={cat}
+                  className="flex items-center justify-between py-1.5 border-b border-border/50 last:border-0 cursor-pointer hover:bg-muted/30 rounded px-1 -mx-1 transition-colors"
+                  onClick={() => setDetailCell({ zoneId: zone.id, category: cat, zoneName: zone.name })}
+                >
+                  <div className="flex items-center gap-2 flex-wrap min-w-0">
                     <span className="text-sm capitalize font-medium">{cat.replace(/_/g, " ")}</span>
-                    <Badge className={`text-xs ${STATE_COLORS[currentStatus]}`}>{currentStatus.replace("_", " ")}</Badge>
+                    <Badge className={`text-xs ${STATE_COLORS[currentStatus]}`}>{currentStatus.replace(/_/g, " ")}</Badge>
+                    {rec && (
+                      <Badge variant="outline" className="text-[10px] border-dashed">
+                        → {rec.recommended_state.replace(/_/g, " ")}
+                      </Badge>
+                    )}
                     {isLocked && (
                       <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
                         <Lock className="h-3 w-3" />
-                        {new Date(state!.locked_until!).toLocaleDateString()}
                       </span>
                     )}
                   </div>
-                  <div className="flex gap-1">
-                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleRefreshHealth(zone.id, cat)}>
+                  <div className="flex gap-1 shrink-0">
+                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={(e) => { e.stopPropagation(); handleRefreshHealth(zone.id, cat); }}>
                       <RefreshCw className="h-3.5 w-3.5" />
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
                       className="h-7 text-xs"
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setOverrideDialog({ zoneId: zone.id, category: cat, currentState: currentStatus });
                         setOverrideForm({ newState: currentStatus, reason: "", lockDays: "" });
                       }}
@@ -181,6 +214,13 @@ function ZoneMatrixTab({ selectedZone, setSelectedZone }: { selectedZone: string
       {displayZones.length === 0 && (
         <p className="text-sm text-muted-foreground text-center py-8">No zones found.</p>
       )}
+
+      <ZoneCategoryDetailPanel
+        zoneId={detailCell?.zoneId ?? null}
+        category={detailCell?.category ?? null}
+        zoneName={detailCell?.zoneName}
+        onClose={() => setDetailCell(null)}
+      />
 
       <Dialog open={!!overrideDialog} onOpenChange={(o) => !o && setOverrideDialog(null)}>
         <DialogContent>
