@@ -3328,6 +3328,7 @@ export type Database = {
           created_at: string
           gate_code: string | null
           geohash: string | null
+          h3_index: string | null
           id: string
           lat: number | null
           lng: number | null
@@ -3347,6 +3348,7 @@ export type Database = {
           created_at?: string
           gate_code?: string | null
           geohash?: string | null
+          h3_index?: string | null
           id?: string
           lat?: number | null
           lng?: number | null
@@ -3366,6 +3368,7 @@ export type Database = {
           created_at?: string
           gate_code?: string | null
           geohash?: string | null
+          h3_index?: string | null
           id?: string
           lat?: number | null
           lng?: number | null
@@ -5109,36 +5112,42 @@ export type Database = {
         Row: {
           created_at: string
           equipment_kits: string[]
+          h3_index: string | null
           home_address_label: string | null
           home_geohash: string | null
           home_lat: number | null
           home_lng: number | null
           max_jobs_per_day: number
           provider_org_id: string
+          service_categories: string[]
           updated_at: string
           working_hours: Json
         }
         Insert: {
           created_at?: string
           equipment_kits?: string[]
+          h3_index?: string | null
           home_address_label?: string | null
           home_geohash?: string | null
           home_lat?: number | null
           home_lng?: number | null
           max_jobs_per_day?: number
           provider_org_id: string
+          service_categories?: string[]
           updated_at?: string
           working_hours?: Json
         }
         Update: {
           created_at?: string
           equipment_kits?: string[]
+          h3_index?: string | null
           home_address_label?: string | null
           home_geohash?: string | null
           home_lat?: number | null
           home_lng?: number | null
           max_jobs_per_day?: number
           provider_org_id?: string
+          service_categories?: string[]
           updated_at?: string
           working_hours?: Json
         }
@@ -7305,6 +7314,7 @@ export type Database = {
           presence_required: boolean
           sku_id: string
           status: string
+          updated_at: string
           visit_id: string
         }
         Insert: {
@@ -7315,6 +7325,7 @@ export type Database = {
           presence_required?: boolean
           sku_id: string
           status?: string
+          updated_at?: string
           visit_id: string
         }
         Update: {
@@ -7325,6 +7336,7 @@ export type Database = {
           presence_required?: boolean
           sku_id?: string
           status?: string
+          updated_at?: string
           visit_id?: string
         }
         Relationships: [
