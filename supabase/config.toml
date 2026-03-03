@@ -65,3 +65,6 @@ verify_jwt = false
 
 [functions.commit-zones]
 verify_jwt = false
+
+[functions.backfill-property-zones]
+verify_jwt = false

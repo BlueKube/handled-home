@@ -8648,7 +8648,12 @@ export type Database = {
         }
         Returns: Json
       }
+      resolve_property_zone: {
+        Args: { p_lat: number; p_lng: number; p_resolution?: number }
+        Returns: Json
+      }
       resolve_weather_event: { Args: { p_event_id: string }; Returns: Json }
+      resolve_zone_by_h3: { Args: { p_h3_index: string }; Returns: Json }
       resume_subscription: {
         Args: { p_subscription_id: string }
         Returns: Json
