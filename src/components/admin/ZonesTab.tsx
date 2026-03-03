@@ -13,6 +13,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, MapPin, Calendar, Users, Wand2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { AddressLookupTool } from "./AddressLookupTool";
+import { ZoneBuilderHistory } from "./ZoneBuilderHistory";
 
 function ProviderSummary({ zoneId }: { zoneId: string }) {
   const { data } = useZoneCategoryProviders(zoneId);
@@ -105,6 +107,9 @@ export function ZonesTab() {
           })}
         </div>
       )}
+
+      <AddressLookupTool />
+      <ZoneBuilderHistory />
 
       <ZoneFormSheet open={createOpen} onOpenChange={setCreateOpen} prefillZips={prefillZips} />
       <ZoneDetailSheet zoneId={detailZoneId} onClose={() => setDetailZoneId(null)} />

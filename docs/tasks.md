@@ -839,9 +839,9 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S2-P4-04** | P1 | S | Zone Builder button already in ZonesTab (Phase 3).
 
 ### Phase 5: Property Resolution + Debug Surfaces
-- [ ] **S2-P5-01** | P0 | M | resolve_property_zone RPC (H3 cell → zone lookup + fallback).
-- [ ] **S2-P5-02** | P1 | M | Address Lookup tool on admin Zones page.
-- [ ] **S2-P5-03** | P1 | M | backfill-property-zones edge function.
-- [ ] **S2-P5-04** | P2 | S | Zone generation history in ZonesTab.
+- [x] **S2-P5-01** | P0 | M | resolve_property_zone + resolve_zone_by_h3 RPCs (SECURITY DEFINER, H3 cell → zone_cells lookup, zip fallback, ring expansion via client h3-js).
+- [x] **S2-P5-02** | P1 | M | Address Lookup tool on admin Zones page (Mapbox geocode → H3 → zone_cells → ring expansion → zip fallback).
+- [x] **S2-P5-03** | P1 | M | backfill-property-zones edge function (compute missing h3_index, resolve zones via zone_cells + ring + zip, idempotent via cron_run_log).
+- [x] **S2-P5-04** | P2 | S | Zone Builder History collapsible section on ZonesTab (past runs with region, zone count, status, date).
 
-*Last updated: 2026-03-03 — Sprint 2 Phase 4 complete. commit-zones deployed, 5-step wizard operational.*
+*Last updated: 2026-03-03 — Sprint 2 Phase 5 complete. Zone Builder v1 fully operational.*
