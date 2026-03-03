@@ -3,9 +3,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Info } from "lucide-react";
+import { Plus, Search, Info, Clock } from "lucide-react";
 import { useLevelDefault } from "@/hooks/useLevelDefault";
 import { useCategoryEligibility } from "@/hooks/useCategoryEligibility";
+import { useZoneCategoryGating } from "@/hooks/useZoneCategoryGating";
+import { getStateMessage } from "@/lib/categoryStateMessaging";
+import { CategoryWaitlistSheet } from "@/components/customer/CategoryWaitlistSheet";
 import type { EntitlementSku } from "@/hooks/useEntitlements";
 import { SkuDetailModal } from "./SkuDetailModal";
 
@@ -71,17 +74,25 @@ export function AddServicesSheet({ skus, existingSkuIds, onAdd }: AddServicesShe
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [detailSku, setDetailSku] = useState<EntitlementSku | null>(null);
+  const [waitlistCategory, setWaitlistCategory] = useState<{ category: string; rawState: string } | null>(null);
   const { isEligible } = useCategoryEligibility();
+  const { getCategoryGating, getRawState, hasGatingData } = useZoneCategoryGating();
 
   const filtered = skus
     .filter((s) => s.status !== "blocked" && s.status !== "provider_only")
     .filter((s) => isEligible(s.category))
+    // Hide CLOSED categories
+    .filter((s) => !hasGatingData || getCategoryGating(s.category) !== "hidden")
     .filter((s) => s.sku_name.toLowerCase().includes(search.toLowerCase()));
 
+  // Split into purchasable vs waitlisted
+  const purchasable = filtered.filter((s) => getCategoryGating(s.category) !== "waitlist");
+  const waitlisted = filtered.filter((s) => getCategoryGating(s.category) === "waitlist");
+
   const grouped = {
-    included: filtered.filter((s) => s.status === "included"),
-    extra: filtered.filter((s) => s.status === "extra_allowed"),
-    available: filtered.filter((s) => s.status === "available"),
+    included: purchasable.filter((s) => s.status === "included"),
+    extra: purchasable.filter((s) => s.status === "extra_allowed"),
+    available: purchasable.filter((s) => s.status === "available"),
   };
 
   const renderSection = (title: string, items: EntitlementSku[]) => {
@@ -103,6 +114,14 @@ export function AddServicesSheet({ skus, existingSkuIds, onAdd }: AddServicesShe
       </div>
     );
   };
+
+  // Group waitlisted SKUs by category for display
+  const waitlistCategories = new Map<string, EntitlementSku[]>();
+  for (const sku of waitlisted) {
+    const cat = sku.category ?? "general";
+    if (!waitlistCategories.has(cat)) waitlistCategories.set(cat, []);
+    waitlistCategories.get(cat)!.push(sku);
+  }
 
   return (
     <>
@@ -130,6 +149,37 @@ export function AddServicesSheet({ skus, existingSkuIds, onAdd }: AddServicesShe
             {renderSection("Included in Plan", grouped.included)}
             {renderSection("Available as Extras", grouped.extra)}
             {renderSection("Available", grouped.available)}
+
+            {/* Waitlisted categories */}
+            {waitlistCategories.size > 0 && (
+              <div>
+                <p className="text-caption uppercase tracking-wider mb-2">Coming Soon</p>
+                <div className="space-y-1">
+                  {Array.from(waitlistCategories.entries()).map(([cat, catSkus]) => {
+                    const rawState = getRawState(cat);
+                    const msg = getStateMessage(rawState, cat);
+                    return (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setWaitlistCategory({ category: cat, rawState: rawState ?? "WAITLIST_ONLY" })}
+                        className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border w-full text-left hover:bg-accent/50 transition-colors"
+                      >
+                        <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium">{catSkus.map((s) => s.sku_name).join(", ")}</p>
+                          <p className="text-xs text-muted-foreground">{msg.subtext.substring(0, 60)}…</p>
+                        </div>
+                        <Badge variant="secondary" className="text-[10px] flex-shrink-0">
+                          {msg.badge}
+                        </Badge>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {filtered.length === 0 && (
               <p className="text-sm text-muted-foreground text-center py-8">No services match your search</p>
             )}
@@ -146,6 +196,16 @@ export function AddServicesSheet({ skus, existingSkuIds, onAdd }: AddServicesShe
         }}
         alreadyAdded={detailSku ? existingSkuIds.has(detailSku.sku_id) : false}
       />
+
+      {/* Waitlist sheet */}
+      {waitlistCategory && (
+        <CategoryWaitlistSheet
+          open={!!waitlistCategory}
+          onOpenChange={(v) => { if (!v) setWaitlistCategory(null); }}
+          category={waitlistCategory.category}
+          rawState={waitlistCategory.rawState}
+        />
+      )}
     </>
   );
 }
