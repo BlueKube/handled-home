@@ -71,3 +71,6 @@ verify_jwt = false
 
 [functions.compute-zone-state-recommendations]
 verify_jwt = false
+
+[functions.assign-visits]
+verify_jwt = false
