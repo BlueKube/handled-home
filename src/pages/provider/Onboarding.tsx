@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CheckCircle, Clock, AlertTriangle, Shield, ArrowRight, Loader2, AlertCircle } from "lucide-react";
+import { OnboardingRecruitingSignals } from "@/components/provider/OnboardingRecruitingSignals";
 import { toast } from "sonner";
 
 export default function ProviderOnboarding() {
@@ -196,6 +197,8 @@ function DraftResumeScreen({ org }: { org: any }) {
         Continue Application
         <ArrowRight className="h-4 w-4 ml-2" />
       </Button>
+
+      <OnboardingRecruitingSignals zoneIds={allowedZoneIds} />
     </div>
   );
 }

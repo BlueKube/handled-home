@@ -10,6 +10,7 @@ import { useProviderEarnings } from "@/hooks/useProviderEarnings";
 import { useProviderRoutePlan } from "@/hooks/useProviderRoutePlan";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProviderNotificationBanners } from "@/components/provider/NotificationBanners";
+import { MarketHeatBanner } from "@/components/provider/MarketHeatBanner";
 import {
   Briefcase,
   Clock,
@@ -221,6 +222,7 @@ export default function ProviderDashboard() {
 
       {/* SLA Notification Banners */}
       <ProviderNotificationBanners />
+      <MarketHeatBanner />
 
       {/* Start Route / Route Locked Banner */}
       {todayCount > 0 && (

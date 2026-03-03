@@ -16,6 +16,7 @@ import { useProperty } from "@/hooks/useProperty";
 import { useJoinWaitlist } from "@/hooks/useWaitlist";
 import { getStateMessage } from "@/lib/categoryStateMessaging";
 import { getCategoryLabel, getCategoryIcon, getCategoryGradient } from "@/lib/serviceCategories";
+import { emitStateAnalyticsEvent } from "@/lib/analyticsEvents";
 
 interface CategoryWaitlistSheetProps {
   open: boolean;
@@ -71,6 +72,7 @@ export function CategoryWaitlistSheet({
         referral_code: undefined,
       });
       setSubmitted(true);
+      if (user) emitStateAnalyticsEvent({ eventType: "waitlist_joined", actorId: user.id, actorRole: "customer", category, sourceSurface: "category_waitlist_sheet" });
     } catch (err: any) {
       if (err?.message?.includes("already on the waitlist")) {
         setSubmitted(true);

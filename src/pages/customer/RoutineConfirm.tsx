@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +15,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Lock, CalendarDays, Loader2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { getCategoryLabel } from "@/lib/serviceCategories";
+import { emitStateAnalyticsEvent } from "@/lib/analyticsEvents";
+import { useAuth } from "@/contexts/AuthContext";
 
 /** Resolve sku_id → category for a set of sku IDs */
 function useSkuCategories(skuIds: string[]) {
@@ -34,6 +36,7 @@ function useSkuCategories(skuIds: string[]) {
 }
 
 export default function RoutineConfirm() {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { property } = useProperty();
   const { data: subscription, isLoading: subLoading } = useCustomerSubscription();
@@ -43,11 +46,28 @@ export default function RoutineConfirm() {
   const [confirmed, setConfirmed] = useState(false);
   const [effectiveAt, setEffectiveAt] = useState<string | null>(null);
   const [waitlistCategory, setWaitlistCategory] = useState<{ category: string; rawState: string } | null>(null);
+  const emittedBlockRef = useRef(false);
 
   const skuIds = routineData?.items.map((i) => i.sku_id) ?? [];
   const { data: skuCategoryMap } = useSkuCategories(skuIds);
 
   const isLoading = subLoading || routineLoading || gatingLoading;
+
+  // Eligibility check: find categories that are NOT purchasable
+  const blockedCategories = !isLoading && hasGatingData && routineData && skuCategoryMap
+    ? [...new Set(routineData.items.map((i) => skuCategoryMap.get(i.sku_id) ?? null).filter((c): c is string => !!c && !isPurchasable(c)))]
+    : [];
+  const hasBlockedCategories = blockedCategories.length > 0;
+
+  // Emit analytics once when blocked categories detected
+  useEffect(() => {
+    if (hasBlockedCategories && user && !emittedBlockRef.current) {
+      emittedBlockRef.current = true;
+      blockedCategories.forEach((cat) => {
+        emitStateAnalyticsEvent({ eventType: "subscribe_blocked_by_state", actorId: user.id, actorRole: "customer", category: cat, sourceSurface: "routine_confirm" });
+      });
+    }
+  }, [hasBlockedCategories, user, blockedCategories]);
 
   // Gate: need active subscription
   if (!isLoading && !subscription) {
@@ -60,12 +80,6 @@ export default function RoutineConfirm() {
     navigate("/customer/routine", { replace: true });
     return null;
   }
-
-  // Eligibility check: find categories that are NOT purchasable
-  const blockedCategories = !isLoading && hasGatingData && routineData && skuCategoryMap
-    ? [...new Set(routineData.items.map((i) => skuCategoryMap.get(i.sku_id) ?? null).filter((c): c is string => !!c && !isPurchasable(c)))]
-    : [];
-  const hasBlockedCategories = blockedCategories.length > 0;
 
   if (confirmed) {
     return <RoutineSuccessScreen effectiveAt={effectiveAt} />;
