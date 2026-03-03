@@ -774,26 +774,30 @@ Deno.serve(async (req) => {
       await supabase.from("visit_assignment_log").insert(chunk);
     }
 
-    // ── Step 11: Emit notifications ──
-    for (const [provOrgId, visitIdList] of assignmentsByProvider) {
-      await supabase.rpc("emit_notification_event", {
-        p_event_type: "PROVIDER_JOBS_ASSIGNED",
-        p_idempotency_key: `visits_assigned:${provOrgId}:${todayStr}`,
-        p_audience_type: "PROVIDER",
-        p_audience_org_id: provOrgId,
-        p_priority: "SERVICE",
-        p_payload: { count: visitIdList.length, date: todayStr, visit_ids: visitIdList },
-      });
-    }
+    // ── Step 11: Emit notifications (best-effort — don't fail the run) ──
+    try {
+      for (const [provOrgId, visitIdList] of assignmentsByProvider) {
+        await supabase.rpc("emit_notification_event", {
+          p_event_type: "PROVIDER_JOBS_ASSIGNED",
+          p_idempotency_key: `visits_assigned:${provOrgId}:${todayStr}`,
+          p_audience_type: "PROVIDER",
+          p_audience_org_id: provOrgId,
+          p_priority: "SERVICE",
+          p_payload: { count: visitIdList.length, date: todayStr, visit_ids: visitIdList },
+        });
+      }
 
-    if (unassignedCount >= 3) {
-      await supabase.rpc("emit_notification_event", {
-        p_event_type: "ADMIN_ZONE_ALERT_BACKLOG",
-        p_idempotency_key: `visit_backlog:${todayStr}`,
-        p_audience_type: "ADMIN",
-        p_priority: "CRITICAL",
-        p_payload: { unassigned_count: unassignedCount, date: todayStr },
-      });
+      if (unassignedCount >= 3) {
+        await supabase.rpc("emit_notification_event", {
+          p_event_type: "ADMIN_ZONE_ALERT_BACKLOG",
+          p_idempotency_key: `visit_backlog:${todayStr}`,
+          p_audience_type: "ADMIN",
+          p_priority: "CRITICAL",
+          p_payload: { unassigned_count: unassignedCount, date: todayStr },
+        });
+      }
+    } catch (notifErr) {
+      console.warn("Non-fatal: notification emission failed", notifErr);
     }
 
     // ── Step 12: Complete assignment run ──
