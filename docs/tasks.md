@@ -833,10 +833,10 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S2-P2-F3** | LOW | Added auth guard — rejects unauthenticated requests with 401.
 
 ### Phase 4: Editing Tools + Commit — Screens 4–5
-- [ ] **S2-P4-01** | P0 | L | Screen 4 — Editing Tools (rename, merge, split).
-- [ ] **S2-P4-02** | P0 | L | commit-zones edge function.
-- [ ] **S2-P4-03** | P0 | M | Screen 5 — Commit Confirmation.
-- [ ] **S2-P4-04** | P1 | S | Add Zone Builder button to ZonesTab.
+- [x] **S2-P4-01** | P0 | L | Screen 4 — Editing Tools (rename inline, merge selection with neighbor validation).
+- [x] **S2-P4-02** | P0 | L | commit-zones edge function (auth guard, zip derivation from properties, round-robin service days, writes to operational zones table, marks run committed).
+- [x] **S2-P4-03** | P0 | M | Screen 5 — Commit Confirmation (summary card, zone list with service day badges, warning count, confirmation dialog).
+- [x] **S2-P4-04** | P1 | S | Zone Builder button already in ZonesTab (Phase 3).
 
 ### Phase 5: Property Resolution + Debug Surfaces
 - [ ] **S2-P5-01** | P0 | M | resolve_property_zone RPC (H3 cell → zone lookup + fallback).
@@ -844,4 +844,4 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [ ] **S2-P5-03** | P1 | M | backfill-property-zones edge function.
 - [ ] **S2-P5-04** | P2 | S | Zone generation history in ZonesTab.
 
-*Last updated: 2026-03-03 — Sprint 2 Phase 3 complete. P2 review findings F1+F3 fixed.*
+*Last updated: 2026-03-03 — Sprint 2 Phase 4 complete. commit-zones deployed, 5-step wizard operational.*

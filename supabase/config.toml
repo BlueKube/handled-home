@@ -62,3 +62,6 @@ verify_jwt = false
 
 [functions.generate-zones]
 verify_jwt = false
+
+[functions.commit-zones]
+verify_jwt = false
