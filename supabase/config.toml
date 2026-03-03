@@ -68,3 +68,6 @@ verify_jwt = false
 
 [functions.backfill-property-zones]
 verify_jwt = false
+
+[functions.compute-zone-state-recommendations]
+verify_jwt = false

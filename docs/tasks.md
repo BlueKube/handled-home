@@ -867,10 +867,10 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S3-P1-10** | P0 | S | Create hooks: `useZoneStateRecommendations`, `useZoneStateThresholds`, `useZoneStateChangeLog`. Update `useMarketZoneState` with new type + jsonb return.
 
 ### Phase 2: Recommendation Engine (Edge Function)
-- [ ] **S3-P2-01** | P0 | L | Create `compute-zone-state-recommendations` edge function — nightly compute of DemandMinutes, SupplyMinutes, Utilization, QualifiedProviderCount, CoverageRisk per (zone, category).
-- [ ] **S3-P2-02** | P0 | M | Implement deterministic recommendation logic (PRD §9 thresholds) with hysteresis + min time-in-state.
-- [ ] **S3-P2-03** | P0 | S | Confidence scoring (high/medium/low based on distance from thresholds + data density).
-- [ ] **S3-P2-04** | P0 | S | Idempotency via cron_run_log + idempotency_key on recommendations.
+- [x] **S3-P2-01** | P0 | L | Create `compute-zone-state-recommendations` edge function — nightly compute of DemandMinutes, SupplyMinutes, Utilization, QualifiedProviderCount, CoverageRisk per (zone, category).
+- [x] **S3-P2-02** | P0 | M | Implement deterministic recommendation logic (PRD §9 thresholds) with hysteresis + min time-in-state.
+- [x] **S3-P2-03** | P0 | S | Confidence scoring (high/medium/low based on distance from thresholds + data density).
+- [x] **S3-P2-04** | P0 | S | Idempotency via cron_run_log + idempotency_key on recommendations.
 
 ### Phase 3: Admin UI — Matrix + Recommendations Inbox
 - [ ] **S3-P3-01** | P0 | XL | Zone × Category Matrix page at `/admin/growth/matrix` (rows=zones, cols=categories, cells=state badge + recommended state + at-a-glance metrics).
@@ -889,4 +889,4 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [ ] **S3-P5-02** | P1 | M | Provider onboarding tie-in (reinforce early positioning when category is PROVIDER_RECRUITING in nearby zones).
 - [ ] **S3-P5-03** | P2 | S | Analytics events: recommendation_created, approved/rejected/snoozed, state_changed, waitlist_joined, subscribe_blocked_by_state.
 
-*Last updated: 2026-03-03 — Phase 1 complete.*
+*Last updated: 2026-03-03 — Phase 2 complete.*
