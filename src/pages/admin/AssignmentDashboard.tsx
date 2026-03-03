@@ -101,11 +101,11 @@ function RunDetailPanel({ run }: { run: AssignmentRun }) {
     : null;
 
   const totalVisits = summary?.total_visits ?? 0;
-  const assigned = summary?.assigned ?? 0;
-  const withBackup = summary?.with_backup ?? 0;
+  const assigned = summary?.assigned_primary ?? 0;
+  const withBackup = summary?.assigned_backup ?? 0;
   const unassigned = summary?.unassigned ?? 0;
   const longDrive = summary?.long_drive ?? 0;
-  const nearCapacity = summary?.near_capacity ?? 0;
+  const lockedSkipped = summary?.locked_skipped ?? 0;
   const pctAssigned = totalVisits > 0 ? Math.round((assigned / totalVisits) * 100) : 0;
   const pctBackup = totalVisits > 0 ? Math.round((withBackup / totalVisits) * 100) : 0;
 
@@ -141,7 +141,7 @@ function RunDetailPanel({ run }: { run: AssignmentRun }) {
         <SummaryStatCard icon={ShieldAlert} label="With Backup" value={`${pctBackup}%`} detail={`${withBackup} of ${totalVisits}`} />
         <SummaryStatCard icon={AlertTriangle} label="Unassigned" value={unassigned} />
         <SummaryStatCard icon={TruckIcon} label="Long Drive" value={longDrive} />
-        <SummaryStatCard icon={MapPin} label="Near Capacity" value={nearCapacity} />
+        <SummaryStatCard icon={Clock} label="Locked (Skipped)" value={lockedSkipped} />
       </div>
 
       {summary?.capacity_hotspots && Array.isArray(summary.capacity_hotspots) && summary.capacity_hotspots.length > 0 && (
