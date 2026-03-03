@@ -5105,6 +5105,53 @@ export type Database = {
           },
         ]
       }
+      provider_work_profiles: {
+        Row: {
+          created_at: string
+          equipment_kits: string[]
+          home_address_label: string | null
+          home_geohash: string | null
+          home_lat: number | null
+          home_lng: number | null
+          max_jobs_per_day: number
+          provider_org_id: string
+          updated_at: string
+          working_hours: Json
+        }
+        Insert: {
+          created_at?: string
+          equipment_kits?: string[]
+          home_address_label?: string | null
+          home_geohash?: string | null
+          home_lat?: number | null
+          home_lng?: number | null
+          max_jobs_per_day?: number
+          provider_org_id: string
+          updated_at?: string
+          working_hours?: Json
+        }
+        Update: {
+          created_at?: string
+          equipment_kits?: string[]
+          home_address_label?: string | null
+          home_geohash?: string | null
+          home_lat?: number | null
+          home_lng?: number | null
+          max_jobs_per_day?: number
+          provider_org_id?: string
+          updated_at?: string
+          working_hours?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_work_profiles_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: true
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       referral_codes: {
         Row: {
           code: string
@@ -5931,6 +5978,7 @@ export type Database = {
           is_featured: boolean
           members_only: boolean
           name: string
+          presence_required: boolean
           price_hint_cents: number | null
           pricing_notes: string | null
           proof_rules: Json
@@ -5962,6 +6010,7 @@ export type Database = {
           is_featured?: boolean
           members_only?: boolean
           name: string
+          presence_required?: boolean
           price_hint_cents?: number | null
           pricing_notes?: string | null
           proof_rules?: Json
@@ -5993,6 +6042,7 @@ export type Database = {
           is_featured?: boolean
           members_only?: boolean
           name?: string
+          presence_required?: boolean
           price_hint_cents?: number | null
           pricing_notes?: string | null
           proof_rules?: Json
@@ -7242,6 +7292,120 @@ export type Database = {
             columns: ["zone_id"]
             isOneToOne: false
             referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      visit_tasks: {
+        Row: {
+          created_at: string
+          duration_estimate_minutes: number
+          id: string
+          notes: string | null
+          presence_required: boolean
+          sku_id: string
+          status: string
+          visit_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_estimate_minutes?: number
+          id?: string
+          notes?: string | null
+          presence_required?: boolean
+          sku_id: string
+          status?: string
+          visit_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_estimate_minutes?: number
+          id?: string
+          notes?: string | null
+          presence_required?: boolean
+          sku_id?: string
+          status?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visit_tasks_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visit_tasks_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      visits: {
+        Row: {
+          created_at: string
+          draft_generated_at: string | null
+          eta_range_end: string | null
+          eta_range_start: string | null
+          id: string
+          locked_at: string | null
+          property_id: string
+          provider_org_id: string | null
+          route_plan_version: number | null
+          schedule_state: Database["public"]["Enums"]["visit_schedule_state"]
+          scheduled_date: string
+          time_window_end: string | null
+          time_window_start: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          draft_generated_at?: string | null
+          eta_range_end?: string | null
+          eta_range_start?: string | null
+          id?: string
+          locked_at?: string | null
+          property_id: string
+          provider_org_id?: string | null
+          route_plan_version?: number | null
+          schedule_state?: Database["public"]["Enums"]["visit_schedule_state"]
+          scheduled_date: string
+          time_window_end?: string | null
+          time_window_start?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          draft_generated_at?: string | null
+          eta_range_end?: string | null
+          eta_range_start?: string | null
+          id?: string
+          locked_at?: string | null
+          property_id?: string
+          provider_org_id?: string | null
+          route_plan_version?: number | null
+          schedule_state?: Database["public"]["Enums"]["visit_schedule_state"]
+          scheduled_date?: string
+          time_window_end?: string | null
+          time_window_start?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visits_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visits_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
             referencedColumns: ["id"]
           },
         ]
@@ -8498,6 +8662,14 @@ export type Database = {
       }
       to_date_immutable: { Args: { ts: string }; Returns: string }
       transition_eligible_earnings: { Args: never; Returns: Json }
+      user_is_provider_owner: {
+        Args: { p_org_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      user_owns_property: {
+        Args: { p_property_id: string; p_user_id: string }
+        Returns: boolean
+      }
       validate_provider_invite: { Args: { p_code: string }; Returns: Json }
       void_referral_reward: {
         Args: { p_reason: string; p_reward_id: string }
@@ -8629,6 +8801,15 @@ export type Database = {
         | "routine_change"
         | "provider_promise_mismatch"
         | "general"
+      visit_schedule_state:
+        | "planning"
+        | "scheduled"
+        | "dispatched"
+        | "in_progress"
+        | "complete"
+        | "exception_pending"
+        | "canceled"
+        | "rescheduled"
       zone_launch_status: "open" | "soft_launch" | "waitlist" | "not_supported"
     }
     CompositeTypes: {
@@ -8889,6 +9070,16 @@ export const Constants = {
         "routine_change",
         "provider_promise_mismatch",
         "general",
+      ],
+      visit_schedule_state: [
+        "planning",
+        "scheduled",
+        "dispatched",
+        "in_progress",
+        "complete",
+        "exception_pending",
+        "canceled",
+        "rescheduled",
       ],
       zone_launch_status: ["open", "soft_launch", "waitlist", "not_supported"],
     },
