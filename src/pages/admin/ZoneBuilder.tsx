@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   ArrowLeft, ArrowRight, Loader2, MapPin, Users, Gauge,
-  AlertTriangle, BarChart3, Check, Pencil, Merge, Scissors,
+  AlertTriangle, BarChart3, Check, Pencil, Merge,
 } from "lucide-react";
 import { useRef } from "react";
 import { toast } from "sonner";
@@ -189,7 +189,7 @@ export default function ZoneBuilder() {
     return zoneA?.neighbor_zone_labels?.includes(b);
   })();
 
-  const selectedResult = editedResults.find((r) => r.zone_label === selectedZone);
+  
   const warningCount = editedResults.reduce((s, r) => s + r.warnings.length, 0);
 
   // Shared zone list card renderer

@@ -13,7 +13,7 @@
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { cellToLatLng } from "https://esm.sh/h3-js@4.2.1";
+import { latLngToCell } from "https://esm.sh/h3-js@4.2.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -102,12 +102,7 @@ Deno.serve(async (req) => {
     }
 
     // ─── Derive zip codes from H3 cells ────────────────────
-    // We look up properties in each cell's area to determine zip codes
-    // Since we stored cells in zone_cells, we can cross-ref with properties
-    const allCellIndices = results.flatMap((r: any) => r.cell_indices || []);
-
-    // Get all properties that might fall in these cells
-    // We'll use the properties table to get zip codes per cell
+    // Cross-ref properties with H3 cells to determine zip codes per zone
     const { data: properties } = await supabase
       .from("properties")
       .select("id, lat, lng, zip_code")
@@ -115,31 +110,11 @@ Deno.serve(async (req) => {
       .not("lng", "is", null)
       .not("zip_code", "is", null);
 
-    // Build property → H3 cell lookup using same resolution as the run
     const resolution = (run.config as any)?.resolution ?? 7;
 
-    // We need h3 to map property lat/lng → cell, but we can also use the
-    // zone_cells table which already has the mapping from the generate step.
-    // Instead, let's just collect zip codes from properties that were in the region.
-
-    // Get existing zones in the region for zip code reference
-    const { data: existingZones } = await supabase
-      .from("zones")
-      .select("zip_codes")
-      .eq("region_id", run.region_id);
-
-    const regionZips = new Set<string>();
-    if (existingZones) {
-      for (const z of existingZones) {
-        if (z.zip_codes) z.zip_codes.forEach((zc: string) => regionZips.add(zc));
-      }
-    }
-
-    // Build a simple cell → zip mapping from properties
+    // Build cell → zip mapping from properties
     const cellZipMap = new Map<string, Set<string>>();
     if (properties) {
-      // Import h3 function at top, so we can map properties to cells
-      const { latLngToCell } = await import("https://esm.sh/h3-js@4.2.1");
       for (const prop of properties) {
         if (!prop.lat || !prop.lng || !prop.zip_code) continue;
         try {
@@ -200,12 +175,12 @@ Deno.serve(async (req) => {
 
       createdZones.push({ id: newZone.id, name: newZone.name, zone_label: label });
 
-      // Update zone_cells with the operational zone_id
-      for (const cellIdx of cellIndices) {
+      // Bulk update zone_cells with the operational zone_id
+      if (cellIndices.length > 0) {
         await supabase
           .from("zone_cells")
           .update({ zone_id: newZone.id })
-          .eq("h3_index", cellIdx)
+          .in("h3_index", cellIndices)
           .eq("run_id", run_id);
       }
     }
