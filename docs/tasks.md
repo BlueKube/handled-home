@@ -879,14 +879,14 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S3-P3-04** | P1 | M | Threshold Dials tab (`ThresholdDials`) — grouped by utilization/coverage/general, percent-aware input, save per threshold, last-updated timestamps.
 
 ### Phase 4: Customer Gating + Category Waitlist
-- [ ] **S3-P4-01** | P0 | L | Catalog gating — filter customer-visible categories based on (zone, category) state. OPEN/SOFT_LAUNCH = show, PROTECT_QUALITY/PROVIDER_RECRUITING/WAITLIST_ONLY = waitlist CTA, CLOSED = hidden.
-- [ ] **S3-P4-02** | P0 | M | Subscribe eligibility check — block checkout unless state is OPEN or SOFT_LAUNCH. Route to waitlist flow.
-- [ ] **S3-P4-03** | P0 | L | Category-level waitlist flow (address confirm, contact info, preferences, submit → existing waitlist_entries).
-- [ ] **S3-P4-04** | P1 | M | Customer messaging by state (copy variants per PRD §4D).
+- [x] **S3-P4-01** | P0 | L | Catalog gating — `useZoneCategoryGating` hook resolves customer zone → fetches `market_zone_category_state` → maps to purchasable/waitlist/hidden. Wired into `AddServicesSheet`: purchasable categories render normally, waitlisted show "Coming Soon" section with waitlist CTA, CLOSED hidden entirely.
+- [x] **S3-P4-02** | P0 | M | Subscribe eligibility check — `RoutineConfirm` resolves sku_id→category via `useSkuCategories`, checks each against `isPurchasable()`. Blocked categories show destructive alert with per-category waitlist buttons. Confirm button disabled when blocked.
+- [x] **S3-P4-03** | P0 | L | Category-level waitlist flow — `CategoryWaitlistSheet` bottom sheet: category icon+gradient header, state-specific messaging, address confirmation from property, email (pre-filled from auth), optional name, priority preference chips (Reliability/Familiar provider/Lowest price/Earliest launch). Submits to existing `join-waitlist` edge function with `source: category_waitlist_{category}`. Success state with checkmark animation.
+- [x] **S3-P4-04** | P1 | M | Customer messaging by state — `src/lib/categoryStateMessaging.ts` provides `getStateMessage(rawState, category)` returning headline/subtext/badge/ctaLabel per PRD §4D. Used in AddServicesSheet waitlist cards and CategoryWaitlistSheet header.
 
 ### Phase 5: Provider Surfaces
 - [ ] **S3-P5-01** | P1 | M | Market heat signals on provider dashboard (PROVIDER_RECRUITING zones/categories show opportunity badges).
 - [ ] **S3-P5-02** | P1 | M | Provider onboarding tie-in (reinforce early positioning when category is PROVIDER_RECRUITING in nearby zones).
 - [ ] **S3-P5-03** | P2 | S | Analytics events: recommendation_created, approved/rejected/snoozed, state_changed, waitlist_joined, subscribe_blocked_by_state.
 
-*Last updated: 2026-03-03 — Phase 3 complete.*
+*Last updated: 2026-03-03 — Phase 4 complete.*

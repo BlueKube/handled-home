@@ -1,14 +1,37 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { useProperty } from "@/hooks/useProperty";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
 import { useRoutine } from "@/hooks/useRoutine";
 import { useConfirmRoutine } from "@/hooks/useRoutineActions";
+import { useZoneCategoryGating } from "@/hooks/useZoneCategoryGating";
+import { CategoryWaitlistSheet } from "@/components/customer/CategoryWaitlistSheet";
 import { RoutineSuccessScreen } from "@/components/routine/RoutineSuccessScreen";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Lock, CalendarDays, Loader2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ArrowLeft, Lock, CalendarDays, Loader2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { getCategoryLabel } from "@/lib/serviceCategories";
+
+/** Resolve sku_id → category for a set of sku IDs */
+function useSkuCategories(skuIds: string[]) {
+  return useQuery({
+    queryKey: ["sku_categories", skuIds],
+    enabled: skuIds.length > 0,
+    staleTime: 10 * 60 * 1000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_skus")
+        .select("id, category")
+        .in("id", skuIds);
+      if (error) throw error;
+      return new Map((data ?? []).map((r) => [r.id, r.category as string | null]));
+    },
+  });
+}
 
 export default function RoutineConfirm() {
   const navigate = useNavigate();
@@ -16,10 +39,15 @@ export default function RoutineConfirm() {
   const { data: subscription, isLoading: subLoading } = useCustomerSubscription();
   const { data: routineData, isLoading: routineLoading } = useRoutine(property?.id, subscription?.plan_id);
   const confirmRoutine = useConfirmRoutine();
+  const { isPurchasable, getRawState, hasGatingData, isLoading: gatingLoading } = useZoneCategoryGating();
   const [confirmed, setConfirmed] = useState(false);
   const [effectiveAt, setEffectiveAt] = useState<string | null>(null);
+  const [waitlistCategory, setWaitlistCategory] = useState<{ category: string; rawState: string } | null>(null);
 
-  const isLoading = subLoading || routineLoading;
+  const skuIds = routineData?.items.map((i) => i.sku_id) ?? [];
+  const { data: skuCategoryMap } = useSkuCategories(skuIds);
+
+  const isLoading = subLoading || routineLoading || gatingLoading;
 
   // Gate: need active subscription
   if (!isLoading && !subscription) {
@@ -32,6 +60,12 @@ export default function RoutineConfirm() {
     navigate("/customer/routine", { replace: true });
     return null;
   }
+
+  // Eligibility check: find categories that are NOT purchasable
+  const blockedCategories = !isLoading && hasGatingData && routineData && skuCategoryMap
+    ? [...new Set(routineData.items.map((i) => skuCategoryMap.get(i.sku_id) ?? null).filter((c): c is string => !!c && !isPurchasable(c)))]
+    : [];
+  const hasBlockedCategories = blockedCategories.length > 0;
 
   if (confirmed) {
     return <RoutineSuccessScreen effectiveAt={effectiveAt} />;
@@ -97,11 +131,39 @@ export default function RoutineConfirm() {
           </div>
         </div>
 
+        {/* Blocked categories warning */}
+        {hasBlockedCategories && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              <p className="font-medium mb-1">Some services aren't available yet</p>
+              <p className="text-sm">
+                {blockedCategories.map((c) => getCategoryLabel(c)).join(", ")}{" "}
+                {blockedCategories.length === 1 ? "isn't" : "aren't"} available in your area yet.
+                Remove {blockedCategories.length === 1 ? "it" : "them"} from your routine or join the waitlist.
+              </p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {blockedCategories.map((cat) => (
+                  <Button
+                    key={cat}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                    onClick={() => setWaitlistCategory({ category: cat, rawState: getRawState(cat) ?? "WAITLIST_ONLY" })}
+                  >
+                    Join {getCategoryLabel(cat)} Waitlist
+                  </Button>
+                ))}
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <Button
           className="w-full gap-2"
           size="lg"
           onClick={handleConfirm}
-          disabled={confirmRoutine.isPending}
+          disabled={confirmRoutine.isPending || hasBlockedCategories}
         >
           {confirmRoutine.isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -111,6 +173,16 @@ export default function RoutineConfirm() {
           Confirm & Lock Routine
         </Button>
       </div>
+
+      {/* Waitlist sheet */}
+      {waitlistCategory && (
+        <CategoryWaitlistSheet
+          open={!!waitlistCategory}
+          onOpenChange={(v) => { if (!v) setWaitlistCategory(null); }}
+          category={waitlistCategory.category}
+          rawState={waitlistCategory.rawState}
+        />
+      )}
     </div>
   );
 }
