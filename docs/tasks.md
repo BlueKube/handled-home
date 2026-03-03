@@ -677,6 +677,34 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 
 ---
 
+## Sprint PRD-300 — Scheduling & Logistics Foundations
+
+> Data model + geo index + schedule states + admin dials + provider work setup + customer upcoming.
+
+### Phase 1: Schema Foundation (visits, visit_tasks, provider_work_profiles, scheduling states)
+- [x] **PRD300-P1** | P0 | L | Created `visits`, `visit_tasks`, `provider_work_profiles` tables with RLS, indexes, triggers
+
+### Phase 1 Remediation (8 code review findings)
+- [x] **PRD300-P1-R1** | P0 | S | Seeded 4 scheduling config keys into admin_system_config
+- [x] **PRD300-P1-R2** | P0 | S | Admin FOR ALL on provider_work_profiles
+- [x] **PRD300-P1-R3** | P0 | S | Added service_categories column to provider_work_profiles
+- [x] **PRD300-P1-R4** | P0 | S | Added h3_index columns to properties + provider_work_profiles
+- [x] **PRD300-P1-R5** | P0 | S | Added updated_at + trigger to visit_tasks
+- [x] **PRD300-P1-R6** | P0 | S | Natural language policy names + WITH CHECK cleanup
+- [x] **PRD300-P1-R7** | P0 | S | Reverted provider work profile RLS to SELECT+INSERT+UPDATE (no DELETE)
+
+### Phase 2: Admin Scheduling Policy UI
+- [x] **PRD300-P2** | P0 | M | SchedulingPolicy page at /admin/scheduling/policy with 4 dials, AuditReasonModal, useSchedulingPolicy hook
+
+### Phase 3: Provider Work Setup Page
+- [x] **PRD300-P3-01** | P0 | M | Created `useProviderWorkProfile` hook (query + upsert)
+- [x] **PRD300-P3-02** | P0 | L | Built `/provider/work-setup` — 3-step stepper (Location → Services → Schedule) with home base, category multi-select, equipment toggles, weekly hours, max jobs/day
+- [x] **PRD300-P3-03** | P0 | S | Wired route in App.tsx + "Work Setup" link in provider More menu
+
+*Last updated: 2026-03-03 — Phase 3 complete. Phase 4 (Customer Upcoming) next.*
+
+---
+
 ## Sprint 3F/3G — Provider Onboarding + BYOC
 
 > Provider acquisition funnel: application, agreement, compliance, BYOC invite links, customer activation, admin review.
