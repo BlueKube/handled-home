@@ -8,9 +8,12 @@ import { useProviderJobs, ProviderJob } from "@/hooks/useProviderJobs";
 import { useProviderOrg } from "@/hooks/useProviderOrg";
 import { useProviderRoutePlan } from "@/hooks/useProviderRoutePlan";
 import { useOptimizeRoute, useReorderRoute } from "@/hooks/useRouteOptimization";
+import { useProviderVisits } from "@/hooks/useProviderVisits";
 import { ProviderMapView } from "@/components/provider/ProviderMapView";
 import { TodayLoadout, DayPlanSummary } from "@/components/provider/DayPlanComponents";
-import { MapPin, Clock, ChevronRight, ArrowUp, ArrowDown, Route, Loader2, Lock, Map as MapIcon, List, ShieldCheck, Timer } from "lucide-react";
+import { VisitJobCard } from "@/components/provider/VisitJobCard";
+import { WeekDueQueue } from "@/components/provider/WeekDueQueue";
+import { MapPin, Clock, ChevronRight, ArrowUp, ArrowDown, Route, Loader2, Lock, Map as MapIcon, List, ShieldCheck, Timer, CalendarClock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format, differenceInDays, parseISO } from "date-fns";
@@ -290,6 +293,77 @@ function UpcomingJobList() {
   );
 }
 
+function WeekView() {
+  const { data: visits, isLoading } = useProviderVisits("week");
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {[1, 2, 3].map((i) => (
+          <Skeleton key={i} className="h-24 w-full rounded-xl" />
+        ))}
+      </div>
+    );
+  }
+
+  // Separate due queue from regular scheduled visits
+  const dueVisits = visits?.filter((v) => v.due_status === "due_soon" || v.due_status === "overdue") ?? [];
+  const scheduledVisits = visits?.filter((v) => !v.due_status || (v.due_status !== "due_soon" && v.due_status !== "overdue")) ?? [];
+
+  // Group scheduled by date
+  const byDate = new Map<string, typeof scheduledVisits>();
+  scheduledVisits.forEach((v) => {
+    const existing = byDate.get(v.scheduled_date) ?? [];
+    existing.push(v);
+    byDate.set(v.scheduled_date, existing);
+  });
+
+  const sortedDates = Array.from(byDate.keys()).sort();
+
+  return (
+    <div className="space-y-5">
+      {/* Due queue at top */}
+      {dueVisits.length > 0 && (
+        <div className="space-y-2">
+          <WeekDueQueue />
+        </div>
+      )}
+
+      {/* Daily breakdown */}
+      {sortedDates.length === 0 && dueVisits.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <CalendarClock className="h-10 w-10 text-muted-foreground/40 mb-3" />
+          <p className="text-muted-foreground font-medium">No visits this week</p>
+          <p className="text-xs text-muted-foreground/70 mt-1">Visits will appear here when scheduled</p>
+        </div>
+      )}
+
+      {sortedDates.map((date) => {
+        const dayVisits = byDate.get(date) ?? [];
+        return (
+          <div key={date} className="space-y-2">
+            <h3 className="text-sm font-semibold text-foreground">
+              {format(parseISO(date), "EEEE, MMM d")}
+              <span className="ml-2 text-xs font-normal text-muted-foreground">
+                {dayVisits.length} stop{dayVisits.length !== 1 ? "s" : ""}
+              </span>
+            </h3>
+            {dayVisits.map((visit, i) => (
+              <VisitJobCard
+                key={visit.id}
+                visit={visit}
+                index={i}
+                total={dayVisits.length}
+                showReorder={false}
+              />
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function ProviderJobs() {
   const [tab, setTab] = useState("today");
 
@@ -300,12 +374,16 @@ export default function ProviderJobs() {
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="w-full">
           <TabsTrigger value="today" className="flex-1">Today</TabsTrigger>
+          <TabsTrigger value="week" className="flex-1">This Week</TabsTrigger>
           <TabsTrigger value="upcoming" className="flex-1">Upcoming</TabsTrigger>
         </TabsList>
         <TabsContent value="today" className="mt-4 space-y-3">
           <TodayLoadout />
           <DayPlanSummary />
           <TodayJobList />
+        </TabsContent>
+        <TabsContent value="week" className="mt-4">
+          <WeekView />
         </TabsContent>
         <TabsContent value="upcoming" className="mt-4">
           <UpcomingJobList />

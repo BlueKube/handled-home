@@ -47,6 +47,8 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
   const [isFeatured, setIsFeatured] = useState(false);
   const [displayOrder, setDisplayOrder] = useState(0);
   const [requiresTrainingGate, setRequiresTrainingGate] = useState(false);
+  const [schedulingProfile, setSchedulingProfile] = useState<string>("day_commit");
+  const [accessMode, setAccessMode] = useState<string>("exterior_only");
 
   useEffect(() => {
     if (!open) return;
@@ -68,6 +70,8 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
       setIsFeatured(sku.is_featured ?? false);
       setDisplayOrder(sku.display_order ?? 0);
       setRequiresTrainingGate(sku.requires_training_gate ?? false);
+      setSchedulingProfile((sku as any).scheduling_profile ?? "day_commit");
+      setAccessMode((sku as any).access_mode ?? "exterior_only");
     } else {
       setName(""); setDescription(""); setCategory(""); setStatus("draft");
       setInclusions([""]); setExclusions([""]); setEdgeCaseNotes("");
@@ -76,6 +80,8 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
       setPriceHintCents(null); setPricingNotes("");
       setIsFeatured(false); setDisplayOrder(0);
       setRequiresTrainingGate(false);
+      setSchedulingProfile("day_commit");
+      setAccessMode("exterior_only");
     }
   }, [open, sku]);
 
@@ -111,6 +117,8 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
     is_featured: isFeatured,
     display_order: displayOrder,
     requires_training_gate: requiresTrainingGate,
+    scheduling_profile: schedulingProfile as any,
+    access_mode: accessMode as any,
   });
 
   const needsConfirmation = (payload: ServiceSkuInsert): boolean => {
@@ -249,6 +257,30 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
                   <p className="text-xs text-muted-foreground">Providers must complete training before being assigned this SKU</p>
                 </div>
                 <Switch checked={requiresTrainingGate} onCheckedChange={setRequiresTrainingGate} />
+              </div>
+              <div>
+                <Label>Scheduling Profile</Label>
+                <Select value={schedulingProfile} onValueChange={setSchedulingProfile}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {Constants.public.Enums.scheduling_profile.map(p => (
+                      <SelectItem key={p} value={p}>{p.replace(/_/g, " ")}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-caption mt-1">How this service is scheduled: appointment window (rigid), day commit (semi-flex), or service week (flexible).</p>
+              </div>
+              <div>
+                <Label>Access Mode</Label>
+                <Select value={accessMode} onValueChange={setAccessMode}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {Constants.public.Enums.access_mode.map(m => (
+                      <SelectItem key={m} value={m}>{m.replace(/_/g, " ")}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-caption mt-1">Whether the customer must be present, the provider has access, or it's exterior only.</p>
               </div>
             </div>
           </CollapsibleSection>

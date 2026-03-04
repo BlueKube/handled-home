@@ -143,6 +143,8 @@ import AdminSchedulingPolicy from "@/pages/admin/SchedulingPolicy";
 import AdminPlannerDashboard from "@/pages/admin/PlannerDashboard";
 import AdminAssignmentDashboard from "@/pages/admin/AssignmentDashboard";
 import AdminAssignmentConfig from "@/pages/admin/AssignmentConfig";
+import AdminWindowTemplates from "@/pages/admin/WindowTemplates";
+import AdminSchedulingExceptions from "@/pages/admin/SchedulingExceptions";
 
 const queryClient = new QueryClient();
 
@@ -267,6 +269,8 @@ const App = () => (
                 <Route path="/admin/scheduling/planner" element={<AdminPlannerDashboard />} />
                 <Route path="/admin/assignments" element={<AdminAssignmentDashboard />} />
                 <Route path="/admin/assignments/config" element={<AdminAssignmentConfig />} />
+                <Route path="/admin/scheduling/windows" element={<AdminWindowTemplates />} />
+                <Route path="/admin/scheduling/exceptions" element={<AdminSchedulingExceptions />} />
                 <Route path="/admin/service-days" element={<AdminServiceDays />} />
                 <Route path="/admin/bundles" element={<AdminBundles />} />
                 <Route path="/admin/support" element={<AdminSupport />} />
