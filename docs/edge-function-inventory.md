@@ -29,7 +29,7 @@
 ### JWT Verification
 
 Functions that accept unauthenticated requests have `verify_jwt = false` in `supabase/config.toml`:
-- `create-checkout-session`, `stripe-webhook`, `create-portal-session`, `cleanup-expired-offers`, `create-setup-intent`, `create-connect-account`, `create-connect-account-link`, `process-payout`, `run-billing-automation`, `support-ai-classify`, `snapshot-rollup`, `run-dunning`, `check-weather`, `evaluate-zone-expansion`, `compute-zone-state-recommendations`
+- `create-checkout-session`, `stripe-webhook`, `create-portal-session`, `cleanup-expired-offers`, `create-setup-intent`, `create-connect-account`, `create-connect-account-link`, `process-payout`, `run-billing-automation`, `support-ai-classify`, `snapshot-rollup`, `run-dunning`, `check-weather`, `evaluate-zone-expansion`, `compute-zone-state-recommendations`, `route-sequence`
 
 ### Planned (Not Yet Deployed)
 | Function | Purpose | Sprint |
@@ -44,3 +44,4 @@ Functions that accept unauthenticated requests have `verify_jwt = false` in `sup
 | `generate-zones` | API (admin) | — | — | ✅ Deployed |
 | `commit-zones` | API (admin) | — | — | ✅ Deployed |
 | `compute-zone-state-recommendations` | Cron / Manual | Nightly | — | ✅ Deployed |
+| `route-sequence` | Cron / Manual | Nightly | — | ✅ Deployed |

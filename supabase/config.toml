@@ -74,3 +74,6 @@ verify_jwt = false
 
 [functions.assign-visits]
 verify_jwt = false
+
+[functions.route-sequence]
+verify_jwt = false
