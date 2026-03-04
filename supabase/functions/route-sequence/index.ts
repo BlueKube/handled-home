@@ -35,27 +35,22 @@ interface Stop {
   requiredEquipment: string[];
   previousRouteOrder: number | null;
   scheduleState: string;
+  // VRPTW fields
+  windowStartMinutes: number | null; // hard window start (minutes from midnight)
+  windowEndMinutes: number | null;   // hard window end
+  isWindowed: boolean;
+  piggybackedOntoVisitId: string | null;
+  serviceWeekEnd: string | null; // for due-status computation
 }
 
 interface BlockedWindow {
-  startMinutes: number; // minutes from midnight
+  startMinutes: number;
   endMinutes: number;
 }
 
 interface Segment {
   startMinutes: number;
   endMinutes: number;
-}
-
-interface ProviderDayContext {
-  providerOrgId: string;
-  homeLat: number;
-  homeLng: number;
-  workStartMinutes: number;
-  workEndMinutes: number;
-  blockedWindows: BlockedWindow[];
-  segments: Segment[];
-  stops: Stop[];
 }
 
 // ── Geo helpers ──
@@ -108,13 +103,12 @@ function computeStopDuration(taskMinutes: number[], dials: ConfigDials): number 
     dials.setup_cap_minutes,
     dials.setup_base_minutes * (taskMinutes.length - 1)
   );
-  return Math.max(totalTask - setupDiscount, totalTask * 0.5); // never discount below 50%
+  return Math.max(totalTask - setupDiscount, totalTask * 0.5);
 }
 
 // ── Build segments from work window minus blocked windows ──
 
 function buildSegments(workStart: number, workEnd: number, blocked: BlockedWindow[]): Segment[] {
-  // Sort blocked by start
   const sorted = [...blocked].sort((a, b) => a.startMinutes - b.startMinutes);
   const segments: Segment[] = [];
   let cursor = workStart;
@@ -128,38 +122,154 @@ function buildSegments(workStart: number, workEnd: number, blocked: BlockedWindo
   if (cursor < workEnd) {
     segments.push({ startMinutes: cursor, endMinutes: workEnd });
   }
-  return segments.filter((s) => s.endMinutes - s.startMinutes >= 15); // drop tiny gaps
+  return segments.filter((s) => s.endMinutes - s.startMinutes >= 15);
 }
 
-// ── Nearest-neighbor initial ordering ──
+// ── VRPTW feasibility simulation ──
+// Simulates the route sequentially. Returns null if feasible, or a description of the first violation.
+// Also returns per-stop arrival times.
 
-function nearestNeighborOrder(stops: Stop[], startLat: number, startLng: number): number[] {
-  if (stops.length === 0) return [];
-  const remaining = stops.map((_, i) => i);
-  const ordered: number[] = [];
-  let curLat = startLat;
-  let curLng = startLng;
+interface SimResult {
+  feasible: boolean;
+  violation: string | null;
+  arrivals: number[]; // arrival minute for each stop in order
+  finishMinute: number;
+}
 
-  while (remaining.length > 0) {
-    let bestIdx = 0;
-    let bestDist = Infinity;
-    for (let i = 0; i < remaining.length; i++) {
-      const s = stops[remaining[i]];
-      const d = driveMinutes(curLat, curLng, s.lat, s.lng);
-      if (d < bestDist) {
-        bestDist = d;
-        bestIdx = i;
+function simulateRoute(
+  order: number[],
+  stops: Stop[],
+  homeLat: number,
+  homeLng: number,
+  workStartMinutes: number,
+  segments: Segment[],
+): SimResult {
+  const arrivals: number[] = [];
+  let curLat = homeLat;
+  let curLng = homeLng;
+  let currentTime = segments.length > 0 ? segments[0].startMinutes : workStartMinutes;
+  let segIdx = 0;
+
+  for (const idx of order) {
+    const stop = stops[idx];
+    const travel = driveMinutes(curLat, curLng, stop.lat, stop.lng);
+    currentTime += travel;
+
+    // Advance past blocked segments
+    if (segments.length > 0 && segIdx < segments.length) {
+      if (currentTime >= segments[segIdx].endMinutes) {
+        segIdx++;
+        if (segIdx < segments.length) {
+          currentTime = Math.max(currentTime, segments[segIdx].startMinutes);
+        }
       }
     }
-    const next = remaining.splice(bestIdx, 1)[0];
-    ordered.push(next);
-    curLat = stops[next].lat;
-    curLng = stops[next].lng;
+
+    // VRPTW: if stop has a hard window, wait until window opens
+    if (stop.isWindowed && stop.windowStartMinutes !== null) {
+      currentTime = Math.max(currentTime, stop.windowStartMinutes);
+    }
+
+    // VRPTW: check if arrival is past window end → infeasible
+    if (stop.isWindowed && stop.windowEndMinutes !== null) {
+      if (currentTime > stop.windowEndMinutes) {
+        return {
+          feasible: false,
+          violation: `Visit ${stop.visitId} arrives at min ${currentTime.toFixed(0)} but window closes at ${stop.windowEndMinutes}`,
+          arrivals,
+          finishMinute: currentTime,
+        };
+      }
+    }
+
+    arrivals.push(currentTime);
+    currentTime += stop.stopDurationMinutes;
+    curLat = stop.lat;
+    curLng = stop.lng;
   }
-  return ordered;
+
+  return { feasible: true, violation: null, arrivals, finishMinute: currentTime };
 }
 
-// ── Route cost function ──
+// ── Windowed-first sequencing heuristic (PRD Section D) ──
+// 1. Separate windowed stops (sorted by window_start) and flexible stops
+// 2. Place windowed stops in window_start order
+// 3. Insert flexible stops at cheapest-insertion position while maintaining feasibility
+// 4. Piggybacked stops are inserted immediately after their parent
+
+function windowedFirstSequence(
+  stops: Stop[],
+  homeLat: number,
+  homeLng: number,
+  workStartMinutes: number,
+  segments: Segment[],
+): number[] {
+  // Separate indices
+  const windowedIndices: number[] = [];
+  const flexibleIndices: number[] = [];
+  const piggybackMap = new Map<string, number[]>(); // parentVisitId → child indices
+
+  for (let i = 0; i < stops.length; i++) {
+    if (stops[i].piggybackedOntoVisitId) {
+      const children = piggybackMap.get(stops[i].piggybackedOntoVisitId!) ?? [];
+      children.push(i);
+      piggybackMap.set(stops[i].piggybackedOntoVisitId!, children);
+    } else if (stops[i].isWindowed) {
+      windowedIndices.push(i);
+    } else {
+      flexibleIndices.push(i);
+    }
+  }
+
+  // Sort windowed by window start
+  windowedIndices.sort((a, b) => (stops[a].windowStartMinutes ?? 0) - (stops[b].windowStartMinutes ?? 0));
+
+  // Start with windowed stops, inserting piggybacked children after parents
+  const order: number[] = [];
+  for (const wi of windowedIndices) {
+    order.push(wi);
+    const children = piggybackMap.get(stops[wi].visitId) ?? [];
+    for (const c of children) order.push(c);
+  }
+
+  // Insert flexible stops at cheapest position
+  for (const fi of flexibleIndices) {
+    // Also check if this flexible stop has piggybacked children
+    const children = piggybackMap.get(stops[fi].visitId) ?? [];
+
+    let bestPos = order.length; // default: append
+    let bestCost = Infinity;
+
+    for (let pos = 0; pos <= order.length; pos++) {
+      // Try inserting at this position
+      const candidate = [...order];
+      candidate.splice(pos, 0, fi, ...children);
+
+      const sim = simulateRoute(candidate, stops, homeLat, homeLng, workStartMinutes, segments);
+      if (!sim.feasible) continue;
+
+      // Cost = total travel in this ordering (simple proxy)
+      let travelCost = 0;
+      let pLat = homeLat, pLng = homeLng;
+      for (const idx of candidate) {
+        travelCost += driveMinutes(pLat, pLng, stops[idx].lat, stops[idx].lng);
+        pLat = stops[idx].lat;
+        pLng = stops[idx].lng;
+      }
+
+      if (travelCost < bestCost) {
+        bestCost = travelCost;
+        bestPos = pos;
+      }
+    }
+
+    order.splice(bestPos, 0, fi, ...children);
+  }
+
+  return order;
+}
+
+// ── Route cost function (extended with VRPTW window violation penalty) ──
 
 function computeRouteCost(
   order: number[],
@@ -175,14 +285,9 @@ function computeRouteCost(
   let totalTravel = 0;
   let curLat = homeLat;
   let curLng = homeLng;
-  let currentTime = workStartMinutes;
+  let currentTime = segments.length > 0 ? segments[0].startMinutes : workStartMinutes;
   let windowViolation = 0;
-
-  // Track segment transitions
   let segIdx = 0;
-  if (segments.length > 0) {
-    currentTime = segments[0].startMinutes;
-  }
 
   for (const idx of order) {
     const stop = stops[idx];
@@ -190,7 +295,7 @@ function computeRouteCost(
     totalTravel += travel;
     currentTime += travel;
 
-    // Check if we've hit a blocked window — skip to next segment
+    // Segment transitions
     if (segments.length > 0 && segIdx < segments.length) {
       if (currentTime >= segments[segIdx].endMinutes) {
         segIdx++;
@@ -200,24 +305,30 @@ function computeRouteCost(
       }
     }
 
-    // Window violation: if visit has a plan_window we'd check it here
-    // For v1, no per-visit windows — skip
+    // VRPTW: wait for window
+    if (stop.isWindowed && stop.windowStartMinutes !== null) {
+      currentTime = Math.max(currentTime, stop.windowStartMinutes);
+    }
+
+    // VRPTW: penalize late arrival
+    if (stop.isWindowed && stop.windowEndMinutes !== null && currentTime > stop.windowEndMinutes) {
+      windowViolation += (currentTime - stop.windowEndMinutes);
+    }
 
     currentTime += stop.stopDurationMinutes;
     curLat = stop.lat;
     curLng = stop.lng;
   }
 
-  // Add drive home
+  // Drive home
   if (order.length > 0) {
     const lastStop = stops[order[order.length - 1]];
     totalTravel += driveMinutes(lastStop.lat, lastStop.lng, homeLat, homeLng);
   }
 
-  const totalWorkMinutes = workEndMinutes - workStartMinutes;
   const overtime = Math.max(0, currentTime - workEndMinutes);
 
-  // Reorder thrash: count how many stops moved position vs prior night
+  // Reorder thrash
   let thrash = 0;
   if (priorOrder) {
     for (let pos = 0; pos < order.length; pos++) {
@@ -238,9 +349,9 @@ function computeRouteCost(
   return { totalTravel, cost, overtime, windowViolation, thrash };
 }
 
-// ── 2-opt improvement ──
+// ── Constrained 2-opt: never break VRPTW feasibility ──
 
-function twoOptImprove(
+function constrainedTwoOptImprove(
   order: number[],
   stops: Stop[],
   homeLat: number,
@@ -262,16 +373,18 @@ function twoOptImprove(
     iterations++;
 
     for (let i = 0; i < best.length - 1; i++) {
-      // Don't move stops that are in_progress (pinned)
       if (stops[best[i]].scheduleState === "in_progress") continue;
 
       for (let j = i + 1; j < best.length; j++) {
         if (stops[best[j]].scheduleState === "in_progress") continue;
 
-        // Reverse segment between i and j
         const candidate = [...best];
         const reversed = candidate.splice(i, j - i + 1).reverse();
         candidate.splice(i, 0, ...reversed);
+
+        // VRPTW feasibility gate: reject if any window is violated
+        const sim = simulateRoute(candidate, stops, homeLat, homeLng, workStartMinutes, segments);
+        if (!sim.feasible) continue;
 
         const candidateCostResult = computeRouteCost(
           candidate, stops, homeLat, homeLng, workEndMinutes, workStartMinutes, segments, dials, priorOrder
@@ -293,6 +406,53 @@ function twoOptImprove(
   }
 
   return best;
+}
+
+// ── Infeasibility repair (PRD Section E) ──
+// If route is infeasible: try dropping flexible stops one at a time (most expensive first)
+// Returns repaired order + list of dropped visit IDs
+
+function attemptInfeasibilityRepair(
+  order: number[],
+  stops: Stop[],
+  homeLat: number,
+  homeLng: number,
+  workStartMinutes: number,
+  segments: Segment[],
+): { repairedOrder: number[]; droppedVisitIds: string[] } {
+  const droppedVisitIds: string[] = [];
+
+  // Find flexible (non-windowed, non-in_progress) stops in the order
+  const flexiblePositions = order
+    .map((idx, pos) => ({ idx, pos }))
+    .filter(({ idx }) => !stops[idx].isWindowed && stops[idx].scheduleState !== "in_progress");
+
+  // Try dropping each one (greedily, most travel-expensive first)
+  // Sort by how much travel they add
+  const withCost = flexiblePositions.map(({ idx, pos }) => {
+    const prevLat = pos > 0 ? stops[order[pos - 1]].lat : homeLat;
+    const prevLng = pos > 0 ? stops[order[pos - 1]].lng : homeLng;
+    const nextLat = pos < order.length - 1 ? stops[order[pos + 1]].lat : homeLat;
+    const nextLng = pos < order.length - 1 ? stops[order[pos + 1]].lng : homeLng;
+    const detour = driveMinutes(prevLat, prevLng, stops[idx].lat, stops[idx].lng) +
+      driveMinutes(stops[idx].lat, stops[idx].lng, nextLat, nextLng) -
+      driveMinutes(prevLat, prevLng, nextLat, nextLng);
+    return { idx, detour };
+  });
+
+  withCost.sort((a, b) => b.detour - a.detour);
+
+  let currentOrder = [...order];
+  for (const { idx } of withCost) {
+    const sim = simulateRoute(currentOrder, stops, homeLat, homeLng, workStartMinutes, segments);
+    if (sim.feasible) break;
+
+    // Drop this stop
+    currentOrder = currentOrder.filter((i) => i !== idx);
+    droppedVisitIds.push(stops[idx].visitId);
+  }
+
+  return { repairedOrder: currentOrder, droppedVisitIds };
 }
 
 // ── ETA range computation ──
@@ -318,7 +478,7 @@ function computeEtaRanges(
     const travel = driveMinutes(curLat, curLng, stop.lat, stop.lng);
     currentTime += travel;
 
-    // Check segment transitions
+    // Segment transitions
     if (segments.length > 0 && segIdx < segments.length) {
       if (currentTime >= segments[segIdx].endMinutes) {
         segIdx++;
@@ -328,33 +488,40 @@ function computeEtaRanges(
       }
     }
 
-    const arrivalMinutes = currentTime;
-
-    // ETA range width based on stop position bucket
-    let halfRange: number;
-    if (pos < 2) {
-      halfRange = dials.base_range_minutes / 2;
-    } else if (pos < 5) {
-      halfRange = dials.base_range_minutes / 2 + dials.increment_per_bucket;
-    } else {
-      halfRange = dials.base_range_minutes / 2 + 2 * dials.increment_per_bucket;
+    // VRPTW: wait for window
+    if (stop.isWindowed && stop.windowStartMinutes !== null) {
+      currentTime = Math.max(currentTime, stop.windowStartMinutes);
     }
 
-    const etaStartMinutes = Math.max(0, arrivalMinutes - halfRange);
-    const etaEndMinutes = arrivalMinutes + halfRange;
+    const arrivalMinutes = currentTime;
 
-    // Convert minutes to ISO timestamp
+    // For windowed stops, ETA range is the window itself (more precise)
+    let etaStartMinutes: number;
+    let etaEndMinutes: number;
+
+    if (stop.isWindowed && stop.windowStartMinutes !== null && stop.windowEndMinutes !== null) {
+      etaStartMinutes = stop.windowStartMinutes;
+      etaEndMinutes = stop.windowEndMinutes;
+    } else {
+      // Progressive widening for flexible stops
+      let halfRange: number;
+      if (pos < 2) {
+        halfRange = dials.base_range_minutes / 2;
+      } else if (pos < 5) {
+        halfRange = dials.base_range_minutes / 2 + dials.increment_per_bucket;
+      } else {
+        halfRange = dials.base_range_minutes / 2 + 2 * dials.increment_per_bucket;
+      }
+      etaStartMinutes = Math.max(0, arrivalMinutes - halfRange);
+      etaEndMinutes = arrivalMinutes + halfRange;
+    }
+
     const baseDate = new Date(dateStr + "T00:00:00Z");
     const plannedArrival = new Date(baseDate.getTime() + arrivalMinutes * 60000).toISOString();
     const etaStart = new Date(baseDate.getTime() + etaStartMinutes * 60000).toISOString();
     const etaEnd = new Date(baseDate.getTime() + etaEndMinutes * 60000).toISOString();
 
-    results.push({
-      visitId: stop.visitId,
-      plannedArrival,
-      etaStart,
-      etaEnd,
-    });
+    results.push({ visitId: stop.visitId, plannedArrival, etaStart, etaEnd });
 
     currentTime += stop.stopDurationMinutes;
     curLat = stop.lat;
@@ -362,6 +529,18 @@ function computeEtaRanges(
   }
 
   return results;
+}
+
+// ── Due-status computation for service-week visits ──
+
+function computeDueStatus(serviceWeekEnd: string | null, scheduledDate: string): string | null {
+  if (!serviceWeekEnd) return null;
+  const now = new Date();
+  const weekEnd = new Date(serviceWeekEnd + "T23:59:59Z");
+  const hoursUntilDue = (weekEnd.getTime() - now.getTime()) / (1000 * 60 * 60);
+  if (hoursUntilDue < 0) return "overdue";
+  if (hoursUntilDue <= 48) return "due_soon";
+  return null;
 }
 
 // ── Main handler ──
@@ -386,7 +565,7 @@ Deno.serve(async (req) => {
   const todayStr = today.toISOString().split("T")[0];
   const idempotencyKey = `route-sequence:${todayStr}`;
 
-  // Idempotency check via cron_run_log
+  // Idempotency check
   const { data: existingRun } = await supabase
     .from("cron_run_log")
     .select("id, status")
@@ -451,7 +630,7 @@ Deno.serve(async (req) => {
     const [visitsResult, workProfilesResult, propertiesResult, skusResult, blockedResult] = await Promise.all([
       supabase
         .from("visits")
-        .select("id, property_id, scheduled_date, schedule_state, provider_org_id, route_order, plan_window")
+        .select("id, property_id, scheduled_date, schedule_state, provider_org_id, route_order, plan_window, time_window_start, time_window_end, scheduling_profile, piggybacked_onto_visit_id, service_week_end, due_status")
         .gte("scheduled_date", horizonStartStr)
         .lte("scheduled_date", horizonEndStr)
         .in("schedule_state", ["scheduled", "confirmed", "in_progress"])
@@ -505,7 +684,7 @@ Deno.serve(async (req) => {
     }
 
     // ── Step 5: Group visits by provider × date ──
-    const providerDays = new Map<string, any[]>(); // "orgId:date" → visits
+    const providerDays = new Map<string, any[]>();
     for (const v of visits) {
       if (!v.provider_org_id) continue;
       const key = `${v.provider_org_id}:${v.scheduled_date}`;
@@ -517,7 +696,6 @@ Deno.serve(async (req) => {
     // ── Step 6: Build blocked windows lookup ──
     const blockedByProviderDay = new Map<string, BlockedWindow[]>();
     for (const bw of blockedWindows) {
-      // For each date in the horizon, check if this blocked window applies
       for (let d = new Date(horizonStart); d <= horizonEnd; d.setDate(d.getDate() + 1)) {
         const dateStr = d.toISOString().split("T")[0];
         const dayOfWeek = d.getUTCDay();
@@ -541,7 +719,10 @@ Deno.serve(async (req) => {
     let totalProviderDays = 0;
     let totalStopsProcessed = 0;
     let infeasibleCount = 0;
+    let repairedCount = 0;
     const sequenceRunRecords: any[] = [];
+    const dueStatusUpdates: { id: string; due_status: string | null }[] = [];
+    const droppedVisits: { visitId: string; providerOrgId: string; date: string }[] = [];
 
     for (const [key, dayVisits] of providerDays) {
       const [providerOrgId, dateStr] = key.split(":");
@@ -556,7 +737,7 @@ Deno.serve(async (req) => {
       const blocked = blockedByProviderDay.get(key) ?? [];
       const segments = buildSegments(workWindow.start, workWindow.end, blocked);
 
-      // Build stops
+      // Build stops with VRPTW fields
       const stops: Stop[] = [];
       for (const v of dayVisits) {
         const prop = propertyMap.get(v.property_id);
@@ -572,7 +753,6 @@ Deno.serve(async (req) => {
 
         const stopDuration = computeStopDuration(taskMinutesList, dials);
 
-        // Aggregate equipment from SKUs
         const equipment = new Set<string>();
         for (const t of tasks) {
           const sku = skuMap.get(t.sku_id);
@@ -582,6 +762,11 @@ Deno.serve(async (req) => {
             }
           }
         }
+
+        // Parse time windows (DB `time` type → "HH:MM:SS" strings)
+        const hasWindow = !!(v.time_window_start && v.time_window_end);
+        const windowStartMin = hasWindow ? parseTimeToMinutes(v.time_window_start) : null;
+        const windowEndMin = hasWindow ? parseTimeToMinutes(v.time_window_end) : null;
 
         stops.push({
           visitId: v.id,
@@ -594,7 +779,20 @@ Deno.serve(async (req) => {
           requiredEquipment: [...equipment],
           previousRouteOrder: v.route_order,
           scheduleState: v.schedule_state,
+          windowStartMinutes: windowStartMin,
+          windowEndMinutes: windowEndMin,
+          isWindowed: hasWindow,
+          piggybackedOntoVisitId: v.piggybacked_onto_visit_id,
+          serviceWeekEnd: v.service_week_end,
         });
+
+        // Compute due status for service-week visits
+        if (v.scheduling_profile === "service_week") {
+          const newDueStatus = computeDueStatus(v.service_week_end, v.scheduled_date);
+          if (newDueStatus !== v.due_status) {
+            dueStatusUpdates.push({ id: v.id, due_status: newDueStatus });
+          }
+        }
       }
 
       if (stops.length === 0) continue;
@@ -607,16 +805,43 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Nearest-neighbor baseline
-      let order = nearestNeighborOrder(stops, provider.home_lat, provider.home_lng);
+      // Use windowed-first heuristic if any windowed stops exist
+      const hasWindowedStops = stops.some((s) => s.isWindowed);
+      let order: number[];
 
-      // 2-opt improvement (skip if ≤ 2 stops)
+      if (hasWindowedStops) {
+        order = windowedFirstSequence(stops, provider.home_lat, provider.home_lng, workWindow.start, segments);
+      } else {
+        // Fall back to nearest-neighbor for all-flexible routes
+        order = nearestNeighborOrder(stops, provider.home_lat, provider.home_lng);
+      }
+
+      // Constrained 2-opt improvement (respects VRPTW feasibility)
       if (stops.length > 2) {
-        order = twoOptImprove(
+        order = constrainedTwoOptImprove(
           order, stops, provider.home_lat, provider.home_lng,
           workWindow.end, workWindow.start, segments, dials,
           priorOrder.size > 0 ? priorOrder : null
         );
+      }
+
+      // VRPTW feasibility check
+      let sim = simulateRoute(order, stops, provider.home_lat, provider.home_lng, workWindow.start, segments);
+
+      // Infeasibility repair if needed
+      let repairDropped: string[] = [];
+      if (!sim.feasible) {
+        const repair = attemptInfeasibilityRepair(order, stops, provider.home_lat, provider.home_lng, workWindow.start, segments);
+        order = repair.repairedOrder;
+        repairDropped = repair.droppedVisitIds;
+        sim = simulateRoute(order, stops, provider.home_lat, provider.home_lng, workWindow.start, segments);
+
+        if (repairDropped.length > 0) {
+          repairedCount++;
+          for (const vid of repairDropped) {
+            droppedVisits.push({ visitId: vid, providerOrgId, date: dateStr });
+          }
+        }
       }
 
       // Compute route cost for summary
@@ -632,15 +857,14 @@ Deno.serve(async (req) => {
         workWindow.start, segments, dials, dateStr
       );
 
-      // Compute total service minutes
       const totalServiceMinutes = stops.reduce((sum, s) => sum + s.stopDurationMinutes, 0);
 
-      // Feasibility check
+      // Overall feasibility (including time capacity)
       const totalAvailableMinutes = segments.reduce((sum, seg) => sum + (seg.endMinutes - seg.startMinutes), 0);
       const totalNeeded = totalServiceMinutes + costResult.totalTravel;
-      const isFeasible = totalNeeded <= totalAvailableMinutes * 1.15; // 15% grace
+      const isFeasible = sim.feasible && totalNeeded <= totalAvailableMinutes * 1.15;
       const infeasibleReason = !isFeasible
-        ? `Need ${totalNeeded.toFixed(0)}min but only ${totalAvailableMinutes}min available (${stops.length} stops, ${costResult.totalTravel.toFixed(0)}min travel)`
+        ? sim.violation ?? `Need ${totalNeeded.toFixed(0)}min but only ${totalAvailableMinutes}min available (${stops.length} stops, ${costResult.totalTravel.toFixed(0)}min travel)`
         : null;
 
       if (!isFeasible) infeasibleCount++;
@@ -650,7 +874,6 @@ Deno.serve(async (req) => {
         const stop = stops[order[pos]];
         const eta = etas[pos];
 
-        // Don't reorder in_progress visits
         if (stop.scheduleState === "in_progress") continue;
 
         await supabase
@@ -666,16 +889,26 @@ Deno.serve(async (req) => {
           .eq("id", stop.visitId);
       }
 
+      // Mark dropped visits as needing reassignment
+      for (const vid of repairDropped) {
+        await supabase
+          .from("visits")
+          .update({
+            schedule_state: "exception_pending",
+            unassigned_reason: "Dropped from route during infeasibility repair — needs reassignment",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", vid);
+      }
+
       totalStopsProcessed += stops.length;
 
-      // Estimated finish time
       const lastEta = etas[etas.length - 1];
       const lastStop = stops[order[order.length - 1]];
       const finishTime = lastEta
         ? new Date(new Date(lastEta.plannedArrival).getTime() + lastStop.stopDurationMinutes * 60000).toISOString()
         : null;
 
-      // Create route_sequence_runs record
       sequenceRunRecords.push({
         run_date: dateStr,
         provider_org_id: providerOrgId,
@@ -690,12 +923,16 @@ Deno.serve(async (req) => {
           overtime_minutes: costResult.overtime,
           thrash_count: costResult.thrash,
           route_cost: costResult.cost,
+          window_violation_minutes: costResult.windowViolation,
+          windowed_stops: stops.filter((s) => s.isWindowed).length,
+          piggybacked_stops: stops.filter((s) => s.piggybackedOntoVisitId).length,
           segments: segments.length,
           blocked_windows: blocked.length,
+          repair_dropped: repairDropped.length,
         },
       });
 
-      // Flag infeasible routes via notification
+      // Flag infeasible routes
       if (!isFeasible) {
         try {
           await supabase.rpc("emit_notification_event", {
@@ -709,12 +946,21 @@ Deno.serve(async (req) => {
               date: dateStr,
               total_stops: stops.length,
               reason: infeasibleReason,
+              repair_dropped: repairDropped,
             },
           });
         } catch (notifErr) {
           console.error(`Failed to emit infeasible notification for ${key}:`, notifErr);
         }
       }
+    }
+
+    // ── Update due statuses in batch ──
+    for (const u of dueStatusUpdates) {
+      await supabase
+        .from("visits")
+        .update({ due_status: u.due_status, updated_at: new Date().toISOString() })
+        .eq("id", u.id);
     }
 
     // Batch insert route_sequence_runs
@@ -738,6 +984,9 @@ Deno.serve(async (req) => {
             provider_days: totalProviderDays,
             total_stops: totalStopsProcessed,
             infeasible_count: infeasibleCount,
+            repaired_count: repairedCount,
+            due_status_updates: dueStatusUpdates.length,
+            dropped_visits: droppedVisits.length,
             sequence_runs: sequenceRunRecords.length,
           },
         })
@@ -750,6 +999,8 @@ Deno.serve(async (req) => {
         provider_days: totalProviderDays,
         total_stops: totalStopsProcessed,
         infeasible_count: infeasibleCount,
+        repaired_count: repairedCount,
+        due_status_updates: dueStatusUpdates.length,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
@@ -771,3 +1022,31 @@ Deno.serve(async (req) => {
     );
   }
 });
+
+// ── Nearest-neighbor (fallback for all-flexible routes) ──
+
+function nearestNeighborOrder(stops: Stop[], startLat: number, startLng: number): number[] {
+  if (stops.length === 0) return [];
+  const remaining = stops.map((_, i) => i);
+  const ordered: number[] = [];
+  let curLat = startLat;
+  let curLng = startLng;
+
+  while (remaining.length > 0) {
+    let bestIdx = 0;
+    let bestDist = Infinity;
+    for (let i = 0; i < remaining.length; i++) {
+      const s = stops[remaining[i]];
+      const d = driveMinutes(curLat, curLng, s.lat, s.lng);
+      if (d < bestDist) {
+        bestDist = d;
+        bestIdx = i;
+      }
+    }
+    const next = remaining.splice(bestIdx, 1)[0];
+    ordered.push(next);
+    curLat = stops[next].lat;
+    curLng = stops[next].lng;
+  }
+  return ordered;
+}
