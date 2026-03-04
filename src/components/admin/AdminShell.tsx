@@ -141,6 +141,8 @@ const navGroups: NavGroup[] = [
 
 function AdminSidebar() {
   const { adminRole } = useAdminMembership();
+  const { state } = useSidebar();
+  const collapsed = state === "collapsed";
   const location = useLocation();
 
   const isItemVisible = (item: NavItem) => {
@@ -158,10 +160,12 @@ function AdminSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r-0">
       <SidebarHeader className="px-4 py-3 flex items-center justify-center bg-white">
-        <span className="font-['Plus_Jakarta_Sans'] font-bold tracking-tight text-xl select-none">
-          <span style={{ color: "hsl(220 20% 10%)" }}>Handled</span>
-          <span style={{ color: "hsl(200 80% 50%)" }}>Home</span>
-        </span>
+        {!collapsed && (
+          <span className="font-['Plus_Jakarta_Sans'] font-bold tracking-tight text-xl select-none">
+            <span style={{ color: "hsl(220 20% 10%)" }}>Handled</span>
+            <span style={{ color: "hsl(200 80% 50%)" }}>Home</span>
+          </span>
+        )}
       </SidebarHeader>
       <SidebarContent className="overflow-y-auto">
         {navGroups.filter(isGroupVisible).map((group) => {
