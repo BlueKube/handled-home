@@ -1249,6 +1249,7 @@ Deno.serve(async (req) => {
             dropped_visits: droppedVisits.length,
             sequence_runs: sequenceRunRecords.length,
             exceptions_created: exceptionsCreated,
+            exceptions_skipped: exceptionsSkipped,
             exceptions_escalated: escalatedCount,
           },
         })
