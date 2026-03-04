@@ -67,11 +67,7 @@ function parseTimeToMinutes(time: string): number {
   return h * 60 + (m || 0);
 }
 
-function minutesToTimeStr(minutes: number): string {
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
-}
+// (removed dead code: minutesToTimeStr)
 
 function getWorkWindow(workingHours: any, dayOfWeek: number): { start: number; end: number } | null {
   const dayName = DAY_NAMES[dayOfWeek];
@@ -206,25 +202,25 @@ Deno.serve(async (req) => {
       // Providers covering this zone + category
       supabase
         .from("zone_category_providers")
-        .select("provider_org_id, slot")
+        .select("provider_org_id, role")
         .eq("zone_id", zone_id)
-        .eq("category_key", category_key)
-        .eq("is_active", true),
+        .eq("category", category_key)
+        .eq("status", "active"),
       // Existing visits in horizon (to count home-required load)
       supabase
         .from("visits")
         .select("id, provider_org_id, scheduled_date, scheduling_profile, schedule_state")
         .gte("scheduled_date", horizonStartStr)
         .lte("scheduled_date", horizonEndStr)
-        .in("schedule_state", ["scheduled", "confirmed", "in_progress", "planned", "draft"]),
+        .in("schedule_state", ["planning", "scheduled", "dispatched", "in_progress"]),
       // Provider blocked windows
       supabase
         .from("provider_blocked_windows")
         .select("provider_org_id, day_of_week, start_time, end_time, is_recurring, specific_date"),
-      // Property location for distance checks
+      // Property existence check
       supabase
         .from("properties")
-        .select("id, lat, lng, zone_id")
+        .select("id")
         .eq("id", property_id)
         .single(),
     ]);
@@ -403,7 +399,7 @@ Deno.serve(async (req) => {
           hasAvailableProvider = true;
 
           // Score: Primary providers score higher, earlier dates score higher
-          const isPrimary = pa.slot === "primary";
+          const isPrimary = pa.role === "PRIMARY";
           const daysFromNow = Math.floor(
             (new Date(dateStr + "T00:00:00Z").getTime() - now.getTime()) / 86400_000
           );
@@ -497,7 +493,7 @@ Deno.serve(async (req) => {
             if (availableMinutes < durationMinutes) continue;
 
             hasProvider = true;
-            const isPrimary = pa.slot === "primary";
+            const isPrimary = pa.role === "PRIMARY";
             const daysFromNow = Math.floor(
               (new Date(dateStr + "T00:00:00Z").getTime() - now.getTime()) / 86400_000
             );
