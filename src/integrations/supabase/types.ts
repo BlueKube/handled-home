@@ -9100,6 +9100,16 @@ export type Database = {
         Args: { p_invoice_id: string; p_reason: string }
         Returns: Json
       }
+      apply_customer_reschedule: {
+        Args: {
+          p_exception_id?: string
+          p_new_date: string
+          p_new_window_end?: string
+          p_new_window_start?: string
+          p_visit_id: string
+        }
+        Returns: Json
+      }
       apply_referral_credits_to_invoice: {
         Args: { p_invoice_id: string }
         Returns: Json
@@ -9208,6 +9218,10 @@ export type Database = {
         Args: { p_category: string; p_zone_id: string }
         Returns: Json
       }
+      confirm_reschedule_hold: {
+        Args: { p_action: string; p_hold_id: string }
+        Returns: Json
+      }
       confirm_routine: { Args: { p_routine_id: string }; Returns: Json }
       confirm_service_day: { Args: { p_assignment_id: string }; Returns: Json }
       create_or_refresh_service_day_offer: {
@@ -9255,6 +9269,7 @@ export type Database = {
       }
       evaluate_training_gates: { Args: never; Returns: Json }
       expire_stale_handles: { Args: never; Returns: Json }
+      expire_stale_holds: { Args: never; Returns: number }
       finish_cron_run: {
         Args: {
           p_error_message?: string
@@ -9509,6 +9524,19 @@ export type Database = {
           p_job_id: string
           p_severity?: string
         }
+        Returns: Json
+      }
+      report_provider_issue: {
+        Args: {
+          p_issue_type: string
+          p_note?: string
+          p_reason_code: string
+          p_visit_id: string
+        }
+        Returns: Json
+      }
+      request_customer_reschedule: {
+        Args: { p_reason?: string; p_visit_id: string }
         Returns: Json
       }
       resolve_property_zone: {
