@@ -75,7 +75,8 @@ export function useConfirmAppointmentWindow() {
 
   return useMutation({
     mutationFn: async (params: ConfirmWindowParams) => {
-      // Edge function returns ISO timestamps; DB column is time type (HH:MM:SS)
+      // Edge function guarantees UTC timestamps (built as `new Date(\`..T..Z\`).toISOString()`).
+      // DB columns time_window_start/end are `time` type (HH:MM:SS).
       const toTimeStr = (iso: string): string => {
         const d = new Date(iso);
         return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}:00`;
