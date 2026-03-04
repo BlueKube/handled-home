@@ -170,7 +170,7 @@ function simulateRoute(
       currentTime = Math.max(currentTime, stop.windowStartMinutes);
     }
 
-    // VRPTW: check if arrival is past window end → infeasible
+    // VRPTW: check if arrival is past window end (with late grace) → infeasible
     if (stop.isWindowed && stop.windowEndMinutes !== null) {
       if (currentTime > stop.windowEndMinutes) {
         return {
@@ -310,9 +310,12 @@ function computeRouteCost(
       currentTime = Math.max(currentTime, stop.windowStartMinutes);
     }
 
-    // VRPTW: penalize late arrival
-    if (stop.isWindowed && stop.windowEndMinutes !== null && currentTime > stop.windowEndMinutes) {
-      windowViolation += (currentTime - stop.windowEndMinutes);
+    // VRPTW: penalize late arrival (with late_grace_minutes tolerance)
+    if (stop.isWindowed && stop.windowEndMinutes !== null) {
+      const graceEnd = stop.windowEndMinutes + dials.late_grace_minutes;
+      if (currentTime > graceEnd) {
+        windowViolation += (currentTime - graceEnd);
+      }
     }
 
     currentTime += stop.stopDurationMinutes;
@@ -349,7 +352,21 @@ function computeRouteCost(
   return { totalTravel, cost, overtime, windowViolation, thrash };
 }
 
-// ── Constrained 2-opt: never break VRPTW feasibility ──
+// ── Constrained 2-opt: never break VRPTW feasibility or piggyback adjacency ──
+
+/** Check that every piggybacked stop is immediately after its parent */
+function piggybackAdjacencyValid(order: number[], stops: Stop[]): boolean {
+  for (let pos = 0; pos < order.length; pos++) {
+    const stop = stops[order[pos]];
+    if (stop.piggybackedOntoVisitId) {
+      // Parent must be at pos - 1
+      if (pos === 0) return false;
+      const prev = stops[order[pos - 1]];
+      if (prev.visitId !== stop.piggybackedOntoVisitId) return false;
+    }
+  }
+  return true;
+}
 
 function constrainedTwoOptImprove(
   order: number[],
@@ -382,7 +399,10 @@ function constrainedTwoOptImprove(
         const reversed = candidate.splice(i, j - i + 1).reverse();
         candidate.splice(i, 0, ...reversed);
 
-        // VRPTW feasibility gate: reject if any window is violated
+        // Gate 1: piggyback adjacency must hold
+        if (!piggybackAdjacencyValid(candidate, stops)) continue;
+
+        // Gate 2: VRPTW feasibility
         const sim = simulateRoute(candidate, stops, homeLat, homeLng, workStartMinutes, segments);
         if (!sim.feasible) continue;
 
@@ -633,7 +653,7 @@ Deno.serve(async (req) => {
         .select("id, property_id, scheduled_date, schedule_state, provider_org_id, route_order, plan_window, time_window_start, time_window_end, scheduling_profile, piggybacked_onto_visit_id, service_week_end, due_status")
         .gte("scheduled_date", horizonStartStr)
         .lte("scheduled_date", horizonEndStr)
-        .in("schedule_state", ["scheduled", "confirmed", "in_progress"])
+        .in("schedule_state", ["scheduled", "dispatched", "in_progress"])
         .not("provider_org_id", "is", null),
       supabase
         .from("provider_work_profiles")
