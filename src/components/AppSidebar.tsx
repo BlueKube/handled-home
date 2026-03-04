@@ -1,6 +1,6 @@
 import {
   Home, CalendarDays, CalendarCheck, History, CreditCard, MapPin, Wallet, Users, HelpCircle, Settings,
-  Briefcase, DollarSign, BarChart3, Building2, Map,
+  Briefcase, DollarSign, BarChart3, Building2, Map, Clock,
   LayoutDashboard, Globe, Gauge, Package, ListChecks, Shield, Megaphone, FileText, Lock, CalendarClock, TrendingUp
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
@@ -35,6 +35,7 @@ const providerNav = [
   { title: "Performance", url: "/provider/performance", icon: BarChart3 },
   { title: "Organization", url: "/provider/organization", icon: Building2 },
   { title: "Coverage", url: "/provider/coverage", icon: Map },
+  { title: "Availability", url: "/provider/availability", icon: Clock },
   { title: "Support", url: "/provider/support", icon: HelpCircle },
   { title: "Referrals", url: "/provider/referrals", icon: Users },
   { title: "Insights", url: "/provider/insights", icon: BarChart3 },
