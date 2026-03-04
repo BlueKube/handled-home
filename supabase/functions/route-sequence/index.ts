@@ -354,15 +354,17 @@ function computeRouteCost(
 
 // ── Constrained 2-opt: never break VRPTW feasibility or piggyback adjacency ──
 
-/** Check that every piggybacked stop is immediately after its parent */
+/** Check that every piggybacked stop is immediately after its parent or after a sibling piggybacked onto the same parent */
 function piggybackAdjacencyValid(order: number[], stops: Stop[]): boolean {
   for (let pos = 0; pos < order.length; pos++) {
     const stop = stops[order[pos]];
     if (stop.piggybackedOntoVisitId) {
-      // Parent must be at pos - 1
       if (pos === 0) return false;
       const prev = stops[order[pos - 1]];
-      if (prev.visitId !== stop.piggybackedOntoVisitId) return false;
+      // prev must be the parent OR another child of the same parent
+      const prevIsParent = prev.visitId === stop.piggybackedOntoVisitId;
+      const prevIsSibling = prev.piggybackedOntoVisitId === stop.piggybackedOntoVisitId;
+      if (!prevIsParent && !prevIsSibling) return false;
     }
   }
   return true;

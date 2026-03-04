@@ -1025,7 +1025,10 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S7-P4-01** | P0 | XL | Update `route-sequence` with VRPTW feasibility, windowed-first sequencing, piggybacking, infeasibility repair.
 
 ### Phase 5: Provider + Admin UX
-- [ ] **S7-P5-01** | P0 | L | Provider: time window badges, reorder constraints, week view with due-this-week queue.
-- [ ] **S7-P5-02** | P0 | M | Admin: SKU scheduling profile/access mode management, window template CRUD, exceptions dashboard.
+- [x] **S7-P5-01** | P0 | L | Provider: time window badges, reorder constraints, week view with due-this-week queue. New `useProviderVisits` hook (queries visits table with visit_tasks + service_skus join). `VisitJobCard` component with time window badges (appointment time, "This week", due-soon/overdue, presence-required, bundled/piggybacked). `WeekDueQueue` component (overdue-first priority queue). "This Week" tab on provider Jobs page with date-grouped visits + due queue.
+- [x] **S7-P5-02** | P0 | M | Admin: SKU scheduling profile/access mode management (added to SkuFormSheet — dropdowns with enum values + helper text), window template CRUD (`/admin/scheduling/windows` — zone filter, category grouping, create/edit/delete sheets), scheduling exceptions dashboard (`/admin/scheduling/exceptions` — unbooked home-required, window infeasible, overdue service-week). Both pages wired into AdminShell sidebar.
 
-*Last updated: 2026-03-04 — Sprint 7 Phase 4 complete. VRPTW route sequencing operational.*
+### Phase 4 → Phase 5 Carryover Fix
+- [x] **S7-P4-FIX** | P2 | S | Fixed `piggybackAdjacencyValid` to support multiple children per parent — prev can be parent OR sibling piggybacked onto same parent.
+
+*Last updated: 2026-03-04 — Sprint 7 Phase 5 complete. Provider + Admin UX operational.*
