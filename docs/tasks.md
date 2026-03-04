@@ -1032,3 +1032,51 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S7-P4-FIX** | P2 | S | Fixed `piggybackAdjacencyValid` to support multiple children per parent — prev can be parent OR sibling piggybacked onto same parent.
 
 *Last updated: 2026-03-04 — Sprint 7 Phase 5 complete. Provider + Admin UX operational.*
+
+---
+
+## PRD-300 Sprint 8 — Exceptions, Reschedules & Ops Control v1
+
+> **PRD:** `docs/prds/unfinished/prd_300_sprint_8_exceptions_reschedules_and_ops_control_v_1.md`
+> **Goal:** Unified exceptions queue, repair actions, provider issue reporting, customer reschedule flows, freeze override policy.
+> **Complexity:** XL (6 phases)
+
+### Phase 1: Schema & Config Foundation
+- [x] **S8-P1-01** | P0 | M | Create `ops_exception_type`, `ops_exception_severity`, `ops_exception_status` enums. Create `ops_exceptions`, `ops_exception_actions`, `ops_exception_attachments`, `customer_reschedule_holds` tables with RLS, triggers, partial unique index.
+- [x] **S8-P1-02** | P0 | S | Seed 13 config dials into `assignment_config` (SLA targets, repair weights, freeze/hold params).
+- [x] **S8-P1-03** | P0 | S | Seed 6 `notification_templates` for exception events.
+- [x] **S8-P1-04** | P1 | S | CHECK constraints on `customer_reschedule_holds` (hold_type, status), `ops_exception_actions` (action_type), `ops_exceptions` (resolution_type). Provider attachment SELECT RLS. `idx_ops_exceptions_customer` index.
+
+### Phase 2: Exception Generation Engine (Predictive)
+- [x] **S8-P2-01** | P0 | L | Integrated predictive exception detection into `route-sequence` edge function — window-at-risk, provider overload, coverage break, service-week-at-risk.
+- [x] **S8-P2-02** | P0 | M | Severity/SLA computation + auto-escalation routine.
+- [x] **S8-P2-03** | P0 | S | Idempotent upsert via `idempotency_key` + `ignoreDuplicates`.
+
+#### Phase 2 Review Fixes
+- [x] **S8-P2-F1** | P1 | S | Fixed provider overload double-count — split into `isPureInfeasibility` (non-window) vs `isOvertimeOnly` (feasible but overtime). Window violations no longer generate both `window_at_risk` and `provider_overload`.
+- [x] **S8-P2-F2** | P2 | S | Added `due_soon` to service-week-at-risk detection — `due_soon` generates exception at `soon` severity (was only catching `overdue`).
+- [x] **S8-P2-F3** | P2 | S | Fixed `exceptionsCreated` counter — uses `.select("id")` + length check to distinguish truly new from duplicate-skipped. Added `exceptionsSkipped` counter.
+- [x] **S8-P2-F4** | P3 | S | Coverage break excludes repair-dropped visits — filters out `exception_pending` visits with `unassigned_reason` set.
+
+### Phase 3: Reactive Exception Flows
+- [x] **S8-P3-01** | P0 | L | `report_provider_issue` RPC — provider reports access_failure/unavailable/weather/quality_block. Creates reactive `ops_exception`. For access_failure: marks visit `exception_pending`, auto-creates `customer_reschedule_holds` with configurable TTL, emits `CUSTOMER_ACCESS_FAILURE_HOLD` notification.
+- [x] **S8-P3-02** | P0 | M | `request_customer_reschedule` RPC — customer-initiated, creates `customer_reschedule` exception with severity based on lead time.
+- [x] **S8-P3-03** | P0 | M | `confirm_reschedule_hold` RPC — customer confirms or releases auto-held slot. On confirm: reschedules visit, resolves exception, notifies.
+- [x] **S8-P3-04** | P0 | M | `apply_customer_reschedule` RPC — customer picks new date from offered options. Releases any active holds.
+- [x] **S8-P3-05** | P0 | S | `expire_stale_holds` RPC — expires holds past TTL. Wired into `run-scheduled-jobs` daily.
+- [x] **S8-P3-06** | P0 | S | Seeded 2 notification templates (`ADMIN_EXCEPTION_CREATED`, `CUSTOMER_ACCESS_FAILURE_HOLD`).
+
+### Phase 4: Ops Console UX (Admin)
+- [ ] **S8-P4-01** | P0 | L | `/admin/ops/exceptions` page — exceptions queue with severity/type/status filters, SLA countdown, affected customer/provider info.
+- [ ] **S8-P4-02** | P0 | L | Exception detail panel — current plan snapshot, repair suggestions, impact preview.
+- [ ] **S8-P4-03** | P0 | M | Ops actions dialog — reorder, move day, swap provider, convert profile, cancel/refund with reason codes + audit trail.
+
+### Phase 5: Customer + Provider UX
+- [ ] **S8-P5-01** | P0 | L | Customer reschedule flow — shows feasible options from `offer-appointment-windows`, confirm/choose-another for access failure holds.
+- [ ] **S8-P5-02** | P0 | M | Provider issue reporting UI — "Report Issue" button on job detail with reason code picker.
+
+### Phase 6: Analytics + Stale Cleanup
+- [ ] **S8-P6-01** | P1 | M | Auto-resolve stale exceptions (underlying condition no longer holds after re-sequencing).
+- [ ] **S8-P6-02** | P1 | M | Exception analytics — window miss rate, access failure rate, break-freeze frequency, time-to-resolve.
+
+*Last updated: 2026-03-04 — Sprint 8 Phase 3 complete. Reactive exception RPCs operational.*
