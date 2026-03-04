@@ -77,3 +77,6 @@ verify_jwt = false
 
 [functions.route-sequence]
 verify_jwt = false
+
+[functions.offer-appointment-windows]
+verify_jwt = false
