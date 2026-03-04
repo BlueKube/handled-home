@@ -1,18 +1,15 @@
-import { useProviderDueQueue } from "@/hooks/useProviderVisits";
 import { VisitJobCard } from "@/components/provider/VisitJobCard";
-import { Skeleton } from "@/components/ui/skeleton";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
+import type { ProviderVisit } from "@/hooks/useProviderVisits";
 
-export function WeekDueQueue() {
-  const { data: dueVisits, isLoading } = useProviderDueQueue();
+interface WeekDueQueueProps {
+  /** Pre-filtered due visits. If provided, skips the separate network request. */
+  visits?: ProviderVisit[];
+}
 
-  if (isLoading) {
-    return (
-      <div className="space-y-3">
-        {[1, 2].map((i) => <Skeleton key={i} className="h-24 w-full rounded-xl" />)}
-      </div>
-    );
-  }
+export function WeekDueQueue({ visits: passedVisits }: WeekDueQueueProps) {
+  // Use passed visits directly — no redundant fetch
+  const dueVisits = passedVisits;
 
   if (!dueVisits || dueVisits.length === 0) {
     return (

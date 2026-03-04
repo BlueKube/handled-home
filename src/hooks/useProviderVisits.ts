@@ -90,7 +90,9 @@ export function useProviderVisits(filter: "today" | "upcoming" | "week") {
   });
 }
 
-/** Returns visits that are due_soon or overdue for the current service week */
+/** Returns visits that are due_soon or overdue for the current service week.
+ * Prefer passing pre-filtered data from useProviderVisits("week") to WeekDueQueue
+ * to avoid redundant fetches. This hook is kept for standalone usage. */
 export function useProviderDueQueue() {
   const { org } = useProviderOrg();
 
@@ -113,7 +115,7 @@ export function useProviderDueQueue() {
         .eq("provider_org_id", org.id)
         .in("schedule_state", ACTIVE_STATES)
         .in("due_status", ["due_soon", "overdue"])
-        .order("due_status", { ascending: false }) // overdue first
+        .order("due_status", { ascending: false })
         .order("service_week_end", { ascending: true });
 
       if (error) throw error;

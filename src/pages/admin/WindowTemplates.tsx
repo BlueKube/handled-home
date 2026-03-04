@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,13 +17,7 @@ import { toast } from "sonner";
 
 const DAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-function formatTime12(t: string): string {
-  const [hStr, mStr] = t.split(":");
-  const h = parseInt(hStr, 10);
-  const suffix = h >= 12 ? "PM" : "AM";
-  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
-  return `${h12}:${mStr ?? "00"} ${suffix}`;
-}
+import { formatTime12 } from "@/lib/formatTime12";
 
 function TemplateFormSheet({
   template,
@@ -40,6 +34,10 @@ function TemplateFormSheet({
   const update = useUpdateWindowTemplate();
   const isEdit = !!template;
 
+  // Key the component on template id won't work since it's rendered unconditionally.
+  // Instead, use a ref to detect when template changes and reset state.
+  const templateId = template?.id ?? "__new__";
+
   const [zoneId, setZoneId] = useState(template?.zone_id ?? zones[0]?.id ?? "");
   const [categoryKey, setCategoryKey] = useState(template?.category_key ?? "");
   const [windowLabel, setWindowLabel] = useState(template?.window_label ?? "");
@@ -49,6 +47,18 @@ function TemplateFormSheet({
     template?.day_of_week != null ? String(template.day_of_week) : "all"
   );
   const [isActive, setIsActive] = useState(template?.is_active ?? true);
+  const [prevTemplateId, setPrevTemplateId] = useState(templateId);
+
+  if (templateId !== prevTemplateId) {
+    setPrevTemplateId(templateId);
+    setZoneId(template?.zone_id ?? zones[0]?.id ?? "");
+    setCategoryKey(template?.category_key ?? "");
+    setWindowLabel(template?.window_label ?? "");
+    setWindowStart(template?.window_start ?? "09:00");
+    setWindowEnd(template?.window_end ?? "12:00");
+    setDayOfWeek(template?.day_of_week != null ? String(template.day_of_week) : "all");
+    setIsActive(template?.is_active ?? true);
+  }
 
   const handleSave = () => {
     if (!zoneId || !categoryKey.trim() || !windowLabel.trim()) {

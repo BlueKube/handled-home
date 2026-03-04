@@ -6,14 +6,7 @@ import { Clock, ChevronRight, ArrowUp, ArrowDown, Timer, AlertTriangle, Calendar
 import { format, parseISO } from "date-fns";
 import type { ProviderVisit } from "@/hooks/useProviderVisits";
 
-/** Format a DB time string (HH:MM:SS or HH:MM) to 12h display */
-function formatTime12(t: string): string {
-  const [hStr, mStr] = t.split(":");
-  const h = parseInt(hStr, 10);
-  const suffix = h >= 12 ? "PM" : "AM";
-  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
-  return `${h12}:${mStr} ${suffix}`;
-}
+import { formatTime12 } from "@/lib/formatTime12";
 
 function getScheduleLabel(visit: ProviderVisit): string {
   if (visit.schedule_state === "in_progress") return "In Progress";

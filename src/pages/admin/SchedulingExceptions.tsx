@@ -19,13 +19,7 @@ interface SchedulingException {
   properties?: { street_address: string; city: string } | null;
 }
 
-function formatTime12(t: string): string {
-  const [hStr, mStr] = t.split(":");
-  const h = parseInt(hStr, 10);
-  const suffix = h >= 12 ? "PM" : "AM";
-  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
-  return `${h12}:${mStr ?? "00"} ${suffix}`;
-}
+import { formatTime12 } from "@/lib/formatTime12";
 
 export default function SchedulingExceptions() {
   const today = new Date();
@@ -34,7 +28,7 @@ export default function SchedulingExceptions() {
 
   // Unbooked home-required: appointment_window profile with no time_window_start
   const { data: unbooked, isLoading: loadingUnbooked } = useQuery({
-    queryKey: ["sched_exceptions_unbooked"],
+    queryKey: ["sched_exceptions_unbooked", todayStr],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("visits")
@@ -53,7 +47,7 @@ export default function SchedulingExceptions() {
 
   // Window infeasible: visits with time windows that have exception_pending state
   const { data: infeasible, isLoading: loadingInfeasible } = useQuery({
-    queryKey: ["sched_exceptions_infeasible"],
+    queryKey: ["sched_exceptions_infeasible", todayStr],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("visits")
@@ -71,7 +65,7 @@ export default function SchedulingExceptions() {
 
   // Overdue service-week visits
   const { data: overdue, isLoading: loadingOverdue } = useQuery({
-    queryKey: ["sched_exceptions_overdue"],
+    queryKey: ["sched_exceptions_overdue", todayStr],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("visits")
