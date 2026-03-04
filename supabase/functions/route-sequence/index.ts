@@ -1231,7 +1231,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log(`Exception generation: ${exceptionsCreated} created, ${escalatedCount} escalated`);
+    console.log(`Exception generation: ${exceptionsCreated} new, ${exceptionsSkipped} skipped, ${escalatedCount} escalated`);
 
     // Update cron log
     if (cronLog) {
