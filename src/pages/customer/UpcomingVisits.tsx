@@ -64,7 +64,7 @@ function VisitCard({ visit }: { visit: UpcomingVisit }) {
   const isServiceWeek = visit.scheduling_profile === "service_week";
   const isAppointment = visit.scheduling_profile === "appointment_window";
   const hasAppointmentWindow = !!(visit.time_window_start && visit.time_window_end);
-  const needsWindowBooking = isAppointment && !hasAppointmentWindow && visit.schedule_state !== "complete" && visit.schedule_state !== "canceled";
+  const needsWindowBooking = isAppointment && !hasAppointmentWindow && visit.schedule_state !== "complete" && visit.schedule_state !== "canceled" && visit.schedule_state !== "rescheduled";
 
   // ETA display logic
   const etaWindow = isScheduledOrActive

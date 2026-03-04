@@ -111,6 +111,19 @@ export default function AppointmentPicker() {
     );
   }
 
+  if (!zone_id) {
+    return (
+      <div className="p-6 max-w-lg text-center space-y-3">
+        <p className="text-sm text-muted-foreground">
+          Your subscription isn't set up yet. Please contact support.
+        </p>
+        <Button variant="link" onClick={() => navigate("/customer/upcoming")}>
+          ← Back to upcoming
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 max-w-lg space-y-5 pb-24">
       <Button

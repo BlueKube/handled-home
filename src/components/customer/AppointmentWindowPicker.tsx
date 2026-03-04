@@ -14,6 +14,7 @@ interface AppointmentWindowPickerProps {
   isConfirming: boolean;
 }
 
+/** Edge function guarantees UTC ISO timestamps for window_start/end. */
 function formatWindowTime(isoStr: string): string {
   const d = parseISO(isoStr);
   const h = d.getUTCHours();
