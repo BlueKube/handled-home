@@ -32,6 +32,12 @@ export interface UpcomingVisit {
   backup_provider_org_id: string | null;
   unassigned_reason: string | null;
   created_at: string;
+  scheduling_profile: string | null;
+  service_week_start: string | null;
+  service_week_end: string | null;
+  due_status: string | null;
+  customer_window_preference: string | null;
+  piggybacked_onto_visit_id: string | null;
   tasks: VisitTask[];
 }
 
@@ -101,7 +107,7 @@ export function useUpcomingVisits() {
       // Fetch visits for customer's property in upcoming states
       const { data: visits, error } = await supabase
         .from("visits")
-        .select("id, scheduled_date, schedule_state, plan_window, eta_range_start, eta_range_end, time_window_start, time_window_end, provider_org_id, assignment_confidence, assignment_reasons, backup_provider_org_id, unassigned_reason, created_at")
+        .select("id, scheduled_date, schedule_state, plan_window, eta_range_start, eta_range_end, time_window_start, time_window_end, provider_org_id, assignment_confidence, assignment_reasons, backup_provider_org_id, unassigned_reason, created_at, scheduling_profile, service_week_start, service_week_end, due_status, customer_window_preference, piggybacked_onto_visit_id")
         .eq("property_id", property.id)
         .in("schedule_state", UPCOMING_STATES)
         .order("scheduled_date", { ascending: true })

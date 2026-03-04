@@ -1018,8 +1018,8 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S7-P2-01** | P0 | XL | `offer-appointment-windows` edge function — generate 3–6 feasible windows from templates, filter by provider supply/availability/blocked windows, respect caps, AM/PM fallback.
 
 ### Phase 3: Customer UX — Window Picker + Visit Display
-- [ ] **S7-P3-01** | P0 | L | Appointment picker flow for home-required services (offered windows, confirmation).
-- [ ] **S7-P3-02** | P0 | M | Visit display updates (appointment badge, "Scheduled this week", due-soon/overdue badges, piggybacking disclosure).
+- [x] **S7-P3-01** | P0 | L | Appointment picker flow for home-required services (offered windows, confirmation).
+- [x] **S7-P3-02** | P0 | M | Visit display updates (appointment badge, "Scheduled this week", due-soon/overdue badges, piggybacking disclosure).
 
 ### Phase 4: Route Feasibility + Sequencing Update
 - [ ] **S7-P4-01** | P0 | XL | Update `route-sequence` with VRPTW feasibility, windowed-first sequencing, piggybacking, infeasibility repair.
@@ -1028,4 +1028,4 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [ ] **S7-P5-01** | P0 | L | Provider: time window badges, reorder constraints, week view with due-this-week queue.
 - [ ] **S7-P5-02** | P0 | M | Admin: SKU scheduling profile/access mode management, window template CRUD, exceptions dashboard.
 
-*Last updated: 2026-03-04 — Sprint 7 Phase 2 complete. Window Offering Engine operational.*
+*Last updated: 2026-03-04 — Sprint 7 Phase 3 complete. Customer appointment picker + visit display enhancements operational.*

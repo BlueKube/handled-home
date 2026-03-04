@@ -1,5 +1,7 @@
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { QueryErrorCard } from "@/components/QueryErrorCard";
 import {
@@ -9,7 +11,7 @@ import {
   type UpcomingVisit,
 } from "@/hooks/useUpcomingVisits";
 import { format, isToday, isTomorrow, isThisWeek, parseISO } from "date-fns";
-import { CalendarDays, Clock, User, AlertTriangle, ShieldCheck, Sparkles } from "lucide-react";
+import { CalendarDays, Clock, User, AlertTriangle, ShieldCheck, Sparkles, CalendarCheck, Timer } from "lucide-react";
 
 function formatVisitDate(dateStr: string): string {
   const date = parseISO(dateStr);
@@ -36,10 +38,6 @@ function formatTimeWindow(start: string | null, end: string | null): string | nu
   }
 }
 
-/**
- * For Planned/draft visits, show a coarse AM/PM block instead of a precise ETA.
- * AM = 8am–12pm, PM = 12pm–5pm (PRD §UX v1 defaults).
- */
 function getCoarseBlock(etaStart: string | null): string {
   if (!etaStart) return "AM";
   try {
@@ -51,6 +49,7 @@ function getCoarseBlock(etaStart: string | null): string {
 }
 
 function VisitCard({ visit }: { visit: UpcomingVisit }) {
+  const navigate = useNavigate();
   const stateLabel = getVisitLabel(visit);
   const stateStyle = getVisitStyle(visit);
   const dateLabel = formatVisitDate(visit.scheduled_date);
@@ -62,7 +61,12 @@ function VisitCard({ visit }: { visit: UpcomingVisit }) {
     visit.schedule_state === "dispatched" ||
     visit.schedule_state === "in_progress";
 
-  // Scheduled/locked → precise ETA range; Planned/draft → coarse AM/PM block
+  const isServiceWeek = visit.scheduling_profile === "service_week";
+  const isAppointment = visit.scheduling_profile === "appointment_window";
+  const hasAppointmentWindow = !!(visit.time_window_start && visit.time_window_end);
+  const needsWindowBooking = isAppointment && !hasAppointmentWindow && visit.schedule_state !== "complete" && visit.schedule_state !== "canceled";
+
+  // ETA display logic
   const etaWindow = isScheduledOrActive
     ? formatTimeWindow(visit.eta_range_start, visit.eta_range_end)
     : null;
@@ -79,49 +83,93 @@ function VisitCard({ visit }: { visit: UpcomingVisit }) {
   const isActive = visit.schedule_state === "dispatched" || visit.schedule_state === "in_progress";
   const isException = visit.schedule_state === "exception_pending";
 
+  // Due status badges
+  const isDueSoon = visit.due_status === "due_soon";
+  const isOverdue = visit.due_status === "overdue";
+
+  // Piggybacking
+  const isPiggybacked = !!visit.piggybacked_onto_visit_id;
+
   return (
-    <Card className={`p-4 space-y-3 transition-colors ${isActive ? "border-accent/40 bg-accent/5" : ""} ${isException ? "border-destructive/30 bg-destructive/5" : ""}`}>
+    <Card className={`p-4 space-y-3 transition-colors ${isActive ? "border-accent/40 bg-accent/5" : ""} ${isException ? "border-destructive/30 bg-destructive/5" : ""} ${isOverdue ? "border-warning/40 bg-warning/5" : ""}`}>
       {/* Header row */}
       <div className="flex items-start justify-between">
         <div className="space-y-0.5">
           <p className="text-sm font-semibold">
-            {dateLabel}{isPlanned && coarseBlock ? ` (${coarseBlock})` : ""}
+            {isServiceWeek && !isScheduledOrActive
+              ? "Scheduled this week"
+              : `${dateLabel}${isPlanned && coarseBlock ? ` (${coarseBlock})` : ""}`}
           </p>
           <p className="text-xs text-muted-foreground">{taskSummary}</p>
         </div>
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${stateStyle.pill}`}>
-          <span className={`h-1.5 w-1.5 rounded-full ${stateStyle.dot}`} />
-          {stateLabel}
-        </span>
+        <div className="flex items-center gap-1.5">
+          {/* Due status badges */}
+          {isDueSoon && (
+            <Badge variant="outline" className="text-[10px] border-warning/30 text-warning bg-warning/10">
+              <Timer className="h-2.5 w-2.5 mr-0.5" />
+              Due soon
+            </Badge>
+          )}
+          {isOverdue && (
+            <Badge variant="destructive" className="text-[10px]">
+              Overdue
+            </Badge>
+          )}
+          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${stateStyle.pill}`}>
+            <span className={`h-1.5 w-1.5 rounded-full ${stateStyle.dot}`} />
+            {stateLabel}
+          </span>
+        </div>
       </div>
+
+      {/* Appointment window badge */}
+      {hasAppointmentWindow && (
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="gap-1 text-xs border-accent/30 text-accent bg-accent/5">
+            <CalendarCheck className="h-3 w-3" />
+            Appointment: {timeWindow}
+          </Badge>
+          {visit.customer_window_preference && (
+            <span className="text-[10px] text-muted-foreground">
+              {visit.customer_window_preference}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Service week range */}
+      {isServiceWeek && visit.service_week_start && visit.service_week_end && (
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <CalendarDays className="h-3 w-3" />
+          <span>
+            Service week: {format(parseISO(visit.service_week_start), "MMM d")} – {format(parseISO(visit.service_week_end), "MMM d")}
+          </span>
+        </div>
+      )}
 
       {/* Details row */}
       <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-        {/* ETA range for scheduled/active visits */}
-        {etaWindow && (
+        {etaWindow && !hasAppointmentWindow && (
           <span className="inline-flex items-center gap-1">
             <Clock className="h-3 w-3" />
             {isActive ? `ETA ${etaWindow}` : etaWindow}
           </span>
         )}
 
-        {/* Coarse AM/PM block for planned/draft visits */}
-        {coarseBlock && !etaWindow && (
+        {coarseBlock && !etaWindow && !hasAppointmentWindow && (
           <span className="inline-flex items-center gap-1">
             <Clock className="h-3 w-3" />
             {coarseBlock}
           </span>
         )}
 
-        {/* Fallback time window */}
-        {!etaWindow && !coarseBlock && timeWindow && (
+        {!etaWindow && !coarseBlock && !hasAppointmentWindow && timeWindow && (
           <span className="inline-flex items-center gap-1">
             <Clock className="h-3 w-3" />
             {timeWindow}
           </span>
         )}
 
-        {/* Duration estimate */}
         {totalMinutes > 0 && (
           <span className="inline-flex items-center gap-1">
             <CalendarDays className="h-3 w-3" />
@@ -129,7 +177,6 @@ function VisitCard({ visit }: { visit: UpcomingVisit }) {
           </span>
         )}
 
-        {/* Presence required */}
         {presenceRequired && (
           <span className="inline-flex items-center gap-1 text-accent">
             <User className="h-3 w-3" />
@@ -137,6 +184,30 @@ function VisitCard({ visit }: { visit: UpcomingVisit }) {
           </span>
         )}
       </div>
+
+      {/* Piggybacking disclosure */}
+      {isPiggybacked && (
+        <div className="flex items-center gap-2 p-2.5 rounded-lg bg-secondary/50 text-xs text-muted-foreground">
+          <Sparkles className="h-3.5 w-3.5 shrink-0 text-accent" />
+          <span>Also scheduled during your appointment for convenience.</span>
+        </div>
+      )}
+
+      {/* Book appointment CTA */}
+      {needsWindowBooking && (
+        <Button
+          variant="default"
+          size="sm"
+          className="w-full gap-1.5"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/customer/appointment/${visit.id}`);
+          }}
+        >
+          <CalendarCheck className="h-3.5 w-3.5" />
+          Book Appointment Window
+        </Button>
+      )}
 
       {/* Exception hint */}
       {isException && (
@@ -147,7 +218,7 @@ function VisitCard({ visit }: { visit: UpcomingVisit }) {
       )}
 
       {/* Assignment status messaging */}
-      {!isException && !isActive && visit.provider_org_id && (
+      {!isException && !isActive && !needsWindowBooking && visit.provider_org_id && (
         visit.plan_window === "draft" ? (
           <div className="flex items-center gap-2 p-2.5 rounded-lg bg-secondary/50 text-xs text-muted-foreground">
             <Sparkles className="h-3.5 w-3.5 shrink-0" />
@@ -162,7 +233,7 @@ function VisitCard({ visit }: { visit: UpcomingVisit }) {
       )}
 
       {/* Unassigned visit */}
-      {!isException && !isActive && !visit.provider_org_id && visit.schedule_state !== "canceled" && (
+      {!isException && !isActive && !needsWindowBooking && !visit.provider_org_id && visit.schedule_state !== "canceled" && (
         <div className="flex items-center gap-2 p-2.5 rounded-lg bg-secondary/50 text-xs text-muted-foreground">
           <Sparkles className="h-3.5 w-3.5 shrink-0" />
           <span>We're matching the best pro for your visit.</span>
