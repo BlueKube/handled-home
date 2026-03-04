@@ -44,46 +44,54 @@ This is Lovable's reply after committing to the main branch. Claude Code to revi
 
 **Migration:**
 
-1. **Create `ops_exceptions` table:**
-   - `id` (uuid PK), `exception_type` (text — `window_at_risk|service_week_at_risk|provider_overload|coverage_break|provider_unavailable|access_failure|customer_reschedule|weather_safety|quality_block`)
-   - `severity` (text — `urgent|soon|watch`)
+1. **Create Postgres enums:**
+   - `ops_exception_type` — `window_at_risk|service_week_at_risk|provider_overload|coverage_break|provider_unavailable|access_failure|customer_reschedule|weather_safety|quality_block`
+   - `ops_exception_severity` — `urgent|soon|watch`
+   - `ops_exception_status` — `open|acknowledged|in_progress|resolved|snoozed|escalated`
+
+2. **Create `ops_exceptions` table:**
+   - `id` (uuid PK), `exception_type` (ops_exception_type NOT NULL)
+   - `severity` (ops_exception_severity NOT NULL)
    - `sla_target_at` (timestamptz) — when ops should resolve by
    - `escalated_at` (timestamptz, nullable) — when auto-escalated
-   - `status` (text — `open|acknowledged|in_progress|resolved|snoozed|escalated`)
-   - `visit_id` (FK visits, nullable), `provider_org_id` (FK provider_orgs, nullable), `customer_id` (text, nullable)
+   - `status` (ops_exception_status NOT NULL DEFAULT 'open')
+   - `visit_id` (FK visits, nullable), `provider_org_id` (FK provider_orgs, nullable), `customer_id` (uuid REFERENCES auth.users, nullable)
    - `scheduled_date` (date, nullable), `zone_id` (FK zones, nullable)
    - `reason_summary` (text) — "Why" one-liner
    - `reason_details` (jsonb) — structured diagnostic data
-   - `assigned_to_user_id` (text, nullable) — ops owner
-   - `resolved_at` (timestamptz, nullable), `resolved_by_user_id` (text, nullable)
+   - `assigned_to_user_id` (uuid REFERENCES auth.users, nullable) — ops owner
+   - `resolved_at` (timestamptz, nullable), `resolved_by_user_id` (uuid REFERENCES auth.users, nullable)
    - `resolution_type` (text, nullable — `reorder|move_day|swap_provider|convert_profile|cancel_refund|auto_resolved|snoozed`)
    - `resolution_note` (text, nullable)
    - `source` (text — `nightly_planning|provider_report|customer_request|system_detection`)
    - `linked_exception_id` (uuid, nullable — for related exceptions)
+   - `idempotency_key` (text, nullable, UNIQUE) — explicit idempotency (pattern matches `cron_run_log`)
    - `created_at`, `updated_at`
+   - **UNIQUE constraint:** `(visit_id, exception_type, scheduled_date)` WHERE `status NOT IN ('resolved')` — partial unique index prevents duplicate open exceptions
    - RLS: admin full access, service_role full access
 
-2. **Create `ops_exception_actions` table (audit trail):**
-   - `id`, `exception_id` (FK), `action_type` (text), `actor_user_id`, `actor_role` (text)
-   - `before_state` (jsonb), `after_state` (jsonb)
+3. **Create `ops_exception_actions` table (audit trail):**
+   - `id`, `exception_id` (FK), `action_type` (text), `actor_user_id` (uuid REFERENCES auth.users), `actor_role` (text)
+   - `before_state` (jsonb) — **shape: `{visit_id, schedule_state, scheduled_date, provider_org_id, route_order, eta_range_start, eta_range_end, time_window_start, time_window_end}`** — full snapshot of affected visit(s) at action time. Kept permanently for audit.
+   - `after_state` (jsonb) — same shape, post-action
    - `reason_code` (text), `reason_note` (text, nullable)
    - `is_freeze_override` (bool, default false)
-   - `is_undone` (bool, default false), `undone_at` (timestamptz, nullable), `undone_by_user_id` (text, nullable)
-   - `undo_expires_at` (timestamptz, nullable) — 10-minute undo window
+   - `is_undone` (bool, default false), `undone_at` (timestamptz, nullable), `undone_by_user_id` (uuid REFERENCES auth.users, nullable)
+   - `undo_expires_at` (timestamptz, nullable) — 10-minute undo window. **Undo rules:** (a) `before_state` kept forever for audit; (b) undo is one-shot (no undo-of-undo); (c) if a subsequent action exists on the same exception, prior action becomes non-undoable
    - `customer_notified` (bool, default false), `provider_notified` (bool, default false)
    - `impact_summary` (jsonb — old_promise, new_promise, added_drive_minutes, added_overtime_minutes)
    - `created_at`
    - RLS: admin read, service_role full access
 
-3. **Create `ops_exception_attachments` table:**
+4. **Create `ops_exception_attachments` table:**
    - `id`, `exception_id` (FK), `attachment_type` (text — `photo|note`)
    - `storage_path` (text, nullable), `note_text` (text, nullable)
-   - `uploaded_by_user_id`, `uploaded_by_role` (text)
+   - `uploaded_by_user_id` (uuid REFERENCES auth.users), `uploaded_by_role` (text)
    - `created_at`
    - RLS: admin full access, provider insert own
 
-4. **Create `customer_reschedule_holds` table:**
-   - `id`, `visit_id` (FK), `customer_id` (text)
+5. **Create `customer_reschedule_holds` table:**
+   - `id`, `visit_id` (FK), `customer_id` (uuid REFERENCES auth.users)
    - `held_date` (date), `held_window_start` (time, nullable), `held_window_end` (time, nullable)
    - `hold_type` (text — `auto_access_failure|customer_choice`)
    - `status` (text — `held|confirmed|released|expired`)
@@ -91,7 +99,7 @@ This is Lovable's reply after committing to the main branch. Claude Code to revi
    - `created_at`, `updated_at`
    - RLS: customer read own, admin full access
 
-5. **Seed assignment_config with Sprint 8 dials (~12 new):**
+6. **Seed assignment_config with Sprint 8 dials (~12 new):**
    - Freeze: `max_break_freeze_per_customer_30d` (1), `freeze_override_warning_threshold` (1)
    - Hold: `hold_ttl_hours` (12)
    - Compensation: `access_failure_show_up_credit_cents` (500)
@@ -100,18 +108,18 @@ This is Lovable's reply after committing to the main branch. Claude Code to revi
    - Escalation: `auto_escalate_within_hours` (48)
    - Repair scoring: `repair_drive_weight` (1.0), `repair_overtime_weight` (2.0), `repair_disruption_weight` (1.5), `repair_customer_disruption_weight` (3.0)
 
-6. **Seed notification_templates for Sprint 8** (~6 new):
+7. **Seed notification_templates for Sprint 8** (~6 new):
    - `CUSTOMER_PROMISE_CHANGED`, `CUSTOMER_VISIT_AT_RISK`, `CUSTOMER_ACCESS_FAILED_HOLD`
    - `PROVIDER_VISIT_REASSIGNED`, `ADMIN_EXCEPTION_ESCALATED`, `ADMIN_FREEZE_OVERRIDE`
 
-7. **Indexes:** `ops_exceptions(status, severity)`, `ops_exceptions(visit_id)`, `ops_exceptions(provider_org_id, scheduled_date)`, `customer_reschedule_holds(visit_id, status)`
+8. **Indexes:** `ops_exceptions(status, severity)`, `ops_exceptions(visit_id)`, `ops_exceptions(provider_org_id, scheduled_date)`, `customer_reschedule_holds(visit_id, status)`
 
 ### Phase 2: Exception Generation Engine
 
 **Enhance `route-sequence` edge function + new `generate-exceptions` logic:**
 
 1. **After nightly sequencing**, for each provider/day:
-   - **Window-at-risk:** If `planned_arrival_time` > `eta_range_end` for any windowed visit → create exception
+   - **Window-at-risk:** If `planned_arrival_time` > `time_window_end` for any windowed visit → create exception (check against the customer's hard window, NOT the display `eta_range_end`)
    - **Service-week-at-risk:** If no visit scheduled before `service_week_end` for any `service_week` profile visit → create exception
    - **Provider overload:** If estimated finish time > working hours end → create exception
    - **Coverage break:** If a visit has no assigned `provider_org_id` → create exception
@@ -134,11 +142,13 @@ This is Lovable's reply after committing to the main branch. Claude Code to revi
 1. **`useProviderIssueReport` hook** — report: `cant_access` (with reason code: gate_locked, customer_not_home, wrong_code), `customer_skip`, `safety_weather`, `running_late`
 2. **Provider UI:** "Report Issue" button on active visit card → reason picker → optional note + photo → creates `ops_exception` + sets visit `schedule_state` to `exception_pending`
 3. **Access failure flow:** auto-creates exception + triggers customer hold flow (Phase 5)
+4. **Running late flow:** creates `window_at_risk` exception if new ETA > `time_window_end`, updates visit's `eta_range_start/end`, emits `CUSTOMER_VISIT_AT_RISK` notification to affected customer
 
 **Customer reschedule request:**
 
 4. **`useCustomerReschedule` hook** — calls `offer-appointment-windows` for feasible alternatives, creates reschedule exception if no options
 5. **Customer UI:** "Reschedule" button on upcoming visit → shows 3-6 feasible options (filtered by scheduling_profile) → confirm → updates visit → notifies ops if inside freeze
+   - **Freeze clarification:** Customer-initiated reschedules inside freeze do NOT count toward `max_break_freeze_per_customer_30d` (customer chose it; only ops-initiated overrides count)
 
 **Provider unavailable:**
 
@@ -179,6 +189,7 @@ This is Lovable's reply after committing to the main branch. Claude Code to revi
    - Audit trail entry
 
 5. **Hooks:** `useOpsExceptions`, `useOpsExceptionDetail`, `useOpsExceptionActions`, `useRepairSuggestions`
+6. **RepairScore computation:** runs server-side in a `suggest-repairs` edge function (needs provider schedules, drive time, capacity data — not feasible client-side)
 
 ### Phase 5: Customer Access Failure Flow + Reschedule UX
 
@@ -193,7 +204,8 @@ This is Lovable's reply after committing to the main branch. Claude Code to revi
    - `useCustomerHoldConfirmation` hook
 
 3. **Hold expiry:**
-   - Background job checks expired holds → releases slot → keeps exception as "Customer confirmation needed"
+   - Piggyback on `run-scheduled-jobs` edge function (already has pg_cron every 2 min) — add a `check_expired_holds` sub-task
+   - Expired holds → set status = `expired`, release slot, keep exception as "Customer confirmation needed"
 
 ### Phase 6: Operational Analytics + Wiring
 
@@ -210,8 +222,10 @@ This is Lovable's reply after committing to the main branch. Claude Code to revi
 2. **Wire into existing systems:**
    - Route-sequence nightly → generate predictive exceptions
    - Provider availability blocks → generate `provider_unavailable` exceptions for affected visits
-   - Add exception count badge to AdminShell sidebar
+   - Coverage-break detection also via provider deactivation flow (not just nightly planning)
+   - Add exception count badge to AdminShell sidebar (lightweight count query, 30s `refetchInterval`)
    - Wire `ops_exception_actions` to `admin_audit_log` via trigger or RPC
+   - **Retire/rewire Sprint 7 `SchedulingExceptions.tsx`** — replace raw visit queries with `ops_exceptions` queries to avoid two conflicting exception views
 
 3. **Notification throttling:**
    - Apply `max_exception_notifications_per_week` cap per customer
