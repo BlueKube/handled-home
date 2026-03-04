@@ -322,11 +322,9 @@ function WeekView() {
 
   return (
     <div className="space-y-5">
-      {/* Due queue at top */}
+      {/* Due queue at top — pass pre-filtered data to avoid redundant fetch */}
       {dueVisits.length > 0 && (
-        <div className="space-y-2">
-          <WeekDueQueue />
-        </div>
+        <WeekDueQueue visits={dueVisits} />
       )}
 
       {/* Daily breakdown */}
