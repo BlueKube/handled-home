@@ -14,7 +14,7 @@ export interface AssignmentConfigRow {
 export interface DialMeta {
   key: string;
   label: string;
-  group: "weights" | "thresholds" | "capacity" | "bundling" | "sequencing" | "eta" | "availability" | "anchored" | "late";
+  group: "weights" | "thresholds" | "capacity" | "bundling" | "sequencing" | "eta" | "availability" | "anchored" | "late" | "window_offering" | "piggybacking" | "service_week";
   min: number;
   max: number;
   step: number;
@@ -64,6 +64,20 @@ export const DIAL_META: DialMeta[] = [
   { key: "max_extra_stops_per_day", label: "Max Extra Stops/Day", group: "anchored", min: 0, max: 3, step: 1, unit: "" },
   // Sprint 6 — Late
   { key: "late_grace_minutes", label: "Late Grace Period", group: "late", min: 5, max: 30, step: 5, unit: "min" },
+  // Sprint 7 — Window Offering
+  { key: "max_windows_shown", label: "Max Windows Shown", group: "window_offering", min: 2, max: 10, step: 1, unit: "" },
+  { key: "min_windows_to_show", label: "Min Windows to Show", group: "window_offering", min: 1, max: 6, step: 1, unit: "" },
+  { key: "min_lead_time_hours", label: "Min Lead Time", group: "window_offering", min: 6, max: 72, step: 6, unit: "hr" },
+  { key: "max_home_required_stops_per_provider_per_day", label: "Max Home Stops/Provider/Day", group: "window_offering", min: 1, max: 8, step: 1, unit: "" },
+  { key: "max_home_required_stops_per_zone_per_day", label: "Max Home Stops/Zone/Day", group: "window_offering", min: 5, max: 50, step: 5, unit: "" },
+  { key: "default_appointment_window_length_hours", label: "Default Window Length", group: "window_offering", min: 1, max: 6, step: 0.5, unit: "hr" },
+  // Sprint 7 — Piggybacking
+  { key: "max_piggyback_added_minutes", label: "Max Piggyback Added", group: "piggybacking", min: 10, max: 60, step: 5, unit: "min" },
+  { key: "max_piggyback_added_percent", label: "Max Piggyback Added %", group: "piggybacking", min: 0.1, max: 0.5, step: 0.05, unit: "" },
+  // Sprint 7 — Service Week
+  { key: "due_soon_lead_hours", label: "Due Soon Lead Time", group: "service_week", min: 12, max: 96, step: 12, unit: "hr" },
+  { key: "max_provider_committed_flexible_stops_per_day", label: "Max Flex Stops/Day", group: "service_week", min: 0, max: 5, step: 1, unit: "" },
+  { key: "max_provider_committed_flexible_minutes_per_day", label: "Max Flex Minutes/Day", group: "service_week", min: 15, max: 120, step: 15, unit: "min" },
 ];
 
 export function useAssignmentConfig() {
