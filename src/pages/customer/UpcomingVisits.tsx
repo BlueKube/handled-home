@@ -19,19 +19,34 @@ function formatVisitDate(dateStr: string): string {
   return format(date, "EEE, MMM d");
 }
 
+function formatTime12(t: string): string {
+  const [h, m] = t.split(":");
+  const hour = parseInt(h);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  const h12 = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+  return m === "00" ? `${h12}${ampm}` : `${h12}:${m}${ampm}`;
+}
+
 function formatTimeWindow(start: string | null, end: string | null): string | null {
   if (!start || !end) return null;
   try {
-    const fmt = (t: string) => {
-      const [h, m] = t.split(":");
-      const hour = parseInt(h);
-      const ampm = hour >= 12 ? "PM" : "AM";
-      const h12 = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
-      return m === "00" ? `${h12}${ampm}` : `${h12}:${m}${ampm}`;
-    };
-    return `${fmt(start)} – ${fmt(end)}`;
+    return `${formatTime12(start)} – ${formatTime12(end)}`;
   } catch {
     return null;
+  }
+}
+
+/**
+ * For Planned/draft visits, show a coarse AM/PM block instead of a precise ETA.
+ * AM = 8am–12pm, PM = 12pm–5pm (PRD §UX v1 defaults).
+ */
+function getCoarseBlock(etaStart: string | null): string {
+  if (!etaStart) return "AM";
+  try {
+    const hour = parseInt(etaStart.split(":")[0]);
+    return hour >= 12 ? "PM" : "AM";
+  } catch {
+    return "AM";
   }
 }
 
@@ -39,8 +54,20 @@ function VisitCard({ visit }: { visit: UpcomingVisit }) {
   const stateLabel = getVisitLabel(visit);
   const stateStyle = getVisitStyle(visit);
   const dateLabel = formatVisitDate(visit.scheduled_date);
+
+  const isPlanned = visit.schedule_state === "planning" && visit.plan_window === "draft";
+  const isScheduledOrActive =
+    visit.plan_window === "locked" ||
+    visit.schedule_state === "scheduled" ||
+    visit.schedule_state === "dispatched" ||
+    visit.schedule_state === "in_progress";
+
+  // Scheduled/locked → precise ETA range; Planned/draft → coarse AM/PM block
+  const etaWindow = isScheduledOrActive
+    ? formatTimeWindow(visit.eta_range_start, visit.eta_range_end)
+    : null;
+  const coarseBlock = isPlanned ? getCoarseBlock(visit.eta_range_start) : null;
   const timeWindow = formatTimeWindow(visit.time_window_start, visit.time_window_end);
-  const etaWindow = formatTimeWindow(visit.eta_range_start, visit.eta_range_end);
 
   const taskSummary = visit.tasks.length > 0
     ? visit.tasks.map((t) => t.sku_name ?? "Service").join(", ")
@@ -57,7 +84,9 @@ function VisitCard({ visit }: { visit: UpcomingVisit }) {
       {/* Header row */}
       <div className="flex items-start justify-between">
         <div className="space-y-0.5">
-          <p className="text-sm font-semibold">{dateLabel}</p>
+          <p className="text-sm font-semibold">
+            {dateLabel}{isPlanned && coarseBlock ? ` (${coarseBlock})` : ""}
+          </p>
           <p className="text-xs text-muted-foreground">{taskSummary}</p>
         </div>
         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${stateStyle.pill}`}>
@@ -68,14 +97,27 @@ function VisitCard({ visit }: { visit: UpcomingVisit }) {
 
       {/* Details row */}
       <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-        {/* Time window or ETA */}
-        {(etaWindow || timeWindow) && (
+        {/* ETA range for scheduled/active visits */}
+        {etaWindow && (
           <span className="inline-flex items-center gap-1">
             <Clock className="h-3 w-3" />
-            {visit.schedule_state === "dispatched" || visit.schedule_state === "in_progress"
-              ? etaWindow ? `ETA ${etaWindow}` : timeWindow
-              : timeWindow ?? "Window TBD"
-            }
+            {isActive ? `ETA ${etaWindow}` : etaWindow}
+          </span>
+        )}
+
+        {/* Coarse AM/PM block for planned/draft visits */}
+        {coarseBlock && !etaWindow && (
+          <span className="inline-flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            {coarseBlock}
+          </span>
+        )}
+
+        {/* Fallback time window */}
+        {!etaWindow && !coarseBlock && timeWindow && (
+          <span className="inline-flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            {timeWindow}
           </span>
         )}
 
@@ -109,7 +151,7 @@ function VisitCard({ visit }: { visit: UpcomingVisit }) {
         visit.plan_window === "draft" ? (
           <div className="flex items-center gap-2 p-2.5 rounded-lg bg-secondary/50 text-xs text-muted-foreground">
             <Sparkles className="h-3.5 w-3.5 shrink-0" />
-            <span>We're planning your visit. Details may adjust until scheduled.</span>
+            <span>Planned visits may shift nightly until they become Scheduled.</span>
           </div>
         ) : (
           <div className="flex items-center gap-2 p-2.5 rounded-lg bg-primary/10 text-xs text-primary">
