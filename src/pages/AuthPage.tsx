@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useGrowthEvents } from "@/hooks/useGrowthEvents";
-import tagline from "@/assets/handled-home-tagline.jpeg";
+
 
 export default function AuthPage() {
   const [tab, setTab] = useState<"login" | "signup">("login");
@@ -110,7 +110,10 @@ export default function AuthPage() {
     <div className="min-h-screen flex flex-col bg-background px-6 safe-top animate-fade-in">
       {/* Logo & tagline */}
       <div className="pt-16 pb-10 flex flex-col items-center">
-        <img src={tagline} alt="Your home, handled." className="h-24 w-auto" />
+        <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          <span style={{ color: 'hsl(220 20% 10%)' }}>Your home, </span>
+          <span style={{ color: 'hsl(200 80% 50%)' }}>handled.</span>
+        </h1>
       </div>
 
       {/* Tab switcher */}
