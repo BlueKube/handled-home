@@ -1022,10 +1022,10 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S7-P3-02** | P0 | M | Visit display updates (appointment badge, "Scheduled this week", due-soon/overdue badges, piggybacking disclosure).
 
 ### Phase 4: Route Feasibility + Sequencing Update
-- [ ] **S7-P4-01** | P0 | XL | Update `route-sequence` with VRPTW feasibility, windowed-first sequencing, piggybacking, infeasibility repair.
+- [x] **S7-P4-01** | P0 | XL | Update `route-sequence` with VRPTW feasibility, windowed-first sequencing, piggybacking, infeasibility repair.
 
 ### Phase 5: Provider + Admin UX
 - [ ] **S7-P5-01** | P0 | L | Provider: time window badges, reorder constraints, week view with due-this-week queue.
 - [ ] **S7-P5-02** | P0 | M | Admin: SKU scheduling profile/access mode management, window template CRUD, exceptions dashboard.
 
-*Last updated: 2026-03-04 — Sprint 7 Phase 3 complete. Customer appointment picker + visit display enhancements operational.*
+*Last updated: 2026-03-04 — Sprint 7 Phase 4 complete. VRPTW route sequencing operational.*
