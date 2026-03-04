@@ -4,7 +4,7 @@ import { useAdminMembership } from "@/hooks/useAdminMembership";
 import { NotificationBell } from "@/components/NotificationBell";
 import { AdminSearchDialog } from "@/components/admin/AdminSearchDialog";
 import { NavLink } from "@/components/NavLink";
-import logo from "@/assets/handled-home-logo.png";
+
 import {
   Sidebar,
   SidebarContent,
@@ -158,7 +158,10 @@ function AdminSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r-0">
       <SidebarHeader className="px-4 py-3 flex items-center justify-center">
-        <img src={logo} alt="Handled Home" className="h-8 w-auto" />
+        <span className="font-['Plus_Jakarta_Sans'] font-bold tracking-tight text-xl select-none">
+          <span style={{ color: "hsl(220 20% 10%)" }}>Handled</span>
+          <span style={{ color: "hsl(200 80% 50%)" }}>Home</span>
+        </span>
       </SidebarHeader>
       <SidebarContent className="overflow-y-auto">
         {navGroups.filter(isGroupVisible).map((group) => {
