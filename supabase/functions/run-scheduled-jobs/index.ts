@@ -237,6 +237,16 @@ Deno.serve(async (req) => {
       );
     }
 
+    // ── Daily: Expire stale reschedule holds ──
+    if (job === "all" || job === "expire_stale_holds") {
+      subResults.expire_stale_holds = await runSubJob(
+        supabase,
+        "expire_stale_holds",
+        `expire_stale_holds:${today}`,
+        () => supabase.rpc("expire_stale_holds"),
+      );
+    }
+
     // Determine orchestrator outcome
     const entries = Object.entries(subResults);
     const failedSubs = entries.filter(([, v]) => v.status === "failed");
