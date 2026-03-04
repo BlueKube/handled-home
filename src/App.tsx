@@ -46,6 +46,7 @@ import CustomerHomeAssistant from "@/pages/customer/HomeAssistant";
 import CustomerCoverageMap from "@/pages/customer/CoverageMap";
 import CustomerPropertySizing from "@/pages/customer/PropertySizing";
 import CustomerUpcomingVisits from "@/pages/customer/UpcomingVisits";
+import CustomerAppointmentPicker from "@/pages/customer/AppointmentPicker";
 // Provider pages
 import ProviderDashboard from "@/pages/provider/Dashboard";
 import ProviderJobs from "@/pages/provider/Jobs";
@@ -186,6 +187,7 @@ const App = () => (
                 <Route path="/customer/visits" element={<CustomerPropertyGate><CustomerHistory /></CustomerPropertyGate>} />
                 <Route path="/customer/upcoming" element={<CustomerPropertyGate><CustomerUpcomingVisits /></CustomerPropertyGate>} />
                 <Route path="/customer/visits/:jobId" element={<CustomerPropertyGate><CustomerVisitDetail /></CustomerPropertyGate>} />
+                <Route path="/customer/appointment/:visitId" element={<CustomerPropertyGate><CustomerAppointmentPicker /></CustomerPropertyGate>} />
                 <Route path="/customer/photos" element={<CustomerPropertyGate><CustomerPhotoTimeline /></CustomerPropertyGate>} />
                 <Route path="/customer/home-assistant" element={<CustomerPropertyGate><CustomerHomeAssistant /></CustomerPropertyGate>} />
                 <Route path="/customer/issues" element={<CustomerPropertyGate><CustomerIssues /></CustomerPropertyGate>} />
