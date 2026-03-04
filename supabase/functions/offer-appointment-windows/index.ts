@@ -67,7 +67,7 @@ function parseTimeToMinutes(time: string): number {
   return h * 60 + (m || 0);
 }
 
-// (removed dead code: minutesToTimeStr)
+
 
 function getWorkWindow(workingHours: any, dayOfWeek: number): { start: number; end: number } | null {
   const dayName = DAY_NAMES[dayOfWeek];
@@ -205,7 +205,7 @@ Deno.serve(async (req) => {
         .select("provider_org_id, role")
         .eq("zone_id", zone_id)
         .eq("category", category_key)
-        .eq("status", "active"),
+        .eq("status", "ACTIVE"),
       // Existing visits in horizon (to count home-required load)
       supabase
         .from("visits")

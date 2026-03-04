@@ -279,7 +279,7 @@ Deno.serve(async (req) => {
       supabase
         .from("zone_category_providers")
         .select("provider_org_id, zone_id, category, role, status")
-        .eq("status", "active"),
+        .eq("status", "ACTIVE"),
     ]);
 
     if (visitsResult.error) throw visitsResult.error;
