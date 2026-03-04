@@ -256,7 +256,7 @@ Deno.serve(async (req) => {
       // Active subscriptions with zone_id
       sb.from("subscriptions").select("zone_id, plan_id").eq("status", "active").in("zone_id", zoneIds),
       // Zone-category providers (active)
-      sb.from("zone_category_providers").select("zone_id, category, provider_org_id, status").eq("status", "active").in("zone_id", zoneIds),
+      sb.from("zone_category_providers").select("zone_id, category, provider_org_id, status").eq("status", "ACTIVE").in("zone_id", zoneIds),
       // Jobs in last 14 days for quality metrics
       sb.from("jobs").select("zone_id, status, scheduled_date").in("zone_id", zoneIds).gte("scheduled_date", fourteenDaysAgo.split("T")[0]),
       // Waitlist entries
