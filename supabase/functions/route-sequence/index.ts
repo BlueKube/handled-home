@@ -1067,9 +1067,17 @@ Deno.serve(async (req) => {
     }
 
     // ── Detection 2: Provider overload ──
-    // Finish time > working hours end
+    // Two distinct conditions:
+    // a) Infeasible route NOT caused by a window violation (pure capacity/time infeasibility)
+    // b) Feasible route but with overtime (finish > working hours end)
+    // This prevents double-counting with window_at_risk exceptions.
     for (const rec of sequenceRunRecords) {
-      if (!rec.is_feasible || (rec.summary?.overtime_minutes ?? 0) > 0) {
+      const overtime = rec.summary?.overtime_minutes ?? 0;
+      const isWindowViolation = rec.infeasible_reason?.includes("window closes at") ?? false;
+      const isPureInfeasibility = !rec.is_feasible && !isWindowViolation;
+      const isOvertimeOnly = rec.is_feasible && overtime > 0;
+
+      if (isPureInfeasibility || isOvertimeOnly) {
         const severity = computeSeverity(rec.run_date);
         exceptionsToUpsert.push({
           exception_type: "provider_overload",
@@ -1078,13 +1086,16 @@ Deno.serve(async (req) => {
           status: "open",
           provider_org_id: rec.provider_org_id,
           scheduled_date: rec.run_date,
-          reason_summary: rec.infeasible_reason ?? `Overtime: ${(rec.summary?.overtime_minutes ?? 0).toFixed(0)}min beyond working hours`,
+          reason_summary: isPureInfeasibility
+            ? (rec.infeasible_reason ?? "Route infeasible — capacity exceeded")
+            : `Overtime: ${overtime.toFixed(0)}min beyond working hours`,
           reason_details: {
             total_stops: rec.total_stops,
             total_travel_minutes: rec.total_travel_minutes,
             total_service_minutes: rec.total_service_minutes,
-            overtime_minutes: rec.summary?.overtime_minutes ?? 0,
+            overtime_minutes: overtime,
             is_feasible: rec.is_feasible,
+            trigger: isPureInfeasibility ? "infeasible" : "overtime",
           },
           source: "nightly_planning",
           idempotency_key: `provider_overload:${rec.provider_org_id}:${rec.run_date}`,
@@ -1094,15 +1105,22 @@ Deno.serve(async (req) => {
 
     // ── Detection 3: Coverage break ──
     // Visits with no assigned provider_org_id in the horizon
+    // Exclude exception_pending visits that already have an unassigned_reason
+    // (those were dropped by infeasibility repair and already have exceptions)
     const { data: unassignedVisits } = await supabase
       .from("visits")
-      .select("id, property_id, scheduled_date, zone_id, customer_id")
+      .select("id, property_id, scheduled_date, zone_id, customer_id, unassigned_reason")
       .gte("scheduled_date", horizonStartStr)
       .lte("scheduled_date", horizonEndStr)
       .in("schedule_state", ["scheduled", "dispatched", "exception_pending"])
       .is("provider_org_id", null);
 
-    for (const v of unassignedVisits ?? []) {
+    // Filter out visits already flagged by infeasibility repair
+    const coverageBreakVisits = (unassignedVisits ?? []).filter(
+      (v: any) => !v.unassigned_reason
+    );
+
+    for (const v of coverageBreakVisits) {
       const severity = computeSeverity(v.scheduled_date);
       exceptionsToUpsert.push({
         exception_type: "coverage_break",
@@ -1124,23 +1142,27 @@ Deno.serve(async (req) => {
     // Visits with service_week profile where service_week_end is approaching
     // and due_status is 'overdue' or 'due_soon'
     for (const u of dueStatusUpdates) {
-      if (u.due_status === "overdue") {
+      if (u.due_status === "overdue" || u.due_status === "due_soon") {
         // Find the visit from our data
         const visit = visits.find((v: any) => v.id === u.id);
         if (!visit) continue;
-        const severity = computeSeverity(visit.scheduled_date);
+
+        // overdue is always urgent; due_soon maps to soon severity
+        const severity = u.due_status === "overdue" ? "urgent" as const : "soon" as const;
         exceptionsToUpsert.push({
           exception_type: "service_week_at_risk",
-          severity: "urgent", // overdue is always urgent
-          sla_target_at: computeSlaTarget("urgent"),
+          severity,
+          sla_target_at: computeSlaTarget(severity),
           status: "open",
           visit_id: visit.id,
           provider_org_id: visit.provider_org_id,
           customer_id: visit.customer_id,
           scheduled_date: visit.scheduled_date,
           zone_id: visit.zone_id,
-          reason_summary: `Service week overdue — visit not completed before service_week_end`,
-          reason_details: { service_week_end: visit.service_week_end, due_status: "overdue" },
+          reason_summary: u.due_status === "overdue"
+            ? `Service week overdue — visit not completed before service_week_end`
+            : `Service week due soon — less than 48h until service_week_end`,
+          reason_details: { service_week_end: visit.service_week_end, due_status: u.due_status },
           source: "nightly_planning",
           idempotency_key: `service_week_at_risk:${visit.id}:${visit.scheduled_date}`,
         });
@@ -1149,16 +1171,22 @@ Deno.serve(async (req) => {
 
     // ── Upsert exceptions (skip duplicates via idempotency_key) ──
     let exceptionsCreated = 0;
+    let exceptionsSkipped = 0;
     for (const exc of exceptionsToUpsert) {
-      const { error: excErr } = await supabase
+      const { data: upsertData, error: excErr } = await supabase
         .from("ops_exceptions")
-        .upsert(exc, { onConflict: "idempotency_key", ignoreDuplicates: true });
+        .upsert(exc, { onConflict: "idempotency_key", ignoreDuplicates: true })
+        .select("id");
       if (excErr) {
         console.error("Failed to upsert exception:", excErr, exc.idempotency_key);
-      } else {
+      } else if (upsertData && upsertData.length > 0) {
         exceptionsCreated++;
+      } else {
+        exceptionsSkipped++;
       }
     }
+
+    console.log(`Exception upsert: ${exceptionsCreated} new, ${exceptionsSkipped} duplicate-skipped`);
 
     // ── Auto-escalation: bump severity of open exceptions whose visits are now within 48h ──
     const escalationCutoff = new Date(Date.now() + autoEscalateWithinHours * 60 * 60 * 1000).toISOString().split("T")[0];
