@@ -9,6 +9,7 @@ import { useProviderOrg } from "@/hooks/useProviderOrg";
 import { useProviderRoutePlan } from "@/hooks/useProviderRoutePlan";
 import { useOptimizeRoute, useReorderRoute } from "@/hooks/useRouteOptimization";
 import { ProviderMapView } from "@/components/provider/ProviderMapView";
+import { TodayLoadout, DayPlanSummary } from "@/components/provider/DayPlanComponents";
 import { MapPin, Clock, ChevronRight, ArrowUp, ArrowDown, Route, Loader2, Lock, Map as MapIcon, List, ShieldCheck, Timer } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -301,7 +302,9 @@ export default function ProviderJobs() {
           <TabsTrigger value="today" className="flex-1">Today</TabsTrigger>
           <TabsTrigger value="upcoming" className="flex-1">Upcoming</TabsTrigger>
         </TabsList>
-        <TabsContent value="today" className="mt-4">
+        <TabsContent value="today" className="mt-4 space-y-3">
+          <TodayLoadout />
+          <DayPlanSummary />
           <TodayJobList />
         </TabsContent>
         <TabsContent value="upcoming" className="mt-4">
