@@ -156,7 +156,7 @@ Deno.serve(async (req) => {
         .from("zone_category_providers")
         .select("id", { count: "exact", head: true })
         .eq("zone_id", zone.id)
-        .eq("status", "active");
+        .eq("status", "ACTIVE");
 
       // Active customers
       const { count: customerCount } = await supabase
