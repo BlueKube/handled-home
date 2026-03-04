@@ -967,3 +967,34 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S5-P4-02** | P0 | M | Provider Jobs: Scheduled/Planned labels (≤7 days = Scheduled, >7 = Planned), "Primary" badge, expected minutes from job_skus.
 
 *Last updated: 2026-03-03 — Sprint 5 complete. Provider Assignment v1 operational.*
+
+---
+
+## PRD-300 Sprint 6 — Route Sequencing v1 + Equipment Manifest
+
+> **PRD:** `docs/prds/unfinished/prd_300_sprint_6_route_sequencing_v_1_equipment_manifest.md`
+> **Goal:** Ordered daily routes per provider, coarse customer ETA ranges, equipment manifests, bundling rules.
+> **Complexity:** XL (5 phases)
+
+### Phase 1: Schema + Config Foundation
+- [x] **S6-P1-01** | P0 | M | Add route sequencing columns to `visits` (route_order, stop_duration_minutes, planned_arrival_time, eta_range_start, eta_range_end, equipment_required, route_sequence_run_id). Create `route_sequence_runs` table. Indexes.
+- [x] **S6-P1-02** | P0 | S | Create `provider_blocked_windows` table (recurring DOW or one-off, optional location, label). RLS: providers manage own org's windows.
+- [x] **S6-P1-03** | P0 | S | Seed 20 `assignment_config` dials for Sprint 6 (bundling, sequencing, ETA, availability, anchored, late grace).
+
+### Phase 2: Route Sequencing Edge Function
+- [x] **S6-P2-01** | P0 | XL | Create `route-sequence` edge function — bundling (setup discount formula), nearest-neighbor + 2-opt sequencing, ETA range generation, equipment manifest, feasibility check with infeasible notification, audit logging to `route_sequence_runs`.
+
+### Phase 3: Provider Availability & Blocked Windows
+- [x] **S6-P3-01** | P0 | M | `useProviderBlockedWindows` hook — CRUD for blocked windows scoped to provider org.
+- [x] **S6-P3-02** | P0 | L | `/provider/availability` page — availability health meter (config-driven thresholds), weekly schedule summary, blocked windows management (recurring/one-off), vacation display, fragmentation warnings.
+- [x] **S6-P3-03** | P0 | S | RLS fix: authenticated SELECT on `assignment_config` so providers can read config dials (N2 review finding).
+
+### Phase 4: Provider Equipment Manifest & Day View
+- [x] **S6-P4-01** | P0 | M | `useProviderDayPlan` hook — aggregates visits + tasks for a provider's day with equipment union, total service minutes.
+- [x] **S6-P4-02** | P0 | M | `DayPlanComponents` — TodayLoadout (collapsible equipment checklist with packed state), DayPlanStopCard (ETA, bundling, equipment per stop), DayPlanSummary (compact stat bar).
+- [x] **S6-P4-03** | P0 | S | Integrate loadout + summary into provider Jobs page Today tab.
+
+### Phase 5: Customer ETA Display
+- [x] **S6-P5-01** | P0 | M | Customer UpcomingVisits ETA enhancements — Scheduled/locked visits show precise ETA range, Planned/draft visits show coarse AM/PM block (e.g., "Wed (AM)"), microcopy: "Planned visits may shift nightly until they become Scheduled."
+
+*Last updated: 2026-03-04 — Sprint 6 Phase 5 complete. Route Sequencing v1 fully operational.*
