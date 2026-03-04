@@ -1453,6 +1453,56 @@ export type Database = {
           },
         ]
       }
+      customer_reschedule_holds: {
+        Row: {
+          created_at: string
+          customer_id: string
+          expires_at: string
+          held_date: string
+          held_window_end: string | null
+          held_window_start: string | null
+          hold_type: string
+          id: string
+          status: string
+          updated_at: string
+          visit_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          expires_at: string
+          held_date: string
+          held_window_end?: string | null
+          held_window_start?: string | null
+          hold_type?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          visit_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          expires_at?: string
+          held_date?: string
+          held_window_end?: string | null
+          held_window_start?: string | null
+          hold_type?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_reschedule_holds_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_seasonal_selections: {
         Row: {
           created_at: string
@@ -2920,6 +2970,225 @@ export type Database = {
             columns: ["source_event_id"]
             isOneToOne: false
             referencedRelation: "notification_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ops_exception_actions: {
+        Row: {
+          action_type: string
+          actor_role: string
+          actor_user_id: string
+          after_state: Json | null
+          before_state: Json | null
+          created_at: string
+          customer_notified: boolean
+          exception_id: string
+          id: string
+          impact_summary: Json | null
+          is_freeze_override: boolean
+          is_undone: boolean
+          provider_notified: boolean
+          reason_code: string
+          reason_note: string | null
+          undo_expires_at: string | null
+          undone_at: string | null
+          undone_by_user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          actor_role: string
+          actor_user_id: string
+          after_state?: Json | null
+          before_state?: Json | null
+          created_at?: string
+          customer_notified?: boolean
+          exception_id: string
+          id?: string
+          impact_summary?: Json | null
+          is_freeze_override?: boolean
+          is_undone?: boolean
+          provider_notified?: boolean
+          reason_code: string
+          reason_note?: string | null
+          undo_expires_at?: string | null
+          undone_at?: string | null
+          undone_by_user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          actor_role?: string
+          actor_user_id?: string
+          after_state?: Json | null
+          before_state?: Json | null
+          created_at?: string
+          customer_notified?: boolean
+          exception_id?: string
+          id?: string
+          impact_summary?: Json | null
+          is_freeze_override?: boolean
+          is_undone?: boolean
+          provider_notified?: boolean
+          reason_code?: string
+          reason_note?: string | null
+          undo_expires_at?: string | null
+          undone_at?: string | null
+          undone_by_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ops_exception_actions_exception_id_fkey"
+            columns: ["exception_id"]
+            isOneToOne: false
+            referencedRelation: "ops_exceptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ops_exception_attachments: {
+        Row: {
+          attachment_type: string
+          created_at: string
+          exception_id: string
+          id: string
+          note_text: string | null
+          storage_path: string | null
+          uploaded_by_role: string
+          uploaded_by_user_id: string
+        }
+        Insert: {
+          attachment_type?: string
+          created_at?: string
+          exception_id: string
+          id?: string
+          note_text?: string | null
+          storage_path?: string | null
+          uploaded_by_role: string
+          uploaded_by_user_id: string
+        }
+        Update: {
+          attachment_type?: string
+          created_at?: string
+          exception_id?: string
+          id?: string
+          note_text?: string | null
+          storage_path?: string | null
+          uploaded_by_role?: string
+          uploaded_by_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ops_exception_attachments_exception_id_fkey"
+            columns: ["exception_id"]
+            isOneToOne: false
+            referencedRelation: "ops_exceptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ops_exceptions: {
+        Row: {
+          assigned_to_user_id: string | null
+          created_at: string
+          customer_id: string | null
+          escalated_at: string | null
+          exception_type: Database["public"]["Enums"]["ops_exception_type"]
+          id: string
+          idempotency_key: string | null
+          linked_exception_id: string | null
+          provider_org_id: string | null
+          reason_details: Json | null
+          reason_summary: string
+          resolution_note: string | null
+          resolution_type: string | null
+          resolved_at: string | null
+          resolved_by_user_id: string | null
+          scheduled_date: string | null
+          severity: Database["public"]["Enums"]["ops_exception_severity"]
+          sla_target_at: string | null
+          source: string
+          status: Database["public"]["Enums"]["ops_exception_status"]
+          updated_at: string
+          visit_id: string | null
+          zone_id: string | null
+        }
+        Insert: {
+          assigned_to_user_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          escalated_at?: string | null
+          exception_type: Database["public"]["Enums"]["ops_exception_type"]
+          id?: string
+          idempotency_key?: string | null
+          linked_exception_id?: string | null
+          provider_org_id?: string | null
+          reason_details?: Json | null
+          reason_summary: string
+          resolution_note?: string | null
+          resolution_type?: string | null
+          resolved_at?: string | null
+          resolved_by_user_id?: string | null
+          scheduled_date?: string | null
+          severity: Database["public"]["Enums"]["ops_exception_severity"]
+          sla_target_at?: string | null
+          source?: string
+          status?: Database["public"]["Enums"]["ops_exception_status"]
+          updated_at?: string
+          visit_id?: string | null
+          zone_id?: string | null
+        }
+        Update: {
+          assigned_to_user_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          escalated_at?: string | null
+          exception_type?: Database["public"]["Enums"]["ops_exception_type"]
+          id?: string
+          idempotency_key?: string | null
+          linked_exception_id?: string | null
+          provider_org_id?: string | null
+          reason_details?: Json | null
+          reason_summary?: string
+          resolution_note?: string | null
+          resolution_type?: string | null
+          resolved_at?: string | null
+          resolved_by_user_id?: string | null
+          scheduled_date?: string | null
+          severity?: Database["public"]["Enums"]["ops_exception_severity"]
+          sla_target_at?: string | null
+          source?: string
+          status?: Database["public"]["Enums"]["ops_exception_status"]
+          updated_at?: string
+          visit_id?: string | null
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ops_exceptions_linked_exception_id_fkey"
+            columns: ["linked_exception_id"]
+            isOneToOne: false
+            referencedRelation: "ops_exceptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ops_exceptions_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ops_exceptions_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ops_exceptions_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
             referencedColumns: ["id"]
           },
         ]
@@ -9468,6 +9737,24 @@ export type Database = {
         | "PROTECT_QUALITY"
         | "WAITLIST_ONLY"
         | "PROVIDER_RECRUITING"
+      ops_exception_severity: "urgent" | "soon" | "watch"
+      ops_exception_status:
+        | "open"
+        | "acknowledged"
+        | "in_progress"
+        | "resolved"
+        | "snoozed"
+        | "escalated"
+      ops_exception_type:
+        | "window_at_risk"
+        | "service_week_at_risk"
+        | "provider_overload"
+        | "coverage_break"
+        | "provider_unavailable"
+        | "access_failure"
+        | "customer_reschedule"
+        | "weather_safety"
+        | "quality_block"
       plan_window: "locked" | "draft"
       provider_application_status:
         | "draft"
@@ -9741,6 +10028,26 @@ export const Constants = {
         "PROTECT_QUALITY",
         "WAITLIST_ONLY",
         "PROVIDER_RECRUITING",
+      ],
+      ops_exception_severity: ["urgent", "soon", "watch"],
+      ops_exception_status: [
+        "open",
+        "acknowledged",
+        "in_progress",
+        "resolved",
+        "snoozed",
+        "escalated",
+      ],
+      ops_exception_type: [
+        "window_at_risk",
+        "service_week_at_risk",
+        "provider_overload",
+        "coverage_break",
+        "provider_unavailable",
+        "access_failure",
+        "customer_reschedule",
+        "weather_safety",
+        "quality_block",
       ],
       plan_window: ["locked", "draft"],
       provider_application_status: [
