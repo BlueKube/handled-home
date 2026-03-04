@@ -652,7 +652,7 @@ Deno.serve(async (req) => {
     const [visitsResult, workProfilesResult, propertiesResult, skusResult, blockedResult] = await Promise.all([
       supabase
         .from("visits")
-        .select("id, property_id, scheduled_date, schedule_state, provider_org_id, route_order, plan_window, time_window_start, time_window_end, scheduling_profile, piggybacked_onto_visit_id, service_week_end, due_status")
+        .select("id, property_id, scheduled_date, schedule_state, provider_org_id, route_order, plan_window, time_window_start, time_window_end, scheduling_profile, piggybacked_onto_visit_id, service_week_end, due_status, customer_id, zone_id")
         .gte("scheduled_date", horizonStartStr)
         .lte("scheduled_date", horizonEndStr)
         .in("schedule_state", ["scheduled", "dispatched", "in_progress"])
@@ -995,6 +995,216 @@ Deno.serve(async (req) => {
       }
     }
 
+    // ══════════════════════════════════════════════════════
+    // ── PHASE 2: Exception Generation Engine ──
+    // Detect predictive exceptions from route-sequence results
+    // ══════════════════════════════════════════════════════
+
+    // Load SLA dials
+    const urgentSlaHours = cm.get("urgent_sla_hours") ?? 8;
+    const soonSlaHours = cm.get("soon_sla_hours") ?? 48;
+    const watchSlaHours = cm.get("watch_sla_hours") ?? 120;
+    const autoEscalateWithinHours = cm.get("auto_escalate_within_hours") ?? 48;
+
+    // Helper: compute severity based on how many days until the affected date
+    function computeSeverity(scheduledDate: string): "urgent" | "soon" | "watch" {
+      const visitDate = new Date(scheduledDate + "T23:59:59Z");
+      const hoursUntil = (visitDate.getTime() - Date.now()) / (1000 * 60 * 60);
+      if (hoursUntil <= 48) return "urgent";
+      if (hoursUntil <= 120) return "soon";
+      return "watch";
+    }
+
+    // Helper: compute SLA target timestamp from severity
+    function computeSlaTarget(severity: "urgent" | "soon" | "watch"): string {
+      const hours = severity === "urgent" ? urgentSlaHours
+        : severity === "soon" ? soonSlaHours : watchSlaHours;
+      return new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
+    }
+
+    const exceptionsToUpsert: any[] = [];
+
+    // ── Detection 1: Window-at-risk ──
+    // Batch-query visits with windows to detect planned_arrival_time > time_window_end
+    const { data: windowedVisits } = await supabase
+      .from("visits")
+      .select("id, property_id, provider_org_id, scheduled_date, time_window_end, planned_arrival_time, zone_id, customer_id")
+      .gte("scheduled_date", horizonStartStr)
+      .lte("scheduled_date", horizonEndStr)
+      .in("schedule_state", ["scheduled", "dispatched"])
+      .not("time_window_end", "is", null)
+      .not("planned_arrival_time", "is", null);
+
+    for (const v of windowedVisits ?? []) {
+      if (!v.planned_arrival_time || !v.time_window_end) continue;
+      // Compare planned arrival (timestamptz) vs time_window_end (time)
+      const arrivalDate = new Date(v.planned_arrival_time);
+      const arrivalMinutes = arrivalDate.getUTCHours() * 60 + arrivalDate.getUTCMinutes();
+      const windowEndMinutes = parseTimeToMinutes(v.time_window_end);
+
+      if (arrivalMinutes > windowEndMinutes) {
+        const severity = computeSeverity(v.scheduled_date);
+        exceptionsToUpsert.push({
+          exception_type: "window_at_risk",
+          severity,
+          sla_target_at: computeSlaTarget(severity),
+          status: "open",
+          visit_id: v.id,
+          provider_org_id: v.provider_org_id,
+          customer_id: v.customer_id,
+          scheduled_date: v.scheduled_date,
+          zone_id: v.zone_id,
+          reason_summary: `Planned arrival ${arrivalMinutes}min exceeds window end ${windowEndMinutes}min`,
+          reason_details: {
+            planned_arrival_minutes: arrivalMinutes,
+            window_end_minutes: windowEndMinutes,
+            overshoot_minutes: arrivalMinutes - windowEndMinutes,
+          },
+          source: "nightly_planning",
+          idempotency_key: `window_at_risk:${v.id}:${v.scheduled_date}`,
+        });
+      }
+    }
+
+    // ── Detection 2: Provider overload ──
+    // Finish time > working hours end
+    for (const rec of sequenceRunRecords) {
+      if (!rec.is_feasible || (rec.summary?.overtime_minutes ?? 0) > 0) {
+        const severity = computeSeverity(rec.run_date);
+        exceptionsToUpsert.push({
+          exception_type: "provider_overload",
+          severity,
+          sla_target_at: computeSlaTarget(severity),
+          status: "open",
+          provider_org_id: rec.provider_org_id,
+          scheduled_date: rec.run_date,
+          reason_summary: rec.infeasible_reason ?? `Overtime: ${(rec.summary?.overtime_minutes ?? 0).toFixed(0)}min beyond working hours`,
+          reason_details: {
+            total_stops: rec.total_stops,
+            total_travel_minutes: rec.total_travel_minutes,
+            total_service_minutes: rec.total_service_minutes,
+            overtime_minutes: rec.summary?.overtime_minutes ?? 0,
+            is_feasible: rec.is_feasible,
+          },
+          source: "nightly_planning",
+          idempotency_key: `provider_overload:${rec.provider_org_id}:${rec.run_date}`,
+        });
+      }
+    }
+
+    // ── Detection 3: Coverage break ──
+    // Visits with no assigned provider_org_id in the horizon
+    const { data: unassignedVisits } = await supabase
+      .from("visits")
+      .select("id, property_id, scheduled_date, zone_id, customer_id")
+      .gte("scheduled_date", horizonStartStr)
+      .lte("scheduled_date", horizonEndStr)
+      .in("schedule_state", ["scheduled", "dispatched", "exception_pending"])
+      .is("provider_org_id", null);
+
+    for (const v of unassignedVisits ?? []) {
+      const severity = computeSeverity(v.scheduled_date);
+      exceptionsToUpsert.push({
+        exception_type: "coverage_break",
+        severity,
+        sla_target_at: computeSlaTarget(severity),
+        status: "open",
+        visit_id: v.id,
+        customer_id: v.customer_id,
+        scheduled_date: v.scheduled_date,
+        zone_id: v.zone_id,
+        reason_summary: "Visit has no assigned provider",
+        reason_details: { property_id: v.property_id },
+        source: "nightly_planning",
+        idempotency_key: `coverage_break:${v.id}:${v.scheduled_date}`,
+      });
+    }
+
+    // ── Detection 4: Service-week-at-risk ──
+    // Visits with service_week profile where service_week_end is approaching
+    // and due_status is 'overdue' or 'due_soon'
+    for (const u of dueStatusUpdates) {
+      if (u.due_status === "overdue") {
+        // Find the visit from our data
+        const visit = visits.find((v: any) => v.id === u.id);
+        if (!visit) continue;
+        const severity = computeSeverity(visit.scheduled_date);
+        exceptionsToUpsert.push({
+          exception_type: "service_week_at_risk",
+          severity: "urgent", // overdue is always urgent
+          sla_target_at: computeSlaTarget("urgent"),
+          status: "open",
+          visit_id: visit.id,
+          provider_org_id: visit.provider_org_id,
+          customer_id: visit.customer_id,
+          scheduled_date: visit.scheduled_date,
+          zone_id: visit.zone_id,
+          reason_summary: `Service week overdue — visit not completed before service_week_end`,
+          reason_details: { service_week_end: visit.service_week_end, due_status: "overdue" },
+          source: "nightly_planning",
+          idempotency_key: `service_week_at_risk:${visit.id}:${visit.scheduled_date}`,
+        });
+      }
+    }
+
+    // ── Upsert exceptions (skip duplicates via idempotency_key) ──
+    let exceptionsCreated = 0;
+    for (const exc of exceptionsToUpsert) {
+      const { error: excErr } = await supabase
+        .from("ops_exceptions")
+        .upsert(exc, { onConflict: "idempotency_key", ignoreDuplicates: true });
+      if (excErr) {
+        console.error("Failed to upsert exception:", excErr, exc.idempotency_key);
+      } else {
+        exceptionsCreated++;
+      }
+    }
+
+    // ── Auto-escalation: bump severity of open exceptions whose visits are now within 48h ──
+    const escalationCutoff = new Date(Date.now() + autoEscalateWithinHours * 60 * 60 * 1000).toISOString().split("T")[0];
+    const { data: escalatableExceptions } = await supabase
+      .from("ops_exceptions")
+      .select("id, visit_id, scheduled_date, severity")
+      .in("status", ["open", "acknowledged", "in_progress"])
+      .neq("severity", "urgent")
+      .lte("scheduled_date", escalationCutoff);
+
+    let escalatedCount = 0;
+    for (const exc of escalatableExceptions ?? []) {
+      const { error: escErr } = await supabase
+        .from("ops_exceptions")
+        .update({
+          severity: "urgent",
+          sla_target_at: computeSlaTarget("urgent"),
+          escalated_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", exc.id);
+      if (!escErr) escalatedCount++;
+
+      // Emit escalation notification
+      try {
+        await supabase.rpc("emit_notification_event", {
+          p_event_type: "ADMIN_EXCEPTION_ESCALATED",
+          p_idempotency_key: `exception_escalated:${exc.id}:${todayStr}`,
+          p_audience_type: "ADMIN",
+          p_audience_org_id: null,
+          p_priority: "HIGH",
+          p_payload: {
+            exception_id: exc.id,
+            visit_id: exc.visit_id,
+            previous_severity: exc.severity,
+            new_severity: "urgent",
+            scheduled_date: exc.scheduled_date,
+          },
+        });
+      } catch (notifErr) {
+        console.error(`Failed to emit escalation notification for exception ${exc.id}:`, notifErr);
+      }
+    }
+
+    console.log(`Exception generation: ${exceptionsCreated} created, ${escalatedCount} escalated`);
+
     // Update cron log
     if (cronLog) {
       await supabase
@@ -1010,6 +1220,8 @@ Deno.serve(async (req) => {
             due_status_updates: dueStatusUpdates.length,
             dropped_visits: droppedVisits.length,
             sequence_runs: sequenceRunRecords.length,
+            exceptions_created: exceptionsCreated,
+            exceptions_escalated: escalatedCount,
           },
         })
         .eq("id", cronLog.id);
@@ -1023,6 +1235,8 @@ Deno.serve(async (req) => {
         infeasible_count: infeasibleCount,
         repaired_count: repairedCount,
         due_status_updates: dueStatusUpdates.length,
+        exceptions_created: exceptionsCreated,
+        exceptions_escalated: escalatedCount,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
