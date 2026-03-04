@@ -998,3 +998,34 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S6-P5-01** | P0 | M | Customer UpcomingVisits ETA enhancements — Scheduled/locked visits show precise ETA range, Planned/draft visits show coarse AM/PM block (e.g., "Wed (AM)"), microcopy: "Planned visits may shift nightly until they become Scheduled."
 
 *Last updated: 2026-03-04 — Sprint 6 Phase 5 complete. Route Sequencing v1 fully operational.*
+
+---
+
+## PRD-300 Sprint 7 — Appointment Windows v1 (Home-Required Services)
+
+> **PRD:** `docs/prds/unfinished/prd_300_sprint_7_appointment_windows_v_1_home_required_services.md`
+> **Goal:** Time-window scheduling for home-required services, feasibility-filtered window offering, route integration, service-week relief valve.
+> **Complexity:** XL (5 phases)
+
+### Phase 1: Schema + Config Foundation
+- [x] **S7-P1-01** | P0 | M | Create `scheduling_profile` enum (appointment_window, day_commit, service_week) and `access_mode` enum (customer_present, provider_access, exterior_only). Add both columns to `service_skus`.
+- [x] **S7-P1-02** | P0 | M | Add visit-level columns: `scheduling_profile`, `service_week_start`, `service_week_end`, `due_status`, `customer_window_preference`, `piggybacked_onto_visit_id` FK.
+- [x] **S7-P1-03** | P0 | M | Create `appointment_window_templates` table (zone + category + time slots). RLS: admin write, authenticated read.
+- [x] **S7-P1-04** | P0 | S | Seed 11 Sprint 7 `assignment_config` dials (window offering, piggybacking, service-week relief valve).
+- [x] **S7-P1-05** | P0 | S | Indexes on scheduling_profile, service_week, piggybacked, templates.
+
+### Phase 2: Window Offering Engine
+- [ ] **S7-P2-01** | P0 | XL | `offer-appointment-windows` edge function — generate 3–6 feasible windows from templates, filter by provider supply/availability/blocked windows, respect caps, AM/PM fallback.
+
+### Phase 3: Customer UX — Window Picker + Visit Display
+- [ ] **S7-P3-01** | P0 | L | Appointment picker flow for home-required services (offered windows, confirmation).
+- [ ] **S7-P3-02** | P0 | M | Visit display updates (appointment badge, "Scheduled this week", due-soon/overdue badges, piggybacking disclosure).
+
+### Phase 4: Route Feasibility + Sequencing Update
+- [ ] **S7-P4-01** | P0 | XL | Update `route-sequence` with VRPTW feasibility, windowed-first sequencing, piggybacking, infeasibility repair.
+
+### Phase 5: Provider + Admin UX
+- [ ] **S7-P5-01** | P0 | L | Provider: time window badges, reorder constraints, week view with due-this-week queue.
+- [ ] **S7-P5-02** | P0 | M | Admin: SKU scheduling profile/access mode management, window template CRUD, exceptions dashboard.
+
+*Last updated: 2026-03-04 — Sprint 7 Phase 1 complete.*

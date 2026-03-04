@@ -344,6 +344,53 @@ export type Database = {
           },
         ]
       }
+      appointment_window_templates: {
+        Row: {
+          category_key: string
+          created_at: string
+          day_of_week: number | null
+          id: string
+          is_active: boolean
+          updated_at: string
+          window_end: string
+          window_label: string
+          window_start: string
+          zone_id: string
+        }
+        Insert: {
+          category_key: string
+          created_at?: string
+          day_of_week?: number | null
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          window_end: string
+          window_label: string
+          window_start: string
+          zone_id: string
+        }
+        Update: {
+          category_key?: string
+          created_at?: string
+          day_of_week?: number | null
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          window_end?: string
+          window_label?: string
+          window_start?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_window_templates_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assignment_config: {
         Row: {
           config_key: string
@@ -6190,6 +6237,7 @@ export type Database = {
       }
       service_skus: {
         Row: {
+          access_mode: Database["public"]["Enums"]["access_mode"]
           addon_triggers: Json
           base_price_cents: number
           category: string | null
@@ -6218,11 +6266,13 @@ export type Database = {
           required_equipment: string[]
           required_photos: Json
           requires_training_gate: boolean
+          scheduling_profile: Database["public"]["Enums"]["scheduling_profile"]
           status: string
           updated_at: string
           weather_sensitive: boolean
         }
         Insert: {
+          access_mode?: Database["public"]["Enums"]["access_mode"]
           addon_triggers?: Json
           base_price_cents?: number
           category?: string | null
@@ -6251,11 +6301,13 @@ export type Database = {
           required_equipment?: string[]
           required_photos?: Json
           requires_training_gate?: boolean
+          scheduling_profile?: Database["public"]["Enums"]["scheduling_profile"]
           status?: string
           updated_at?: string
           weather_sensitive?: boolean
         }
         Update: {
+          access_mode?: Database["public"]["Enums"]["access_mode"]
           addon_triggers?: Json
           base_price_cents?: number
           category?: string | null
@@ -6284,6 +6336,7 @@ export type Database = {
           required_equipment?: string[]
           required_photos?: Json
           requires_training_gate?: boolean
+          scheduling_profile?: Database["public"]["Enums"]["scheduling_profile"]
           status?: string
           updated_at?: string
           weather_sensitive?: boolean
@@ -7652,12 +7705,15 @@ export type Database = {
           assignment_score: number | null
           backup_provider_org_id: string | null
           created_at: string
+          customer_window_preference: string | null
           draft_generated_at: string | null
+          due_status: string | null
           equipment_required: string[]
           eta_range_end: string | null
           eta_range_start: string | null
           id: string
           locked_at: string | null
+          piggybacked_onto_visit_id: string | null
           plan_run_id: string | null
           plan_window: Database["public"]["Enums"]["plan_window"] | null
           planned_arrival_time: string | null
@@ -7667,6 +7723,11 @@ export type Database = {
           route_plan_version: number | null
           schedule_state: Database["public"]["Enums"]["visit_schedule_state"]
           scheduled_date: string
+          scheduling_profile:
+            | Database["public"]["Enums"]["scheduling_profile"]
+            | null
+          service_week_end: string | null
+          service_week_start: string | null
           stop_duration_minutes: number | null
           time_window_end: string | null
           time_window_start: string | null
@@ -7681,12 +7742,15 @@ export type Database = {
           assignment_score?: number | null
           backup_provider_org_id?: string | null
           created_at?: string
+          customer_window_preference?: string | null
           draft_generated_at?: string | null
+          due_status?: string | null
           equipment_required?: string[]
           eta_range_end?: string | null
           eta_range_start?: string | null
           id?: string
           locked_at?: string | null
+          piggybacked_onto_visit_id?: string | null
           plan_run_id?: string | null
           plan_window?: Database["public"]["Enums"]["plan_window"] | null
           planned_arrival_time?: string | null
@@ -7696,6 +7760,11 @@ export type Database = {
           route_plan_version?: number | null
           schedule_state?: Database["public"]["Enums"]["visit_schedule_state"]
           scheduled_date: string
+          scheduling_profile?:
+            | Database["public"]["Enums"]["scheduling_profile"]
+            | null
+          service_week_end?: string | null
+          service_week_start?: string | null
           stop_duration_minutes?: number | null
           time_window_end?: string | null
           time_window_start?: string | null
@@ -7710,12 +7779,15 @@ export type Database = {
           assignment_score?: number | null
           backup_provider_org_id?: string | null
           created_at?: string
+          customer_window_preference?: string | null
           draft_generated_at?: string | null
+          due_status?: string | null
           equipment_required?: string[]
           eta_range_end?: string | null
           eta_range_start?: string | null
           id?: string
           locked_at?: string | null
+          piggybacked_onto_visit_id?: string | null
           plan_run_id?: string | null
           plan_window?: Database["public"]["Enums"]["plan_window"] | null
           planned_arrival_time?: string | null
@@ -7725,6 +7797,11 @@ export type Database = {
           route_plan_version?: number | null
           schedule_state?: Database["public"]["Enums"]["visit_schedule_state"]
           scheduled_date?: string
+          scheduling_profile?:
+            | Database["public"]["Enums"]["scheduling_profile"]
+            | null
+          service_week_end?: string | null
+          service_week_start?: string | null
           stop_duration_minutes?: number | null
           time_window_end?: string | null
           time_window_start?: string | null
@@ -7744,6 +7821,13 @@ export type Database = {
             columns: ["backup_provider_org_id"]
             isOneToOne: false
             referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visits_piggybacked_onto_visit_id_fkey"
+            columns: ["piggybacked_onto_visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
             referencedColumns: ["id"]
           },
           {
@@ -9351,6 +9435,7 @@ export type Database = {
       }
     }
     Enums: {
+      access_mode: "customer_present" | "provider_access" | "exterior_only"
       admin_role: "superuser" | "ops" | "dispatcher" | "growth_manager"
       app_role: "customer" | "provider" | "admin"
       cadence_type:
@@ -9413,6 +9498,7 @@ export type Database = {
         | "voided"
       referral_reward_type: "customer_credit" | "provider_bonus"
       referral_risk_flag_status: "open" | "reviewed" | "dismissed"
+      scheduling_profile: "appointment_window" | "day_commit" | "service_week"
       sku_rule_type: "included" | "extra_allowed" | "blocked" | "provider_only"
       support_event_type:
         | "ticket_created"
@@ -9624,6 +9710,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      access_mode: ["customer_present", "provider_access", "exterior_only"],
       admin_role: ["superuser", "ops", "dispatcher", "growth_manager"],
       app_role: ["customer", "provider", "admin"],
       cadence_type: ["weekly", "biweekly", "four_week", "monthly", "quarterly"],
@@ -9689,6 +9776,7 @@ export const Constants = {
       ],
       referral_reward_type: ["customer_credit", "provider_bonus"],
       referral_risk_flag_status: ["open", "reviewed", "dismissed"],
+      scheduling_profile: ["appointment_window", "day_commit", "service_week"],
       sku_rule_type: ["included", "extra_allowed", "blocked", "provider_only"],
       support_event_type: [
         "ticket_created",
