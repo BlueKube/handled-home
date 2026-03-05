@@ -150,7 +150,6 @@ function AdminSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { data: exceptionCount } = useOpsExceptionCount();
-  const location = useLocation();
 
   const isItemVisible = (item: NavItem) => {
     if (!item.roles) return true;
