@@ -66,6 +66,7 @@ const navGroups: NavGroup[] = [
       { title: "Window Templates", url: "/admin/scheduling/windows", icon: CalendarClock, roles: ["superuser", "ops"] },
       { title: "Scheduling Exceptions", url: "/admin/scheduling/exceptions", icon: CalendarClock, roles: ["superuser", "ops", "dispatcher"] },
       { title: "Job Exceptions", url: "/admin/exceptions", icon: AlertTriangle },
+      { title: "Ops Console", url: "/admin/ops/exceptions", icon: Shield, roles: ["superuser", "ops", "dispatcher"] },
     ],
   },
   {
