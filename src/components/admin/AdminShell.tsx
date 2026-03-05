@@ -1,9 +1,11 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminMembership } from "@/hooks/useAdminMembership";
+import { useOpsExceptionCount } from "@/hooks/useOpsExceptions";
 import { NotificationBell } from "@/components/NotificationBell";
 import { AdminSearchDialog } from "@/components/admin/AdminSearchDialog";
 import { NavLink } from "@/components/NavLink";
+import { Badge } from "@/components/ui/badge";
 
 import {
   Sidebar,
@@ -147,6 +149,8 @@ function AdminSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const { data: exceptionCount } = useOpsExceptionCount();
+  const location = useLocation();
 
   const isItemVisible = (item: NavItem) => {
     if (!item.roles) return true;
@@ -193,6 +197,11 @@ function AdminSidebar() {
                         >
                           <item.icon className="mr-2 h-4 w-4 shrink-0" />
                           <span className="truncate">{item.title}</span>
+                          {item.url === "/admin/ops/exceptions" && exceptionCount && exceptionCount > 0 ? (
+                            <Badge variant="destructive" className="ml-auto text-[10px] h-5 min-w-5 px-1 justify-center">
+                              {exceptionCount > 99 ? "99+" : exceptionCount}
+                            </Badge>
+                          ) : null}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
