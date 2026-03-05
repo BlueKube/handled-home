@@ -9269,7 +9269,7 @@ export type Database = {
       }
       evaluate_training_gates: { Args: never; Returns: Json }
       expire_stale_handles: { Args: never; Returns: Json }
-      expire_stale_holds: { Args: never; Returns: number }
+      expire_stale_holds: { Args: never; Returns: Json }
       finish_cron_run: {
         Args: {
           p_error_message?: string
