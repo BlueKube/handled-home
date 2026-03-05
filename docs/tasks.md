@@ -1067,9 +1067,9 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S8-P3-06** | P0 | S | Seeded 2 notification templates (`ADMIN_EXCEPTION_CREATED`, `CUSTOMER_ACCESS_FAILURE_HOLD`).
 
 ### Phase 4: Ops Console UX (Admin)
-- [ ] **S8-P4-01** | P0 | L | `/admin/ops/exceptions` page — exceptions queue with severity/type/status filters, SLA countdown, affected customer/provider info.
-- [ ] **S8-P4-02** | P0 | L | Exception detail panel — current plan snapshot, repair suggestions, impact preview.
-- [ ] **S8-P4-03** | P0 | M | Ops actions dialog — reorder, move day, swap provider, convert profile, cancel/refund with reason codes + audit trail.
+- [x] **S8-P4-01** | P0 | L | `/admin/ops/exceptions` page — exceptions queue with severity/type/status filters, SLA countdown, affected customer/provider info. `useOpsExceptions` hook with 30s polling, zone/provider/visit joins. `OpsExceptionQueue` component with severity icons, SLA countdown, filter bar.
+- [x] **S8-P4-02** | P0 | L | Exception detail panel — context cards (visit, zone, provider, customer), reason details JSON, repair suggestions (per exception type), SLA bar, decision traces integration. Status transition buttons (acknowledge, start work, escalate, resolve). Actions history timeline.
+- [x] **S8-P4-03** | P0 | M | Ops actions dialog — 10 action types (reorder, move day, swap provider, convert profile, cancel, credit, contact, redo, note), 8 reason codes, freeze override toggle, 10-min undo window. `OpsActionDialog` component. `useRecordOpsAction` mutation. Sidebar nav with exception count badge (`useOpsExceptionCount` with 30s polling).
 
 ### Phase 5: Customer + Provider UX
 - [ ] **S8-P5-01** | P0 | L | Customer reschedule flow — shows feasible options from `offer-appointment-windows`, confirm/choose-another for access failure holds.
@@ -1079,4 +1079,4 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [ ] **S8-P6-01** | P1 | M | Auto-resolve stale exceptions (underlying condition no longer holds after re-sequencing).
 - [ ] **S8-P6-02** | P1 | M | Exception analytics — window miss rate, access failure rate, break-freeze frequency, time-to-resolve.
 
-*Last updated: 2026-03-04 — Sprint 8 Phase 3 complete. Reactive exception RPCs operational.*
+*Last updated: 2026-03-05 — Sprint 8 Phase 4 complete. Ops Console UX operational.*

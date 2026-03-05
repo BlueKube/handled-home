@@ -121,6 +121,7 @@ import AdminJobDetail from "@/pages/admin/JobDetail";
 import AdminBilling from "@/pages/admin/Billing";
 import AdminPayouts from "@/pages/admin/Payouts";
 import AdminExceptions from "@/pages/admin/Exceptions";
+import AdminOpsExceptions from "@/pages/admin/OpsExceptions";
 import AdminCustomerLedger from "@/pages/admin/CustomerLedger";
 import AdminProviderLedger from "@/pages/admin/ProviderLedger";
 import AdminSupportPolicies from "@/pages/admin/SupportPolicies";
@@ -300,6 +301,7 @@ const App = () => (
                 <Route path="/admin/payouts" element={<AdminPayouts />} />
                 <Route path="/admin/payouts/providers/:providerOrgId" element={<AdminProviderLedger />} />
                 <Route path="/admin/exceptions" element={<AdminExceptions />} />
+                <Route path="/admin/ops/exceptions" element={<AdminOpsExceptions />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
                 <Route path="/admin/more" element={<MoreMenuPage />} />
                 <Route path="/admin/control/pricing" element={<AdminControlPricing />} />
