@@ -1133,3 +1133,18 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [ ] **BYOC-05** | P1 | S | Opus 4.6 code review + fix findings
 
 *Last updated: 2026-03-07 — BYOC-01 through BYOC-04 complete. Wizard, context hook, auth redirect, routing, and dashboard card operational.*
+
+---
+
+## Smart Banner + Deep-Link Prep
+
+> **Goal:** Encourage native app install without blocking web onboarding.
+
+- [x] **DL-01** | P1 | S | `SmartAppBanner` component — dismissible mobile-only install suggestion with 30-day localStorage snooze
+- [x] **DL-02** | P1 | S | Integrate SmartAppBanner into Customer Dashboard (above notification banners)
+- [x] **DL-03** | P2 | S | Add `apple-itunes-app` meta tag placeholder in `index.html` (commented until App Store ID exists)
+- [ ] **DL-04** | P2 | M | iOS Universal Links — `apple-app-site-association` file in `public/.well-known/`, Capacitor `appUrlOpen` listener, route parsing for `/byoc/activate/:token`
+- [ ] **DL-05** | P2 | M | Android App Links — `assetlinks.json` in `public/.well-known/`, intent filter in `AndroidManifest.xml`
+- [ ] **DL-06** | P2 | S | Uncomment `apple-itunes-app` meta tag once App Store ID is issued
+
+*Last updated: 2026-03-07 — DL-01 through DL-03 complete. Smart banner live. Deep-link wiring deferred.*
