@@ -11,10 +11,6 @@ export default defineConfig({
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
   },
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-      // Mock image/asset imports for tests
-      "\\.png$": path.resolve(__dirname, "./src/test/fileMock.ts"),
-    },
+    alias: { "@": path.resolve(__dirname, "./src") },
   },
 });
