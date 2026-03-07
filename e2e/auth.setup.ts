@@ -22,7 +22,7 @@ setup("authenticate test user", async ({ page }) => {
   // This avoids the bug where waitForSelector finds a hidden input inside
   // an inactive Radix Tabs panel but getByPlaceholder can't interact with it.
   try {
-    await page.getByPlaceholder(/email/i).waitFor({ state: "visible", timeout: 60000 });
+    await page.getByLabel(/email/i).waitFor({ state: "visible", timeout: 60000 });
   } catch {
     await page.screenshot({ path: "test-results/auth-setup-debug.png", fullPage: true });
     const bodyText = await page.locator("body").innerText().catch(() => "(empty)");
@@ -32,8 +32,8 @@ setup("authenticate test user", async ({ page }) => {
   // Ensure form is fully interactive after hydration
   await page.waitForTimeout(1000);
 
-  await page.getByPlaceholder(/email/i).fill(email);
-  await page.getByPlaceholder(/password/i).fill(password);
+  await page.getByLabel(/email/i).fill(email);
+  await page.getByLabel(/password/i).fill(password);
   await page.getByRole("button", { name: /sign in|log in/i }).click();
 
   // Wait for auth to complete — expect redirect away from /auth
