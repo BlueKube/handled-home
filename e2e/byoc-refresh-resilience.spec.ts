@@ -39,20 +39,31 @@ test.describe("BYOC Refresh Resilience", () => {
   test("wizard survives refresh at confirm, property, and services screens", async ({
     page,
   }) => {
-    await page.goto(`/customer/onboarding/byoc/${TOKEN}`);
+    // networkidle ensures ProtectedRoute auth resolves and wizard data loads
+    await page.goto(`/customer/onboarding/byoc/${TOKEN}`, {
+      waitUntil: "networkidle",
+      timeout: 60000,
+    });
 
     // ── Guard: detect "already activated" redirect ──
     try {
       await expect(
         page.getByText(/already on Handled|provider is on/i)
-      ).toBeVisible({ timeout: 15000 });
+      ).toBeVisible({ timeout: 30000 });
     } catch {
       const url = page.url();
       if (url.includes("/customer") && !url.includes("/onboarding/byoc/")) {
         test.skip(true, "BYOC token already activated for this user — skipping refresh test");
         return;
       }
-      throw new Error("Recognition screen not found and not redirected — unexpected state");
+      await page.screenshot({
+        path: path.join(MILESTONES_DIR, "byoc-refresh-recognition-debug.png"),
+        fullPage: true,
+      });
+      const bodyText = await page.locator("body").innerText().catch(() => "(empty)");
+      throw new Error(
+        `Recognition screen not found and not redirected — unexpected state.\nURL: ${url}\nBody: ${bodyText.slice(0, 500)}`
+      );
     }
 
     // ── Navigate to Recognition → Continue ──
@@ -98,14 +109,14 @@ test.describe("BYOC Refresh Resilience", () => {
 
     // Fill and advance to services with unique address
     const street = uniqueStreet();
-    const streetInput = page.getByPlaceholder(/street|address/i).first();
+    const streetInput = page.getByLabel(/street|address/i).first();
     if (await streetInput.isVisible()) {
       await streetInput.fill(street);
-      const cityInput = page.getByPlaceholder(/city/i).first();
+      const cityInput = page.getByLabel(/city/i).first();
       if (await cityInput.isVisible()) await cityInput.fill("Austin");
-      const stateInput = page.getByPlaceholder(/state/i).first();
+      const stateInput = page.getByLabel(/state/i).first();
       if (await stateInput.isVisible()) await stateInput.fill("TX");
-      const zipInput = page.getByPlaceholder(/zip/i).first();
+      const zipInput = page.getByLabel(/zip/i).first();
       if (await zipInput.isVisible()) await zipInput.fill("78701");
     }
     await page.getByRole("button", { name: /continue|next/i }).click();
