@@ -247,6 +247,16 @@ Deno.serve(async (req) => {
       );
     }
 
+    // ── Daily: Auto-resolve stale exceptions ──
+    if (job === "all" || job === "auto_resolve_stale_exceptions") {
+      subResults.auto_resolve_stale_exceptions = await runSubJob(
+        supabase,
+        "auto_resolve_stale_exceptions",
+        `auto_resolve_stale_exceptions:${today}`,
+        () => supabase.rpc("auto_resolve_stale_exceptions"),
+      );
+    }
+
     // Determine orchestrator outcome
     const entries = Object.entries(subResults);
     const failedSubs = entries.filter(([, v]) => v.status === "failed");
