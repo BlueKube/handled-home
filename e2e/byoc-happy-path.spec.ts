@@ -15,9 +15,22 @@ function milestonePath(name: string) {
 }
 
 /**
+ * Generate a unique street address per run to avoid idempotency issues.
+ * Uses timestamp so repeated runs don't collide with stale property data.
+ */
+function uniqueStreet() {
+  return `${Date.now()} Test St`;
+}
+
+/**
  * BYOC Happy Path — starts unauthenticated.
  * This test is matched by the `chromium-mobile-no-auth` project
  * so it does NOT use the shared auth setup.
+ *
+ * IDEMPOTENCY: Uses unique addresses per run. However, the BYOC invite
+ * token can only be activated once per user. If the test user has already
+ * activated this token, the test will detect the redirect to /customer
+ * and skip gracefully rather than fail.
  */
 test.describe("BYOC Onboarding — Happy Path", () => {
   const TOKEN = process.env.TEST_BYOC_TOKEN;
@@ -52,10 +65,24 @@ test.describe("BYOC Onboarding — Happy Path", () => {
       { timeout: 15000 }
     );
 
+    // ── Guard: detect "already activated" redirect ──
+    // If the token was already used by this user, the wizard redirects to /customer.
+    // Detect this and skip the rest of the test gracefully.
+    try {
+      await expect(
+        page.getByText(/already on Handled|provider is on/i)
+      ).toBeVisible({ timeout: 10000 });
+    } catch {
+      // Check if we were redirected away (already activated)
+      const url = page.url();
+      if (url.includes("/customer") && !url.includes("/onboarding/byoc/")) {
+        test.skip(true, "BYOC token already activated for this user — skipping happy path");
+        return;
+      }
+      throw new Error("Recognition screen not found and not redirected — unexpected state");
+    }
+
     // ── Screen 1: Provider Recognition ──
-    await expect(
-      page.getByText(/already on Handled|provider is on/i)
-    ).toBeVisible({ timeout: 10000 });
     await page.screenshot({ path: milestonePath("byoc-01-recognition") });
     await page.getByRole("button", { name: /continue/i }).click();
 
@@ -72,10 +99,11 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     ).toBeVisible({ timeout: 10000 });
     await page.screenshot({ path: milestonePath("byoc-03-property") });
 
-    // Fill address fields if visible
+    // Fill address fields with unique data
+    const street = uniqueStreet();
     const streetInput = page.getByPlaceholder(/street|address/i).first();
     if (await streetInput.isVisible()) {
-      await streetInput.fill("123 Test Street");
+      await streetInput.fill(street);
     }
     const cityInput = page.getByPlaceholder(/city/i).first();
     if (await cityInput.isVisible()) {

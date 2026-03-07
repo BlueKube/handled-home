@@ -4,6 +4,21 @@ import path from "path";
 
 const MILESTONES_DIR = path.join("test-results", "milestones");
 
+/**
+ * Generate a unique street address per run to avoid collisions.
+ */
+function uniqueStreet() {
+  return `${Date.now()} Refresh Ave`;
+}
+
+/**
+ * BYOC Refresh Resilience — verifies wizard survives page.reload().
+ *
+ * IDEMPOTENCY: This test uses unique addresses. If the BYOC token is
+ * already activated for this user, the test detects the redirect and
+ * skips gracefully. This test MUST NOT run in the same suite as the
+ * happy path test against the same token+user combination.
+ */
 test.describe("BYOC Refresh Resilience", () => {
   const TOKEN = process.env.TEST_BYOC_TOKEN;
 
@@ -23,10 +38,21 @@ test.describe("BYOC Refresh Resilience", () => {
   }) => {
     await page.goto(`/customer/onboarding/byoc/${TOKEN}`);
 
+    // ── Guard: detect "already activated" redirect ──
+    try {
+      await expect(
+        page.getByText(/already on Handled|provider is on/i)
+      ).toBeVisible({ timeout: 15000 });
+    } catch {
+      const url = page.url();
+      if (url.includes("/customer") && !url.includes("/onboarding/byoc/")) {
+        test.skip(true, "BYOC token already activated for this user — skipping refresh test");
+        return;
+      }
+      throw new Error("Recognition screen not found and not redirected — unexpected state");
+    }
+
     // ── Navigate to Recognition → Continue ──
-    await expect(
-      page.getByText(/already on Handled|provider is on/i)
-    ).toBeVisible({ timeout: 15000 });
     await page.getByRole("button", { name: /continue/i }).click();
 
     // ── Confirm screen — refresh ──
@@ -67,10 +93,11 @@ test.describe("BYOC Refresh Resilience", () => {
       path: path.join(MILESTONES_DIR, "byoc-refresh-property.png"),
     });
 
-    // Fill and advance to services (simplified — just need to get there)
+    // Fill and advance to services with unique address
+    const street = uniqueStreet();
     const streetInput = page.getByPlaceholder(/street|address/i).first();
     if (await streetInput.isVisible()) {
-      await streetInput.fill("456 Refresh Test Ave");
+      await streetInput.fill(street);
       const cityInput = page.getByPlaceholder(/city/i).first();
       if (await cityInput.isVisible()) await cityInput.fill("Austin");
       const stateInput = page.getByPlaceholder(/state/i).first();

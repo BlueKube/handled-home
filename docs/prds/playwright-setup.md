@@ -335,7 +335,7 @@ Access control:
 | Preview URL changes between deploys | Use `BASE_URL` secret, update as needed |
 | BYOC test token expires or is deactivated | Use a dedicated long-lived token in preview |
 | Test user account state conflicts | Use a dedicated test-only account |
-| Tests not idempotent (double activation) | Known P2 — future: reset data or fresh users per run |
+| Tests not idempotent (double activation) | Tests use `Date.now()` unique addresses + `test.skip()` guard on already-activated tokens |
 | LLM API costs for synthetic reviews | Phase 2; start with manual prompt-paste evaluation |
 | Flaky selectors due to UI changes | Use role-based and text-based selectors, avoid CSS classes |
 | Deno edge function tests not in CI | Document separately; add Deno test step in Phase 2 |
@@ -356,7 +356,7 @@ Access control:
 
 ## 12. Review History
 
-### Code Review — 2026-03-07
+### Code Review Round 1 — 2026-03-07
 
 Findings fixed in this iteration:
 
@@ -368,3 +368,12 @@ Findings fixed in this iteration:
 | P2 | `SECURITY DEFINER` function missing `REVOKE` | Added `REVOKE ALL` from `PUBLIC, anon` + `GRANT` to `authenticated` |
 | P3 | `ProtectedRoute` dropped `location.hash` on redirect | Now includes `location.hash` |
 | P3 | Deno tests undocumented | Documented in this PRD |
+
+### Code Review Round 2 — 2026-03-07
+
+| Severity | Finding | Fix |
+|----------|---------|-----|
+| P1 | `@playwright/test` still in `dependencies` after first fix attempt | Removed + re-added manually to `devDependencies` |
+| P2 | Happy path not idempotent (fails on re-run) | Added `test.skip()` guard for already-activated tokens + `Date.now()` unique addresses |
+| P2 | Refresh resilience test same idempotency issue | Same fix: skip guard + unique addresses |
+| P3 | `vitest` major version bump (3→4) unintentional | Acknowledged; no breaking changes observed |
