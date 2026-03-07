@@ -46,11 +46,7 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     await page.goto(`/byoc/activate/${TOKEN}`, { waitUntil: "load", timeout: 60000 });
 
     // Wait for the SPA to hydrate and AuthContext to resolve.
-    // Instead of asserting URL immediately, wait for either:
-    //   a) The auth form (redirect happened, user is unauthenticated)
-    //   b) The recognition screen (user was already logged in)
-    //   c) The customer dashboard (token already activated)
-    const authEmail = page.getByPlaceholder(/email/i);
+    const authEmail = page.getByLabel(/email/i);
     const recognitionScreen = page.getByText(/already on Handled|provider is on/i);
     const dashboardScreen = page.getByText(/your home team|dashboard/i);
 
@@ -75,8 +71,8 @@ test.describe("BYOC Onboarding — Happy Path", () => {
         await page.waitForTimeout(500);
       }
 
-      await page.getByPlaceholder(/email/i).fill(email);
-      await page.getByPlaceholder(/password/i).fill(password);
+      await page.getByLabel(/email/i).fill(email);
+      await page.getByLabel(/password/i).fill(password);
       await page.getByRole("button", { name: /sign in|log in/i }).click();
 
       // Should redirect into the BYOC wizard
@@ -117,19 +113,19 @@ test.describe("BYOC Onboarding — Happy Path", () => {
 
     // Fill address fields with unique data
     const street = uniqueStreet();
-    const streetInput = page.getByPlaceholder(/street|address/i).first();
+    const streetInput = page.getByLabel(/street|address/i).first();
     if (await streetInput.isVisible()) {
       await streetInput.fill(street);
     }
-    const cityInput = page.getByPlaceholder(/city/i).first();
+    const cityInput = page.getByLabel(/city/i).first();
     if (await cityInput.isVisible()) {
       await cityInput.fill("Austin");
     }
-    const stateInput = page.getByPlaceholder(/state/i).first();
+    const stateInput = page.getByLabel(/state/i).first();
     if (await stateInput.isVisible()) {
       await stateInput.fill("TX");
     }
-    const zipInput = page.getByPlaceholder(/zip/i).first();
+    const zipInput = page.getByLabel(/zip/i).first();
     if (await zipInput.isVisible()) {
       await zipInput.fill("78701");
     }
