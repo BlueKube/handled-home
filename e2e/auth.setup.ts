@@ -15,10 +15,17 @@ setup("authenticate test user", async ({ page }) => {
     );
   }
 
-  await page.goto("/auth", { waitUntil: "domcontentloaded" });
+  // Navigate and wait for full page load (preview URL may cold-start)
+  await page.goto("/auth", { waitUntil: "load", timeout: 60000 });
 
-  // Wait for the auth form to render
-  await page.waitForSelector('input[placeholder*="mail" i]', { timeout: 20000 });
+  // Wait for the auth form to render — capture screenshot on failure for diagnostics
+  try {
+    await page.waitForSelector('input[placeholder*="mail" i]', { timeout: 30000 });
+  } catch {
+    await page.screenshot({ path: "test-results/auth-setup-debug.png", fullPage: true });
+    const bodyText = await page.locator("body").innerText().catch(() => "(empty)");
+    throw new Error(`Auth form not found after 30s. URL: ${page.url()}\nBody: ${bodyText.slice(0, 500)}`);
+  }
 
   await page.getByPlaceholder(/email/i).fill(email);
   await page.getByPlaceholder(/password/i).fill(password);
