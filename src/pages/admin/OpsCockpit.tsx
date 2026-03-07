@@ -135,6 +135,11 @@ export default function OpsCockpit() {
 
   return (
     <div className="p-6 space-y-5">
+      {/* Autopilot Status Banner */}
+      {!autopilot.isLoading && (
+        <AutopilotBanner status={autopilot.status} reasons={autopilot.reasons} />
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
