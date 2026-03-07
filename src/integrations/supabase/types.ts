@@ -9340,6 +9340,7 @@ export type Database = {
           zone_name: string
         }[]
       }
+      get_zone_health_rolling: { Args: { p_days?: number }; Returns: Json }
       grant_cycle_handles: {
         Args: {
           p_customer_id: string
