@@ -18,7 +18,7 @@ const COLUMNS: { key: SortKey; label: string; align?: "right" }[] = [
   { key: "open_exceptions", label: "Open Exc.", align: "right" },
 ];
 
-function cellAlert(key: SortKey, row: ZoneHealthRow): boolean {
+function cellAlert(key: SortKey, row: ZoneHealthRollingRow): boolean {
   if (key === "unassigned_locked") return row.unassigned_locked > 0;
   if (key === "reschedule_rate") return row.reschedule_rate > 5;
   if (key === "proof_missing_rate") return row.proof_missing_rate > 10;
@@ -27,7 +27,7 @@ function cellAlert(key: SortKey, row: ZoneHealthRow): boolean {
 }
 
 export function ZoneHealthTable() {
-  const { data: zones, isLoading } = useZoneHealth();
+  const { data: zones, isLoading } = useZoneHealthRolling();
   const [sortKey, setSortKey] = useState<SortKey>("open_exceptions");
   const [sortAsc, setSortAsc] = useState(false);
   const nav = useNavigate();
