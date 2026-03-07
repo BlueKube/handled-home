@@ -72,18 +72,16 @@ export function useByocOnboardingContext(token: string | undefined): UseByocOnbo
 
     // Write metadata directly without advancing onboarding steps
     if (progress?.id) {
-      supabase
+      void supabase
         .from("customer_onboarding_progress")
         .update({ metadata: newMetadata as unknown as Json })
         .eq("id", progress.id)
-        .then(() => {})
-        .catch(() => { persisted.current = false; });
+        .then(({ error }) => { if (error) persisted.current = false; });
     } else if (user) {
-      supabase
+      void supabase
         .from("customer_onboarding_progress")
         .insert([{ user_id: user.id, current_step: "property", metadata: newMetadata as unknown as Json }])
-        .then(() => {})
-        .catch(() => { persisted.current = false; });
+        .then(({ error }) => { if (error) persisted.current = false; });
     }
   }, [inviteData, progress, metadata, token, user]);
 
