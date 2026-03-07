@@ -46,12 +46,13 @@ export function AutopilotThresholdsDialog() {
   const isDirty = Object.keys(edits).length > 0;
 
   const handleSave = async () => {
-    for (const [key, value] of Object.entries(edits)) {
-      const row = configMap.get(key);
-      if (row) {
-        await updateConfig.mutateAsync({ id: row.id, config_value: value });
-      }
-    }
+    const mutations = Object.entries(edits)
+      .map(([key, value]) => {
+        const row = configMap.get(key);
+        return row ? updateConfig.mutateAsync({ id: row.id, config_value: value }) : null;
+      })
+      .filter(Boolean);
+    await Promise.all(mutations);
     setEdits({});
     toast.success("Thresholds updated");
   };

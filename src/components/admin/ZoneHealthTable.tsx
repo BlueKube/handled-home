@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useMemo } from "react";
 import { useZoneHealthRolling, type ZoneHealthRollingRow } from "@/hooks/useZoneHealthRolling";
+import { useAssignmentConfig } from "@/hooks/useAssignmentConfig";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -18,19 +18,49 @@ const COLUMNS: { key: SortKey; label: string; align?: "right" }[] = [
   { key: "open_exceptions", label: "Open Exc.", align: "right" },
 ];
 
-function cellAlert(key: SortKey, row: ZoneHealthRollingRow): boolean {
-  if (key === "unassigned_locked") return row.unassigned_locked > 0;
-  if (key === "reschedule_rate") return row.reschedule_rate > 5;
-  if (key === "proof_missing_rate") return row.proof_missing_rate > 10;
-  if (key === "open_exceptions") return row.open_exceptions > 3;
+interface CellThresholds {
+  max_unassigned_locked: number;
+  max_reschedule_rate_locked: number;
+  max_proof_missing_rate: number;
+  max_open_exceptions: number;
+}
+
+const CELL_DEFAULTS: CellThresholds = {
+  max_unassigned_locked: 0,
+  max_reschedule_rate_locked: 5,
+  max_proof_missing_rate: 10,
+  max_open_exceptions: 5,
+};
+
+function parseCellThresholds(config: any[]): CellThresholds {
+  const t = { ...CELL_DEFAULTS };
+  for (const row of config) {
+    const key = row.config_key as string;
+    const val = typeof row.config_value === "number" ? row.config_value : Number(row.config_value);
+    if (isNaN(val)) continue;
+    if (key === "autopilot_max_unassigned_locked") t.max_unassigned_locked = val;
+    else if (key === "autopilot_max_reschedule_rate_locked") t.max_reschedule_rate_locked = val;
+    else if (key === "autopilot_max_proof_missing_rate") t.max_proof_missing_rate = val;
+    else if (key === "autopilot_max_open_exceptions") t.max_open_exceptions = val;
+  }
+  return t;
+}
+
+function cellAlert(key: SortKey, row: ZoneHealthRollingRow, t: CellThresholds): boolean {
+  if (key === "unassigned_locked") return row.unassigned_locked > t.max_unassigned_locked;
+  if (key === "reschedule_rate") return row.reschedule_rate > t.max_reschedule_rate_locked;
+  if (key === "proof_missing_rate") return row.proof_missing_rate > t.max_proof_missing_rate;
+  if (key === "open_exceptions") return row.open_exceptions > t.max_open_exceptions;
   return false;
 }
 
 export function ZoneHealthTable() {
   const { data: zones, isLoading } = useZoneHealthRolling();
+  const { data: configRows } = useAssignmentConfig();
   const [sortKey, setSortKey] = useState<SortKey>("open_exceptions");
   const [sortAsc, setSortAsc] = useState(false);
-  const nav = useNavigate();
+
+  const thresholds = useMemo(() => parseCellThresholds(configRows ?? []), [configRows]);
 
   if (isLoading) return <Skeleton className="h-48 rounded-xl" />;
   if (!zones || zones.length === 0) return null;
@@ -82,25 +112,24 @@ export function ZoneHealthTable() {
               {sorted.map((row) => (
                 <tr
                   key={row.zone_id}
-                  className="border-t hover:bg-muted/30 cursor-pointer transition-colors"
-                  onClick={() => nav(`/admin/ops/zones/${row.zone_id}`)}
+                  className="border-t hover:bg-muted/30 transition-colors"
                 >
                   <td className="px-3 py-2 font-medium">{row.zone_name}</td>
                   <td className="px-3 py-2 text-right">{row.jobs_today}</td>
-                  <td className={cn("px-3 py-2 text-right", cellAlert("unassigned_locked", row) && "text-destructive font-semibold")}>
+                  <td className={cn("px-3 py-2 text-right", cellAlert("unassigned_locked", row, thresholds) && "text-destructive font-semibold")}>
                     {row.unassigned_locked}
                     {row.unassigned_locked > 0 && (
                       <Badge variant="destructive" className="ml-1 text-[9px] px-1 py-0">!</Badge>
                     )}
                   </td>
-                  <td className={cn("px-3 py-2 text-right", cellAlert("reschedule_rate", row) && "text-destructive font-semibold")}>
+                  <td className={cn("px-3 py-2 text-right", cellAlert("reschedule_rate", row, thresholds) && "text-destructive font-semibold")}>
                     {row.reschedule_rate}%
                   </td>
-                  <td className={cn("px-3 py-2 text-right", cellAlert("proof_missing_rate", row) && "text-destructive font-semibold")}>
+                  <td className={cn("px-3 py-2 text-right", cellAlert("proof_missing_rate", row, thresholds) && "text-destructive font-semibold")}>
                     {row.proof_missing_rate}%
                   </td>
                   <td className="px-3 py-2 text-right">{row.issue_count_7d}</td>
-                  <td className={cn("px-3 py-2 text-right", cellAlert("open_exceptions", row) && "text-destructive font-semibold")}>
+                  <td className={cn("px-3 py-2 text-right", cellAlert("open_exceptions", row, thresholds) && "text-destructive font-semibold")}>
                     {row.open_exceptions}
                   </td>
                 </tr>

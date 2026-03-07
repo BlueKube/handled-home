@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useOpsMetrics, OpsMetrics } from "@/hooks/useOpsMetrics";
 import { useOpsExceptionCount } from "@/hooks/useOpsExceptions";
 import { useAssignmentConfig } from "@/hooks/useAssignmentConfig";
+import { useZoneHealthRolling, ZoneHealthRollingRow } from "@/hooks/useZoneHealthRolling";
 
 export type AutopilotStatus = "green" | "yellow" | "red";
 
@@ -60,18 +61,36 @@ function parseThresholds(config: any[]): Thresholds {
   return t;
 }
 
+/** Aggregate zone-level metrics into system-wide signals */
+function aggregateZoneMetrics(zones: ZoneHealthRollingRow[]) {
+  let totalUnassignedLocked = 0;
+  let maxRescheduleRate = 0;
+  let maxProofMissingRate = 0;
+  let maxAvgDriveMinutes = 0;
+
+  for (const z of zones) {
+    totalUnassignedLocked += z.unassigned_locked;
+    if (z.reschedule_rate > maxRescheduleRate) maxRescheduleRate = z.reschedule_rate;
+    if (z.proof_missing_rate > maxProofMissingRate) maxProofMissingRate = z.proof_missing_rate;
+    if (z.avg_stop_minutes > maxAvgDriveMinutes) maxAvgDriveMinutes = z.avg_stop_minutes;
+  }
+
+  return { totalUnassignedLocked, maxRescheduleRate, maxProofMissingRate, maxAvgDriveMinutes };
+}
+
 function computeHealth(
   m: OpsMetrics,
   openExceptions: number,
   t: Thresholds,
+  zoneAgg: ReturnType<typeof aggregateZoneMetrics>,
 ): { status: AutopilotStatus; reasons: AutopilotReason[] } {
   const reasons: AutopilotReason[] = [];
 
   // RED conditions
-  if (m.jobsInIssue > t.max_unassigned_locked) {
+  if (zoneAgg.totalUnassignedLocked > t.max_unassigned_locked) {
     reasons.push({
-      label: "Jobs at risk in LOCKED window",
-      detail: `${m.jobsInIssue} job(s) with open issues (threshold: ${t.max_unassigned_locked})`,
+      label: "Unassigned jobs in LOCKED window",
+      detail: `${zoneAgg.totalUnassignedLocked} unassigned job(s) (threshold: ${t.max_unassigned_locked})`,
       severity: "red",
     });
   }
@@ -93,10 +112,26 @@ function computeHealth(
   }
 
   // YELLOW conditions
-  if (m.proofExceptions > 0) {
+  if (zoneAgg.maxProofMissingRate > t.max_proof_missing_rate) {
     reasons.push({
-      label: "Missing proof submissions",
-      detail: `${m.proofExceptions} completed job(s) missing required proof`,
+      label: "Proof missing rate exceeded",
+      detail: `${zoneAgg.maxProofMissingRate}% in worst zone (threshold: ${t.max_proof_missing_rate}%)`,
+      severity: "yellow",
+    });
+  }
+
+  if (zoneAgg.maxRescheduleRate > t.max_reschedule_rate_locked) {
+    reasons.push({
+      label: "Reschedule rate elevated",
+      detail: `${zoneAgg.maxRescheduleRate}% in worst zone (threshold: ${t.max_reschedule_rate_locked}%)`,
+      severity: "yellow",
+    });
+  }
+
+  if (zoneAgg.maxAvgDriveMinutes > t.max_avg_drive_minutes) {
+    reasons.push({
+      label: "Average drive time high",
+      detail: `${zoneAgg.maxAvgDriveMinutes} min in worst zone (threshold: ${t.max_avg_drive_minutes} min)`,
       severity: "yellow",
     });
   }
@@ -144,8 +179,10 @@ export function useAutopilotHealth(): AutopilotHealth {
   const { data: metrics, isLoading: metricsLoading } = useOpsMetrics();
   const { data: openExceptions = 0, isLoading: exceptionsLoading } = useOpsExceptionCount();
   const { data: configRows, isLoading: configLoading } = useAssignmentConfig();
+  const { data: zoneRows, isLoading: zonesLoading } = useZoneHealthRolling();
 
   const thresholds = useMemo(() => parseThresholds(configRows ?? []), [configRows]);
+  const zoneAgg = useMemo(() => aggregateZoneMetrics(zoneRows ?? []), [zoneRows]);
 
   const health = useMemo(() => {
     if (!metrics) {
@@ -162,23 +199,23 @@ export function useAutopilotHealth(): AutopilotHealth {
       };
     }
 
-    const { status, reasons } = computeHealth(metrics, openExceptions, thresholds);
+    const { status, reasons } = computeHealth(metrics, openExceptions, thresholds, zoneAgg);
 
     return {
       status,
       reasons,
       kpis: {
-        unassignedLocked: 0,
+        unassignedLocked: zoneAgg.totalUnassignedLocked,
         slaRiskJobs: metrics.jobsInIssue,
         providerCallouts: metrics.redoIntents,
         proofMissing: metrics.proofExceptions,
         customerReschedules: 0,
       },
     };
-  }, [metrics, openExceptions, thresholds]);
+  }, [metrics, openExceptions, thresholds, zoneAgg]);
 
   return {
     ...health,
-    isLoading: metricsLoading || exceptionsLoading || configLoading,
+    isLoading: metricsLoading || exceptionsLoading || configLoading || zonesLoading,
   };
 }
