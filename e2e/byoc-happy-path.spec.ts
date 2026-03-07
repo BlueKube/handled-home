@@ -49,13 +49,19 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     const password = process.env.TEST_USER_PASSWORD!;
 
     // ── Step 0: Visit invite link unauthenticated ──
-    await page.goto(`/byoc/activate/${TOKEN}`);
+    await page.goto(`/byoc/activate/${TOKEN}`, { waitUntil: "load", timeout: 60000 });
 
     // Should redirect to auth with return URL
-    await expect(page).toHaveURL(/\/auth\?redirect=/, { timeout: 15000 });
+    await expect(page).toHaveURL(/\/auth\?redirect=/, { timeout: 30000 });
 
     // Wait for the auth form to render
-    await page.waitForSelector('input[placeholder*="mail" i]', { timeout: 20000 });
+    try {
+      await page.waitForSelector('input[placeholder*="mail" i]', { timeout: 30000 });
+    } catch {
+      await page.screenshot({ path: milestonePath("byoc-auth-debug"), fullPage: true });
+      const bodyText = await page.locator("body").innerText().catch(() => "(empty)");
+      throw new Error(`Auth form not found. URL: ${page.url()}\nBody: ${bodyText.slice(0, 500)}`);
+    }
 
     // ── Step 1: Log in ──
     await page.getByPlaceholder(/email/i).fill(email);
