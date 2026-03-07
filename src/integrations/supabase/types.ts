@@ -9130,6 +9130,7 @@ export type Database = {
         Returns: undefined
       }
       auto_assign_job: { Args: { p_job_id: string }; Returns: Json }
+      auto_resolve_stale_exceptions: { Args: never; Returns: Json }
       book_home_assistant: {
         Args: {
           p_payment_method?: string
@@ -9310,6 +9311,10 @@ export type Database = {
           price_multiplier: number
           sku_id: string
         }[]
+      }
+      get_exception_analytics: {
+        Args: { p_days_back?: number; p_zone_id?: string }
+        Returns: Json
       }
       get_handle_balance: {
         Args: { p_subscription_id: string }
