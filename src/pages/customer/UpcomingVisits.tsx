@@ -211,9 +211,23 @@ function VisitCard({ visit }: { visit: UpcomingVisit }) {
 
       {/* Exception hint */}
       {isException && (
-        <div className="flex items-center gap-2 p-2.5 rounded-lg bg-destructive/10 text-xs text-destructive">
-          <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-          <span>We're working on rescheduling this visit. We'll update you soon.</span>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 p-2.5 rounded-lg bg-destructive/10 text-xs text-destructive">
+            <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+            <span>We're working on rescheduling this visit. We'll update you soon.</span>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full gap-1.5"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/customer/reschedule/${visit.id}`);
+            }}
+          >
+            <CalendarDays className="h-3.5 w-3.5" />
+            Reschedule Visit
+          </Button>
         </div>
       )}
 
