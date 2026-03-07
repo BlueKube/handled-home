@@ -31,40 +31,42 @@ export function HomeTeamCard() {
       if (error) throw error;
       if (!activations || activations.length === 0) return [];
 
-      // Get next scheduled job for each provider
-      const results: LinkedProvider[] = [];
+      // Collect unique property IDs for a single jobs query
+      const propertyIds = [...new Set(activations.map((a) => a.property_id).filter(Boolean))] as string[];
+      
+      // Single query: get next scheduled job per provider_org_id
+      let jobsByProvider: Record<string, string> = {};
+      if (propertyIds.length > 0) {
+        const today = new Date().toISOString().split("T")[0];
+        const { data: jobs } = await supabase
+          .from("jobs")
+          .select("provider_org_id, scheduled_date")
+          .in("property_id", propertyIds)
+          .eq("status", "scheduled")
+          .gte("scheduled_date", today)
+          .order("scheduled_date", { ascending: true });
+        
+        if (jobs) {
+          for (const job of jobs) {
+            // Keep earliest date per provider
+            if (!jobsByProvider[job.provider_org_id]) {
+              jobsByProvider[job.provider_org_id] = job.scheduled_date!;
+            }
+          }
+        }
+      }
 
-      for (const act of activations) {
+      return activations.map((act) => {
         const providerOrg = act.provider_orgs as any;
         const sku = act.service_skus as any;
-        
-        let nextVisitDate: string | null = null;
-        
-        if (act.property_id) {
-          const { data: nextJob } = await supabase
-            .from("jobs")
-            .select("scheduled_date")
-            .eq("property_id", act.property_id)
-            .eq("provider_org_id", act.provider_org_id)
-            .eq("status", "scheduled")
-            .gte("scheduled_date", new Date().toISOString().split("T")[0])
-            .order("scheduled_date", { ascending: true })
-            .limit(1)
-            .maybeSingle();
-          
-          nextVisitDate = nextJob?.scheduled_date ?? null;
-        }
-
-        results.push({
+        return {
           id: act.id,
           providerName: providerOrg?.name ?? "Provider",
           providerLogoUrl: providerOrg?.logo_url ?? null,
           category: sku?.category ?? "general",
-          nextVisitDate,
-        });
-      }
-
-      return results;
+          nextVisitDate: jobsByProvider[act.provider_org_id] ?? null,
+        };
+      });
     },
   });
 

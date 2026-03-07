@@ -109,9 +109,22 @@ export default function ByocOnboardingWizard() {
   const [step, setStep] = useState<ByocStep>("recognition");
   const [selectedCadence, setSelectedCadence] = useState<string | null>(null);
   const [interestedCategories, setInterestedCategories] = useState<string[]>([]);
+  const [createdPropertyId, setCreatedPropertyId] = useState<string | null>(null);
 
   const inviteData = invite.data;
   const cadence = selectedCadence || inviteData?.default_cadence || "weekly";
+  const { progress } = useOnboardingProgress();
+
+  // Persist interested_services to metadata
+  const persistInterestedServices = useCallback(async (categories: string[]) => {
+    if (!progress?.id) return;
+    const metadata = (progress.metadata as Record<string, unknown>) ?? {};
+    const updated = { ...metadata, interested_services: categories };
+    await supabase
+      .from("customer_onboarding_progress")
+      .update({ metadata: updated as any })
+      .eq("id", progress.id);
+  }, [progress]);
 
   // Loading
   if (contextLoading || invite.isLoading) {
@@ -130,14 +143,14 @@ export default function ByocOnboardingWizard() {
   }
 
   const stepIndex = BYOC_STEPS.indexOf(step);
-  // Don't count "activating" as a visible step for progress
   const visibleSteps = BYOC_STEPS.filter((s): s is ByocStep => s !== "activating");
   const visibleIndex = visibleSteps.indexOf(step as ByocStep);
   const progressPercent = Math.round(((visibleIndex >= 0 ? visibleIndex : stepIndex) / (visibleSteps.length - 1)) * 100);
 
   const canGoBack = stepIndex > 0 && step !== "activating" && step !== "success";
   const handleBack = () => {
-    const prevIdx = stepIndex - 1;
+    let prevIdx = stepIndex - 1;
+    if (BYOC_STEPS[prevIdx] === "activating") prevIdx--;
     if (prevIdx >= 0) setStep(BYOC_STEPS[prevIdx]);
   };
 
@@ -187,7 +200,10 @@ export default function ByocOnboardingWizard() {
           />
         )}
         {step === "property" && (
-          <PropertyScreen onComplete={() => setStep("home_setup")} />
+          <PropertyScreen onComplete={(propertyId) => {
+            if (propertyId) setCreatedPropertyId(propertyId);
+            setStep("home_setup");
+          }} />
         )}
         {step === "home_setup" && (
           <HomeSetupScreen
@@ -208,17 +224,22 @@ export default function ByocOnboardingWizard() {
                   return;
                 }
 
-                // Get property_id
-                const { data: prop } = await supabase
-                  .from("properties")
-                  .select("id")
-                  .eq("user_id", user!.id)
-                  .order("updated_at", { ascending: false })
-                  .limit(1)
-                  .maybeSingle();
+                // Use the property_id passed forward from PropertyScreen
+                let propertyId = createdPropertyId;
+                if (!propertyId) {
+                  // Fallback: query most recent property
+                  const { data: prop } = await supabase
+                    .from("properties")
+                    .select("id")
+                    .eq("user_id", user!.id)
+                    .order("updated_at", { ascending: false })
+                    .limit(1)
+                    .maybeSingle();
+                  propertyId = prop?.id ?? undefined;
+                }
 
                 await activate.mutateAsync({
-                  property_id: prop?.id,
+                  property_id: propertyId,
                   cadence,
                 });
 
@@ -230,8 +251,8 @@ export default function ByocOnboardingWizard() {
                   navigate("/customer");
                   return;
                 }
-                toast.error(err.message || "Connection failed. Continuing setup...");
-                setStep("services");
+                toast.error(err.message || "Connection failed. Please try again.");
+                setStep("home_setup");
               }
             }}
           />
@@ -247,14 +268,18 @@ export default function ByocOnboardingWizard() {
                 prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
               );
             }}
-            onContinue={() => {
+            onContinue={async () => {
+              await persistInterestedServices(interestedCategories);
               if (interestedCategories.length > 0) {
                 setStep("plan");
               } else {
                 setStep("success");
               }
             }}
-            onSkip={() => setStep("success")}
+            onSkip={async () => {
+              await persistInterestedServices([]);
+              setStep("success");
+            }}
           />
         )}
         {step === "plan" && (
@@ -428,7 +453,7 @@ function ConfirmServiceScreen({
 // ════════════════════════════════════════
 // Screen 3: Property
 // ════════════════════════════════════════
-function PropertyScreen({ onComplete }: { onComplete: () => void }) {
+function PropertyScreen({ onComplete }: { onComplete: (propertyId?: string) => void }) {
   const { property, save, isSaving } = useProperty();
   const [form, setForm] = useState<PropertyFormData>({
     street_address: "",
@@ -476,8 +501,8 @@ function PropertyScreen({ onComplete }: { onComplete: () => void }) {
     setErrors(fieldErrors);
     if (Object.keys(fieldErrors).length > 0) return;
     try {
-      await save(normalized);
-      onComplete();
+      const saved = await save(normalized);
+      onComplete(saved?.id);
     } catch {}
   };
 
