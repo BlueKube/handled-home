@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CustomerNotificationBanners } from "@/components/customer/NotificationBanners";
+import { SmartAppBanner } from "@/components/SmartAppBanner";
 import { HomeSetupCard } from "@/components/customer/HomeSetupCard";
 import { NextVisitCard } from "@/components/customer/NextVisitCard";
 import { HandleBalanceBar } from "@/components/customer/HandleBalanceBar";
@@ -115,6 +116,9 @@ export default function CustomerDashboard() {
           Welcome back{user?.user_metadata?.full_name ? `, ${user.user_metadata.full_name}` : ""}.
         </p>
       </div>
+
+      {/* Smart App Banner */}
+      <SmartAppBanner />
 
       {/* Notification Banners */}
       <CustomerNotificationBanners />
