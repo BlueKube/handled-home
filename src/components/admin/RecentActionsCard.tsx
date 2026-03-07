@@ -28,13 +28,20 @@ function useRecentActions(limit: number = 15) {
         .order("created_at", { ascending: false })
         .limit(limit);
 
+      // Batch-fetch actor names for ops actions
+      const opsActorIds = [...new Set((opsActions ?? []).map(a => a.actor_user_id).filter(Boolean))];
+      const { data: opsProfiles } = opsActorIds.length > 0
+        ? await supabase.from("profiles").select("id, full_name").in("id", opsActorIds)
+        : { data: [] };
+      const profileMap = new Map((opsProfiles ?? []).map(p => [p.id, p.full_name ?? "Admin"]));
+
       for (const a of opsActions ?? []) {
         actions.push({
           id: a.id,
           source: "ops",
           label: (a.action_type ?? "").replace(/_/g, " "),
           detail: a.reason_note || a.reason_code || "",
-          actor: a.actor_user_id?.slice(0, 8) ?? "system",
+          actor: a.actor_user_id ? (profileMap.get(a.actor_user_id) ?? "Admin") : "System",
           created_at: a.created_at,
         });
       }
