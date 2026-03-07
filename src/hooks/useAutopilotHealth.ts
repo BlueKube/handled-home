@@ -118,7 +118,7 @@ function computeHealth(
 
 export function useAutopilotHealth(): AutopilotHealth {
   const { data: metrics, isLoading: metricsLoading } = useOpsMetrics();
-  const { count: openExceptions, isLoading: exceptionsLoading } = useOpsExceptionCount();
+  const { data: openExceptions = 0, isLoading: exceptionsLoading } = useOpsExceptionCount();
 
   const health = useMemo(() => {
     if (!metrics) {
