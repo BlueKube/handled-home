@@ -1080,3 +1080,26 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S8-P6-02** | P1 | M | Exception analytics dashboard — `get_exception_analytics` RPC returns aggregate metrics (total/resolved/open, resolution rate, avg resolve hours, break-freeze count, by type/zone/severity/resolution_type). `/admin/ops/exception-analytics` page with KPI cards, bar chart by type, severity pie, resolution type pie, zone table, time-to-resolve breakdown. Period selector (7/14/30/90 days). `useExceptionAnalytics` hook. Nav link added.
 
 *Last updated: 2026-03-07 — Sprint 8 Phase 6 complete. Auto-resolve stale exceptions + exception analytics dashboard operational.*
+
+---
+
+## PRD-300 Sprint 9 — Ops Dashboard v2 (Autopilot Health + Configurable Thresholds)
+
+> **PRD:** `docs/prds/unfinished/prd_300_sprint_9_ops_user_manual.md`
+> **Goal:** Autopilot status banner (G/Y/R), zone health table (rolling 7d), configurable thresholds, alerting behavior.
+> **Complexity:** L (3 phases)
+
+### Phase 1: Autopilot Status Banner + KPI Tiles
+- [x] **S9-P1-01** | P0 | M | `useAutopilotHealth` hook — computes GREEN/YELLOW/RED from existing metrics (jobs at risk, exceptions backlog, failed payments, proof missing, issue rate, capacity, past due, redo intents). Returns status, reasons array, KPI snapshot.
+- [x] **S9-P1-02** | P0 | M | `AutopilotBanner` component — collapsible card with status icon/color, reason count badge, expandable "Why not green?" breakdown sorted by severity. Integrated at top of OpsCockpit.
+
+### Phase 2: Zone Health Table (Rolling 7-Day)
+- [x] **S9-P2-01** | P0 | M | `get_zone_health_rolling` RPC — per-zone rolling 7-day metrics: jobs today, unassigned today, reschedule rate (LOCKED), avg drive minutes/route, proof missing rate, dispute rate. Admin-guarded via `admin_memberships` check.
+- [x] **S9-P2-02** | P0 | M | `ZoneHealthTable` component — sortable table with drilldowns (click zone → underlying jobs/providers). `useZoneHealthRolling` hook. Integrated into OpsCockpit below KPI grid.
+
+### Phase 3: Configurable Thresholds + Alerting
+- [x] **S9-P3-01** | P0 | S | Seed 9 threshold dials into `assignment_config` (autopilot_max_unassigned_locked, autopilot_sla_risk_threshold, autopilot_max_proof_missing_rate, autopilot_max_reschedule_rate_locked, autopilot_max_provider_callouts_day, autopilot_max_avg_drive_minutes, autopilot_max_open_exceptions, autopilot_max_issue_rate_7d, autopilot_max_redo_intents_7d).
+- [x] **S9-P3-02** | P0 | M | `AutopilotThresholdsDialog` — admin-editable threshold dials with save/reset. Accessible from OpsCockpit header "Thresholds" button.
+- [x] **S9-P3-03** | P0 | M | Wire thresholds into `useAutopilotHealth` — reads config dials from `assignment_config`, falls back to hardcoded defaults. Threshold values shown in reason detail strings.
+
+*Last updated: 2026-03-07 — Sprint 9 Phases 1–3 complete. Autopilot health banner, zone health table, configurable thresholds operational.*

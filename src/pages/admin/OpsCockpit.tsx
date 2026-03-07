@@ -1,5 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useOpsMetrics } from "@/hooks/useOpsMetrics";
+import { useAutopilotHealth } from "@/hooks/useAutopilotHealth";
+import { AutopilotBanner } from "@/components/admin/AutopilotBanner";
+import { ZoneHealthTable } from "@/components/admin/ZoneHealthTable";
+import { AutopilotThresholdsDialog } from "@/components/admin/AutopilotThresholdsDialog";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -105,6 +109,7 @@ function ListTile({ title, items, emptyLabel, href }: {
 
 export default function OpsCockpit() {
   const { data: m, isLoading, dataUpdatedAt } = useOpsMetrics();
+  const autopilot = useAutopilotHealth();
   const nav = useNavigate();
 
   if (isLoading || !m) {
@@ -132,19 +137,27 @@ export default function OpsCockpit() {
 
   return (
     <div className="p-6 space-y-5">
+      {/* Autopilot Status Banner */}
+      {!autopilot.isLoading && (
+        <AutopilotBanner status={autopilot.status} reasons={autopilot.reasons} />
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-h2 mb-0.5">Ops Cockpit</h1>
           <p className="text-caption">{updatedLabel}</p>
         </div>
-        <Badge
-          variant="outline"
-          className="cursor-pointer text-xs"
-          onClick={() => nav("/admin/ops/dispatch")}
-        >
-          Open Dispatcher →
-        </Badge>
+        <div className="flex items-center gap-2">
+          <AutopilotThresholdsDialog />
+          <Badge
+            variant="outline"
+            className="cursor-pointer text-xs"
+            onClick={() => nav("/admin/ops/dispatch")}
+          >
+            Open Dispatcher →
+          </Badge>
+        </div>
       </div>
 
       {/* 4-column grid */}
@@ -294,6 +307,9 @@ export default function OpsCockpit() {
           </div>
         </div>
       </div>
+
+      {/* Zone Health Table */}
+      <ZoneHealthTable />
     </div>
   );
 }
