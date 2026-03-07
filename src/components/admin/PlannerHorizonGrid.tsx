@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { format, addDays, isBefore, isToday, startOfDay } from "date-fns";
+import { format, addDays, isToday, startOfDay } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -20,36 +20,22 @@ function useHorizonStats() {
     queryKey: ["planner-horizon-stats"],
     queryFn: async () => {
       const today = startOfDay(new Date());
-      const days: DayStats[] = [];
+      const todayStr = format(today, "yyyy-MM-dd");
 
-      for (let i = 0; i < 14; i++) {
-        const d = addDays(today, i);
-        const dateStr = format(d, "yyyy-MM-dd");
-        const window = i < 7 ? "locked" : "draft";
+      const { data, error } = await supabase.rpc(
+        "get_planner_horizon_stats" as any,
+        { p_start_date: todayStr, p_days: 14 } as any
+      );
 
-        const { count: total } = await supabase
-          .from("visits")
-          .select("*", { count: "exact", head: true })
-          .eq("scheduled_date", dateStr)
-          .not("schedule_state", "in", '("canceled","rescheduled")');
+      if (error) throw error;
 
-        const { count: unassigned } = await supabase
-          .from("visits")
-          .select("*", { count: "exact", head: true })
-          .eq("scheduled_date", dateStr)
-          .is("provider_org_id", null)
-          .not("schedule_state", "in", '("canceled","rescheduled")');
-
-        days.push({
-          date: dateStr,
-          total: total ?? 0,
-          assigned: (total ?? 0) - (unassigned ?? 0),
-          unassigned: unassigned ?? 0,
-          window,
-        });
-      }
-
-      return days;
+      return ((data as any[]) ?? []).map((row: any, i: number) => ({
+        date: row.stat_date,
+        total: Number(row.total ?? 0),
+        assigned: Number(row.assigned ?? 0),
+        unassigned: Number(row.unassigned ?? 0),
+        window: (i < 7 ? "locked" : "draft") as "locked" | "draft",
+      }));
     },
     staleTime: 120_000,
     refetchInterval: 120_000,
@@ -76,7 +62,7 @@ export function PlannerHorizonGrid() {
 
   if (!days) return null;
 
-  const freezeBoundaryIdx = 6; // Last LOCKED day index
+  const freezeBoundaryIdx = 6;
 
   return (
     <Card>
