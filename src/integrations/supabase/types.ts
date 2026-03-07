@@ -9378,6 +9378,15 @@ export type Database = {
         Returns: number
       }
       get_neighborhood_density: { Args: { p_user_id: string }; Returns: Json }
+      get_planner_horizon_stats: {
+        Args: { p_days?: number; p_start_date?: string }
+        Returns: {
+          assigned: number
+          stat_date: string
+          total: number
+          unassigned: number
+        }[]
+      }
       get_property_profile_context: {
         Args: { p_property_id: string }
         Returns: Json
