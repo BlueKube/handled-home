@@ -17,15 +17,15 @@ test.describe("BYOC Invalid Invite", () => {
   });
 
   test("shows fallback screen for invalid BYOC token", async ({ page }) => {
-    // networkidle ensures ProtectedRoute auth resolves and wizard data fetches complete
-    await page.goto("/customer/onboarding/byoc/invalid-token-xyz-playwright", {
+    // Use the public /byoc/activate route (avoids ProtectedRoute 404 issues)
+    await page.goto("/byoc/activate/invalid-token-xyz-playwright", {
       waitUntil: "networkidle",
       timeout: 60000,
     });
 
-    // Expect a fallback / error state (InviteFallbackScreen renders
-    // "This invitation is no longer active" for null/inactive invites).
-    // Use 30s timeout to allow for auth resolution + Supabase query.
+    // Expect a fallback / error state.
+    // ByocActivate shows "This invitation is no longer active" for invalid tokens.
+    // The wizard's InviteFallbackScreen shows "This invitation is no longer active".
     try {
       await expect(
         page.getByText(/no longer active|invalid|not found|expired|something went wrong/i)
