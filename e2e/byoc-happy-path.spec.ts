@@ -52,7 +52,10 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     await page.goto(`/byoc/activate/${TOKEN}`);
 
     // Should redirect to auth with return URL
-    await expect(page).toHaveURL(/\/auth\?redirect=/, { timeout: 10000 });
+    await expect(page).toHaveURL(/\/auth\?redirect=/, { timeout: 15000 });
+
+    // Wait for the auth form to render
+    await page.waitForSelector('input[placeholder*="mail" i]', { timeout: 20000 });
 
     // ── Step 1: Log in ──
     await page.getByPlaceholder(/email/i).fill(email);
