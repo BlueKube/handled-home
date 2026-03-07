@@ -131,8 +131,8 @@ export default function ByocOnboardingWizard() {
 
   const stepIndex = BYOC_STEPS.indexOf(step);
   // Don't count "activating" as a visible step for progress
-  const visibleSteps = BYOC_STEPS.filter((s) => s !== "activating");
-  const visibleIndex = visibleSteps.indexOf(step);
+  const visibleSteps = BYOC_STEPS.filter((s): s is ByocStep => s !== "activating");
+  const visibleIndex = visibleSteps.indexOf(step as ByocStep);
   const progressPercent = Math.round(((visibleIndex >= 0 ? visibleIndex : stepIndex) / (visibleSteps.length - 1)) * 100);
 
   const canGoBack = stepIndex > 0 && step !== "activating" && step !== "success";
