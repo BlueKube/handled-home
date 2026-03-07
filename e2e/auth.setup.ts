@@ -1,7 +1,7 @@
 import { test as setup, expect } from "@playwright/test";
 import path from "path";
 
-const authFile = path.join(__dirname, ".auth", "user.json");
+const authFile = path.join(import.meta.dirname, ".auth", "user.json");
 
 setup("authenticate test user", async ({ page }) => {
   const email = process.env.TEST_USER_EMAIL;
