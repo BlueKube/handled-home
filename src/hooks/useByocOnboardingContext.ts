@@ -1,7 +1,10 @@
 import { useEffect, useRef } from "react";
 import { useByocActivation, type ByocInviteDetails } from "@/hooks/useByocActivation";
 import { useOnboardingProgress } from "@/hooks/useOnboardingProgress";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { getCategoryLabel } from "@/lib/serviceCategories";
+import type { Json } from "@/integrations/supabase/types";
 
 export interface ByocContext {
   /** Provider name (persisted to metadata) */
@@ -32,8 +35,9 @@ interface UseByocOnboardingContextResult {
  * customer_onboarding_progress.metadata so screens survive refresh.
  */
 export function useByocOnboardingContext(token: string | undefined): UseByocOnboardingContextResult {
+  const { user } = useAuth();
   const { invite, activate } = useByocActivation(token);
-  const { progress, completeStep } = useOnboardingProgress();
+  const { progress } = useOnboardingProgress();
   const persisted = useRef(false);
 
   const inviteData = invite.data;
@@ -66,12 +70,22 @@ export function useByocOnboardingContext(token: string | undefined): UseByocOnbo
 
     persisted.current = true;
 
-    // Write metadata to onboarding progress (fire and forget)
-    completeStep("property", { metadata: newMetadata }).catch(() => {
-      // Intentionally silent — we retry on next render
-      persisted.current = false;
-    });
-  }, [inviteData, progress, metadata, token, completeStep]);
+    // Write metadata directly without advancing onboarding steps
+    if (progress?.id) {
+      supabase
+        .from("customer_onboarding_progress")
+        .update({ metadata: newMetadata as unknown as Json })
+        .eq("id", progress.id)
+        .then(() => {})
+        .catch(() => { persisted.current = false; });
+    } else if (user) {
+      supabase
+        .from("customer_onboarding_progress")
+        .insert([{ user_id: user.id, current_step: "property", metadata: newMetadata as unknown as Json }])
+        .then(() => {})
+        .catch(() => { persisted.current = false; });
+    }
+  }, [inviteData, progress, metadata, token, user]);
 
   // Build context from metadata (preferred) or live invite
   const byocContext = buildContext(metadata, inviteData);
