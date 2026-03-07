@@ -9209,6 +9209,10 @@ export type Database = {
         }
         Returns: Json
       }
+      can_read_provider_org_via_byoc: {
+        Args: { p_org_id: string; p_user_id: string }
+        Returns: boolean
+      }
       cancel_pending_plan_change: {
         Args: { p_subscription_id: string }
         Returns: Json
