@@ -1,11 +1,14 @@
 import { test, expect } from "@playwright/test";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const MILESTONES_DIR = path.join("test-results", "milestones");
 
 test.describe("BYOC Invalid Invite", () => {
-  test.use({ storageState: path.join(import.meta.dirname, ".auth", "user.json") });
+  test.use({ storageState: path.join(__dirname, ".auth", "user.json") });
 
   test.beforeAll(() => {
     if (!fs.existsSync(MILESTONES_DIR)) {
