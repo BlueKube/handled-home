@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useZoneHealth, type ZoneHealthRow } from "@/hooks/useZoneHealth";
+import { useZoneHealthRolling, type ZoneHealthRollingRow } from "@/hooks/useZoneHealthRolling";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
