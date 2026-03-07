@@ -26,8 +26,8 @@ export default function AuthPage() {
 
   // If arriving with a ref or redirect code, default to signup tab
   useEffect(() => {
-    if (refCode || redirectTo) setTab("signup");
-  }, [refCode, redirectTo]);
+    if (refCode) setTab("signup");
+  }, [refCode]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
