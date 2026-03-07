@@ -46,15 +46,20 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     // networkidle ensures the SPA fully hydrates (cold-start preview URLs)
     await page.goto(`/byoc/activate/${TOKEN}`, { waitUntil: "networkidle", timeout: 60000 });
 
-    // Wait for the SPA to hydrate and AuthContext to resolve.
-    // ByocActivate redirects unauth → /auth, auth → /customer/onboarding/byoc/:token
+    // The BYOC landing page should appear for unauthenticated users.
+    // Wait for one of these possible states:
+    // 1. The BYOC invite landing page (new flow) with "Sign Up to Activate"
+    // 2. The auth page (redirect flow) with email input
+    // 3. The recognition screen (already authenticated, redirected to wizard)
+    // 4. The customer dashboard (already activated)
+    const signUpBtn = page.getByRole("button", { name: /sign up to activate/i });
     const authEmail = page.getByLabel(/email/i);
     const recognitionScreen = page.getByText(/already on Handled|provider is on/i);
     const dashboardScreen = page.getByText(/your home team|dashboard/i);
 
     try {
       await expect(
-        authEmail.or(recognitionScreen).or(dashboardScreen)
+        signUpBtn.or(authEmail).or(recognitionScreen).or(dashboardScreen)
       ).toBeVisible({ timeout: 60000 });
     } catch {
       await page.screenshot({ path: milestonePath("byoc-00-stuck-debug"), fullPage: true });
@@ -64,6 +69,9 @@ test.describe("BYOC Onboarding — Happy Path", () => {
       );
     }
 
+    // Take a milestone screenshot of whatever we landed on
+    await page.screenshot({ path: milestonePath("byoc-00-landing"), fullPage: true });
+
     // Determine which state we landed in
     const currentUrl = page.url();
 
@@ -72,7 +80,14 @@ test.describe("BYOC Onboarding — Happy Path", () => {
       return;
     }
 
-    // If we're on the auth page, log in
+    // ── If we see the BYOC landing page, click "Sign Up to Activate" ──
+    if (await signUpBtn.isVisible()) {
+      await signUpBtn.click();
+      // Should navigate to auth page
+      await expect(authEmail).toBeVisible({ timeout: 30000 });
+    }
+
+    // ── If we're on the auth page, log in ──
     if (await authEmail.isVisible()) {
       // Ensure we're on the login tab (not signup)
       const loginTab = page.getByRole("tab", { name: /log in/i });
@@ -127,7 +142,7 @@ test.describe("BYOC Onboarding — Happy Path", () => {
 
     // Fill address fields with unique data
     const street = uniqueStreet();
-    const streetInput = page.getByLabel(/street|address/i).first();
+    const streetInput = page.getByLabel(/street/i).first();
     if (await streetInput.isVisible()) {
       await streetInput.fill(street);
     }
