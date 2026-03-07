@@ -120,10 +120,11 @@ export default function ByocOnboardingWizard() {
     if (!progress?.id) return;
     const metadata = (progress.metadata as Record<string, unknown>) ?? {};
     const updated = { ...metadata, interested_services: categories };
-    await supabase
+    const { error } = await supabase
       .from("customer_onboarding_progress")
       .update({ metadata: updated as any })
       .eq("id", progress.id);
+    if (error) console.error("[BYOC] Failed to persist interested_services:", error);
   }, [progress]);
 
   // Loading
