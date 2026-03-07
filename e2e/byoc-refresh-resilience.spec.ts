@@ -17,10 +17,8 @@ function uniqueStreet() {
 /**
  * BYOC Refresh Resilience — verifies wizard survives page.reload().
  *
- * IDEMPOTENCY: This test uses unique addresses. If the BYOC token is
- * already activated for this user, the test detects the redirect and
- * skips gracefully. This test MUST NOT run in the same suite as the
- * happy path test against the same token+user combination.
+ * Uses /byoc/activate/:token (public route) which renders the wizard
+ * inline for authenticated users, avoiding ProtectedRoute issues.
  */
 test.describe("BYOC Refresh Resilience", () => {
   const TOKEN = process.env.TEST_BYOC_TOKEN;
@@ -39,8 +37,8 @@ test.describe("BYOC Refresh Resilience", () => {
   test("wizard survives refresh at confirm, property, and services screens", async ({
     page,
   }) => {
-    // networkidle ensures ProtectedRoute auth resolves and wizard data loads
-    await page.goto(`/customer/onboarding/byoc/${TOKEN}`, {
+    // Use the public /byoc/activate route which renders wizard inline
+    await page.goto(`/byoc/activate/${TOKEN}`, {
       waitUntil: "networkidle",
       timeout: 60000,
     });

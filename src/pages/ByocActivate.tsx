@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, ArrowRight, Clock, MapPin, Shield, Camera, Sparkles } from "lucide-react";
 import handledLogo from "@/assets/handled-home-logo.png";
+import CustomerByocOnboardingWizard from "@/pages/customer/ByocOnboardingWizard";
 
 const CADENCE_LABELS: Record<string, string> = {
   weekly: "Weekly",
@@ -31,28 +32,19 @@ interface InvitePreview {
 }
 
 /**
- * Public BYOC invite landing page.
- * - Fetches invite preview data (no auth required)
- * - Shows provider info, service details, and "Sign Up to Activate" CTA
- * - If already authenticated → redirects to the BYOC onboarding wizard
+ * Public BYOC invite page.
+ * - Unauthenticated: shows invite landing page with "Sign Up to Activate" CTA
+ * - Authenticated: renders the BYOC onboarding wizard inline (avoids protected route)
  */
 export default function ByocActivate() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
 
-  // If authenticated, skip the landing page and go straight to the wizard
-  useEffect(() => {
-    if (authLoading) return;
-    if (user) {
-      navigate(`/customer/onboarding/byoc/${token}`, { replace: true });
-    }
-  }, [user, authLoading, token, navigate]);
-
-  // Fetch invite preview (works for anon via public RPC)
+  // Fetch invite preview for unauthenticated users (public RPC)
   const { data: invite, isLoading } = useQuery({
     queryKey: ["byoc-invite-public", token],
-    enabled: !!token && !user,
+    enabled: !!token && !user && !authLoading,
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_byoc_invite_public" as any, {
         p_token: token,
@@ -63,11 +55,11 @@ export default function ByocActivate() {
   });
 
   const handleActivate = () => {
-    navigate(`/auth?redirect=${encodeURIComponent(`/customer/onboarding/byoc/${token}`)}`);
+    navigate(`/auth?redirect=${encodeURIComponent(`/byoc/activate/${token}`)}`);
   };
 
-  // Loading states
-  if (authLoading || (user && !invite)) {
+  // Loading auth state
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -75,7 +67,14 @@ export default function ByocActivate() {
     );
   }
 
-  // Invalid/expired invite
+  // ── Authenticated: render wizard inline ──
+  if (user) {
+    return <CustomerByocOnboardingWizard />;
+  }
+
+  // ── Unauthenticated: show landing page ──
+
+  // Invalid/expired invite (or RPC not found)
   if (!isLoading && !invite) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-background">
@@ -105,7 +104,6 @@ export default function ByocActivate() {
   const providerInitial = providerName.charAt(0).toUpperCase();
   const categoryLabel = getCategoryLabel(invite?.category_key);
   const serviceName = invite?.service_name || categoryLabel;
-  const cadenceLabel = CADENCE_LABELS[invite?.default_cadence ?? ""] ?? invite?.default_cadence ?? "Weekly";
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-background px-5 py-10 animate-fade-in">

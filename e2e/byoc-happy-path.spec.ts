@@ -25,6 +25,8 @@ function uniqueStreet() {
  * BYOC Happy Path — starts unauthenticated.
  * This test is matched by the `chromium-mobile-no-auth` project
  * so it does NOT use the shared auth setup.
+ *
+ * Flow: /byoc/activate/:token (landing page) → auth → /byoc/activate/:token (wizard inline)
  */
 test.describe("BYOC Onboarding — Happy Path", () => {
   const TOKEN = process.env.TEST_BYOC_TOKEN;
@@ -43,15 +45,9 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     const password = process.env.TEST_USER_PASSWORD!;
 
     // ── Step 0: Visit invite link unauthenticated ──
-    // networkidle ensures the SPA fully hydrates (cold-start preview URLs)
     await page.goto(`/byoc/activate/${TOKEN}`, { waitUntil: "networkidle", timeout: 60000 });
 
-    // The BYOC landing page should appear for unauthenticated users.
-    // Wait for one of these possible states:
-    // 1. The BYOC invite landing page (new flow) with "Sign Up to Activate"
-    // 2. The auth page (redirect flow) with email input
-    // 3. The recognition screen (already authenticated, redirected to wizard)
-    // 4. The customer dashboard (already activated)
+    // Wait for landing page, auth page, recognition screen, or dashboard
     const signUpBtn = page.getByRole("button", { name: /sign up to activate/i });
     const authEmail = page.getByLabel(/email/i);
     const recognitionScreen = page.getByText(/already on Handled|provider is on/i);
@@ -69,13 +65,11 @@ test.describe("BYOC Onboarding — Happy Path", () => {
       );
     }
 
-    // Take a milestone screenshot of whatever we landed on
     await page.screenshot({ path: milestonePath("byoc-00-landing"), fullPage: true });
 
-    // Determine which state we landed in
+    // ── Already activated? ──
     const currentUrl = page.url();
-
-    if (currentUrl.includes("/customer") && !currentUrl.includes("/onboarding/byoc/")) {
+    if (currentUrl.includes("/customer") && !currentUrl.includes("/onboarding/byoc/") && !currentUrl.includes("/byoc/activate/")) {
       test.skip(true, "BYOC token already activated for this user — skipping happy path");
       return;
     }
@@ -83,13 +77,11 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     // ── If we see the BYOC landing page, click "Sign Up to Activate" ──
     if (await signUpBtn.isVisible()) {
       await signUpBtn.click();
-      // Should navigate to auth page
       await expect(authEmail).toBeVisible({ timeout: 30000 });
     }
 
     // ── If we're on the auth page, log in ──
     if (await authEmail.isVisible()) {
-      // Ensure we're on the login tab (not signup)
       const loginTab = page.getByRole("tab", { name: /log in/i });
       if (await loginTab.isVisible()) {
         await loginTab.click();
@@ -100,26 +92,27 @@ test.describe("BYOC Onboarding — Happy Path", () => {
       await page.getByLabel(/password/i).fill(password);
       await page.getByRole("button", { name: /sign in|log in/i }).click();
 
-      // Should redirect into the BYOC wizard
+      // After login, should redirect back to /byoc/activate/:token
+      // where the wizard renders inline for authenticated users
       await expect(page).toHaveURL(
-        new RegExp(`/customer/onboarding/byoc/${TOKEN}`),
+        new RegExp(`/byoc/activate/${TOKEN}`),
         { timeout: 30000 }
       );
     }
 
-    // ── Guard: detect "already activated" redirect ──
+    // ── Wait for recognition screen (wizard renders inline at /byoc/activate) ──
     try {
       await expect(recognitionScreen).toBeVisible({ timeout: 15000 });
     } catch {
       const url = page.url();
-      if (url.includes("/customer") && !url.includes("/onboarding/byoc/")) {
+      if (url.includes("/customer") && !url.includes("/byoc/activate/")) {
         test.skip(true, "BYOC token already activated for this user — skipping happy path");
         return;
       }
       await page.screenshot({ path: milestonePath("byoc-01-recognition-debug"), fullPage: true });
       const bodyText = await page.locator("body").innerText().catch(() => "(empty)");
       throw new Error(
-        `Recognition screen not found and not redirected — unexpected state.\nURL: ${url}\nBody: ${bodyText.slice(0, 500)}`
+        `Recognition screen not found — unexpected state.\nURL: ${url}\nBody: ${bodyText.slice(0, 500)}`
       );
     }
 
@@ -140,24 +133,15 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     ).toBeVisible({ timeout: 10000 });
     await page.screenshot({ path: milestonePath("byoc-03-property") });
 
-    // Fill address fields with unique data
     const street = uniqueStreet();
     const streetInput = page.getByLabel(/street/i).first();
-    if (await streetInput.isVisible()) {
-      await streetInput.fill(street);
-    }
+    if (await streetInput.isVisible()) await streetInput.fill(street);
     const cityInput = page.getByLabel(/city/i).first();
-    if (await cityInput.isVisible()) {
-      await cityInput.fill("Austin");
-    }
+    if (await cityInput.isVisible()) await cityInput.fill("Austin");
     const stateInput = page.getByLabel(/state/i).first();
-    if (await stateInput.isVisible()) {
-      await stateInput.fill("TX");
-    }
+    if (await stateInput.isVisible()) await stateInput.fill("TX");
     const zipInput = page.getByLabel(/zip/i).first();
-    if (await zipInput.isVisible()) {
-      await zipInput.fill("78701");
-    }
+    if (await zipInput.isVisible()) await zipInput.fill("78701");
 
     await page.getByRole("button", { name: /continue|next/i }).click();
 
@@ -168,11 +152,10 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     await page.screenshot({ path: milestonePath("byoc-04-home-setup") });
 
     const skipBtn = page.getByRole("button", { name: /skip/i });
-    const continueBtn = page.getByRole("button", { name: /continue|next/i });
     if (await skipBtn.isVisible()) {
       await skipBtn.click();
     } else {
-      await continueBtn.click();
+      await page.getByRole("button", { name: /continue|next/i }).click();
     }
 
     // ── Screen 4b: Activating / Connecting (transient) ──
@@ -185,9 +168,7 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     if (await servicesHeading.isVisible()) {
       await page.screenshot({ path: milestonePath("byoc-05-services") });
       const skipServices = page.getByRole("button", { name: /skip|continue|next|done/i });
-      if (await skipServices.isVisible()) {
-        await skipServices.click();
-      }
+      if (await skipServices.isVisible()) await skipServices.click();
     }
 
     // ── Screen 6: Success ──
@@ -197,9 +178,7 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     await page.screenshot({ path: milestonePath("byoc-06-success") });
 
     const dashBtn = page.getByRole("button", { name: /dashboard|go to dashboard|get started/i });
-    if (await dashBtn.isVisible()) {
-      await dashBtn.click();
-    }
+    if (await dashBtn.isVisible()) await dashBtn.click();
 
     // ── Screen 7: Dashboard ──
     await expect(
