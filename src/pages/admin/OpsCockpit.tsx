@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useOpsMetrics } from "@/hooks/useOpsMetrics";
 import { useAutopilotHealth } from "@/hooks/useAutopilotHealth";
 import { AutopilotBanner } from "@/components/admin/AutopilotBanner";
+import { ZoneHealthTable } from "@/components/admin/ZoneHealthTable";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -302,6 +303,9 @@ export default function OpsCockpit() {
           </div>
         </div>
       </div>
+
+      {/* Zone Health Table */}
+      <ZoneHealthTable />
     </div>
   );
 }
