@@ -31,7 +31,7 @@ export function useRescheduleHold(visitId: string | undefined) {
         .select("*")
         .eq("visit_id", visitId)
         .eq("customer_id", user.id)
-        .eq("status", "active")
+        .eq("status", "held")
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
