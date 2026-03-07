@@ -82,7 +82,7 @@ function Wrapper({ children }: { children: ReactNode }) {
 }
 
 // ── Import component under test ──
-import ByocOnboardingWizard from "../ByocOnboardingWizard";
+import ByocOnboardingWizard from "@/pages/customer/ByocOnboardingWizard";
 
 beforeEach(() => {
   vi.clearAllMocks();
