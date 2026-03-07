@@ -24,7 +24,7 @@ function useRecentActions(limit: number = 15) {
       // Fetch from ops_exception_actions (recent ops actions)
       const { data: opsActions } = await supabase
         .from("ops_exception_actions")
-        .select("id, action_type, reason_code, note, actor_user_id, created_at")
+        .select("id, action_type, reason_code, reason_note, actor_user_id, created_at")
         .order("created_at", { ascending: false })
         .limit(limit);
 
@@ -33,7 +33,7 @@ function useRecentActions(limit: number = 15) {
           id: a.id,
           source: "ops",
           label: (a.action_type ?? "").replace(/_/g, " "),
-          detail: a.note || a.reason_code || "",
+          detail: a.reason_note || a.reason_code || "",
           actor: a.actor_user_id?.slice(0, 8) ?? "system",
           created_at: a.created_at,
         });
