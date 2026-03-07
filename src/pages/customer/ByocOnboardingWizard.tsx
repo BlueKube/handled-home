@@ -115,6 +115,17 @@ export default function ByocOnboardingWizard() {
   const cadence = selectedCadence || inviteData?.default_cadence || "weekly";
   const { progress } = useOnboardingProgress();
 
+  // Persist interested_services to metadata
+  const persistInterestedServices = useCallback(async (categories: string[]) => {
+    if (!progress?.id) return;
+    const metadata = (progress.metadata as Record<string, unknown>) ?? {};
+    const updated = { ...metadata, interested_services: categories };
+    await supabase
+      .from("customer_onboarding_progress")
+      .update({ metadata: updated as any })
+      .eq("id", progress.id);
+  }, [progress]);
+
   // Loading
   if (contextLoading || invite.isLoading) {
     return (
@@ -132,7 +143,6 @@ export default function ByocOnboardingWizard() {
   }
 
   const stepIndex = BYOC_STEPS.indexOf(step);
-  // Don't count "activating" as a visible step for progress
   const visibleSteps = BYOC_STEPS.filter((s): s is ByocStep => s !== "activating");
   const visibleIndex = visibleSteps.indexOf(step as ByocStep);
   const progressPercent = Math.round(((visibleIndex >= 0 ? visibleIndex : stepIndex) / (visibleSteps.length - 1)) * 100);
@@ -143,17 +153,6 @@ export default function ByocOnboardingWizard() {
     if (BYOC_STEPS[prevIdx] === "activating") prevIdx--;
     if (prevIdx >= 0) setStep(BYOC_STEPS[prevIdx]);
   };
-
-  // Persist interested_services to metadata
-  const persistInterestedServices = useCallback(async (categories: string[]) => {
-    if (!progress?.id) return;
-    const metadata = (progress.metadata as Record<string, unknown>) ?? {};
-    const updated = { ...metadata, interested_services: categories };
-    await supabase
-      .from("customer_onboarding_progress")
-      .update({ metadata: updated as any })
-      .eq("id", progress.id);
-  }, [progress]);
 
   return (
     <div className="animate-fade-in pb-24">
