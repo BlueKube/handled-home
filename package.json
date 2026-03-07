@@ -10,7 +10,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "ux-report": "tsx scripts/generate-synthetic-ux-report.ts"
   },
   "dependencies": {
     "@capacitor/android": "^8.1.0",
