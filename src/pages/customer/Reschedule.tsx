@@ -28,13 +28,7 @@ import {
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
-function formatTime12(t: string): string {
-  const [h, m] = t.split(":");
-  const hour = parseInt(h);
-  const ampm = hour >= 12 ? "PM" : "AM";
-  const h12 = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
-  return m === "00" ? `${h12}${ampm}` : `${h12}:${m}${ampm}`;
-}
+import { formatTime12 } from "@/lib/formatTime12";
 
 /**
  * Customer Reschedule Page
