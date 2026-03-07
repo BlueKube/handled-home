@@ -54,12 +54,13 @@ function useRecentActions(limit: number = 15) {
         .limit(limit);
 
       for (const a of assignActions ?? []) {
+        const actorLabel = a.assigned_by === "system" ? "System" : (a.assigned_by === "admin" ? "Admin" : a.assigned_by ?? "System");
         actions.push({
           id: a.id,
           source: a.assigned_by === "system" ? "system" : "assignment",
           label: "Assignment",
           detail: a.explain_admin || a.assignment_reason || "",
-          actor: a.assigned_by ?? "system",
+          actor: actorLabel,
           created_at: a.created_at,
         });
       }
