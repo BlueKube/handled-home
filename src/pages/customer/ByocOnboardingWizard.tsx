@@ -7,6 +7,7 @@ import { usePropertyCoverage, COVERAGE_CATEGORIES, type CoverageStatus, type Swi
 import { usePropertySignals, type SignalsFormData, SQFT_OPTIONS, YARD_OPTIONS, WINDOWS_OPTIONS, STORIES_OPTIONS, type SqftTier, type YardTier, type WindowsTier, type StoriesTier } from "@/hooks/usePropertySignals";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { getCategoryLabel, getCategoryIcon, getCategoryGradient, CATEGORY_ORDER } from "@/lib/serviceCategories";
 import { useOnboardingProgress } from "@/hooks/useOnboardingProgress";
 import { Card, CardContent } from "@/components/ui/card";
