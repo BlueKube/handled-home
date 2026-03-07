@@ -1,6 +1,6 @@
 import {
   Home, CalendarDays, CalendarCheck, History, CreditCard, MapPin, Wallet, Users, HelpCircle, Settings,
-  Briefcase, DollarSign, BarChart3, Building2, Map, Clock,
+  Briefcase, DollarSign, BarChart3, Building2, Map, Clock, Activity,
   LayoutDashboard, Globe, Gauge, Package, ListChecks, Shield, Megaphone, FileText, Lock, CalendarClock, TrendingUp
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
@@ -60,6 +60,7 @@ const adminNav = [
   { title: "Growth", url: "/admin/growth", icon: TrendingUp },
   { title: "Ops Cockpit", url: "/admin/ops", icon: Gauge },
   { title: "Reports", url: "/admin/reports", icon: FileText },
+  { title: "Exception Analytics", url: "/admin/ops/exception-analytics", icon: Activity },
   { title: "Audit Logs", url: "/admin/audit", icon: Lock },
   { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
