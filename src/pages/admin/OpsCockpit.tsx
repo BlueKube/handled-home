@@ -3,6 +3,7 @@ import { useOpsMetrics } from "@/hooks/useOpsMetrics";
 import { useAutopilotHealth } from "@/hooks/useAutopilotHealth";
 import { AutopilotBanner } from "@/components/admin/AutopilotBanner";
 import { ZoneHealthTable } from "@/components/admin/ZoneHealthTable";
+import { AutopilotThresholdsDialog } from "@/components/admin/AutopilotThresholdsDialog";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -147,13 +148,16 @@ export default function OpsCockpit() {
           <h1 className="text-h2 mb-0.5">Ops Cockpit</h1>
           <p className="text-caption">{updatedLabel}</p>
         </div>
-        <Badge
-          variant="outline"
-          className="cursor-pointer text-xs"
-          onClick={() => nav("/admin/ops/dispatch")}
-        >
-          Open Dispatcher →
-        </Badge>
+        <div className="flex items-center gap-2">
+          <AutopilotThresholdsDialog />
+          <Badge
+            variant="outline"
+            className="cursor-pointer text-xs"
+            onClick={() => nav("/admin/ops/dispatch")}
+          >
+            Open Dispatcher →
+          </Badge>
+        </div>
       </div>
 
       {/* 4-column grid */}
