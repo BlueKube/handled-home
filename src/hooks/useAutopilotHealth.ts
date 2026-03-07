@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useOpsMetrics, OpsMetrics } from "@/hooks/useOpsMetrics";
-import { useOpsExceptionCount } from "@/hooks/useOpsExceptionCount";
+import { useOpsExceptionCount } from "@/hooks/useOpsExceptions";
 
 export type AutopilotStatus = "green" | "yellow" | "red";
 
