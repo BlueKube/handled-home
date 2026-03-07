@@ -1076,7 +1076,7 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S8-P5-02** | P0 | M | Provider issue reporting UI — `ProviderReportIssueSheet` with PRD reason codes (access_failure, unavailable, weather, quality_block) + sub-reason codes (gate_locked, customer_not_home, sick, etc.). Wired to `report_provider_issue` RPC via `useReportProviderIssue` hook. JobDetail resolves visit_id via property+date+provider lookup, with fallback to legacy `report_job_issue`. Access failure note explains no reliability penalty.
 
 ### Phase 6: Analytics + Stale Cleanup
-- [ ] **S8-P6-01** | P1 | M | Auto-resolve stale exceptions (underlying condition no longer holds after re-sequencing).
-- [ ] **S8-P6-02** | P1 | M | Exception analytics — window miss rate, access failure rate, break-freeze frequency, time-to-resolve.
+- [x] **S8-P6-01** | P1 | M | Auto-resolve stale exceptions — `auto_resolve_stale_exceptions` RPC (SECURITY DEFINER, service_role only). Resolves exceptions where visit is completed/canceled/skipped, visit deleted, or predictive exception for past date. Sets `resolution_type = 'auto_stale'` with descriptive note.
+- [x] **S8-P6-02** | P1 | M | Exception analytics dashboard — `get_exception_analytics` RPC returns aggregate metrics (total/resolved/open, resolution rate, avg resolve hours, break-freeze count, by type/zone/severity/resolution_type). `/admin/ops/exception-analytics` page with KPI cards, bar chart by type, severity pie, resolution type pie, zone table, time-to-resolve breakdown. Period selector (7/14/30/90 days). `useExceptionAnalytics` hook. Nav link added.
 
-*Last updated: 2026-03-07 — Sprint 8 Phase 5 complete. Customer reschedule + provider issue reporting operational.*
+*Last updated: 2026-03-07 — Sprint 8 Phase 6 complete. Auto-resolve stale exceptions + exception analytics dashboard operational.*
