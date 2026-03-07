@@ -22,6 +22,7 @@ import { PropertyHealthWidget } from "@/components/customer/PropertyHealthWidget
 import { FloatingAddButton } from "@/components/customer/FloatingAddButton";
 import { AddServiceDrawer } from "@/components/customer/AddServiceDrawer";
 import { SeasonalPlanCard } from "@/components/customer/SeasonalPlanCard";
+import { HomeTeamCard } from "@/components/customer/HomeTeamCard";
 import { toast } from "sonner";
 
 function capitalize(s: string) {
@@ -117,6 +118,9 @@ export default function CustomerDashboard() {
 
       {/* Notification Banners */}
       <CustomerNotificationBanners />
+
+      {/* Your Home Team */}
+      <HomeTeamCard />
 
       {/* Home Setup Prompt */}
       <HomeSetupCard />

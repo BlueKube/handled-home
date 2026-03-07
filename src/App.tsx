@@ -41,6 +41,7 @@ import CustomerServiceDay from "@/pages/customer/ServiceDay";
 import CustomerRoutineReview from "@/pages/customer/RoutineReview";
 import CustomerRoutineConfirm from "@/pages/customer/RoutineConfirm";
 import CustomerOnboardingWizard from "@/pages/customer/OnboardingWizard";
+import CustomerByocOnboardingWizard from "@/pages/customer/ByocOnboardingWizard";
 import CustomerPhotoTimeline from "@/pages/customer/PhotoTimeline";
 import CustomerHomeAssistant from "@/pages/customer/HomeAssistant";
 import CustomerCoverageMap from "@/pages/customer/CoverageMap";
@@ -176,6 +177,7 @@ const App = () => (
               {/* Customer App */}
               <Route element={<ProtectedRoute requiredRole="customer"><AppLayout /></ProtectedRoute>}>
                 <Route path="/customer/onboarding" element={<CustomerOnboardingWizard />} />
+                <Route path="/customer/onboarding/byoc/:token" element={<CustomerByocOnboardingWizard />} />
                 <Route path="/customer/property" element={<CustomerProperty />} />
                 <Route path="/customer/coverage-map" element={<CustomerCoverageMap />} />
                 <Route path="/customer/property-sizing" element={<CustomerPropertySizing />} />

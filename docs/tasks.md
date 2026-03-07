@@ -1117,3 +1117,19 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S9-P6-02** | P0 | M | `RecentActionsCard` component — combined feed from `ops_exception_actions` + `job_assignment_log`, sorted by recency, with source badges (Ops/System/Assign). Integrated into OpsCockpit alongside Zone Health Table.
 
 *Last updated: 2026-03-07 — Sprint 9 Phases 4–6 complete. Provider self-healing, horizon visualization, comms templates, and actions feed operational.*
+
+---
+
+## BYOC Onboarding Wizard (Provider-Referred Customer Flow)
+
+> **PRD:** `docs/prds/unfinished/PRD301-byoc-onboarding-wizard.md`  
+> **Route:** `/customer/onboarding/byoc/:token`  
+> **Complexity:** L (full day)
+
+- [x] **BYOC-01** | P0 | L | Build ByocOnboardingWizard (7-screen flow) + useByocOnboardingContext hook
+- [x] **BYOC-02** | P0 | S | Refactor ByocActivate.tsx to auth-gate redirect
+- [x] **BYOC-03** | P0 | S | Add BYOC wizard route to App.tsx (inside ProtectedRoute, no PropertyGate)
+- [x] **BYOC-04** | P1 | M | Build HomeTeamCard dashboard component with next-visit query
+- [ ] **BYOC-05** | P1 | S | Opus 4.6 code review + fix findings
+
+*Last updated: 2026-03-07 — BYOC-01 through BYOC-04 complete. Wizard, context hook, auth redirect, routing, and dashboard card operational.*
