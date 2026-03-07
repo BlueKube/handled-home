@@ -2,11 +2,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useJobDetail } from "@/hooks/useJobDetail";
 import { useJobActions } from "@/hooks/useJobActions";
 import { useReportProviderIssue, type ProviderIssueType } from "@/hooks/useProviderIssueReport";
+import { useProposeProviderAction } from "@/hooks/useProviderSelfHealing";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProviderReportIssueSheet } from "@/components/provider/ProviderReportIssueSheet";
+import { ProviderSelfHealingSheet } from "@/components/provider/ProviderSelfHealingSheet";
 import {
   Play, CheckSquare, Camera, Send, AlertTriangle, MapPin, Clock,
   ChevronLeft, Dog, Key, Car, ShieldAlert, LogIn, LogOut
@@ -46,7 +48,9 @@ export default function ProviderJobDetail() {
   const { data, isLoading } = useJobDetail(jobId);
   const actions = useJobActions(jobId);
   const [issueSheetOpen, setIssueSheetOpen] = useState(false);
+  const [selfHealOpen, setSelfHealOpen] = useState(false);
   const reportIssue = useReportProviderIssue();
+  const proposeAction = useProposeProviderAction();
 
   // Resolve visit_id for the report_provider_issue RPC
   const { data: visitId } = useVisitIdForJob(data?.job);
@@ -365,6 +369,19 @@ export default function ProviderJobDetail() {
             Report an Issue
           </Button>
         )}
+
+        {/* Quick Actions button — self-healing */}
+        {isActive && visitId && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={() => setSelfHealOpen(true)}
+          >
+            <Clock className="h-3.5 w-3.5 mr-1.5" />
+            Quick Actions
+          </Button>
+        )}
       </div>
 
       {/* Structured issue reporting sheet — wired to report_provider_issue RPC */}
@@ -373,6 +390,25 @@ export default function ProviderJobDetail() {
         onOpenChange={setIssueSheetOpen}
         onSubmit={handleIssueSubmit}
         isPending={reportIssue.isPending || actions.reportIssue.isPending}
+      />
+
+      {/* Self-healing actions sheet */}
+      <ProviderSelfHealingSheet
+        open={selfHealOpen}
+        onOpenChange={setSelfHealOpen}
+        onSubmit={async ({ actionType, payload }) => {
+          const result = await proposeAction.mutateAsync({
+            visitId: visitId!,
+            actionType,
+            payload,
+          });
+          return {
+            decision: result.decision,
+            reason: result.reason,
+            customer_notified: result.customer_notified,
+          };
+        }}
+        isPending={proposeAction.isPending}
       />
     </div>
   );

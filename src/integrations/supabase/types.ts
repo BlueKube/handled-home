@@ -3991,6 +3991,63 @@ export type Database = {
           },
         ]
       }
+      provider_action_proposals: {
+        Row: {
+          action_type: string
+          created_at: string
+          customer_notified: boolean
+          decided_at: string | null
+          decided_by: string | null
+          decision: string
+          decision_reason: string | null
+          id: string
+          payload: Json
+          provider_org_id: string
+          visit_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          customer_notified?: boolean
+          decided_at?: string | null
+          decided_by?: string | null
+          decision?: string
+          decision_reason?: string | null
+          id?: string
+          payload?: Json
+          provider_org_id: string
+          visit_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          customer_notified?: boolean
+          decided_at?: string | null
+          decided_by?: string | null
+          decision?: string
+          decision_reason?: string | null
+          id?: string
+          payload?: Json
+          provider_org_id?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_action_proposals_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_action_proposals_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       provider_agreement_acceptance: {
         Row: {
           accepted_at: string
@@ -9426,6 +9483,10 @@ export type Database = {
       }
       pause_subscription: {
         Args: { p_subscription_id: string; p_weeks: number }
+        Returns: Json
+      }
+      propose_provider_action: {
+        Args: { p_action_type: string; p_payload?: Json; p_visit_id: string }
         Returns: Json
       }
       purchase_addon: {

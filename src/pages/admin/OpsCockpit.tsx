@@ -4,6 +4,7 @@ import { useAutopilotHealth } from "@/hooks/useAutopilotHealth";
 import { AutopilotBanner } from "@/components/admin/AutopilotBanner";
 import { ZoneHealthTable } from "@/components/admin/ZoneHealthTable";
 import { AutopilotThresholdsDialog } from "@/components/admin/AutopilotThresholdsDialog";
+import { RecentActionsCard } from "@/components/admin/RecentActionsCard";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -308,8 +309,13 @@ export default function OpsCockpit() {
         </div>
       </div>
 
-      {/* Zone Health Table */}
-      <ZoneHealthTable />
+      {/* Zone Health + Recent Actions */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+        <div className="xl:col-span-2">
+          <ZoneHealthTable />
+        </div>
+        <RecentActionsCard />
+      </div>
     </div>
   );
 }
