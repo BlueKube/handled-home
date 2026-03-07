@@ -2,6 +2,7 @@
 
 **Status**: Phase 1 — Implemented  
 **Created**: 2026-03-07  
+**Last Updated**: 2026-03-07  
 **Owner**: Engineering  
 
 ---
@@ -23,10 +24,10 @@ Together they form a testing loop:
 
 ## 2. What Playwright Catches
 
-- Broken flows (wizard steps fail to advance)
-- Missing elements (buttons, headings, forms absent)
-- Regressions (previously working screens break)
-- Wrong redirects (auth redirect chain, BYOC token routing)
+- **Broken flows** — wizard steps fail to advance
+- **Missing elements** — buttons, headings, forms absent
+- **Regressions** — previously working screens break
+- **Wrong redirects** — auth redirect chain, BYOC token routing
 
 ## 3. What Playwright Does NOT Catch
 
@@ -35,7 +36,7 @@ Together they form a testing loop:
 - Whether the user understands what happens next
 - Whether the flow feels like work
 
-That is exactly where synthetic users come in.
+That is exactly where synthetic users come in. They sit **on top of** the screenshots Playwright generates — they don't replace Playwright, they extend it.
 
 ---
 
@@ -47,7 +48,7 @@ That is exactly where synthetic users come in.
 |---------|-------|
 | Test directory | `./e2e` |
 | Output directory | `test-results` |
-| Base URL | `process.env.BASE_URL` (falls back to intentionally invalid URL) |
+| Base URL | `process.env.BASE_URL` (falls back to `http://invalid-base-url-set-BASE_URL-secret`) |
 | Browser | Chromium only |
 | Device | iPhone 15 |
 | Retries | 1 on CI, 0 locally |
@@ -56,22 +57,28 @@ That is exactly where synthetic users come in.
 | Screenshot | `only-on-failure` (plus explicit milestone screenshots) |
 | Reporter | `html` + `list` |
 
+**Important**: The fallback URL is intentionally invalid. If `BASE_URL` is not set, tests fail loudly rather than silently hitting a wrong environment.
+
 ### 4.2 Projects
 
-| Project | Auth | Purpose |
-|---------|------|---------|
-| `auth-setup` | Performs login | Saves storage state to `e2e/.auth/user.json` |
-| `chromium-mobile` | Pre-authenticated | Used by invalid-invite and refresh-resilience tests |
-| `chromium-mobile-no-auth` | None | Used by happy-path to validate auth redirect |
+| Project | Auth | Test Match | Purpose |
+|---------|------|------------|---------|
+| `auth-setup` | Performs login | `auth.setup.ts` | Saves storage state to `e2e/.auth/user.json` |
+| `chromium-mobile` | Pre-authenticated | All **except** `byoc-happy-path.spec.ts` | Invalid-invite and refresh-resilience tests |
+| `chromium-mobile-no-auth` | None | `byoc-happy-path.spec.ts` only | Validates auth redirect flow |
+
+**Design decision**: `chromium-mobile` uses `testIgnore: /byoc-happy-path\.spec\.ts/` to prevent the happy-path test from running twice (once unauthenticated, once with pre-auth state).
 
 ### 4.3 Test Specs
 
 #### `e2e/byoc-happy-path.spec.ts` — No pre-auth
 
+Uses: `/byoc/activate/${TEST_BYOC_TOKEN}` (unauthenticated entry point)
+
 1. Navigate to `/byoc/activate/${TEST_BYOC_TOKEN}` unauthenticated
 2. Assert redirect to `/auth?redirect=...`
 3. Fill login form, submit
-4. **Assert URL becomes** `/customer/onboarding/byoc/${TEST_BYOC_TOKEN}`
+4. **Assert URL becomes** `/customer/onboarding/byoc/${TEST_BYOC_TOKEN}` (validates redirect chain)
 5. Walk through all wizard screens:
    - Recognition → Confirm → Property → Home Setup → Activating → Services → Success → Dashboard
 6. Assert "Your Home Team" visible on dashboard
@@ -86,6 +93,8 @@ That is exactly where synthetic users come in.
 
 #### `e2e/byoc-invalid-invite.spec.ts` — Pre-authenticated
 
+Uses: `/customer/onboarding/byoc/invalid-token-xyz-playwright` (guaranteed-bad token format)
+
 1. Navigate to `/customer/onboarding/byoc/invalid-token-xyz-playwright`
 2. Assert fallback screen (inactive/invalid/expired text)
 3. Assert safe-continue button visible
@@ -93,11 +102,13 @@ That is exactly where synthetic users come in.
 
 #### `e2e/byoc-refresh-resilience.spec.ts` — Pre-authenticated
 
+Uses: `/customer/onboarding/byoc/${TEST_BYOC_TOKEN}` (authenticated entry point)
+
 1. Navigate to `/customer/onboarding/byoc/${TEST_BYOC_TOKEN}`
 2. Advance to confirm screen → `page.reload()` → assert wizard functional
 3. Advance to property screen → `page.reload()` → assert form present
 4. Advance to services screen → `page.reload()` → assert screen intact
-5. Screenshots:
+5. Screenshots in `test-results/milestones/`:
    - `byoc-refresh-confirm.png`
    - `byoc-refresh-property.png`
    - `byoc-refresh-services.png`
@@ -115,17 +126,28 @@ That is exactly where synthetic users come in.
 
 | Secret | Purpose |
 |--------|---------|
-| `BASE_URL` | Lovable Preview URL |
+| `BASE_URL` | Lovable Preview URL (e.g. `https://id-preview--a671f2cf-...lovable.app`) |
 | `TEST_USER_EMAIL` | Test account email in preview environment |
 | `TEST_USER_PASSWORD` | Test account password |
 | `TEST_BYOC_TOKEN` | Active BYOC invite token in preview database |
 
 ### 4.6 Assumptions
 
-- Test user account exists and is email-confirmed in preview environment
+- Test user account exists and is email-confirmed in preview environment with `customer` role
 - BYOC token is linked to a real provider org and remains active
 - Preview URL is stable across CI runs
-- Email auto-confirm is enabled for the test user
+
+### 4.7 Test Idempotency
+
+**Known limitation**: The happy-path and refresh-resilience tests are NOT fully idempotent. Running them twice against the same token/user will encounter "already activated" states. Mitigations:
+
+- Use a dedicated test user per CI run (future), or
+- Handle already-activated state gracefully in tests, or
+- Reset test data between runs via a cleanup script
+
+### 4.8 Deno Edge Function Tests
+
+`supabase/functions/activate-byoc-invite/index.test.ts` uses Deno imports and must be run separately via `deno test`, not through the standard `npm test` pipeline. This is not included in the CI workflow yet.
 
 ---
 
@@ -153,7 +175,7 @@ test-results/ux-review-report.md generated
 
 | Persona | File | Key Trait |
 |---------|------|-----------|
-| Busy Homeowner | `busy-homeowner.md` | Low patience, skims headings |
+| Busy Homeowner | `busy-homeowner.md` | Low patience, skims headings, two kids |
 | Price-Sensitive Homeowner | `price-sensitive-homeowner.md` | Reads pricing carefully |
 | Tech-Savvy Early Adopter | `tech-savvy-early-adopter.md` | Judges by design quality |
 | Confused First-Time User | `confused-first-time-user.md` | Reads everything, needs reassurance |
@@ -162,37 +184,60 @@ test-results/ux-review-report.md generated
 
 ### 5.3 Evaluation Dimensions
 
-For each screen × persona:
+For each screen × persona, the reviewer answers:
 
-1. What is this screen for?
+1. What do you think this screen is for?
 2. What would you tap first?
 3. What is confusing or unclear?
 4. What makes you hesitate?
 5. What would make you quit?
-6. Scores (1–10): Clarity, Trust, Friction
+6. Scores (1–10): **Clarity**, **Trust**, **Friction**
 7. Top improvement suggestion
 
 ### 5.4 Report Format (`test-results/ux-review-report.md`)
 
-- Per-screen, per-persona evaluation tables
-- Summary section:
-  - Most confusing screen
-  - Most frequent hesitation
-  - Screens with low trust
-  - Top 5 UX fixes
+Organized per-screen, per-persona:
 
-### 5.5 Phase 1 Scope (Current)
+```markdown
+## Screen: Recognition
 
-- Prompt files and report template created
-- Scaffold script generates report structure with `[pending AI review]` placeholders
-- No external LLM API integration yet
+### Persona: Busy Homeowner
 
-### 5.6 Phase 2 Scope (Future)
+**What this screen is for**: [AI response]
+**First tap**: [AI response]
+**Confusion points**: [AI response]
+**Hesitation**: [AI response]
+**Quit trigger**: [AI response]
 
-- Integrate LLM API (OpenAI or Claude) into the script
+| Clarity | Trust | Friction |
+|---------|-------|----------|
+| 8       | 8     | 3        |
+
+**Top improvement**: [AI response]
+```
+
+Summary section at end:
+- Most confusing screen
+- Most frequent hesitation
+- Screens with low trust
+- Top 5 UX fixes
+
+### 5.5 Execution Strategy
+
+**Part A — Built now (Phase 1)**:
+- Playwright harness with milestone screenshots
+- Persona prompt files in `e2e/prompts/personas/`
+- System prompt in `e2e/prompts/ux-review-system.md`
+- Scaffold script `scripts/generate-synthetic-ux-report.ts`
+- Report template with `[pending AI review]` placeholders
+
+**Part B — External AI execution (Phase 2)**:
+- Integrate LLM API (OpenAI, Claude, or Lovable AI models)
 - Send screenshot + persona prompt to vision-capable model
 - Auto-populate evaluation tables
 - Optionally run as a GitHub Actions step after Playwright
+
+This split keeps Phase 1 practical without blocking on API integration.
 
 ---
 
@@ -218,7 +263,7 @@ e2e/
 scripts/
   generate-synthetic-ux-report.ts     # Report generator (scaffold)
 test-results/
-  milestones/                         # Stable screenshot folder
+  milestones/                         # Stable screenshot folder for synthetic review
   ux-review-report.md                 # Generated report
 .github/
   workflows/
@@ -240,37 +285,64 @@ test-results/
 ## 8. Rollout Plan
 
 ### Phase 1 (Current) — BYOC Onboarding
-- Playwright harness with 3 test specs
+
+Synthetic users only on the highest-risk flow:
+- BYOC onboarding (3 test specs, 7 milestone screenshots)
 - 6 persona prompt files
-- Report scaffold
+- Report scaffold with placeholders
 
 ### Phase 2 — Expand Coverage
-- Standard onboarding flow
+
+Expand to additional flows:
+- Standard onboarding
 - Service day flow
 - Dashboard
-- LLM API integration for automated reviews
-
-### Phase 3 — Scale
 - Proof / receipt flow
 - Plan selection
+
+LLM API integration for automated reviews.
+
+### Phase 3 — Scale
+
 - Provider onboarding
 - 50–100 persona simulations overnight
+- Multiple flow branches
+- Automated CI integration for synthetic reviews
 
 ---
 
-## 9. Risks & Mitigations
+## 9. Security Notes
+
+### RLS for BYOC Provider Org Visibility
+
+The `can_read_provider_org_via_byoc(p_user_id, p_org_id)` function grants visibility to provider orgs when:
+
+1. The user has an existing `byoc_activation` for that org, **OR**
+2. The user's `customer_onboarding_progress.metadata.byoc_token` matches an active invite for that org
+
+**Important**: The function does NOT expose all provider orgs with active invites to all authenticated users. It is scoped to the specific user's context.
+
+Access control:
+- `REVOKE ALL` from `PUBLIC` and `anon`
+- `GRANT EXECUTE` to `authenticated` only
+
+---
+
+## 10. Risks & Mitigations
 
 | Risk | Mitigation |
 |------|------------|
 | Preview URL changes between deploys | Use `BASE_URL` secret, update as needed |
 | BYOC test token expires or is deactivated | Use a dedicated long-lived token in preview |
-| Test user account state conflicts with other tests | Use a dedicated test-only account |
+| Test user account state conflicts | Use a dedicated test-only account |
+| Tests not idempotent (double activation) | Known P2 — future: reset data or fresh users per run |
 | LLM API costs for synthetic reviews | Phase 2; start with manual prompt-paste evaluation |
 | Flaky selectors due to UI changes | Use role-based and text-based selectors, avoid CSS classes |
+| Deno edge function tests not in CI | Document separately; add Deno test step in Phase 2 |
 
 ---
 
-## 10. Success Criteria
+## 11. Success Criteria
 
 - [ ] Playwright CI runs green on every PR to `main`
 - [ ] Milestone screenshots are saved and accessible as CI artifacts
@@ -278,3 +350,21 @@ test-results/
 - [ ] Refresh resilience test catches lost wizard state
 - [ ] Persona prompts are usable for manual AI review immediately
 - [ ] Report scaffold generates correct structure from screenshots
+- [ ] RLS policy scoped to user-specific BYOC context (not broad exposure)
+
+---
+
+## 12. Review History
+
+### Code Review — 2026-03-07
+
+Findings fixed in this iteration:
+
+| Severity | Finding | Fix |
+|----------|---------|-----|
+| P1 | `@playwright/test` in production `dependencies` | Moved to `devDependencies` |
+| P1 | RLS over-exposed all provider orgs with active invites | Scoped to user's own onboarding token context |
+| P2 | Happy path ran twice (in both projects) | Added `testIgnore` to `chromium-mobile` project |
+| P2 | `SECURITY DEFINER` function missing `REVOKE` | Added `REVOKE ALL` from `PUBLIC, anon` + `GRANT` to `authenticated` |
+| P3 | `ProtectedRoute` dropped `location.hash` on redirect | Now includes `location.hash` |
+| P3 | Deno tests undocumented | Documented in this PRD |
