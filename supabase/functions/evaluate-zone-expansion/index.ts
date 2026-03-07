@@ -203,21 +203,21 @@ Deno.serve(async (req) => {
           suggestionsCreated++;
           results.push({ zone_id: zone.id, zone_name: zone.name, suggestion_created: true });
 
-          // Notify admins
-          const { data: admins } = await supabase
-            .from("user_roles")
-            .select("user_id")
-            .eq("role", "admin");
-
-          for (const admin of admins || []) {
-            await supabase.rpc("emit_notification", {
-              p_user_id: admin.user_id,
-              p_type: "expansion_suggestion",
-              p_title: `Zone Expansion: ${zone.name}`,
-              p_body: suggestion.recommendation,
-              p_data: { zone_id: zone.id, suggestion_type: suggestion.type, priority: suggestion.priority },
-            });
-          }
+          // Notify ops admins via event bus
+          await supabase.rpc("emit_notification_event", {
+            p_event_type: "ADMIN_ZONE_EXPANSION_SUGGESTED",
+            p_idempotency_key: `zone_expansion:${zone.id}:${new Date().toISOString().slice(0, 10)}:${suggestion.type}`,
+            p_audience_type: "ADMIN",
+            p_audience_zone_id: zone.id,
+            p_priority: suggestion.priority === "critical" ? "CRITICAL" : "SERVICE",
+            p_payload: {
+              zone_id: zone.id,
+              zone_name: zone.name,
+              suggestion_type: suggestion.type,
+              priority: suggestion.priority,
+              recommendation: suggestion.recommendation,
+            },
+          });
         }
       } else {
         results.push({ zone_id: zone.id, zone_name: zone.name, suggestion_created: false });
