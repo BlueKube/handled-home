@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth, AppRole } from "@/contexts/AuthContext";
 import { AccountNotConfigured } from "@/components/AccountNotConfigured";
 
@@ -10,6 +10,7 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const { user, loading, roles, activeRole, effectiveRole, previewRole } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -20,7 +21,8 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   }
 
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    const redirectPath = location.pathname + location.search;
+    return <Navigate to={`/auth?redirect=${encodeURIComponent(redirectPath)}`} replace />;
   }
 
   if (roles.length === 0) {
