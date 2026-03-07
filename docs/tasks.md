@@ -1072,11 +1072,11 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S8-P4-03** | P0 | M | Ops actions dialog — 10 action types (reorder, move day, swap provider, convert profile, cancel, credit, contact, redo, note), 8 reason codes, freeze override toggle, 10-min undo window. `OpsActionDialog` component. `useRecordOpsAction` mutation. Sidebar nav with exception count badge (`useOpsExceptionCount` with 30s polling).
 
 ### Phase 5: Customer + Provider UX
-- [ ] **S8-P5-01** | P0 | L | Customer reschedule flow — shows feasible options from `offer-appointment-windows`, confirm/choose-another for access failure holds.
-- [ ] **S8-P5-02** | P0 | M | Provider issue reporting UI — "Report Issue" button on job detail with reason code picker.
+- [x] **S8-P5-01** | P0 | L | Customer reschedule flow — `/customer/reschedule/:visitId` page. Access failure hold (confirm/choose-another with auto-held slot display + expiry countdown). Customer-initiated reschedule (reason + feasible window picker via `offer-appointment-windows`). `useCustomerReschedule` hook with `useRescheduleHold`, `useConfirmRescheduleHold`, `useRequestReschedule`, `useApplyReschedule`. UpcomingVisits `exception_pending` state now shows "Reschedule Visit" CTA.
+- [x] **S8-P5-02** | P0 | M | Provider issue reporting UI — `ProviderReportIssueSheet` with PRD reason codes (access_failure, unavailable, weather, quality_block) + sub-reason codes (gate_locked, customer_not_home, sick, etc.). Wired to `report_provider_issue` RPC via `useReportProviderIssue` hook. JobDetail resolves visit_id via property+date+provider lookup, with fallback to legacy `report_job_issue`. Access failure note explains no reliability penalty.
 
 ### Phase 6: Analytics + Stale Cleanup
 - [ ] **S8-P6-01** | P1 | M | Auto-resolve stale exceptions (underlying condition no longer holds after re-sequencing).
 - [ ] **S8-P6-02** | P1 | M | Exception analytics — window miss rate, access failure rate, break-freeze frequency, time-to-resolve.
 
-*Last updated: 2026-03-05 — Sprint 8 Phase 4 complete. Ops Console UX operational.*
+*Last updated: 2026-03-07 — Sprint 8 Phase 5 complete. Customer reschedule + provider issue reporting operational.*

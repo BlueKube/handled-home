@@ -1,17 +1,44 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useJobDetail } from "@/hooks/useJobDetail";
 import { useJobActions } from "@/hooks/useJobActions";
+import { useReportProviderIssue, type ProviderIssueType } from "@/hooks/useProviderIssueReport";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ReportIssueSheet } from "@/components/provider/ReportIssueSheet";
+import { ProviderReportIssueSheet } from "@/components/provider/ProviderReportIssueSheet";
 import {
   Play, CheckSquare, Camera, Send, AlertTriangle, MapPin, Clock,
   ChevronLeft, Dog, Key, Car, ShieldAlert, LogIn, LogOut
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+
+/** Look up the visit_id for this job by matching property + date */
+function useVisitIdForJob(job: { property_id: string; scheduled_date: string | null; provider_org_id: string } | undefined) {
+  return useQuery({
+    queryKey: ["visit_for_job", job?.property_id, job?.scheduled_date, job?.provider_org_id],
+    enabled: !!(job?.property_id && job?.scheduled_date && job?.provider_org_id),
+    staleTime: 10 * 60 * 1000,
+    queryFn: async () => {
+      if (!job?.property_id || !job?.scheduled_date || !job?.provider_org_id) return null;
+      const { data, error } = await supabase
+        .from("visits")
+        .select("id")
+        .eq("property_id", job.property_id)
+        .eq("scheduled_date", job.scheduled_date)
+        .eq("provider_org_id", job.provider_org_id)
+        .not("schedule_state", "in", '("canceled","rescheduled")')
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data?.id ?? null;
+    },
+  });
+}
 
 export default function ProviderJobDetail() {
   const { jobId } = useParams<{ jobId: string }>();
@@ -19,6 +46,10 @@ export default function ProviderJobDetail() {
   const { data, isLoading } = useJobDetail(jobId);
   const actions = useJobActions(jobId);
   const [issueSheetOpen, setIssueSheetOpen] = useState(false);
+  const reportIssue = useReportProviderIssue();
+
+  // Resolve visit_id for the report_provider_issue RPC
+  const { data: visitId } = useVisitIdForJob(data?.job);
 
   if (isLoading || !data) {
     return (
@@ -71,9 +102,33 @@ export default function ProviderJobDetail() {
     }
   };
 
-  const handleIssueSubmit = async (params: { issue_type: string; severity: string; description?: string }) => {
+  const handleIssueSubmit = async (params: {
+    issueType: ProviderIssueType;
+    reasonCode: string;
+    note?: string;
+  }) => {
+    if (!visitId) {
+      // Fallback to legacy job_issues for jobs without a matching visit
+      try {
+        await actions.reportIssue.mutateAsync({
+          issue_type: params.issueType,
+          severity: "MED",
+          description: `[${params.reasonCode}] ${params.note ?? ""}`.trim(),
+        });
+        toast({ title: "Issue reported" });
+      } catch (e: any) {
+        toast({ title: "Error", description: e.message, variant: "destructive" });
+      }
+      return;
+    }
+
     try {
-      await actions.reportIssue.mutateAsync(params);
+      await reportIssue.mutateAsync({
+        visitId,
+        issueType: params.issueType,
+        reasonCode: params.reasonCode,
+        note: params.note,
+      });
       toast({ title: "Issue reported" });
     } catch (e: any) {
       toast({ title: "Error", description: e.message, variant: "destructive" });
@@ -146,7 +201,6 @@ export default function ProviderJobDetail() {
                     </span>
                   )}
                 </div>
-                {/* Level details: planned minutes + scope */}
                 {s.scheduled_level_planned_minutes && (
                   <div className="ml-4 flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Clock className="h-3 w-3" />
@@ -162,14 +216,12 @@ export default function ProviderJobDetail() {
                     ))}
                   </ul>
                 )}
-                {/* Proof requirements from level */}
                 {s.scheduled_level_proof_photo_min != null && s.scheduled_level_proof_photo_min > 0 && (
                   <div className="ml-4 flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Camera className="h-3 w-3" />
                     <span>{s.scheduled_level_proof_photo_min} photo{s.scheduled_level_proof_photo_min !== 1 ? "s" : ""} required</span>
                   </div>
                 )}
-                {/* Fallback for SKUs without levels */}
                 {!s.scheduled_level_label && s.duration_minutes_snapshot && (
                   <div className="ml-4 flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Clock className="h-3 w-3" />
@@ -315,12 +367,12 @@ export default function ProviderJobDetail() {
         )}
       </div>
 
-      {/* P1: Structured issue reporting sheet */}
-      <ReportIssueSheet
+      {/* Structured issue reporting sheet — wired to report_provider_issue RPC */}
+      <ProviderReportIssueSheet
         open={issueSheetOpen}
         onOpenChange={setIssueSheetOpen}
         onSubmit={handleIssueSubmit}
-        isPending={actions.reportIssue.isPending}
+        isPending={reportIssue.isPending || actions.reportIssue.isPending}
       />
     </div>
   );
