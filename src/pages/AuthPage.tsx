@@ -129,12 +129,12 @@ export default function AuthPage() {
         <form onSubmit={handleLogin} className="space-y-4 w-full max-w-sm mx-auto">
           <div>
             <Label htmlFor="login-email" className="text-sm font-medium">Email</Label>
-            <Input id="login-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
+            <Input id="login-email" type="email" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} required
               disabled={loading} className="mt-1.5" />
           </div>
           <div>
             <Label htmlFor="login-password" className="text-sm font-medium">Password</Label>
-            <Input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
+            <Input id="login-password" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required
               disabled={loading} className="mt-1.5" />
           </div>
           <Button type="submit" variant="accent" size="xl" className="w-full" loading={loading}>
@@ -150,12 +150,12 @@ export default function AuthPage() {
         <form onSubmit={handleSignup} className="space-y-4 w-full max-w-sm mx-auto">
           <div>
             <Label htmlFor="signup-name" className="text-sm font-medium">Full Name</Label>
-            <Input id="signup-name" value={fullName} onChange={(e) => setFullName(e.target.value)} required
+            <Input id="signup-name" placeholder="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} required
               disabled={loading} className="mt-1.5" />
           </div>
           <div>
             <Label htmlFor="signup-email" className="text-sm font-medium">Email</Label>
-            <Input id="signup-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
+            <Input id="signup-email" type="email" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} required
               disabled={loading} className="mt-1.5" />
           </div>
           <div>
