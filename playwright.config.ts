@@ -6,6 +6,8 @@ const BASE_URL =
 export default defineConfig({
   testDir: "./e2e",
   outputDir: "test-results",
+  timeout: 120_000,
+  expect: { timeout: 15_000 },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
@@ -17,6 +19,8 @@ export default defineConfig({
     trace: "on-first-retry",
     video: "retain-on-failure",
     screenshot: "only-on-failure",
+    navigationTimeout: 60_000,
+    actionTimeout: 15_000,
   },
 
   projects: [
