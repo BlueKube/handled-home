@@ -122,7 +122,7 @@ export default function ByocOnboardingWizard() {
     const updated = { ...metadata, interested_services: categories };
     const { error } = await supabase
       .from("customer_onboarding_progress")
-      .update({ metadata: updated as any })
+      .update({ metadata: updated as unknown as Json })
       .eq("id", progress.id);
     if (error) console.error("[BYOC] Failed to persist interested_services:", error);
   }, [progress]);
@@ -504,7 +504,9 @@ function PropertyScreen({ onComplete }: { onComplete: (propertyId?: string) => v
     try {
       const saved = await save(normalized);
       onComplete(saved?.id);
-    } catch {}
+    } catch {
+      toast.error("Failed to save property. Please try again.");
+    }
   };
 
   const isValid = Object.keys(validateProperty(form)).length === 0;
@@ -637,7 +639,9 @@ function HomeSetupScreen({ onComplete }: { onComplete: () => Promise<void> }) {
     try {
       await saveCoverage(updates);
       setPhase("sizing");
-    } catch {}
+    } catch {
+      toast.error("Failed to save coverage. Please try again.");
+    }
   };
 
   const handleSizingComplete = async () => {
@@ -645,7 +649,9 @@ function HomeSetupScreen({ onComplete }: { onComplete: () => Promise<void> }) {
     try {
       await saveSizing(sizingForm);
       await onComplete();
-    } catch {} finally {
+    } catch {
+      toast.error("Failed to save home details. Please try again.");
+    } finally {
       setCompleting(false);
     }
   };
@@ -816,9 +822,8 @@ function ServicesScreen({
       );
 
       // Sort by CATEGORY_ORDER
-      return categories.sort(
-        (a, b) => (CATEGORY_ORDER.indexOf(a) ?? 99) - (CATEGORY_ORDER.indexOf(b) ?? 99)
-      );
+      const orderOf = (c: string) => { const i = CATEGORY_ORDER.indexOf(c); return i >= 0 ? i : 99; };
+      return categories.sort((a, b) => orderOf(a) - orderOf(b));
     },
   });
 
