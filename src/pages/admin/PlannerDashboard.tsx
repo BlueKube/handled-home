@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PlannerHorizonGrid } from "@/components/admin/PlannerHorizonGrid";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -196,6 +197,9 @@ export default function PlannerDashboard() {
             </Button>
           </div>
         </div>
+
+        {/* 14-day horizon grid */}
+        <PlannerHorizonGrid />
 
         {isLoading ? (
           <div className="space-y-3">
