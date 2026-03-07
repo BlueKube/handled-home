@@ -43,16 +43,26 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     const password = process.env.TEST_USER_PASSWORD!;
 
     // ── Step 0: Visit invite link unauthenticated ──
-    await page.goto(`/byoc/activate/${TOKEN}`, { waitUntil: "load", timeout: 60000 });
+    // networkidle ensures the SPA fully hydrates (cold-start preview URLs)
+    await page.goto(`/byoc/activate/${TOKEN}`, { waitUntil: "networkidle", timeout: 60000 });
 
     // Wait for the SPA to hydrate and AuthContext to resolve.
+    // ByocActivate redirects unauth → /auth, auth → /customer/onboarding/byoc/:token
     const authEmail = page.getByLabel(/email/i);
     const recognitionScreen = page.getByText(/already on Handled|provider is on/i);
     const dashboardScreen = page.getByText(/your home team|dashboard/i);
 
-    await expect(
-      authEmail.or(recognitionScreen).or(dashboardScreen)
-    ).toBeVisible({ timeout: 60000 });
+    try {
+      await expect(
+        authEmail.or(recognitionScreen).or(dashboardScreen)
+      ).toBeVisible({ timeout: 60000 });
+    } catch {
+      await page.screenshot({ path: milestonePath("byoc-00-stuck-debug"), fullPage: true });
+      const bodyText = await page.locator("body").innerText().catch(() => "(empty)");
+      throw new Error(
+        `BYOC happy-path: no expected screen after 60s.\nURL: ${page.url()}\nBody: ${bodyText.slice(0, 500)}`
+      );
+    }
 
     // Determine which state we landed in
     const currentUrl = page.url();
@@ -91,7 +101,11 @@ test.describe("BYOC Onboarding — Happy Path", () => {
         test.skip(true, "BYOC token already activated for this user — skipping happy path");
         return;
       }
-      throw new Error("Recognition screen not found and not redirected — unexpected state");
+      await page.screenshot({ path: milestonePath("byoc-01-recognition-debug"), fullPage: true });
+      const bodyText = await page.locator("body").innerText().catch(() => "(empty)");
+      throw new Error(
+        `Recognition screen not found and not redirected — unexpected state.\nURL: ${url}\nBody: ${bodyText.slice(0, 500)}`
+      );
     }
 
     // ── Screen 1: Provider Recognition ──
