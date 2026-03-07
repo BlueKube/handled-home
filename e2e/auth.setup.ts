@@ -16,16 +16,22 @@ setup("authenticate test user", async ({ page }) => {
   }
 
   // Navigate and wait for full page load (preview URL may cold-start)
-  await page.goto("/auth", { waitUntil: "load", timeout: 60000 });
+  await page.goto("/auth", { waitUntil: "networkidle", timeout: 60000 });
 
   // Wait for the auth form to render — capture screenshot on failure for diagnostics
   try {
-    await page.waitForSelector('input[placeholder*="mail" i]', { timeout: 30000 });
+    await Promise.race([
+      page.waitForSelector('input[placeholder*="mail" i]', { timeout: 45000 }),
+      page.waitForSelector('input[type="email"]', { timeout: 45000 }),
+    ]);
   } catch {
     await page.screenshot({ path: "test-results/auth-setup-debug.png", fullPage: true });
     const bodyText = await page.locator("body").innerText().catch(() => "(empty)");
-    throw new Error(`Auth form not found after 30s. URL: ${page.url()}\nBody: ${bodyText.slice(0, 500)}`);
+    throw new Error(`Auth form not found after 45s. URL: ${page.url()}\nBody: ${bodyText.slice(0, 500)}`);
   }
+
+  // Ensure form is fully interactive
+  await page.waitForTimeout(500);
 
   await page.getByPlaceholder(/email/i).fill(email);
   await page.getByPlaceholder(/password/i).fill(password);
