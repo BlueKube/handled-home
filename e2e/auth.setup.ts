@@ -15,7 +15,7 @@ setup("authenticate test user", async ({ page }) => {
     );
   }
 
-  await page.goto("/auth");
+  await page.goto("/auth", { waitUntil: "networkidle" });
   await page.getByPlaceholder(/email/i).fill(email);
   await page.getByPlaceholder(/password/i).fill(password);
   await page.getByRole("button", { name: /sign in|log in/i }).click();
