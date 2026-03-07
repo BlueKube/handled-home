@@ -1103,3 +1103,17 @@ AI, insurance, financing, data marketplace. These make the business defensible.
 - [x] **S9-P3-03** | P0 | M | Wire thresholds into `useAutopilotHealth` — reads config dials from `assignment_config`, falls back to hardcoded defaults. Threshold values shown in reason detail strings.
 
 *Last updated: 2026-03-07 — Sprint 9 Phases 1–3 complete. Autopilot health banner, zone health table, configurable thresholds operational.*
+
+### Phase 4: Provider Self-Healing Actions
+- [x] **S9-P4-01** | P0 | L | `provider_action_proposals` table + `propose_provider_action` RPC — evaluates running_late/reorder_stops/push_stop against tolerances (ETA slip, scheduling profile). Auto-approves or denies with reason. Updates visit ETA and emits customer notification on approval.
+- [x] **S9-P4-02** | P0 | M | `ProviderSelfHealingSheet` component — step-through UI (pick action → configure → submit → result). Wired to `useProposeProviderAction` hook on provider JobDetail page.
+- [x] **S9-P4-03** | P0 | S | Seeded `autopilot_max_eta_slip_minutes` config dial (default 30 min).
+
+### Phase 5: Rolling Horizon Planner Visualization
+- [x] **S9-P5-01** | P0 | M | `PlannerHorizonGrid` component — 14-day calendar grid showing LOCKED vs DRAFT days, visit counts per day, unassigned badges, freeze boundary indicator. Today highlighted. Integrated into PlannerDashboard above run history.
+
+### Phase 6: Comms Templates + Actions Feed
+- [x] **S9-P6-01** | P0 | S | Seeded 3 notification templates: `CUSTOMER_RESCHEDULE_NOTICE`, `CUSTOMER_RUNNING_LATE`, `PROVIDER_PROOF_NEEDED` with PRD copy.
+- [x] **S9-P6-02** | P0 | M | `RecentActionsCard` component — combined feed from `ops_exception_actions` + `job_assignment_log`, sorted by recency, with source badges (Ops/System/Assign). Integrated into OpsCockpit alongside Zone Health Table.
+
+*Last updated: 2026-03-07 — Sprint 9 Phases 4–6 complete. Provider self-healing, horizon visualization, comms templates, and actions feed operational.*
