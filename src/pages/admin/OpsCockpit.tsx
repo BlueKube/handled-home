@@ -107,6 +107,7 @@ function ListTile({ title, items, emptyLabel, href }: {
 
 export default function OpsCockpit() {
   const { data: m, isLoading, dataUpdatedAt } = useOpsMetrics();
+  const autopilot = useAutopilotHealth();
   const nav = useNavigate();
 
   if (isLoading || !m) {
