@@ -93,6 +93,13 @@ test.describe("BYOC Refresh Resilience", () => {
       await page.getByRole("button", { name: /yes|looks right|continue/i }).click();
     }
 
+    // After clicking "Continue" on recognition, we may now be on the confirm screen.
+    // Check and click "Yes, looks right" if so.
+    const confirmText = page.getByText(/found your service|does this look right/i);
+    if (await confirmText.isVisible()) {
+      await page.getByRole("button", { name: /yes|looks right/i }).click();
+    }
+
     // ── Property screen — race against fallback ──
     // After confirm, the wizard may show the property screen OR the invite
     // may have been already activated (showing "no longer active" fallback).
