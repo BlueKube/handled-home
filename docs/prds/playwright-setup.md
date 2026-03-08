@@ -1,6 +1,6 @@
 # PRD: Playwright E2E + Synthetic UX Review Harness
 
-**Status**: Phase 1 — Implemented  
+**Status**: Phase 2 — Implemented  
 **Created**: 2026-03-07  
 **Last Updated**: 2026-03-07  
 **Owner**: Engineering  
@@ -130,6 +130,7 @@ Uses: `/customer/onboarding/byoc/${TEST_BYOC_TOKEN}` (authenticated entry point)
 | `TEST_USER_EMAIL` | Test account email in preview environment |
 | `TEST_USER_PASSWORD` | Test account password |
 | `TEST_BYOC_TOKEN` | Active BYOC invite token in preview database |
+| `ANTHROPIC_API_KEY` | _(Optional)_ Anthropic API key for AI-powered UX evaluations. If not set, scaffold report is generated instead. |
 
 ### 4.6 Assumptions
 
@@ -151,7 +152,7 @@ Uses: `/customer/onboarding/byoc/${TEST_BYOC_TOKEN}` (authenticated entry point)
 
 ---
 
-## 5. Phase 1B — Synthetic UX Review Scaffold
+## 5. Phase 2 — AI-Powered Synthetic UX Review
 
 ### 5.1 Architecture
 
@@ -165,11 +166,29 @@ Milestone screenshots saved to test-results/milestones/
 generate-synthetic-ux-report.ts reads screenshots + persona prompts
         │
         ▼
-(Phase 2: LLM API evaluates each screenshot × persona)
+Claude Sonnet API evaluates each screenshot × persona (vision)
+        │
+        ▼
+Claude summarizes aggregate findings
         │
         ▼
 test-results/ux-review-report.md generated
 ```
+
+### 5.1.1 How It Works
+
+The script (`scripts/generate-synthetic-ux-report.ts`) performs the following:
+
+1. **Loads** milestone PNGs from `test-results/milestones/` and persona definitions from `e2e/prompts/personas/`
+2. **Sends** each screenshot + persona prompt to Claude Sonnet via the Anthropic API (vision)
+3. **Parses** structured JSON responses containing: screen purpose, first tap, confusion points, hesitation/quit triggers, clarity/trust/friction scores, and top improvement
+4. **Runs** evaluations with concurrency control (default 3 parallel calls) to balance speed vs rate limits
+5. **Generates** a final summary by sending all evaluation data to Claude for aggregate analysis
+6. **Outputs** a comprehensive markdown report at `test-results/ux-review-report.md`
+
+**Graceful degradation**: If `ANTHROPIC_API_KEY` is not set or `--dry-run` is passed, the script produces a scaffold report with placeholder text (Phase 1 behavior).
+
+**Cost**: ~$0.15 per full run (6 personas × 8 screenshots = 48 evaluations + 1 summary call)
 
 ### 5.2 Personas (6 for Phase 1)
 
@@ -224,20 +243,21 @@ Summary section at end:
 
 ### 5.5 Execution Strategy
 
-**Part A — Built now (Phase 1)**:
+**Phase 1 (Complete)**:
 - Playwright harness with milestone screenshots
 - Persona prompt files in `e2e/prompts/personas/`
 - System prompt in `e2e/prompts/ux-review-system.md`
-- Scaffold script `scripts/generate-synthetic-ux-report.ts`
-- Report template with `[pending AI review]` placeholders
+- Scaffold script with placeholder report generation
 
-**Part B — External AI execution (Phase 2)**:
-- Integrate LLM API (OpenAI, Claude, or Lovable AI models)
-- Send screenshot + persona prompt to vision-capable model
-- Auto-populate evaluation tables
-- Optionally run as a GitHub Actions step after Playwright
-
-This split keeps Phase 1 practical without blocking on API integration.
+**Phase 2 (Complete)**:
+- Anthropic Claude Sonnet API integration via `@anthropic-ai/sdk`
+- Vision-based screenshot evaluation per persona
+- Structured JSON output with typed `Evaluation` interface
+- Concurrency-controlled API calls (configurable via `UX_CONCURRENCY`)
+- AI-generated aggregate summary with top 5 UX fixes
+- Integrated into GitHub Actions workflow (runs after Playwright tests pass)
+- Graceful fallback to scaffold mode when no API key is configured
+- `--dry-run` flag for cost-free scaffold generation
 
 ---
 
@@ -278,7 +298,8 @@ test-results/
 |--------|---------|---------|
 | E2E tests | `npm run test:e2e` | Run Playwright tests |
 | E2E UI mode | `npm run test:e2e:ui` | Interactive Playwright debugging |
-| UX report | `npm run ux-report` | Generate synthetic review scaffold |
+| UX report | `npm run ux-report` | Generate AI-powered synthetic UX review (requires `ANTHROPIC_API_KEY`) |
+| UX report (dry) | `npm run ux-report:dry` | Generate scaffold report without API calls |
 
 ---
 
@@ -291,7 +312,14 @@ Synthetic users only on the highest-risk flow:
 - 6 persona prompt files
 - Report scaffold with placeholders
 
-### Phase 2 — Expand Coverage
+### Phase 2 (Current) — AI User Simulation
+
+- Claude Sonnet API integration for vision-based UX evaluation
+- 6 personas × N screenshots = automated UX feedback
+- Aggregate summary with top friction points and fixes
+- CI integration (runs after Playwright tests pass)
+
+### Phase 2.5 — Expand Coverage
 
 Expand to additional flows:
 - Standard onboarding
@@ -299,8 +327,6 @@ Expand to additional flows:
 - Dashboard
 - Proof / receipt flow
 - Plan selection
-
-LLM API integration for automated reviews.
 
 ### Phase 3 — Scale
 
