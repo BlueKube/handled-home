@@ -47,15 +47,17 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     // ── Step 0: Visit invite link unauthenticated ──
     await page.goto(`/byoc/activate/${TOKEN}`, { waitUntil: "networkidle", timeout: 60000 });
 
-    // Wait for landing page, auth page, recognition screen, or dashboard
+    // Wait for landing page, auth page, recognition screen, expired fallback, or dashboard
     const signUpBtn = page.getByRole("button", { name: /sign up to activate/i });
     const authEmail = page.getByLabel(/email/i);
     const recognitionScreen = page.getByText(/already on Handled|provider is on/i);
     const dashboardScreen = page.getByText(/your home team|dashboard/i);
+    const inviteExpired = page.getByText(/no longer active/i);
+    const inviteLanding = page.getByText(/invited you/i);
 
     try {
       await expect(
-        signUpBtn.or(authEmail).or(recognitionScreen).or(dashboardScreen)
+        signUpBtn.or(authEmail).or(recognitionScreen).or(dashboardScreen).or(inviteExpired).or(inviteLanding)
       ).toBeVisible({ timeout: 60000 });
     } catch {
       await page.screenshot({ path: milestonePath("byoc-00-stuck-debug"), fullPage: true });
@@ -66,6 +68,14 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     }
 
     await page.screenshot({ path: milestonePath("byoc-00-landing"), fullPage: true });
+
+    // If invite is expired/inactive, fail with a clear message
+    if (await inviteExpired.isVisible() && !(await signUpBtn.isVisible())) {
+      throw new Error(
+        "BYOC invite token appears expired or the public invite query failed. " +
+        "Verify TEST_BYOC_TOKEN is a valid, active invite link token."
+      );
+    }
 
     // ── Already activated? ──
     const currentUrl = page.url();
