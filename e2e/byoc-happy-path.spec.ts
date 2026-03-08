@@ -179,50 +179,61 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     await page.getByRole("button", { name: /continue|next/i }).first().click();
 
     // ── Screens 4–4b: Home Setup + Activating ──
-    // Home setup may have multiple phases (coverage, sizing).
-    // After that, "activating" is a transient spinner.
-    // Loop: keep clicking skip/continue until we reach services, plan, success, or fallback.
-    const postSetupPattern = /many homes also need|connecting your provider|your home is ready|no longer active|simplest way to handle/i;
-    for (let attempt = 0; attempt < 8; attempt++) {
-      // Check if we've reached a post-setup screen
+    // Home setup has phases (coverage, sizing). "Skip for now" triggers an async
+    // activation API call. If activation fails, wizard reverts to home_setup.
+    // The skip button gets disabled (pointer-events:none) during the async call,
+    // so we wrap clicks in try/catch and wait longer for transitions.
+    const postSetupKeywords = [
+      "many homes also need", "connecting your provider", "your home is ready",
+      "no longer active", "simplest way to handle",
+    ];
+    let reachedPostSetup = false;
+    for (let attempt = 0; attempt < 6; attempt++) {
       const bodyText = await page.locator("body").innerText().catch(() => "");
       const lower = bodyText.toLowerCase();
-      if (
-        lower.includes("many homes also need") ||
-        lower.includes("connecting your provider") ||
-        lower.includes("your home is ready") ||
-        lower.includes("no longer active") ||
-        lower.includes("simplest way to handle")
-      ) {
+      if (postSetupKeywords.some((kw) => lower.includes(kw))) {
+        reachedPostSetup = true;
         break;
       }
 
-      // Screenshot first pass for debugging
       if (attempt === 0) {
         await page.screenshot({ path: milestonePath("byoc-04-home-setup") });
       }
 
-      // Try skip first, then continue
-      const skip = page.getByRole("button", { name: /skip/i }).first();
-      if (await skip.isVisible()) {
-        await skip.click();
-        await page.waitForTimeout(1500);
+      // Try skip first, then continue — wrapped in try/catch because buttons
+      // may be disabled (pointer-events:none) during async activation calls
+      try {
+        const skip = page.getByRole("button", { name: /skip/i }).first();
+        if (await skip.isVisible()) {
+          await skip.click({ timeout: 5000 });
+          await page.waitForTimeout(3000);
+          continue;
+        }
+      } catch {
+        // Button was visible but disabled/loading — wait for transition
+        await page.waitForTimeout(3000);
         continue;
       }
-      const cont = page.getByRole("button", { name: /continue|next/i }).first();
-      if (await cont.isVisible()) {
-        await cont.click();
-        await page.waitForTimeout(1500);
+      try {
+        const cont = page.getByRole("button", { name: /continue|next/i }).first();
+        if (await cont.isVisible()) {
+          await cont.click({ timeout: 5000 });
+          await page.waitForTimeout(3000);
+          continue;
+        }
+      } catch {
+        await page.waitForTimeout(3000);
         continue;
       }
-      // Nothing clickable yet — wait for screen transition
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(3000);
     }
 
-    // Wait for post-setup screen (services, plan, success, or activating spinner)
-    await expect(
-      page.getByText(postSetupPattern).first()
-    ).toBeVisible({ timeout: 30000 });
+    if (!reachedPostSetup) {
+      // Final check — maybe we arrived during the last wait
+      await expect(
+        page.getByText(/many homes also need|connecting your provider|your home is ready|no longer active|simplest way to handle/i).first()
+      ).toBeVisible({ timeout: 15000 });
+    }
 
     // If on activating spinner, wait for it to pass
     const activatingText = page.getByText(/connecting your provider/i).first();
