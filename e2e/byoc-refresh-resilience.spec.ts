@@ -84,13 +84,6 @@ test.describe("BYOC Refresh Resilience", () => {
     const confirmBtn = page.getByRole("button", { name: /yes|looks right|continue/i });
     if (await confirmBtn.isVisible()) {
       await confirmBtn.click();
-      // After clicking confirm, check if invite became inactive
-      await page.waitForTimeout(1000);
-      const postConfirmFallback = page.getByText(/no longer active|invitation is no longer/i);
-      if (await postConfirmFallback.isVisible({ timeout: 2000 }).catch(() => false)) {
-        test.skip(true, "BYOC invite became inactive after confirm (already activated) — skipping");
-        return;
-      }
     }
 
     // May need to pass recognition again after refresh
@@ -100,19 +93,29 @@ test.describe("BYOC Refresh Resilience", () => {
       await page.getByRole("button", { name: /yes|looks right|continue/i }).click();
     }
 
-    // ── Guard: if invite became inactive mid-flow (already activated by prior run) ──
+    // ── Property screen — race against fallback ──
+    // After confirm, the wizard may show the property screen OR the invite
+    // may have been already activated (showing "no longer active" fallback).
+    // We race both and skip gracefully if fallback wins.
+    const propertyText = page.getByText(/about your home|tell us about|street address|few quick details/i);
     const fallbackText = page.getByText(/no longer active|invitation is no longer/i);
-    if (await fallbackText.isVisible({ timeout: 2000 }).catch(() => false)) {
-      test.skip(true, "BYOC invite became inactive mid-flow (likely already activated) — skipping refresh test");
-      return;
+    try {
+      await expect(propertyText.or(fallbackText)).toBeVisible({ timeout: 15000 });
+    } catch {
+      await page.screenshot({
+        path: path.join(MILESTONES_DIR, "byoc-refresh-post-confirm-debug.png"),
+        fullPage: true,
+      });
+      const bodyText = await page.locator("body").innerText().catch(() => "(empty)");
+      throw new Error(
+        `Neither property screen nor fallback found after confirm.\nURL: ${page.url()}\nBody: ${bodyText.slice(0, 500)}`
+      );
     }
 
-    // ── Property screen — refresh ──
-    // Property screen may show "Tell us about your home" or "Street Address"
-    // or wizard may have advanced to home_setup ("few quick details")
-    await expect(
-      page.getByText(/about your home|tell us about|street address|few quick details/i)
-    ).toBeVisible({ timeout: 15000 });
+    if (await fallbackText.isVisible()) {
+      test.skip(true, "BYOC invite became inactive (already activated) — skipping refresh test");
+      return;
+    }
     await page.reload();
     await expect(
       page.getByText(/about your home|tell us about|street address|few quick details|already on Handled|confirm/i)

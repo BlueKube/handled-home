@@ -47,20 +47,26 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     // ── Step 0: Visit invite link unauthenticated ──
     await page.goto(`/byoc/activate/${TOKEN}`, { waitUntil: "networkidle", timeout: 60000 });
 
-    // Wait for landing page, auth page, recognition screen, expired fallback, or dashboard.
-    // Use getByText instead of getByRole for the CTA button — the ArrowRight icon
-    // inside the <Button> can alter the accessible name, causing getByRole to miss it.
-    const signUpBtn = page.getByText(/sign up to activate/i);
-    const authEmail = page.getByLabel(/email/i);
-    const recognitionScreen = page.getByText(/already on Handled|provider is on/i);
-    const dashboardScreen = page.getByText(/your home team|dashboard/i);
-    const inviteExpired = page.getByText(/no longer active/i);
-    const inviteLanding = page.getByText(/invited you/i);
-
+    // Wait for ANY expected screen to appear. We use waitForFunction on raw DOM
+    // text because Playwright's .or() chain with many getByText locators has proven
+    // unreliable — it fails to match text that is visually present on the page.
+    const screenKeywords = [
+      "sign up to activate",
+      "invited you",
+      "already on handled",
+      "provider is on",
+      "your home team",
+      "no longer active",
+    ];
     try {
-      await expect(
-        signUpBtn.or(authEmail).or(recognitionScreen).or(dashboardScreen).or(inviteExpired).or(inviteLanding)
-      ).toBeVisible({ timeout: 60000 });
+      await page.waitForFunction(
+        (keywords: string[]) => {
+          const text = document.body?.innerText?.toLowerCase() ?? "";
+          return keywords.some((kw) => text.includes(kw));
+        },
+        screenKeywords,
+        { timeout: 60000 }
+      );
     } catch {
       await page.screenshot({ path: milestonePath("byoc-00-stuck-debug"), fullPage: true });
       const bodyText = await page.locator("body").innerText().catch(() => "(empty)");
@@ -68,6 +74,14 @@ test.describe("BYOC Onboarding — Happy Path", () => {
         `BYOC happy-path: no expected screen after 60s.\nURL: ${page.url()}\nBody: ${bodyText.slice(0, 500)}`
       );
     }
+
+    // Now determine which screen we landed on using simple locators
+    const signUpBtn = page.locator("button", { hasText: /sign up to activate/i });
+    const authEmail = page.getByLabel(/email/i);
+    const recognitionScreen = page.getByText(/already on Handled|provider is on/i);
+    const dashboardScreen = page.getByText(/your home team|dashboard/i);
+    const inviteExpired = page.getByText(/no longer active/i);
+    const inviteLanding = page.getByText(/invited you/i);
 
     await page.screenshot({ path: milestonePath("byoc-00-landing"), fullPage: true });
 
@@ -87,8 +101,8 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     }
 
     // ── If we see the BYOC landing page, click "Sign Up to Activate" ──
-    if (await signUpBtn.isVisible()) {
-      await signUpBtn.click({ timeout: 10000 });
+    if (await inviteLanding.isVisible() || await signUpBtn.isVisible()) {
+      await signUpBtn.first().click({ timeout: 10000 });
       await expect(authEmail).toBeVisible({ timeout: 30000 });
     }
 
