@@ -48,10 +48,10 @@ export function HomeTeamExpandCard() {
           <div className="flex-1 min-w-0 space-y-3">
             <div>
               <p className="text-sm font-semibold">
-                Want to keep track of your other home services too?
+                Keep all your home services in one place
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Add the services you already use — pest control, pool, cleaning, and more.
+                Add the providers you already use for things like pest control, pool, or house cleaning.
               </p>
             </div>
 
@@ -61,7 +61,7 @@ export function HomeTeamExpandCard() {
                 className="rounded-lg text-xs"
                 onClick={() => navigate("/customer/routine")}
               >
-                I already have a provider
+                Add a service
                 <ArrowRight className="h-3 w-3 ml-1" />
               </Button>
               <Button
