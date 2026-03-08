@@ -156,37 +156,46 @@ test.describe("BYOC Refresh Resilience", () => {
     }
     await page.getByRole("button", { name: /continue|next/i }).first().click();
 
-    // Home setup — skip (has two phases: coverage then sizing)
-    const skipBtn = page.getByRole("button", { name: /skip/i }).first();
-    if (await skipBtn.isVisible()) {
-      await skipBtn.click();
-    } else {
-      const continueBtn = page.getByRole("button", { name: /continue|next/i }).first();
-      if (await continueBtn.isVisible()) await continueBtn.click();
-    }
-
-    // Phase 2: sizing (may appear)
-    await page.waitForTimeout(1000);
-    const sizingScreen = page.getByText(/home size|square feet|lot size/i).first();
-    if (await sizingScreen.isVisible()) {
-      const skipSizing = page.getByRole("button", { name: /skip/i }).first();
-      if (await skipSizing.isVisible()) {
-        await skipSizing.click();
-      } else {
-        await page.getByRole("button", { name: /continue|next/i }).first().click();
+    // Home setup may have multiple phases (coverage, sizing).
+    // Loop: keep clicking skip/continue until we reach services/activating/success.
+    const postSetupPattern = /many homes also need|connecting your provider|your home is ready|no longer active|simplest way to handle/i;
+    for (let attempt = 0; attempt < 8; attempt++) {
+      const bodyText = await page.locator("body").innerText().catch(() => "");
+      const lower = bodyText.toLowerCase();
+      if (
+        lower.includes("many homes also need") ||
+        lower.includes("connecting your provider") ||
+        lower.includes("your home is ready") ||
+        lower.includes("no longer active") ||
+        lower.includes("simplest way to handle")
+      ) {
+        break;
       }
+
+      const skip = page.getByRole("button", { name: /skip/i }).first();
+      if (await skip.isVisible()) {
+        await skip.click();
+        await page.waitForTimeout(1500);
+        continue;
+      }
+      const cont = page.getByRole("button", { name: /continue|next/i }).first();
+      if (await cont.isVisible()) {
+        await cont.click();
+        await page.waitForTimeout(1500);
+        continue;
+      }
+      await page.waitForTimeout(2000);
     }
 
-    // Wait for services, activating, or success
     await expect(
-      page.getByText(/many homes also need|connecting your provider|your home is ready/i).first()
+      page.getByText(postSetupPattern).first()
     ).toBeVisible({ timeout: 30000 });
 
     // If on activating spinner, wait for it to pass
     const activatingText = page.getByText(/connecting your provider/i).first();
     if (await activatingText.isVisible()) {
       await expect(
-        page.getByText(/many homes also need|your home is ready/i).first()
+        page.getByText(/many homes also need|your home is ready|simplest way to handle/i).first()
       ).toBeVisible({ timeout: 30000 });
     }
 

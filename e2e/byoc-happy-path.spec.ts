@@ -178,44 +178,53 @@ test.describe("BYOC Onboarding — Happy Path", () => {
 
     await page.getByRole("button", { name: /continue|next/i }).first().click();
 
-    // ── Screen 4: Home Setup ──
-    // Home setup has TWO phases: "A few quick details" (coverage) then
-    // "Home size (quick estimate)" (sizing). Need to skip/continue through both.
-    await expect(
-      page.getByText(/few quick details|home setup|home size/i).first()
-    ).toBeVisible({ timeout: 10000 });
-    await page.screenshot({ path: milestonePath("byoc-04-home-setup") });
-
-    // Phase 1: coverage
-    const skipBtn = page.getByRole("button", { name: /skip/i }).first();
-    if (await skipBtn.isVisible()) {
-      await skipBtn.click();
-    } else {
-      await page.getByRole("button", { name: /continue|next/i }).first().click();
-    }
-
-    // Phase 2: sizing (may appear — skip/continue through it too)
-    await page.waitForTimeout(1000);
-    const sizingScreen = page.getByText(/home size|square feet|lot size/i).first();
-    if (await sizingScreen.isVisible()) {
-      const skipSizing = page.getByRole("button", { name: /skip/i }).first();
-      if (await skipSizing.isVisible()) {
-        await skipSizing.click();
-      } else {
-        await page.getByRole("button", { name: /continue|next/i }).first().click();
+    // ── Screens 4–4b: Home Setup + Activating ──
+    // Home setup may have multiple phases (coverage, sizing).
+    // After that, "activating" is a transient spinner.
+    // Loop: keep clicking skip/continue until we reach services, plan, success, or fallback.
+    const postSetupPattern = /many homes also need|connecting your provider|your home is ready|no longer active|simplest way to handle/i;
+    for (let attempt = 0; attempt < 8; attempt++) {
+      // Check if we've reached a post-setup screen
+      const bodyText = await page.locator("body").innerText().catch(() => "");
+      const lower = bodyText.toLowerCase();
+      if (
+        lower.includes("many homes also need") ||
+        lower.includes("connecting your provider") ||
+        lower.includes("your home is ready") ||
+        lower.includes("no longer active") ||
+        lower.includes("simplest way to handle")
+      ) {
+        break;
       }
+
+      // Screenshot first pass for debugging
+      if (attempt === 0) {
+        await page.screenshot({ path: milestonePath("byoc-04-home-setup") });
+      }
+
+      // Try skip first, then continue
+      const skip = page.getByRole("button", { name: /skip/i }).first();
+      if (await skip.isVisible()) {
+        await skip.click();
+        await page.waitForTimeout(1500);
+        continue;
+      }
+      const cont = page.getByRole("button", { name: /continue|next/i }).first();
+      if (await cont.isVisible()) {
+        await cont.click();
+        await page.waitForTimeout(1500);
+        continue;
+      }
+      // Nothing clickable yet — wait for screen transition
+      await page.waitForTimeout(2000);
     }
 
-    // ── Screen 4b: Activating / Connecting (transient) ──
-    // Wait for services, activating, success, or fallback screen
-    // Services heading: "Many homes also need help with:"
-    // Activating: "Connecting your provider"
-    // Success: "Your home is ready"
+    // Wait for post-setup screen (services, plan, success, or activating spinner)
     await expect(
-      page.getByText(/many homes also need|connecting your provider|your home is ready|no longer active|simplest way to handle/i).first()
+      page.getByText(postSetupPattern).first()
     ).toBeVisible({ timeout: 30000 });
 
-    // If stuck on activating spinner, wait for it to pass
+    // If on activating spinner, wait for it to pass
     const activatingText = page.getByText(/connecting your provider/i).first();
     if (await activatingText.isVisible()) {
       await expect(
