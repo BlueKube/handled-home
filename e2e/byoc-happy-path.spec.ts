@@ -78,7 +78,7 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     // Now determine which screen we landed on using simple locators
     const signUpBtn = page.locator("button", { hasText: /sign up to activate/i });
     const authEmail = page.getByLabel(/email/i);
-    const recognitionScreen = page.getByText(/already on Handled|provider is on/i);
+    const recognitionScreen = page.getByText(/already on Handled|provider is on/i).first();
     const dashboardScreen = page.getByText(/your home team|dashboard/i);
     const inviteExpired = page.getByText(/no longer active/i);
     const inviteLanding = page.getByText(/invited you/i);
@@ -149,7 +149,7 @@ test.describe("BYOC Onboarding — Happy Path", () => {
 
     // ── Screen 2: Confirm Service ──
     await expect(
-      page.getByText(/found your service|confirm.*service/i)
+      page.getByText(/found your service|confirm.*service/i).first()
     ).toBeVisible({ timeout: 10000 });
     await page.screenshot({ path: milestonePath("byoc-02-confirm") });
     await page.getByRole("button", { name: /yes|looks right|continue/i }).click();
@@ -157,8 +157,8 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     // ── Screen 3: Property / Your Home ──
     // After confirm, wizard may show property screen OR fallback if invite was
     // already activated by a previous test run.
-    const propertyScreen = page.getByText(/about your home|your home|tell us about/i);
-    const inviteFallback = page.getByText(/no longer active|invitation is no longer/i);
+    const propertyScreen = page.getByText(/about your home|your home|tell us about/i).first();
+    const inviteFallback = page.getByText(/no longer active|invitation is no longer/i).first();
     await expect(propertyScreen.or(inviteFallback)).toBeVisible({ timeout: 15000 });
     if (await inviteFallback.isVisible()) {
       test.skip(true, "BYOC invite became inactive after confirm (already activated) — skipping");

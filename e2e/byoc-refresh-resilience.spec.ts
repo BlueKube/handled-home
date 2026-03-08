@@ -46,7 +46,7 @@ test.describe("BYOC Refresh Resilience", () => {
     // ── Guard: detect "already activated" redirect ──
     try {
       await expect(
-        page.getByText(/already on Handled|provider is on/i)
+        page.getByText(/already on Handled|provider is on/i).first()
       ).toBeVisible({ timeout: 30000 });
     } catch {
       const url = page.url();
@@ -69,12 +69,12 @@ test.describe("BYOC Refresh Resilience", () => {
 
     // ── Confirm screen — refresh ──
     await expect(
-      page.getByText(/found your service|confirm.*service/i)
+      page.getByText(/found your service|confirm.*service/i).first()
     ).toBeVisible({ timeout: 10000 });
     await page.reload();
     // After refresh, wizard should still be functional
     await expect(
-      page.getByText(/found your service|confirm.*service|already on Handled|provider is on/i)
+      page.getByText(/found your service|confirm.*service|already on Handled|provider is on/i).first()
     ).toBeVisible({ timeout: 10000 });
     await page.screenshot({
       path: path.join(MILESTONES_DIR, "byoc-refresh-confirm.png"),
@@ -87,7 +87,7 @@ test.describe("BYOC Refresh Resilience", () => {
     }
 
     // May need to pass recognition again after refresh
-    const recognitionText = page.getByText(/already on Handled|provider is on/i);
+    const recognitionText = page.getByText(/already on Handled|provider is on/i).first();
     if (await recognitionText.isVisible()) {
       await page.getByRole("button", { name: /continue/i }).click();
       await page.getByRole("button", { name: /yes|looks right|continue/i }).click();
@@ -95,7 +95,7 @@ test.describe("BYOC Refresh Resilience", () => {
 
     // After clicking "Continue" on recognition, we may now be on the confirm screen.
     // Check and click "Yes, looks right" if so.
-    const confirmText = page.getByText(/found your service|does this look right/i);
+    const confirmText = page.getByText(/found your service|does this look right/i).first();
     if (await confirmText.isVisible()) {
       await page.getByRole("button", { name: /yes|looks right/i }).click();
     }
