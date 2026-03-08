@@ -47,8 +47,10 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     // ── Step 0: Visit invite link unauthenticated ──
     await page.goto(`/byoc/activate/${TOKEN}`, { waitUntil: "networkidle", timeout: 60000 });
 
-    // Wait for landing page, auth page, recognition screen, expired fallback, or dashboard
-    const signUpBtn = page.getByRole("button", { name: /sign up to activate/i });
+    // Wait for landing page, auth page, recognition screen, expired fallback, or dashboard.
+    // Use getByText instead of getByRole for the CTA button — the ArrowRight icon
+    // inside the <Button> can alter the accessible name, causing getByRole to miss it.
+    const signUpBtn = page.getByText(/sign up to activate/i);
     const authEmail = page.getByLabel(/email/i);
     const recognitionScreen = page.getByText(/already on Handled|provider is on/i);
     const dashboardScreen = page.getByText(/your home team|dashboard/i);
@@ -86,7 +88,7 @@ test.describe("BYOC Onboarding — Happy Path", () => {
 
     // ── If we see the BYOC landing page, click "Sign Up to Activate" ──
     if (await signUpBtn.isVisible()) {
-      await signUpBtn.click();
+      await signUpBtn.click({ timeout: 10000 });
       await expect(authEmail).toBeVisible({ timeout: 30000 });
     }
 
@@ -103,7 +105,8 @@ test.describe("BYOC Onboarding — Happy Path", () => {
       await page.getByRole("button", { name: /sign in|log in/i }).click();
 
       // After login, should redirect back to /byoc/activate/:token
-      // where the wizard renders inline for authenticated users
+      // where the wizard renders inline for authenticated users.
+      // Wait for either the redirect URL or the wizard content to appear.
       await expect(page).toHaveURL(
         new RegExp(`/byoc/activate/${TOKEN}`),
         { timeout: 30000 }
