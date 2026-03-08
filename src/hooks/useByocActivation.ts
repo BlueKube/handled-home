@@ -72,7 +72,24 @@ export function useByocActivation(token: string | undefined) {
           cadence: params.cadence,
         },
       });
-      if (error) throw error;
+
+      if (error) {
+        // supabase.functions.invoke wraps non-2xx responses in a generic
+        // FunctionsHttpError. Try to extract the structured error from the
+        // response body so callers get a useful message.
+        let message = "Connection failed. Please try again.";
+        try {
+          const body = await (error as any).context?.json?.();
+          if (body?.error) message = body.error;
+        } catch {
+          // context.json() may not exist or may fail — use the raw message
+          if (error.message && !error.message.includes("non-2xx")) {
+            message = error.message;
+          }
+        }
+        throw new Error(message);
+      }
+
       if (data?.error) throw new Error(data.error);
       return data;
     },

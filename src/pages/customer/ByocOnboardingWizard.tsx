@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useByocOnboardingContext } from "@/hooks/useByocOnboardingContext";
@@ -106,14 +106,43 @@ export default function ByocOnboardingWizard() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { invite, activate, byocContext, isLoading: contextLoading } = useByocOnboardingContext(token);
-  const [step, setStep] = useState<ByocStep>("recognition");
+  const [step, setStepRaw] = useState<ByocStep>("recognition");
   const [selectedCadence, setSelectedCadence] = useState<string | null>(null);
   const [interestedCategories, setInterestedCategories] = useState<string[]>([]);
   const [createdPropertyId, setCreatedPropertyId] = useState<string | null>(null);
+  const [activationError, setActivationError] = useState<string | null>(null);
+  const stepRestored = useRef(false);
 
   const inviteData = invite.data;
   const cadence = selectedCadence || inviteData?.default_cadence || "weekly";
   const { progress } = useOnboardingProgress();
+
+  // Persist step to metadata on every change
+  const setStep = useCallback((nextStep: ByocStep) => {
+    setStepRaw(nextStep);
+    if (progress?.id) {
+      const metadata = (progress.metadata as Record<string, unknown>) ?? {};
+      const updated = { ...metadata, byoc_step: nextStep };
+      void supabase
+        .from("customer_onboarding_progress")
+        .update({ metadata: updated as any })
+        .eq("id", progress.id);
+    }
+  }, [progress]);
+
+  // Restore step from persisted metadata on mount
+  useEffect(() => {
+    if (stepRestored.current || !progress) return;
+    const metadata = progress.metadata as Record<string, unknown> | null;
+    const savedStep = metadata?.byoc_step as ByocStep | undefined;
+    if (savedStep && BYOC_STEPS.includes(savedStep) && savedStep !== "activating") {
+      stepRestored.current = true;
+      setStepRaw(savedStep);
+    } else if (metadata?.byoc_provider_id) {
+      // Metadata exists but no step saved — at least we've been here before
+      stepRestored.current = true;
+    }
+  }, [progress]);
 
   // Persist interested_services to metadata
   const persistInterestedServices = useCallback(async (categories: string[]) => {
@@ -126,6 +155,52 @@ export default function ByocOnboardingWizard() {
       .eq("id", progress.id);
     if (error) console.error("[BYOC] Failed to persist interested_services:", error);
   }, [progress]);
+
+  // Activation logic extracted so it can be retried
+  const attemptActivation = useCallback(async () => {
+    try {
+      // Re-check invite validity
+      const { data: freshInvite } = await supabase
+        .from("byoc_invite_links")
+        .select("is_active")
+        .eq("token", token!)
+        .maybeSingle();
+
+      if (!freshInvite?.is_active) {
+        toast.error("This invitation is no longer active.");
+        setStep("services");
+        return;
+      }
+
+      // Use the property_id passed forward from PropertyScreen
+      let propertyId = createdPropertyId;
+      if (!propertyId) {
+        const { data: prop } = await supabase
+          .from("properties")
+          .select("id")
+          .eq("user_id", user!.id)
+          .order("updated_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        propertyId = prop?.id ?? undefined;
+      }
+
+      await activate.mutateAsync({
+        property_id: propertyId,
+        cadence,
+      });
+
+      toast.success("Provider connected!");
+      setStep("services");
+    } catch (err: any) {
+      if (err.message?.includes("already activated") || err.message?.includes("409")) {
+        toast.info("You've already activated this invite.");
+        navigate("/customer");
+        return;
+      }
+      setActivationError(err.message || "Connection failed. Please try again.");
+    }
+  }, [token, createdPropertyId, user, activate, cadence, setStep, navigate]);
 
   // Loading
   if (contextLoading || invite.isLoading) {
@@ -209,56 +284,25 @@ export default function ByocOnboardingWizard() {
         {step === "home_setup" && (
           <HomeSetupScreen
             onComplete={async () => {
-              // Transition to activating spinner
               setStep("activating");
-              try {
-                // Re-check invite validity
-                const { data: freshInvite } = await supabase
-                  .from("byoc_invite_links")
-                  .select("is_active")
-                  .eq("token", token!)
-                  .maybeSingle();
-
-                if (!freshInvite?.is_active) {
-                  toast.error("This invitation is no longer active.");
-                  setStep("services"); // Skip activation, continue setup
-                  return;
-                }
-
-                // Use the property_id passed forward from PropertyScreen
-                let propertyId = createdPropertyId;
-                if (!propertyId) {
-                  // Fallback: query most recent property
-                  const { data: prop } = await supabase
-                    .from("properties")
-                    .select("id")
-                    .eq("user_id", user!.id)
-                    .order("updated_at", { ascending: false })
-                    .limit(1)
-                    .maybeSingle();
-                  propertyId = prop?.id ?? undefined;
-                }
-
-                await activate.mutateAsync({
-                  property_id: propertyId,
-                  cadence,
-                });
-
-                toast.success("Provider connected!");
-                setStep("services");
-              } catch (err: any) {
-                if (err.message?.includes("already activated") || err.message?.includes("409")) {
-                  toast.info("You've already activated this invite.");
-                  navigate("/customer");
-                  return;
-                }
-                toast.error(err.message || "Connection failed. Please try again.");
-                setStep("home_setup");
-              }
+              setActivationError(null);
+              await attemptActivation();
             }}
           />
         )}
-        {step === "activating" && <ActivatingScreen />}
+        {step === "activating" && (
+          <ActivatingScreen
+            error={activationError}
+            onRetry={async () => {
+              setActivationError(null);
+              await attemptActivation();
+            }}
+            onSkip={() => {
+              setActivationError(null);
+              setStep("services");
+            }}
+          />
+        )}
         {step === "services" && byocContext && (
           <ServicesScreen
             excludeCategory={byocContext.categoryKey}
@@ -766,9 +810,35 @@ function HomeSetupScreen({ onComplete }: { onComplete: () => Promise<void> }) {
 }
 
 // ════════════════════════════════════════
-// Activating Screen (spinner)
+// Activating Screen (spinner / error)
 // ════════════════════════════════════════
-function ActivatingScreen() {
+function ActivatingScreen({
+  error,
+  onRetry,
+  onSkip,
+}: {
+  error: string | null;
+  onRetry: () => void;
+  onSkip: () => void;
+}) {
+  if (error) {
+    return (
+      <div className="max-w-lg mx-auto space-y-6 text-center py-16 animate-fade-in">
+        <AlertTriangle className="h-12 w-12 text-destructive mx-auto" />
+        <h1 className="text-h2">Something went wrong</h1>
+        <p className="text-sm text-muted-foreground">{error}</p>
+        <div className="space-y-2 pt-2">
+          <Button onClick={onRetry} className="w-full h-12 text-base font-semibold rounded-xl">
+            Try Again
+          </Button>
+          <Button variant="ghost" className="w-full text-sm" onClick={onSkip}>
+            Skip and continue setup
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-lg mx-auto space-y-6 text-center py-16 animate-fade-in">
       <Loader2 className="h-12 w-12 animate-spin text-accent mx-auto" />
