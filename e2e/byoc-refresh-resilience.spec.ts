@@ -156,7 +156,7 @@ test.describe("BYOC Refresh Resilience", () => {
     }
     await page.getByRole("button", { name: /continue|next/i }).first().click();
 
-    // Home setup — skip
+    // Home setup — skip (has two phases: coverage then sizing)
     const skipBtn = page.getByRole("button", { name: /skip/i }).first();
     if (await skipBtn.isVisible()) {
       await skipBtn.click();
@@ -165,17 +165,37 @@ test.describe("BYOC Refresh Resilience", () => {
       if (await continueBtn.isVisible()) await continueBtn.click();
     }
 
-    // Wait for services or success
+    // Phase 2: sizing (may appear)
+    await page.waitForTimeout(1000);
+    const sizingScreen = page.getByText(/home size|square feet|lot size/i).first();
+    if (await sizingScreen.isVisible()) {
+      const skipSizing = page.getByRole("button", { name: /skip/i }).first();
+      if (await skipSizing.isVisible()) {
+        await skipSizing.click();
+      } else {
+        await page.getByRole("button", { name: /continue|next/i }).first().click();
+      }
+    }
+
+    // Wait for services, activating, or success
     await expect(
-      page.getByText(/services|other services|what else|success|your home is ready/i).first()
-    ).toBeVisible({ timeout: 20000 });
+      page.getByText(/many homes also need|connecting your provider|your home is ready/i).first()
+    ).toBeVisible({ timeout: 30000 });
+
+    // If on activating spinner, wait for it to pass
+    const activatingText = page.getByText(/connecting your provider/i).first();
+    if (await activatingText.isVisible()) {
+      await expect(
+        page.getByText(/many homes also need|your home is ready/i).first()
+      ).toBeVisible({ timeout: 30000 });
+    }
 
     // ── Services screen — refresh ──
-    const servicesText = page.getByText(/services|other services|what else/i).first();
+    const servicesText = page.getByText(/many homes also need|also need help/i).first();
     if (await servicesText.isVisible()) {
       await page.reload();
       await expect(
-        page.getByText(/services|other services|what else|success|your home is ready/i).first()
+        page.getByText(/many homes also need|your home is ready|simplest way to handle/i).first()
       ).toBeVisible({ timeout: 10000 });
       await page.screenshot({
         path: path.join(MILESTONES_DIR, "byoc-refresh-services.png"),

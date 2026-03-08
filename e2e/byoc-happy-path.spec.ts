@@ -179,11 +179,14 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     await page.getByRole("button", { name: /continue|next/i }).first().click();
 
     // ── Screen 4: Home Setup ──
+    // Home setup has TWO phases: "A few quick details" (coverage) then
+    // "Home size (quick estimate)" (sizing). Need to skip/continue through both.
     await expect(
-      page.getByText(/few quick details|home setup|details/i).first()
+      page.getByText(/few quick details|home setup|home size/i).first()
     ).toBeVisible({ timeout: 10000 });
     await page.screenshot({ path: milestonePath("byoc-04-home-setup") });
 
+    // Phase 1: coverage
     const skipBtn = page.getByRole("button", { name: /skip/i }).first();
     if (await skipBtn.isVisible()) {
       await skipBtn.click();
@@ -191,18 +194,49 @@ test.describe("BYOC Onboarding — Happy Path", () => {
       await page.getByRole("button", { name: /continue|next/i }).first().click();
     }
 
+    // Phase 2: sizing (may appear — skip/continue through it too)
+    await page.waitForTimeout(1000);
+    const sizingScreen = page.getByText(/home size|square feet|lot size/i).first();
+    if (await sizingScreen.isVisible()) {
+      const skipSizing = page.getByRole("button", { name: /skip/i }).first();
+      if (await skipSizing.isVisible()) {
+        await skipSizing.click();
+      } else {
+        await page.getByRole("button", { name: /continue|next/i }).first().click();
+      }
+    }
+
     // ── Screen 4b: Activating / Connecting (transient) ──
-    // Wait for services, success, or fallback screen (invite may become inactive)
+    // Wait for services, activating, success, or fallback screen
+    // Services heading: "Many homes also need help with:"
+    // Activating: "Connecting your provider"
+    // Success: "Your home is ready"
     await expect(
-      page.getByText(/services|other services|what else|success|your home is ready|no longer active/i).first()
+      page.getByText(/many homes also need|connecting your provider|your home is ready|no longer active|simplest way to handle/i).first()
     ).toBeVisible({ timeout: 30000 });
 
+    // If stuck on activating spinner, wait for it to pass
+    const activatingText = page.getByText(/connecting your provider/i).first();
+    if (await activatingText.isVisible()) {
+      await expect(
+        page.getByText(/many homes also need|your home is ready|no longer active|simplest way to handle/i).first()
+      ).toBeVisible({ timeout: 30000 });
+    }
+
     // ── Screen 5: Services ──
-    const servicesHeading = page.getByText(/services|other services|what else/i).first();
+    const servicesHeading = page.getByText(/many homes also need|also need help/i).first();
     if (await servicesHeading.isVisible()) {
       await page.screenshot({ path: milestonePath("byoc-05-services") });
       const skipServices = page.getByRole("button", { name: /skip|continue|next|done/i }).first();
       if (await skipServices.isVisible()) await skipServices.click();
+    }
+
+    // ── Screen 5b: Plan (may appear after services) ──
+    const planHeading = page.getByText(/simplest way to handle|estimated monthly/i).first();
+    if (await planHeading.isVisible()) {
+      await page.screenshot({ path: milestonePath("byoc-05b-plan") });
+      const planContinue = page.getByRole("button", { name: /continue|skip|next|done|looks good/i }).first();
+      if (await planContinue.isVisible()) await planContinue.click();
     }
 
     // ── Screen 6: Success ──
