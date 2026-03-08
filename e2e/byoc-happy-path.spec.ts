@@ -1,18 +1,9 @@
 import { test, expect } from "@playwright/test";
-import fs from "fs";
-import path from "path";
-
-const MILESTONES_DIR = path.join("test-results", "milestones");
-
-function ensureMilestonesDir() {
-  if (!fs.existsSync(MILESTONES_DIR)) {
-    fs.mkdirSync(MILESTONES_DIR, { recursive: true });
-  }
-}
-
-function milestonePath(name: string) {
-  return path.join(MILESTONES_DIR, `${name}.png`);
-}
+import {
+  ensureMilestonesDir,
+  milestonePath,
+  MilestoneTracker,
+} from "./milestone";
 
 /**
  * Generate a unique street address per run to avoid idempotency issues.
@@ -43,6 +34,7 @@ test.describe("BYOC Onboarding — Happy Path", () => {
   }) => {
     const email = process.env.TEST_USER_EMAIL!;
     const password = process.env.TEST_USER_PASSWORD!;
+    const tracker = new MilestoneTracker();
 
     // ── Step 0: Visit invite link unauthenticated ──
     await page.goto(`/byoc/activate/${TOKEN}`, { waitUntil: "networkidle", timeout: 60000 });
@@ -84,6 +76,15 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     const inviteLanding = page.getByText(/invited you/i).first();
 
     await page.screenshot({ path: milestonePath("byoc-00-landing"), fullPage: true });
+    tracker.capture({
+      filename: "byoc-00-landing.png",
+      flow: "byoc-onboarding",
+      step: "landing",
+      stepNumber: 0,
+      route: page.url(),
+      userGoal: "Understand what this page is and decide whether to sign up",
+      screenType: "landing",
+    });
 
     // If invite is expired/inactive, fail with a clear message
     if (await inviteExpired.isVisible() && !(await signUpBtn.isVisible())) {
@@ -145,6 +146,15 @@ test.describe("BYOC Onboarding — Happy Path", () => {
 
     // ── Screen 1: Provider Recognition ──
     await page.screenshot({ path: milestonePath("byoc-01-recognition") });
+    tracker.capture({
+      filename: "byoc-01-recognition.png",
+      flow: "byoc-onboarding",
+      step: "recognition",
+      stepNumber: 1,
+      route: page.url(),
+      userGoal: "Recognize their existing provider and feel confident continuing",
+      screenType: "wizard-step",
+    });
     await page.getByRole("button", { name: /continue/i }).first().click();
 
     // ── Screen 2: Confirm Service ──
@@ -152,6 +162,15 @@ test.describe("BYOC Onboarding — Happy Path", () => {
       page.getByText(/found your service|confirm.*service/i).first()
     ).toBeVisible({ timeout: 10000 });
     await page.screenshot({ path: milestonePath("byoc-02-confirm") });
+    tracker.capture({
+      filename: "byoc-02-confirm.png",
+      flow: "byoc-onboarding",
+      step: "confirm",
+      stepNumber: 2,
+      route: page.url(),
+      userGoal: "Confirm the service details are correct before proceeding",
+      screenType: "wizard-step",
+    });
     await page.getByRole("button", { name: /yes|looks right|continue/i }).first().click();
 
     // ── Screen 3: Property / Your Home ──
@@ -165,6 +184,15 @@ test.describe("BYOC Onboarding — Happy Path", () => {
       return;
     }
     await page.screenshot({ path: milestonePath("byoc-03-property") });
+    tracker.capture({
+      filename: "byoc-03-property.png",
+      flow: "byoc-onboarding",
+      step: "property",
+      stepNumber: 3,
+      route: page.url(),
+      userGoal: "Enter home address quickly without confusion",
+      screenType: "wizard-step",
+    });
 
     const street = uniqueStreet();
     const streetInput = page.getByLabel(/street/i).first();
@@ -200,6 +228,15 @@ test.describe("BYOC Onboarding — Happy Path", () => {
 
       if (attempt === 0) {
         await page.screenshot({ path: milestonePath("byoc-04-home-setup") });
+        tracker.capture({
+          filename: "byoc-04-home-setup.png",
+          flow: "byoc-onboarding",
+          step: "home-setup",
+          stepNumber: 4,
+          route: page.url(),
+          userGoal: "Answer home details questions or skip to proceed quickly",
+          screenType: "wizard-step",
+        });
       }
 
       try {
@@ -232,6 +269,7 @@ test.describe("BYOC Onboarding — Happy Path", () => {
       await page.screenshot({ path: milestonePath("byoc-04-home-setup-final") });
       // eslint-disable-next-line no-console
       console.log("BYOC happy-path: activation API did not advance past home_setup. Core flow verified through property step.");
+      tracker.writeManifest();
       return; // Pass — core flow verified
     }
 
@@ -247,6 +285,15 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     const servicesHeading = page.getByText(/many homes also need|also need help/i).first();
     if (await servicesHeading.isVisible()) {
       await page.screenshot({ path: milestonePath("byoc-05-services") });
+      tracker.capture({
+        filename: "byoc-05-services.png",
+        flow: "byoc-onboarding",
+        step: "services",
+        stepNumber: 5,
+        route: page.url(),
+        userGoal: "Understand additional service options without feeling upsold",
+        screenType: "wizard-step",
+      });
       const skipServices = page.getByRole("button", { name: /skip|continue|next|done/i }).first();
       if (await skipServices.isVisible()) await skipServices.click();
     }
@@ -255,6 +302,15 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     const planHeading = page.getByText(/simplest way to handle|estimated monthly/i).first();
     if (await planHeading.isVisible()) {
       await page.screenshot({ path: milestonePath("byoc-05b-plan") });
+      tracker.capture({
+        filename: "byoc-05b-plan.png",
+        flow: "byoc-onboarding",
+        step: "plan",
+        stepNumber: 5.5,
+        route: page.url(),
+        userGoal: "Review pricing and feel confident about cost before committing",
+        screenType: "wizard-step",
+      });
       const planContinue = page.getByRole("button", { name: /continue|skip|next|done|looks good/i }).first();
       if (await planContinue.isVisible()) await planContinue.click();
     }
@@ -264,6 +320,15 @@ test.describe("BYOC Onboarding — Happy Path", () => {
       page.getByText(/your home is ready|success|all set/i).first()
     ).toBeVisible({ timeout: 15000 });
     await page.screenshot({ path: milestonePath("byoc-06-success") });
+    tracker.capture({
+      filename: "byoc-06-success.png",
+      flow: "byoc-onboarding",
+      step: "success",
+      stepNumber: 6,
+      route: page.url(),
+      userGoal: "Feel reassured that setup is complete and know what to do next",
+      screenType: "success",
+    });
 
     const dashBtn = page.getByRole("button", { name: /dashboard|go to dashboard|get started/i }).first();
     if (await dashBtn.isVisible()) await dashBtn.click();
@@ -273,5 +338,16 @@ test.describe("BYOC Onboarding — Happy Path", () => {
       page.getByText(/your home team|dashboard|home/i).first()
     ).toBeVisible({ timeout: 15000 });
     await page.screenshot({ path: milestonePath("byoc-07-dashboard") });
+    tracker.capture({
+      filename: "byoc-07-dashboard.png",
+      flow: "byoc-onboarding",
+      step: "dashboard",
+      stepNumber: 7,
+      route: page.url(),
+      userGoal: "See their home team and understand what the app offers going forward",
+      screenType: "dashboard",
+    });
+
+    tracker.writeManifest();
   });
 });

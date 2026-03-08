@@ -1,22 +1,24 @@
 import { test, expect } from "@playwright/test";
-import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import {
+  ensureMilestonesDir,
+  MILESTONES_DIR,
+  MilestoneTracker,
+} from "./milestone";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-const MILESTONES_DIR = path.join("test-results", "milestones");
 
 test.describe("BYOC Invalid Invite", () => {
   test.use({ storageState: path.join(__dirname, ".auth", "user.json") });
 
   test.beforeAll(() => {
-    if (!fs.existsSync(MILESTONES_DIR)) {
-      fs.mkdirSync(MILESTONES_DIR, { recursive: true });
-    }
+    ensureMilestonesDir();
   });
 
   test("shows fallback screen for invalid BYOC token", async ({ page }) => {
+    const tracker = new MilestoneTracker();
+
     // Use the public /byoc/activate route (avoids ProtectedRoute 404 issues)
     await page.goto("/byoc/activate/invalid-token-xyz-playwright", {
       waitUntil: "networkidle",
@@ -49,5 +51,16 @@ test.describe("BYOC Invalid Invite", () => {
     await page.screenshot({
       path: path.join(MILESTONES_DIR, "byoc-invalid-fallback.png"),
     });
+    tracker.capture({
+      filename: "byoc-invalid-fallback.png",
+      flow: "byoc-invalid-invite",
+      step: "fallback",
+      stepNumber: 0,
+      route: page.url(),
+      userGoal: "Understand why the invite failed and find a safe way to continue",
+      screenType: "error",
+    });
+
+    tracker.writeManifest();
   });
 });
