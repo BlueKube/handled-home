@@ -1,13 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useByocOnboardingContext } from "@/hooks/useByocOnboardingContext";
 import { useProperty, PropertyFormData, formatPetsForDisplay } from "@/hooks/useProperty";
 import { usePropertyCoverage, COVERAGE_CATEGORIES, type CoverageStatus, type SwitchIntent, type CoverageUpdate } from "@/hooks/usePropertyCoverage";
 import { usePropertySignals, type SignalsFormData, SQFT_OPTIONS, YARD_OPTIONS, WINDOWS_OPTIONS, STORIES_OPTIONS, type SqftTier, type YardTier, type WindowsTier, type StoriesTier } from "@/hooks/usePropertySignals";
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { getCategoryLabel, getCategoryIcon, getCategoryGradient, CATEGORY_ORDER } from "@/lib/serviceCategories";
 import { useOnboardingProgress } from "@/hooks/useOnboardingProgress";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,9 +31,9 @@ import { toast } from "sonner";
 import handledLogo from "@/assets/handled-home-logo.png";
 
 // ── Types ──
-type ByocStep = "recognition" | "confirm" | "property" | "home_setup" | "activating" | "services" | "plan" | "success";
+type ByocStep = "recognition" | "confirm" | "property" | "home_setup" | "activating" | "success";
 
-const BYOC_STEPS: ByocStep[] = ["recognition", "confirm", "property", "home_setup", "activating", "services", "plan", "success"];
+const BYOC_STEPS: ByocStep[] = ["recognition", "confirm", "property", "home_setup", "activating", "success"];
 
 const STEP_LABELS: Record<ByocStep, string> = {
   recognition: "Provider",
@@ -43,8 +41,6 @@ const STEP_LABELS: Record<ByocStep, string> = {
   property: "Your Home",
   home_setup: "Details",
   activating: "Linking",
-  services: "More",
-  plan: "Plan",
   success: "Done",
 };
 
@@ -106,26 +102,88 @@ export default function ByocOnboardingWizard() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { invite, activate, byocContext, isLoading: contextLoading } = useByocOnboardingContext(token);
-  const [step, setStep] = useState<ByocStep>("recognition");
+  const [step, setStepRaw] = useState<ByocStep>("recognition");
   const [selectedCadence, setSelectedCadence] = useState<string | null>(null);
-  const [interestedCategories, setInterestedCategories] = useState<string[]>([]);
   const [createdPropertyId, setCreatedPropertyId] = useState<string | null>(null);
+  const [activationError, setActivationError] = useState<string | null>(null);
+  const stepRestored = useRef(false);
 
   const inviteData = invite.data;
   const cadence = selectedCadence || inviteData?.default_cadence || "weekly";
   const { progress } = useOnboardingProgress();
 
-  // Persist interested_services to metadata
-  const persistInterestedServices = useCallback(async (categories: string[]) => {
-    if (!progress?.id) return;
-    const metadata = (progress.metadata as Record<string, unknown>) ?? {};
-    const updated = { ...metadata, interested_services: categories };
-    const { error } = await supabase
-      .from("customer_onboarding_progress")
-      .update({ metadata: updated as any })
-      .eq("id", progress.id);
-    if (error) console.error("[BYOC] Failed to persist interested_services:", error);
+  // Persist step to metadata on every change
+  const setStep = useCallback((nextStep: ByocStep) => {
+    setStepRaw(nextStep);
+    if (progress?.id) {
+      const metadata = (progress.metadata as Record<string, unknown>) ?? {};
+      const updated = { ...metadata, byoc_step: nextStep };
+      void supabase
+        .from("customer_onboarding_progress")
+        .update({ metadata: updated as any })
+        .eq("id", progress.id);
+    }
   }, [progress]);
+
+  // Restore step from persisted metadata on mount
+  useEffect(() => {
+    if (stepRestored.current || !progress) return;
+    const metadata = progress.metadata as Record<string, unknown> | null;
+    const savedStep = metadata?.byoc_step as ByocStep | undefined;
+    if (savedStep && BYOC_STEPS.includes(savedStep) && savedStep !== "activating") {
+      stepRestored.current = true;
+      setStepRaw(savedStep);
+    } else if (metadata?.byoc_provider_id) {
+      // Metadata exists but no step saved — at least we've been here before
+      stepRestored.current = true;
+    }
+  }, [progress]);
+
+  // Activation logic extracted so it can be retried
+  const attemptActivation = useCallback(async () => {
+    try {
+      // Re-check invite validity
+      const { data: freshInvite } = await supabase
+        .from("byoc_invite_links")
+        .select("is_active")
+        .eq("token", token!)
+        .maybeSingle();
+
+      if (!freshInvite?.is_active) {
+        toast.error("This invitation is no longer active.");
+        setStep("success");
+        return;
+      }
+
+      // Use the property_id passed forward from PropertyScreen
+      let propertyId = createdPropertyId;
+      if (!propertyId) {
+        const { data: prop } = await supabase
+          .from("properties")
+          .select("id")
+          .eq("user_id", user!.id)
+          .order("updated_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        propertyId = prop?.id ?? undefined;
+      }
+
+      await activate.mutateAsync({
+        property_id: propertyId,
+        cadence,
+      });
+
+      toast.success("Provider connected!");
+      setStep("success");
+    } catch (err: any) {
+      if (err.message?.includes("already activated") || err.message?.includes("409")) {
+        toast.info("You've already activated this invite.");
+        navigate("/customer");
+        return;
+      }
+      setActivationError(err.message || "Connection failed. Please try again.");
+    }
+  }, [token, createdPropertyId, user, activate, cadence, setStep, navigate]);
 
   // Loading
   if (contextLoading || invite.isLoading) {
@@ -209,85 +267,23 @@ export default function ByocOnboardingWizard() {
         {step === "home_setup" && (
           <HomeSetupScreen
             onComplete={async () => {
-              // Transition to activating spinner
               setStep("activating");
-              try {
-                // Re-check invite validity
-                const { data: freshInvite } = await supabase
-                  .from("byoc_invite_links")
-                  .select("is_active")
-                  .eq("token", token!)
-                  .maybeSingle();
-
-                if (!freshInvite?.is_active) {
-                  toast.error("This invitation is no longer active.");
-                  setStep("services"); // Skip activation, continue setup
-                  return;
-                }
-
-                // Use the property_id passed forward from PropertyScreen
-                let propertyId = createdPropertyId;
-                if (!propertyId) {
-                  // Fallback: query most recent property
-                  const { data: prop } = await supabase
-                    .from("properties")
-                    .select("id")
-                    .eq("user_id", user!.id)
-                    .order("updated_at", { ascending: false })
-                    .limit(1)
-                    .maybeSingle();
-                  propertyId = prop?.id ?? undefined;
-                }
-
-                await activate.mutateAsync({
-                  property_id: propertyId,
-                  cadence,
-                });
-
-                toast.success("Provider connected!");
-                setStep("services");
-              } catch (err: any) {
-                if (err.message?.includes("already activated") || err.message?.includes("409")) {
-                  toast.info("You've already activated this invite.");
-                  navigate("/customer");
-                  return;
-                }
-                toast.error(err.message || "Connection failed. Please try again.");
-                setStep("home_setup");
-              }
+              setActivationError(null);
+              await attemptActivation();
             }}
           />
         )}
-        {step === "activating" && <ActivatingScreen />}
-        {step === "services" && byocContext && (
-          <ServicesScreen
-            excludeCategory={byocContext.categoryKey}
-            zoneId={byocContext.zoneId}
-            interested={interestedCategories}
-            onToggle={(cat) => {
-              setInterestedCategories((prev) =>
-                prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
-              );
+        {step === "activating" && (
+          <ActivatingScreen
+            error={activationError}
+            onRetry={async () => {
+              setActivationError(null);
+              await attemptActivation();
             }}
-            onContinue={async () => {
-              await persistInterestedServices(interestedCategories);
-              if (interestedCategories.length > 0) {
-                setStep("plan");
-              } else {
-                setStep("success");
-              }
-            }}
-            onSkip={async () => {
-              await persistInterestedServices([]);
+            onSkip={() => {
+              setActivationError(null);
               setStep("success");
             }}
-          />
-        )}
-        {step === "plan" && (
-          <PlanSummaryScreen
-            interestedCategories={interestedCategories}
-            onContinue={() => setStep("success")}
-            onSkip={() => setStep("success")}
           />
         )}
         {step === "success" && byocContext && (
@@ -766,9 +762,35 @@ function HomeSetupScreen({ onComplete }: { onComplete: () => Promise<void> }) {
 }
 
 // ════════════════════════════════════════
-// Activating Screen (spinner)
+// Activating Screen (spinner / error)
 // ════════════════════════════════════════
-function ActivatingScreen() {
+function ActivatingScreen({
+  error,
+  onRetry,
+  onSkip,
+}: {
+  error: string | null;
+  onRetry: () => void;
+  onSkip: () => void;
+}) {
+  if (error) {
+    return (
+      <div className="max-w-lg mx-auto space-y-6 text-center py-16 animate-fade-in">
+        <AlertTriangle className="h-12 w-12 text-destructive mx-auto" />
+        <h1 className="text-h2">Something went wrong</h1>
+        <p className="text-sm text-muted-foreground">{error}</p>
+        <div className="space-y-2 pt-2">
+          <Button onClick={onRetry} className="w-full h-12 text-base font-semibold rounded-xl">
+            Try Again
+          </Button>
+          <Button variant="ghost" className="w-full text-sm" onClick={onSkip}>
+            Skip and continue setup
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-lg mx-auto space-y-6 text-center py-16 animate-fade-in">
       <Loader2 className="h-12 w-12 animate-spin text-accent mx-auto" />
@@ -779,161 +801,7 @@ function ActivatingScreen() {
 }
 
 // ════════════════════════════════════════
-// Screen 5: Other Services (by category)
-// ════════════════════════════════════════
-function ServicesScreen({
-  excludeCategory,
-  zoneId,
-  interested,
-  onToggle,
-  onContinue,
-  onSkip,
-}: {
-  excludeCategory: string;
-  zoneId: string;
-  interested: string[];
-  onToggle: (cat: string) => void;
-  onContinue: () => void;
-  onSkip: () => void;
-}) {
-  // Query zone_category_providers for active categories in this zone
-  const { data: availableCategories } = useQuery({
-    queryKey: ["byoc_zone_categories", zoneId],
-    enabled: !!zoneId,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("zone_category_providers")
-        .select("category")
-        .eq("zone_id", zoneId)
-        .eq("role", "primary");
-
-      if (error) throw error;
-      if (!data) return [];
-
-      // Deduplicate and exclude the BYOC category
-      const categories = [...new Set(data.map((r) => r.category))].filter(
-        (c) => c !== excludeCategory
-      );
-
-      // Sort by CATEGORY_ORDER
-      return categories.sort(
-        (a, b) => (CATEGORY_ORDER.indexOf(a) ?? 99) - (CATEGORY_ORDER.indexOf(b) ?? 99)
-      );
-    },
-  });
-
-  const cats = availableCategories ?? [];
-
-  return (
-    <div className="max-w-lg mx-auto space-y-6">
-      <div className="text-center">
-        <Sparkles className="h-10 w-10 text-accent mx-auto mb-3" />
-        <h1 className="text-h2">Many homes also need help with:</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Add what interests you, or skip for now.
-        </p>
-      </div>
-
-      {cats.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-6">
-          No additional services available in your area yet.
-        </p>
-      ) : (
-        <div className="space-y-2">
-          {cats.map((cat) => {
-            const Icon = getCategoryIcon(cat);
-            const label = getCategoryLabel(cat);
-            const isSelected = interested.includes(cat);
-
-            return (
-              <button
-                key={cat}
-                onClick={() => onToggle(cat)}
-                className={`w-full flex items-center gap-3 p-4 rounded-xl border transition-all ${
-                  isSelected
-                    ? "border-primary bg-primary/5 shadow-sm"
-                    : "border-border bg-card hover:bg-secondary/50"
-                }`}
-              >
-                <div className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${
-                  isSelected ? "bg-primary/10" : "bg-accent/10"
-                }`}>
-                  <Icon className={`h-5 w-5 ${isSelected ? "text-primary" : "text-accent"}`} />
-                </div>
-                <span className="text-sm font-medium flex-1 text-left">{label}</span>
-                {isSelected && <CheckCircle className="h-5 w-5 text-primary shrink-0" />}
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      <Button onClick={onContinue} className="w-full h-12 text-base font-semibold rounded-xl">
-        Continue
-        <ArrowRight className="h-4 w-4 ml-2" />
-      </Button>
-      <Button variant="ghost" className="w-full text-sm" onClick={onSkip}>
-        Skip for now
-      </Button>
-    </div>
-  );
-}
-
-// ════════════════════════════════════════
-// Screen 6: Plan Summary (conditional)
-// ════════════════════════════════════════
-function PlanSummaryScreen({
-  interestedCategories,
-  onContinue,
-  onSkip,
-}: {
-  interestedCategories: string[];
-  onContinue: () => void;
-  onSkip: () => void;
-}) {
-  return (
-    <div className="max-w-lg mx-auto space-y-6">
-      <div className="text-center">
-        <Home className="h-10 w-10 text-accent mx-auto mb-3" />
-        <h1 className="text-h2">Here's the simplest way to handle these</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Estimated monthly total for added services
-        </p>
-      </div>
-
-      <Card>
-        <CardContent className="pt-5 space-y-3">
-          {interestedCategories.map((cat) => {
-            const Icon = getCategoryIcon(cat);
-            return (
-              <div key={cat} className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-                  <Icon className="h-4 w-4 text-accent" />
-                </div>
-                <span className="text-sm font-medium">{getCategoryLabel(cat)}</span>
-              </div>
-            );
-          })}
-        </CardContent>
-      </Card>
-
-      <p className="text-xs text-muted-foreground text-center">
-        Pricing details will be available once your plan is configured. You can always adjust later.
-      </p>
-
-      <Button onClick={onContinue} className="w-full h-12 text-base font-semibold rounded-xl">
-        Start my plan
-        <ArrowRight className="h-4 w-4 ml-2" />
-      </Button>
-      <Button variant="ghost" className="w-full text-sm" onClick={onSkip}>
-        Keep services separate
-      </Button>
-    </div>
-  );
-}
-
-// ════════════════════════════════════════
-// Screen 7: Success
+// Screen 5: Success
 // ════════════════════════════════════════
 function SuccessScreen({
   providerName,
