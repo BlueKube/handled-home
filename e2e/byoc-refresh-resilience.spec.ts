@@ -65,7 +65,7 @@ test.describe("BYOC Refresh Resilience", () => {
     }
 
     // ── Navigate to Recognition → Continue ──
-    await page.getByRole("button", { name: /continue/i }).click();
+    await page.getByRole("button", { name: /continue/i }).first().click();
 
     // ── Confirm screen — refresh ──
     await expect(
@@ -81,7 +81,7 @@ test.describe("BYOC Refresh Resilience", () => {
     });
 
     // Advance past confirm if we landed back on it
-    const confirmBtn = page.getByRole("button", { name: /yes|looks right|continue/i });
+    const confirmBtn = page.getByRole("button", { name: /yes|looks right|continue/i }).first();
     if (await confirmBtn.isVisible()) {
       await confirmBtn.click();
     }
@@ -89,15 +89,15 @@ test.describe("BYOC Refresh Resilience", () => {
     // May need to pass recognition again after refresh
     const recognitionText = page.getByText(/already on Handled|provider is on/i).first();
     if (await recognitionText.isVisible()) {
-      await page.getByRole("button", { name: /continue/i }).click();
-      await page.getByRole("button", { name: /yes|looks right|continue/i }).click();
+      await page.getByRole("button", { name: /continue/i }).first().click();
+      await page.getByRole("button", { name: /yes|looks right|continue/i }).first().click();
     }
 
     // After clicking "Continue" on recognition, we may now be on the confirm screen.
     // Check and click "Yes, looks right" if so.
     const confirmText = page.getByText(/found your service|does this look right/i).first();
     if (await confirmText.isVisible()) {
-      await page.getByRole("button", { name: /yes|looks right/i }).click();
+      await page.getByRole("button", { name: /yes|looks right/i }).first().click();
     }
 
     // ── Property screen — race against fallback ──
@@ -136,7 +136,7 @@ test.describe("BYOC Refresh Resilience", () => {
     }
     await page.reload();
     await expect(
-      page.getByText(/about your home|tell us about|street address|few quick details|already on Handled|confirm/i)
+      page.getByText(/about your home|tell us about|street address|few quick details|already on Handled|confirm/i).first()
     ).toBeVisible({ timeout: 15000 });
     await page.screenshot({
       path: path.join(MILESTONES_DIR, "byoc-refresh-property.png"),
@@ -154,28 +154,28 @@ test.describe("BYOC Refresh Resilience", () => {
       const zipInput = page.getByLabel(/zip/i).first();
       if (await zipInput.isVisible()) await zipInput.fill("78701");
     }
-    await page.getByRole("button", { name: /continue|next/i }).click();
+    await page.getByRole("button", { name: /continue|next/i }).first().click();
 
     // Home setup — skip
-    const skipBtn = page.getByRole("button", { name: /skip/i });
+    const skipBtn = page.getByRole("button", { name: /skip/i }).first();
     if (await skipBtn.isVisible()) {
       await skipBtn.click();
     } else {
-      const continueBtn = page.getByRole("button", { name: /continue|next/i });
+      const continueBtn = page.getByRole("button", { name: /continue|next/i }).first();
       if (await continueBtn.isVisible()) await continueBtn.click();
     }
 
     // Wait for services or success
     await expect(
-      page.getByText(/services|other services|what else|success|your home is ready/i)
+      page.getByText(/services|other services|what else|success|your home is ready/i).first()
     ).toBeVisible({ timeout: 20000 });
 
     // ── Services screen — refresh ──
-    const servicesText = page.getByText(/services|other services|what else/i);
+    const servicesText = page.getByText(/services|other services|what else/i).first();
     if (await servicesText.isVisible()) {
       await page.reload();
       await expect(
-        page.getByText(/services|other services|what else|success|your home is ready/i)
+        page.getByText(/services|other services|what else|success|your home is ready/i).first()
       ).toBeVisible({ timeout: 10000 });
       await page.screenshot({
         path: path.join(MILESTONES_DIR, "byoc-refresh-services.png"),

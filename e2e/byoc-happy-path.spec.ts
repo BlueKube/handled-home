@@ -79,9 +79,9 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     const signUpBtn = page.locator("button", { hasText: /sign up to activate/i });
     const authEmail = page.getByLabel(/email/i);
     const recognitionScreen = page.getByText(/already on Handled|provider is on/i).first();
-    const dashboardScreen = page.getByText(/your home team|dashboard/i);
-    const inviteExpired = page.getByText(/no longer active/i);
-    const inviteLanding = page.getByText(/invited you/i);
+    const dashboardScreen = page.getByText(/your home team|dashboard/i).first();
+    const inviteExpired = page.getByText(/no longer active/i).first();
+    const inviteLanding = page.getByText(/invited you/i).first();
 
     await page.screenshot({ path: milestonePath("byoc-00-landing"), fullPage: true });
 
@@ -145,14 +145,14 @@ test.describe("BYOC Onboarding — Happy Path", () => {
 
     // ── Screen 1: Provider Recognition ──
     await page.screenshot({ path: milestonePath("byoc-01-recognition") });
-    await page.getByRole("button", { name: /continue/i }).click();
+    await page.getByRole("button", { name: /continue/i }).first().click();
 
     // ── Screen 2: Confirm Service ──
     await expect(
       page.getByText(/found your service|confirm.*service/i).first()
     ).toBeVisible({ timeout: 10000 });
     await page.screenshot({ path: milestonePath("byoc-02-confirm") });
-    await page.getByRole("button", { name: /yes|looks right|continue/i }).click();
+    await page.getByRole("button", { name: /yes|looks right|continue/i }).first().click();
 
     // ── Screen 3: Property / Your Home ──
     // After confirm, wizard may show property screen OR fallback if invite was
@@ -176,11 +176,11 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     const zipInput = page.getByLabel(/zip/i).first();
     if (await zipInput.isVisible()) await zipInput.fill("78701");
 
-    await page.getByRole("button", { name: /continue|next/i }).click();
+    await page.getByRole("button", { name: /continue|next/i }).first().click();
 
     // ── Screen 4: Home Setup ──
     await expect(
-      page.getByText(/few quick details|home setup|details/i)
+      page.getByText(/few quick details|home setup|details/i).first()
     ).toBeVisible({ timeout: 10000 });
     await page.screenshot({ path: milestonePath("byoc-04-home-setup") });
 
@@ -198,7 +198,7 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     ).toBeVisible({ timeout: 30000 });
 
     // ── Screen 5: Services ──
-    const servicesHeading = page.getByText(/services|other services|what else/i);
+    const servicesHeading = page.getByText(/services|other services|what else/i).first();
     if (await servicesHeading.isVisible()) {
       await page.screenshot({ path: milestonePath("byoc-05-services") });
       const skipServices = page.getByRole("button", { name: /skip|continue|next|done/i }).first();
@@ -207,16 +207,16 @@ test.describe("BYOC Onboarding — Happy Path", () => {
 
     // ── Screen 6: Success ──
     await expect(
-      page.getByText(/your home is ready|success|all set/i)
+      page.getByText(/your home is ready|success|all set/i).first()
     ).toBeVisible({ timeout: 15000 });
     await page.screenshot({ path: milestonePath("byoc-06-success") });
 
-    const dashBtn = page.getByRole("button", { name: /dashboard|go to dashboard|get started/i });
+    const dashBtn = page.getByRole("button", { name: /dashboard|go to dashboard|get started/i }).first();
     if (await dashBtn.isVisible()) await dashBtn.click();
 
     // ── Screen 7: Dashboard ──
     await expect(
-      page.getByText(/your home team|dashboard|home/i)
+      page.getByText(/your home team|dashboard|home/i).first()
     ).toBeVisible({ timeout: 15000 });
     await page.screenshot({ path: milestonePath("byoc-07-dashboard") });
   });
