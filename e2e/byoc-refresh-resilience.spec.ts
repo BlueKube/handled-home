@@ -1,11 +1,14 @@
 import { test, expect } from "@playwright/test";
-import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import {
+  ensureMilestonesDir,
+  milestonePath,
+  MILESTONES_DIR,
+  MilestoneTracker,
+} from "./milestone";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-const MILESTONES_DIR = path.join("test-results", "milestones");
 
 /**
  * Generate a unique street address per run to avoid collisions.
@@ -29,14 +32,14 @@ test.describe("BYOC Refresh Resilience", () => {
     if (!TOKEN) {
       throw new Error("TEST_BYOC_TOKEN must be set as an environment variable");
     }
-    if (!fs.existsSync(MILESTONES_DIR)) {
-      fs.mkdirSync(MILESTONES_DIR, { recursive: true });
-    }
+    ensureMilestonesDir();
   });
 
   test("wizard survives refresh at confirm, property, and services screens", async ({
     page,
   }) => {
+    const tracker = new MilestoneTracker();
+
     // Use the public /byoc/activate route which renders wizard inline
     await page.goto(`/byoc/activate/${TOKEN}`, {
       waitUntil: "networkidle",
@@ -78,6 +81,15 @@ test.describe("BYOC Refresh Resilience", () => {
     ).toBeVisible({ timeout: 10000 });
     await page.screenshot({
       path: path.join(MILESTONES_DIR, "byoc-refresh-confirm.png"),
+    });
+    tracker.capture({
+      filename: "byoc-refresh-confirm.png",
+      flow: "byoc-refresh-resilience",
+      step: "confirm-after-refresh",
+      stepNumber: 0,
+      route: page.url(),
+      userGoal: "Confirm service details still display correctly after page refresh",
+      screenType: "wizard-step",
     });
 
     // Advance past confirm if we landed back on it
@@ -131,6 +143,7 @@ test.describe("BYOC Refresh Resilience", () => {
     const bodyAfterConfirm = await page.locator("body").innerText();
     const bodyLower = bodyAfterConfirm.toLowerCase();
     if (fallbackKeywords.some((kw) => bodyLower.includes(kw))) {
+      tracker.writeManifest();
       test.skip(true, "BYOC invite became inactive (already activated) — skipping refresh test");
       return;
     }
@@ -140,6 +153,15 @@ test.describe("BYOC Refresh Resilience", () => {
     ).toBeVisible({ timeout: 15000 });
     await page.screenshot({
       path: path.join(MILESTONES_DIR, "byoc-refresh-property.png"),
+    });
+    tracker.capture({
+      filename: "byoc-refresh-property.png",
+      flow: "byoc-refresh-resilience",
+      step: "property-after-refresh",
+      stepNumber: 1,
+      route: page.url(),
+      userGoal: "Property form still displays correctly after page refresh",
+      screenType: "wizard-step",
     });
 
     // Fill and advance to services with unique address
@@ -206,6 +228,7 @@ test.describe("BYOC Refresh Resilience", () => {
       });
       // eslint-disable-next-line no-console
       console.log("BYOC refresh: activation API did not advance past home_setup. Refresh resilience verified through property step.");
+      tracker.writeManifest();
       return; // Pass — confirm and property refresh verified
     }
 
@@ -227,6 +250,17 @@ test.describe("BYOC Refresh Resilience", () => {
       await page.screenshot({
         path: path.join(MILESTONES_DIR, "byoc-refresh-services.png"),
       });
+      tracker.capture({
+        filename: "byoc-refresh-services.png",
+        flow: "byoc-refresh-resilience",
+        step: "services-after-refresh",
+        stepNumber: 2,
+        route: page.url(),
+        userGoal: "Services screen still displays correctly after page refresh",
+        screenType: "wizard-step",
+      });
     }
+
+    tracker.writeManifest();
   });
 });
