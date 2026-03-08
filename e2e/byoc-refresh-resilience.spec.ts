@@ -103,11 +103,19 @@ test.describe("BYOC Refresh Resilience", () => {
     // ── Property screen — race against fallback ──
     // After confirm, the wizard may show the property screen OR the invite
     // may have been already activated (showing "no longer active" fallback).
-    // We race both and skip gracefully if fallback wins.
-    const propertyText = page.getByText(/about your home|tell us about|street address|few quick details/i);
-    const fallbackText = page.getByText(/no longer active|invitation is no longer/i);
+    // Use waitForFunction on raw DOM text — Playwright's .or() with getByText
+    // has proven unreliable (fails to match visible text).
+    const propertyKeywords = ["about your home", "tell us about", "street address", "few quick details"];
+    const fallbackKeywords = ["no longer active", "invitation is no longer"];
     try {
-      await expect(propertyText.or(fallbackText)).toBeVisible({ timeout: 15000 });
+      await page.waitForFunction(
+        ({ propKw, fallKw }: { propKw: string[]; fallKw: string[] }) => {
+          const text = document.body?.innerText?.toLowerCase() ?? "";
+          return propKw.some((kw) => text.includes(kw)) || fallKw.some((kw) => text.includes(kw));
+        },
+        { propKw: propertyKeywords, fallKw: fallbackKeywords },
+        { timeout: 15000 }
+      );
     } catch {
       await page.screenshot({
         path: path.join(MILESTONES_DIR, "byoc-refresh-post-confirm-debug.png"),
@@ -119,7 +127,10 @@ test.describe("BYOC Refresh Resilience", () => {
       );
     }
 
-    if (await fallbackText.isVisible()) {
+    // Check which screen won
+    const bodyAfterConfirm = await page.locator("body").innerText();
+    const bodyLower = bodyAfterConfirm.toLowerCase();
+    if (fallbackKeywords.some((kw) => bodyLower.includes(kw))) {
       test.skip(true, "BYOC invite became inactive (already activated) — skipping refresh test");
       return;
     }

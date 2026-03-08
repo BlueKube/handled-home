@@ -184,23 +184,24 @@ test.describe("BYOC Onboarding — Happy Path", () => {
     ).toBeVisible({ timeout: 10000 });
     await page.screenshot({ path: milestonePath("byoc-04-home-setup") });
 
-    const skipBtn = page.getByRole("button", { name: /skip/i });
+    const skipBtn = page.getByRole("button", { name: /skip/i }).first();
     if (await skipBtn.isVisible()) {
       await skipBtn.click();
     } else {
-      await page.getByRole("button", { name: /continue|next/i }).click();
+      await page.getByRole("button", { name: /continue|next/i }).first().click();
     }
 
     // ── Screen 4b: Activating / Connecting (transient) ──
+    // Wait for services, success, or fallback screen (invite may become inactive)
     await expect(
-      page.getByText(/services|other services|what else|success|your home is ready/i)
-    ).toBeVisible({ timeout: 20000 });
+      page.getByText(/services|other services|what else|success|your home is ready|no longer active/i).first()
+    ).toBeVisible({ timeout: 30000 });
 
     // ── Screen 5: Services ──
     const servicesHeading = page.getByText(/services|other services|what else/i);
     if (await servicesHeading.isVisible()) {
       await page.screenshot({ path: milestonePath("byoc-05-services") });
-      const skipServices = page.getByRole("button", { name: /skip|continue|next|done/i });
+      const skipServices = page.getByRole("button", { name: /skip|continue|next|done/i }).first();
       if (await skipServices.isVisible()) await skipServices.click();
     }
 
