@@ -41,9 +41,9 @@ test.describe("BYOC Invalid Invite", () => {
       );
     }
 
-    // User should have a safe way to continue
+    // User should have a safe way to continue (multiple buttons may exist)
     await expect(
-      page.getByRole("button", { name: /dashboard|continue|set up|home/i })
+      page.getByRole("button", { name: /dashboard|continue|set up|home/i }).first()
     ).toBeVisible();
 
     await page.screenshot({

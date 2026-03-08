@@ -41,16 +41,42 @@ export default function ByocActivate() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
 
-  // Fetch invite preview for unauthenticated users (public RPC)
+  // Fetch invite preview for unauthenticated users.
+  // Try public RPC first, fall back to direct table query (anon SELECT is allowed by RLS).
   const { data: invite, isLoading } = useQuery({
     queryKey: ["byoc-invite-public", token],
     enabled: !!token && !user && !authLoading,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_byoc_invite_public" as any, {
-        p_token: token,
-      });
-      if (error) throw error;
-      return data as InvitePreview | null;
+      // Try RPC first
+      try {
+        const { data, error } = await supabase.rpc("get_byoc_invite_public" as any, {
+          p_token: token,
+        });
+        if (!error && data) return data as InvitePreview;
+      } catch {
+        // RPC may not exist yet — fall through to direct query
+      }
+
+      // Fallback: direct table query (anon SELECT allowed by RLS on active links)
+      const { data: row, error: queryError } = await supabase
+        .from("byoc_invite_links")
+        .select("token, category_key, default_cadence, is_active")
+        .eq("token", token!)
+        .eq("is_active", true)
+        .maybeSingle();
+      if (queryError || !row) return null;
+      return {
+        token: row.token,
+        category_key: row.category_key,
+        default_cadence: row.default_cadence,
+        is_active: row.is_active,
+        provider_name: null,
+        provider_logo_url: null,
+        service_name: null,
+        duration_minutes: null,
+        level_label: null,
+        zone_name: null,
+      } as InvitePreview;
     },
   });
 

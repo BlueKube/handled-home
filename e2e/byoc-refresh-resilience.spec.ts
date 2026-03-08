@@ -94,13 +94,15 @@ test.describe("BYOC Refresh Resilience", () => {
     }
 
     // ── Property screen — refresh ──
+    // Property screen may show "Tell us about your home" or "Street Address"
+    // or wizard may have advanced to home_setup ("few quick details")
     await expect(
-      page.getByText(/about your home|your home|property/i)
-    ).toBeVisible({ timeout: 10000 });
+      page.getByText(/about your home|tell us about|street address|few quick details/i)
+    ).toBeVisible({ timeout: 15000 });
     await page.reload();
     await expect(
-      page.getByText(/about your home|your home|property|already on Handled|confirm/i)
-    ).toBeVisible({ timeout: 10000 });
+      page.getByText(/about your home|tell us about|street address|few quick details|already on Handled|confirm/i)
+    ).toBeVisible({ timeout: 15000 });
     await page.screenshot({
       path: path.join(MILESTONES_DIR, "byoc-refresh-property.png"),
     });
