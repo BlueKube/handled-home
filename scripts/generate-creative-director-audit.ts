@@ -5,8 +5,15 @@
  * Produces a structured 4-part audit document:
  *   Part A — Strategic Audit (cross-flow insights)
  *   Part B — Flow-by-Flow Redesign Spec
- *   Part C — Global Pattern Rules
+ *   Part C — Global Pattern Rules + Cross-Product State Audit
  *   Part D — Priority Roadmap
+ *
+ * v2 upgrades:
+ *   - Risk taxonomy on every finding (conversion/trust/retention/ops-burden/...)
+ *   - Product-rule compliance as first-class scoring per flow
+ *   - State coverage audit (loading/empty/error/locked/pending/partial)
+ *   - Cross-product state pattern audit (horizontal review)
+ *   - Component rules on every redesign target (not just recommendations)
  *
  * Usage:
  *   ANTHROPIC_API_KEY=sk-... npx tsx scripts/generate-creative-director-audit.ts
@@ -34,19 +41,26 @@ const CONCURRENCY = parseInt(process.env.UX_CONCURRENCY ?? "2", 10);
 const MODEL = process.env.UX_MODEL ?? "claude-sonnet-4-20250514";
 const MAX_RETRIES = parseInt(process.env.UX_MAX_RETRIES ?? "5", 10);
 
+// ── Risk Types ──
+
+type RiskType =
+  | "conversion"
+  | "trust"
+  | "retention"
+  | "ops-burden"
+  | "design-inconsistency"
+  | "policy-violation";
+
 // ── Flow Definitions ──
-// Maps screenshot filename prefixes to the 8 audit flows recommended by the
-// design review framework. Flows are evaluated in priority order.
 
 interface FlowDefinition {
   id: string;
   name: string;
   description: string;
-  /** What the user is trying to accomplish in this flow */
   userJourney: string;
-  /** Screenshot filename prefixes that belong to this flow */
+  /** Known system states this flow should handle */
+  expectedStates: string[];
   prefixes: string[];
-  /** Review priority (1 = highest) */
   priority: number;
 }
 
@@ -56,6 +70,7 @@ const AUDIT_FLOWS: FlowDefinition[] = [
     name: "Customer Onboarding",
     description: "First-time customer experience from BYOC invite link through property setup",
     userJourney: "Customer receives invite link from provider → lands on BYOC page → signs up → enters property details → sees dashboard for first time",
+    expectedStates: ["expired invite link", "duplicate account", "address not in coverage zone", "provider suspended", "incomplete wizard resume"],
     prefixes: ["byoc-", "customer-property", "customer-coverage-map", "customer-property-sizing"],
     priority: 1,
   },
@@ -64,6 +79,7 @@ const AUDIT_FLOWS: FlowDefinition[] = [
     name: "Plans / Subscribe / Routine",
     description: "Service selection, subscription, and routine configuration",
     userJourney: "Customer browses plans → selects a plan → configures service routine (SKUs + cadences) → reviews schedule → confirms subscription",
+    expectedStates: ["no plans available", "payment failed", "plan change pending next cycle", "routine empty", "service unavailable in zone"],
     prefixes: ["customer-plans", "customer-subscription", "customer-routine", "customer-services"],
     priority: 2,
   },
@@ -72,6 +88,7 @@ const AUDIT_FLOWS: FlowDefinition[] = [
     name: "Customer Dashboard / Receipts / Issues",
     description: "Day-to-day customer experience: dashboard, visit history, billing, support",
     userJourney: "Customer opens app → checks dashboard → views upcoming visits → reviews past visits with photos → manages billing → reports issues if needed",
+    expectedStates: ["no visits yet", "visit delayed/rescheduled", "payment failed banner", "issue under review", "photos not yet uploaded", "empty billing history"],
     prefixes: [
       "customer-dashboard", "customer-history", "customer-upcoming",
       "customer-photos", "customer-billing", "customer-home-assistant",
@@ -84,6 +101,7 @@ const AUDIT_FLOWS: FlowDefinition[] = [
     name: "Provider Onboarding",
     description: "Provider application and onboarding through first job readiness",
     userJourney: "Provider applies → completes org details → sets coverage → selects service categories → submits compliance docs → signs agreement → review & submit",
+    expectedStates: ["application pending review", "application rejected", "compliance docs expired", "probation status", "suspended status", "incomplete onboarding resume"],
     prefixes: ["provider-apply", "provider-organization", "provider-work-setup"],
     priority: 4,
   },
@@ -92,6 +110,7 @@ const AUDIT_FLOWS: FlowDefinition[] = [
     name: "Provider Day-of-Work / Job Execution",
     description: "Provider daily workflow: jobs, earnings, payouts, quality",
     userJourney: "Provider opens app → sees today's jobs → views job details → completes checklist → uploads photos → submits completion → checks earnings",
+    expectedStates: ["no jobs today", "job cancelled by customer", "missing proof photos", "issue reported on job", "payout on hold", "Stripe Connect not set up", "quality score below threshold"],
     prefixes: [
       "provider-dashboard", "provider-jobs", "provider-earnings",
       "provider-payouts", "provider-quality", "provider-availability",
@@ -103,6 +122,7 @@ const AUDIT_FLOWS: FlowDefinition[] = [
     name: "Admin Ops Mission-Critical",
     description: "Admin operational monitoring and exception triage",
     userJourney: "Admin opens ops cockpit → scans zone health → monitors active jobs → triages exceptions → checks billing health → reviews support queue",
+    expectedStates: ["critical exceptions", "zone at capacity", "provider shortage", "billing anomalies", "support queue overflowed", "mass rescheduling event"],
     prefixes: [
       "admin-dashboard", "admin-ops-", "admin-exceptions",
       "admin-zones", "admin-providers", "admin-applications",
@@ -114,6 +134,7 @@ const AUDIT_FLOWS: FlowDefinition[] = [
     name: "Growth / Referral Surfaces",
     description: "Viral loops, BYOC invite creation, referral programs",
     userJourney: "Provider creates BYOC invite link → tracks conversions → customer shares referral code → new user arrives via referral → attribution tracked",
+    expectedStates: ["no referrals yet", "referral reward pending", "invite link expired", "customer already on platform", "attribution ambiguity"],
     prefixes: [
       "customer-referrals", "provider-byoc-", "provider-referrals",
       "public-auth",
@@ -125,6 +146,7 @@ const AUDIT_FLOWS: FlowDefinition[] = [
     name: "Reporting / Analytics",
     description: "Growth dashboards, feedback, insights, admin config",
     userJourney: "Admin reviews growth metrics → checks feedback → configures plans/SKUs → provider views insights and trends",
+    expectedStates: ["no data yet (new zone)", "data loading", "stale data warning", "no feedback received"],
     prefixes: [
       "admin-growth", "admin-feedback", "admin-skus", "admin-plans",
       "provider-insights", "provider-coverage", "provider-skus",
@@ -161,12 +183,42 @@ interface FlowScreens {
   screens: ScreenInfo[];
 }
 
+interface TypedFinding {
+  finding: string;
+  riskType: RiskType;
+}
+
+interface ProductRuleViolation {
+  rule: string;
+  screen: string;
+  detail: string;
+  riskType: RiskType;
+  severity: string;
+}
+
+interface StatesCoverage {
+  loadingState: string;
+  loadingNotes: string;
+  emptyState: string;
+  emptyNotes: string;
+  errorState: string;
+  errorNotes: string;
+  lockedState: string;
+  lockedNotes: string;
+  pendingState: string;
+  pendingNotes: string;
+  partialState: string;
+  partialNotes: string;
+}
+
 interface RedesignTarget {
   screen: string;
   problem: string;
   recommendation: string;
+  componentRule: string;
   priority: string;
   impact: string;
+  riskType: RiskType;
 }
 
 interface CopyRecommendation {
@@ -174,12 +226,7 @@ interface CopyRecommendation {
   current: string;
   recommended: string;
   reason: string;
-}
-
-interface PatternViolation {
-  rule: string;
-  screen: string;
-  detail: string;
+  riskType: RiskType;
 }
 
 interface FlowEvaluation {
@@ -187,24 +234,29 @@ interface FlowEvaluation {
   overallGrade: string;
   strengthsTopThree: string[];
   frictionScore: number;
-  frictionFindings: string[];
+  frictionFindings: TypedFinding[];
   trustScore: number;
-  trustFindings: string[];
+  trustFindings: TypedFinding[];
   storytellingScore: number;
-  storytellingFindings: string[];
+  storytellingFindings: TypedFinding[];
   hierarchyScore: number;
-  hierarchyFindings: string[];
+  hierarchyFindings: TypedFinding[];
   consistencyScore: number;
-  consistencyFindings: string[];
+  consistencyFindings: TypedFinding[];
   conversionScore: number;
-  conversionFindings: string[];
+  conversionFindings: TypedFinding[];
   stateHandlingScore: number;
-  stateHandlingFindings: string[];
+  stateHandlingFindings: TypedFinding[];
+  productRuleCompliance: {
+    score: number;
+    violations: ProductRuleViolation[];
+    commentary: string;
+  };
+  statesCoverage: StatesCoverage;
   missingScreens: string[];
   unnecessaryScreens: string[];
   topRedesignTargets: RedesignTarget[];
   copyRecommendations: CopyRecommendation[];
-  patternViolations: PatternViolation[];
 }
 
 interface FlowResult {
@@ -224,6 +276,7 @@ interface FlowScores {
   consistency: number;
   conversion: number;
   stateHandling: number;
+  productRuleCompliance: number;
   composite: number;
 }
 
@@ -285,7 +338,6 @@ function groupScreensByFlow(screenshots: ScreenInfo[]): FlowScreens[] {
     }
   }
 
-  // Collect any screenshots not assigned to a flow
   const unassigned = screenshots.filter((s) => !assigned.has(s.filename));
   if (unassigned.length > 0) {
     result.push({
@@ -294,6 +346,7 @@ function groupScreensByFlow(screenshots: ScreenInfo[]): FlowScreens[] {
         name: "Other Screens",
         description: "Screens not assigned to a primary audit flow",
         userJourney: "Various utility and settings screens",
+        expectedStates: [],
         prefixes: [],
         priority: 99,
       },
@@ -372,76 +425,6 @@ async function withRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
 
 // ── AI Evaluation ──
 
-const FLOW_EVAL_SCHEMA = {
-  type: "object" as const,
-  properties: {
-    flowSummary: { type: "string" as const },
-    overallGrade: { type: "string" as const, description: "A/B/C/D/F" },
-    strengthsTopThree: { type: "array" as const, items: { type: "string" as const } },
-    frictionScore: { type: "number" as const, description: "1-10" },
-    frictionFindings: { type: "array" as const, items: { type: "string" as const } },
-    trustScore: { type: "number" as const, description: "1-10" },
-    trustFindings: { type: "array" as const, items: { type: "string" as const } },
-    storytellingScore: { type: "number" as const, description: "1-10" },
-    storytellingFindings: { type: "array" as const, items: { type: "string" as const } },
-    hierarchyScore: { type: "number" as const, description: "1-10" },
-    hierarchyFindings: { type: "array" as const, items: { type: "string" as const } },
-    consistencyScore: { type: "number" as const, description: "1-10" },
-    consistencyFindings: { type: "array" as const, items: { type: "string" as const } },
-    conversionScore: { type: "number" as const, description: "1-10" },
-    conversionFindings: { type: "array" as const, items: { type: "string" as const } },
-    stateHandlingScore: { type: "number" as const, description: "1-10" },
-    stateHandlingFindings: { type: "array" as const, items: { type: "string" as const } },
-    missingScreens: { type: "array" as const, items: { type: "string" as const } },
-    unnecessaryScreens: { type: "array" as const, items: { type: "string" as const } },
-    topRedesignTargets: {
-      type: "array" as const,
-      items: {
-        type: "object" as const,
-        properties: {
-          screen: { type: "string" as const },
-          problem: { type: "string" as const },
-          recommendation: { type: "string" as const },
-          priority: { type: "string" as const, description: "now | soon | later" },
-          impact: { type: "string" as const, description: "high | medium | low" },
-        },
-      },
-    },
-    copyRecommendations: {
-      type: "array" as const,
-      items: {
-        type: "object" as const,
-        properties: {
-          screen: { type: "string" as const },
-          current: { type: "string" as const },
-          recommended: { type: "string" as const },
-          reason: { type: "string" as const },
-        },
-      },
-    },
-    patternViolations: {
-      type: "array" as const,
-      items: {
-        type: "object" as const,
-        properties: {
-          rule: { type: "string" as const },
-          screen: { type: "string" as const },
-          detail: { type: "string" as const },
-        },
-      },
-    },
-  },
-  required: [
-    "flowSummary", "overallGrade", "strengthsTopThree",
-    "frictionScore", "frictionFindings", "trustScore", "trustFindings",
-    "storytellingScore", "storytellingFindings", "hierarchyScore", "hierarchyFindings",
-    "consistencyScore", "consistencyFindings", "conversionScore", "conversionFindings",
-    "stateHandlingScore", "stateHandlingFindings",
-    "missingScreens", "unnecessaryScreens",
-    "topRedesignTargets", "copyRecommendations", "patternViolations",
-  ],
-};
-
 async function evaluateFlow(
   client: Anthropic,
   systemPrompt: string,
@@ -449,7 +432,6 @@ async function evaluateFlow(
 ): Promise<FlowEvaluation> {
   const { flow, screens } = flowScreens;
 
-  // Build screen context
   const screenList = screens
     .map((s, i) => {
       const parts = [`Screen ${i + 1}: "${s.label}"`];
@@ -460,7 +442,10 @@ async function evaluateFlow(
     })
     .join("\n");
 
-  // Build message content with all screenshots
+  const stateContext = flow.expectedStates.length > 0
+    ? `\n**Known system states this flow must handle**: ${flow.expectedStates.join(", ")}`
+    : "";
+
   const content: Anthropic.Messages.ContentBlockParam[] = [
     {
       type: "text",
@@ -469,19 +454,19 @@ async function evaluateFlow(
 ${flow.description}
 
 **User Journey**: ${flow.userJourney}
+${stateContext}
 
 **Screens in this flow** (${screens.length} total):
 ${screenList}
 
 Analyze ALL ${screens.length} screenshots below as a complete flow. Evaluate the journey holistically — how screens connect, whether momentum is maintained, where users would drop off.
 
-Respond with a JSON object matching this schema. Do not include any text outside the JSON.
+IMPORTANT: You MUST evaluate product-rule compliance, state coverage, and assign a riskType to every finding. Every redesign target MUST include a componentRule.
 
-${JSON.stringify(FLOW_EVAL_SCHEMA, null, 2)}`,
+Respond with a JSON object matching the schema defined in the system prompt. Do not include any text outside the JSON.`,
     },
   ];
 
-  // Add all screenshots as images
   for (const screen of screens) {
     const imageData = fs.readFileSync(screen.filepath);
     const base64Image = imageData.toString("base64");
@@ -502,7 +487,7 @@ ${JSON.stringify(FLOW_EVAL_SCHEMA, null, 2)}`,
 
   const response = await client.messages.create({
     model: MODEL,
-    max_tokens: 4096,
+    max_tokens: 6000,
     system: systemPrompt,
     messages: [{ role: "user", content }],
   });
@@ -524,6 +509,21 @@ async function generateStrategicSummary(
   results: FlowResult[],
   scores: FlowScores[],
 ): Promise<string> {
+  // Aggregate findings by risk type
+  const findingsByRisk: Record<string, { flow: string; finding: string }[]> = {};
+  for (const r of results) {
+    const allFindings = [
+      ...r.evaluation.frictionFindings,
+      ...r.evaluation.trustFindings,
+      ...r.evaluation.conversionFindings,
+      ...r.evaluation.stateHandlingFindings,
+    ];
+    for (const f of allFindings) {
+      if (!findingsByRisk[f.riskType]) findingsByRisk[f.riskType] = [];
+      findingsByRisk[f.riskType].push({ flow: r.flow.name, finding: f.finding });
+    }
+  }
+
   const flowData = results.map((r) => ({
     flow: r.flow.name,
     grade: r.evaluation.overallGrade,
@@ -531,27 +531,25 @@ async function generateStrategicSummary(
     strengths: r.evaluation.strengthsTopThree,
     friction: r.evaluation.frictionScore,
     trust: r.evaluation.trustScore,
-    storytelling: r.evaluation.storytellingScore,
-    hierarchy: r.evaluation.hierarchyScore,
-    consistency: r.evaluation.consistencyScore,
     conversion: r.evaluation.conversionScore,
+    productRuleCompliance: r.evaluation.productRuleCompliance.score,
     stateHandling: r.evaluation.stateHandlingScore,
+    policyViolationCount: r.evaluation.productRuleCompliance.violations.length,
     topRedesigns: r.evaluation.topRedesignTargets.slice(0, 3),
-    patternViolations: r.evaluation.patternViolations.length,
     missingScreens: r.evaluation.missingScreens,
   }));
 
   const response = await client.messages.create({
     model: MODEL,
-    max_tokens: 3000,
+    max_tokens: 3500,
     messages: [
       {
         role: "user",
         content: `You are a creative director writing the executive summary of a UI/UX audit for Handled Home, a mobile home-services marketplace.
 
-Below are flow-by-flow audit results across ${results.length} user journeys.
+Below are flow-by-flow audit results across ${results.length} user journeys, with findings categorized by risk type.
 
-The product rules are: mobile-only, calm/competent/kind voice, one clear primary CTA, no calendar creep, no marketplace feel, consistent proof/status UI, screens explain what happens next, accessible and non-blaming.
+Product rules: mobile-only, calm/competent/kind voice, one clear primary CTA, no calendar creep, no marketplace feel, consistent proof/status UI, screens explain what happens next, accessible and non-blaming, next-cycle language, proof before narrative, guided provider flows, bounded issue reporting, structured support.
 
 Produce the strategic audit summary in this exact markdown format:
 
@@ -561,40 +559,58 @@ Produce the strategic audit summary in this exact markdown format:
 
 ### Biggest Cross-Product UX Problems
 
-1. [Problem + which flows it affects + severity]
-2. [Problem + which flows it affects + severity]
-3. [Problem + which flows it affects + severity]
-4. [Problem + which flows it affects + severity]
-5. [Problem + which flows it affects + severity]
+1. [Problem + which flows it affects + risk type + severity]
+2. ...
+3. ...
+4. ...
+5. ...
 
 ### Trust & Friction Assessment
 
-| Flow | Grade | Friction | Trust | Storytelling | Consistency |
-|------|-------|----------|-------|-------------|-------------|
-${scores.map((s) => `| ${s.flowName} | ${s.grade} | ${s.friction}/10 | ${s.trust}/10 | ${s.storytelling}/10 | ${s.consistency}/10 |`).join("\n")}
+| Flow | Grade | Friction | Trust | Conversion | Product Rules | States |
+|------|-------|----------|-------|------------|---------------|--------|
+${scores.map((s) => `| ${s.flowName} | ${s.grade} | ${s.friction}/10 | ${s.trust}/10 | ${s.conversion}/10 | ${s.productRuleCompliance}/10 | ${s.stateHandling}/10 |`).join("\n")}
+
+### Risk Type Distribution
+
+| Risk Type | Count | Most Affected Flows |
+|-----------|-------|---------------------|
+${Object.entries(findingsByRisk).map(([type, findings]) => {
+  const flows = [...new Set(findings.map((f) => f.flow))].join(", ");
+  return `| ${type} | ${findings.length} | ${flows} |`;
+}).join("\n")}
 
 ### Design System Drift
 
-[2-3 sentences identifying where the design system is inconsistent and which flows show the most drift]
+[2-3 sentences identifying where the design system is inconsistent]
 
 ### Top Conversion Blockers
 
 1. [Blocker + flow + estimated impact]
-2. [Blocker + flow + estimated impact]
-3. [Blocker + flow + estimated impact]
+2. ...
+3. ...
 
 ### Top Retention Blockers
 
 1. [Blocker + flow + estimated impact]
-2. [Blocker + flow + estimated impact]
-3. [Blocker + flow + estimated impact]
+2. ...
+3. ...
 
 ### Ops/Support Burden Risks
 
-[2-3 items where UI gaps will generate support tickets]
+1. [UI gap that will generate support tickets + flow]
+2. ...
+3. ...
+
+### Product-Rule Compliance Summary
+
+[2-3 sentences on how well the product adheres to its own philosophy. Call out the most egregious violations.]
 
 Flow audit data:
-${JSON.stringify(flowData, null, 2)}`,
+${JSON.stringify(flowData, null, 2)}
+
+Findings by risk type:
+${JSON.stringify(findingsByRisk, null, 2)}`,
       },
     ],
   });
@@ -604,72 +620,136 @@ ${JSON.stringify(flowData, null, 2)}`,
   return textBlock.text.trim();
 }
 
-// ── Global Pattern Rules (Part C) ──
+// ── Cross-Product State Pattern Audit ──
 
-async function generatePatternRules(
+async function generateCrossProductStateAudit(
   client: Anthropic,
   results: FlowResult[],
 ): Promise<string> {
+  const stateData = results.map((r) => ({
+    flow: r.flow.name,
+    statesCoverage: r.evaluation.statesCoverage,
+    stateHandlingScore: r.evaluation.stateHandlingScore,
+    stateFindings: r.evaluation.stateHandlingFindings,
+    expectedStates: r.flow.expectedStates,
+  }));
+
   const allViolations = results.flatMap((r) =>
-    r.evaluation.patternViolations.map((v) => ({ ...v, flow: r.flow.name }))
+    r.evaluation.productRuleCompliance.violations.map((v) => ({ ...v, flow: r.flow.name }))
   );
-  const allStateFindings = results.flatMap((r) =>
-    r.evaluation.stateHandlingFindings.map((f) => ({ finding: f, flow: r.flow.name }))
-  );
-  const allHierarchyFindings = results.flatMap((r) =>
-    r.evaluation.hierarchyFindings.map((f) => ({ finding: f, flow: r.flow.name }))
+
+  const allComponentRules = results.flatMap((r) =>
+    r.evaluation.topRedesignTargets
+      .filter((t) => t.componentRule)
+      .map((t) => ({ rule: t.componentRule, screen: t.screen, flow: r.flow.name }))
   );
 
   const response = await client.messages.create({
     model: MODEL,
-    max_tokens: 2500,
+    max_tokens: 4000,
     messages: [
       {
         role: "user",
-        content: `You are a creative director codifying global pattern rules for a mobile home-services app. Based on the audit findings below, produce pattern standards in this exact markdown format:
+        content: `You are a creative director codifying global pattern rules and a cross-product state audit for Handled Home, a mobile home-services marketplace.
 
-## Part C — Global Pattern Rules
+The product uses calm, competent, kind truth-telling across all states. Key recurring system states include: loading, pending review, en route, issue under review, payment failed, plan updates effective next cycle, under review, on hold, delayed, unavailable.
 
-### Loading State Standards
-[2-3 rules for how loading states should behave across all flows]
+Based on the audit findings below, produce TWO sections in this exact markdown format:
 
-### Error State Standards
-[2-3 rules for error presentation — must be accessible and non-blaming per product rules]
+## Cross-Product State Pattern Audit
 
-### Empty State Standards
-[2-3 rules for empty/zero-data states]
+Review each state type horizontally across ALL flows:
+
+### Loading States
+- **Current coverage**: [which flows showed loading states, which didn't]
+- **Consistency**: [are loading states consistent across flows?]
+- **Standard**: [prescriptive rule, e.g. "All loading states must show brand wordmark + one-line context sentence + skeleton of expected content"]
+
+### Empty/Zero-Data States
+- **Current coverage**: ...
+- **Consistency**: ...
+- **Standard**: [prescriptive rule]
+
+### Error/Failure States
+- **Current coverage**: ...
+- **Consistency**: ...
+- **Standard**: [prescriptive rule — must align with non-blaming product rule]
+
+### Pending/Review States
+- **Current coverage**: ...
+- **Consistency**: ...
+- **Standard**: [prescriptive rule — critical for provider onboarding and admin ops]
+
+### Locked/Disabled States
+- **Current coverage**: ...
+- **Consistency**: ...
+- **Standard**: [prescriptive rule]
+
+### Truth Banner / Status Communication Standards
+- **Current patterns**: [how the app currently communicates status changes like "Updated", "Under review", "Action required"]
+- **Standard**: [prescriptive severity/tone model for all status communications]
+
+## Component Implementation Rules
+
+These are reusable, testable rules that can be directly enforced in the component library:
+
+### Loading State Component
+- [Rule 1]
+- [Rule 2]
+
+### Error State Component
+- [Rule 1]
+- [Rule 2]
+
+### Empty State Component
+- [Rule 1]
+- [Rule 2]
 
 ### CTA Hierarchy Rules
-[3-4 rules for primary/secondary/tertiary action button usage]
+- [Primary: rule]
+- [Secondary: rule]
+- [Tertiary: rule]
 
-### Form Simplification Rules
-[2-3 rules for form design — mobile-first, thumb-zone, minimal fields]
+### Truth Banner Component
+- [Severity levels and when to use each]
+- [Tone rules]
 
-### Progress Indicator Rules
-[2-3 rules for multi-step flows]
+### Form Pattern Rules
+- [Rule 1: mobile-first, thumb-zone]
+- [Rule 2: minimal fields]
+
+### Progress/Wizard Pattern Rules
+- [Rule 1]
+- [Rule 2]
 
 ### Card & List Pattern Rules
-[2-3 rules for card-based UI consistency]
+- [Rule 1]
+- [Rule 2]
+
+### Receipt/Proof Display Rules
+- [Rule 1: proof before narrative]
+- [Rule 2]
 
 ### Dashboard Scanning Rules
-[2-3 rules for dashboard/overview screens — especially admin]
+- [Rule 1: especially admin]
+- [Rule 2]
 
-Each rule should be specific, testable, and actionable (not vague). Reference the product rules: mobile-only, calm/competent/kind voice, one CTA, no marketplace feel.
+Each rule must be specific, testable, and directly implementable. Not vague. Reference the product rules and actual audit findings.
 
-Pattern violations found:
+State coverage data by flow:
+${JSON.stringify(stateData, null, 2)}
+
+Product-rule violations found:
 ${JSON.stringify(allViolations, null, 2)}
 
-State handling findings:
-${JSON.stringify(allStateFindings, null, 2)}
-
-Hierarchy findings:
-${JSON.stringify(allHierarchyFindings, null, 2)}`,
+Component rules suggested by flow audits:
+${JSON.stringify(allComponentRules, null, 2)}`,
       },
     ],
   });
 
   const textBlock = response.content.find((b) => b.type === "text");
-  if (!textBlock || textBlock.type !== "text") throw new Error("No pattern rules response");
+  if (!textBlock || textBlock.type !== "text") throw new Error("No state audit response");
   return textBlock.text.trim();
 }
 
@@ -679,12 +759,11 @@ function computeFlowScores(results: FlowResult[]): FlowScores[] {
   return results
     .map((r) => {
       const e = r.evaluation;
-      // Invert friction (high friction = low score)
       const invertedFriction = 11 - e.frictionScore;
       const composite =
         (invertedFriction + e.trustScore + e.storytellingScore +
           e.hierarchyScore + e.consistencyScore + e.conversionScore +
-          e.stateHandlingScore) / 7;
+          e.stateHandlingScore + e.productRuleCompliance.score) / 8;
       return {
         flowId: r.flow.id,
         flowName: r.flow.name,
@@ -696,19 +775,24 @@ function computeFlowScores(results: FlowResult[]): FlowScores[] {
         consistency: e.consistencyScore,
         conversion: e.conversionScore,
         stateHandling: e.stateHandlingScore,
+        productRuleCompliance: e.productRuleCompliance.score,
         composite: Math.round(composite * 10) / 10,
       };
     })
-    .sort((a, b) => a.composite - b.composite); // weakest first
+    .sort((a, b) => a.composite - b.composite);
 }
 
 // ── Report Formatting ──
+
+function formatFinding(f: TypedFinding): string {
+  return `${f.finding} \`[${f.riskType}]\``;
+}
 
 function generateAIReport(
   results: FlowResult[],
   scores: FlowScores[],
   strategicSummary: string,
-  patternRules: string,
+  stateAuditAndRules: string,
 ): string {
   const lines: string[] = [];
 
@@ -756,14 +840,49 @@ function generateAIReport(
     // Scores table
     lines.push("| Dimension | Score | Key Finding |");
     lines.push("|-----------|-------|-------------|");
-    lines.push(`| Friction | ${e.frictionScore}/10 | ${e.frictionFindings[0] ?? "—"} |`);
-    lines.push(`| Trust | ${e.trustScore}/10 | ${e.trustFindings[0] ?? "—"} |`);
-    lines.push(`| Storytelling | ${e.storytellingScore}/10 | ${e.storytellingFindings[0] ?? "—"} |`);
-    lines.push(`| Hierarchy | ${e.hierarchyScore}/10 | ${e.hierarchyFindings[0] ?? "—"} |`);
-    lines.push(`| Consistency | ${e.consistencyScore}/10 | ${e.consistencyFindings[0] ?? "—"} |`);
-    lines.push(`| Conversion | ${e.conversionScore}/10 | ${e.conversionFindings[0] ?? "—"} |`);
-    lines.push(`| State Handling | ${e.stateHandlingScore}/10 | ${e.stateHandlingFindings[0] ?? "—"} |`);
+    lines.push(`| Friction | ${e.frictionScore}/10 | ${e.frictionFindings[0] ? formatFinding(e.frictionFindings[0]) : "—"} |`);
+    lines.push(`| Trust | ${e.trustScore}/10 | ${e.trustFindings[0] ? formatFinding(e.trustFindings[0]) : "—"} |`);
+    lines.push(`| Storytelling | ${e.storytellingScore}/10 | ${e.storytellingFindings[0] ? formatFinding(e.storytellingFindings[0]) : "—"} |`);
+    lines.push(`| Hierarchy | ${e.hierarchyScore}/10 | ${e.hierarchyFindings[0] ? formatFinding(e.hierarchyFindings[0]) : "—"} |`);
+    lines.push(`| Consistency | ${e.consistencyScore}/10 | ${e.consistencyFindings[0] ? formatFinding(e.consistencyFindings[0]) : "—"} |`);
+    lines.push(`| Conversion | ${e.conversionScore}/10 | ${e.conversionFindings[0] ? formatFinding(e.conversionFindings[0]) : "—"} |`);
+    lines.push(`| State Handling | ${e.stateHandlingScore}/10 | ${e.stateHandlingFindings[0] ? formatFinding(e.stateHandlingFindings[0]) : "—"} |`);
+    lines.push(`| **Product Rules** | **${e.productRuleCompliance.score}/10** | ${e.productRuleCompliance.commentary.slice(0, 120)}${e.productRuleCompliance.commentary.length > 120 ? "..." : ""} |`);
     lines.push("");
+
+    // Product-rule compliance (first-class section)
+    if (e.productRuleCompliance.violations.length > 0) {
+      lines.push("### Product-Rule Violations");
+      lines.push("");
+      lines.push("| Severity | Rule | Screen | Detail |");
+      lines.push("|----------|------|--------|--------|");
+      for (const v of e.productRuleCompliance.violations) {
+        lines.push(`| ${v.severity} | ${v.rule} | ${v.screen} | ${v.detail} |`);
+      }
+      lines.push("");
+    }
+
+    // State coverage
+    const sc = e.statesCoverage;
+    const stateEntries = [
+      { label: "Loading", status: sc.loadingState, notes: sc.loadingNotes },
+      { label: "Empty", status: sc.emptyState, notes: sc.emptyNotes },
+      { label: "Error", status: sc.errorState, notes: sc.errorNotes },
+      { label: "Locked", status: sc.lockedState, notes: sc.lockedNotes },
+      { label: "Pending", status: sc.pendingState, notes: sc.pendingNotes },
+      { label: "Partial", status: sc.partialState, notes: sc.partialNotes },
+    ];
+    const needsAudit = stateEntries.filter((s) => s.status === "needs-audit" || s.status === "not-visible");
+    if (needsAudit.length > 0) {
+      lines.push("### State Coverage Gaps");
+      lines.push("");
+      lines.push("| State | Status | Notes |");
+      lines.push("|-------|--------|-------|");
+      for (const s of needsAudit) {
+        lines.push(`| ${s.label} | ${s.status} | ${s.notes} |`);
+      }
+      lines.push("");
+    }
 
     // Missing / unnecessary screens
     if (e.missingScreens.length > 0) {
@@ -775,36 +894,27 @@ function generateAIReport(
       lines.push("");
     }
 
-    // Redesign targets
+    // Redesign targets with component rules
     if (e.topRedesignTargets.length > 0) {
       lines.push("### Redesign Targets");
       lines.push("");
-      lines.push("| Screen | Problem | Recommendation | Priority | Impact |");
-      lines.push("|--------|---------|----------------|----------|--------|");
       for (const t of e.topRedesignTargets) {
-        lines.push(`| ${t.screen} | ${t.problem} | ${t.recommendation} | ${t.priority} | ${t.impact} |`);
+        lines.push(`**${t.screen}** — \`${t.priority}\` / \`${t.impact}\` / \`${t.riskType}\``);
+        lines.push(`- **Problem**: ${t.problem}`);
+        lines.push(`- **Recommendation**: ${t.recommendation}`);
+        lines.push(`- **Component Rule**: ${t.componentRule}`);
+        lines.push("");
       }
-      lines.push("");
     }
 
     // Copy recommendations
     if (e.copyRecommendations.length > 0) {
       lines.push("### Copy Recommendations");
       lines.push("");
-      lines.push("| Screen | Current | Recommended | Reason |");
-      lines.push("|--------|---------|-------------|--------|");
+      lines.push("| Screen | Current | Recommended | Reason | Risk |");
+      lines.push("|--------|---------|-------------|--------|------|");
       for (const c of e.copyRecommendations) {
-        lines.push(`| ${c.screen} | ${c.current} | ${c.recommended} | ${c.reason} |`);
-      }
-      lines.push("");
-    }
-
-    // Pattern violations
-    if (e.patternViolations.length > 0) {
-      lines.push("### Product Rule Violations");
-      lines.push("");
-      for (const v of e.patternViolations) {
-        lines.push(`- **${v.rule}** on ${v.screen}: ${v.detail}`);
+        lines.push(`| ${c.screen} | ${c.current} | ${c.recommended} | ${c.reason} | \`${c.riskType}\` |`);
       }
       lines.push("");
     }
@@ -813,8 +923,10 @@ function generateAIReport(
     lines.push("");
   }
 
-  // ── Part C: Global Pattern Rules ──
-  lines.push(patternRules);
+  // ── Part C: Cross-Product State Audit + Component Rules ──
+  lines.push("# Part C — Cross-Product State Audit & Component Rules");
+  lines.push("");
+  lines.push(stateAuditAndRules);
   lines.push("");
   lines.push("---");
   lines.push("");
@@ -823,7 +935,7 @@ function generateAIReport(
   lines.push("# Part D — Priority Roadmap");
   lines.push("");
 
-  // Collect all redesign targets and sort by priority
+  // Collect all redesign targets
   const allTargets = results.flatMap((r) =>
     r.evaluation.topRedesignTargets.map((t) => ({
       ...t,
@@ -831,12 +943,19 @@ function generateAIReport(
     }))
   );
 
+  // Group by risk type first, then priority
+  const riskGroups: Record<string, typeof allTargets> = {};
+  for (const t of allTargets) {
+    if (!riskGroups[t.riskType]) riskGroups[t.riskType] = [];
+    riskGroups[t.riskType].push(t);
+  }
+
   const quickWins = allTargets.filter((t) => t.priority === "now" && t.impact === "high");
   const mediumLift = allTargets.filter(
-    (t) => t.priority === "now" && t.impact !== "high" || t.priority === "soon" && t.impact === "high"
+    (t) => (t.priority === "now" && t.impact !== "high") || (t.priority === "soon" && t.impact === "high")
   );
   const biggerRedesigns = allTargets.filter(
-    (t) => t.priority === "later" || t.priority === "soon" && t.impact !== "high"
+    (t) => t.priority === "later" || (t.priority === "soon" && t.impact !== "high")
   );
 
   lines.push("## Quick Wins (Now / High Impact)");
@@ -846,7 +965,8 @@ function generateAIReport(
   } else {
     for (let i = 0; i < quickWins.length; i++) {
       const t = quickWins[i];
-      lines.push(`${i + 1}. **${t.screen}** (${t.flow}): ${t.recommendation}`);
+      lines.push(`${i + 1}. **${t.screen}** (${t.flow}) \`${t.riskType}\`: ${t.recommendation}`);
+      lines.push(`   - _Component rule_: ${t.componentRule}`);
     }
   }
   lines.push("");
@@ -858,7 +978,8 @@ function generateAIReport(
   } else {
     for (let i = 0; i < mediumLift.length; i++) {
       const t = mediumLift[i];
-      lines.push(`${i + 1}. **${t.screen}** (${t.flow}): ${t.recommendation}`);
+      lines.push(`${i + 1}. **${t.screen}** (${t.flow}) \`${t.riskType}\`: ${t.recommendation}`);
+      lines.push(`   - _Component rule_: ${t.componentRule}`);
     }
   }
   lines.push("");
@@ -870,19 +991,31 @@ function generateAIReport(
   } else {
     for (let i = 0; i < biggerRedesigns.length; i++) {
       const t = biggerRedesigns[i];
-      lines.push(`${i + 1}. **${t.screen}** (${t.flow}): ${t.recommendation}`);
+      lines.push(`${i + 1}. **${t.screen}** (${t.flow}) \`${t.riskType}\`: ${t.recommendation}`);
+      lines.push(`   - _Component rule_: ${t.componentRule}`);
     }
   }
   lines.push("");
 
-  // Flow scorecard summary
+  // Risk type breakdown
+  lines.push("## Findings by Risk Type");
+  lines.push("");
+  lines.push("| Risk Type | Targets | Flows |");
+  lines.push("|-----------|---------|-------|");
+  for (const [riskType, targets] of Object.entries(riskGroups)) {
+    const flows = [...new Set(targets.map((t) => t.flow))].join(", ");
+    lines.push(`| \`${riskType}\` | ${targets.length} | ${flows} |`);
+  }
+  lines.push("");
+
+  // Flow scorecard
   lines.push("## Flow Scorecard");
   lines.push("");
-  lines.push("| Rank | Flow | Grade | Friction | Trust | Story | Hierarchy | Consistency | Conversion | States | Composite |");
-  lines.push("|------|------|-------|----------|-------|-------|-----------|-------------|------------|--------|-----------|");
+  lines.push("| Rank | Flow | Grade | Friction | Trust | Story | Hierarchy | Consistency | Conversion | States | Product Rules | Composite |");
+  lines.push("|------|------|-------|----------|-------|-------|-----------|-------------|------------|--------|---------------|-----------|");
   scores.forEach((s, i) => {
     lines.push(
-      `| ${i + 1} | ${s.flowName} | ${s.grade} | ${s.friction} | ${s.trust} | ${s.storytelling} | ${s.hierarchy} | ${s.consistency} | ${s.conversion} | ${s.stateHandling} | **${s.composite}** |`
+      `| ${i + 1} | ${s.flowName} | ${s.grade} | ${s.friction} | ${s.trust} | ${s.storytelling} | ${s.hierarchy} | ${s.consistency} | ${s.conversion} | ${s.stateHandling} | ${s.productRuleCompliance} | **${s.composite}** |`
     );
   });
   lines.push("");
@@ -911,10 +1044,10 @@ function generateScaffoldReport(flowGroups: FlowScreens[]): string {
 
   lines.push("## Flow Inventory");
   lines.push("");
-  lines.push("| Priority | Flow | Screens | Description |");
-  lines.push("|----------|------|---------|-------------|");
+  lines.push("| Priority | Flow | Screens | Expected States | Description |");
+  lines.push("|----------|------|---------|-----------------|-------------|");
   for (const g of flowGroups) {
-    lines.push(`| ${g.flow.priority} | ${g.flow.name} | ${g.screens.length} | ${g.flow.description} |`);
+    lines.push(`| ${g.flow.priority} | ${g.flow.name} | ${g.screens.length} | ${g.flow.expectedStates.length} | ${g.flow.description} |`);
   }
   lines.push("");
 
@@ -922,6 +1055,9 @@ function generateScaffoldReport(flowGroups: FlowScreens[]): string {
     lines.push(`## ${g.flow.priority}. ${g.flow.name}`);
     lines.push("");
     lines.push(`**Journey**: ${g.flow.userJourney}`);
+    if (g.flow.expectedStates.length > 0) {
+      lines.push(`**Expected states to audit**: ${g.flow.expectedStates.join(", ")}`);
+    }
     lines.push("");
     lines.push("| Screen | Route | User Goal | Type |");
     lines.push("|--------|-------|-----------|------|");
@@ -945,7 +1081,7 @@ async function main() {
   const flowGroups = groupScreensByFlow(screenshots);
   console.log(`Grouped into ${flowGroups.length} audit flows:`);
   for (const g of flowGroups) {
-    console.log(`  ${g.flow.priority}. ${g.flow.name} (${g.screens.length} screens)`);
+    console.log(`  ${g.flow.priority}. ${g.flow.name} (${g.screens.length} screens, ${g.flow.expectedStates.length} expected states)`);
   }
 
   if (screenshots.length === 0) {
@@ -1000,13 +1136,13 @@ async function main() {
         "Strategic Summary",
       );
 
-      console.log("Generating global pattern rules (Part C)...");
-      const patternRules = await withRetry(
-        () => generatePatternRules(client, results),
-        "Pattern Rules",
+      console.log("Generating cross-product state audit + component rules (Part C)...");
+      const stateAuditAndRules = await withRetry(
+        () => generateCrossProductStateAudit(client, results),
+        "State Audit & Rules",
       );
 
-      report = generateAIReport(results, scores, strategicSummary, patternRules);
+      report = generateAIReport(results, scores, strategicSummary, stateAuditAndRules);
 
       // Write machine-readable scores
       fs.writeFileSync(
@@ -1015,6 +1151,15 @@ async function main() {
           timestamp: new Date().toISOString(),
           model: MODEL,
           flows: scores,
+          riskDistribution: (() => {
+            const dist: Record<string, number> = {};
+            for (const r of results) {
+              for (const t of r.evaluation.topRedesignTargets) {
+                dist[t.riskType] = (dist[t.riskType] ?? 0) + 1;
+              }
+            }
+            return dist;
+          })(),
         }, null, 2),
         "utf-8"
       );
