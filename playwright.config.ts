@@ -32,13 +32,19 @@ export default defineConfig({
     {
       name: "chromium-mobile",
       use: { ...devices["iPhone 15"] },
-      testIgnore: /byoc-happy-path\.spec\.ts/,
+      testIgnore: [/byoc-happy-path\.spec\.ts/, /screenshot-catalog\.spec\.ts/],
       dependencies: ["auth-setup"],
     },
     {
       name: "chromium-mobile-no-auth",
       testMatch: /byoc-happy-path\.spec\.ts/,
       use: { ...devices["iPhone 15"] },
+    },
+    {
+      name: "screenshot-catalog",
+      testMatch: /screenshot-catalog\.spec\.ts/,
+      use: { ...devices["iPhone 15"] },
+      dependencies: ["auth-setup"],
     },
   ],
 });
