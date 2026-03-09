@@ -7,7 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useGrowthEvents } from "@/hooks/useGrowthEvents";
+import { Home, Wrench } from "lucide-react";
 
+type SignupRole = "customer" | "provider";
 
 export default function AuthPage() {
   const [tab, setTab] = useState<"login" | "signup">("login");
@@ -15,6 +17,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [signupRole, setSignupRole] = useState<SignupRole>("customer");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -62,7 +65,7 @@ export default function AuthPage() {
       email,
       password,
       options: {
-        data: { full_name: fullName.trim() },
+        data: { full_name: fullName.trim(), intended_role: signupRole },
         emailRedirectTo: window.location.origin,
       },
     });
@@ -89,7 +92,7 @@ export default function AuthPage() {
     try {
       recordEvent.mutate({
         eventType: "signup_completed",
-        actorRole: "customer",
+        actorRole: signupRole,
         sourceSurface: refCode ? "provider_invite" : shareCode ? "receipt_share_card" : "organic",
         idempotencyKey: `signup_${email}_${Date.now()}`,
         context: {
@@ -148,6 +151,37 @@ export default function AuthPage() {
         </form>
       ) : (
         <form onSubmit={handleSignup} className="space-y-4 w-full max-w-sm mx-auto">
+          {/* Role selection */}
+          <fieldset className="space-y-2" disabled={loading}>
+            <Label className="text-sm font-medium">I am a...</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setSignupRole("customer")}
+                className={`flex flex-col items-center gap-1.5 rounded-xl border-2 px-3 py-4 text-sm font-medium transition-colors ${
+                  signupRole === "customer"
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-muted bg-background text-muted-foreground hover:border-muted-foreground/30"
+                }`}
+              >
+                <Home className="h-6 w-6" />
+                Homeowner
+              </button>
+              <button
+                type="button"
+                onClick={() => setSignupRole("provider")}
+                className={`flex flex-col items-center gap-1.5 rounded-xl border-2 px-3 py-4 text-sm font-medium transition-colors ${
+                  signupRole === "provider"
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-muted bg-background text-muted-foreground hover:border-muted-foreground/30"
+                }`}
+              >
+                <Wrench className="h-6 w-6" />
+                Service Provider
+              </button>
+            </div>
+          </fieldset>
+
           <div>
             <Label htmlFor="signup-name" className="text-sm font-medium">Full Name</Label>
             <Input id="signup-name" placeholder="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} required
