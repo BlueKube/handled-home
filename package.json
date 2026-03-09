@@ -11,10 +11,13 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --project=chromium-mobile --project=chromium-mobile-no-auth",
     "test:e2e:ui": "playwright test --ui",
+    "test:catalog": "playwright test --project=screenshot-catalog",
     "ux-report": "tsx scripts/generate-synthetic-ux-report.ts",
-    "ux-report:dry": "tsx scripts/generate-synthetic-ux-report.ts --dry-run"
+    "ux-report:dry": "tsx scripts/generate-synthetic-ux-report.ts --dry-run",
+    "growth-report": "tsx scripts/generate-growth-audit.ts",
+    "growth-report:dry": "tsx scripts/generate-growth-audit.ts --dry-run"
   },
   "dependencies": {
     "@capacitor/android": "^8.1.0",
