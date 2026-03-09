@@ -19,6 +19,11 @@ on:
         required: false
         default: false
         type: boolean
+      run_creative_audit:
+        description: "Run Creative Director UI/UX Audit (flow-based)"
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   e2e:
@@ -216,6 +221,51 @@ jobs:
         with:
           name: growth-audit-report
           path: test-results/growth-audit-report.md
+
+  # Creative Director audit evaluates all screens grouped by flow
+  creative-audit:
+    needs: e2e
+    if: success() && github.event.inputs.run_creative_audit == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Download test results from e2e job
+        uses: actions/download-artifact@v4
+        with:
+          name: test-results
+          path: test-results/
+
+      - name: Generate Creative Director Audit
+        if: env.ANTHROPIC_API_KEY != ''
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: npm run creative-audit
+
+      - name: Generate Creative Director Audit Scaffold (no API key)
+        if: env.ANTHROPIC_API_KEY == ''
+        env:
+          ANTHROPIC_API_KEY: ""
+        run: npm run creative-audit:dry
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: creative-director-audit
+          path: |
+            test-results/creative-director-audit.md
+            test-results/creative-director-scores.json
 
   # Run additional UX simulation batches in parallel
   # Each batch = 7 personas × all screens (different randomness per run)
