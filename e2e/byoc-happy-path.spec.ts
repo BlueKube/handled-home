@@ -32,8 +32,8 @@ test.describe("BYOC Onboarding — Happy Path", () => {
   test("completes full BYOC onboarding flow from unauthenticated state", async ({
     page,
   }) => {
-    const email = process.env.TEST_USER_EMAIL!;
-    const password = process.env.TEST_USER_PASSWORD!;
+    const email = process.env.TEST_CUSTOMER_EMAIL!;
+    const password = process.env.TEST_CUSTOMER_PASSWORD!;
     const tracker = new MilestoneTracker();
 
     // ── Step 0: Visit invite link unauthenticated ──

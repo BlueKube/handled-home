@@ -26,7 +26,7 @@ function uniqueStreet() {
 test.describe("BYOC Refresh Resilience", () => {
   const TOKEN = process.env.TEST_BYOC_TOKEN;
 
-  test.use({ storageState: path.join(__dirname, ".auth", "user.json") });
+  test.use({ storageState: path.join(__dirname, ".auth", "customer.json") });
 
   test.beforeAll(() => {
     if (!TOKEN) {

@@ -492,7 +492,7 @@ const PUBLIC_SCREENS: ScreenDef[] = [
 test.describe("Screenshot Catalog", () => {
   test.describe("Customer Screens", () => {
     test.use({
-      storageState: path.join(__dirname, ".auth", "user.json"),
+      storageState: path.join(__dirname, ".auth", "customer.json"),
     });
 
     test.beforeAll(() => {
@@ -550,7 +550,7 @@ test.describe("Screenshot Catalog", () => {
 
   test.describe("Provider Screens", () => {
     test.use({
-      storageState: path.join(__dirname, ".auth", "user.json"),
+      storageState: path.join(__dirname, ".auth", "provider.json"),
     });
 
     test.beforeAll(() => {
@@ -606,7 +606,7 @@ test.describe("Screenshot Catalog", () => {
 
   test.describe("Admin Screens", () => {
     test.use({
-      storageState: path.join(__dirname, ".auth", "user.json"),
+      storageState: path.join(__dirname, ".auth", "admin.json"),
     });
 
     test.beforeAll(() => {

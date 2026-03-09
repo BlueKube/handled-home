@@ -24,22 +24,32 @@ export default defineConfig({
   },
 
   projects: [
+    // ── Auth setup (logs in all three role users) ──
     {
       name: "auth-setup",
       testMatch: /auth\.setup\.ts/,
       use: { ...devices["iPhone 15"] },
     },
+
+    // ── Pre-authenticated tests (customer role) ──
     {
       name: "chromium-mobile",
-      use: { ...devices["iPhone 15"] },
+      use: {
+        ...devices["iPhone 15"],
+        storageState: "e2e/.auth/customer.json",
+      },
       testIgnore: [/byoc-happy-path\.spec\.ts/, /screenshot-catalog\.spec\.ts/],
       dependencies: ["auth-setup"],
     },
+
+    // ── No-auth tests (BYOC happy path starts unauthenticated) ──
     {
       name: "chromium-mobile-no-auth",
       testMatch: /byoc-happy-path\.spec\.ts/,
       use: { ...devices["iPhone 15"] },
     },
+
+    // ── Screenshot catalog (uses per-role auth internally) ──
     {
       name: "screenshot-catalog",
       testMatch: /screenshot-catalog\.spec\.ts/,

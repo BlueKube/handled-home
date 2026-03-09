@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       ux_runs:
-        description: "Number of UX simulation batches (each = 6 personas × all screens)"
+        description: "Number of UX simulation batches (each = 7 personas × all screens)"
         required: false
         default: "1"
         type: choice
@@ -41,13 +41,25 @@ jobs:
 
       - name: Validate required secrets
         run: |
-          if [ -z "$BASE_URL" ]; then echo "ERROR: BASE_URL secret is not set"; exit 1; fi
-          if [ -z "$TEST_USER_EMAIL" ]; then echo "ERROR: TEST_USER_EMAIL secret is not set"; exit 1; fi
-          if [ -z "$TEST_USER_PASSWORD" ]; then echo "ERROR: TEST_USER_PASSWORD secret is not set"; exit 1; fi
+          missing=0
+          for var in BASE_URL \
+                     TEST_CUSTOMER_EMAIL TEST_CUSTOMER_PASSWORD \
+                     TEST_PROVIDER_EMAIL TEST_PROVIDER_PASSWORD \
+                     TEST_ADMIN_EMAIL    TEST_ADMIN_PASSWORD; do
+            if [ -z "${!var}" ]; then
+              echo "ERROR: $var secret is not set"
+              missing=1
+            fi
+          done
+          if [ "$missing" -eq 1 ]; then exit 1; fi
         env:
           BASE_URL: ${{ secrets.BASE_URL }}
-          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
-          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+          TEST_CUSTOMER_EMAIL: ${{ secrets.TEST_CUSTOMER_EMAIL }}
+          TEST_CUSTOMER_PASSWORD: ${{ secrets.TEST_CUSTOMER_PASSWORD }}
+          TEST_PROVIDER_EMAIL: ${{ secrets.TEST_PROVIDER_EMAIL }}
+          TEST_PROVIDER_PASSWORD: ${{ secrets.TEST_PROVIDER_PASSWORD }}
+          TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
+          TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
 
       - name: Warm up preview URL (cold-start)
         run: |
@@ -71,8 +83,12 @@ jobs:
         run: npm run test:e2e
         env:
           BASE_URL: ${{ secrets.BASE_URL }}
-          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
-          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+          TEST_CUSTOMER_EMAIL: ${{ secrets.TEST_CUSTOMER_EMAIL }}
+          TEST_CUSTOMER_PASSWORD: ${{ secrets.TEST_CUSTOMER_PASSWORD }}
+          TEST_PROVIDER_EMAIL: ${{ secrets.TEST_PROVIDER_EMAIL }}
+          TEST_PROVIDER_PASSWORD: ${{ secrets.TEST_PROVIDER_PASSWORD }}
+          TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
+          TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
           TEST_BYOC_TOKEN: ${{ secrets.TEST_BYOC_TOKEN }}
 
       - name: Run screenshot catalog
@@ -80,32 +96,12 @@ jobs:
         run: npm run test:catalog
         env:
           BASE_URL: ${{ secrets.BASE_URL }}
-          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
-          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
-
-      - name: Generate Synthetic UX Report
-        if: success() && env.ANTHROPIC_API_KEY != ''
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: npm run ux-report
-
-      - name: Generate UX Report Scaffold (no API key)
-        if: success() && env.ANTHROPIC_API_KEY == ''
-        env:
-          ANTHROPIC_API_KEY: ""
-        run: npm run ux-report:dry
-
-      - name: Generate Growth Audit
-        if: success() && github.event.inputs.run_growth_audit == 'true' && env.ANTHROPIC_API_KEY != ''
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: npm run growth-report
-
-      - name: Generate Growth Audit Scaffold (no API key)
-        if: success() && github.event.inputs.run_growth_audit == 'true' && env.ANTHROPIC_API_KEY == ''
-        env:
-          ANTHROPIC_API_KEY: ""
-        run: npm run growth-report:dry
+          TEST_CUSTOMER_EMAIL: ${{ secrets.TEST_CUSTOMER_EMAIL }}
+          TEST_CUSTOMER_PASSWORD: ${{ secrets.TEST_CUSTOMER_PASSWORD }}
+          TEST_PROVIDER_EMAIL: ${{ secrets.TEST_PROVIDER_EMAIL }}
+          TEST_PROVIDER_PASSWORD: ${{ secrets.TEST_PROVIDER_PASSWORD }}
+          TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
+          TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -119,15 +115,74 @@ jobs:
           name: test-results
           path: test-results/
 
+  # AI-powered reports run in a separate job with generous timeout
+  # so the e2e job stays fast and artifacts are uploaded regardless
+  ai-reports:
+    needs: e2e
+    if: success()
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Download test results from e2e job
+        uses: actions/download-artifact@v4
+        with:
+          name: test-results
+          path: test-results/
+
+      - name: Generate Synthetic UX Report
+        if: env.ANTHROPIC_API_KEY != ''
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: npm run ux-report
+
+      - name: Generate UX Report Scaffold (no API key)
+        if: env.ANTHROPIC_API_KEY == ''
+        env:
+          ANTHROPIC_API_KEY: ""
+        run: npm run ux-report:dry
+
+      - name: Generate Growth Audit
+        if: github.event.inputs.run_growth_audit == 'true' && env.ANTHROPIC_API_KEY != ''
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: npm run growth-report
+
+      - name: Generate Growth Audit Scaffold (no API key)
+        if: github.event.inputs.run_growth_audit == 'true' && env.ANTHROPIC_API_KEY == ''
+        env:
+          ANTHROPIC_API_KEY: ""
+        run: npm run growth-report:dry
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ai-reports
+          path: |
+            test-results/ux-review-report.md
+            test-results/ux-review-scores.json
+            test-results/growth-audit-report.md
+
   # Run additional UX simulation batches in parallel
-  # Each batch = 6 personas × all screens (different randomness per run)
+  # Each batch = 7 personas × all screens (different randomness per run)
   ux-simulation:
     needs: e2e
     if: >
       success() &&
       github.event.inputs.ux_runs != '1'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 120
     strategy:
       matrix:
         # Extra batches (e2e job already ran one)

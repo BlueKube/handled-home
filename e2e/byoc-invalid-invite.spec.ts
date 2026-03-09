@@ -10,7 +10,7 @@ import {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 test.describe("BYOC Invalid Invite", () => {
-  test.use({ storageState: path.join(__dirname, ".auth", "user.json") });
+  test.use({ storageState: path.join(__dirname, ".auth", "customer.json") });
 
   test.beforeAll(() => {
     ensureMilestonesDir();
