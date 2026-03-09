@@ -31,6 +31,7 @@ const SCORES_FILE = path.resolve("test-results/growth-audit-scores.json");
 const DRY_RUN = process.argv.includes("--dry-run");
 const CONCURRENCY = parseInt(process.env.UX_CONCURRENCY ?? "3", 10);
 const MODEL = process.env.UX_MODEL ?? "claude-sonnet-4-20250514";
+const MAX_RETRIES = parseInt(process.env.UX_MAX_RETRIES ?? "5", 10);
 
 // ── Types ──
 
@@ -167,6 +168,46 @@ async function runWithConcurrency<T>(
     Array.from({ length: Math.min(concurrency, tasks.length) }, () => worker())
   );
   return results;
+}
+
+// ── Rate-limit retry ──
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function withRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      return await fn();
+    } catch (error: unknown) {
+      const isRateLimit =
+        error instanceof Error &&
+        (error.message.includes("429") ||
+          error.message.includes("rate_limit") ||
+          (error as { status?: number }).status === 429);
+
+      if (!isRateLimit || attempt === MAX_RETRIES) {
+        throw error;
+      }
+
+      // Parse retry-after header if available, otherwise use exponential backoff
+      let waitMs: number;
+      const retryAfter = (error as { headers?: { "retry-after"?: string } })
+        .headers?.["retry-after"];
+      if (retryAfter) {
+        waitMs = (parseFloat(retryAfter) + 1) * 1000;
+      } else {
+        waitMs = Math.min(2000 * Math.pow(2, attempt), 120000);
+      }
+
+      console.log(
+        `  ⏳ Rate limited on "${label}" (attempt ${attempt + 1}/${MAX_RETRIES}), waiting ${Math.round(waitMs / 1000)}s...`
+      );
+      await sleep(waitMs);
+    }
+  }
+  throw new Error("Unreachable");
 }
 
 // ── AI Evaluation ──
@@ -501,47 +542,60 @@ async function main() {
   let report: string;
 
   if (useAI) {
-    const client = new Anthropic({ apiKey });
-    const systemPrompt = getSystemPrompt();
+    try {
+      const client = new Anthropic({ apiKey });
+      const systemPrompt = getSystemPrompt();
 
-    console.log(`\nRunning ${screenshots.length} growth evaluations`);
-    console.log(`Model: ${MODEL}, Concurrency: ${CONCURRENCY}\n`);
+      console.log(`\nRunning ${screenshots.length} growth evaluations`);
+      console.log(`Model: ${MODEL}, Concurrency: ${CONCURRENCY}\n`);
 
-    let completed = 0;
-    const tasks = screenshots.map(
-      (screen) => async (): Promise<EvaluationResult> => {
-        const num = ++completed;
-        console.log(`[${num}/${screenshots.length}] Auditing "${screen.label}" (${screen.role})...`);
-        const evaluation = await evaluateScreen(client, systemPrompt, screen);
-        return { screen, evaluation };
+      let completed = 0;
+      const tasks = screenshots.map(
+        (screen) => async (): Promise<EvaluationResult> => {
+          const num = ++completed;
+          console.log(`[${num}/${screenshots.length}] Auditing "${screen.label}" (${screen.role})...`);
+          const evaluation = await withRetry(
+            () => evaluateScreen(client, systemPrompt, screen),
+            screen.label,
+          );
+          return { screen, evaluation };
+        }
+      );
+
+      const results = await runWithConcurrency(tasks, CONCURRENCY);
+
+      console.log(`\nAll ${results.length} evaluations complete.`);
+
+      const growthScores = computeGrowthScores(results);
+
+      // Group by role for summary
+      const scoresByRole = new Map<string, GrowthScores[]>();
+      for (const s of growthScores) {
+        if (!scoresByRole.has(s.role)) scoresByRole.set(s.role, []);
+        scoresByRole.get(s.role)!.push(s);
       }
-    );
 
-    const results = await runWithConcurrency(tasks, CONCURRENCY);
+      console.log("Generating executive summary...");
+      const executiveSummary = await withRetry(
+        () => generateExecutiveSummary(client, results, scoresByRole),
+        "Executive Summary",
+      );
 
-    console.log(`\nAll ${results.length} evaluations complete.`);
+      report = generateAIReport(results, growthScores, executiveSummary);
 
-    const growthScores = computeGrowthScores(results);
-
-    // Group by role for summary
-    const scoresByRole = new Map<string, GrowthScores[]>();
-    for (const s of growthScores) {
-      if (!scoresByRole.has(s.role)) scoresByRole.set(s.role, []);
-      scoresByRole.get(s.role)!.push(s);
+      // Write machine-readable scores
+      fs.writeFileSync(
+        SCORES_FILE,
+        JSON.stringify({ timestamp: new Date().toISOString(), model: MODEL, scores: growthScores }, null, 2),
+        "utf-8"
+      );
+      console.log(`Growth scores written to ${SCORES_FILE}`);
+    } catch (aiError: unknown) {
+      const msg = aiError instanceof Error ? aiError.message : String(aiError);
+      console.error(`\nAI evaluation failed: ${msg}`);
+      console.error("Falling back to scaffold report.\n");
+      report = generateScaffoldReport(screenshots);
     }
-
-    console.log("Generating executive summary...");
-    const executiveSummary = await generateExecutiveSummary(client, results, scoresByRole);
-
-    report = generateAIReport(results, growthScores, executiveSummary);
-
-    // Write machine-readable scores
-    fs.writeFileSync(
-      SCORES_FILE,
-      JSON.stringify({ timestamp: new Date().toISOString(), model: MODEL, scores: growthScores }, null, 2),
-      "utf-8"
-    );
-    console.log(`Growth scores written to ${SCORES_FILE}`);
   } else {
     report = generateScaffoldReport(screenshots);
   }

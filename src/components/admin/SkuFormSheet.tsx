@@ -15,6 +15,7 @@ import type { ServiceSku, PhotoRequirement, ChecklistItem, ServiceSkuInsert } fr
 import { Constants } from "@/integrations/supabase/types";
 import { SkuLevelEditor } from "@/components/admin/SkuLevelEditor";
 import { GuidanceQuestionEditor } from "@/components/admin/GuidanceQuestionEditor";
+import { SkuImageUpload } from "@/components/admin/SkuImageUpload";
 
 interface SkuFormSheetProps {
   sku: ServiceSku | null; // null = create mode
@@ -49,6 +50,7 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
   const [requiresTrainingGate, setRequiresTrainingGate] = useState(false);
   const [schedulingProfile, setSchedulingProfile] = useState<string>("day_commit");
   const [accessMode, setAccessMode] = useState<string>("exterior_only");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -72,6 +74,7 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
       setRequiresTrainingGate(sku.requires_training_gate ?? false);
       setSchedulingProfile((sku as any).scheduling_profile ?? "day_commit");
       setAccessMode((sku as any).access_mode ?? "exterior_only");
+      setImageUrl(sku.image_url ?? null);
     } else {
       setName(""); setDescription(""); setCategory(""); setStatus("draft");
       setInclusions([""]); setExclusions([""]); setEdgeCaseNotes("");
@@ -82,6 +85,7 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
       setRequiresTrainingGate(false);
       setSchedulingProfile("day_commit");
       setAccessMode("exterior_only");
+      setImageUrl(null);
     }
   }, [open, sku]);
 
@@ -114,6 +118,7 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
     checklist: checklist.filter(c => c.label.trim()) as unknown as ServiceSkuInsert["checklist"],
     price_hint_cents: priceHintCents,
     pricing_notes: pricingNotes.trim() || null,
+    image_url: imageUrl,
     is_featured: isFeatured,
     display_order: displayOrder,
     requires_training_gate: requiresTrainingGate,
@@ -202,6 +207,12 @@ export function SkuFormSheet({ sku, open, onOpenChange }: SkuFormSheetProps) {
                 <Input type="number" min={0} value={displayOrder} onChange={e => setDisplayOrder(Number(e.target.value))} placeholder="0" />
                 <p className="text-caption mt-1">Lower numbers appear first within category.</p>
               </div>
+              <SkuImageUpload
+                skuId={sku?.id ?? null}
+                skuName={name}
+                imageUrl={imageUrl}
+                onImageUrlChange={setImageUrl}
+              />
             </div>
           </CollapsibleSection>
 
