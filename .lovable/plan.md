@@ -1,170 +1,285 @@
 
-# Plan: Update Feature List and Reorganize PRD Files
+# Sprint 8: Exceptions, Reschedules, and Ops Control v1 — Implementation Plan
 
-## Summary
-Update `docs/feature-list.md` with all features from PRD-300 (Routing & Scheduling Engine, Sprints 1-9) and PRD-301 (BYOC Onboarding Wizard), plus the Playwright E2E testing infrastructure. Also move PRD-300 and PRD-301 files from the `docs/prds/unfinished` folder to `docs/prds`.
-
----
-
-## Phase 1: Move PRD Files
-
-Move the following files from `docs/prds/unfinished/` to `docs/prds/`:
-
-**PRD-300 Series (10 files):**
-- `prd-300-routing-scheduling-overview.md`
-- `prd-300-sprint-1-foundations.md`
-- `prd-300-sprint-2-zone-builder.md`
-- `PRD 300 - sprint_3_prd_market_zone_category_states_integration.md`
-- `PRD 300 - sprint_4_prd_rolling_horizon_planner_14_day_plan_7_day_freeze.md`
-- `PRD_300_sprint_5_provider_assignment_v1.md`
-- `prd_300_sprint_6_route_sequencing_v_1_equipment_manifest.md`
-- `prd_300_sprint_7_appointment_windows_v_1_home_required_services.md`
-- `prd_300_sprint_8_exceptions_reschedules_and_ops_control_v_1.md`
-- `prd_300_sprint_9_ops_user_manual.md`
-
-**PRD-301 (1 file):**
-- `PRD301-byoc-onboarding-wizard.md`
+This is Lovable's reply after committing to the main branch. Claude Code to review, but not code anything...
 
 ---
 
-## Phase 2: Update Feature List
+## Existing State (What We Have)
 
-Add the following new sections to `docs/feature-list.md` (after Section XXXIX and before Section XL):
+- **visits** table: `schedule_state` enum (`planning|scheduled|dispatched|in_progress|complete|exception_pending|canceled|rescheduled`), `scheduling_profile`, `eta_range_start/end`, `route_order`, `service_week_start/end`, `due_status`, `piggybacked_onto_visit_id`
+- **visit_tasks** table: task-level status, SKU refs, duration estimates
+- **provider_work_profiles** table: working hours, home lat/lng, equipment kits, blocked windows
+- **provider_blocked_windows** table: recurring + one-off blocked windows
+- **route_sequence_runs** table: nightly run audit trail with feasibility status
+- **assignment_config** table: tuning dials infrastructure
+- **support_tickets** / **customer_issues** tables: existing support pipeline
+- **notifications** / **notification_events** tables: full event bus + delivery infrastructure
+- **admin_audit_log** / **decision_traces** tables: audit + explainability
+- **customer_credits** table: credit issuance + application
+- **billing_exceptions** table: existing billing-level exceptions (NOT scheduling exceptions)
+- **SchedulingExceptions.tsx** page: Sprint 7 admin page (unbooked, infeasible, overdue queries — read-only)
+- **job_events** / **job_issues** tables: existing event/issue logging
 
-### Section XL — Routing & Scheduling Engine (PRD-300)
+## What's Missing (Needs Building)
 
-**Sprint 1 — Foundations:**
-- Visit and task bundling data model supporting multi-category services per stop
-- Scheduling state machine (Draft → Locked → Dispatched → In Progress → Complete → Exception Pending)
-- Provider work profile with home base location, service categories, equipment kits, working hours, and capacity limits
-- Property and provider geo-coordinate indexing for spatial queries
-- Admin scheduling policy dials (appointment window length, ETA range display, arrival notification minutes)
-- Customer-facing upcoming visits with status labels (Planning, Scheduled, Today, In Progress, Completed)
-
-**Sprint 2 — Zone Builder v1:**
-- H3 hex-grid geo cell infrastructure for scalable zone partitioning
-- Automated zone generation from region boundaries with configurable dials
-- Zone metrics computation (demand density, supply capacity, compactness, drive-time proxy)
-- Cell scoring and seed selection strategies (demand-first, provider-first, auto-hybrid)
-- Constrained region-growing algorithm with cost function optimization
-- Admin Zone Builder wizard (select region → settings → preview → edit → commit)
-- Property-to-zone resolution via H3 cell lookup with fallback ring expansion
-
-**Sprint 3 — Market/Zone Category States Integration:**
-- Zone × Category state matrix (Closed, Waitlist Only, Provider Recruiting, Soft Launch, Open, Protect Quality)
-- State-based customer catalog gating and subscribe eligibility enforcement
-- Category-level waitlist system with zone-specific demand capture
-- Provider opportunity surfaces responding to recruiting states
-- Nightly recommendation engine with hysteresis thresholds and anti-flap rules
-- Admin approval-gated state transitions with confidence scoring
-- Minimum time-in-state guardrails to prevent state thrashing
-
-**Sprint 4 — Rolling Horizon Planner:**
-- 14-day rolling planning horizon with 7-day LOCKED freeze window
-- Nightly planning boundary for schedule promotion and state change application
-- Customer routine changes effective only in DRAFT window (≥8 days out)
-- Cadence-based task scheduling (weekly, biweekly, every 4 weeks) with stable offsets
-- Visit bundling rules merging same-property tasks into single stops
-- Stability rules minimizing DRAFT plan changes unless constraints change
-- Admin planner health dashboard with run summaries and conflict flagging
-
-**Sprint 5 — Provider Assignment v1:**
-- Candidate selection with feasibility filters (skills, equipment, working hours, capacity, proximity)
-- Assignment solver with objective function (minimize travel, balance workload, reward familiarity)
-- Primary + Backup provider assignment per visit
-- Familiarity scoring with configurable cap to balance relationship vs efficiency
-- Assignment stability rules with freeze-window extra protection
-- Explainability with confidence levels and top reasons per assignment
-- Admin exceptions inbox with unassigned/fragile visit prioritization and manual override tools
-
-**Sprint 6 — Route Sequencing v1 + Equipment Manifest:**
-- Ordered daily route per provider using nearest-neighbor + 2-opt optimization
-- Coarse customer-facing ETA ranges derived from stop sequence
-- Daily equipment manifest generation per provider route
-- Same-property task bundling with setup discount calculation
-- Provider blocked windows and legacy commitment support with segment-based planning
-- Provider pre-Start-Day route reorder with feasibility guardrails
-- Running-late notification when predicted arrival exceeds ETA window end
-
-**Sprint 7 — Appointment Windows v1 (Home-Required Services):**
-- Scheduling profiles per SKU (Appointment Window, Day Commit, Service Week)
-- Customer availability capture with 3–6 feasible window offers
-- Time-window constraint enforcement in route sequencing (VRPTW feasibility)
-- Mixed-profile bundle piggybacking with duration guardrails
-- Service-week flexible work with due-soon/overdue queue and week-end deadlines
-- Provider-placed flexible work via drag/drop with feasibility checks
-- Window-at-risk exception flagging with local repair attempts
-
-**Sprint 8 — Exceptions, Reschedules, and Ops Control v1:**
-- Unified exceptions queue with severity/SLA/escalation timers
-- Predictive exceptions from nightly planning (window-at-risk, service-week-at-risk, coverage break)
-- Reactive exceptions from day-of events (provider unavailable, access failure, weather stop)
-- Ops repair actions (reorder, move day, swap provider, cancel/credit) with feasibility checks
-- Break-freeze policy with explicit requirements (reason code, customer notification, audit)
-- Customer self-serve reschedules inside freeze from feasible options
-- Access failure auto-hold with priority reschedule and soft hold expiration
-- Ops action idempotency and undo support with reversal transactions
-- Provider fairness rules (no-blame access failure, show-up credits)
-
-**Sprint 9 — Ops User Manual:**
-- Autopilot health indicators (GREEN/YELLOW/RED) based on configurable thresholds
-- Provider-first self-healing with approve/notify/deny/escalate decision framework
-- Daily and weekly ops rhythm checklists
-- SKU discovery and continuous tuning workflow with provider interviews
-- Launch SKU templates for Pool, Windows, and Pest categories
-- Ops dashboard requirements with KPI tiles and zone health table
-- Standard procedures for zone launch, category opening, planner runs, and call-outs
-- Exception playbooks with severity levels and repair strategies
+1. **`ops_exceptions` table** — unified exception queue with severity, SLA, escalation, type, status, ownership
+2. **`ops_exception_actions` table** — audit trail for every repair action taken
+3. **`ops_exception_attachments` table** — photos/notes evidence per exception
+4. **`customer_reschedule_holds` table** — soft-hold on next-best slot for access failure flow
+5. **Config dials** for freeze override policy, hold TTL, notification throttling, show-up credit
+6. **`generate-exceptions` logic** — nightly predictive exception creation from route-sequence results
+7. **`repair-visit` edge function** — feasibility-checked repair actions with undo support
+8. **Ops Console UI** — exception queue, detail view, guided repair panel, bulk actions
+9. **Customer reschedule flow** — self-serve inside-freeze reschedule from feasible options
+10. **Provider issue reporting flow** — can't access, skip, safety, running late
+11. **Freeze override policy enforcement** — break-freeze guardrails + frequency limits
+12. **Notification templates** — promise-changed, at-risk, access-failed customer comms
 
 ---
 
-### Section XLI — BYOC Onboarding Wizard (PRD-301)
+## Phased Implementation
 
-- 7-screen provider-referred customer onboarding flow (60–90 second target)
-- Provider recognition screen preserving existing relationship trust
-- Confirm existing service screen with editable cadence
-- Property creation with address and home type
-- Home setup with property signals (pool, trees, pets, garden, windows)
-- Connecting provider spinner with activate-byoc-invite call
-- Other services screen with zone-available categories (skip-friendly)
-- Conditional Home Plan screen for bundled service pricing
-- Success screen with provider connection summary
-- Dashboard "Your Home Team" card showing connected providers and next visits
-- Referral state handling (Existing Provider First Touch, future: Not First Touch, Cold Referral)
-- Invite validation with fallback screen for expired/revoked/inactive tokens
-- Already-activated 409 handling with dashboard redirect
-- BYOC attribution tracking preserved separate from provider-customer relationship
+### Phase 1: Schema & Config Foundation
 
----
+**Migration:**
 
-### Section XLII — E2E Testing & Synthetic UX Review (Playwright)
+1. **Create Postgres enums:**
+   - `ops_exception_type` — `window_at_risk|service_week_at_risk|provider_overload|coverage_break|provider_unavailable|access_failure|customer_reschedule|weather_safety|quality_block`
+   - `ops_exception_severity` — `urgent|soon|watch`
+   - `ops_exception_status` — `open|acknowledged|in_progress|resolved|snoozed|escalated`
 
-- Playwright E2E test harness with Chromium mobile browser emulation
-- Auth setup project saving storage state for authenticated tests
-- BYOC happy-path test validating full wizard flow with milestone screenshots
-- BYOC invalid-invite test validating fallback UI for bad tokens
-- BYOC refresh-resilience test validating wizard state preservation on reload
-- GitHub Actions CI workflow with artifact upload (reports, screenshots, traces)
-- AI-powered synthetic UX review using 6 persona prompts and Claude Sonnet vision
-- Per-screen/per-persona evaluation with clarity/trust/friction scores
-- Aggregate UX summary report with top 5 friction points and fixes
+2. **Create `ops_exceptions` table:**
+   - `id` (uuid PK), `exception_type` (ops_exception_type NOT NULL)
+   - `severity` (ops_exception_severity NOT NULL)
+   - `sla_target_at` (timestamptz) — when ops should resolve by
+   - `escalated_at` (timestamptz, nullable) — when auto-escalated
+   - `status` (ops_exception_status NOT NULL DEFAULT 'open')
+   - `visit_id` (FK visits, nullable), `provider_org_id` (FK provider_orgs, nullable), `customer_id` (uuid REFERENCES auth.users, nullable)
+   - `scheduled_date` (date, nullable), `zone_id` (FK zones, nullable)
+   - `reason_summary` (text) — "Why" one-liner
+   - `reason_details` (jsonb) — structured diagnostic data
+   - `assigned_to_user_id` (uuid REFERENCES auth.users, nullable) — ops owner
+   - `resolved_at` (timestamptz, nullable), `resolved_by_user_id` (uuid REFERENCES auth.users, nullable)
+   - `resolution_type` (text, nullable — `reorder|move_day|swap_provider|convert_profile|cancel_refund|auto_resolved|snoozed`)
+   - `resolution_note` (text, nullable)
+   - `source` (text — `nightly_planning|provider_report|customer_request|system_detection`)
+   - `linked_exception_id` (uuid, nullable — for related exceptions)
+   - `idempotency_key` (text, nullable, UNIQUE) — explicit idempotency (pattern matches `cron_run_log`)
+   - `created_at`, `updated_at`
+   - **UNIQUE constraint:** `(visit_id, exception_type, scheduled_date)` WHERE `status NOT IN ('resolved')` — partial unique index prevents duplicate open exceptions
+   - RLS: admin full access, service_role full access
 
----
+3. **Create `ops_exception_actions` table (audit trail):**
+   - `id`, `exception_id` (FK), `action_type` (text), `actor_user_id` (uuid REFERENCES auth.users), `actor_role` (text)
+   - `before_state` (jsonb) — **shape: `{visit_id, schedule_state, scheduled_date, provider_org_id, route_order, eta_range_start, eta_range_end, time_window_start, time_window_end}`** — full snapshot of affected visit(s) at action time. Kept permanently for audit.
+   - `after_state` (jsonb) — same shape, post-action
+   - `reason_code` (text), `reason_note` (text, nullable)
+   - `is_freeze_override` (bool, default false)
+   - `is_undone` (bool, default false), `undone_at` (timestamptz, nullable), `undone_by_user_id` (uuid REFERENCES auth.users, nullable)
+   - `undo_expires_at` (timestamptz, nullable) — 10-minute undo window. **Undo rules:** (a) `before_state` kept forever for audit; (b) undo is one-shot (no undo-of-undo); (c) if a subsequent action exists on the same exception, prior action becomes non-undoable
+   - `customer_notified` (bool, default false), `provider_notified` (bool, default false)
+   - `impact_summary` (jsonb — old_promise, new_promise, added_drive_minutes, added_overtime_minutes)
+   - `created_at`
+   - RLS: admin read, service_role full access
 
-### Update Metadata
+4. **Create `ops_exception_attachments` table:**
+   - `id`, `exception_id` (FK), `attachment_type` (text — `photo|note`)
+   - `storage_path` (text, nullable), `note_text` (text, nullable)
+   - `uploaded_by_user_id` (uuid REFERENCES auth.users), `uploaded_by_role` (text)
+   - `created_at`
+   - RLS: admin full access, provider insert own
 
-- Update total feature count from 270 to ~330
-- Update "Last updated" date to 2026-03-09
+5. **Create `customer_reschedule_holds` table:**
+   - `id`, `visit_id` (FK), `customer_id` (uuid REFERENCES auth.users)
+   - `held_date` (date), `held_window_start` (time, nullable), `held_window_end` (time, nullable)
+   - `hold_type` (text — `auto_access_failure|customer_choice`)
+   - `status` (text — `held|confirmed|released|expired`)
+   - `expires_at` (timestamptz)
+   - `created_at`, `updated_at`
+   - RLS: customer read own, admin full access
+
+6. **Seed assignment_config with Sprint 8 dials (~12 new):**
+   - Freeze: `max_break_freeze_per_customer_30d` (1), `freeze_override_warning_threshold` (1)
+   - Hold: `hold_ttl_hours` (12)
+   - Compensation: `access_failure_show_up_credit_cents` (500)
+   - Notification throttle: `max_exception_notifications_per_week` (3)
+   - SLA: `urgent_sla_hours` (8), `soon_sla_hours` (48), `watch_sla_hours` (120)
+   - Escalation: `auto_escalate_within_hours` (48)
+   - Repair scoring: `repair_drive_weight` (1.0), `repair_overtime_weight` (2.0), `repair_disruption_weight` (1.5), `repair_customer_disruption_weight` (3.0)
+
+7. **Seed notification_templates for Sprint 8** (~6 new):
+   - `CUSTOMER_PROMISE_CHANGED`, `CUSTOMER_VISIT_AT_RISK`, `CUSTOMER_ACCESS_FAILED_HOLD`
+   - `PROVIDER_VISIT_REASSIGNED`, `ADMIN_EXCEPTION_ESCALATED`, `ADMIN_FREEZE_OVERRIDE`
+
+8. **Indexes:** `ops_exceptions(status, severity)`, `ops_exceptions(visit_id)`, `ops_exceptions(provider_org_id, scheduled_date)`, `customer_reschedule_holds(visit_id, status)`
+
+### Phase 2: Exception Generation Engine
+
+**Enhance `route-sequence` edge function + new `generate-exceptions` logic:**
+
+1. **After nightly sequencing**, for each provider/day:
+   - **Window-at-risk:** If `planned_arrival_time` > `time_window_end` for any windowed visit → create exception (check against the customer's hard window, NOT the display `eta_range_end`)
+   - **Service-week-at-risk:** If no visit scheduled before `service_week_end` for any `service_week` profile visit → create exception
+   - **Provider overload:** If estimated finish time > working hours end → create exception
+   - **Coverage break:** If a visit has no assigned `provider_org_id` → create exception
+
+2. **Severity auto-assignment:**
+   - 🔴 Urgent: affected visit within 48 hours
+   - 🟠 Soon: affected visit within 3-5 days
+   - 🟡 Watch: beyond 5 days
+
+3. **SLA target computation:** severity → `sla_target_at` from config dials
+
+4. **Idempotency:** use `(visit_id, exception_type, scheduled_date)` as natural key — don't create duplicates for same issue
+
+5. **Auto-escalation:** background check — if unresolved exception and visit now within 48h, bump to urgent
+
+### Phase 3: Reactive Exception Flows (Provider + Customer)
+
+**Provider issue reporting:**
+
+1. **`useProviderIssueReport` hook** — report: `cant_access` (with reason code: gate_locked, customer_not_home, wrong_code), `customer_skip`, `safety_weather`, `running_late`
+2. **Provider UI:** "Report Issue" button on active visit card → reason picker → optional note + photo → creates `ops_exception` + sets visit `schedule_state` to `exception_pending`
+3. **Access failure flow:** auto-creates exception + triggers customer hold flow (Phase 5)
+4. **Running late flow:** creates `window_at_risk` exception if new ETA > `time_window_end`, updates visit's `eta_range_start/end`, emits `CUSTOMER_VISIT_AT_RISK` notification to affected customer
+
+**Customer reschedule request:**
+
+4. **`useCustomerReschedule` hook** — calls `offer-appointment-windows` for feasible alternatives, creates reschedule exception if no options
+5. **Customer UI:** "Reschedule" button on upcoming visit → shows 3-6 feasible options (filtered by scheduling_profile) → confirm → updates visit → notifies ops if inside freeze
+   - **Freeze clarification:** Customer-initiated reschedules inside freeze do NOT count toward `max_break_freeze_per_customer_30d` (customer chose it; only ops-initiated overrides count)
+
+**Provider unavailable:**
+
+6. **`useProviderUnavailable` hook** — mark day unavailable → all affected visits get `provider_unavailable` exceptions → trigger repair suggestions
+
+### Phase 4: Ops Console — Exception Queue + Detail + Actions
+
+**New pages/components:**
+
+1. **`/admin/ops/exceptions` page** — Ops Exception Queue:
+   - Filterable by severity, type, status, zone, provider, date range
+   - Sortable (default: severity desc, then SLA urgency)
+   - Bulk actions: acknowledge, assign owner, snooze until next nightly
+   - Count badges per severity tier
+   - Auto-refresh on interval
+
+2. **Exception Detail View** (sheet/drawer):
+   - Current plan snapshot: route order, ETA, remaining capacity, provider schedule
+   - Constraints summary: window, due-by, provider hours, blocked windows
+   - Repair suggestions (ranked by RepairScore):
+     - Impact preview: old promise → new promise, customer notify?, provider minutes
+   - Evidence/attachments section (photos + notes)
+   - Action history timeline
+   - "Create Support Ticket" escalation action
+
+3. **Repair Actions (v1):**
+   - **Reorder within provider day** — calls route-sequence for single provider/day
+   - **Move to another day** — with freeze override check + Break Freeze dialog if inside freeze
+   - **Swap provider** — feasibility check (capacity, equipment, zone coverage)
+   - **Cancel + credit** — cancel visit, optionally issue credit
+   - All actions: confirmation dialog with impact preview, reason code + optional note required
+   - 10-minute undo window on all actions
+
+4. **Break Freeze dialog:**
+   - Reason code selector (provider_unavailable, safety_weather, access_failure, window_at_risk)
+   - Customer notification preview
+   - Frequency check: "This customer has had N freeze overrides in the last 30 days" warning
+   - Audit trail entry
+
+5. **Hooks:** `useOpsExceptions`, `useOpsExceptionDetail`, `useOpsExceptionActions`, `useRepairSuggestions`
+6. **RepairScore computation:** runs server-side in a `suggest-repairs` edge function (needs provider schedules, drive time, capacity data — not feasible client-side)
+
+### Phase 5: Customer Access Failure Flow + Reschedule UX
+
+1. **Auto-hold on access failure:**
+   - When provider reports access failure → system selects next-best feasible slot
+   - Creates `customer_reschedule_holds` entry with `hold_ttl_hours` expiry
+   - Emits `CUSTOMER_ACCESS_FAILED_HOLD` notification
+
+2. **Customer confirmation UI:**
+   - Calm message: "We couldn't access your home. We reserved: [option]. Confirm or choose another."
+   - Actions: **Confirm** (one tap), **Choose another** (shows 3-6 feasible options), **Skip this cycle** (if allowed)
+   - `useCustomerHoldConfirmation` hook
+
+3. **Hold expiry:**
+   - Piggyback on `run-scheduled-jobs` edge function (already has pg_cron every 2 min) — add a `check_expired_holds` sub-task
+   - Expired holds → set status = `expired`, release slot, keep exception as "Customer confirmation needed"
+
+### Phase 6: Operational Analytics + Wiring
+
+1. **Exception metrics queries** (admin views):
+   - Window miss rate by category/zone/provider
+   - Access failure rate by access mode
+   - Break-freeze frequency (30-day rolling)
+   - Reschedule frequency
+   - SLA compliance (time-to-resolve)
+   - Top reason codes
+   - Repair outcome distribution
+   - Customer impact rate
+
+2. **Wire into existing systems:**
+   - Route-sequence nightly → generate predictive exceptions
+   - Provider availability blocks → generate `provider_unavailable` exceptions for affected visits
+   - Coverage-break detection also via provider deactivation flow (not just nightly planning)
+   - Add exception count badge to AdminShell sidebar (lightweight count query, 30s `refetchInterval`)
+   - Wire `ops_exception_actions` to `admin_audit_log` via trigger or RPC
+   - **Retire/rewire Sprint 7 `SchedulingExceptions.tsx`** — replace raw visit queries with `ops_exceptions` queries to avoid two conflicting exception views
+
+3. **Notification throttling:**
+   - Apply `max_exception_notifications_per_week` cap per customer
+   - Max 1 notification per promise change
+
+4. **Provider compensation:**
+   - On customer-caused access failure resolution → auto-create show-up credit for provider (configurable amount)
 
 ---
 
 ## Technical Details
 
-**File operations:**
-1. Delete files from `docs/prds/unfinished/` and recreate in `docs/prds/` (same content)
-2. Edit `docs/feature-list.md` to append new sections before Section XL (Simplicity by Design) and renumber
+### Repair Strategy Order (deterministic)
+```text
+1) Local repair (reorder same provider/day) — cheapest
+2) Same provider, different day (outside freeze only, unless Break Freeze)
+3) Swap provider within zone (same day)
+4) Swap provider within zone (different day)
+5) Escalate (cancel/credit/manual)
+```
 
-**Renumbering:**
-- Current Section XL (Simplicity by Design) becomes Section XLIII
-- New features numbered 271–330 (approximately 60 new features)
+### RepairScore
+```text
+RepairScore = +PromiseKeptBonus
+            − (AddedDriveMin × w_drive)
+            − (AddedOvertimeMin × w_ot)
+            − (ProviderDisruption × w_disrupt)
+            − (CustomerDisruption × w_cust)
+```
 
+### Severity → SLA Mapping
+```text
+🔴 Urgent: within 48h → SLA = same day (8h)
+🟠 Soon:   3-5 days  → SLA = 24-48h
+🟡 Watch:  5+ days   → SLA = 5 days
+```
+
+### Break Freeze Guardrails
+```text
+MaxBreakFreezePerCustomerPer30Days = 1 (configurable)
+Required: reason code + audit + customer notification
+```
+
+---
+
+## File Summary
+
+| Phase | New Files | Modified Files |
+|-------|-----------|----------------|
+| 1 | — | migration SQL |
+| 2 | — | `route-sequence/index.ts` |
+| 3 | `src/hooks/useProviderIssueReport.ts`, `src/hooks/useCustomerReschedule.ts`, `src/components/provider/IssueReportSheet.tsx`, `src/components/customer/RescheduleSheet.tsx` | Provider Jobs page, Customer UpcomingVisits |
+| 4 | `src/hooks/useOpsExceptions.ts`, `src/pages/admin/OpsExceptions.tsx`, `src/components/admin/ExceptionDetailSheet.tsx`, `src/components/admin/RepairActionDialog.tsx`, `src/components/admin/BreakFreezeDialog.tsx` | `AdminShell.tsx`, `App.tsx` |
+| 5 | `src/hooks/useCustomerHoldConfirmation.ts`, `src/components/customer/AccessFailureHold.tsx` | Customer dashboard/visits |
+| 6 | — | `route-sequence/index.ts`, `AdminShell.tsx`, existing exception views |
+
+First action: Begin Phase 1 migration.
