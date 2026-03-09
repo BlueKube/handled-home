@@ -863,81 +863,88 @@ async function main() {
   let report: string;
 
   if (useAI) {
-    const client = new Anthropic({ apiKey });
-    const systemPrompt = getSystemPrompt();
-    const totalEvaluations = screenshots.length * personas.length;
+    try {
+      const client = new Anthropic({ apiKey });
+      const systemPrompt = getSystemPrompt();
+      const totalEvaluations = screenshots.length * personas.length;
 
-    console.log(
-      `\nRunning ${totalEvaluations} AI evaluations (${screenshots.length} screens x ${personas.length} personas)`
-    );
-    console.log(`Model: ${MODEL}`);
-    console.log(`Concurrency: ${CONCURRENCY}`);
-    console.log("");
+      console.log(
+        `\nRunning ${totalEvaluations} AI evaluations (${screenshots.length} screens x ${personas.length} personas)`
+      );
+      console.log(`Model: ${MODEL}`);
+      console.log(`Concurrency: ${CONCURRENCY}`);
+      console.log("");
 
-    // Build tasks
-    let completed = 0;
-    const tasks = screenshots.flatMap((screen) =>
-      personas.map((persona) => async (): Promise<EvaluationResult> => {
-        const num = ++completed;
-        console.log(
-          `[${num}/${totalEvaluations}] Evaluating "${screen.label}" as ${persona.name}...`
-        );
+      // Build tasks
+      let completed = 0;
+      const tasks = screenshots.flatMap((screen) =>
+        personas.map((persona) => async (): Promise<EvaluationResult> => {
+          const num = ++completed;
+          console.log(
+            `[${num}/${totalEvaluations}] Evaluating "${screen.label}" as ${persona.name}...`
+          );
 
-        const evaluation = await evaluateScreen(
-          client,
-          systemPrompt,
-          screen,
-          persona,
-          screenshots.length
-        );
+          const evaluation = await evaluateScreen(
+            client,
+            systemPrompt,
+            screen,
+            persona,
+            screenshots.length
+          );
 
-        // Throttle to stay under rate limits
-        if (REQUEST_DELAY_MS > 0) {
-          await sleep(REQUEST_DELAY_MS);
-        }
+          // Throttle to stay under rate limits
+          if (REQUEST_DELAY_MS > 0) {
+            await sleep(REQUEST_DELAY_MS);
+          }
 
-        return { screen, persona, evaluation };
-      })
-    );
+          return { screen, persona, evaluation };
+        })
+      );
 
-    // Run with concurrency control
-    const results = await runWithConcurrency(tasks, CONCURRENCY);
+      // Run with concurrency control
+      const results = await runWithConcurrency(tasks, CONCURRENCY);
 
-    console.log(`\nAll ${results.length} evaluations complete.`);
+      console.log(`\nAll ${results.length} evaluations complete.`);
 
-    // Compute scorecards
-    const screenScores = computeScreenScores(results);
-    const personaScores = computePersonaScores(results);
+      // Compute scorecards
+      const screenScores = computeScreenScores(results);
+      const personaScores = computePersonaScores(results);
 
-    console.log("Generating summary...");
+      console.log("Generating summary...");
 
-    // Generate summary (with scorecard context)
-    const summaryMarkdown = await generateSummary(
-      client,
-      results,
-      screenScores,
-      personaScores
-    );
+      // Generate summary (with scorecard context)
+      const summaryMarkdown = await generateSummary(
+        client,
+        results,
+        screenScores,
+        personaScores
+      );
 
-    report = generateAIReport(
-      screenshots,
-      personas,
-      results,
-      summaryMarkdown,
-      screenScores,
-      personaScores,
-      previousScores
-    );
+      report = generateAIReport(
+        screenshots,
+        personas,
+        results,
+        summaryMarkdown,
+        screenScores,
+        personaScores,
+        previousScores
+      );
 
-    // Write machine-readable scores for next run's delta comparison
-    const snapshot: ScoresSnapshot = {
-      timestamp: new Date().toISOString(),
-      model: MODEL,
-      screens: screenScores,
-      personas: personaScores,
-    };
-    fs.writeFileSync(SCORES_FILE, JSON.stringify(snapshot, null, 2), "utf-8");
-    console.log(`Scores snapshot written to ${SCORES_FILE}`);
+      // Write machine-readable scores for next run's delta comparison
+      const snapshot: ScoresSnapshot = {
+        timestamp: new Date().toISOString(),
+        model: MODEL,
+        screens: screenScores,
+        personas: personaScores,
+      };
+      fs.writeFileSync(SCORES_FILE, JSON.stringify(snapshot, null, 2), "utf-8");
+      console.log(`Scores snapshot written to ${SCORES_FILE}`);
+    } catch (aiError: unknown) {
+      const msg = aiError instanceof Error ? aiError.message : String(aiError);
+      console.error(`\nAI evaluation failed: ${msg}`);
+      console.error("Falling back to scaffold report.\n");
+      report = generateScaffoldReport(screenshots, personas);
+    }
   } else {
     report = generateScaffoldReport(screenshots, personas);
   }
