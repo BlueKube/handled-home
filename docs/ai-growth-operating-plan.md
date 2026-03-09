@@ -117,6 +117,7 @@ Create a self-improving operating system for home services that:
 
 ### 1) Source-of-truth consolidation
 - Keep one canonical strategy doc, one architecture doc, one feature inventory, one operations runbook index.
+- Add and maintain a compact `docs/ai-context-pack.md` as the session-bootstrap document for AI tools.
 - Mark all legacy/planning docs as active/archived/draft.
 
 ### 2) Feature inventory normalization

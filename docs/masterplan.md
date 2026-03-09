@@ -218,6 +218,33 @@ Compounding economics:
 
 ---
 
+## Documentation System (How to keep docs accurate)
+You should **not** keep a single giant document for everything. It will rot quickly and exceed AI context windows.
+
+Use a layered “source-of-truth” model:
+1. `docs/masterplan.md` → strategy, flywheels, business model, non-negotiable principles.
+2. `docs/global-system-architecture.md` → canonical states, schema spine, cross-module invariants.
+3. `docs/feature-list.md` + `docs/feature-list-by-role.md` → implementation inventory.
+4. `docs/tasks.md` → execution status and sequencing.
+5. `docs/ai-context-pack.md` → compact handoff brief for new AI sessions.
+
+Rule of thumb: if a detail changes weekly, it should not live only in the master plan.
+
+### Documentation update cadence
+- Per PR: update impacted feature/task docs.
+- Weekly: refresh scorecard metrics + top risks in context pack.
+- Monthly: revisit master plan assumptions and strategic bets.
+- Quarterly: archive stale specs/reviews and rebaseline priorities.
+
+### Documentation quality gates
+Every meaningful PR should include:
+- changed feature IDs,
+- changed tests,
+- changed KPIs or expectations,
+- changed runbooks/fallbacks (if operational behavior changed).
+
+---
+
 ## Roadmap: Round 3 Sprints (Current Direction)
 ### 3A — Levels (SKU Variants)
 - scope/time/proof/handles buckets
