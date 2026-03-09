@@ -34,8 +34,10 @@ const SCORES_FILE = path.resolve("test-results/ux-review-scores.json");
 const MANIFEST_FILE = path.join(MILESTONES_DIR, "manifest.json");
 
 const DRY_RUN = process.argv.includes("--dry-run");
-const CONCURRENCY = parseInt(process.env.UX_CONCURRENCY ?? "3", 10);
+const CONCURRENCY = parseInt(process.env.UX_CONCURRENCY ?? "1", 10);
 const MODEL = process.env.UX_MODEL ?? "claude-sonnet-4-20250514";
+const MAX_RETRIES = parseInt(process.env.UX_MAX_RETRIES ?? "5", 10);
+const REQUEST_DELAY_MS = parseInt(process.env.UX_REQUEST_DELAY_MS ?? "15000", 10);
 
 // ── Types ──
 
@@ -222,6 +224,46 @@ async function runWithConcurrency<T>(
   return results;
 }
 
+// ── Rate-limit retry ──
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function withRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      return await fn();
+    } catch (error: unknown) {
+      const isRateLimit =
+        error instanceof Error &&
+        (error.message.includes("429") ||
+          error.message.includes("rate_limit") ||
+          (error as { status?: number }).status === 429);
+
+      if (!isRateLimit || attempt === MAX_RETRIES) {
+        throw error;
+      }
+
+      // Parse retry-after header if available, otherwise use exponential backoff
+      let waitMs: number;
+      const retryAfter = (error as { headers?: { "retry-after"?: string } })
+        .headers?.["retry-after"];
+      if (retryAfter) {
+        waitMs = (parseFloat(retryAfter) + 1) * 1000;
+      } else {
+        waitMs = Math.min(2000 * Math.pow(2, attempt), 120000);
+      }
+
+      console.log(
+        `  ⏳ Rate limited on "${label}" (attempt ${attempt + 1}/${MAX_RETRIES}), waiting ${Math.round(waitMs / 1000)}s...`
+      );
+      await sleep(waitMs);
+    }
+  }
+  throw new Error("Unreachable");
+}
+
 // ── AI Evaluation ──
 
 const EVALUATION_SCHEMA = {
@@ -320,30 +362,34 @@ async function evaluateScreen(
 
   const screenContext = buildScreenContext(screen, totalScreens);
 
-  const response = await client.messages.create({
-    model: MODEL,
-    max_tokens: 1024,
-    system: systemPrompt,
-    messages: [
-      {
-        role: "user",
-        content: [
+  const response = await withRetry(
+    () =>
+      client.messages.create({
+        model: MODEL,
+        max_tokens: 1024,
+        system: systemPrompt,
+        messages: [
           {
-            type: "text",
-            text: `You are evaluating this screen as the following persona:\n\n${persona.content}\n\n${screenContext}\n\nAnalyze this screenshot and respond with a JSON object matching this schema. Do not include any text outside the JSON.\n\n${JSON.stringify(EVALUATION_SCHEMA, null, 2)}`,
-          },
-          {
-            type: "image",
-            source: {
-              type: "base64",
-              media_type: "image/png",
-              data: base64Image,
-            },
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: `You are evaluating this screen as the following persona:\n\n${persona.content}\n\n${screenContext}\n\nAnalyze this screenshot and respond with a JSON object matching this schema. Do not include any text outside the JSON.\n\n${JSON.stringify(EVALUATION_SCHEMA, null, 2)}`,
+              },
+              {
+                type: "image",
+                source: {
+                  type: "base64",
+                  media_type: "image/png",
+                  data: base64Image,
+                },
+              },
+            ],
           },
         ],
-      },
-    ],
-  });
+      }),
+    `${screen.label} / ${persona.name}`
+  );
 
   const textBlock = response.content.find((block) => block.type === "text");
   if (!textBlock || textBlock.type !== "text") {
@@ -509,13 +555,15 @@ async function generateSummary(
     topImprovement: r.evaluation.topImprovement,
   }));
 
-  const response = await client.messages.create({
-    model: MODEL,
-    max_tokens: 1500,
-    messages: [
-      {
-        role: "user",
-        content: `You are a UX research analyst. Below are evaluation results from ${results.length} synthetic user tests across multiple screens and personas for a mobile home-services app called Handled Home.
+  const response = await withRetry(
+    () =>
+      client.messages.create({
+        model: MODEL,
+        max_tokens: 1500,
+        messages: [
+          {
+            role: "user",
+            content: `You are a UX research analyst. Below are evaluation results from ${results.length} synthetic user tests across multiple screens and personas for a mobile home-services app called Handled Home.
 
 Also provided: aggregated screen risk rankings and persona sensitivity rankings for additional context.
 
@@ -544,9 +592,11 @@ ${JSON.stringify(personaScores, null, 2)}
 
 Evaluation Data:
 ${JSON.stringify(summaryData, null, 2)}`,
-      },
-    ],
-  });
+          },
+        ],
+      }),
+    "Summary generation"
+  );
 
   const textBlock = response.content.find((block) => block.type === "text");
   if (!textBlock || textBlock.type !== "text") {
@@ -830,6 +880,11 @@ async function main() {
           persona,
           screenshots.length
         );
+
+        // Throttle to stay under rate limits
+        if (REQUEST_DELAY_MS > 0) {
+          await sleep(REQUEST_DELAY_MS);
+        }
 
         return { screen, persona, evaluation };
       })
