@@ -559,6 +559,10 @@ test.describe("Screenshot Catalog", () => {
 
     for (const screen of PROVIDER_SCREENS) {
       test(`capture ${screen.id}`, async ({ page }) => {
+        // Ensure the app activates the provider role (not customer default)
+        await page.addInitScript(() => {
+          localStorage.setItem("handled_active_role", "provider");
+        });
         const tracker = new MilestoneTracker();
 
         await page.goto(screen.route, {
@@ -615,6 +619,10 @@ test.describe("Screenshot Catalog", () => {
 
     for (const screen of ADMIN_SCREENS) {
       test(`capture ${screen.id}`, async ({ page }) => {
+        // Ensure the app activates the admin role (not customer default)
+        await page.addInitScript(() => {
+          localStorage.setItem("handled_active_role", "admin");
+        });
         const tracker = new MilestoneTracker();
 
         await page.goto(screen.route, {

@@ -115,13 +115,23 @@ jobs:
           name: test-results
           path: test-results/
 
-  # AI-powered reports run in a separate job with generous timeout
-  # so the e2e job stays fast and artifacts are uploaded regardless
+  # AI-powered UX reports run in parallel per role so each finishes
+  # well within the timeout (~18 screens × 7 personas per role).
   ai-reports:
     needs: e2e
     if: success()
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 60
+    strategy:
+      matrix:
+        role: [customer, provider, admin]
+        include:
+          - role: customer
+            filter: "customer,byoc,public"
+          - role: provider
+            filter: "provider"
+          - role: admin
+            filter: "admin"
     steps:
       - uses: actions/checkout@v4
 
@@ -141,26 +151,61 @@ jobs:
           name: test-results
           path: test-results/
 
-      - name: Generate Synthetic UX Report
+      - name: Generate Synthetic UX Report (${{ matrix.role }})
         if: env.ANTHROPIC_API_KEY != ''
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          UX_ROLE_FILTER: ${{ matrix.filter }}
         run: npm run ux-report
 
-      - name: Generate UX Report Scaffold (no API key)
+      - name: Generate UX Report Scaffold (${{ matrix.role }}, no API key)
         if: env.ANTHROPIC_API_KEY == ''
         env:
           ANTHROPIC_API_KEY: ""
+          UX_ROLE_FILTER: ${{ matrix.filter }}
         run: npm run ux-report:dry
 
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ai-reports-${{ matrix.role }}
+          path: |
+            test-results/ux-review-report-*.md
+            test-results/ux-review-scores-*.json
+
+  # Growth audit runs separately (not per-role)
+  growth-audit:
+    needs: e2e
+    if: success() && github.event.inputs.run_growth_audit == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Download test results from e2e job
+        uses: actions/download-artifact@v4
+        with:
+          name: test-results
+          path: test-results/
+
       - name: Generate Growth Audit
-        if: github.event.inputs.run_growth_audit == 'true' && env.ANTHROPIC_API_KEY != ''
+        if: env.ANTHROPIC_API_KEY != ''
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: npm run growth-report
 
       - name: Generate Growth Audit Scaffold (no API key)
-        if: github.event.inputs.run_growth_audit == 'true' && env.ANTHROPIC_API_KEY == ''
+        if: env.ANTHROPIC_API_KEY == ''
         env:
           ANTHROPIC_API_KEY: ""
         run: npm run growth-report:dry
@@ -168,11 +213,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ai-reports
-          path: |
-            test-results/ux-review-report.md
-            test-results/ux-review-scores.json
-            test-results/growth-audit-report.md
+          name: growth-audit-report
+          path: test-results/growth-audit-report.md
 
   # Run additional UX simulation batches in parallel
   # Each batch = 7 personas × all screens (different randomness per run)

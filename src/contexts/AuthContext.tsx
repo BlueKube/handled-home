@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const bootstrapAttempted = useRef(false);
 
-  const fetchUserData = async (userId: string, userEmail?: string) => {
+  const fetchUserData = async (userId: string, userEmail?: string, userMeta?: Record<string, unknown>) => {
     try {
       const [rolesResult, profileResult] = await Promise.all([
         supabase.from("user_roles").select("role").eq("user_id", userId),
@@ -73,7 +73,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (userRoles.length === 0 && !bootstrapAttempted.current) {
         bootstrapAttempted.current = true;
         const displayName = profileResult.data?.full_name || userEmail || "User";
-        await supabase.rpc("bootstrap_new_user", { _full_name: displayName });
+        const intendedRole = (userMeta?.intended_role as string) ?? "customer";
+        await supabase.rpc("bootstrap_new_user", {
+          _full_name: displayName,
+          _role: intendedRole,
+        });
 
         // Re-fetch after bootstrap
         const [rolesRetry, profileRetry] = await Promise.all([
@@ -112,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         if (session?.user) {
           // Defer fetchUserData outside the session lock via setTimeout
-          setTimeout(() => fetchUserData(session.user.id, session.user.email ?? undefined), 0);
+          setTimeout(() => fetchUserData(session.user.id, session.user.email ?? undefined, session.user.user_metadata), 0);
         } else {
           setRoles([]);
           setProfile(null);
@@ -126,7 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserData(session.user.id, session.user.email ?? undefined);
+        fetchUserData(session.user.id, session.user.email ?? undefined, session.user.user_metadata);
       } else {
         setLoading(false);
       }
