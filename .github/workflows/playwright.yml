@@ -41,13 +41,25 @@ jobs:
 
       - name: Validate required secrets
         run: |
-          if [ -z "$BASE_URL" ]; then echo "ERROR: BASE_URL secret is not set"; exit 1; fi
-          if [ -z "$TEST_USER_EMAIL" ]; then echo "ERROR: TEST_USER_EMAIL secret is not set"; exit 1; fi
-          if [ -z "$TEST_USER_PASSWORD" ]; then echo "ERROR: TEST_USER_PASSWORD secret is not set"; exit 1; fi
+          missing=0
+          for var in BASE_URL \
+                     TEST_CUSTOMER_EMAIL TEST_CUSTOMER_PASSWORD \
+                     TEST_PROVIDER_EMAIL TEST_PROVIDER_PASSWORD \
+                     TEST_ADMIN_EMAIL    TEST_ADMIN_PASSWORD; do
+            if [ -z "${!var}" ]; then
+              echo "ERROR: $var secret is not set"
+              missing=1
+            fi
+          done
+          if [ "$missing" -eq 1 ]; then exit 1; fi
         env:
           BASE_URL: ${{ secrets.BASE_URL }}
-          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
-          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+          TEST_CUSTOMER_EMAIL: ${{ secrets.TEST_CUSTOMER_EMAIL }}
+          TEST_CUSTOMER_PASSWORD: ${{ secrets.TEST_CUSTOMER_PASSWORD }}
+          TEST_PROVIDER_EMAIL: ${{ secrets.TEST_PROVIDER_EMAIL }}
+          TEST_PROVIDER_PASSWORD: ${{ secrets.TEST_PROVIDER_PASSWORD }}
+          TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
+          TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
 
       - name: Warm up preview URL (cold-start)
         run: |
@@ -71,8 +83,12 @@ jobs:
         run: npm run test:e2e
         env:
           BASE_URL: ${{ secrets.BASE_URL }}
-          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
-          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+          TEST_CUSTOMER_EMAIL: ${{ secrets.TEST_CUSTOMER_EMAIL }}
+          TEST_CUSTOMER_PASSWORD: ${{ secrets.TEST_CUSTOMER_PASSWORD }}
+          TEST_PROVIDER_EMAIL: ${{ secrets.TEST_PROVIDER_EMAIL }}
+          TEST_PROVIDER_PASSWORD: ${{ secrets.TEST_PROVIDER_PASSWORD }}
+          TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
+          TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
           TEST_BYOC_TOKEN: ${{ secrets.TEST_BYOC_TOKEN }}
 
       - name: Run screenshot catalog
@@ -80,8 +96,12 @@ jobs:
         run: npm run test:catalog
         env:
           BASE_URL: ${{ secrets.BASE_URL }}
-          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
-          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+          TEST_CUSTOMER_EMAIL: ${{ secrets.TEST_CUSTOMER_EMAIL }}
+          TEST_CUSTOMER_PASSWORD: ${{ secrets.TEST_CUSTOMER_PASSWORD }}
+          TEST_PROVIDER_EMAIL: ${{ secrets.TEST_PROVIDER_EMAIL }}
+          TEST_PROVIDER_PASSWORD: ${{ secrets.TEST_PROVIDER_PASSWORD }}
+          TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
+          TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
 
       - uses: actions/upload-artifact@v4
         if: always()
