@@ -542,53 +542,60 @@ async function main() {
   let report: string;
 
   if (useAI) {
-    const client = new Anthropic({ apiKey });
-    const systemPrompt = getSystemPrompt();
+    try {
+      const client = new Anthropic({ apiKey });
+      const systemPrompt = getSystemPrompt();
 
-    console.log(`\nRunning ${screenshots.length} growth evaluations`);
-    console.log(`Model: ${MODEL}, Concurrency: ${CONCURRENCY}\n`);
+      console.log(`\nRunning ${screenshots.length} growth evaluations`);
+      console.log(`Model: ${MODEL}, Concurrency: ${CONCURRENCY}\n`);
 
-    let completed = 0;
-    const tasks = screenshots.map(
-      (screen) => async (): Promise<EvaluationResult> => {
-        const num = ++completed;
-        console.log(`[${num}/${screenshots.length}] Auditing "${screen.label}" (${screen.role})...`);
-        const evaluation = await withRetry(
-          () => evaluateScreen(client, systemPrompt, screen),
-          screen.label,
-        );
-        return { screen, evaluation };
+      let completed = 0;
+      const tasks = screenshots.map(
+        (screen) => async (): Promise<EvaluationResult> => {
+          const num = ++completed;
+          console.log(`[${num}/${screenshots.length}] Auditing "${screen.label}" (${screen.role})...`);
+          const evaluation = await withRetry(
+            () => evaluateScreen(client, systemPrompt, screen),
+            screen.label,
+          );
+          return { screen, evaluation };
+        }
+      );
+
+      const results = await runWithConcurrency(tasks, CONCURRENCY);
+
+      console.log(`\nAll ${results.length} evaluations complete.`);
+
+      const growthScores = computeGrowthScores(results);
+
+      // Group by role for summary
+      const scoresByRole = new Map<string, GrowthScores[]>();
+      for (const s of growthScores) {
+        if (!scoresByRole.has(s.role)) scoresByRole.set(s.role, []);
+        scoresByRole.get(s.role)!.push(s);
       }
-    );
 
-    const results = await runWithConcurrency(tasks, CONCURRENCY);
+      console.log("Generating executive summary...");
+      const executiveSummary = await withRetry(
+        () => generateExecutiveSummary(client, results, scoresByRole),
+        "Executive Summary",
+      );
 
-    console.log(`\nAll ${results.length} evaluations complete.`);
+      report = generateAIReport(results, growthScores, executiveSummary);
 
-    const growthScores = computeGrowthScores(results);
-
-    // Group by role for summary
-    const scoresByRole = new Map<string, GrowthScores[]>();
-    for (const s of growthScores) {
-      if (!scoresByRole.has(s.role)) scoresByRole.set(s.role, []);
-      scoresByRole.get(s.role)!.push(s);
+      // Write machine-readable scores
+      fs.writeFileSync(
+        SCORES_FILE,
+        JSON.stringify({ timestamp: new Date().toISOString(), model: MODEL, scores: growthScores }, null, 2),
+        "utf-8"
+      );
+      console.log(`Growth scores written to ${SCORES_FILE}`);
+    } catch (aiError: unknown) {
+      const msg = aiError instanceof Error ? aiError.message : String(aiError);
+      console.error(`\nAI evaluation failed: ${msg}`);
+      console.error("Falling back to scaffold report.\n");
+      report = generateScaffoldReport(screenshots);
     }
-
-    console.log("Generating executive summary...");
-    const executiveSummary = await withRetry(
-      () => generateExecutiveSummary(client, results, scoresByRole),
-      "Executive Summary",
-    );
-
-    report = generateAIReport(results, growthScores, executiveSummary);
-
-    // Write machine-readable scores
-    fs.writeFileSync(
-      SCORES_FILE,
-      JSON.stringify({ timestamp: new Date().toISOString(), model: MODEL, scores: growthScores }, null, 2),
-      "utf-8"
-    );
-    console.log(`Growth scores written to ${SCORES_FILE}`);
   } else {
     report = generateScaffoldReport(screenshots);
   }
