@@ -31,6 +31,7 @@ const SCORES_FILE = path.resolve("test-results/growth-audit-scores.json");
 const DRY_RUN = process.argv.includes("--dry-run");
 const CONCURRENCY = parseInt(process.env.UX_CONCURRENCY ?? "3", 10);
 const MODEL = process.env.UX_MODEL ?? "claude-sonnet-4-20250514";
+const MAX_RETRIES = parseInt(process.env.UX_MAX_RETRIES ?? "5", 10);
 
 // ── Types ──
 
@@ -167,6 +168,46 @@ async function runWithConcurrency<T>(
     Array.from({ length: Math.min(concurrency, tasks.length) }, () => worker())
   );
   return results;
+}
+
+// ── Rate-limit retry ──
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function withRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      return await fn();
+    } catch (error: unknown) {
+      const isRateLimit =
+        error instanceof Error &&
+        (error.message.includes("429") ||
+          error.message.includes("rate_limit") ||
+          (error as { status?: number }).status === 429);
+
+      if (!isRateLimit || attempt === MAX_RETRIES) {
+        throw error;
+      }
+
+      // Parse retry-after header if available, otherwise use exponential backoff
+      let waitMs: number;
+      const retryAfter = (error as { headers?: { "retry-after"?: string } })
+        .headers?.["retry-after"];
+      if (retryAfter) {
+        waitMs = (parseFloat(retryAfter) + 1) * 1000;
+      } else {
+        waitMs = Math.min(2000 * Math.pow(2, attempt), 120000);
+      }
+
+      console.log(
+        `  ⏳ Rate limited on "${label}" (attempt ${attempt + 1}/${MAX_RETRIES}), waiting ${Math.round(waitMs / 1000)}s...`
+      );
+      await sleep(waitMs);
+    }
+  }
+  throw new Error("Unreachable");
 }
 
 // ── AI Evaluation ──
@@ -512,7 +553,10 @@ async function main() {
       (screen) => async (): Promise<EvaluationResult> => {
         const num = ++completed;
         console.log(`[${num}/${screenshots.length}] Auditing "${screen.label}" (${screen.role})...`);
-        const evaluation = await evaluateScreen(client, systemPrompt, screen);
+        const evaluation = await withRetry(
+          () => evaluateScreen(client, systemPrompt, screen),
+          screen.label,
+        );
         return { screen, evaluation };
       }
     );
@@ -531,7 +575,10 @@ async function main() {
     }
 
     console.log("Generating executive summary...");
-    const executiveSummary = await generateExecutiveSummary(client, results, scoresByRole);
+    const executiveSummary = await withRetry(
+      () => generateExecutiveSummary(client, results, scoresByRole),
+      "Executive Summary",
+    );
 
     report = generateAIReport(results, growthScores, executiveSummary);
 
