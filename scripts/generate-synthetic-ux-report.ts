@@ -29,8 +29,11 @@ import path from "path";
 const MILESTONES_DIR = path.resolve("test-results/milestones");
 const PERSONAS_DIR = path.resolve("e2e/prompts/personas");
 const SYSTEM_PROMPT_FILE = path.resolve("e2e/prompts/ux-review-system.md");
-const OUTPUT_FILE = path.resolve("test-results/ux-review-report.md");
-const SCORES_FILE = path.resolve("test-results/ux-review-scores.json");
+const ROLE_SUFFIX = process.env.UX_ROLE_FILTER
+  ? `-${process.env.UX_ROLE_FILTER.replace(/,/g, "-")}`
+  : "";
+const OUTPUT_FILE = path.resolve(`test-results/ux-review-report${ROLE_SUFFIX}.md`);
+const SCORES_FILE = path.resolve(`test-results/ux-review-scores${ROLE_SUFFIX}.json`);
 const MANIFEST_FILE = path.join(MILESTONES_DIR, "manifest.json");
 
 const DRY_RUN = process.argv.includes("--dry-run");
@@ -38,6 +41,8 @@ const CONCURRENCY = parseInt(process.env.UX_CONCURRENCY ?? "1", 10);
 const MODEL = process.env.UX_MODEL ?? "claude-sonnet-4-20250514";
 const MAX_RETRIES = parseInt(process.env.UX_MAX_RETRIES ?? "5", 10);
 const REQUEST_DELAY_MS = parseInt(process.env.UX_REQUEST_DELAY_MS ?? "15000", 10);
+/** Comma-separated prefixes to include, e.g. "customer,byoc" or "admin". Empty = all. */
+const ROLE_FILTER = process.env.UX_ROLE_FILTER ?? "";
 
 // ── Types ──
 
@@ -138,9 +143,14 @@ function getScreenshots(): ScreenInfo[] {
 
   const manifest = loadManifest();
 
+  const prefixes = ROLE_FILTER
+    ? ROLE_FILTER.split(",").map((p) => p.trim().toLowerCase())
+    : [];
+
   return fs
     .readdirSync(MILESTONES_DIR)
     .filter((f) => f.endsWith(".png"))
+    .filter((f) => prefixes.length === 0 || prefixes.some((p) => f.startsWith(p)))
     .sort()
     .map((f) => {
       const meta = manifest.get(f);
