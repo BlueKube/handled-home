@@ -17,7 +17,9 @@
     "ux-report": "tsx scripts/generate-synthetic-ux-report.ts",
     "ux-report:dry": "tsx scripts/generate-synthetic-ux-report.ts --dry-run",
     "growth-report": "tsx scripts/generate-growth-audit.ts",
-    "growth-report:dry": "tsx scripts/generate-growth-audit.ts --dry-run"
+    "growth-report:dry": "tsx scripts/generate-growth-audit.ts --dry-run",
+    "creative-audit": "tsx scripts/generate-creative-director-audit.ts",
+    "creative-audit:dry": "tsx scripts/generate-creative-director-audit.ts --dry-run"
   },
   "dependencies": {
     "@capacitor/android": "^8.1.0",
