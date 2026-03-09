@@ -461,19 +461,148 @@
 
 ---
 
-## XL. Simplicity by Design
+## XL. Routing & Scheduling Engine (PRD-300)
 
-261. No calendar browsing anywhere — scheduling is automatic and routine-based — DONE
-262. One-tap "Add to routine" from any suggestion surface with 10-second undo — DONE
-263. Smart defaults everywhere: level auto-selected from property size, pattern auto-optimized — DONE
-264. Suggestion throttling: max 2–4 suggestions, "hide / not interested" feedback respected — DONE
-265. One primary CTA per screen — never overwhelm — DONE
-266. Three-tap issue resolution: category → evidence → accept offer → done — DONE
-267. Provider job completion in under 2 minutes: checklist + photos + submit — DONE
-268. Admin can launch a new city in under 10 minutes — DONE
-269. Customer can add a new service in under 5 seconds — DONE
-270. Zero-configuration payout setup: processor-hosted onboarding with one CTA — DONE
+### Sprint 1 — Foundations
+
+261. Visit and task bundling data model supporting multi-category services per stop — DONE
+262. Scheduling state machine (Draft → Locked → Dispatched → In Progress → Complete → Exception Pending) — DONE
+263. Provider work profile with home base location, service categories, equipment kits, working hours, and capacity limits — DONE
+264. Property and provider geo-coordinate indexing for spatial queries — DONE
+265. Admin scheduling policy dials (appointment window length, ETA range display, arrival notification minutes) — DONE
+266. Customer-facing upcoming visits with status labels (Planning, Scheduled, Today, In Progress, Completed) — DONE
+
+### Sprint 2 — Zone Builder v1
+
+267. H3 hex-grid geo cell infrastructure for scalable zone partitioning — DONE
+268. Automated zone generation from region boundaries with configurable dials — DONE
+269. Zone metrics computation (demand density, supply capacity, compactness, drive-time proxy) — DONE
+270. Cell scoring and seed selection strategies (demand-first, provider-first, auto-hybrid) — DONE
+271. Constrained region-growing algorithm with cost function optimization — DONE
+272. Admin Zone Builder wizard (select region → settings → preview → edit → commit) — DONE
+273. Property-to-zone resolution via H3 cell lookup with fallback ring expansion — DONE
+
+### Sprint 3 — Market/Zone Category States Integration
+
+274. Zone × Category state matrix (Closed, Waitlist Only, Provider Recruiting, Soft Launch, Open, Protect Quality) — DONE
+275. State-based customer catalog gating and subscribe eligibility enforcement — DONE
+276. Category-level waitlist system with zone-specific demand capture — DONE
+277. Provider opportunity surfaces responding to recruiting states — DONE
+278. Nightly recommendation engine with hysteresis thresholds and anti-flap rules — DONE
+279. Admin approval-gated state transitions with confidence scoring — DONE
+280. Minimum time-in-state guardrails to prevent state thrashing — DONE
+
+### Sprint 4 — Rolling Horizon Planner
+
+281. 14-day rolling planning horizon with 7-day LOCKED freeze window — DONE
+282. Nightly planning boundary for schedule promotion and state change application — DONE
+283. Customer routine changes effective only in DRAFT window (≥8 days out) — DONE
+284. Cadence-based task scheduling (weekly, biweekly, every 4 weeks) with stable offsets — DONE
+285. Visit bundling rules merging same-property tasks into single stops — DONE
+286. Stability rules minimizing DRAFT plan changes unless constraints change — DONE
+287. Admin planner health dashboard with run summaries and conflict flagging — DONE
+
+### Sprint 5 — Provider Assignment v1
+
+288. Candidate selection with feasibility filters (skills, equipment, working hours, capacity, proximity) — DONE
+289. Assignment solver with objective function (minimize travel, balance workload, reward familiarity) — DONE
+290. Primary + Backup provider assignment per visit — DONE
+291. Familiarity scoring with configurable cap to balance relationship vs efficiency — DONE
+292. Assignment stability rules with freeze-window extra protection — DONE
+293. Explainability with confidence levels and top reasons per assignment — DONE
+294. Admin exceptions inbox with unassigned/fragile visit prioritization and manual override tools — DONE
+
+### Sprint 6 — Route Sequencing v1 + Equipment Manifest
+
+295. Ordered daily route per provider using nearest-neighbor + 2-opt optimization — DONE
+296. Coarse customer-facing ETA ranges derived from stop sequence — DONE
+297. Daily equipment manifest generation per provider route — DONE
+298. Same-property task bundling with setup discount calculation — DONE
+299. Provider blocked windows and legacy commitment support with segment-based planning — DONE
+300. Provider pre-Start-Day route reorder with feasibility guardrails — DONE
+301. Running-late notification when predicted arrival exceeds ETA window end — DONE
+
+### Sprint 7 — Appointment Windows v1 (Home-Required Services)
+
+302. Scheduling profiles per SKU (Appointment Window, Day Commit, Service Week) — DONE
+303. Customer availability capture with 3–6 feasible window offers — DONE
+304. Time-window constraint enforcement in route sequencing (VRPTW feasibility) — DONE
+305. Mixed-profile bundle piggybacking with duration guardrails — DONE
+306. Service-week flexible work with due-soon/overdue queue and week-end deadlines — DONE
+307. Provider-placed flexible work via drag/drop with feasibility checks — DONE
+308. Window-at-risk exception flagging with local repair attempts — DONE
+
+### Sprint 8 — Exceptions, Reschedules, and Ops Control v1
+
+309. Unified exceptions queue with severity/SLA/escalation timers — DONE
+310. Predictive exceptions from nightly planning (window-at-risk, service-week-at-risk, coverage break) — DONE
+311. Reactive exceptions from day-of events (provider unavailable, access failure, weather stop) — DONE
+312. Ops repair actions (reorder, move day, swap provider, cancel/credit) with feasibility checks — DONE
+313. Break-freeze policy with explicit requirements (reason code, customer notification, audit) — DONE
+314. Customer self-serve reschedules inside freeze from feasible options — DONE
+315. Access failure auto-hold with priority reschedule and soft hold expiration — DONE
+316. Ops action idempotency and undo support with reversal transactions — DONE
+317. Provider fairness rules (no-blame access failure, show-up credits) — DONE
+
+### Sprint 9 — Ops User Manual
+
+318. Autopilot health indicators (GREEN/YELLOW/RED) based on configurable thresholds — DONE
+319. Provider-first self-healing with approve/notify/deny/escalate decision framework — DONE
+320. Daily and weekly ops rhythm checklists — DONE
+321. SKU discovery and continuous tuning workflow with provider interviews — DONE
+322. Launch SKU templates for Pool, Windows, and Pest categories — DONE
+323. Ops dashboard requirements with KPI tiles and zone health table — DONE
+324. Standard procedures for zone launch, category opening, planner runs, and call-outs — DONE
+325. Exception playbooks with severity levels and repair strategies — DONE
 
 ---
 
-*Total features: 270 | Last updated: 2026-03-02*
+## XLI. BYOC Onboarding Wizard (PRD-301)
+
+326. 7-screen provider-referred customer onboarding flow (60–90 second target) — DONE
+327. Provider recognition screen preserving existing relationship trust — DONE
+328. Confirm existing service screen with editable cadence — DONE
+329. Property creation with address and home type — DONE
+330. Home setup with property signals (pool, trees, pets, garden, windows) — DONE
+331. Connecting provider spinner with activate-byoc-invite call — DONE
+332. Other services screen with zone-available categories (skip-friendly) — DONE
+333. Conditional Home Plan screen for bundled service pricing — DONE
+334. Success screen with provider connection summary — DONE
+335. Dashboard "Your Home Team" card showing connected providers and next visits — DONE
+336. Referral state handling (Existing Provider First Touch, future: Not First Touch, Cold Referral) — DONE
+337. Invite validation with fallback screen for expired/revoked/inactive tokens — DONE
+338. Already-activated 409 handling with dashboard redirect — DONE
+339. BYOC attribution tracking preserved separate from provider-customer relationship — DONE
+
+---
+
+## XLII. E2E Testing & Synthetic UX Review (Playwright)
+
+340. Playwright E2E test harness with Chromium mobile browser emulation — DONE
+341. Auth setup project saving storage state for authenticated tests — DONE
+342. BYOC happy-path test validating full wizard flow with milestone screenshots — DONE
+343. BYOC invalid-invite test validating fallback UI for bad tokens — DONE
+344. BYOC refresh-resilience test validating wizard state preservation on reload — DONE
+345. GitHub Actions CI workflow with artifact upload (reports, screenshots, traces) — DONE
+346. AI-powered synthetic UX review using 6 persona prompts and Claude Sonnet vision — DONE
+347. Per-screen/per-persona evaluation with clarity/trust/friction scores — DONE
+348. Aggregate UX summary report with top 5 friction points and fixes — DONE
+
+---
+
+## XLIII. Simplicity by Design
+
+349. No calendar browsing anywhere — scheduling is automatic and routine-based — DONE
+350. One-tap "Add to routine" from any suggestion surface with 10-second undo — DONE
+351. Smart defaults everywhere: level auto-selected from property size, pattern auto-optimized — DONE
+352. Suggestion throttling: max 2–4 suggestions, "hide / not interested" feedback respected — DONE
+353. One primary CTA per screen — never overwhelm — DONE
+354. Three-tap issue resolution: category → evidence → accept offer → done — DONE
+355. Provider job completion in under 2 minutes: checklist + photos + submit — DONE
+356. Admin can launch a new city in under 10 minutes — DONE
+357. Customer can add a new service in under 5 seconds — DONE
+358. Zero-configuration payout setup: processor-hosted onboarding with one CTA — DONE
+
+---
+
+*Total features: 358 | Last updated: 2026-03-09*
