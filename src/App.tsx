@@ -194,7 +194,7 @@ const App = () => (
                 <Route path="/customer/build" element={<CustomerPropertyGate><CustomerBuild /></CustomerPropertyGate>} />
                 {/* Redirects for old routes (gated for parity with route table) */}
                 <Route path="/customer/history" element={<CustomerPropertyGate><Navigate to="/customer/activity" replace /></CustomerPropertyGate>} />
-                <Route path="/customer/visits" element={<CustomerPropertyGate><Navigate to="/customer/schedule" replace /></CustomerPropertyGate>} />
+                <Route path="/customer/visits" element={<CustomerPropertyGate><Navigate to="/customer/activity" replace /></CustomerPropertyGate>} />
                 <Route path="/customer/upcoming" element={<CustomerPropertyGate><Navigate to="/customer/schedule" replace /></CustomerPropertyGate>} />
                 <Route path="/customer/timeline" element={<CustomerPropertyGate><Navigate to="/customer/activity" replace /></CustomerPropertyGate>} />
                 <Route path="/customer/visits/:jobId" element={<CustomerPropertyGate><CustomerVisitDetail /></CustomerPropertyGate>} />

@@ -18,7 +18,7 @@ import { useProperty } from "@/hooks/useProperty";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
 import { useHandleBalance, usePlanHandlesConfig } from "@/hooks/useHandles";
 import { useServiceDayAssignment } from "@/hooks/useServiceDayAssignment";
-import { format, isToday, isTomorrow, isThisWeek, isSameDay, parseISO } from "date-fns";
+import { format, isToday, isTomorrow, isThisWeek, parseISO } from "date-fns";
 import {
   CalendarDays,
   Clock,
@@ -312,11 +312,10 @@ export default function Schedule() {
   }, [visits]);
 
   const handleCalendarSelect = useCallback((date: Date) => {
-    // Find the first visit group matching this date and scroll to it
-    const key = date.toISOString().split("T")[0];
-    // Try exact match first, then find the closest
+    // Build key in local date space to avoid UTC offset shifting
+    const key = format(date, "yyyy-MM-dd");
     for (const [refKey, el] of dateRefs.current) {
-      if (refKey === key || isSameDay(parseISO(refKey), date)) {
+      if (refKey === key) {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
         return;
       }

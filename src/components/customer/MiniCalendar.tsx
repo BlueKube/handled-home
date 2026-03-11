@@ -7,10 +7,10 @@ import {
   eachDayOfInterval,
   format,
   isSameMonth,
-  isSameDay,
   isToday,
   addMonths,
   subMonths,
+  parseISO,
 } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -29,7 +29,7 @@ export function MiniCalendar({ serviceDates, onSelectDate }: MiniCalendarProps) 
   const serviceDateSet = useMemo(() => {
     const set = new Set<string>();
     for (const d of serviceDates) {
-      const date = typeof d === "string" ? new Date(d) : d;
+      const date = typeof d === "string" ? parseISO(d) : d;
       set.add(format(date, "yyyy-MM-dd"));
     }
     return set;
@@ -45,7 +45,7 @@ export function MiniCalendar({ serviceDates, onSelectDate }: MiniCalendarProps) 
 
   const servicesThisMonth = useMemo(() => {
     return serviceDates.filter((d) => {
-      const date = typeof d === "string" ? new Date(d) : d;
+      const date = typeof d === "string" ? parseISO(d) : d;
       return isSameMonth(date, currentMonth);
     }).length;
   }, [serviceDates, currentMonth]);
