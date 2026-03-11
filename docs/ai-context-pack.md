@@ -8,6 +8,7 @@ Handled Home is a subscription home-services operating system, not a commodity l
 
 Primary growth engine: increase services per household through one-tap bundle expansion.
 Secondary engine: route density and operational reliability.
+Profit engine: **subscription spread** — the delta between what customers pay per handle and what providers are paid per job. Handles abstraction hides margin from both sides. Density widens it automatically.
 
 ## 2) Non-negotiable product principles
 1. OS feel over marketplace feel (routine-first, not open-calendar shopping).
@@ -26,6 +27,9 @@ Secondary engine: route density and operational reliability.
 2. Reduce ops/support burden through deterministic + AI-assisted self-healing flows.
 3. Improve provider ROI (earnings/hour, route density, predictable work).
 4. Keep quality/trust high (proof compliance, low disputes, clear policy enforcement).
+5. Shift UX from feature communication to **outcome storytelling** (show savings, show proof, show provider trust).
+6. Make BYOC a primary acquisition channel (provider-driven growth at near-zero CAC).
+7. Optimize subscription spread margin per zone through density flywheel.
 
 ## 5) Source-of-truth map
 - Strategy: `docs/masterplan.md`
@@ -37,9 +41,10 @@ Secondary engine: route density and operational reliability.
 ## 6) KPI scorecard (review weekly)
 - Growth: ARR per household, services per household, referral share, 30/60/90 retention.
 - Reliability: issues per 100 jobs, support minutes per job, proof compliance.
-- Provider: earnings/hour, acceptance/completion rates, provider retention.
+- Provider: earnings/hour, acceptance/completion rates, provider retention, BYOC activations.
 - Automation: ticket auto-resolution %, billing self-recovery %, ops interventions/1k jobs.
-- Financial: contribution margin by market, payment failure rate, dispute loss rate.
+- Financial: subscription spread margin by zone, contribution margin by market, payment failure rate, dispute loss rate.
+- UX/Conversion: onboarding completion rate, first-service celebration engagement, bundle savings calculator views, referral milestone progression.
 
 ## 7) How to work in this repo
 - Implement in small PRs with tests and explicit rollback/fallback notes.

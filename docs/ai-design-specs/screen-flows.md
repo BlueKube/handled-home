@@ -1545,3 +1545,189 @@ Each menu item: icon + label + ChevronRight, tappable
 
 ## Admin — Sidebar Navigation
 Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections instead of bottom tabs.
+
+---
+
+# FLOW 31: Bundle Savings Calculator
+
+**Component**: `BundleSavingsCard`
+**Where**: Plans page, Onboarding Plan Step
+**Purpose**: Show customers how much they save vs. hiring separate vendors — reinforces subscription value without exposing per-handle economics
+
+### Screen 31.1: Bundle Savings Card
+
+**Layout**:
+- Card with `bg-accent/5 border-accent/20`
+- Left: 36px accent circle with PiggyBank icon
+- Right: text content
+
+**Sections**:
+1. **Headline**: "Save ~$X/mo vs. separate vendors" (bold, 14px)
+2. **Subtext**: "That's X% less than hiring individually" (muted, 12px)
+3. **Service breakdown** (mt-2, space-y-1):
+   - Per service: Check icon + service name + strikethrough separate price (right-aligned)
+   - Bottom row: PiggyBank icon + "Handled Home" + subscription price (accent, bold)
+   - Separated by thin accent/10 border
+
+**Data**: Tier-based services (Essential: lawn; Plus: lawn+pest; Premium: lawn+pest+pool). Conservative market-rate estimates.
+
+**Key constraint**: Never show per-handle math. Show monthly totals only.
+
+---
+
+# FLOW 32: First Service Celebration
+
+**Component**: `FirstServiceCelebration`
+**Where**: Customer Dashboard (overlay, triggered once)
+**Purpose**: Create emotional "aha" moment after first completed service
+
+### Screen 32.1: Celebration Overlay
+
+**Layout**:
+- Full-screen fixed overlay, `z-50`, `bg-background/95 backdrop-blur-sm`
+- Content centered, max-w-sm, space-y-6
+
+**Sections**:
+1. **Icon**: PartyPopper (64px, accent) with spring animation + rotation wiggle
+2. **Headline**: "Your home is handled!" (24px bold)
+3. **Subtext**: "Your first service is complete. Your subscription is already working for you." (muted, 14px)
+4. **Service summary card** (bg-card, rounded-2xl, border, p-4):
+   - Star icon + "Serviced by {providerName}" (if available)
+   - Date (muted, 12px)
+   - "Your proof-of-work receipt is ready to view..." (muted, 12px)
+5. **Primary CTA**: "View Your Receipt" (default button, h-12, rounded-xl, with ArrowRight)
+6. **Secondary CTA**: "Share the news" (outline, with Share2 icon)
+7. **Dismiss**: "Continue to dashboard" (text link, muted)
+
+**Trigger**: Once only (localStorage flag). Shown when `lastCompletedJob` exists and flag not set.
+
+---
+
+# FLOW 33: Home Timeline
+
+**Route**: `/customer/timeline`
+**Who**: Customer
+**Purpose**: Chronological service history that reinforces subscription value and creates switching costs
+
+### Screen 33.1: Home Timeline Page
+
+**Layout**:
+- Standard page with back arrow + "Home Timeline" header
+- pb-24 for tab bar clearance
+
+**Sections**:
+1. **Stats row** (grid-cols-3, gap-3):
+   - CheckCircle + total services count + "Services"
+   - Camera + total photos count + "Photos"
+   - Clock + membership duration + "Member"
+2. **Value card** (bg-accent/5, border-accent/20):
+   - TrendingUp icon + "Your subscription has delivered X services" + "All verified with proof-of-work receipts"
+3. **Trust badge** (centered): Shield icon + "Insured providers · Proof on every visit"
+4. **Monthly groups**:
+   - Calendar icon + month name + visit count badge (right-aligned)
+   - Left border (accent/20, 2px) with indented job cards:
+     - CheckCircle + service names + date + photo count
+     - Tappable → navigates to `/customer/visits/:jobId`
+5. **Bottom CTA**: "View all photos" (outline button, Camera icon)
+
+**Empty state**: Calendar icon + "No completed services yet" + subtext
+
+---
+
+# FLOW 34: Provider Earnings Projection
+
+**Component**: `EarningsProjectionCard`
+**Where**: Provider Dashboard, Provider Onboarding (future)
+**Purpose**: Show providers income potential to kill ambiguity and reduce churn
+
+### Screen 34.1: Dashboard Variant
+
+**Layout**:
+- Card with `bg-primary/5 border-primary/20`
+- Left: 36px primary circle with Target icon
+
+**Content**:
+- Headline: "You're at X% capacity" (or "nearly at full capacity" if ≥80%)
+- Subtext: "X jobs/week · avg finish Xh" or "est. $X/mo"
+- Growth CTA (accent, 12px): "Fill your schedule to earn $X more/mo" (if <90% capacity)
+
+### Screen 34.2: Onboarding Variant
+
+**Layout**:
+- Card with `bg-accent/5 border-accent/20`
+- TrendingUp icon circle + "Earnings potential in your zone"
+
+**Content**:
+- 2-column grid:
+  - "At 60% capacity" + weekly estimate (foreground, bold)
+  - "Full schedule" + weekly estimate (accent, bold)
+- Footer: Zap icon + "Dense routes mean less driving, more earning"
+
+**Key constraint**: Never show customer pricing or subscription spread. Show payout amounts only.
+
+---
+
+# FLOW 35: BYOC Banner (Provider Dashboard)
+
+**Component**: `ByocBanner`
+**Where**: Provider Dashboard (between stats and job queue)
+**Purpose**: Make BYOC the hero growth action for providers
+
+### Screen 35.1: BYOC Banner Card
+
+**Layout**:
+- Card with `bg-accent/5 border-accent/20`
+- Left: 36px accent circle with Users icon
+
+**Content**:
+- Headline: "Bring your existing customers" (bold, 14px)
+- Subtext: "Earn bonus income on top of your guaranteed route pay when your own customers join Handled Home." (muted, 12px)
+- Activation count (if >0): DollarSign + "X customers activated" (accent, 12px)
+- CTA: "Create invite link" (outline sm button, ArrowRight icon)
+
+---
+
+# FLOW 36: Trust Bar (Onboarding Social Proof)
+
+**Component**: `TrustBar`
+**Where**: Onboarding Zone Check step, Plan Selection step
+**Purpose**: Reduce cold-funnel fear with trust signals
+
+### Screen 36.1: Trust Bar
+
+**Layout**:
+- Horizontal flex, centered, py-2.5 px-3, bg-muted/50 rounded-xl
+- 3 items separated by 12px-tall vertical dividers (bg-border)
+
+**Items**:
+1. Shield icon (primary) + "Insured providers"
+2. Clock icon (accent) + "Satisfaction guarantee"
+3. XCircle icon (muted) + "Cancel anytime"
+
+**Typography**: 12px, muted-foreground
+
+---
+
+# FLOW 37: Referral Milestones
+
+**Where**: Customer Referrals page (below credits summary)
+**Purpose**: Create urgency and tiered goals for referral growth
+
+### Screen 37.1: Milestone Card
+
+**Layout**:
+- Card with CardHeader ("Referral Milestones" + Target icon) and CardContent
+
+**Content**:
+1. **Progress headline**: "X more referrals to unlock: {reward}" (14px medium)
+2. **Progress bar**: `<Progress>` component, h-2
+3. **Count label**: "X / Y referrals" (muted, 12px)
+4. **3-column tier grid** (gap-2):
+   - Per tier: icon + label + reward text
+   - Achieved: bg-accent/10, border-accent/30, accent icon
+   - Locked: bg-muted/30, border-border, muted icon
+
+**Tiers**:
+- Starter (Star icon): 3 referrals → $30 credit
+- Ambassador (Trophy icon): 5 referrals → Free month
+- Champion (Gift icon): 10 referrals → VIP status
