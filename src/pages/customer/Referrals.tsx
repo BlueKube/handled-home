@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Copy, Check, Users, Gift, Clock, ChevronRight } from "lucide-react";
+import { Copy, Check, Users, Gift, Clock, ChevronRight, Target, Star, Trophy } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -101,6 +102,62 @@ export default function CustomerReferrals() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Referral Milestones — tiered rewards */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Target className="h-4 w-4 text-accent" /> Referral Milestones
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {(() => {
+            const referralCount = referrals.data?.length ?? 0;
+            const milestones = [
+              { target: 3, reward: "$30 credit", icon: Star, label: "Starter" },
+              { target: 5, reward: "Free month", icon: Trophy, label: "Ambassador" },
+              { target: 10, reward: "VIP status", icon: Gift, label: "Champion" },
+            ];
+            const current = milestones.find((m) => referralCount < m.target) ?? milestones[milestones.length - 1];
+            const progress = Math.min((referralCount / current.target) * 100, 100);
+            const remaining = Math.max(0, current.target - referralCount);
+
+            return (
+              <>
+                <div className="text-center">
+                  <p className="text-sm font-medium">
+                    {remaining > 0
+                      ? `${remaining} more referral${remaining !== 1 ? "s" : ""} to unlock: ${current.reward}`
+                      : "All milestones unlocked!"}
+                  </p>
+                  <Progress value={progress} className="h-2 mt-2" />
+                  <p className="text-xs text-muted-foreground mt-1">{referralCount} / {current.target} referrals</p>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {milestones.map((m) => {
+                    const Icon = m.icon;
+                    const achieved = referralCount >= m.target;
+                    return (
+                      <div
+                        key={m.target}
+                        className={`rounded-xl p-2.5 text-center border ${
+                          achieved
+                            ? "bg-accent/10 border-accent/30"
+                            : "bg-muted/30 border-border"
+                        }`}
+                      >
+                        <Icon className={`h-4 w-4 mx-auto mb-1 ${achieved ? "text-accent" : "text-muted-foreground/50"}`} />
+                        <p className="text-xs font-medium">{m.label}</p>
+                        <p className="text-[10px] text-muted-foreground">{m.reward}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            );
+          })()}
+        </CardContent>
+      </Card>
 
       {/* Referral List */}
       <div>

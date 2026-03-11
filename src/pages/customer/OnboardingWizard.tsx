@@ -16,6 +16,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PlanCard } from "@/components/plans/PlanCard";
 import { HandlesExplainer } from "@/components/plans/HandlesExplainer";
+import { BundleSavingsCard } from "@/components/plans/BundleSavingsCard";
+import { TrustBar } from "@/components/customer/TrustBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -455,6 +457,9 @@ function ZoneCheckStep({ onComplete, onWaitlist }: { onComplete: () => Promise<v
         </Card>
       )}
 
+      {/* Trust bar — social proof */}
+      <TrustBar />
+
       {isNotCovered && (
         <Card className="border-warning/30 bg-warning/5">
           <CardContent className="pt-6 space-y-4">
@@ -545,6 +550,23 @@ function PlanStep({ onSelectPlan }: { onSelectPlan: (planId: string) => Promise<
       </div>
 
       <HandlesExplainer />
+
+      {/* Bundle savings comparison */}
+      {plans && plans.length > 0 && (() => {
+        const recommended = plans.find((p) => p.recommended_rank != null && plans.every(
+          (q) => (q.recommended_rank ?? 0) <= (p.recommended_rank ?? 0)
+        )) ?? plans[0];
+        const tk = getTierKey(recommended.name);
+        return (
+          <BundleSavingsCard
+            planPriceCents={recommended.price_cents}
+            planDisplayPrice={recommended.display_price_text ?? undefined}
+            tierKey={tk}
+          />
+        );
+      })()}
+
+      <TrustBar />
 
       {isLoading ? (
         <div className="space-y-4">

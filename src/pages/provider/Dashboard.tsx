@@ -11,6 +11,8 @@ import { useProviderRoutePlan } from "@/hooks/useProviderRoutePlan";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProviderNotificationBanners } from "@/components/provider/NotificationBanners";
 import { MarketHeatBanner } from "@/components/provider/MarketHeatBanner";
+import { ByocBanner } from "@/components/provider/ByocBanner";
+import { EarningsProjectionCard } from "@/components/provider/EarningsProjectionCard";
 import {
   Briefcase,
   Clock,
@@ -297,6 +299,19 @@ export default function ProviderDashboard() {
           value={isLoading ? "—" : formatCents(weekEarnings)}
         />
       </div>
+
+      {/* Earnings Growth Meter */}
+      {!isLoading && (
+        <EarningsProjectionCard
+          capacityPercent={todayCount > 0 ? Math.min(Math.round((todayCount / 8) * 100), 100) : 0}
+          weeklyEarningsCents={weekEarnings}
+          weeklyJobs={todayCount * 5}
+          estimatedFinishTime={estWorkMinutes > 0 ? `${Math.round((estWorkMinutes + estDriveMinutes) / 60)}h` : undefined}
+        />
+      )}
+
+      {/* BYOC Banner — bring your own customers */}
+      <ByocBanner />
 
       {/* Today's Job Queue */}
       <div>

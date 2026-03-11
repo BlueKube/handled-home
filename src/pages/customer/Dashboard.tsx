@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { CalendarDays, Loader2, Sparkles, X, Settings2, Plus } from "lucide-react";
+import { CalendarDays, Loader2, Sparkles, X, Settings2, Plus, Clock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProperty } from "@/hooks/useProperty";
 import { useServiceDayAssignment } from "@/hooks/useServiceDayAssignment";
@@ -25,6 +25,7 @@ import { AddServiceDrawer } from "@/components/customer/AddServiceDrawer";
 import { SeasonalPlanCard } from "@/components/customer/SeasonalPlanCard";
 import { HomeTeamCard } from "@/components/customer/HomeTeamCard";
 import { HomeTeamExpandCard } from "@/components/customer/HomeTeamExpandCard";
+import { FirstServiceCelebration } from "@/components/customer/FirstServiceCelebration";
 import { toast } from "sonner";
 
 function capitalize(s: string) {
@@ -232,6 +233,27 @@ export default function CustomerDashboard() {
 
       {/* Section D — Recent Receipt */}
       <RecentReceipt job={lastCompletedJob} />
+
+      {/* Home Timeline link */}
+      {completedJobs && completedJobs.length > 0 && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full text-xs text-accent gap-1"
+          onClick={() => navigate("/customer/timeline")}
+        >
+          <Clock className="h-3.5 w-3.5" />
+          View full home timeline ({completedJobs.length} services)
+        </Button>
+      )}
+
+      {/* First Service Celebration */}
+      {lastCompletedJob && (
+        <FirstServiceCelebration
+          jobId={lastCompletedJob.id}
+          serviceDate={lastCompletedJob.scheduled_date ?? undefined}
+        />
+      )}
 
       {/* Seasonal Plan Card */}
       <SeasonalPlanCard propertyId={property?.id} zoneId={subscription?.zone_id} />
