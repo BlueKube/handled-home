@@ -107,6 +107,26 @@ npm run test         # Run Vitest unit tests
 npx playwright test  # Run E2E tests
 ```
 
+## PR Review Workflow
+
+When working on a PR or responding to code review feedback, use `gh` CLI to fetch comments:
+
+```bash
+# Quick: fetch all review data for a PR
+./scripts/fetch-pr-review.sh <PR_NUMBER>
+
+# Individual commands:
+gh pr view <NUMBER> --comments                              # Conversation comments
+gh api repos/{owner}/{repo}/pulls/<NUMBER>/comments         # Inline code review comments
+gh api repos/{owner}/{repo}/pulls/<NUMBER>/reviews          # Review verdicts (approved, changes requested)
+```
+
+**Steps when addressing review feedback:**
+1. Run `./scripts/fetch-pr-review.sh <PR#>` to see all pending comments
+2. Address each comment — fix code, respond, or discuss
+3. Commit fixes and push to the PR branch
+4. Optionally reply to resolved comments via `gh api`
+
 ## Conventions
 
 - Pages are in `src/pages/<role>/` — one file per route
