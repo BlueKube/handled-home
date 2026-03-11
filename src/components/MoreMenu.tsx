@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth, AppRole } from "@/contexts/AuthContext";
 import {
   MapPin, Wallet, Users, HelpCircle, Settings,
-  Building2, Package,
+  Building2, Package, Map, UserPlus,
   CreditCard, CalendarDays, Megaphone, FileText, Lock,
   LogOut, Moon, Sun, TrendingUp, ChevronRight, BarChart3,
   AlertTriangle, Banknote, Clock,
@@ -27,6 +27,7 @@ const customerSections: MenuSection[] = [
   {
     title: "Account",
     items: [
+      { label: "Plans & Subscription", icon: CreditCard, path: "/customer/plans" },
       { label: "Property", icon: MapPin, path: "/customer/property" },
       { label: "Billing", icon: Wallet, path: "/customer/billing" },
     ],
@@ -51,14 +52,20 @@ const providerSections: MenuSection[] = [
     title: "Business",
     items: [
       { label: "Organization", icon: Building2, path: "/provider/organization" },
-      { label: "Work Setup", icon: MapPin, path: "/provider/work-setup" },
+      { label: "Coverage & Availability", icon: Map, path: "/provider/coverage" },
     ],
   },
   {
-    title: "Help & Growth",
+    title: "Growth",
+    items: [
+      { label: "BYOC Center", icon: UserPlus, path: "/provider/byoc" },
+      { label: "Referrals", icon: Users, path: "/provider/referrals" },
+    ],
+  },
+  {
+    title: "Help",
     items: [
       { label: "Support", icon: HelpCircle, path: "/provider/support" },
-      { label: "Referrals", icon: Users, path: "/provider/referrals" },
     ],
   },
   {

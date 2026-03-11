@@ -49,6 +49,8 @@ import CustomerPropertySizing from "@/pages/customer/PropertySizing";
 import CustomerUpcomingVisits from "@/pages/customer/UpcomingVisits";
 import CustomerAppointmentPicker from "@/pages/customer/AppointmentPicker";
 import CustomerHomeTimeline from "@/pages/customer/HomeTimeline";
+import CustomerSchedule from "@/pages/customer/Schedule";
+import CustomerActivity from "@/pages/customer/Activity";
 import CustomerReschedule from "@/pages/customer/Reschedule";
 // Provider pages
 import ProviderDashboard from "@/pages/provider/Dashboard";
@@ -190,14 +192,17 @@ const App = () => (
                 <Route path="/customer/subscribe" element={<CustomerSubscribe />} />
                 <Route path="/customer/service-day" element={<CustomerPropertyGate><CustomerServiceDay /></CustomerPropertyGate>} />
                 <Route path="/customer" element={<CustomerPropertyGate><CustomerDashboard /></CustomerPropertyGate>} />
+                <Route path="/customer/schedule" element={<CustomerPropertyGate><CustomerSchedule /></CustomerPropertyGate>} />
+                <Route path="/customer/activity" element={<CustomerPropertyGate><CustomerActivity /></CustomerPropertyGate>} />
                 <Route path="/customer/build" element={<CustomerPropertyGate><CustomerBuild /></CustomerPropertyGate>} />
-                <Route path="/customer/history" element={<CustomerPropertyGate><CustomerHistory /></CustomerPropertyGate>} />
-                <Route path="/customer/visits" element={<CustomerPropertyGate><CustomerHistory /></CustomerPropertyGate>} />
-                <Route path="/customer/upcoming" element={<CustomerPropertyGate><CustomerUpcomingVisits /></CustomerPropertyGate>} />
+                {/* Redirects for old routes */}
+                <Route path="/customer/history" element={<Navigate to="/customer/activity" replace />} />
+                <Route path="/customer/visits" element={<Navigate to="/customer/schedule" replace />} />
+                <Route path="/customer/upcoming" element={<Navigate to="/customer/schedule" replace />} />
+                <Route path="/customer/timeline" element={<Navigate to="/customer/activity" replace />} />
                 <Route path="/customer/visits/:jobId" element={<CustomerPropertyGate><CustomerVisitDetail /></CustomerPropertyGate>} />
                 <Route path="/customer/appointment/:visitId" element={<CustomerPropertyGate><CustomerAppointmentPicker /></CustomerPropertyGate>} />
                 <Route path="/customer/reschedule/:visitId" element={<CustomerPropertyGate><CustomerReschedule /></CustomerPropertyGate>} />
-                <Route path="/customer/timeline" element={<CustomerPropertyGate><CustomerHomeTimeline /></CustomerPropertyGate>} />
                 <Route path="/customer/photos" element={<CustomerPropertyGate><CustomerPhotoTimeline /></CustomerPropertyGate>} />
                 <Route path="/customer/home-assistant" element={<CustomerPropertyGate><CustomerHomeAssistant /></CustomerPropertyGate>} />
                 <Route path="/customer/issues" element={<CustomerPropertyGate><CustomerIssues /></CustomerPropertyGate>} />

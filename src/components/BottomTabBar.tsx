@@ -1,8 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth, AppRole } from "@/contexts/AuthContext";
 import {
-  Home, CalendarDays, History, CreditCard, MoreHorizontal,
-  Briefcase, DollarSign, BarChart3, Map,
+  Home, CalendarDays, ListChecks, Clock, MoreHorizontal,
+  Briefcase, DollarSign, BarChart3,
   LayoutDashboard, Globe, Package, Shield,
 } from "lucide-react";
 
@@ -14,17 +14,17 @@ interface TabItem {
 
 const customerTabs: TabItem[] = [
   { label: "Home", icon: Home, path: "/customer" },
-  { label: "Plans", icon: CreditCard, path: "/customer/plans" },
-  { label: "Routine", icon: CalendarDays, path: "/customer/routine" },
-  { label: "Visits", icon: History, path: "/customer/visits" },
+  { label: "Schedule", icon: CalendarDays, path: "/customer/schedule" },
+  { label: "Routine", icon: ListChecks, path: "/customer/routine" },
+  { label: "Activity", icon: Clock, path: "/customer/activity" },
   { label: "More", icon: MoreHorizontal, path: "/customer/more" },
 ];
 
 const providerTabs: TabItem[] = [
+  { label: "Home", icon: Home, path: "/provider" },
   { label: "Jobs", icon: Briefcase, path: "/provider/jobs" },
-  { label: "Payouts", icon: DollarSign, path: "/provider/payouts" },
-  { label: "Performance", icon: BarChart3, path: "/provider/performance" },
-  { label: "Coverage", icon: Map, path: "/provider/coverage" },
+  { label: "Earn", icon: DollarSign, path: "/provider/earnings" },
+  { label: "Score", icon: BarChart3, path: "/provider/performance" },
   { label: "More", icon: MoreHorizontal, path: "/provider/more" },
 ];
 
