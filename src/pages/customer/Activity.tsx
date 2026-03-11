@@ -4,11 +4,9 @@ import { useCustomerJobs } from "@/hooks/useCustomerJobs";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   CheckCircle,
-  Camera,
   Clock,
   Calendar,
   TrendingUp,
@@ -34,15 +32,11 @@ export default function Activity() {
   const stats = useMemo(() => {
     if (!completedJobs) return null;
     const totalServices = completedJobs.length;
-    const photosCount = completedJobs.reduce(
-      (sum, j: any) => sum + (j.job_photos?.length ?? 0),
-      0
-    );
     const memberSince = subscription?.created_at
       ? differenceInMonths(new Date(), new Date(subscription.created_at))
       : 0;
 
-    return { totalServices, photosCount, memberSince };
+    return { totalServices, memberSince };
   }, [completedJobs, subscription]);
 
   const groupedJobs = useMemo(() => {
@@ -62,8 +56,8 @@ export default function Activity() {
     return (
       <div className="p-4 space-y-4 max-w-lg mx-auto pb-24">
         <h1 className="text-h2">Activity</h1>
-        <div className="grid grid-cols-3 gap-3">
-          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
+        <div className="grid grid-cols-2 gap-3">
+          {[1, 2].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
         </div>
         <Skeleton className="h-48 w-full" />
       </div>
@@ -77,9 +71,8 @@ export default function Activity() {
 
       {/* Summary stats */}
       {stats && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <StatPill icon={CheckCircle} label="Services" value={stats.totalServices} />
-          <StatPill icon={Camera} label="Photos" value={stats.photosCount} />
           <StatPill
             icon={Clock}
             label="Member"
@@ -143,7 +136,7 @@ export default function Activity() {
                       <CheckCircle className="h-4 w-4 text-accent shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">
-                          {job.job_skus
+                          {job.skus
                             ?.map((s: any) => s.sku_name_snapshot)
                             .filter(Boolean)
                             .join(", ") || "Service visit"}
@@ -152,11 +145,6 @@ export default function Activity() {
                           {job.scheduled_date
                             ? format(new Date(job.scheduled_date), "EEE, MMM d")
                             : "Completed"}
-                          {job.job_photos?.length > 0 && (
-                            <span className="ml-2">
-                              <Camera className="h-3 w-3 inline" /> {job.job_photos.length}
-                            </span>
-                          )}
                         </p>
                       </div>
                     </div>
@@ -168,17 +156,6 @@ export default function Activity() {
         </div>
       )}
 
-      {/* Photos CTA */}
-      {stats && stats.photosCount > 0 && (
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={() => navigate("/customer/photos")}
-        >
-          <Camera className="h-4 w-4 mr-2" />
-          View all photos
-        </Button>
-      )}
     </div>
   );
 }
