@@ -17,7 +17,6 @@ import MoreMenuPage from "@/components/MoreMenu";
 // Customer pages
 import CustomerDashboard from "@/pages/customer/Dashboard";
 import CustomerBuild from "@/pages/customer/Build";
-import CustomerHistory from "@/pages/customer/History";
 import CustomerVisitDetail from "@/pages/customer/VisitDetail";
 import CustomerIssues from "@/pages/customer/Issues";
 import CustomerSubscription from "@/pages/customer/Subscription";
@@ -46,9 +45,7 @@ import CustomerPhotoTimeline from "@/pages/customer/PhotoTimeline";
 import CustomerHomeAssistant from "@/pages/customer/HomeAssistant";
 import CustomerCoverageMap from "@/pages/customer/CoverageMap";
 import CustomerPropertySizing from "@/pages/customer/PropertySizing";
-import CustomerUpcomingVisits from "@/pages/customer/UpcomingVisits";
 import CustomerAppointmentPicker from "@/pages/customer/AppointmentPicker";
-import CustomerHomeTimeline from "@/pages/customer/HomeTimeline";
 import CustomerSchedule from "@/pages/customer/Schedule";
 import CustomerActivity from "@/pages/customer/Activity";
 import CustomerReschedule from "@/pages/customer/Reschedule";
@@ -195,11 +192,11 @@ const App = () => (
                 <Route path="/customer/schedule" element={<CustomerPropertyGate><CustomerSchedule /></CustomerPropertyGate>} />
                 <Route path="/customer/activity" element={<CustomerPropertyGate><CustomerActivity /></CustomerPropertyGate>} />
                 <Route path="/customer/build" element={<CustomerPropertyGate><CustomerBuild /></CustomerPropertyGate>} />
-                {/* Redirects for old routes */}
-                <Route path="/customer/history" element={<Navigate to="/customer/activity" replace />} />
-                <Route path="/customer/visits" element={<Navigate to="/customer/schedule" replace />} />
-                <Route path="/customer/upcoming" element={<Navigate to="/customer/schedule" replace />} />
-                <Route path="/customer/timeline" element={<Navigate to="/customer/activity" replace />} />
+                {/* Redirects for old routes (gated for parity with route table) */}
+                <Route path="/customer/history" element={<CustomerPropertyGate><Navigate to="/customer/activity" replace /></CustomerPropertyGate>} />
+                <Route path="/customer/visits" element={<CustomerPropertyGate><Navigate to="/customer/schedule" replace /></CustomerPropertyGate>} />
+                <Route path="/customer/upcoming" element={<CustomerPropertyGate><Navigate to="/customer/schedule" replace /></CustomerPropertyGate>} />
+                <Route path="/customer/timeline" element={<CustomerPropertyGate><Navigate to="/customer/activity" replace /></CustomerPropertyGate>} />
                 <Route path="/customer/visits/:jobId" element={<CustomerPropertyGate><CustomerVisitDetail /></CustomerPropertyGate>} />
                 <Route path="/customer/appointment/:visitId" element={<CustomerPropertyGate><CustomerAppointmentPicker /></CustomerPropertyGate>} />
                 <Route path="/customer/reschedule/:visitId" element={<CustomerPropertyGate><CustomerReschedule /></CustomerPropertyGate>} />
