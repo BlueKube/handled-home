@@ -5,6 +5,7 @@ import { usePlans } from "@/hooks/usePlans";
 import { useProperty } from "@/hooks/useProperty";
 import { PlanCard } from "@/components/plans/PlanCard";
 import { HandlesExplainer } from "@/components/plans/HandlesExplainer";
+import { BundleSavingsCard } from "@/components/plans/BundleSavingsCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
@@ -119,6 +120,21 @@ export default function CustomerPlans() {
 
       {/* Handles explainer — the "10-second" education */}
       <HandlesExplainer />
+
+      {/* Bundle savings comparison */}
+      {plans && plans.length > 0 && (() => {
+        const recommended = plans.find((p) => p.recommended_rank != null && plans.every(
+          (q) => (q.recommended_rank ?? 0) <= (p.recommended_rank ?? 0)
+        )) ?? plans[0];
+        const tierKey = getTierKey(recommended.name);
+        return (
+          <BundleSavingsCard
+            planPriceCents={recommended.price_cents}
+            planDisplayPrice={recommended.display_price_text ?? undefined}
+            tierKey={tierKey}
+          />
+        );
+      })()}
 
       {isLoading ? (
         <div className="space-y-4">

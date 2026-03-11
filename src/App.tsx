@@ -48,6 +48,7 @@ import CustomerCoverageMap from "@/pages/customer/CoverageMap";
 import CustomerPropertySizing from "@/pages/customer/PropertySizing";
 import CustomerUpcomingVisits from "@/pages/customer/UpcomingVisits";
 import CustomerAppointmentPicker from "@/pages/customer/AppointmentPicker";
+import CustomerHomeTimeline from "@/pages/customer/HomeTimeline";
 import CustomerReschedule from "@/pages/customer/Reschedule";
 // Provider pages
 import ProviderDashboard from "@/pages/provider/Dashboard";
@@ -196,6 +197,7 @@ const App = () => (
                 <Route path="/customer/visits/:jobId" element={<CustomerPropertyGate><CustomerVisitDetail /></CustomerPropertyGate>} />
                 <Route path="/customer/appointment/:visitId" element={<CustomerPropertyGate><CustomerAppointmentPicker /></CustomerPropertyGate>} />
                 <Route path="/customer/reschedule/:visitId" element={<CustomerPropertyGate><CustomerReschedule /></CustomerPropertyGate>} />
+                <Route path="/customer/timeline" element={<CustomerPropertyGate><CustomerHomeTimeline /></CustomerPropertyGate>} />
                 <Route path="/customer/photos" element={<CustomerPropertyGate><CustomerPhotoTimeline /></CustomerPropertyGate>} />
                 <Route path="/customer/home-assistant" element={<CustomerPropertyGate><CustomerHomeAssistant /></CustomerPropertyGate>} />
                 <Route path="/customer/issues" element={<CustomerPropertyGate><CustomerIssues /></CustomerPropertyGate>} />
