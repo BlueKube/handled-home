@@ -1,16 +1,17 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCustomerJobs } from "@/hooks/useCustomerJobs";
+import { useCustomerJobs, type CustomerJob } from "@/hooks/useCustomerJobs";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   CheckCircle,
-  Clock,
+  Shield,
   Calendar,
   TrendingUp,
-  Shield,
+  ArrowRight,
 } from "lucide-react";
 import { format, differenceInMonths } from "date-fns";
 
@@ -32,12 +33,14 @@ export default function Activity() {
   const stats = useMemo(() => {
     if (!completedJobs) return null;
     const totalServices = completedJobs.length;
-    const memberSince = subscription?.created_at
+    const memberMonths = subscription?.created_at
       ? differenceInMonths(new Date(), new Date(subscription.created_at))
       : 0;
 
-    return { totalServices, memberSince };
+    return { totalServices, memberMonths };
   }, [completedJobs, subscription]);
+
+  const latestJob: CustomerJob | null = completedJobs?.[0] ?? null;
 
   const groupedJobs = useMemo(() => {
     if (!completedJobs) return [];
@@ -56,8 +59,8 @@ export default function Activity() {
     return (
       <div className="p-4 space-y-4 max-w-lg mx-auto pb-24">
         <h1 className="text-h2">Activity</h1>
-        <div className="grid grid-cols-2 gap-3">
-          {[1, 2].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
+        <div className="grid grid-cols-3 gap-3">
+          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
         </div>
         <Skeleton className="h-48 w-full" />
       </div>
@@ -71,13 +74,10 @@ export default function Activity() {
 
       {/* Summary stats */}
       {stats && (
-        <div className="grid grid-cols-2 gap-3">
-          <StatPill icon={CheckCircle} label="Services" value={stats.totalServices} />
-          <StatPill
-            icon={Clock}
-            label="Member"
-            value={stats.memberSince > 0 ? `${stats.memberSince}mo` : "New"}
-          />
+        <div className="grid grid-cols-3 gap-3">
+          <StatPill icon={Shield} label="Services" value={stats.totalServices} />
+          <StatPill icon={Calendar} label="Months" value={stats.memberMonths > 0 ? stats.memberMonths : "New"} />
+          <StatPill icon={CheckCircle} label="Receipts" value={stats.totalServices} />
         </div>
       )}
 
@@ -88,21 +88,53 @@ export default function Activity() {
             <TrendingUp className="h-5 w-5 text-accent shrink-0" />
             <div>
               <p className="text-sm font-semibold">
-                Your subscription has delivered {stats.totalServices} service{stats.totalServices !== 1 ? "s" : ""}
+                Your home has received {stats.totalServices} professional service{stats.totalServices !== 1 ? "s" : ""}
+                {subscription?.created_at && (
+                  <> since {format(new Date(subscription.created_at), "MMMM yyyy")}</>
+                )}
               </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                All verified with proof-of-work receipts
-              </p>
+              <Badge variant="outline" className="mt-1.5 text-[10px] border-primary/20 text-primary bg-primary/5">
+                Insured providers · Proof on every visit
+              </Badge>
             </div>
           </div>
         </Card>
       )}
 
-      {/* Trust badge */}
-      <div className="flex items-center gap-2 justify-center">
-        <Shield className="h-3.5 w-3.5 text-primary" />
-        <span className="text-xs text-muted-foreground">Insured providers · Proof on every visit</span>
-      </div>
+      {/* Recent Receipt Highlight */}
+      {latestJob && (
+        <Card
+          className="p-4 cursor-pointer hover:bg-secondary/30 transition-colors"
+          onClick={() => navigate(`/customer/visits/${latestJob.id}`)}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                <CheckCircle className="h-5 w-5 text-accent" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">
+                  {latestJob.skus
+                    ?.map((s) => s.sku_name_snapshot)
+                    .filter(Boolean)
+                    .join(", ") || "Latest visit"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {latestJob.completed_at
+                    ? format(new Date(latestJob.completed_at), "MMM d, yyyy")
+                    : latestJob.scheduled_date
+                      ? format(new Date(latestJob.scheduled_date), "MMM d, yyyy")
+                      : "Completed"}
+                </p>
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" className="text-xs gap-1">
+              View receipt
+              <ArrowRight className="h-3 w-3" />
+            </Button>
+          </div>
+        </Card>
+      )}
 
       {/* Timeline */}
       {groupedJobs.length === 0 ? (

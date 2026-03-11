@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { CalendarDays, Loader2, Sparkles, X, Settings2, Plus, Clock } from "lucide-react";
+import { CalendarDays, Loader2, Sparkles, X, Settings2, Plus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProperty } from "@/hooks/useProperty";
 import { useServiceDayAssignment } from "@/hooks/useServiceDayAssignment";
@@ -16,9 +16,7 @@ import { SmartAppBanner } from "@/components/SmartAppBanner";
 import { HomeSetupCard } from "@/components/customer/HomeSetupCard";
 import { NextVisitCard } from "@/components/customer/NextVisitCard";
 import { HandleBalanceBar } from "@/components/customer/HandleBalanceBar";
-import { ThisCycleSummary } from "@/components/customer/ThisCycleSummary";
 import { HomeSuggestions } from "@/components/customer/HomeSuggestions";
-import { RecentReceipt } from "@/components/customer/RecentReceipt";
 import { PropertyHealthWidget } from "@/components/customer/PropertyHealthWidget";
 import { FloatingAddButton } from "@/components/customer/FloatingAddButton";
 import { AddServiceDrawer } from "@/components/customer/AddServiceDrawer";
@@ -106,8 +104,6 @@ export default function CustomerDashboard() {
     },
     [routineItems, removeItem]
   );
-
-  const serviceNames = routineItems.map((i) => i.sku_name).filter(Boolean) as string[];
 
   return (
     <div className="p-6 max-w-4xl space-y-4 pb-24">
@@ -205,8 +201,8 @@ export default function CustomerDashboard() {
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Next Up</p>
-          <Button variant="link" size="sm" className="text-xs h-auto p-0" onClick={() => navigate("/customer/upcoming")}>
-            View all upcoming →
+          <Button variant="link" size="sm" className="text-xs h-auto p-0" onClick={() => navigate("/customer/schedule")}>
+            View schedule →
           </Button>
         </div>
         <NextVisitCard job={nextJob} isLoading={jobsLoading} />
@@ -217,35 +213,11 @@ export default function CustomerDashboard() {
         <HandleBalanceBar balance={handleBalance} perCycle={planHandles.handles_per_cycle} />
       )}
 
-      {/* Section B — This Cycle */}
-      <ThisCycleSummary
-        serviceCount={routineItems.length}
-        serviceNames={serviceNames}
-        handlesUsed={planHandles ? (planHandles.handles_per_cycle - (handleBalance ?? 0)) : undefined}
-        handlesTotal={planHandles?.handles_per_cycle}
-      />
-
       {/* Property Health Score */}
       <PropertyHealthWidget propertyId={property?.id} />
 
-      {/* Section C — Suggested for Your Home */}
+      {/* Suggested for Your Home */}
       <HomeSuggestions onAddToRoutine={handleAddToRoutine} onUndo={handleUndo} />
-
-      {/* Section D — Recent Receipt */}
-      <RecentReceipt job={lastCompletedJob} />
-
-      {/* Home Timeline link */}
-      {completedJobs && completedJobs.length > 0 && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full text-xs text-accent gap-1"
-          onClick={() => navigate("/customer/timeline")}
-        >
-          <Clock className="h-3.5 w-3.5" />
-          View full home timeline ({completedJobs.length} services)
-        </Button>
-      )}
 
       {/* First Service Celebration */}
       {lastCompletedJob && (

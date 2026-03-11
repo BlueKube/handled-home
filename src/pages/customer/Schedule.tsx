@@ -1,9 +1,11 @@
+import { useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { QueryErrorCard } from "@/components/QueryErrorCard";
+import { MiniCalendar } from "@/components/customer/MiniCalendar";
 import { ThisCycleSummary } from "@/components/customer/ThisCycleSummary";
 import {
   useUpcomingVisits,
@@ -16,7 +18,7 @@ import { useProperty } from "@/hooks/useProperty";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
 import { useHandleBalance, usePlanHandlesConfig } from "@/hooks/useHandles";
 import { useServiceDayAssignment } from "@/hooks/useServiceDayAssignment";
-import { format, isToday, isTomorrow, isThisWeek, parseISO } from "date-fns";
+import { format, isToday, isTomorrow, isThisWeek, isSameDay, parseISO } from "date-fns";
 import {
   CalendarDays,
   Clock,
@@ -283,15 +285,50 @@ export default function Schedule() {
   const { data: handleBalance } = useHandleBalance();
   const { data: planHandles } = usePlanHandlesConfig(subscription?.plan_id);
   const { assignment } = useServiceDayAssignment(property?.id);
+  const dateRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   const routineItems = routineData?.items ?? [];
   const serviceNames = routineItems.map((i) => i.sku_name).filter(Boolean) as string[];
+
+  const serviceDates = useMemo(
+    () => (visits ?? []).map((v) => v.scheduled_date),
+    [visits]
+  );
+
+  // Group visits by date for section headers
+  const groupedVisits = useMemo(() => {
+    if (!visits || visits.length === 0) return [];
+    const groups: { date: string; label: string; visits: UpcomingVisit[] }[] = [];
+    let currentKey = "";
+    for (const visit of visits) {
+      const key = visit.scheduled_date;
+      if (key !== currentKey) {
+        currentKey = key;
+        groups.push({ date: key, label: formatVisitDate(key), visits: [] });
+      }
+      groups[groups.length - 1].visits.push(visit);
+    }
+    return groups;
+  }, [visits]);
+
+  const handleCalendarSelect = useCallback((date: Date) => {
+    // Find the first visit group matching this date and scroll to it
+    const key = date.toISOString().split("T")[0];
+    // Try exact match first, then find the closest
+    for (const [refKey, el] of dateRefs.current) {
+      if (refKey === key || isSameDay(parseISO(refKey), date)) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+    }
+  }, []);
 
   if (isLoading) {
     return (
       <div className="p-4 max-w-4xl space-y-4 pb-24">
         <h1 className="text-h2">Schedule</h1>
-        {[1, 2, 3].map((i) => (
+        <Skeleton className="h-[320px] rounded-2xl" />
+        {[1, 2].map((i) => (
           <Skeleton key={i} className="h-28 rounded-xl" />
         ))}
       </div>
@@ -311,6 +348,9 @@ export default function Schedule() {
     <div className="p-4 max-w-4xl space-y-4 pb-24 animate-fade-in">
       {/* Header */}
       <h1 className="text-h2">Schedule</h1>
+
+      {/* Mini Calendar */}
+      <MiniCalendar serviceDates={serviceDates} onSelectDate={handleCalendarSelect} />
 
       {/* This Cycle Summary (moved from Dashboard) */}
       <ThisCycleSummary
@@ -355,9 +395,24 @@ export default function Schedule() {
             </p>
           </Card>
         ) : (
-          <div className="space-y-3">
-            {visits.map((visit) => (
-              <VisitCard key={visit.id} visit={visit} />
+          <div className="space-y-4">
+            {groupedVisits.map((group) => (
+              <div
+                key={group.date}
+                ref={(el) => {
+                  if (el) dateRefs.current.set(group.date, el);
+                  else dateRefs.current.delete(group.date);
+                }}
+              >
+                <p className="text-xs font-semibold text-muted-foreground mb-2">
+                  {group.label}
+                </p>
+                <div className="space-y-3">
+                  {group.visits.map((visit) => (
+                    <VisitCard key={visit.id} visit={visit} />
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         )}
