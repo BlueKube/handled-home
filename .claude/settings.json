@@ -1,12 +1,2 @@
 {
-  "mcpServers": {
-    "stitch": {
-      "command": "npx",
-      "args": ["@_davideast/stitch-mcp", "proxy"],
-      "env": {
-        "STITCH_API_KEY": "AQ.Ab8RN6JAYVtwcil2zw5c5KSkFeelf6Q5WoLy_7FPH-S5v9_vGg",
-        "STITCH_PROJECT_ID": "6279422033514512205"
-      }
-    }
-  }
 }
