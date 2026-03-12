@@ -1,9 +1,15 @@
+import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { StatCard } from "@/components/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { useProviderPerformance } from "@/hooks/useProviderPerformance";
+import { useProviderQualityScore } from "@/hooks/useProviderQualityScore";
+import { useProviderTier } from "@/hooks/useProviderTier";
+import { useProviderOrg } from "@/hooks/useProviderOrg";
 import {
   CheckCircle,
   Clock,
@@ -13,7 +19,11 @@ import {
   TrendingUp,
   Shield,
   XCircle,
+  Award,
+  Flame,
+  ArrowRight,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
 function MetricRing({ value, label, color }: { value: number | null; label: string; color: string }) {
@@ -79,13 +89,39 @@ function SnapshotTrend({ snapshots }: { snapshots: { snapshot_date: string; comp
   );
 }
 
+/** Compute consecutive days with completed_jobs > 0, most recent first. */
+function computeStreak(snapshots: { snapshot_date: string; completed_jobs: number | null }[]): number {
+  // Snapshots come in DESC order (most recent first)
+  let streak = 0;
+  for (const s of snapshots) {
+    if ((s.completed_jobs ?? 0) > 0) streak++;
+    else break;
+  }
+  return streak;
+}
+
+const BAND_COLORS: Record<string, { color: string; bg: string }> = {
+  GREEN: { color: "text-success", bg: "bg-success/10" },
+  YELLOW: { color: "text-amber-500", bg: "bg-amber-500/10" },
+  ORANGE: { color: "text-orange-500", bg: "bg-orange-500/10" },
+  RED: { color: "text-destructive", bg: "bg-destructive/10" },
+};
+
 export default function ProviderPerformance() {
+  const navigate = useNavigate();
   const { data, isLoading, isError, refetch } = useProviderPerformance();
+  const { org } = useProviderOrg();
+  const { score } = useProviderQualityScore(org?.id);
+  const { currentTier, tierConfig } = useProviderTier(org?.id);
+
+  const snapshots = data?.snapshots ?? [];
+  const streak = useMemo(() => computeStreak(snapshots), [snapshots]);
 
   if (isLoading) {
     return (
       <div className="animate-fade-in p-4 pb-24 space-y-4 max-w-2xl">
-        <h1 className="text-h2">Performance</h1>
+        <h1 className="text-h2">Score</h1>
+        <Skeleton className="h-28 rounded-2xl" />
         <div className="grid grid-cols-2 gap-3">
           {[1, 2, 3, 4].map((i) => (
             <Skeleton key={i} className="h-24 rounded-xl" />
@@ -99,26 +135,83 @@ export default function ProviderPerformance() {
   if (isError) {
     return (
       <div className="animate-fade-in p-4 pb-24 space-y-4 max-w-2xl">
-        <h1 className="text-h2">Performance</h1>
+        <h1 className="text-h2">Score</h1>
         <QueryErrorCard message="Failed to load performance data." onRetry={() => refetch()} />
       </div>
     );
   }
 
   const stats = data?.jobStats;
-  const snapshots = data?.snapshots ?? [];
   const enforcements = data?.enforcements ?? [];
 
   const latestSnapshot = snapshots.length > 0 ? snapshots[0] : null;
   const proofCompliance = latestSnapshot?.proof_compliance != null ? Math.round(Number(latestSnapshot.proof_compliance)) : null;
   const issueRate = latestSnapshot?.issue_rate != null ? Math.round(Number(latestSnapshot.issue_rate) * 100) : null;
 
+  const band = score ? BAND_COLORS[score.band] ?? BAND_COLORS.GREEN : null;
+
   return (
     <div className="animate-fade-in p-4 pb-24 space-y-5 max-w-2xl">
       <div>
-        <h1 className="text-h2">Performance</h1>
+        <h1 className="text-h2">Score</h1>
         <p className="text-caption mt-0.5">Last 30 days</p>
       </div>
+
+      {/* Score Summary Banner */}
+      <Card
+        className={cn("p-4 cursor-pointer hover:bg-secondary/30 transition-colors", band?.bg)}
+        onClick={() => navigate("/provider/quality")}
+      >
+        <div className="flex items-center gap-4">
+          <div className={cn("text-4xl font-bold tabular-nums", band?.color ?? "text-muted-foreground")}>
+            {score ? Number(score.score).toFixed(0) : "—"}
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold">Quality Score</span>
+              {currentTier && (
+                <Badge variant="outline" className={cn("text-[10px] gap-1", tierConfig.color)}>
+                  <Award className="h-2.5 w-2.5" />
+                  {tierConfig.label}
+                </Badge>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {score ? "Tap to see full breakdown" : "Complete more jobs to generate your score"}
+            </p>
+          </div>
+          <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+        </div>
+      </Card>
+
+      {/* Streak Card */}
+      <Card className={cn("p-4", streak > 0 ? "border-accent/30 bg-accent/5" : "")}>
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            "h-10 w-10 rounded-xl flex items-center justify-center",
+            streak > 0 ? "bg-accent/20" : "bg-muted/50"
+          )}>
+            <Flame className={cn("h-5 w-5", streak > 0 ? "text-accent" : "text-muted-foreground")} />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold">
+              {streak > 0 ? `${streak}-day streak` : "Start a new streak today"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {streak > 0
+                ? streak >= 7
+                  ? "Incredible consistency. Keep it going!"
+                  : "Complete jobs every day to build your streak."
+                : "Complete a job to start your streak."}
+            </p>
+          </div>
+          {streak >= 3 && (
+            <Badge variant="secondary" className="text-xs tabular-nums">
+              {streak >= 14 ? "On fire" : streak >= 7 ? "Hot streak" : "Building"}
+            </Badge>
+          )}
+        </div>
+      </Card>
 
       <div className="grid gap-3 grid-cols-2">
         <StatCard icon={CheckCircle} label="Jobs Completed" value={stats?.totalCompleted ?? 0} />
@@ -131,7 +224,7 @@ export default function ProviderPerformance() {
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            Key Metrics
+            Your Rates
           </CardTitle>
         </CardHeader>
         <CardContent>
