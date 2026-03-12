@@ -42,6 +42,12 @@ const tabsByRole: Record<AppRole, TabItem[]> = {
   admin: adminTabs,
 };
 
+/** Routes that should highlight a parent tab they don't prefix-match. */
+const TAB_CHILD_PATHS: Record<string, string[]> = {
+  "/customer/activity": ["/customer/visits/"],
+  "/customer/schedule": ["/customer/appointment/", "/customer/reschedule/"],
+};
+
 export function BottomTabBar() {
   const { effectiveRole } = useAuth();
   const location = useLocation();
@@ -54,15 +60,22 @@ export function BottomTabBar() {
 
   const isActive = (tab: TabItem) => {
     if (tab.path.endsWith("/more")) {
-      const otherPaths = tabs.filter((t) => !t.path.endsWith("/more")).map((t) => t.path);
-      return !otherPaths.some(
+      // "More" catches everything not matched by another tab (including child paths)
+      const allPrefixes = tabs
+        .filter((t) => !t.path.endsWith("/more"))
+        .flatMap((t) => [t.path, ...(TAB_CHILD_PATHS[t.path] ?? [])]);
+      return !allPrefixes.some(
         (p) => location.pathname === p || (p !== `/${effectiveRole}` && location.pathname.startsWith(p))
       ) && location.pathname.startsWith(`/${effectiveRole}`);
     }
     if (tab.path === `/${effectiveRole}`) {
       return location.pathname === tab.path;
     }
-    return location.pathname.startsWith(tab.path);
+    // Check direct prefix match OR any registered child paths
+    return (
+      location.pathname.startsWith(tab.path) ||
+      (TAB_CHILD_PATHS[tab.path] ?? []).some((prefix) => location.pathname.startsWith(prefix))
+    );
   };
 
   return (
