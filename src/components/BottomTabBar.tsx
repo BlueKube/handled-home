@@ -46,6 +46,7 @@ const tabsByRole: Record<AppRole, TabItem[]> = {
 const TAB_CHILD_PATHS: Record<string, string[]> = {
   "/customer/activity": ["/customer/visits/"],
   "/customer/schedule": ["/customer/appointment/", "/customer/reschedule/"],
+  "/provider/performance": ["/provider/quality"],
 };
 
 export function BottomTabBar() {

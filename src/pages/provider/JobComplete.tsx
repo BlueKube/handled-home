@@ -19,6 +19,7 @@ export default function ProviderJobComplete() {
   const actions = useJobActions(jobId);
   const [summary, setSummary] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [earnedCents, setEarnedCents] = useState<number | null>(null);
 
   // Track which SKUs have completed their level feedback
@@ -55,11 +56,14 @@ export default function ProviderJobComplete() {
   };
 
   const handleSubmit = async () => {
+    if (submitting) return;
+    setSubmitting(true);
     try {
       const result = await actions.completeJob.mutateAsync(summary || undefined);
       const res = result as any;
       if (res?.status === "INCOMPLETE") {
         toast({ title: "Cannot complete", description: "Some requirements are still missing", variant: "destructive" });
+        setSubmitting(false);
         return;
       }
 
@@ -85,6 +89,7 @@ export default function ProviderJobComplete() {
       setSubmitted(true);
     } catch (e: any) {
       toast({ title: "Error", description: e.message, variant: "destructive" });
+      setSubmitting(false);
     }
   };
 
@@ -207,7 +212,7 @@ export default function ProviderJobComplete() {
         className="w-full"
         size="lg"
         onClick={handleSubmit}
-        disabled={!canSubmit || actions.completeJob.isPending}
+        disabled={!canSubmit || submitting}
       >
         <Send className="h-4 w-4 mr-2" />
         {!allLevelFeedbackDone
