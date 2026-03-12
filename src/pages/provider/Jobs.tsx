@@ -125,7 +125,9 @@ function TodayJobList() {
   const optimizeRoute = useOptimizeRoute();
   const reorderRoute = useReorderRoute();
   const [localJobs, setLocalJobs] = useState<ProviderJob[] | null>(null);
-  const [viewMode, setViewMode] = useState<"list" | "map">("map");
+  const [viewMode, setViewMode] = useState<"list" | "map">(
+    import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ? "map" : "list"
+  );
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
   const displayJobs = localJobs ?? jobs;
