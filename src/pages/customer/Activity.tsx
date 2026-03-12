@@ -13,7 +13,7 @@ import {
   TrendingUp,
   ArrowRight,
 } from "lucide-react";
-import { format, differenceInMonths } from "date-fns";
+import { format, differenceInMonths, parseISO } from "date-fns";
 
 function StatPill({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string | number }) {
   return (
@@ -47,7 +47,7 @@ export default function Activity() {
     const groups: Record<string, any[]> = {};
     for (const job of completedJobs) {
       const key = job.scheduled_date
-        ? format(new Date(job.scheduled_date), "MMMM yyyy")
+        ? format(parseISO(job.scheduled_date), "MMMM yyyy")
         : "Unscheduled";
       if (!groups[key]) groups[key] = [];
       groups[key].push(job);
@@ -123,7 +123,7 @@ export default function Activity() {
                   {latestJob.completed_at
                     ? format(new Date(latestJob.completed_at), "MMM d, yyyy")
                     : latestJob.scheduled_date
-                      ? format(new Date(latestJob.scheduled_date), "MMM d, yyyy")
+                      ? format(parseISO(latestJob.scheduled_date), "MMM d, yyyy")
                       : "Completed"}
                 </p>
               </div>
@@ -175,7 +175,7 @@ export default function Activity() {
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {job.scheduled_date
-                            ? format(new Date(job.scheduled_date), "EEE, MMM d")
+                            ? format(parseISO(job.scheduled_date), "EEE, MMM d")
                             : "Completed"}
                         </p>
                       </div>
