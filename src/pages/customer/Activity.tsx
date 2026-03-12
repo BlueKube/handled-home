@@ -46,8 +46,15 @@ export default function Activity() {
     if (!completedJobs) return [];
     const groups: Record<string, any[]> = {};
     for (const job of completedJobs) {
-      const key = job.scheduled_date
-        ? format(parseISO(job.scheduled_date), "MMMM yyyy")
+      // Prefer completed_at (timestamp) over scheduled_date (date-only) for
+      // grouping — completed_at reflects when work actually happened and
+      // avoids bucketing legacy/corrected records under "Unscheduled".
+      const dateSource = job.completed_at ?? job.scheduled_date;
+      const key = dateSource
+        ? format(
+            job.completed_at ? new Date(dateSource) : parseISO(dateSource),
+            "MMMM yyyy",
+          )
         : "Unscheduled";
       if (!groups[key]) groups[key] = [];
       groups[key].push(job);
@@ -174,9 +181,11 @@ export default function Activity() {
                             .join(", ") || "Service visit"}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {job.scheduled_date
-                            ? format(parseISO(job.scheduled_date), "EEE, MMM d")
-                            : "Completed"}
+                          {job.completed_at
+                            ? format(new Date(job.completed_at), "EEE, MMM d")
+                            : job.scheduled_date
+                              ? format(parseISO(job.scheduled_date), "EEE, MMM d")
+                              : "Completed"}
                         </p>
                       </div>
                     </div>
