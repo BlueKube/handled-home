@@ -22,7 +22,6 @@ It defines:
 
 ## 1) Product truths (do not violate)
 - Subscription logistics platform (not marketplace).
-- Customers never browse free-form calendars.
 - Zone-assigned recurring **Service Day** is the customer promise.
 - Standardized SKUs + proof-of-work are the quality moat.
 - Capacity guardrails are required for stability.
