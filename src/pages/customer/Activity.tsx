@@ -40,12 +40,23 @@ export default function Activity() {
     return { totalServices, memberMonths };
   }, [completedJobs, subscription]);
 
-  const latestJob: CustomerJob | null = completedJobs?.[0] ?? null;
+  // Re-sort by completed_at DESC so the most recently finished job is first.
+  // The hook orders by scheduled_date which is wrong for completion chronology.
+  const sortedJobs = useMemo(() => {
+    if (!completedJobs) return [];
+    return [...completedJobs].sort((a, b) => {
+      const aDate = a.completed_at ?? a.scheduled_date ?? a.created_at;
+      const bDate = b.completed_at ?? b.scheduled_date ?? b.created_at;
+      return bDate.localeCompare(aDate);
+    });
+  }, [completedJobs]);
+
+  const latestJob: CustomerJob | null = sortedJobs[0] ?? null;
 
   const groupedJobs = useMemo(() => {
-    if (!completedJobs) return [];
+    if (sortedJobs.length === 0) return [];
     const groups: Record<string, any[]> = {};
-    for (const job of completedJobs) {
+    for (const job of sortedJobs) {
       // Prefer completed_at (timestamp) over scheduled_date (date-only) for
       // grouping — completed_at reflects when work actually happened and
       // avoids bucketing legacy/corrected records under "Unscheduled".
@@ -60,7 +71,7 @@ export default function Activity() {
       groups[key].push(job);
     }
     return Object.entries(groups);
-  }, [completedJobs]);
+  }, [sortedJobs]);
 
   if (isLoading) {
     return (
