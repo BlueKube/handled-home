@@ -1,8 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth, AppRole } from "@/contexts/AuthContext";
 import {
-  Home, CalendarDays, History, CreditCard, MoreHorizontal,
-  Briefcase, DollarSign, BarChart3, Map,
+  Home, CalendarDays, ListChecks, Clock, MoreHorizontal,
+  Briefcase, DollarSign, BarChart3,
   LayoutDashboard, Globe, Package, Shield,
 } from "lucide-react";
 
@@ -14,17 +14,17 @@ interface TabItem {
 
 const customerTabs: TabItem[] = [
   { label: "Home", icon: Home, path: "/customer" },
-  { label: "Plans", icon: CreditCard, path: "/customer/plans" },
-  { label: "Routine", icon: CalendarDays, path: "/customer/routine" },
-  { label: "Visits", icon: History, path: "/customer/visits" },
+  { label: "Schedule", icon: CalendarDays, path: "/customer/schedule" },
+  { label: "Routine", icon: ListChecks, path: "/customer/routine" },
+  { label: "Activity", icon: Clock, path: "/customer/activity" },
   { label: "More", icon: MoreHorizontal, path: "/customer/more" },
 ];
 
 const providerTabs: TabItem[] = [
+  { label: "Home", icon: Home, path: "/provider" },
   { label: "Jobs", icon: Briefcase, path: "/provider/jobs" },
-  { label: "Payouts", icon: DollarSign, path: "/provider/payouts" },
-  { label: "Performance", icon: BarChart3, path: "/provider/performance" },
-  { label: "Coverage", icon: Map, path: "/provider/coverage" },
+  { label: "Earn", icon: DollarSign, path: "/provider/earnings" },
+  { label: "Score", icon: BarChart3, path: "/provider/performance" },
   { label: "More", icon: MoreHorizontal, path: "/provider/more" },
 ];
 
@@ -42,6 +42,13 @@ const tabsByRole: Record<AppRole, TabItem[]> = {
   admin: adminTabs,
 };
 
+/** Routes that should highlight a parent tab they don't prefix-match. */
+const TAB_CHILD_PATHS: Record<string, string[]> = {
+  "/customer/activity": ["/customer/visits/"],
+  "/customer/schedule": ["/customer/appointment/", "/customer/reschedule/"],
+  "/provider/performance": ["/provider/quality"],
+};
+
 export function BottomTabBar() {
   const { effectiveRole } = useAuth();
   const location = useLocation();
@@ -54,15 +61,22 @@ export function BottomTabBar() {
 
   const isActive = (tab: TabItem) => {
     if (tab.path.endsWith("/more")) {
-      const otherPaths = tabs.filter((t) => !t.path.endsWith("/more")).map((t) => t.path);
-      return !otherPaths.some(
+      // "More" catches everything not matched by another tab (including child paths)
+      const allPrefixes = tabs
+        .filter((t) => !t.path.endsWith("/more"))
+        .flatMap((t) => [t.path, ...(TAB_CHILD_PATHS[t.path] ?? [])]);
+      return !allPrefixes.some(
         (p) => location.pathname === p || (p !== `/${effectiveRole}` && location.pathname.startsWith(p))
       ) && location.pathname.startsWith(`/${effectiveRole}`);
     }
     if (tab.path === `/${effectiveRole}`) {
       return location.pathname === tab.path;
     }
-    return location.pathname.startsWith(tab.path);
+    // Check direct prefix match OR any registered child paths
+    return (
+      location.pathname.startsWith(tab.path) ||
+      (TAB_CHILD_PATHS[tab.path] ?? []).some((prefix) => location.pathname.startsWith(prefix))
+    );
   };
 
   return (

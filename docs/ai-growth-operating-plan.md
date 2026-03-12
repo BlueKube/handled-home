@@ -108,10 +108,38 @@ Create a self-improving operating system for home services that:
   - What was escalated to humans and why.
   - Which policies to tighten/loosen.
 
+**Revenue model:** Subscription spread — margin is the delta between customer handle price and provider payout. Density widens this automatically. Zone-based multipliers give admin per-market control.
+
 **Deliverables**
-- Market-level unit economics board.
+- Market-level unit economics board (subscription spread margin by zone).
 - Automated policy change proposals with approval workflow.
 - Exception budget with trend targets.
+- Subscription spread dashboard: revenue per handle, payout per handle, margin by zone/tier.
+
+### Program F — UX Value Proposition & Conversion (4–8 weeks)
+**Goal:** Shift UX from feature communication to outcome storytelling. Increase conversion, activation, and retention by making value visible.
+
+**Revenue model alignment:** All UX surfaces reinforce the subscription spread model — show customers the value of their subscription, never expose per-handle economics.
+
+- **Bundle Savings Calculator**: Shows customers savings vs. separate vendors at plan selection and onboarding.
+- **First Service Celebration**: Full-screen animated celebration after first completed service with share CTA.
+- **Provider Visibility**: Provider name, photo, rating, and trust badges on customer dashboard and visit detail.
+- **Earnings Projection**: Shows providers estimated income at onboarding and on dashboard with capacity growth meter.
+- **Home Timeline**: Chronological service history page reinforcing subscription value (“87 services delivered”).
+- **Social Proof in Onboarding**: Trust bar (insured, guaranteed, cancel anytime) throughout funnel.
+- **BYOC Banner**: Prominent on provider dashboard — “Bring your customers, earn bonus income.”
+- **Referral Milestones**: Tiered rewards (Starter/Ambassador/Champion) with progress tracking.
+
+**Deliverables**
+- All 8 UX features implemented and integrated.
+- Conversion rate tracking at each onboarding step.
+- Referral milestone completion rate dashboard.
+- First-service celebration engagement rate (share vs. dismiss).
+
+**Key constraints:**
+- Customer-facing surfaces never expose per-handle economics or provider payout rates.
+- Provider-facing surfaces never expose customer pricing or subscription spread.
+- Bundle savings comparisons use conservative market-rate estimates (configurable in admin).
 
 ## Documentation cleanup plan
 

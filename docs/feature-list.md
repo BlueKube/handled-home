@@ -605,4 +605,17 @@
 
 ---
 
-*Total features: 358 | Last updated: 2026-03-09*
+## XLIV. UX Value Proposition & Conversion
+
+359. Bundle Savings Calculator on Plans page and onboarding: compares monthly subscription cost vs. hiring separate vendors with per-service breakdown — DONE
+360. First Service Celebration: full-screen animated overlay after first completed service with share CTA and receipt link — DONE
+361. Provider Profile Sheet: bottom drawer showing provider name, avatar, rating, trust badges (Verified, Insured), and specialties — DONE
+362. Provider Earnings Projection Card: two variants (onboarding zone estimate + dashboard capacity growth meter) showing income potential — DONE
+363. Home Timeline page (`/customer/timeline`): chronological service history grouped by month with stats (total services, photos, membership duration) — DONE
+364. Trust Bar: compact social proof strip (insured providers, satisfaction guarantee, cancel anytime) shown in onboarding zone check and plan selection — DONE
+365. BYOC Banner on provider dashboard: prominent call-to-action for bringing own customers with activation count — DONE
+366. Referral Milestones: tiered reward system (Starter $30 credit at 3 referrals, Ambassador free month at 5, Champion VIP at 10) with progress bars — DONE
+
+---
+
+*Total features: 366 | Last updated: 2026-03-11*

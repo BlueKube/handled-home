@@ -1,6 +1,6 @@
 # app-flow-pages-and-roles.md
 
-> **Last updated:** 2026-02-26 — Synced with `App.tsx` route tree.
+> **Last updated:** 2026-03-11 — Updated navigation structure (Schedule/Activity tabs for Customer, Home/Earn/Score tabs for Provider).
 
 ## Public Routes
 
@@ -16,18 +16,21 @@
 
 | Route | Page | Gate |
 |-------|------|------|
-| `/customer` | Dashboard | PropertyGate |
-| `/customer/property` | Property Profile | — |
-| `/customer/plans` | Browse Plans | — |
-| `/customer/plans/:planId` | Plan Detail | — |
-| `/customer/subscribe` | Checkout | — |
-| `/customer/routine` | Build Routine | PropertyGate |
+| `/customer` | Dashboard (Home tab) | PropertyGate |
+| `/customer/schedule` | **Schedule (tab)** — Calendar + upcoming visits | PropertyGate |
+| `/customer/activity` | **Activity (tab)** — Completed services timeline | PropertyGate |
+| `/customer/routine` | Build Routine (tab) | PropertyGate |
 | `/customer/routine/review` | Routine Review (4-week preview) | PropertyGate |
 | `/customer/routine/confirm` | Routine Confirmation | PropertyGate |
+| `/customer/property` | Property Profile | — |
+| `/customer/plans` | Plans & Subscription (via More) | — |
+| `/customer/plans/:planId` | Plan Detail | — |
+| `/customer/subscribe` | Checkout | — |
 | `/customer/service-day` | Service Day Assignment | PropertyGate |
 | `/customer/build` | Build (redirects to Routine) | PropertyGate |
-| `/customer/history` | Service History | PropertyGate |
-| `/customer/visits` | Visit Timeline (alias) | PropertyGate |
+| `/customer/visits` | → Redirects to `/customer/schedule` | PropertyGate |
+| `/customer/history` | → Redirects to `/customer/activity` | PropertyGate |
+| `/customer/timeline` | → Redirects to `/customer/activity` | PropertyGate |
 | `/customer/visits/:jobId` | Visit Detail | PropertyGate |
 | `/customer/issues` | Submitted Issues | PropertyGate |
 | `/customer/subscription` | Current Subscription | PropertyGate |
@@ -42,8 +45,10 @@
 | `/customer/support/tickets/:ticketId` | Ticket Detail | PropertyGate |
 | `/customer/settings` | Account Settings | PropertyGate |
 | `/customer/services` | Service Catalog | PropertyGate |
-| `/customer/more` | More Menu | PropertyGate |
+| `/customer/more` | More Menu (tab) | PropertyGate |
 | `/customer/notifications` | Notification Inbox | — |
+
+**Bottom Tab Bar**: Home | Schedule | Routine | Activity | More
 
 ---
 
@@ -51,36 +56,38 @@
 
 | Route | Page |
 |-------|------|
-| `/provider` | Dashboard |
-| `/provider/onboarding` | Onboarding Hub |
-| `/provider/onboarding/org` | Step 1: Org Setup |
-| `/provider/onboarding/coverage` | Step 2: Zone Coverage |
-| `/provider/onboarding/capabilities` | Step 3: SKU Authorization |
-| `/provider/onboarding/compliance` | Step 4: Insurance/Tax/Background |
-| `/provider/onboarding/review` | Step 5: Final Review |
-| `/provider/jobs` | Job List |
-| `/provider/jobs/:jobId` | Job Detail |
-| `/provider/jobs/:jobId/checklist` | Job Checklist |
-| `/provider/jobs/:jobId/photos` | Job Photos |
-| `/provider/jobs/:jobId/complete` | Job Complete |
-| `/provider/history` | Job History |
-| `/provider/skus` | Authorized SKUs |
-| `/provider/earnings` | Earnings Overview |
-| `/provider/payouts` | Payout Status |
-| `/provider/payouts/history` | Payout History |
-| `/provider/performance` | Performance Metrics |
-| `/provider/organization` | Org Management |
-| `/provider/coverage` | Coverage & Capacity |
-| `/provider/settings` | Account Settings |
-| `/provider/support` | Support |
-| `/provider/support/tickets/:ticketId` | Ticket Detail |
-| `/provider/referrals` | Referrals |
-| `/provider/referrals/invite-customers` | Invite Customers |
-| `/provider/insights` | Growth Insights |
-| `/provider/insights/history` | Insights History |
-| `/provider/apply` | Provider Application |
-| `/provider/more` | More Menu |
-| `/provider/notifications` | Notification Inbox |
+| `/provider` | **Dashboard (Home tab)** | |
+| `/provider/jobs` | **Job List (Jobs tab)** | |
+| `/provider/earnings` | **Earnings Center (Earn tab)** — merged earnings + payouts | |
+| `/provider/performance` | **Score (Score tab)** — performance + gamification | |
+| `/provider/more` | **More Menu (tab)** | |
+| `/provider/onboarding` | Onboarding Hub | |
+| `/provider/onboarding/org` | Step 1: Org Setup | |
+| `/provider/onboarding/coverage` | Step 2: Zone Coverage | |
+| `/provider/onboarding/capabilities` | Step 3: SKU Authorization | |
+| `/provider/onboarding/compliance` | Step 4: Insurance/Tax/Background | |
+| `/provider/onboarding/review` | Step 5: Final Review | |
+| `/provider/jobs/:jobId` | Job Detail | |
+| `/provider/jobs/:jobId/checklist` | Job Checklist | |
+| `/provider/jobs/:jobId/photos` | Job Photos | |
+| `/provider/jobs/:jobId/complete` | Job Complete | |
+| `/provider/history` | Job History | |
+| `/provider/skus` | Authorized SKUs | |
+| `/provider/payouts` | Payout Status (also via Earn tab) | |
+| `/provider/payouts/history` | Payout History | |
+| `/provider/organization` | Org Management (via More) | |
+| `/provider/coverage` | Coverage & Availability (via More) | |
+| `/provider/settings` | Account Settings (via More) | |
+| `/provider/support` | Support (via More) | |
+| `/provider/support/tickets/:ticketId` | Ticket Detail | |
+| `/provider/referrals` | Referrals (via More → Growth) | |
+| `/provider/referrals/invite-customers` | Invite Customers | |
+| `/provider/insights` | Growth Insights | |
+| `/provider/insights/history` | Insights History | |
+| `/provider/apply` | Provider Application | |
+| `/provider/notifications` | Notification Inbox | |
+
+**Bottom Tab Bar**: Home | Jobs | Earn | Score | More
 
 ---
 
@@ -148,12 +155,26 @@ Customer Signup:
 5. Build routine (select SKUs + cadences)
 6. Confirm → first service week scheduled
 
+Customer Weekly Loop:
+1. Home tab → see "Thursday service" card → feel assured
+2. Schedule tab → calendar shows dot on Thursday → see service details
+3. After service → Activity tab → see receipt + photos → feel satisfied
+4. Optionally: Home suggestion → Routine tab → add service → expand subscription
+
 Build Routine:
 1. Select SKUs from catalog
 2. Set cadence per SKU (weekly, biweekly, monthly)
 3. Add seasonal boosts (optional)
 4. Review 4-week preview
 5. Confirm routine
+
+Provider Daily Workflow:
+1. Home tab → see today's jobs count + projected earnings
+2. Lock route → Jobs tab → map view → drive to first stop
+3. Job detail → checklist → photos → complete → earning toast
+4. Repeat through day
+5. Earn tab → see daily running total → feel productive
+6. Score tab (weekly) → review metrics + streak
 
 Provider Job Completion:
 1. View today's jobs

@@ -1,12 +1,14 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useJobDetail } from "@/hooks/useJobDetail";
 import { useJobActions } from "@/hooks/useJobActions";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { ChevronLeft, CheckCircle2, Camera, AlertTriangle, Send, PartyPopper } from "lucide-react";
+import { ChevronLeft, CheckCircle2, Camera, AlertTriangle, Send, PartyPopper, DollarSign } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { toast as sonnerToast } from "sonner";
 import { useState, useMemo } from "react";
 import { LevelSufficiencyForm } from "@/components/provider/LevelSufficiencyForm";
 
@@ -17,6 +19,8 @@ export default function ProviderJobComplete() {
   const actions = useJobActions(jobId);
   const [summary, setSummary] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [earnedCents, setEarnedCents] = useState<number | null>(null);
 
   // Track which SKUs have completed their level feedback
   const [completedLevelSkus, setCompletedLevelSkus] = useState<Set<string>>(new Set());
@@ -52,19 +56,40 @@ export default function ProviderJobComplete() {
   };
 
   const handleSubmit = async () => {
+    if (submitting) return;
+    setSubmitting(true);
     try {
       const result = await actions.completeJob.mutateAsync(summary || undefined);
       const res = result as any;
       if (res?.status === "INCOMPLETE") {
         toast({ title: "Cannot complete", description: "Some requirements are still missing", variant: "destructive" });
-      } else if (res?.status === "PARTIAL_COMPLETE") {
-        toast({ title: "Partially complete", description: `${res.open_issues} open issue(s) remain` });
-        setSubmitted(true);
-      } else {
-        setSubmitted(true);
+        setSubmitting(false);
+        return;
       }
+
+      // Try to fetch the earning for this job (may be computed async)
+      try {
+        const { data: earning } = await supabase
+          .from("provider_earnings")
+          .select("net_amount_cents")
+          .eq("job_id", jobId!)
+          .maybeSingle();
+        if (earning?.net_amount_cents) {
+          const amount = (earning.net_amount_cents / 100).toFixed(2);
+          setEarnedCents(earning.net_amount_cents);
+          sonnerToast.success(`+$${amount} earned`);
+        }
+      } catch {
+        // Earning not yet computed — no toast, show fallback in success screen
+      }
+
+      if (res?.status === "PARTIAL_COMPLETE") {
+        toast({ title: "Partially complete", description: `${res.open_issues} open issue(s) remain` });
+      }
+      setSubmitted(true);
     } catch (e: any) {
       toast({ title: "Error", description: e.message, variant: "destructive" });
+      setSubmitting(false);
     }
   };
 
@@ -73,6 +98,18 @@ export default function ProviderJobComplete() {
       <div className="animate-fade-in p-4 flex flex-col items-center justify-center min-h-[60vh] text-center">
         <PartyPopper className="h-16 w-16 text-accent mb-4" />
         <h1 className="text-h2 mb-2">Job Submitted!</h1>
+        {earnedCents ? (
+          <div className="flex items-center gap-2 mb-2">
+            <DollarSign className="h-5 w-5 text-success" />
+            <span className="text-lg font-bold text-success">
+              +${(earnedCents / 100).toFixed(2)} earned
+            </span>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground mb-2">
+            Earnings will appear in your Earn tab
+          </p>
+        )}
         <p className="text-muted-foreground mb-6">Great work. Your job has been recorded.</p>
         <Button onClick={() => navigate("/provider/jobs")}>Back to Jobs</Button>
       </div>
@@ -175,7 +212,7 @@ export default function ProviderJobComplete() {
         className="w-full"
         size="lg"
         onClick={handleSubmit}
-        disabled={!canSubmit || actions.completeJob.isPending}
+        disabled={!canSubmit || submitting}
       >
         <Send className="h-4 w-4 mr-2" />
         {!allLevelFeedbackDone

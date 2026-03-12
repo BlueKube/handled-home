@@ -471,12 +471,13 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Who**: Authenticated customer with property set up
 **Purpose**: Central hub — see next visit, routine status, suggestions, and quick actions
 
-### Screen 7.1: Customer Dashboard
+### Screen 7.1: Customer Dashboard (Simplified)
 
 **Layout**:
 - Bottom tab bar visible (Home tab active)
 - p-6, pb-24 (account for tab bar)
 - Content scrollable
+- **Design goal**: Calm status board. Answers "Is everything OK with my home right now?" at a glance. Urgent when action needed, serene when all clear.
 
 **Sections (top to bottom)**:
 
@@ -501,30 +502,32 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - **Draft routine nudge**: Card with Sparkles icon + "Finish your routine" + "You have X services ready to confirm." + "Continue →" + dismiss X
    - **No routine**: Card with Plus icon + "Start your routine" + "Choose services to keep your home maintained automatically."
 
-7. **Next Up Section**
-   - Label: "NEXT UP" (uppercase caption) + "View all upcoming →" link
+7. **Next Up Section** (prominent — the hero card)
+   - Label: "NEXT UP" (uppercase caption) + "View schedule →" link (navigates to `/customer/schedule`)
    - NextVisitCard component (shows date, services, provider, ETA)
 
 8. **Handle Balance Bar** (conditional, only if subscription with handles)
    - Progress bar: handles used / handles per cycle
 
-9. **This Cycle Summary**
-   - Service count, names, handles usage
-
-10. **Property Health Widget**
+9. **Property Health Widget**
     - Health score visualization
 
-11. **Suggested Services Section**
-    - Horizontal scroll of AI-suggested services with "Add to routine" CTA
+10. **Suggested Services Section** (single top suggestion)
+    - One AI-suggested service card with "Add to routine" CTA
+    - "See more →" link to full routine catalog
 
-12. **Recent Receipt**
-    - Latest completed visit card with photo thumbnail
+11. **Seasonal Plan Card** (conditional)
 
-13. **Seasonal Plan Card** (conditional)
+12. **First Service Celebration** (conditional, one-time overlay)
 
-14. **Floating Add Button** (fixed, bottom-right above tab bar)
+13. **Floating Add Button** (fixed, bottom-right above tab bar)
     - Circle button with Plus icon
     - Opens AddServiceDrawer sheet
+
+**Removed from Dashboard** (moved to dedicated tabs):
+- ~~This Cycle Summary~~ → Moved to Schedule tab
+- ~~Recent Receipt~~ → Moved to Activity tab
+- ~~Home Timeline link~~ → Activity is now a primary tab
 
 **Sheets/Modals**:
 - **AddServiceDrawer**: Bottom sheet with service search + add capability
@@ -673,28 +676,96 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 ---
 
-# FLOW 11: Visits & History
+# FLOW 11: Schedule & Activity
 
-### Screen 11.1: Upcoming Visits
+### Screen 11.1: Schedule (Primary Tab)
 
-**Route**: `/customer/upcoming`
+**Route**: `/customer/schedule`
+**Tab**: Schedule (2nd tab, CalendarDays icon)
+**Purpose**: Answer "When is my next service?" — the #1 reason customers open the app.
 
-**Sections**:
-1. Header: page title
-2. Visit cards (repeating):
-   - Date/time, task summary, status badges (due soon/overdue)
-   - Appointment window info, ETA, duration estimate
-   - Book Appointment CTA, Reschedule CTA
-3. Empty: "No upcoming visits"
+**Layout**:
+- Bottom tab bar visible (Schedule tab active)
+- p-4, pb-24
 
-### Screen 11.2: Visit History
+**Sections (top to bottom)**:
 
-**Route**: `/customer/history` or `/customer/visits`
+1. **Header**
+   - H2: "Schedule"
 
-**Sections**:
-1. Header
-2. Visit cards (repeating): photo thumbnail, service summary, date, status badge
-3. Tap → visit detail
+2. **Month Calendar** (mini calendar widget)
+   - Compact month grid (Mon–Sun columns)
+   - Current month shown, swipe left/right to navigate months
+   - Days with scheduled services show a cyan dot below the date number
+   - Today highlighted with accent circle
+   - Tapping a day with a dot scrolls the list below to that date
+   - Caption below calendar: "X services this month"
+
+3. **This Cycle Summary** (Card, moved from Dashboard)
+   - Service count badges (top 3 services + "+X more")
+   - Handle usage bar: "X/Y handles used this cycle"
+   - "Edit routine →" link to `/customer/routine`
+
+4. **Upcoming Visits List**
+   - Section label: "UPCOMING" (uppercase caption)
+   - Visit cards (repeating):
+     - Date header (e.g., "Thursday, Mar 13")
+     - Card: Service names, provider name + avatar, estimated time window
+     - Status badge: Scheduled / En Route / In Progress
+     - Tap → `/customer/visits/:jobId` (Visit Detail)
+   - Empty state: CalendarDays icon + "No upcoming visits" + "Your next service will appear here once scheduled."
+
+5. **Service Day Info** (Card, compact)
+   - CalendarDays icon + "Your service day: {dayOfWeek}"
+   - Link: "Change preferences →" to `/customer/service-day`
+
+**Redirects**:
+- `/customer/visits` → `/customer/schedule`
+- `/customer/upcoming` → `/customer/schedule`
+
+### Screen 11.2: Activity (Primary Tab)
+
+**Route**: `/customer/activity`
+**Tab**: Activity (4th tab, Clock icon)
+**Purpose**: Show proof that services were done. The retention moat — cumulative value that makes leaving feel like losing a record.
+
+**Layout**:
+- Bottom tab bar visible (Activity tab active)
+- p-4, pb-24
+
+**Sections (top to bottom)**:
+
+1. **Header**
+   - H2: "Activity"
+
+2. **Stats Summary** (3-pill row, horizontal)
+   - Shield icon: "{totalServices} services"
+   - Camera icon: "{totalPhotos} photos"
+   - Calendar icon: "{memberMonths} months"
+
+3. **Value Card** (Card, accent/5 bg)
+   - "Your home has received {totalServices} professional services since {joinDate}."
+   - Badge: "Insured providers · Proof on every visit"
+
+4. **Recent Receipt Highlight** (Card, if last completed job exists)
+   - Latest completed visit card with photo thumbnail
+   - Service names, date, provider name
+   - "View receipt →" CTA
+   - Tap → `/customer/visits/:jobId`
+
+5. **Timeline** (grouped by month)
+   - Month headers: "March 2026", "February 2026", etc.
+   - Left border accent line (timeline visual)
+   - Per-visit entry:
+     - Date: "EEE, MMM d" format
+     - Service names (Badge per service)
+     - Camera icon + photo count (if photos exist)
+     - Tap → `/customer/visits/:jobId`
+   - Empty state: Clock icon + "No completed services yet" + "Your service history will build here over time."
+
+**Redirects**:
+- `/customer/history` → `/customer/activity`
+- `/customer/timeline` → `/customer/activity`
 
 ### Screen 11.3: Visit Detail (Receipt)
 
@@ -956,7 +1027,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 2. **Role Switcher** (conditional, if user has multiple roles)
 
 3. **Menu Sections** (grouped cards with dividers):
-   - **Account**: Property (MapPin) | Billing (Wallet)
+   - **Account**: Plans & Subscription (CreditCard) | Property (MapPin) | Billing (Wallet)
    - **Community**: Referrals (Users) | Support (HelpCircle)
    - **Preferences**: Settings (Settings)
 
@@ -967,6 +1038,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - LogOut icon + "Sign Out"
 
 Each menu item: icon + label + ChevronRight, tappable
+
+**Note**: "Plans & Subscription" replaces the former Plans primary tab. It links to `/customer/plans` which serves as both plan browsing (for new/upgrading customers) and subscription management (for active subscribers).
 
 ### Screen 16.2: Account Settings
 
@@ -1060,10 +1133,10 @@ Each menu item: icon + label + ChevronRight, tappable
 **Who**: Active provider
 **Purpose**: Daily operations hub — today's jobs, earnings, route status
 
-### Screen 18.1: Provider Dashboard
+### Screen 18.1: Provider Dashboard (Primary Tab — Home)
 
 **Layout**:
-- Bottom tab bar (Jobs tab may be active, or custom provider tabs)
+- Bottom tab bar visible (Home tab active)
 - p-4, pb-24
 
 **Sections (top to bottom)**:
@@ -1276,11 +1349,14 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/provider/more`
 
 **Sections** (same structure as customer More menu):
-- **Business**: Organization (Building2) | Work Setup (MapPin)
-- **Help & Growth**: Support (HelpCircle) | Referrals (Users)
+- **Business**: Organization (Building2) | Coverage & Availability (Map)
+- **Growth**: BYOC Center (UserPlus) | Referrals (Users)
+- **Help**: Support (HelpCircle)
 - **Preferences**: Settings (Settings)
 - Appearance toggle
 - Sign Out
+
+**Note**: Coverage & Availability replaces the former Coverage primary tab. BYOC Center and Referrals are grouped under "Growth" to make the revenue-boosting tools discoverable as a category.
 
 ### Screen 24.2: Provider Settings
 
@@ -1529,19 +1605,388 @@ Each menu item: icon + label + ChevronRight, tappable
 | Tab | Icon | Route | Label |
 |-----|------|-------|-------|
 | 1 | Home | `/customer` | Home |
-| 2 | Shield | `/customer/plans` | Plans |
-| 3 | Sparkles | `/customer/routine` | Routine |
-| 4 | Clock | `/customer/visits` | Visits |
+| 2 | CalendarDays | `/customer/schedule` | Schedule |
+| 3 | ListChecks | `/customer/routine` | Routine |
+| 4 | Clock | `/customer/activity` | Activity |
 | 5 | MoreHorizontal | `/customer/more` | More |
+
+**Navigation story (left to right):** "My home → What's next → My services → What got done → Everything else"
+
+**Rationale:** Plans was a setup-once page consuming a primary tab. Schedule (upcoming visits) and Activity (completed services timeline) are higher-frequency destinations. Plans moves to the More menu under Account.
 
 ## Bottom Tab Bar — Provider
 | Tab | Icon | Route | Label |
 |-----|------|-------|-------|
-| 1 | Briefcase | `/provider/jobs` | Jobs |
-| 2 | DollarSign | `/provider/payouts` | Payouts |
-| 3 | BarChart | `/provider/performance` | Performance |
-| 4 | Map | `/provider/coverage` | Coverage |
+| 1 | Home | `/provider` | Home |
+| 2 | Briefcase | `/provider/jobs` | Jobs |
+| 3 | DollarSign | `/provider/earnings` | Earn |
+| 4 | BarChart3 | `/provider/performance` | Score |
 | 5 | MoreHorizontal | `/provider/more` | More |
+
+**Navigation story (left to right):** "My overview → My work → My money → My standing → Everything else"
+
+**Rationale:** The Dashboard (today's queue, route lock, projected earnings) was not previously a tab — providers couldn't reach it via tab navigation. Earn merges Earnings + Payouts into one money center. Score rebrands Performance with gamification potential. Coverage (setup-once) moves to More.
 
 ## Admin — Sidebar Navigation
 Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections instead of bottom tabs.
+
+---
+
+# FLOW 31: Bundle Savings Calculator
+
+**Component**: `BundleSavingsCard`
+**Where**: Plans page, Onboarding Plan Step
+**Purpose**: Show customers how much they save vs. hiring separate vendors — reinforces subscription value without exposing per-handle economics
+
+### Screen 31.1: Bundle Savings Card
+
+**Layout**:
+- Card with `bg-accent/5 border-accent/20`
+- Left: 36px accent circle with PiggyBank icon
+- Right: text content
+
+**Sections**:
+1. **Headline**: "Save ~$X/mo vs. separate vendors" (bold, 14px)
+2. **Subtext**: "That's X% less than hiring individually" (muted, 12px)
+3. **Service breakdown** (mt-2, space-y-1):
+   - Per service: Check icon + service name + strikethrough separate price (right-aligned)
+   - Bottom row: PiggyBank icon + "Handled Home" + subscription price (accent, bold)
+   - Separated by thin accent/10 border
+
+**Data**: Tier-based services (Essential: lawn; Plus: lawn+pest; Premium: lawn+pest+pool). Conservative market-rate estimates.
+
+**Key constraint**: Never show per-handle math. Show monthly totals only.
+
+---
+
+# FLOW 32: First Service Celebration
+
+**Component**: `FirstServiceCelebration`
+**Where**: Customer Dashboard (overlay, triggered once)
+**Purpose**: Create emotional "aha" moment after first completed service
+
+### Screen 32.1: Celebration Overlay
+
+**Layout**:
+- Full-screen fixed overlay, `z-50`, `bg-background/95 backdrop-blur-sm`
+- Content centered, max-w-sm, space-y-6
+
+**Sections**:
+1. **Icon**: PartyPopper (64px, accent) with spring animation + rotation wiggle
+2. **Headline**: "Your home is handled!" (24px bold)
+3. **Subtext**: "Your first service is complete. Your subscription is already working for you." (muted, 14px)
+4. **Service summary card** (bg-card, rounded-2xl, border, p-4):
+   - Star icon + "Serviced by {providerName}" (if available)
+   - Date (muted, 12px)
+   - "Your proof-of-work receipt is ready to view..." (muted, 12px)
+5. **Primary CTA**: "View Your Receipt" (default button, h-12, rounded-xl, with ArrowRight)
+6. **Secondary CTA**: "Share the news" (outline, with Share2 icon)
+7. **Dismiss**: "Continue to dashboard" (text link, muted)
+
+**Trigger**: Once only (localStorage flag). Shown when `lastCompletedJob` exists and flag not set.
+
+---
+
+# FLOW 33: Home Timeline
+
+**Route**: `/customer/timeline`
+**Who**: Customer
+**Purpose**: Chronological service history that reinforces subscription value and creates switching costs
+
+### Screen 33.1: Home Timeline Page
+
+**Layout**:
+- Standard page with back arrow + "Home Timeline" header
+- pb-24 for tab bar clearance
+
+**Sections**:
+1. **Stats row** (grid-cols-3, gap-3):
+   - CheckCircle + total services count + "Services"
+   - Camera + total photos count + "Photos"
+   - Clock + membership duration + "Member"
+2. **Value card** (bg-accent/5, border-accent/20):
+   - TrendingUp icon + "Your subscription has delivered X services" + "All verified with proof-of-work receipts"
+3. **Trust badge** (centered): Shield icon + "Insured providers · Proof on every visit"
+4. **Monthly groups**:
+   - Calendar icon + month name + visit count badge (right-aligned)
+   - Left border (accent/20, 2px) with indented job cards:
+     - CheckCircle + service names + date + photo count
+     - Tappable → navigates to `/customer/visits/:jobId`
+5. **Bottom CTA**: "View all photos" (outline button, Camera icon)
+
+**Empty state**: Calendar icon + "No completed services yet" + subtext
+
+---
+
+# FLOW 34: Provider Earnings Projection
+
+**Component**: `EarningsProjectionCard`
+**Where**: Provider Dashboard, Provider Onboarding (future)
+**Purpose**: Show providers income potential to kill ambiguity and reduce churn
+
+### Screen 34.1: Dashboard Variant
+
+**Layout**:
+- Card with `bg-primary/5 border-primary/20`
+- Left: 36px primary circle with Target icon
+
+**Content**:
+- Headline: "You're at X% capacity" (or "nearly at full capacity" if ≥80%)
+- Subtext: "X jobs/week · avg finish Xh" or "est. $X/mo"
+- Growth CTA (accent, 12px): "Fill your schedule to earn $X more/mo" (if <90% capacity)
+
+### Screen 34.2: Onboarding Variant
+
+**Layout**:
+- Card with `bg-accent/5 border-accent/20`
+- TrendingUp icon circle + "Earnings potential in your zone"
+
+**Content**:
+- 2-column grid:
+  - "At 60% capacity" + weekly estimate (foreground, bold)
+  - "Full schedule" + weekly estimate (accent, bold)
+- Footer: Zap icon + "Dense routes mean less driving, more earning"
+
+**Key constraint**: Never show customer pricing or subscription spread. Show payout amounts only.
+
+---
+
+# FLOW 35: BYOC Banner (Provider Dashboard)
+
+**Component**: `ByocBanner`
+**Where**: Provider Dashboard (between stats and job queue)
+**Purpose**: Make BYOC the hero growth action for providers
+
+### Screen 35.1: BYOC Banner Card
+
+**Layout**:
+- Card with `bg-accent/5 border-accent/20`
+- Left: 36px accent circle with Users icon
+
+**Content**:
+- Headline: "Bring your existing customers" (bold, 14px)
+- Subtext: "Earn bonus income on top of your guaranteed route pay when your own customers join Handled Home." (muted, 12px)
+- Activation count (if >0): DollarSign + "X customers activated" (accent, 12px)
+- CTA: "Create invite link" (outline sm button, ArrowRight icon)
+
+---
+
+# FLOW 36: Trust Bar (Onboarding Social Proof)
+
+**Component**: `TrustBar`
+**Where**: Onboarding Zone Check step, Plan Selection step
+**Purpose**: Reduce cold-funnel fear with trust signals
+
+### Screen 36.1: Trust Bar
+
+**Layout**:
+- Horizontal flex, centered, py-2.5 px-3, bg-muted/50 rounded-xl
+- 3 items separated by 12px-tall vertical dividers (bg-border)
+
+**Items**:
+1. Shield icon (primary) + "Insured providers"
+2. Clock icon (accent) + "Satisfaction guarantee"
+3. XCircle icon (muted) + "Cancel anytime"
+
+**Typography**: 12px, muted-foreground
+
+---
+
+# FLOW 37: Referral Milestones
+
+**Where**: Customer Referrals page (below credits summary)
+**Purpose**: Create urgency and tiered goals for referral growth
+
+### Screen 37.1: Milestone Card
+
+**Layout**:
+- Card with CardHeader ("Referral Milestones" + Target icon) and CardContent
+
+**Content**:
+1. **Progress headline**: "X more referrals to unlock: {reward}" (14px medium)
+2. **Progress bar**: `<Progress>` component, h-2
+3. **Count label**: "X / Y referrals" (muted, 12px)
+4. **3-column tier grid** (gap-2):
+   - Per tier: icon + label + reward text
+   - Achieved: bg-accent/10, border-accent/30, accent icon
+   - Locked: bg-muted/30, border-border, muted icon
+
+**Tiers**:
+- Starter (Star icon): 3 referrals → $30 credit
+- Ambassador (Trophy icon): 5 referrals → Free month
+- Champion (Gift icon): 10 referrals → VIP status
+
+---
+
+# FLOW 38: Navigation Restructure
+
+**Purpose**: Redesign bottom tab navigation for both Customer and Provider roles based on first-principles analysis of user frequency patterns. Tabs should reflect daily-use destinations, not setup-once pages.
+
+## Customer Navigation Change
+
+**Before**: `Home | Plans | Routine | Visits | More`
+**After**: `Home | Schedule | Routine | Activity | More`
+
+### Rationale
+- **Plans** (setup-once) replaced by **Schedule** (checked 2-3x/week — "when is my next service?")
+- **Visits** (ambiguous) replaced by **Activity** (clear — "what's been done to my home")
+- **Routine** stays — it's the subscription flywheel and a differentiator
+- Dashboard simplified by offloading ThisCycleSummary → Schedule, RecentReceipt → Activity
+
+### Customer Weekly Loop
+```
+Monday:    Home → see "Thursday service" card → feel assured → close
+Thursday:  Push notification → Schedule → see ETA → wait
+Thursday:  Push notification → Activity → see receipt + photos → satisfied
+Saturday:  Home → see suggestion → Routine → add pool cleaning → done
+```
+
+**Every interaction reinforces the value proposition. The loop: anticipate → receive → verify → expand.**
+
+## Provider Navigation Change
+
+**Before**: `Jobs | Payouts | Performance | Coverage | More`
+**After**: `Home | Jobs | Earn | Score | More`
+
+### Rationale
+- **Dashboard added as Home tab** — it has today's queue, route lock, projected earnings, BYOC banner. Was previously unreachable via tabs.
+- **Payouts** replaced by **Earn** — broader framing includes real-time earnings, projections, and BYOC bonuses (not just past payouts)
+- **Performance** rebranded as **Score** — more engaging, implies gamification
+- **Coverage** (setup-once) moves to More
+
+### Provider Daily Workflow
+```
+7:00 AM:   Home → see 6 jobs → tap "Lock Route" → see projected $187
+7:30 AM:   Jobs → map view → drive to first stop
+8:00 AM:   Job detail → checklist → photos → complete → "+$32" toast
+3:00 PM:   Earn → see "$187 earned today" → feel productive
+Friday:    Earn → see "Payout: $843 sent" → feel paid
+Sunday:    Score → see 98% on-time, 15-day streak → feel proud
+```
+
+## Route Redirects
+
+| Old Route | Redirects To | Reason |
+|-----------|-------------|--------|
+| `/customer/visits` | `/customer/schedule` | Renamed tab |
+| `/customer/upcoming` | `/customer/schedule` | Merged into Schedule |
+| `/customer/history` | `/customer/activity` | Merged into Activity |
+| `/customer/timeline` | `/customer/activity` | Merged into Activity |
+
+**Note**: `/customer/visits/:jobId` remains unchanged (Visit Detail / Receipt page). Only the list views redirect.
+
+## More Menu Restructuring
+
+### Customer More Menu
+```
+Account
+  ├─ Plans & Subscription    (CreditCard icon)
+  ├─ Property                (MapPin icon)
+  └─ Billing                 (Wallet icon)
+
+Community
+  ├─ Referrals               (Users icon)
+  └─ Support                 (HelpCircle icon)
+
+Preferences
+  └─ Settings                (Settings icon)
+```
+
+### Provider More Menu
+```
+Business
+  ├─ Organization            (Building2 icon)
+  └─ Coverage & Availability (Map icon)
+
+Growth
+  ├─ BYOC Center             (UserPlus icon)
+  └─ Referrals               (Users icon)
+
+Help
+  └─ Support                 (HelpCircle icon)
+
+Preferences
+  └─ Settings                (Settings icon)
+```
+
+## Page Merges
+
+| Current (separate pages) | Merged Into | Notes |
+|--------------------------|-------------|-------|
+| Upcoming Visits + Visit History | Schedule + Activity | Future visits → Schedule tab; past visits → Activity tab |
+| HomeTimeline + History | Activity | Activity is the enriched timeline with stats |
+| Earnings + Payouts | Earn | Single money center with period tabs |
+| Performance + Insights | Score | Single performance hub |
+
+---
+
+# FLOW 39: Sprint Implementation Plan
+
+## Sprint 1: Navigation Shell (Foundation)
+
+**Goal**: Change tab bars, routes, redirects. No page content changes. Everything works — tabs just point to new destinations.
+
+### Files to modify:
+1. `src/components/BottomTabBar.tsx` — Update customerTabs and providerTabs arrays
+2. `src/App.tsx` — Add routes for `/customer/schedule` and `/customer/activity`, add redirect routes
+3. `src/components/MoreMenu.tsx` — Restructure menu sections for both roles
+
+### Changes:
+- **BottomTabBar.tsx**: Customer tabs → Home, Schedule (`/customer/schedule`), Routine, Activity (`/customer/activity`), More. Provider tabs → Home (`/provider`), Jobs, Earn (`/provider/earnings`), Score (`/provider/performance`), More.
+- **App.tsx**: Add `<Route path="/customer/schedule" element={<CustomerSchedule />} />`, `<Route path="/customer/activity" element={<CustomerActivity />} />`, redirect routes for old paths.
+- **MoreMenu.tsx**: Add "Plans & Subscription" to customer Account section. Add "Coverage & Availability" and "Growth" section to provider menu.
+
+### New files:
+- `src/pages/customer/Schedule.tsx` — Initially wraps existing upcoming visits functionality
+- `src/pages/customer/Activity.tsx` — Initially wraps existing HomeTimeline component
+
+### Verification:
+- All tabs navigate correctly
+- Old routes redirect properly
+- `/customer/visits/:jobId` still works
+- More menus show updated sections
+- `npm run build` passes
+
+---
+
+## Sprint 2: Customer Page Refinement
+
+**Goal**: Build the Schedule page with calendar, enrich the Activity page, simplify Dashboard.
+
+### Files to modify:
+1. `src/pages/customer/Schedule.tsx` — Full implementation with mini calendar + upcoming list + cycle summary
+2. `src/pages/customer/Activity.tsx` — Full implementation merging HomeTimeline stats + chronological history
+3. `src/pages/customer/Dashboard.tsx` — Remove ThisCycleSummary, RecentReceipt, HomeTimeline link
+
+### New components:
+- `src/components/customer/MiniCalendar.tsx` — Month grid calendar widget with service day dots
+
+### Verification:
+- Schedule shows calendar with dots on service days
+- Tapping a calendar day scrolls to that date's visits
+- Activity shows stats + grouped timeline + receipts
+- Dashboard is cleaner (5 focused sections)
+- `npm run build` passes
+
+---
+
+## Sprint 3: Provider Enhancements & Polish
+
+**Goal**: Polish provider experience — real-time earning feedback, Score page gamification, map view improvements.
+
+### Files to modify:
+1. `src/pages/provider/Performance.tsx` — Add streak tracking, zone rank, gamification elements
+2. `src/pages/provider/Earnings.tsx` — Ensure combined view works well as primary money tab
+3. `src/pages/provider/JobComplete.tsx` — Add earning toast after job completion ("+$32 earned" animation)
+
+### Optional enhancements:
+- Provider Score badges and streak counter
+- Real-time earning animation on job completion
+- Map view prominence on Jobs page
+
+### Verification:
+- Score tab shows engaging performance metrics
+- Earn tab is comprehensive money center
+- Job completion shows earning feedback
+- `npm run build` passes
+- Full walkthrough on 390×844 viewport
