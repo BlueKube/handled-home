@@ -304,34 +304,6 @@ Every meaningful PR should include:
 
 ---
 
-## Roadmap: Round 3 Sprints (Current Direction)
-### 3A — Levels (SKU Variants)
-- scope/time/proof/handles buckets
-- provider recommendation next time
-- courtesy upgrade + guardrails
-
-### 3B — Coverage Map + Property Signals
-- what’s already handled + not applicable
-- sizing tiers (sqft/yard/windows/stories)
-- feeds smart defaults + relevance
-
-### 3C — Growth Surfaces + Add Service Drawer + Home Restructure
-- Home becomes action-first and calm
-- Add Service Drawer enables one-tap expansion + Undo
-- suggestion throttling + suppression
-
-### 3D — Switch Kit + Ops Cockpit v1
-- safe scheduled switching from incumbents
-- operator control tower with drilldowns and actions
-
-### 3E — Handled Receipts (Proof-of-Work Artifact)
-- premium receipt per visit (photos + checklist + notes)
-- tasteful post-visit actions:
-  - update Level going forward
-  - add adjacent service next cycle
-
----
-
 ## What Success Looks Like
 A customer shifts from:
 > “I need to find someone for X…”
