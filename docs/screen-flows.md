@@ -1,6 +1,8 @@
 # Handled Home — AI Design Specs: Screen Flows
 
 > **Purpose**: Feed this document into Google Stitch or Figma Make to generate production-quality mobile screen designs. Every screen is described with layout, copy, components, states, and design system tokens.
+>
+> **Business context**: Plan pricing, tier structure, bundle design, provider payouts, and margin mechanics are defined in `docs/operating-model.md`. Reference that document for any copy decisions involving pricing, plan framing, or provider economics.
 
 ---
 
@@ -371,14 +373,18 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 3. **Plan Cards** (stacked, space-y-4)
    - Each PlanCard:
-     - Plan name (H3)
+     - Plan name (H3) — tier names: Essential, Plus, Premium
+     - Tier positioning tagline (caption):
+       - Essential: "The basics, handled."
+       - Plus: "More covered, less to think about."
+       - Premium: "Your home, fully handled."
      - Price text (large bold)
-     - Tagline (caption)
      - Handles per cycle badge
-     - Tier highlights list (checkmark bullets)
+     - Tier highlights list (checkmark bullets) — frame as outcomes, not line items
      - "Recommended" badge (if applicable, accent border)
      - "Not available in your zone" overlay (if zone-disabled)
      - CTA: "Build Routine" button
+   - See `operating-model.md` → Plan Tier Structure for positioning guidance
 
 4. **Loading**: 3 skeleton cards (h-56 each)
 
@@ -508,6 +514,9 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 8. **Handle Balance Bar** (conditional, only if subscription with handles)
    - Progress bar: handles used / handles per cycle
+   - If rollover handles exist: "+X rolled over" badge (accent, small) to the right of the bar
+   - Rollover cap: 1.5× monthly allowance — show rollover as a positive signal, not a limit
+   - See `operating-model.md` → Rollover language
 
 9. **Property Health Widget**
     - Health score visualization
@@ -553,7 +562,9 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 3. **Handles Explainer** (education component)
 
 4. **Plan Cards** (stacked)
-   - Each card: name, price, handles, highlights, recommended badge, zone availability
+   - Each card: tier name (Essential / Plus / Premium), tier tagline, price, handles, outcome-based highlights, recommended badge, zone availability
+   - Tier taglines: Essential → "The basics, handled." | Plus → "More covered, less to think about." | Premium → "Your home, fully handled."
+   - Highlights should frame outcomes ("Recurring lawn + pest care") not line items ("2 anchor services")
    - CTA per card: "Preview" and "Build Routine" buttons
 
 5. **Footer**
@@ -704,6 +715,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 3. **This Cycle Summary** (Card, moved from Dashboard)
    - Service count badges (top 3 services + "+X more")
    - Handle usage bar: "X/Y handles used this cycle"
+   - If rollover: "+X rolled over from last cycle" caption (accent, 12px) below the bar
    - "Edit routine →" link to `/customer/routine`
 
 4. **Upcoming Visits List**
@@ -797,13 +809,15 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 7. **Courtesy Upgrade Notice** (conditional, accent border)
    - ArrowUpCircle icon + "Courtesy Upgrade Applied"
-   - "We upgraded you from Standard to Premium today so your home meets Handled standards."
-   - Button: "Update to Premium going forward"
+   - "We upgraded your [service] level today so your home meets Handled standards."
+   - Button: "Update level going forward"
+   - Copy should reference the service level name (e.g., Essential → Plus), not hardcoded tier names
 
 8. **Provider Recommendation** (conditional, accent border)
    - Lightbulb icon + "Provider Recommendation"
-   - "Your provider recommends upgrading to Premium for better results."
+   - "Your provider recommends upgrading to [next level] for better results."
    - Two buttons: "Update going forward" | "Keep current level"
+   - Level names are dynamic per SKU — see `operating-model.md` for tier structure (Essential / Plus / Premium)
 
 9. **Quick Feedback Card** (conditional, completed jobs only)
    - Satisfaction check with emoji/tag buttons
@@ -1280,6 +1294,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 4. **Monthly Projection Card** (conditional, primary tint)
    - Target icon + "At current pace: $X,XXX" + "X scheduled jobs remaining · avg $XX/job"
+   - Framing: guaranteed, predictable payout per job — no tip dependency, no surprise adjustments
 
 5. **Payout Account Status Card**
    - CheckCircle (green): "Payout account ready" + "Earnings will be deposited on schedule"
@@ -1288,9 +1303,12 @@ Each menu item: icon + label + ChevronRight, tappable
 6. **Earnings/Payouts Tabs**
    - Tab "Earnings": Earning cards with address, date, status badge, base/modifier/net breakdown (expandable)
    - Tab "Payouts": Payout cards with date, status badge, amount
+   - All payout amounts are per-job, set by SKU + Level + zone. Providers never see customer pricing.
 
 **Empty (earnings)**: DollarSign icon + "No earnings for this period" + "Complete jobs to start earning"
 **Empty (payouts)**: Banknote icon + "No payouts yet"
+
+**Design note**: Provider earnings screens should reinforce the value of predictable, guaranteed payouts and denser routes — the core provider value prop. See `operating-model.md` → Provider Payout Logic.
 
 ---
 
@@ -1636,7 +1654,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 
 **Component**: `BundleSavingsCard`
 **Where**: Plans page, Onboarding Plan Step
-**Purpose**: Show customers how much they save vs. hiring separate vendors — reinforces subscription value without exposing per-handle economics
+**Purpose**: Show customers how much they save vs. hiring separate vendors — reinforces subscription value without exposing per-handle economics. See `operating-model.md` → Bundle Design for the margin logic behind bundling anchor services with low-frequency, high-perceived-value items.
 
 ### Screen 31.1: Bundle Savings Card
 
@@ -1653,9 +1671,9 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
    - Bottom row: PiggyBank icon + "Handled Home" + subscription price (accent, bold)
    - Separated by thin accent/10 border
 
-**Data**: Tier-based services (Essential: lawn; Plus: lawn+pest; Premium: lawn+pest+pool). Conservative market-rate estimates.
+**Data**: Tier-based services (Essential: lawn; Plus: lawn+pest; Premium: lawn+pest+pool). Conservative market-rate estimates. Include low-frequency items (gutters, dryer vent, pressure washing) in higher tiers to widen perceived value gap — these items increase plan attractiveness without proportional monthly cost. See `operating-model.md` → Low-frequency, high-perceived-value items.
 
-**Key constraint**: Never show per-handle math. Show monthly totals only.
+**Key constraint**: Never show per-handle math. Show monthly totals only. Frame savings at the plan level ("Save ~$X/mo"), never per-service margin.
 
 ---
 
@@ -1746,8 +1764,9 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
   - "At 60% capacity" + weekly estimate (foreground, bold)
   - "Full schedule" + weekly estimate (accent, bold)
 - Footer: Zap icon + "Dense routes mean less driving, more earning"
+- The density message reinforces the provider economics flywheel: more density → denser routes → more stops/day → better earnings/hour → better retention
 
-**Key constraint**: Never show customer pricing or subscription spread. Show payout amounts only.
+**Key constraint**: Never show customer pricing or subscription spread. Show payout amounts only. See `operating-model.md` → Provider Payout Logic for the full economics model.
 
 ---
 
