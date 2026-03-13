@@ -145,7 +145,7 @@
 
 ---
 
-## XI. Job Execution & Provider Workflow `provider-value` `trust-builder` `provider-value` `trust-builder`
+## XI. Job Execution & Provider Workflow `provider-value` `trust-builder`
 
 83. Provider daily job list optimized for "today → next" with route-ordered stops — DONE
 84. Job detail with Level, scope bullets, access notes, proof requirements, and planned minutes — DONE
@@ -158,7 +158,7 @@
 
 ---
 
-## XII. Provider Day Command Center `provider-value` `density-driver` `provider-value` `density-driver`
+## XII. Provider Day Command Center `provider-value` `density-driver`
 
 91. Route plan locking: "Start Route" freezes route order and computes projected earnings — DONE
 92. Projected earnings banner based on completed + (historical avg × remaining stops) — DONE
@@ -167,7 +167,7 @@
 
 ---
 
-## XIII. Route Optimization `density-driver` `provider-value` `density-driver` `provider-value`
+## XIII. Route Optimization `density-driver` `provider-value`
 
 95. Nearest-neighbor route optimization using geohash/lat-lng from properties — DONE
 96. Provider manual reorder with up/down controls and audit logging — DONE
@@ -176,7 +176,7 @@
 
 ---
 
-## XIV. Photo Proof & Visit Receipts `trust-builder` `trust-builder`
+## XIV. Photo Proof & Visit Receipts `trust-builder`
 
 99. Before/after comparison slider with pointer-drag interaction — DONE
 100. Photo timeline: chronological gallery of all visit photos per property — DONE
@@ -187,7 +187,7 @@
 
 ---
 
-## XV. Billing & Payments `margin-lever` `margin-lever`
+## XV. Billing & Payments `margin-lever`
 
 105. Tokenized payment method management with add/remove/default — DONE
 106. Subscription autopay with 28-day cycle invoicing — DONE
@@ -199,7 +199,7 @@
 
 ---
 
-## XVI. Provider Payouts `provider-value` `margin-lever` `provider-value` `margin-lever`
+## XVI. Provider Payouts `provider-value` `margin-lever`
 
 112. Provider payout onboarding via Stripe Connect Express — DONE
 113. Weekly automated payout runs with minimum threshold enforcement — DONE
@@ -211,7 +211,7 @@
 
 ---
 
-## XVII. Dunning & Payment Recovery `margin-lever` `margin-lever`
+## XVII. Dunning & Payment Recovery `margin-lever`
 
 119. 5-step automated dunning sequence: +1d, +3d, +5d retry with escalating notifications — DONE
 120. Calm in-app banner: "We couldn't process your payment. Update your card." — DONE
@@ -221,7 +221,7 @@
 
 ---
 
-## XVIII. Plan Self-Service `mental-load-reduction` `margin-lever` `mental-load-reduction` `margin-lever`
+## XVIII. Plan Self-Service `mental-load-reduction` `margin-lever`
 
 124. Plan upgrade/downgrade with next-cycle default and direction detection — DONE
 125. Pending plan change banner with effective date — DONE
@@ -231,7 +231,7 @@
 
 ---
 
-## XIX. Add-ons & Contextual Services `margin-lever` `mental-load-reduction` `margin-lever` `mental-load-reduction`
+## XIX. Add-ons & Contextual Services `margin-lever` `mental-load-reduction`
 
 129. SKUs flagged as add-ons with contextual surfacing triggers (season, weather, time-since-last) — DONE
 130. One-tap add-on purchase: deduct handles or charge card — DONE
@@ -241,7 +241,7 @@
 
 ---
 
-## XX. Home Assistant Category `margin-lever` `mental-load-reduction` `mental-load-reduction` `margin-lever`
+## XX. Home Assistant Category `margin-lever` `mental-load-reduction`
 
 134. Time-boxed SKUs: 30 / 60 / 90-minute sessions with clear boundaries — DONE
 135. Customer prep requirements and privacy-safe proof rules — DONE
@@ -251,7 +251,7 @@
 
 ---
 
-## XXI. Support & Disputes `trust-builder` `mental-load-reduction` `trust-builder` `margin-lever`
+## XXI. Support & Disputes `trust-builder` `mental-load-reduction`
 
 139. Self-resolution target: ≥80% of issues resolved without human involvement — DONE
 140. Receipt-anchored issue reporting: every receipt has "Report an issue" — DONE
@@ -267,7 +267,7 @@
 
 ---
 
-## XXII. Notifications & Messaging `mental-load-reduction` `mental-load-reduction`
+## XXII. Notifications & Messaging `mental-load-reduction`
 
 150. Event bus architecture: `notification_events` → processor → inbox + push + email — DONE
 151. 3-tier priority model: Critical (always delivered), Service (default on), Marketing (default off) — DONE
@@ -285,7 +285,7 @@
 
 ---
 
-## XXIII. Customer Feedback & Provider Quality `trust-builder` `trust-builder`
+## XXIII. Customer Feedback & Provider Quality `trust-builder`
 
 163. Immediate satisfaction check on receipt view: "How did today's visit go?" (< 5 seconds) — DONE
 164. Delayed private provider review: 7–21 day randomized delay, "Providers won't know it's you" — DONE
@@ -298,7 +298,7 @@
 
 ---
 
-## XXIV. Ratings & Reviews `trust-builder` `trust-builder`
+## XXIV. Ratings & Reviews `trust-builder`
 
 171. Post-visit 1–5 star rating anchored to receipt view (not immediate post-job) — DONE
 172. Smart rating suppression: first visit or if issue already reported — DONE
@@ -306,7 +306,7 @@
 
 ---
 
-## XXV. Property Health Score `mental-load-reduction` `trust-builder` `mental-load-reduction` `trust-builder`
+## XXV. Property Health Score `mental-load-reduction` `trust-builder`
 
 174. Composite health score (0–100): regularity 40%, coverage 25%, seasonal 15%, issues 20% — DONE
 175. Dashboard widget with SVG score ring, color-coded labels, and trend arrow — DONE
@@ -315,7 +315,7 @@
 
 ---
 
-## XXVI. Referrals & Attribution `density-driver` `margin-lever` `density-driver` `margin-lever`
+## XXVI. Referrals & Attribution `density-driver` `margin-lever`
 
 178. First-touch deterministic attribution via referral link or code — DONE
 179. Milestone-based reward system: signup → subscribe → first visit → paid cycle — DONE
@@ -326,7 +326,7 @@
 
 ---
 
-## XXVII. Founding Partner & BYOC (Bring Your Own Customers) `density-driver` `provider-value` `density-driver` `provider-value`
+## XXVII. Founding Partner & BYOC (Bring Your Own Customers) `density-driver` `provider-value`
 
 184. Provider application funnel with category/ZIP intake and opportunity banners (5 variants) — DONE
 185. 12-clause legal agreement with per-clause acceptance tracking and timestamps — DONE
@@ -340,7 +340,7 @@
 
 ---
 
-## XXVIII. Growth Autopilot & Market Launch `density-driver` `density-driver`
+## XXVIII. Growth Autopilot & Market Launch `density-driver`
 
 193. Market health snapshots per zone — DONE
 194. Growth event bus for viral surface tracking — DONE
@@ -350,7 +350,7 @@
 
 ---
 
-## XXIX. Seasonal Services `margin-lever` `mental-load-reduction` `margin-lever` `mental-load-reduction`
+## XXIX. Seasonal Services `margin-lever` `mental-load-reduction`
 
 198. Seasonal service templates per zone with time windows — DONE
 199. Customer seasonal selections with window preference tracking — DONE
@@ -358,7 +358,7 @@
 
 ---
 
-## XXX. AI Intelligence Layer `margin-lever` `mental-load-reduction` `margin-lever` `mental-load-reduction`
+## XXX. AI Intelligence Layer `margin-lever` `mental-load-reduction`
 
 201. Predictive service recommendations via Gemini AI: property signals → SKU predictions with confidence scores — DONE
 202. "AI Picks for You" section in Add Service Drawer with brain icon badge — DONE
@@ -369,7 +369,7 @@
 
 ---
 
-## XXXI. Ops Cockpit & Admin Analytics `density-driver` `trust-builder` `density-driver` `trust-builder`
+## XXXI. Ops Cockpit & Admin Analytics `density-driver` `trust-builder`
 
 207. Real-time ops dashboard: today's jobs, capacity pressure, quality metrics, revenue, growth — DONE
 208. Zone health drilldowns: capacity, demand, quality, provider coverage, actions — DONE
@@ -383,7 +383,7 @@
 
 ---
 
-## XXXII. Provider Insights `provider-value` `trust-builder` `provider-value` `trust-builder`
+## XXXII. Provider Insights `provider-value` `trust-builder`
 
 216. Provider performance page: jobs completed, proof compliance %, issue rate, avg time on site — DONE
 217. Template-based coaching cues: "Add more after photos to improve proof score" — DONE
@@ -391,7 +391,7 @@
 
 ---
 
-## XXXIII. Admin Controls & Governance `margin-lever` `trust-builder` `margin-lever` `trust-builder`
+## XXXIII. Admin Controls & Governance `margin-lever` `trust-builder`
 
 219. Pricing & payout engine with zone multipliers and SKU-specific overrides — DONE
 220. Governance audit trail: every money, access, scheduling, and policy change is logged — DONE
@@ -401,7 +401,7 @@
 
 ---
 
-## XXXIV. Automation Engine `provider-value` `density-driver` `density-driver` `provider-value`
+## XXXIV. Automation Engine `provider-value` `density-driver`
 
 224. Auto-assign jobs to providers: Primary-first → Backup fallback with explainability — DONE
 225. Provider no-show detection (hourly) with auto-reassign and calm customer notification — DONE
@@ -415,7 +415,7 @@
 
 ---
 
-## XXXV. Billing Automation `margin-lever` `margin-lever`
+## XXXV. Billing Automation `margin-lever`
 
 233. Automated invoice generation with cycle-based idempotency — DONE
 234. Automated dunning with 5-step escalation ladder — DONE
