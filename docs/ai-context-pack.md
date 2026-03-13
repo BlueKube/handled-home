@@ -4,11 +4,11 @@
 > Keep this under ~250 lines so it fits comfortably in model context windows.
 
 ## 1) What this company is
-Handled Home is a subscription home-services operating system, not a commodity lead marketplace.
+Handled Home is a **managed home-maintenance platform** — not a commodity lead marketplace. Customers set up their home once, get a recommended recurring service plan, and manage all home services from one app. Providers get recurring work, less admin, and denser routes.
 
-Primary growth engine: increase services per household through one-tap bundle expansion.
+Primary growth engine: increase services per household through plan expansion and one-tap add-ons.
 Secondary engine: route density and operational reliability.
-Profit engine: **subscription spread** — the delta between what customers pay per handle and what providers are paid per job. Handles abstraction hides margin from both sides. Density widens it automatically.
+Profit engine: **subscription spread** — the delta between what customers pay for their plan and what providers are paid per job. The plan abstraction hides margin from both sides. Density widens it automatically. See `docs/operating-model.md` for full margin mechanics.
 
 ## 2) Non-negotiable product principles
 1. OS feel over marketplace feel (routine-first, not open-calendar shopping).
@@ -32,8 +32,11 @@ Profit engine: **subscription spread** — the delta between what customers pay 
 7. Optimize subscription spread margin per zone through density flywheel.
 
 ## 5) Source-of-truth map
-- Strategy: `docs/masterplan.md`
+- Strategy & vision: `docs/masterplan.md`
+- Unit economics, pricing & margin: `docs/operating-model.md`
 - Architecture/states/schema spine: `docs/global-system-architecture.md`
+- Screen specs & UI flows: `docs/screen-flows.md`
+- Route tree & page roles: `docs/app-flow-pages-and-roles.md`
 - Feature inventory: `docs/feature-list.md`, `docs/feature-list-by-role.md`
 - Execution tracker: `docs/tasks.md`
 - AI operating plan: `docs/ai-growth-operating-plan.md`
@@ -54,12 +57,13 @@ Profit engine: **subscription spread** — the delta between what customers pay 
 ## 8) Standard prompt template for new AI sessions
 Use this at the top of a new session:
 
-"You are helping ship Handled Home, a home-services subscription OS. Read and follow:
+"You are helping ship Handled Home, a managed home-maintenance platform. Read and follow:
 1) docs/ai-context-pack.md
 2) docs/masterplan.md
-3) docs/global-system-architecture.md
-4) docs/tasks.md (only relevant section)
-5) the specific feature spec(s) for this task.
+3) docs/operating-model.md (if pricing/plan/payout related)
+4) docs/global-system-architecture.md
+5) docs/tasks.md (only relevant section)
+6) the specific feature spec(s) for this task.
 
 When proposing changes:
 - optimize for services-per-household growth, provider ROI, and low ops/support overhead;

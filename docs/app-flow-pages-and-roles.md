@@ -1,6 +1,6 @@
 # app-flow-pages-and-roles.md
 
-> **Last updated:** 2026-03-11 — Updated navigation structure (Schedule/Activity tabs for Customer, Home/Earn/Score tabs for Provider).
+> **Last updated:** 2026-03-13 — Added BYOP routes (customer, provider, admin), BYOC public/provider routes, BYOP primary journey.
 
 ## Public Routes
 
@@ -9,6 +9,7 @@
 | `/auth` | AuthPage | Login / signup |
 | `/invite/:code` | InviteLanding | Referral invite deep link |
 | `/share/:shareCode` | ShareLanding | Share card deep link |
+| `/byoc/activate/:token` | BYOC Invite Landing | Provider's invite link for existing customers (see Flow 2) |
 
 ---
 
@@ -45,6 +46,8 @@
 | `/customer/support/tickets/:ticketId` | Ticket Detail | PropertyGate |
 | `/customer/settings` | Account Settings | PropertyGate |
 | `/customer/services` | Service Catalog | PropertyGate |
+| `/customer/byop` | BYOP: Recommend a Provider | PropertyGate |
+| `/customer/byop/status` | BYOP: Nomination Status | PropertyGate |
 | `/customer/more` | More Menu (tab) | PropertyGate |
 | `/customer/notifications` | Notification Inbox | — |
 
@@ -80,8 +83,11 @@
 | `/provider/settings` | Account Settings (via More) | |
 | `/provider/support` | Support (via More) | |
 | `/provider/support/tickets/:ticketId` | Ticket Detail | |
+| `/provider/byoc` | BYOC Center (via More → Growth) | |
+| `/provider/byoc/create-link` | Create BYOC Invite Link | |
 | `/provider/referrals` | Referrals (via More → Growth) | |
 | `/provider/referrals/invite-customers` | Invite Customers | |
+| `/provider/byop/:nominationId` | BYOP: Respond to Customer Nomination | |
 | `/provider/insights` | Growth Insights | |
 | `/provider/insights/history` | Insights History | |
 | `/provider/apply` | Provider Application | |
@@ -131,6 +137,8 @@
 | `/admin/payouts` | Payout Overview |
 | `/admin/payouts/providers/:providerOrgId` | Provider Ledger |
 | `/admin/exceptions` | Exception Queue |
+| `/admin/providers/byop` | BYOP Nominations Queue | |
+| `/admin/providers/byop/:nominationId` | BYOP Nomination Review | |
 | `/admin/settings` | Admin Settings |
 | `/admin/more` | More Menu |
 | `/admin/notifications` | Notification Inbox |
@@ -196,6 +204,14 @@ Provider Payout Onboarding:
 3. Return → account.updated webhook fires
 4. Status transitions to READY
 5. Next payout run includes eligible earnings
+
+BYOP (Bring Your Own Provider):
+1. Customer navigates to `/customer/byop` (via More → Community or in-app prompt)
+2. Submits provider recommendation: name, service category, contact info, optional note
+3. Admin reviews nomination at `/admin/providers/byop` — decides to invite, reject, or flag duplicate
+4. If invited: provider receives Handled Home onboarding invite (standard provider onboarding flow)
+5. Customer sees nomination status updates at `/customer/byop/status`
+6. If provider joins and is approved: admin can assign them to the customer's zone/route
 
 Admin Exception Triage:
 1. Exceptions page shows queue (severity-sorted)
