@@ -2,11 +2,18 @@
 
 > **"Your home is handled."**
 >
-> This document catalogs every feature built into Handled Home — a subscription-based home maintenance platform that replaces fragmented vendor relationships with a single, intelligent, density-optimized operating system for your home. Every item below is implemented and deployed.
+> This document catalogs every feature built into Handled Home — a managed home-maintenance platform that replaces fragmented vendor relationships with a single, intelligent, density-optimized operating system for your home. Every item below is implemented and deployed.
+>
+> **Value-prop tags**: Each section is tagged with the strategic value propositions it serves (see `operating-model.md`):
+> - `mental-load-reduction` — reduces customer coordination burden
+> - `provider-value` — improves provider business operations
+> - `density-driver` — improves zone economics and route efficiency
+> - `trust-builder` — proof, transparency, quality
+> - `margin-lever` — directly impacts subscription spread or unit economics
 
 ---
 
-## I. Authentication & Identity
+## I. Authentication & Identity `mental-load-reduction`
 
 1. Email/password signup and login with secure session persistence across app restarts — DONE
 2. Automatic profile creation and default customer role assignment on signup — DONE
@@ -19,7 +26,7 @@
 
 ---
 
-## II. Property Profiles & Home Intelligence
+## II. Property Profiles & Home Intelligence `mental-load-reduction` `density-driver`
 
 9. Single-screen property profile with structured address, access notes, gate codes, parking, and pet info — DONE
 10. Real-time zone coverage indicator as the customer types their ZIP code — DONE
@@ -32,7 +39,7 @@
 
 ---
 
-## III. Zones, Regions & Capacity Governance
+## III. Zones, Regions & Capacity Governance `density-driver`
 
 17. Region hierarchy for organizational grouping (e.g., "Los Angeles County") — DONE
 18. ZIP-code-based zone definitions with instant coverage lookups — DONE
@@ -47,7 +54,7 @@
 
 ---
 
-## IV. Service Catalog (SKU System)
+## IV. Service Catalog (SKU System) `trust-builder` `margin-lever`
 
 27. Standardized Service SKUs with inclusions, exclusions, duration, and edge-case notes — DONE
 28. Fulfillment mode governance: same_day_preferred / same_week_allowed / independent_cadence — DONE
@@ -61,7 +68,7 @@
 
 ---
 
-## V. SKU Levels (Service Variants)
+## V. SKU Levels (Service Variants) `trust-builder` `margin-lever`
 
 36. Multi-level variants per SKU (e.g., Maintenance / Standard / Deep) with different scope, time, and cost — DONE
 37. Side-by-side level comparison UI with handle delta display — DONE
@@ -74,7 +81,7 @@
 
 ---
 
-## VI. Subscription Engine
+## VI. Subscription Engine `margin-lever` `mental-load-reduction`
 
 44. Membership-first tiered plans: Essential / Plus / Premium — DONE
 45. 28-day billing cycles ("Billed every 4 weeks") for predictability without calendar-month complexity — DONE
@@ -87,7 +94,7 @@
 
 ---
 
-## VII. Handles Currency System
+## VII. Handles Currency System `margin-lever`
 
 52. Handles as the internal unit of value — simple "Used / Remaining" bar for customers — DONE
 53. Handle transaction ledger: grant / spend / expire / rollover / refund — append-only, reconcilable — DONE
@@ -99,7 +106,7 @@
 
 ---
 
-## VIII. Service Day System
+## VIII. Service Day System `density-driver` `mental-load-reduction`
 
 59. System-assigned recurring Service Day based on zone, capacity, and route optimization — DONE
 60. Customer confirm/reject flow with exactly one rejection token — DONE
@@ -113,7 +120,7 @@
 
 ---
 
-## IX. Routine & Bundle Builder
+## IX. Routine & Bundle Builder `mental-load-reduction` `margin-lever`
 
 68. 3-step progressive flow: Build Routine → Review Scope + Proof → Confirm Lock — DONE
 69. Per-SKU cadence picker: weekly / biweekly / every 4 weeks / independent — DONE
@@ -128,7 +135,7 @@
 
 ---
 
-## X. Guided Customer Onboarding
+## X. Guided Customer Onboarding `mental-load-reduction`
 
 78. 6-step onboarding wizard: Property → ZIP/Zone Check → Plan Selection → Subscribe → Service Day → Build Routine — DONE
 79. Zone availability check with automatic waitlist signup if no zone covers the ZIP — DONE
@@ -138,7 +145,7 @@
 
 ---
 
-## XI. Job Execution & Provider Workflow
+## XI. Job Execution & Provider Workflow `provider-value` `trust-builder`
 
 83. Provider daily job list optimized for "today → next" with route-ordered stops — DONE
 84. Job detail with Level, scope bullets, access notes, proof requirements, and planned minutes — DONE
@@ -151,7 +158,7 @@
 
 ---
 
-## XII. Provider Day Command Center
+## XII. Provider Day Command Center `provider-value` `density-driver`
 
 91. Route plan locking: "Start Route" freezes route order and computes projected earnings — DONE
 92. Projected earnings banner based on completed + (historical avg × remaining stops) — DONE
@@ -160,7 +167,7 @@
 
 ---
 
-## XIII. Route Optimization
+## XIII. Route Optimization `density-driver` `provider-value`
 
 95. Nearest-neighbor route optimization using geohash/lat-lng from properties — DONE
 96. Provider manual reorder with up/down controls and audit logging — DONE
@@ -169,7 +176,7 @@
 
 ---
 
-## XIV. Photo Proof & Visit Receipts
+## XIV. Photo Proof & Visit Receipts `trust-builder`
 
 99. Before/after comparison slider with pointer-drag interaction — DONE
 100. Photo timeline: chronological gallery of all visit photos per property — DONE
@@ -180,7 +187,7 @@
 
 ---
 
-## XV. Billing & Payments
+## XV. Billing & Payments `margin-lever`
 
 105. Tokenized payment method management with add/remove/default — DONE
 106. Subscription autopay with 28-day cycle invoicing — DONE
@@ -192,7 +199,7 @@
 
 ---
 
-## XVI. Provider Payouts
+## XVI. Provider Payouts `provider-value` `margin-lever`
 
 112. Provider payout onboarding via Stripe Connect Express — DONE
 113. Weekly automated payout runs with minimum threshold enforcement — DONE
@@ -204,7 +211,7 @@
 
 ---
 
-## XVII. Dunning & Payment Recovery
+## XVII. Dunning & Payment Recovery `margin-lever`
 
 119. 5-step automated dunning sequence: +1d, +3d, +5d retry with escalating notifications — DONE
 120. Calm in-app banner: "We couldn't process your payment. Update your card." — DONE
@@ -214,7 +221,7 @@
 
 ---
 
-## XVIII. Plan Self-Service
+## XVIII. Plan Self-Service `mental-load-reduction` `margin-lever`
 
 124. Plan upgrade/downgrade with next-cycle default and direction detection — DONE
 125. Pending plan change banner with effective date — DONE
@@ -224,7 +231,7 @@
 
 ---
 
-## XIX. Add-ons & Contextual Services
+## XIX. Add-ons & Contextual Services `margin-lever` `mental-load-reduction`
 
 129. SKUs flagged as add-ons with contextual surfacing triggers (season, weather, time-since-last) — DONE
 130. One-tap add-on purchase: deduct handles or charge card — DONE
@@ -234,7 +241,7 @@
 
 ---
 
-## XX. Home Assistant Category
+## XX. Home Assistant Category `margin-lever` `mental-load-reduction`
 
 134. Time-boxed SKUs: 30 / 60 / 90-minute sessions with clear boundaries — DONE
 135. Customer prep requirements and privacy-safe proof rules — DONE
@@ -244,7 +251,7 @@
 
 ---
 
-## XXI. Support & Disputes
+## XXI. Support & Disputes `trust-builder` `mental-load-reduction`
 
 139. Self-resolution target: ≥80% of issues resolved without human involvement — DONE
 140. Receipt-anchored issue reporting: every receipt has "Report an issue" — DONE
@@ -260,7 +267,7 @@
 
 ---
 
-## XXII. Notifications & Messaging
+## XXII. Notifications & Messaging `mental-load-reduction`
 
 150. Event bus architecture: `notification_events` → processor → inbox + push + email — DONE
 151. 3-tier priority model: Critical (always delivered), Service (default on), Marketing (default off) — DONE
@@ -278,7 +285,7 @@
 
 ---
 
-## XXIII. Customer Feedback & Provider Quality
+## XXIII. Customer Feedback & Provider Quality `trust-builder`
 
 163. Immediate satisfaction check on receipt view: "How did today's visit go?" (< 5 seconds) — DONE
 164. Delayed private provider review: 7–21 day randomized delay, "Providers won't know it's you" — DONE
@@ -291,7 +298,7 @@
 
 ---
 
-## XXIV. Ratings & Reviews
+## XXIV. Ratings & Reviews `trust-builder`
 
 171. Post-visit 1–5 star rating anchored to receipt view (not immediate post-job) — DONE
 172. Smart rating suppression: first visit or if issue already reported — DONE
@@ -299,7 +306,7 @@
 
 ---
 
-## XXV. Property Health Score
+## XXV. Property Health Score `mental-load-reduction` `trust-builder`
 
 174. Composite health score (0–100): regularity 40%, coverage 25%, seasonal 15%, issues 20% — DONE
 175. Dashboard widget with SVG score ring, color-coded labels, and trend arrow — DONE
@@ -308,7 +315,7 @@
 
 ---
 
-## XXVI. Referrals & Attribution
+## XXVI. Referrals & Attribution `density-driver` `margin-lever`
 
 178. First-touch deterministic attribution via referral link or code — DONE
 179. Milestone-based reward system: signup → subscribe → first visit → paid cycle — DONE
@@ -319,7 +326,7 @@
 
 ---
 
-## XXVII. Founding Partner & BYOC (Bring Your Own Customers)
+## XXVII. Founding Partner & BYOC (Bring Your Own Customers) `density-driver` `provider-value`
 
 184. Provider application funnel with category/ZIP intake and opportunity banners (5 variants) — DONE
 185. 12-clause legal agreement with per-clause acceptance tracking and timestamps — DONE
@@ -333,7 +340,7 @@
 
 ---
 
-## XXVIII. Growth Autopilot & Market Launch
+## XXVIII. Growth Autopilot & Market Launch `density-driver`
 
 193. Market health snapshots per zone — DONE
 194. Growth event bus for viral surface tracking — DONE
@@ -343,7 +350,7 @@
 
 ---
 
-## XXIX. Seasonal Services
+## XXIX. Seasonal Services `margin-lever` `mental-load-reduction`
 
 198. Seasonal service templates per zone with time windows — DONE
 199. Customer seasonal selections with window preference tracking — DONE
@@ -351,7 +358,7 @@
 
 ---
 
-## XXX. AI Intelligence Layer
+## XXX. AI Intelligence Layer `margin-lever` `mental-load-reduction`
 
 201. Predictive service recommendations via Gemini AI: property signals → SKU predictions with confidence scores — DONE
 202. "AI Picks for You" section in Add Service Drawer with brain icon badge — DONE
@@ -362,7 +369,7 @@
 
 ---
 
-## XXXI. Ops Cockpit & Admin Analytics
+## XXXI. Ops Cockpit & Admin Analytics `density-driver` `trust-builder`
 
 207. Real-time ops dashboard: today's jobs, capacity pressure, quality metrics, revenue, growth — DONE
 208. Zone health drilldowns: capacity, demand, quality, provider coverage, actions — DONE
@@ -376,7 +383,7 @@
 
 ---
 
-## XXXII. Provider Insights
+## XXXII. Provider Insights `provider-value` `trust-builder`
 
 216. Provider performance page: jobs completed, proof compliance %, issue rate, avg time on site — DONE
 217. Template-based coaching cues: "Add more after photos to improve proof score" — DONE
@@ -384,7 +391,7 @@
 
 ---
 
-## XXXIII. Admin Controls & Governance
+## XXXIII. Admin Controls & Governance `margin-lever` `trust-builder`
 
 219. Pricing & payout engine with zone multipliers and SKU-specific overrides — DONE
 220. Governance audit trail: every money, access, scheduling, and policy change is logged — DONE
@@ -394,7 +401,7 @@
 
 ---
 
-## XXXIV. Automation Engine
+## XXXIV. Automation Engine `provider-value` `density-driver`
 
 224. Auto-assign jobs to providers: Primary-first → Backup fallback with explainability — DONE
 225. Provider no-show detection (hourly) with auto-reassign and calm customer notification — DONE
@@ -408,7 +415,7 @@
 
 ---
 
-## XXXV. Billing Automation
+## XXXV. Billing Automation `margin-lever`
 
 233. Automated invoice generation with cycle-based idempotency — DONE
 234. Automated dunning with 5-step escalation ladder — DONE
@@ -418,7 +425,7 @@
 
 ---
 
-## XXXVI. Exception Management
+## XXXVI. Exception Management `trust-builder`
 
 238. Unified exception queue: failed payments, disputes, payout failures, held earnings, reconciliation mismatches — DONE
 239. Per-exception "next best action" CTA with audit trail link — DONE
@@ -426,7 +433,7 @@
 
 ---
 
-## XXXVII. Edge Functions & Scheduled Automation
+## XXXVII. Edge Functions & Scheduled Automation `density-driver` `margin-lever`
 
 241. 20+ deployed edge functions covering assignment, billing, weather, payouts, notifications, AI — DONE
 242. Cron-based orchestrator (`run-scheduled-jobs`) with per-sub-job idempotency keys — DONE
@@ -434,7 +441,7 @@
 
 ---
 
-## XXXVIII. Standard Operating Procedures
+## XXXVIII. Standard Operating Procedures `trust-builder` `provider-value`
 
 244. Emergency pricing override SOP with rollback capability — DONE
 245. End-of-day reconciliation SOP — DONE
@@ -445,7 +452,7 @@
 
 ---
 
-## XXXIX. Platform & Infrastructure
+## XXXIX. Platform & Infrastructure `trust-builder`
 
 250. Native iOS + Android via Capacitor — DONE
 251. Supabase backend: Auth + Postgres + Storage + Edge Functions — DONE
@@ -461,7 +468,7 @@
 
 ---
 
-## XL. Routing & Scheduling Engine (PRD-300)
+## XL. Routing & Scheduling Engine (PRD-300) `density-driver` `provider-value`
 
 ### Sprint 1 — Foundations
 
@@ -557,7 +564,7 @@
 
 ---
 
-## XLI. BYOC Onboarding Wizard (PRD-301)
+## XLI. BYOC Onboarding Wizard (PRD-301) `density-driver` `provider-value`
 
 326. 7-screen provider-referred customer onboarding flow (60–90 second target) — DONE
 327. Provider recognition screen preserving existing relationship trust — DONE
@@ -576,7 +583,7 @@
 
 ---
 
-## XLII. E2E Testing & Synthetic UX Review (Playwright)
+## XLII. E2E Testing & Synthetic UX Review (Playwright) `trust-builder`
 
 340. Playwright E2E test harness with Chromium mobile browser emulation — DONE
 341. Auth setup project saving storage state for authenticated tests — DONE
@@ -590,7 +597,7 @@
 
 ---
 
-## XLIII. Simplicity by Design
+## XLIII. Simplicity by Design `mental-load-reduction`
 
 349. No calendar browsing anywhere — scheduling is automatic and routine-based — DONE
 350. One-tap "Add to routine" from any suggestion surface with 10-second undo — DONE
@@ -605,7 +612,7 @@
 
 ---
 
-## XLIV. UX Value Proposition & Conversion
+## XLIV. UX Value Proposition & Conversion `margin-lever` `trust-builder`
 
 359. Bundle Savings Calculator on Plans page and onboarding: compares monthly subscription cost vs. hiring separate vendors with per-service breakdown — DONE
 360. First Service Celebration: full-screen animated overlay after first completed service with share CTA and receipt link — DONE
@@ -618,4 +625,4 @@
 
 ---
 
-*Total features: 366 | Last updated: 2026-03-11*
+*Total features: 366 | Last updated: 2026-03-13 | Value-prop tags added per section*

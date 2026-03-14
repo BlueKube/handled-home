@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Handled Home is a **household bundling engine** for home maintenance — "Bundle & Save for home services." Customers manage all home services (lawn, pool, pest, etc.) from one app with one-tap add-ons, standardized quality levels, and proof-of-work receipts.
+Handled Home is a **managed home-maintenance platform** — "Your home, handled." Customers set up their home once, get a recommended recurring service plan, and manage all home services (lawn, pool, pest, etc.) from one app with one-tap add-ons, standardized quality levels, and proof-of-work receipts. For providers, the app fills schedules with recurring work, reduces admin, and improves route density.
 
 Three user roles: **Customer**, **Provider**, **Admin**.
 
@@ -94,8 +94,9 @@ When implementing a screen from Stitch designs:
 
 ### Key Design Docs
 
-- `docs/ai-design-specs/screen-flows.md` — 30 user flows with detailed screen specs (layout, copy, components, states)
-- `docs/masterplan.md` — Business model, flywheels, and product strategy
+- `docs/masterplan.md` — Business model, vision, flywheels, and product strategy
+- `docs/operating-model.md` — Unit economics, pricing mechanics, margin levers, provider payouts
+- `docs/screen-flows.md` — 30+ user flows with detailed screen specs (layout, copy, components, states)
 - `docs/app-flow-pages-and-roles.md` — Complete route tree with page names and gates
 
 ## Development Commands
