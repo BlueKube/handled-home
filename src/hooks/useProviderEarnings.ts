@@ -5,6 +5,31 @@ import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, format, differenceInC
 
 export type EarningsPeriod = "today" | "week" | "month";
 
+export interface ProviderEarning {
+  id: string;
+  total_cents: number;
+  base_amount_cents?: number;
+  modifier_cents: number;
+  status: string;
+  hold_reason?: string | null;
+  hold_until?: string | null;
+  created_at: string;
+  jobs?: {
+    scheduled_date: string;
+    property_id: string;
+    properties: { street_address: string };
+  };
+}
+
+export interface HeldEarning {
+  id: string;
+  total_cents: number;
+  status: string;
+  hold_reason: string | null;
+  hold_until: string | null;
+  created_at: string;
+}
+
 function periodRange(period: EarningsPeriod): { from: string; to: string } {
   const now = new Date();
   if (period === "today") {
@@ -142,12 +167,12 @@ export function useProviderEarnings(period: EarningsPeriod = "month") {
     enabled: !!org?.id,
   });
 
-  const earnings = earningsQuery.data ?? [];
-  const balances = balanceQuery.data ?? [];
+  const earnings = (earningsQuery.data ?? []) as ProviderEarning[];
+  const balances = (balanceQuery.data ?? []) as HeldEarning[];
   const periodTotal = earnings.reduce((s, e) => s + e.total_cents, 0);
   const periodModifiers = earnings.reduce((s, e) => s + e.modifier_cents, 0);
   const eligibleBalance = balances.filter(e => e.status === "ELIGIBLE").reduce((s, e) => s + e.total_cents, 0);
-  const heldEarnings = balances.filter(e => ["HELD", "HELD_UNTIL_READY"].includes(e.status));
+  const heldEarnings: HeldEarning[] = balances.filter(e => ["HELD", "HELD_UNTIL_READY"].includes(e.status));
   const heldBalance = heldEarnings.reduce((s, e) => s + e.total_cents, 0);
 
   // E02-F2 fix: always use MTD query for projection, not period-dependent

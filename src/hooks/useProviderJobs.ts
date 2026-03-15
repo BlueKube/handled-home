@@ -46,7 +46,7 @@ export function useProviderJobs(filter: "today" | "today_all" | "upcoming" | "hi
       if (filter === "today") {
         query = query.eq("scheduled_date", today).not("status", "in", '("COMPLETED","CANCELED")');
       } else if (filter === "today_all") {
-        query = query.eq("scheduled_date", today);
+        query = query.eq("scheduled_date", today).not("status", "eq", "CANCELED");
       } else if (filter === "upcoming") {
         query = query.gt("scheduled_date", today).not("status", "in", '("COMPLETED","CANCELED")');
       } else {

@@ -1,11 +1,12 @@
-import { useState, useMemo } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { StatCard } from "@/components/StatCard";
 import { QueryErrorCard } from "@/components/QueryErrorCard";
-import { useProviderEarnings, type EarningsPeriod } from "@/hooks/useProviderEarnings";
+import { useProviderEarnings, type EarningsPeriod, type ProviderEarning, type HeldEarning } from "@/hooks/useProviderEarnings";
+import { formatCents } from "@/utils/format";
 import {
   DollarSign,
   TrendingUp,
@@ -23,11 +24,7 @@ import {
 } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 
-function formatCents(cents: number) {
-  return `$${(cents / 100).toFixed(2)}`;
-}
-
-function modifierExplanation(cents: number, holdReason?: string): string {
+function modifierExplanation(cents: number, holdReason?: string | null): string {
   if (cents > 0) {
     if (cents >= 1000) return "Quality tier bonus";
     if (cents >= 500) return "Rush / high-demand bonus";
@@ -68,13 +65,24 @@ function statusVariant(status: string): "default" | "secondary" | "outline" | "d
   }
 }
 
-function EarningCard({ earning }: { earning: any }) {
+function EarningCard({ earning }: { earning: ProviderEarning }) {
   const [expanded, setExpanded] = useState(false);
   const jobDate = earning.jobs?.scheduled_date;
   const address = earning.jobs?.properties?.street_address;
 
+  // Safely compute base: use column if available, otherwise derive from total - modifier
+  const baseCents = earning.base_amount_cents ?? (earning.total_cents - earning.modifier_cents);
+
   return (
-    <Card className="p-3 cursor-pointer" onClick={() => setExpanded(!expanded)}>
+    <Card
+      className="p-3 cursor-pointer"
+      role="button"
+      tabIndex={0}
+      aria-expanded={expanded}
+      aria-label={`Earning details for ${address ?? "job"}`}
+      onClick={() => setExpanded(!expanded)}
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), setExpanded(!expanded))}
+    >
       <div className="flex items-center gap-3">
         <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
           <DollarSign className="h-4 w-4 text-accent" />
@@ -115,7 +123,7 @@ function EarningCard({ earning }: { earning: any }) {
         <div className="mt-3 pt-3 border-t border-border space-y-1.5">
           <div className="flex justify-between text-xs">
             <span className="text-muted-foreground">Base pay</span>
-            <span className="font-medium">{formatCents(earning.base_amount_cents)}</span>
+            <span className="font-medium">{formatCents(baseCents)}</span>
           </div>
           {earning.modifier_cents !== 0 && (
             <div className="flex justify-between text-xs">
@@ -136,7 +144,7 @@ function EarningCard({ earning }: { earning: any }) {
           {earning.hold_reason && (
             <div className="flex items-center gap-1.5 text-xs text-warning mt-1">
               <PauseCircle className="h-3 w-3" />
-              <span>Hold: {earning.hold_reason}</span>
+              <span>Hold: {holdReasonLabel(earning.hold_reason)}</span>
               {earning.hold_until && (
                 <span className="text-muted-foreground">
                   · releases {formatDistanceToNow(new Date(earning.hold_until), { addSuffix: true })}
@@ -267,7 +275,7 @@ export default function ProviderEarnings() {
           <button
             key={p}
             onClick={() => setPeriod(p)}
-            className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-colors ${
+            className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
               period === p
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
@@ -299,9 +307,10 @@ export default function ProviderEarnings() {
           role={heldBalance > 0 ? "button" : undefined}
           tabIndex={heldBalance > 0 ? 0 : undefined}
           aria-expanded={heldBalance > 0 ? holdExpanded : undefined}
+          aria-label={heldBalance > 0 ? (holdExpanded ? "Collapse hold details" : "Expand hold details") : undefined}
           className={heldBalance > 0 ? "cursor-pointer" : undefined}
           onClick={() => heldBalance > 0 && setHoldExpanded(!holdExpanded)}
-          onKeyDown={(e) => e.key === "Enter" && heldBalance > 0 && setHoldExpanded(!holdExpanded)}
+          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && heldBalance > 0 && (e.preventDefault(), setHoldExpanded(!holdExpanded))}
         >
           <StatCard
             icon={Clock}
@@ -319,7 +328,7 @@ export default function ProviderEarnings() {
             <span className="text-xs font-medium">Hold Details</span>
           </div>
           <div className="space-y-2">
-            {heldEarnings.map((h: any) => (
+            {heldEarnings.map((h: HeldEarning) => (
               <div key={h.id} className="flex items-start justify-between text-xs gap-2">
                 <div className="flex-1 min-w-0">
                   <p className="text-muted-foreground">

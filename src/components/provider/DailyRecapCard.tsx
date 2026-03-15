@@ -1,20 +1,17 @@
 import { Card } from "@/components/ui/card";
 import { useProviderJobs } from "@/hooks/useProviderJobs";
 import { useProviderEarnings } from "@/hooks/useProviderEarnings";
-import { CheckCircle, Clock, ListChecks, DollarSign, Trophy } from "lucide-react";
+import { formatCents } from "@/utils/format";
+import { CheckCircle, Clock, ListChecks, DollarSign, Trophy, LogIn } from "lucide-react";
 
-function formatCents(cents: number) {
-  return `$${(cents / 100).toFixed(2)}`;
-}
-
-function getRecapMessage(completedCount: number, totalCount: number, onTimeRate: number): string {
+function getRecapMessage(completedCount: number, totalCount: number, checkInRate: number): string {
   if (completedCount === totalCount && totalCount > 0) {
-    return onTimeRate === 100
-      ? "All visits complete and on time — great day!"
+    return checkInRate === 100
+      ? "All visits complete with check-ins — great day!"
       : "All visits complete — solid work!";
   }
   if (completedCount === 1) return "Your first visit today is complete!";
-  if (onTimeRate >= 90) return "Looking great — strong on-time performance!";
+  if (checkInRate >= 90) return "Looking great — strong check-in discipline!";
   return "Keep it up — you're making progress!";
 }
 
@@ -36,13 +33,14 @@ export function DailyRecapCard() {
   const arrivedCount = completedJobs.filter((j) => j.arrived_at).length;
   const checkInRate = Math.round((arrivedCount / completedCount) * 100);
 
-  // Photo count from completed jobs' SKUs (proxy — actual photo count would need a separate query)
+  // Service count from completed jobs' SKUs
   const totalSkus = completedJobs.reduce(
     (sum, j) => sum + (j.job_skus?.length ?? 0),
     0
   );
 
   const message = getRecapMessage(completedCount, totalCount, checkInRate);
+  const earningsReady = completedCount > 0 && periodTotal > 0;
 
   return (
     <Card className="p-4 bg-success/5 border-success/20">
@@ -59,9 +57,9 @@ export function DailyRecapCard() {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <Clock className="h-3.5 w-3.5 text-accent shrink-0" />
+          <LogIn className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
           <span className="text-xs text-muted-foreground">
-            {checkInRate}% on-time
+            {checkInRate}% checked in
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -73,7 +71,9 @@ export function DailyRecapCard() {
         <div className="flex items-center gap-2">
           <DollarSign className="h-3.5 w-3.5 text-accent shrink-0" />
           <span className="text-xs text-muted-foreground">
-            {formatCents(periodTotal)} earned
+            {earningsReady
+              ? `${formatCents(periodTotal)} earned`
+              : "Earnings updating…"}
           </span>
         </div>
       </div>
