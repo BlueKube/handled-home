@@ -6,11 +6,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
-import { ClipboardCheck, Camera, Bug, DollarSign, Lightbulb, Clock } from "lucide-react";
+import { ClipboardCheck, Camera, Bug, DollarSign, Lightbulb, Clock, ChevronRight, TrendingUp } from "lucide-react";
 
 export default function ProviderInsights() {
   const { org } = useProviderOrg();
-  const nav = useNavigate();
+  const navigate = useNavigate();
 
   const { data, isLoading } = useQuery({
     queryKey: ["provider-insights", org?.id],
@@ -35,7 +35,6 @@ export default function ProviderInsights() {
       const issues30d = issuesRes.data?.length ?? 0;
       const issueRate = completed30d > 0 ? Math.round((issues30d / completed30d) * 100) : 0;
 
-      // Proof compliance: check photos for completed jobs this week
       const weekJobIds = completedWeekJobs.map((j: any) => j.id);
       let proofCompliance = 100;
       if (weekJobIds.length > 0) {
@@ -59,7 +58,6 @@ export default function ProviderInsights() {
         proofCompliance = total > 0 ? Math.round((compliant / total) * 100) : 100;
       }
 
-      // Average time on site
       const timesOnSite = completedWeekJobs
         .filter((j: any) => j.arrived_at && j.departed_at)
         .map((j: any) => (new Date(j.departed_at).getTime() - new Date(j.arrived_at).getTime()) / 60000);
@@ -90,32 +88,51 @@ export default function ProviderInsights() {
 
   if (isLoading || !data) {
     return (
-      <div className="p-6 space-y-4">
-        <h1 className="text-h2">My Performance</h1>
+      <div className="animate-fade-in p-4 pb-24 space-y-4">
+        <div className="space-y-1.5">
+          <Skeleton className="h-7 w-40" />
+          <Skeleton className="h-4 w-52" />
+        </div>
         <div className="grid gap-3 grid-cols-2">
-          {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
+          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24 rounded-2xl" />)}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="animate-fade-in p-4 pb-24 space-y-5">
       <div>
-        <h1 className="text-h2 mb-1">My Performance</h1>
-        <p className="text-caption">How you're doing this week</p>
+        <h1 className="text-h2">My Performance</h1>
+        <p className="text-caption mt-0.5">How you're doing this week</p>
       </div>
 
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-3 grid-cols-2">
         <StatCard icon={ClipboardCheck} label="Completed (Week)" value={data.completedWeek} />
         <StatCard icon={Camera} label="Proof Compliance" value={`${data.proofCompliance}%`} />
         <StatCard icon={Bug} label="Issue Rate (30d)" value={`${data.issueRate}%`} />
         <StatCard icon={Clock} label="Avg On-Site" value={data.avgTimeOnSite > 0 ? `${data.avgTimeOnSite}m` : "—"} />
-        <div onClick={() => nav("/provider/payouts")} className="cursor-pointer">
-          <StatCard icon={DollarSign} label="Eligible Payout" value={`$${(data.eligibleCents / 100).toFixed(0)}`} />
-        </div>
       </div>
 
+      {/* Eligible payout card */}
+      <Card
+        variant="interactive"
+        className="p-4 cursor-pointer"
+        onClick={() => navigate("/provider/payouts")}
+      >
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+            <DollarSign className="h-5 w-5 text-accent" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold">${(data.eligibleCents / 100).toFixed(0)} eligible</p>
+            <p className="text-xs text-muted-foreground">Tap to view payouts</p>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        </div>
+      </Card>
+
+      {/* Coaching tips */}
       {cues.length > 0 && (
         <Card className="p-4 space-y-2 border-warning/30 bg-warning/5">
           <div className="flex items-center gap-2">
@@ -123,14 +140,23 @@ export default function ProviderInsights() {
             <h3 className="font-semibold text-sm">Coaching Tips</h3>
           </div>
           {cues.map((c, i) => (
-            <p key={i} className="text-sm text-muted-foreground">• {c}</p>
+            <p key={i} className="text-sm text-muted-foreground">{"\u2022"} {c}</p>
           ))}
         </Card>
       )}
 
-      <Button variant="outline" onClick={() => nav("/provider/insights/history")}>
-        View Weekly Trends →
-      </Button>
+      {/* Weekly trends link */}
+      <Card
+        variant="interactive"
+        className="p-4 cursor-pointer"
+        onClick={() => navigate("/provider/insights/history")}
+      >
+        <div className="flex items-center gap-3">
+          <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          <p className="text-sm font-medium flex-1">View Weekly Trends</p>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        </div>
+      </Card>
     </div>
   );
 }
