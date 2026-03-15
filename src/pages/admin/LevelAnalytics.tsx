@@ -29,7 +29,7 @@ export default function LevelAnalytics() {
 
   if (isLoading || !data) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="animate-fade-in p-6 space-y-6">
         <h1 className="text-h2">Level Analytics</h1>
         <div className="grid gap-4 grid-cols-2 md:grid-cols-3">
           {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
@@ -40,7 +40,7 @@ export default function LevelAnalytics() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="animate-fade-in p-6 space-y-6">
       <div>
         <h1 className="text-h2 mb-0.5">Level Analytics</h1>
         <p className="text-caption">Last 30 days · Recommendations, courtesy upgrades, and mismatch hotspots</p>

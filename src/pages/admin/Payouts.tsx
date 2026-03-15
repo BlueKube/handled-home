@@ -19,8 +19,8 @@ export default function AdminPayoutsPage() {
   const pendingCount = payouts.filter(p => p.status === "INITIATED").length;
 
   return (
-    <div className="px-4 py-6 space-y-4 animate-fade-in pb-20">
-      <h1 className="text-2xl font-bold">Payouts</h1>
+    <div className="p-6 space-y-4 animate-fade-in">
+      <h1 className="text-h2">Payouts</h1>
 
       <div className="grid grid-cols-2 gap-3">
         <StatCard label="Total paid out" value={formatCents(paidTotal)} icon={DollarSign} />

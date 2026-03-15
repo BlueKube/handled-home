@@ -83,7 +83,7 @@ export default function AdminPlans() {
   };
 
   return (
-    <div className="p-4 pb-24 space-y-6 animate-fade-in">
+    <div className="p-6 space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <h1 className="text-h2">Subscription Plans</h1>
         <Button size="sm" onClick={openCreate}><Plus className="h-4 w-4 mr-1" /> New Plan</Button>
