@@ -14,7 +14,11 @@ interface LinkedProvider {
   nextVisitDate: string | null;
 }
 
-export function HomeTeamCard() {
+interface HomeTeamCardProps {
+  serviceDayConfirmed?: boolean;
+}
+
+export function HomeTeamCard({ serviceDayConfirmed = false }: HomeTeamCardProps) {
   const { user } = useAuth();
 
   const { data: providers, isLoading } = useQuery({
@@ -113,7 +117,9 @@ export function HomeTeamCard() {
                     <p className="text-sm font-medium">
                       {provider.nextVisitDate
                         ? format(parseISO(provider.nextVisitDate), "EEE, MMM d")
-                        : "Scheduled soon"}
+                        : serviceDayConfirmed
+                          ? "Scheduling in progress"
+                          : "Complete setup to schedule visits"}
                     </p>
                   </div>
                 </div>

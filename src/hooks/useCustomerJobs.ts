@@ -15,13 +15,16 @@ export interface CustomerJob {
   zone_id: string;
   created_at: string;
   skus: { sku_id: string; sku_name_snapshot: string | null; duration_minutes_snapshot: number | null }[];
+  photo_count: number;
+  photos: { id: string; url: string }[];
 }
 
-export function useCustomerJobs(filter: "upcoming" | "completed" | "all" = "all") {
+export function useCustomerJobs(filter: "upcoming" | "completed" | "all" = "all", options?: { includePhotos?: boolean }) {
+  const includePhotos = options?.includePhotos ?? false;
   const { user } = useAuth();
 
   return useQuery<CustomerJob[]>({
-    queryKey: ["customer_jobs", user?.id, filter],
+    queryKey: ["customer_jobs", user?.id, filter, includePhotos],
     enabled: !!user,
     queryFn: async () => {
       if (!user) return [];
@@ -58,10 +61,36 @@ export function useCustomerJobs(filter: "upcoming" | "completed" | "all" = "all"
         skusByJob.set(s.job_id, arr);
       }
 
-      return jobs.map((j) => ({
-        ...j,
-        skus: skusByJob.get(j.id) ?? [],
-      }));
+      // Batch fetch photos for all jobs (opt-in to avoid unnecessary queries)
+      const photosByJob = new Map<string, { id: string; url: string }[]>();
+      if (includePhotos) {
+        const { data: photos, error: photoErr } = await supabase
+          .from("job_photos")
+          .select("id, job_id, storage_path")
+          .in("job_id", jobIds);
+        if (photoErr) throw photoErr;
+
+        for (const p of photos ?? []) {
+          if (!p.storage_path) continue;
+          const { data: urlData } = await supabase.storage
+            .from("job-photos")
+            .createSignedUrl(p.storage_path, 3600);
+          if (!urlData?.signedUrl) continue;
+          const arr = photosByJob.get(p.job_id) ?? [];
+          arr.push({ id: p.id, url: urlData.signedUrl });
+          photosByJob.set(p.job_id, arr);
+        }
+      }
+
+      return jobs.map((j) => {
+        const jobPhotos = photosByJob.get(j.id) ?? [];
+        return {
+          ...j,
+          skus: skusByJob.get(j.id) ?? [],
+          photo_count: jobPhotos.length,
+          photos: jobPhotos,
+        };
+      });
     },
   });
 }

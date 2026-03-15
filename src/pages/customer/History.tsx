@@ -3,6 +3,7 @@ import { useCustomerJobs } from "@/hooks/useCustomerJobs";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Badge } from "@/components/ui/badge";
+import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
 import { format } from "date-fns";
 import { ImageIcon } from "lucide-react";
 
@@ -12,7 +13,7 @@ export default function CustomerHistory() {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-4xl">
+      <div className="px-4 py-6 pb-24 max-w-lg mx-auto">
         <h1 className="text-h2 mb-4">Visits</h1>
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
@@ -24,15 +25,15 @@ export default function CustomerHistory() {
   }
 
   return (
-    <div className="p-6 max-w-4xl">
+    <div className="px-4 py-6 pb-24 max-w-lg mx-auto animate-fade-in">
       <h1 className="text-h2 mb-4">Visits</h1>
 
       {(!jobs || jobs.length === 0) ? (
-        <Card className="p-8 text-center">
-          <ImageIcon className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-          <p className="text-sm font-medium">No visits yet</p>
-          <p className="text-xs text-muted-foreground mt-1">Your visit receipts will appear here after your first handled visit.</p>
-        </Card>
+        <CustomerEmptyState
+          icon={ImageIcon}
+          title="No visits yet"
+          body="Your visit receipts will appear here after your first handled visit."
+        />
       ) : (
         <div className="space-y-2">
           {jobs.map((job) => {

@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TicketStatusChip } from "@/components/support/TicketStatusChip";
 import { MessageCirclePlus, ChevronRight, Inbox, Clock } from "lucide-react";
+import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
 import { format } from "date-fns";
 
 export default function CustomerSupportHome() {
@@ -18,7 +19,7 @@ export default function CustomerSupportHome() {
     .slice(0, 3);
 
   return (
-    <div className="p-6 max-w-2xl space-y-6 animate-fade-in">
+    <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-6 animate-fade-in">
       <div className="space-y-1">
         <h1 className="text-h2">Support</h1>
         <p className="text-caption">Get help or resolve an issue</p>
@@ -108,10 +109,11 @@ export default function CustomerSupportHome() {
 
       {/* Empty state */}
       {!ticketsLoading && tickets.length === 0 && recentCompleted.length === 0 && (
-        <div className="text-center py-10 space-y-2">
-          <Inbox className="h-10 w-10 text-muted-foreground/40 mx-auto" />
-          <p className="text-sm text-muted-foreground">No issues yet — that's great!</p>
-        </div>
+        <CustomerEmptyState
+          icon={Inbox}
+          title="No issues — that's great!"
+          body="If something comes up after a visit, you can report it here and we'll resolve it quickly."
+        />
       )}
     </div>
   );

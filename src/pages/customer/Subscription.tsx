@@ -8,6 +8,8 @@ import { PausePanel } from "@/components/plans/PausePanel";
 import { CancellationFlow } from "@/components/plans/CancellationFlow";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Shield } from "lucide-react";
+import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
 
 export default function CustomerSubscription() {
   const navigate = useNavigate();
@@ -20,10 +22,15 @@ export default function CustomerSubscription() {
 
   if (!subscription) {
     return (
-      <div className="p-4 pb-24 space-y-6 animate-fade-in max-w-lg mx-auto text-center">
-        <h1 className="text-h2">No Active Subscription</h1>
-        <p className="text-muted-foreground">You don't have a subscription yet.</p>
-        <Button onClick={() => navigate("/customer/plans")}>Browse Plans</Button>
+      <div className="p-4 pb-24 space-y-6 animate-fade-in max-w-lg mx-auto">
+        <h1 className="text-h2">Subscription</h1>
+        <CustomerEmptyState
+          icon={Shield}
+          title="No active membership"
+          body="Pick a plan to start your recurring home maintenance. One simple membership — we handle the rest."
+          ctaLabel="Browse plans"
+          ctaAction={() => navigate("/customer/plans")}
+        />
       </div>
     );
   }

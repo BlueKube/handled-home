@@ -1,7 +1,9 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { Camera, ZoomIn, Calendar } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
 import type { TimelinePhoto } from "@/hooks/usePropertyPhotoTimeline";
 
 interface PhotoTimelineProps {
@@ -24,13 +26,17 @@ export function PhotoTimeline({ photos }: PhotoTimelineProps) {
     return Array.from(groups.entries());
   }, [photos]);
 
+  const navigate = useNavigate();
+
   if (photos.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <Camera className="h-10 w-10 text-muted-foreground/40 mb-3" />
-        <p className="text-sm text-muted-foreground">No photos yet</p>
-        <p className="text-xs text-muted-foreground mt-1">Photos from completed visits will appear here.</p>
-      </div>
+      <CustomerEmptyState
+        icon={Camera}
+        title="No photos yet"
+        body="After each visit, your provider uploads proof photos. They'll appear here as a visual timeline of your home."
+        ctaLabel="View your schedule"
+        ctaAction={() => navigate("/customer/schedule")}
+      />
     );
   }
 

@@ -85,7 +85,7 @@ export default function CustomerSupportNew() {
   };
 
   return (
-    <div className="p-6 max-w-2xl space-y-4 animate-fade-in">
+    <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4 animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-2">
         <Button

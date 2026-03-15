@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Copy, Check, Users, Gift, Clock, ChevronRight, Target, Star, Trophy } from "lucide-react";
+import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -49,14 +50,14 @@ export default function CustomerReferrals() {
   }
 
   return (
-    <div className="px-4 py-6 space-y-6 animate-fade-in">
-      <h1 className="text-2xl font-bold">Referrals</h1>
+    <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-6 animate-fade-in">
+      <h1 className="text-h2">Referrals</h1>
 
       {/* Share Section */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
-            <Users className="h-4 w-4 text-primary" /> Share & Earn
+            <Users className="h-4 w-4 text-accent" /> Share & Earn
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -66,7 +67,7 @@ export default function CustomerReferrals() {
               {myCode ? (
                 <div className="flex items-center gap-2">
                   <code className="flex-1 bg-muted px-3 py-2 rounded-lg text-sm font-mono">{myCode.code}</code>
-                  <Button size="sm" variant="outline" onClick={handleCopyLink}>
+                  <Button size="sm" variant="outline" onClick={handleCopyLink} aria-label={copied ? "Copied" : "Copy referral link"}>
                     {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
@@ -89,14 +90,14 @@ export default function CustomerReferrals() {
       <div className="grid grid-cols-2 gap-3">
         <Card>
           <CardContent className="pt-4 text-center">
-            <Gift className="h-5 w-5 text-primary mx-auto mb-1" />
+            <Gift className="h-5 w-5 text-accent mx-auto mb-1" />
             <p className="text-2xl font-bold">${(earnedCents / 100).toFixed(0)}</p>
             <p className="text-xs text-muted-foreground">Earned</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
-            <Clock className="h-5 w-5 text-amber-500 mx-auto mb-1" />
+            <Clock className="h-5 w-5 text-accent mx-auto mb-1" />
             <p className="text-2xl font-bold">${(pendingCents / 100).toFixed(0)}</p>
             <p className="text-xs text-muted-foreground">Pending</p>
           </CardContent>
@@ -161,7 +162,7 @@ export default function CustomerReferrals() {
 
       {/* Referral List */}
       <div>
-        <h2 className="text-lg font-semibold mb-3">Your Referrals</h2>
+        <h2 className="text-h3 mb-3">Your Referrals</h2>
         {referrals.data && referrals.data.length > 0 ? (
           <div className="space-y-2">
             {referrals.data.map((ref: any) => (
@@ -186,7 +187,14 @@ export default function CustomerReferrals() {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">No referrals yet. Share your code to get started!</p>
+          <CustomerEmptyState
+            icon={Users}
+            title="No referrals yet"
+            body="Share your code with friends and earn rewards when they subscribe."
+            ctaLabel={myCode ? "Copy your referral link" : "Generate referral code"}
+            ctaAction={myCode ? handleCopyLink : handleGenerateCode}
+            ctaDisabled={!myCode && generateCode.isPending}
+          />
         )}
       </div>
     </div>

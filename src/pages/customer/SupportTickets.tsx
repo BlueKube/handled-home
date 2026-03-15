@@ -27,7 +27,7 @@ export default function CustomerSupportTickets() {
   ];
 
   return (
-    <div className="p-6 max-w-2xl space-y-4 animate-fade-in">
+    <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4 animate-fade-in">
       <Button variant="ghost" size="sm" className="gap-1 -ml-2" onClick={() => navigate("/customer/support")}>
         <ArrowLeft className="h-4 w-4" />
         Support

@@ -131,8 +131,8 @@ export default function MoreMenuPage() {
   };
 
   return (
-    <div className="px-4 py-6 animate-fade-in space-y-5">
-      <h1 className="text-2xl font-bold">More</h1>
+    <div className="px-4 py-6 pb-24 max-w-lg mx-auto animate-fade-in space-y-5">
+      <h1 className="text-h2">More</h1>
 
       {roles.length > 1 && (
         <div>
@@ -171,6 +171,7 @@ export default function MoreMenuPage() {
           <CardContent className="p-0 divide-y divide-border">
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              aria-pressed={theme === "dark"}
               className="flex items-center gap-3 w-full px-4 py-3.5 text-left text-foreground hover:bg-secondary/50 active:bg-secondary transition-colors rounded-xl"
             >
               {theme === "dark" ? <Sun className="h-5 w-5 text-muted-foreground" /> : <Moon className="h-5 w-5 text-muted-foreground" />}

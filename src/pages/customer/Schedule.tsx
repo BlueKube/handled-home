@@ -29,6 +29,7 @@ import {
   CalendarCheck,
   Timer,
 } from "lucide-react";
+import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
 
 function formatVisitDate(dateStr: string): string {
   const date = parseISO(dateStr);
@@ -324,7 +325,7 @@ export default function Schedule() {
 
   if (isLoading) {
     return (
-      <div className="p-4 max-w-4xl space-y-4 pb-24">
+      <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4">
         <h1 className="text-h2">Schedule</h1>
         <Skeleton className="h-[320px] rounded-2xl" />
         {[1, 2].map((i) => (
@@ -336,7 +337,7 @@ export default function Schedule() {
 
   if (isError) {
     return (
-      <div className="p-4 max-w-4xl pb-24">
+      <div className="px-4 py-6 pb-24 max-w-lg mx-auto">
         <h1 className="text-h2 mb-4">Schedule</h1>
         <QueryErrorCard message="Failed to load your schedule." onRetry={() => refetch()} />
       </div>
@@ -344,7 +345,7 @@ export default function Schedule() {
   }
 
   return (
-    <div className="p-4 max-w-4xl space-y-4 pb-24 animate-fade-in">
+    <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4 animate-fade-in">
       {/* Header */}
       <h1 className="text-h2">Schedule</h1>
 
@@ -386,13 +387,13 @@ export default function Schedule() {
         </p>
 
         {!visits || visits.length === 0 ? (
-          <Card className="p-8 text-center">
-            <CalendarDays className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-            <p className="text-sm font-medium">No upcoming visits</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Your next service will appear here once scheduled.
-            </p>
-          </Card>
+          <CustomerEmptyState
+            icon={CalendarDays}
+            title="No upcoming visits"
+            body="Your next service will appear here once scheduled."
+            ctaLabel="Build your routine"
+            ctaAction={() => navigate("/customer/routine")}
+          />
         ) : (
           <div className="space-y-4">
             {groupedVisits.map((group) => (

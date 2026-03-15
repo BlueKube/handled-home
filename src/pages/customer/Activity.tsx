@@ -10,9 +10,12 @@ import {
   CheckCircle,
   Shield,
   Calendar,
+  Clock,
   TrendingUp,
   ArrowRight,
+  Camera,
 } from "lucide-react";
+import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
 import { format, differenceInMonths, parseISO } from "date-fns";
 
 function StatPill({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string | number }) {
@@ -27,7 +30,7 @@ function StatPill({ icon: Icon, label, value }: { icon: React.ElementType; label
 
 export default function Activity() {
   const navigate = useNavigate();
-  const { data: completedJobs, isLoading } = useCustomerJobs("completed");
+  const { data: completedJobs, isLoading } = useCustomerJobs("completed", { includePhotos: true });
   const { data: subscription } = useCustomerSubscription();
 
   const stats = useMemo(() => {
@@ -36,8 +39,12 @@ export default function Activity() {
     const memberMonths = subscription?.created_at
       ? differenceInMonths(new Date(), new Date(subscription.created_at))
       : 0;
+    const totalPhotos = completedJobs.reduce(
+      (sum, job) => sum + (job.photo_count ?? 0),
+      0
+    );
 
-    return { totalServices, memberMonths };
+    return { totalServices, memberMonths, totalPhotos };
   }, [completedJobs, subscription]);
 
   // Re-sort by completed_at DESC so the most recently finished job is first.
@@ -75,7 +82,7 @@ export default function Activity() {
 
   if (isLoading) {
     return (
-      <div className="p-4 space-y-4 max-w-lg mx-auto pb-24">
+      <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4">
         <h1 className="text-h2">Activity</h1>
         <div className="grid grid-cols-3 gap-3">
           {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
@@ -86,7 +93,7 @@ export default function Activity() {
   }
 
   return (
-    <div className="p-4 pb-24 space-y-6 max-w-lg mx-auto animate-fade-in">
+    <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-6 animate-fade-in">
       {/* Header */}
       <h1 className="text-h2">Activity</h1>
 
@@ -95,7 +102,7 @@ export default function Activity() {
         <div className="grid grid-cols-3 gap-3">
           <StatPill icon={Shield} label="Services" value={stats.totalServices} />
           <StatPill icon={Calendar} label="Months" value={stats.memberMonths > 0 ? stats.memberMonths : "New"} />
-          <StatPill icon={CheckCircle} label="Receipts" value={stats.totalServices} />
+          <StatPill icon={Camera} label="Photos" value={stats.totalPhotos} />
         </div>
       )}
 
@@ -127,7 +134,23 @@ export default function Activity() {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+              {latestJob.photos?.[0]?.url ? (
+                <img
+                  src={latestJob.photos[0].url}
+                  alt="Service photo"
+                  className="h-10 w-10 rounded-lg object-cover shrink-0"
+                  onError={(e) => {
+                    const el = e.currentTarget;
+                    el.onerror = null;
+                    el.style.display = "none";
+                    el.parentElement?.querySelector("[data-photo-fallback]")?.classList.remove("hidden");
+                  }}
+                />
+              ) : null}
+              <div
+                className={`h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0${latestJob.photos?.[0]?.url ? " hidden" : ""}`}
+                data-photo-fallback
+              >
                 <CheckCircle className="h-5 w-5 text-accent" />
               </div>
               <div>
@@ -156,13 +179,13 @@ export default function Activity() {
 
       {/* Timeline */}
       {groupedJobs.length === 0 ? (
-        <div className="text-center py-12">
-          <Calendar className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-          <p className="text-sm text-muted-foreground">No completed services yet</p>
-          <p className="text-xs text-muted-foreground/70 mt-1">
-            Your service history will build here over time.
-          </p>
-        </div>
+        <CustomerEmptyState
+          icon={Clock}
+          title="No completed services yet"
+          body="Your service history will build here over time. Each visit includes proof photos and a receipt."
+          ctaLabel="View your schedule"
+          ctaAction={() => navigate("/customer/schedule")}
+        />
       ) : (
         <div className="space-y-6">
           {groupedJobs.map(([month, jobs]) => (
@@ -198,6 +221,14 @@ export default function Activity() {
                               ? format(parseISO(job.scheduled_date), "EEE, MMM d")
                               : "Completed"}
                         </p>
+                        {(job.photo_count > 0 || (job.photos?.length ?? 0) > 0) && (
+                          <div className="flex items-center gap-1 mt-1">
+                            <Camera className="h-3 w-3 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground">
+                              {job.photo_count} photo{job.photo_count !== 1 ? "s" : ""}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </Card>

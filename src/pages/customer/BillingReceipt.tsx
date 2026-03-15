@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, AlertTriangle } from "lucide-react";
+import { ChevronLeft, AlertTriangle, Shield } from "lucide-react";
 import { PageSkeleton } from "@/components/PageSkeleton";
 
 function formatCents(cents: number) { return `$${(cents / 100).toFixed(2)}`; }
@@ -52,47 +52,52 @@ export default function CustomerBillingReceipt() {
   });
 
   return (
-    <div className="px-4 py-6 space-y-4 animate-fade-in pb-20">
+    <div className="px-4 py-6 space-y-4 animate-fade-in pb-24 max-w-lg mx-auto">
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" onClick={() => navigate("/customer/billing/history")}>
           <ChevronLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-2xl font-bold">Receipt</h1>
+        <h1 className="text-h2">Receipt</h1>
       </div>
 
       <Card>
-        <CardContent className="p-4 space-y-3">
+        <CardContent className="p-4 space-y-4">
+          {/* Branded receipt header */}
+          <div className="flex items-center justify-between pb-3 border-b">
+            <div className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-primary" />
+              <span className="font-semibold text-primary">Handled</span>
+            </div>
+            <Badge variant={invoice.status === "PAID" ? "default" : "destructive"}>{invoice.status}</Badge>
+          </div>
+
           {invoice.cycle_start_at && invoice.cycle_end_at && (
-            <p className="text-sm text-muted-foreground">
-              {new Date(invoice.cycle_start_at).toLocaleDateString()} – {new Date(invoice.cycle_end_at).toLocaleDateString()}
+            <p className="text-caption">
+              {new Date(invoice.cycle_start_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} – {new Date(invoice.cycle_end_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
             </p>
           )}
 
-          {Object.entries(typeGroups).map(([type, items]) =>
+          {Object.entries(typeGroups).map(([type, items], idx) =>
             items.length > 0 ? (
-              <div key={type}>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">{type.replace("_", " ")}</p>
+              <div key={type} className={idx > 0 ? "pt-2 border-t border-border/50" : ""}>
+                <p className="text-caption uppercase tracking-wider mb-2">{type.replace("_", " ")}</p>
                 {items.map((li: any) => (
-                  <div key={li.id} className="flex justify-between text-sm py-0.5">
+                  <div key={li.id} className="flex justify-between text-sm py-1">
                     <span>{li.label}</span>
-                    <span className={li.amount_cents < 0 ? "text-accent" : ""}>{formatCents(li.amount_cents)}</span>
+                    <span className={li.amount_cents < 0 ? "text-accent font-medium" : ""}>{formatCents(li.amount_cents)}</span>
                   </div>
                 ))}
               </div>
             ) : null
           )}
 
-          <div className="border-t pt-2 flex justify-between font-semibold">
+          <div className="border-t pt-3 flex justify-between font-semibold text-base">
             <span>Total</span>
             <span>{formatCents(invoice.total_cents)}</span>
           </div>
 
-          <div className="flex items-center gap-2 pt-1">
-            <Badge variant={invoice.status === "PAID" ? "default" : "destructive"}>{invoice.status}</Badge>
-          </div>
-
           {invoice.status === "FAILED" && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/5 border border-destructive/20">
+            <div className="flex items-center gap-2 p-3 rounded-2xl bg-destructive/5 border border-destructive/20">
               <AlertTriangle className="h-4 w-4 text-destructive" />
               <div className="flex-1">
                 <p className="text-sm font-medium">Payment failed</p>

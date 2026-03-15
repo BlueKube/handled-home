@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { CalendarDays, Loader2, Sparkles, X, Settings2, Plus } from "lucide-react";
+import { CalendarDays, Sparkles, X, Settings2, Plus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProperty } from "@/hooks/useProperty";
 import { useServiceDayAssignment } from "@/hooks/useServiceDayAssignment";
@@ -8,6 +8,8 @@ import { useCustomerSubscription } from "@/hooks/useSubscription";
 import { useCustomerJobs } from "@/hooks/useCustomerJobs";
 import { useHandleBalance, usePlanHandlesConfig } from "@/hooks/useHandles";
 import { useAddRoutineItem, useRemoveRoutineItem } from "@/hooks/useRoutineActions";
+import { usePropertyCoverage } from "@/hooks/usePropertyCoverage";
+import { usePropertySignals } from "@/hooks/usePropertySignals";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,6 +23,7 @@ import { PropertyHealthWidget } from "@/components/customer/PropertyHealthWidget
 import { FloatingAddButton } from "@/components/customer/FloatingAddButton";
 import { AddServiceDrawer } from "@/components/customer/AddServiceDrawer";
 import { SeasonalPlanCard } from "@/components/customer/SeasonalPlanCard";
+import { CycleStatsRow } from "@/components/customer/CycleStatsRow";
 import { HomeTeamCard } from "@/components/customer/HomeTeamCard";
 import { HomeTeamExpandCard } from "@/components/customer/HomeTeamExpandCard";
 import { FirstServiceCelebration } from "@/components/customer/FirstServiceCelebration";
@@ -51,16 +54,20 @@ export default function CustomerDashboard() {
   const { data: planHandles } = usePlanHandlesConfig(subscription?.plan_id);
   const addItem = useAddRoutineItem();
   const removeItem = useRemoveRoutineItem();
+  const { hasData: hasCoverage } = usePropertyCoverage();
+  const { hasData: hasSignals } = usePropertySignals();
   const navigate = useNavigate();
   const [nudgeDismissed, setNudgeDismissed] = useState(isNudgeDismissed);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const serviceDayConfirmed = assignment?.status === "confirmed";
+  // Mirrors HomeSetupCard completion check — cached by React Query
+  const setupComplete = hasCoverage && hasSignals;
   const routineItems = routineData?.items ?? [];
   const nextJob = upcomingJobs?.[0] ?? null;
   const lastCompletedJob = completedJobs?.[0] ?? null;
 
-  const showServiceDayBanner = !isLoading && !assignment;
+  const showServiceDayBanner = !isLoading && !assignment && setupComplete;
   const showServiceDayOffer = !isLoading && assignment?.status === "offered";
   const showRoutineNotEffective =
     routineData?.routine.status === "active" &&
@@ -106,33 +113,76 @@ export default function CustomerDashboard() {
   );
 
   return (
-    <div className="p-6 max-w-4xl space-y-4 pb-24">
+    <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4 animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="text-h2 mb-1">Your home is handled.</h1>
-        <p className="text-caption">
-          Welcome back{user?.user_metadata?.full_name ? `, ${user.user_metadata.full_name}` : ""}.
-        </p>
+        {subscription ? (
+          <>
+            <h1 className="text-h2 mb-1">Your home is handled.</h1>
+            <p className="text-caption">
+              Welcome back{user?.user_metadata?.full_name ? `, ${user.user_metadata.full_name.split(" ")[0]}` : ""}.
+            </p>
+          </>
+        ) : setupComplete ? (
+          <>
+            <h1 className="text-h2 mb-1">Almost there.</h1>
+            <p className="text-caption">Choose a plan to start your home maintenance routine.</p>
+          </>
+        ) : (
+          <>
+            <h1 className="text-h2 mb-1">Let's get started.</h1>
+            <p className="text-caption">Complete your home profile to unlock personalized services.</p>
+          </>
+        )}
       </div>
-
-      {/* Smart App Banner */}
-      <SmartAppBanner />
 
       {/* Notification Banners */}
       <CustomerNotificationBanners />
 
       {/* Your Home Team */}
-      <HomeTeamCard />
+      <HomeTeamCard serviceDayConfirmed={serviceDayConfirmed} />
       <HomeTeamExpandCard />
 
       {/* Home Setup Prompt */}
       <HomeSetupCard />
 
+      {/* Subscription Bridge CTA — setup complete but no subscription */}
+      {setupComplete && !subscription && (
+        <Card className="p-4 space-y-3 animate-fade-in">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+              <Sparkles className="h-4 w-4 text-accent" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold">Your home profile is ready</p>
+              <p className="text-xs text-muted-foreground">
+                Choose a plan to start your recurring maintenance routine.
+              </p>
+            </div>
+          </div>
+          <Button
+            className="w-full"
+            onClick={() => navigate("/customer/plans")}
+          >
+            Browse plans
+          </Button>
+        </Card>
+      )}
+
       {/* Truth Banners */}
       {showServiceDayBanner && (
-        <Card className="p-4 flex items-center gap-3 bg-muted/50">
-          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-          <p className="text-sm">We're assigning your Service Day…</p>
+        <Card className="p-4 space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+              <CalendarDays className="h-4 w-4 text-accent animate-pulse" />
+            </div>
+            <div>
+              <p className="text-sm font-medium">Finding your best service day</p>
+              <p className="text-xs text-muted-foreground">
+                We're matching your area and preferences — usually ready within a few hours.
+              </p>
+            </div>
+          </div>
         </Card>
       )}
 
@@ -199,7 +249,7 @@ export default function CustomerDashboard() {
 
       {/* Section A — Next Up */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pr-16">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Next Up</p>
           <Button variant="link" size="sm" className="text-xs h-auto p-0" onClick={() => navigate("/customer/schedule")}>
             View schedule →
@@ -207,6 +257,16 @@ export default function CustomerDashboard() {
         </div>
         <NextVisitCard job={nextJob} isLoading={jobsLoading} />
       </div>
+
+      {/* Cycle Stats */}
+      {serviceDayConfirmed && (
+        <CycleStatsRow
+          upcomingCount={upcomingJobs?.length ?? 0}
+          completedCount={completedJobs?.length ?? 0}
+          handlesUsed={handleBalance ?? null}
+          handlesPerCycle={planHandles?.handles_per_cycle ?? null}
+        />
+      )}
 
       {/* Handles Balance */}
       {handleBalance != null && planHandles && planHandles.handles_per_cycle > 0 && (
@@ -218,6 +278,9 @@ export default function CustomerDashboard() {
 
       {/* Suggested for Your Home */}
       <HomeSuggestions onAddToRoutine={handleAddToRoutine} onUndo={handleUndo} />
+
+      {/* Smart App Banner (demoted below product content) */}
+      <SmartAppBanner />
 
       {/* First Service Celebration */}
       {lastCompletedJob && (

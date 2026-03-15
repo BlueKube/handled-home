@@ -32,8 +32,25 @@ export function HomeSetupCard() {
         <div className="flex-1">
           <p className="text-sm font-semibold text-foreground">Complete Home Setup</p>
           <p className="text-xs text-muted-foreground">
-            ~30 seconds — helps us tailor your services
+            Finish setup to get your personalized service day and routine.
           </p>
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div className="flex items-center gap-2">
+        <div
+          className="flex-1 bg-muted rounded-full h-1.5"
+          role="progressbar"
+          aria-valuenow={completedCount}
+          aria-valuemin={0}
+          aria-valuemax={steps.length}
+          aria-label={`Home setup progress: ${completedCount} of ${steps.length} steps complete`}
+        >
+          <div
+            className="bg-accent rounded-full h-1.5 transition-all"
+            style={{ width: `${(completedCount / steps.length) * 100}%` }}
+          />
         </div>
         <span className="text-xs font-medium text-accent">
           {completedCount}/{steps.length}
@@ -60,10 +77,9 @@ export function HomeSetupCard() {
 
       {nextStep && (
         <Button
-          variant="outline"
           size="sm"
           onClick={() => navigate(nextStep.route)}
-          className="w-full border-accent/30 text-accent hover:bg-accent/10"
+          className="w-full"
         >
           Continue setup
           <ChevronRight className="h-3.5 w-3.5 ml-1" />

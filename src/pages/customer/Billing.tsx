@@ -1,6 +1,6 @@
-import { useAuth } from "@/contexts/AuthContext";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
 import { useCustomerBilling } from "@/hooks/useCustomerBilling";
+import { usePlanDetail } from "@/hooks/usePlans";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ export default function CustomerBillingPage() {
   const navigate = useNavigate();
   const { data: subscription, isLoading: subLoading } = useCustomerSubscription();
   const { defaultMethod, availableCredits, latestInvoice, hasFailedPayment, isLoading } = useCustomerBilling();
+  const { data: currentPlan } = usePlanDetail(subscription?.plan_id ?? null);
 
   if (isLoading || subLoading) return <PageSkeleton />;
 
@@ -23,8 +24,8 @@ export default function CustomerBillingPage() {
   const statusLabel = hasFailedPayment ? "Action needed" : latestInvoice?.status === "PAID" ? "Paid" : latestInvoice?.status ?? "No invoices";
 
   return (
-    <div className="px-4 py-6 space-y-4 animate-fade-in pb-20">
-      <h1 className="text-2xl font-bold">Billing</h1>
+    <div className="px-4 py-6 space-y-4 animate-fade-in pb-24 max-w-lg mx-auto">
+      <h1 className="text-h2">Billing</h1>
 
       {/* Current Plan */}
       <Card>
@@ -32,14 +33,19 @@ export default function CustomerBillingPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Current plan</p>
-              <p className="text-lg font-semibold">{subscription?.plan_id ? "Active plan" : "No plan"}</p>
+              <p className="text-lg font-semibold">{currentPlan?.name ?? (subscription?.plan_id ? "Active plan" : "No plan")}</p>
             </div>
             <Badge variant={statusColor as any}>{statusLabel}</Badge>
           </div>
           {subscription?.billing_cycle_end_at && (
             <p className="text-sm text-muted-foreground flex items-center gap-1">
               <Clock className="h-3.5 w-3.5" />
-              Next bill: {new Date(subscription.billing_cycle_end_at).toLocaleDateString()}
+              Next bill: {new Date(subscription.billing_cycle_end_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+              {currentPlan?.display_price_text && (
+                <span className="font-medium text-foreground ml-1">
+                  · Plan: {currentPlan.display_price_text}
+                </span>
+              )}
             </p>
           )}
         </CardContent>
