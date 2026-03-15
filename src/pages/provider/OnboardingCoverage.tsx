@@ -79,7 +79,7 @@ export default function OnboardingCoverage() {
   }
 
   return (
-    <div className="p-4 max-w-lg mx-auto animate-fade-in">
+    <div className="animate-fade-in p-4 pb-24">
       <p className="text-caption mb-1">Step 2 of 6</p>
       <h1 className="text-h2 mb-1">Coverage Zones</h1>
       <p className="text-caption mb-6">Select the zones you'd like to serve. Your requests will be reviewed by our team.</p>

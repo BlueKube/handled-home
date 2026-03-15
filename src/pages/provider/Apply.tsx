@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, MapPin, CheckCircle, Clock, AlertCircle, Sparkles, Users, Loader2 } from "lucide-react";
+import { ChevronLeft, MapPin, CheckCircle, Clock, AlertCircle, Sparkles, Users, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -171,12 +171,12 @@ export default function ProviderApply() {
     const status = app.status as string;
     const msg = STATUS_MESSAGES[status] ?? STATUS_MESSAGES.submitted;
     return (
-      <div className="px-4 py-6 space-y-6 animate-fade-in">
+      <div className="animate-fade-in p-4 pb-24 space-y-5">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-5 w-5" />
+            <ChevronLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-xl font-bold">Your Application</h1>
+          <h1 className="text-h2">Your Application</h1>
         </div>
         <Card>
           <CardContent className="py-6 text-center space-y-3">
@@ -219,12 +219,12 @@ export default function ProviderApply() {
   }
 
   return (
-    <div className="px-4 py-6 space-y-6 animate-fade-in">
+    <div className="animate-fade-in p-4 pb-24 space-y-5">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-5 w-5" />
+          <ChevronLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-xl font-bold">Apply to Handled Home</h1>
+        <h1 className="text-h2">Apply to Handled Home</h1>
       </div>
 
       {/* Step indicator */}

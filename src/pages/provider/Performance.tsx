@@ -119,7 +119,7 @@ export default function ProviderPerformance() {
 
   if (isLoading) {
     return (
-      <div className="animate-fade-in p-4 pb-24 space-y-4 max-w-2xl">
+      <div className="animate-fade-in p-4 pb-24 space-y-4">
         <h1 className="text-h2">Score</h1>
         <Skeleton className="h-28 rounded-2xl" />
         <div className="grid grid-cols-2 gap-3">
@@ -134,7 +134,7 @@ export default function ProviderPerformance() {
 
   if (isError) {
     return (
-      <div className="animate-fade-in p-4 pb-24 space-y-4 max-w-2xl">
+      <div className="animate-fade-in p-4 pb-24 space-y-4">
         <h1 className="text-h2">Score</h1>
         <QueryErrorCard message="Failed to load performance data." onRetry={() => refetch()} />
       </div>
@@ -151,7 +151,7 @@ export default function ProviderPerformance() {
   const band = score ? BAND_COLORS[score.band] ?? BAND_COLORS.GREEN : null;
 
   return (
-    <div className="animate-fade-in p-4 pb-24 space-y-5 max-w-2xl">
+    <div className="animate-fade-in p-4 pb-24 space-y-5">
       <div>
         <h1 className="text-h2">Score</h1>
         <p className="text-caption mt-0.5">Last 30 days</p>

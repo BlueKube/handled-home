@@ -52,7 +52,7 @@ export default function OnboardingReview() {
   }
 
   return (
-    <div className="p-4 max-w-lg mx-auto animate-fade-in">
+    <div className="animate-fade-in p-4 pb-24">
       <p className="text-caption mb-1">Step 6 of 6</p>
       <h1 className="text-h2 mb-1">Review & Submit</h1>
       <p className="text-caption mb-6">Review your application before submitting. All sections must be complete.</p>
