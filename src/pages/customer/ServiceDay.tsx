@@ -104,7 +104,7 @@ export default function CustomerServiceDay() {
 
   if (propLoading || assignLoading || createOrRefreshOffer.isPending) {
     return (
-      <div className="p-6 max-w-md mx-auto space-y-4">
+      <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4">
         {/* M4: Calm expiry message */}
         {showExpiredMessage && (
           <Alert>
@@ -124,7 +124,7 @@ export default function CustomerServiceDay() {
 
   if (!assignment) {
     return (
-      <div className="p-6 max-w-md mx-auto">
+      <div className="px-4 py-6 pb-24 max-w-lg mx-auto">
         <p className="text-caption text-center py-12">
           Unable to generate a service day offer. Please ensure you have an active subscription.
         </p>
@@ -135,7 +135,7 @@ export default function CustomerServiceDay() {
   // Confirmed state
   if (assignment.status === "confirmed") {
     return (
-      <div className="p-6 max-w-md mx-auto animate-fade-in space-y-6">
+      <div className="px-4 py-6 pb-24 max-w-lg mx-auto animate-fade-in space-y-6">
         <ServiceDayConfirmed dayOfWeek={assignment.day_of_week} />
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-foreground">Scheduling preferences</h3>
@@ -153,7 +153,7 @@ export default function CustomerServiceDay() {
   const alternatives = offers.filter((o) => o.offer_type === "alternative");
   if (showAlternatives && assignment.rejection_used) {
     return (
-      <div className="p-6 max-w-md mx-auto animate-fade-in">
+      <div className="px-4 py-6 pb-24 max-w-lg mx-auto animate-fade-in">
         <ServiceDayAlternatives
           alternatives={alternatives}
           onSelect={(offerId) =>
@@ -175,7 +175,7 @@ export default function CustomerServiceDay() {
 
   // Offer pending state
   return (
-    <div className="p-6 max-w-md mx-auto animate-fade-in space-y-6">
+    <div className="px-4 py-6 pb-24 max-w-lg mx-auto animate-fade-in space-y-6">
       {/* M4: Calm expiry message */}
       {showExpiredMessage && (
         <Alert>

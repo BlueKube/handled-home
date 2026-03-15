@@ -2,11 +2,11 @@ import { NotificationBell } from "./NotificationBell";
 
 export function AppHeader() {
   return (
-    <header className="h-14 bg-card border-b border-border flex items-center px-4 safe-top relative">
+    <header className="h-12 bg-card/90 backdrop-blur-lg border-b border-border/50 flex items-center px-4 safe-top relative">
       <div className="flex-1" />
-      <span className="font-['Plus_Jakarta_Sans'] font-bold tracking-tight text-xl select-none">
-        <span style={{ color: "hsl(220 20% 10%)" }}>Handled</span>
-        <span style={{ color: "hsl(200 80% 50%)" }}>Home</span>
+      <span className="font-['Plus_Jakarta_Sans'] font-bold tracking-tight text-lg select-none">
+        <span className="text-foreground">Handled</span>
+        <span className="text-accent">Home</span>
       </span>
       <div className="flex-1 flex justify-end">
         <NotificationBell />

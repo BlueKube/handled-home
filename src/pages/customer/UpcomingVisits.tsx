@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -286,10 +287,10 @@ export default function UpcomingVisits() {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-4xl space-y-4">
+      <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4">
         <div>
-          <h1 className="text-xl font-bold">Upcoming Visits</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Your scheduled home care.</p>
+          <h1 className="text-h2">Upcoming Visits</h1>
+          <p className="text-caption mt-0.5">Your scheduled home care.</p>
         </div>
         {[1, 2, 3].map((i) => (
           <Skeleton key={i} className="h-28 rounded-xl" />
@@ -300,27 +301,25 @@ export default function UpcomingVisits() {
 
   if (isError) {
     return (
-      <div className="p-6 max-w-4xl">
+      <div className="px-4 py-6 pb-24 max-w-lg mx-auto">
         <QueryErrorCard message="Failed to load upcoming visits." onRetry={() => refetch()} />
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-4xl space-y-4 pb-24">
+    <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4 animate-fade-in">
       <div>
-        <h1 className="text-xl font-bold">Upcoming Visits</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Your scheduled home care.</p>
+        <h1 className="text-h2">Upcoming Visits</h1>
+        <p className="text-caption mt-0.5">Your scheduled home care.</p>
       </div>
 
       {(!visits || visits.length === 0) ? (
-        <Card className="p-8 text-center">
-          <CalendarDays className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-          <p className="text-sm font-medium">No upcoming visits</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Visits will appear here as your routine generates them.
-          </p>
-        </Card>
+        <CustomerEmptyState
+          icon={CalendarDays}
+          title="No upcoming visits"
+          body="Visits will appear here as your routine generates them."
+        />
       ) : (
         <div className="space-y-3">
           {visits.map((visit) => (

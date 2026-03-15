@@ -26,27 +26,22 @@ export function HandlesExplainer() {
 
   return (
     <Card>
-      <CardContent className="pt-5 pb-4 space-y-4">
+      <CardContent className={cn("pt-5 space-y-4", expanded ? "pb-4" : "pb-3")}>
         <button
+          type="button"
           onClick={() => setExpanded(!expanded)}
           className="flex items-center justify-between w-full"
+          aria-expanded={expanded}
+          aria-controls="handles-explainer-content"
         >
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-accent" />
-            <p className="text-sm font-semibold text-foreground">
-              How handles work
-            </p>
+            <h3 className="text-sm font-semibold">How handles work</h3>
           </div>
-          <ChevronDown
-            className={cn(
-              "h-4 w-4 text-muted-foreground transition-transform",
-              expanded && "rotate-180"
-            )}
-          />
+          <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", expanded && "rotate-180")} />
         </button>
-
         {expanded && (
-          <div className="space-y-3">
+          <div id="handles-explainer-content" className="space-y-3">
             {POINTS.map((p, i) => (
               <div key={i} className="flex items-start gap-3">
                 <div className="mt-0.5 h-7 w-7 rounded-full bg-accent/10 flex items-center justify-center shrink-0">

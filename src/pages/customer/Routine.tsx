@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProperty } from "@/hooks/useProperty";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
@@ -8,6 +8,7 @@ import { useAddRoutineItem, useRemoveRoutineItem, useUpdateRoutineItemCadence, u
 import { useRoutinePreview, computeCycleDemand } from "@/hooks/useRoutinePreview";
 import { useServiceDayAssignment } from "@/hooks/useServiceDayAssignment";
 import { useBiweeklyOptimizer } from "@/hooks/useBiweeklyOptimizer";
+import { useSkus } from "@/hooks/useSkus";
 import { TruthBanner } from "@/components/routine/TruthBanner";
 import { WeekPreviewTimeline } from "@/components/routine/WeekPreviewTimeline";
 import { AddServicesSheet } from "@/components/routine/AddServicesSheet";
@@ -19,7 +20,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowRight, Sparkles, Loader2 } from "lucide-react";
-import { useSkus } from "@/hooks/useSkus";
 import { toast } from "sonner";
 import type { CadenceType } from "@/hooks/useRoutine";
 
@@ -36,10 +36,10 @@ export default function CustomerRoutine() {
   const { assignment } = useServiceDayAssignment(property?.id);
 
   const hasSub = !!subscription;
-  const { data: availableServices } = useSkus({ status: "active" });
   const planId = subscription?.plan_id ?? null;
   const zoneId = subscription?.zone_id ?? null;
   const { data: entitlements, isLoading: entLoading } = useEntitlements(planId, zoneId);
+  const { data: browsableSkus } = useSkus({ status: "active" });
   const { data: routineData, isLoading: routineLoading } = useRoutine(property?.id, planId);
   const createRoutine = useCreateRoutine();
   const addItem = useAddRoutineItem();
@@ -51,6 +51,7 @@ export default function CustomerRoutine() {
 
   const items = routineData?.items ?? [];
   const weeks = useRoutinePreview(items);
+  const servicesPreviewRef = useRef<HTMLDivElement>(null);
 
   const modelType = entitlements?.plan.model_type ?? "credits_per_cycle";
   const modelLabel = MODEL_LABELS[modelType] ?? "credits";
@@ -141,9 +142,9 @@ export default function CustomerRoutine() {
   // H3: Service day gate only when subscribed
   if (!isLoading && hasSub && assignment?.status !== "confirmed") {
     return (
-      <div className="p-6 text-center space-y-4 animate-fade-in">
+      <div className="px-4 py-6 pb-24 max-w-lg mx-auto text-center space-y-4 animate-fade-in">
         <h2 className="text-h2">Confirm your Service Day</h2>
-        <p className="text-sm text-muted-foreground">Lock in your weekly service day before building your routine.</p>
+        <p className="text-caption">Lock in your weekly service day before building your routine.</p>
         <Button onClick={() => navigate("/customer/service-day")}>Set Service Day</Button>
       </div>
     );
@@ -151,7 +152,7 @@ export default function CustomerRoutine() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4 p-4">
+      <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4">
         <Skeleton className="h-16 w-full" />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-32 w-full" />
@@ -162,10 +163,10 @@ export default function CustomerRoutine() {
   }
 
   const existingSkuIds = new Set(items.map((i) => i.sku_id));
-  const planName = hasSub ? "Your Plan" : "—";
+  const planName = "Your Plan";
 
   return (
-    <div className="pb-32 animate-fade-in">
+    <div className="pb-24 animate-fade-in max-w-lg mx-auto">
       {hasSub && (
         <TruthBanner
           planName={planName}
@@ -217,14 +218,14 @@ export default function CustomerRoutine() {
               {hasSub ? "No services yet. Tap below to add your first." : "Browse available services — subscribe when you're ready."}
             </p>
 
-            {/* Item 6: Service preview cards for unsubscribed users */}
-            {!hasSub && items.length === 0 && availableServices && availableServices.length > 0 && (
-              <div className="w-full space-y-3 pt-2">
+            {/* Popular services preview for unsubscribed users */}
+            {!hasSub && items.length === 0 && browsableSkus && browsableSkus.length > 0 && (
+              <div ref={servicesPreviewRef} className="w-full space-y-3 pt-2">
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Popular services
                 </p>
                 <div className="space-y-2">
-                  {availableServices.slice(0, 3).map((service) => (
+                  {browsableSkus.slice(0, 3).map((service) => (
                     <Card key={service.id} className="p-3 flex items-center gap-3">
                       <div className="h-9 w-9 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
                         <Sparkles className="h-4 w-4 text-accent" />
@@ -233,9 +234,11 @@ export default function CustomerRoutine() {
                         <p className="text-sm font-medium truncate">{service.name}</p>
                         <p className="text-xs text-muted-foreground">{service.category ?? "Home service"}</p>
                       </div>
-                      <p className="text-xs font-semibold text-accent shrink-0">
-                        {service.handle_cost ?? "—"} handles
-                      </p>
+                      {service.handle_cost != null && (
+                        <p className="text-xs font-semibold text-accent shrink-0">
+                          {service.handle_cost} handles
+                        </p>
+                      )}
                     </Card>
                   ))}
                 </div>
@@ -262,8 +265,9 @@ export default function CustomerRoutine() {
               onAdd={handleAddItem}
             />
           )}
+          {/* Unsubscribed: scroll to service previews */}
           {!hasSub && !entitlements && (
-            <Button variant="outline" className="gap-2" onClick={() => navigate("/customer/plans")}>
+            <Button className="gap-2" onClick={() => servicesPreviewRef.current?.scrollIntoView({ behavior: "smooth" })}>
               <Sparkles className="h-4 w-4" />
               Browse services
             </Button>
@@ -272,7 +276,7 @@ export default function CustomerRoutine() {
       </div>
 
       {/* Bottom CTA */}
-      {items.length > 0 && (
+      {(items.length > 0 || !hasSub) && (
         <div className="fixed bottom-16 left-0 right-0 z-40 p-4 bg-card/95 backdrop-blur border-t border-border max-w-lg mx-auto">
           {hasSub ? (
             <>
@@ -293,7 +297,7 @@ export default function CustomerRoutine() {
             <Button
               className="w-full gap-2"
               size="lg"
-              onClick={() => navigate("/customer/plans")}
+              onClick={() => servicesPreviewRef.current?.scrollIntoView({ behavior: "smooth" })}
             >
               <Sparkles className="h-4 w-4" />
               Browse services

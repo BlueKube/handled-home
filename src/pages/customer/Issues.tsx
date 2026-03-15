@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useCustomerIssues } from "@/hooks/useCustomerIssues";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/StatusBadge";
+import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
 import { format } from "date-fns";
 import { AlertTriangle } from "lucide-react";
 
@@ -30,7 +31,7 @@ export default function CustomerIssues() {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-4xl">
+      <div className="px-4 py-6 pb-24 max-w-lg mx-auto">
         <h1 className="text-h2 mb-4">My Issues</h1>
         <div className="space-y-3">
           {[1, 2].map((i) => (
@@ -42,15 +43,15 @@ export default function CustomerIssues() {
   }
 
   return (
-    <div className="p-6 max-w-4xl">
+    <div className="px-4 py-6 pb-24 max-w-lg mx-auto animate-fade-in">
       <h1 className="text-h2 mb-4">My Issues</h1>
 
       {(!issues || issues.length === 0) ? (
-        <Card className="p-8 text-center">
-          <AlertTriangle className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-          <p className="text-sm font-medium">No issues reported</p>
-          <p className="text-xs text-muted-foreground mt-1">Any concerns you report will appear here.</p>
-        </Card>
+        <CustomerEmptyState
+          icon={AlertTriangle}
+          title="No issues reported"
+          body="Any concerns you report will appear here."
+        />
       ) : (
         <div className="space-y-2">
           {issues.map((issue) => (

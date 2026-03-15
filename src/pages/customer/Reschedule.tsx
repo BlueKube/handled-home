@@ -159,7 +159,7 @@ export default function CustomerReschedule() {
   // --- Loading states ---
   if (metaLoading || holdLoading) {
     return (
-      <div className="p-6 max-w-lg space-y-4">
+      <div className="px-4 py-6 max-w-lg mx-auto space-y-4">
         <Skeleton className="h-6 w-40" />
         <Skeleton className="h-24 rounded-xl" />
         <Skeleton className="h-24 rounded-xl" />
@@ -169,7 +169,7 @@ export default function CustomerReschedule() {
 
   if (!visitMeta) {
     return (
-      <div className="p-6 max-w-lg text-center space-y-3">
+      <div className="px-4 py-6 max-w-lg mx-auto text-center space-y-3">
         <p className="text-sm text-muted-foreground">Visit not found.</p>
         <Button variant="link" onClick={() => navigate("/customer/upcoming")}>
           ← Back to upcoming
@@ -181,9 +181,9 @@ export default function CustomerReschedule() {
   // --- Done state ---
   if (step === "done") {
     return (
-      <div className="p-6 max-w-lg space-y-5 text-center">
+      <div className="px-4 py-6 max-w-lg mx-auto space-y-5 text-center">
         <CheckCircle2 className="h-14 w-14 text-success mx-auto" />
-        <h1 className="text-xl font-bold">Visit Rescheduled</h1>
+        <h1 className="text-h2">Visit Rescheduled</h1>
         <p className="text-sm text-muted-foreground">
           We've updated your schedule. You'll get a confirmation notification.
         </p>
@@ -193,7 +193,7 @@ export default function CustomerReschedule() {
   }
 
   return (
-    <div className="p-6 max-w-lg space-y-5 pb-24">
+    <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-5 animate-fade-in">
       {/* Header */}
       <Button
         variant="ghost"
@@ -206,7 +206,7 @@ export default function CustomerReschedule() {
       </Button>
 
       <div>
-        <h1 className="text-xl font-bold">Reschedule Visit</h1>
+        <h1 className="text-h2">Reschedule Visit</h1>
         <p className="text-sm text-muted-foreground mt-0.5">{visitMeta.task_summary}</p>
         <p className="text-xs text-muted-foreground mt-1">
           <CalendarDays className="inline h-3 w-3 mr-1" />

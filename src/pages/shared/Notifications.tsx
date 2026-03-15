@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
 import type { Database } from "@/integrations/supabase/types";
 
 type Notification = Database["public"]["Tables"]["notifications"]["Row"];
@@ -73,10 +74,11 @@ export default function Notifications() {
           ))}
         </div>
       ) : notifications.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
-          <Bell className="h-12 w-12 opacity-20" />
-          <p className="text-sm">No notifications</p>
-        </div>
+        <CustomerEmptyState
+          icon={Bell}
+          title="All caught up"
+          body="We'll notify you about upcoming visits, service updates, and billing reminders."
+        />
       ) : (
         <>
           <ul className="divide-y divide-border rounded-lg border border-border overflow-hidden bg-card">

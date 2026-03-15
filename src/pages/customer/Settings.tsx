@@ -26,8 +26,8 @@ export default function CustomerSettings() {
   };
 
   return (
-    <div className="px-4 py-6 space-y-6 max-w-lg mx-auto animate-fade-in">
-      <h1 className="text-2xl font-bold">Account Settings</h1>
+    <div className="px-4 py-6 pb-24 space-y-6 max-w-lg mx-auto animate-fade-in">
+      <h1 className="text-h2">Account Settings</h1>
 
       {/* Avatar + email */}
       <div className="flex items-center gap-4">
