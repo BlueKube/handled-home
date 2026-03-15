@@ -29,7 +29,7 @@ export default function ByocCenter() {
   // Gate: must be approved provider org
   if (!org || (org.status !== "ACTIVE" && org.status !== "PROBATION")) {
     return (
-      <div className="p-4 max-w-lg mx-auto text-center mt-12 animate-fade-in">
+      <div className="animate-fade-in p-4 pb-24 text-center mt-12">
         <Gift className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
         <h1 className="text-h2 mb-2">BYOC Center</h1>
         <p className="text-caption">
@@ -55,7 +55,7 @@ export default function ByocCenter() {
   const recentEvents = events.data?.slice(0, 10) ?? [];
 
   return (
-    <div className="p-4 max-w-lg mx-auto space-y-4 animate-fade-in">
+    <div className="animate-fade-in p-4 pb-24 space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-h2">BYOC Center</h1>
