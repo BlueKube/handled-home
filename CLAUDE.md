@@ -8,7 +8,7 @@ Three user roles: **Customer**, **Provider**, **Admin**.
 
 ## Your Current Mission
 
-You are continuing a UI/UX overhaul of the Handled Home app. The customer redesign (12 epics) and all provider pages (11 batches, 34 pages) are complete. The next phase is **admin pages** — 59 pages that need the same consistency polish.
+You are continuing a UI/UX overhaul of the Handled Home app. The customer redesign (12 epics), all provider pages (11 batches, 34 pages), and all admin pages (5 batches, ~54 pages) are complete. The next phase is **documentation sync** and any remaining cleanup.
 
 ## Workflow (Non-Negotiable)
 
@@ -93,9 +93,31 @@ All 34 provider pages and key provider components have been polished across 11 b
 - L10: Add focus ring to Proof Required buttons in JobDetail
 - L11: Confirm `replace: true` behavior on breadcrumb navigation
 
-## What Remains — Admin Pages
+## Admin Redesign (Complete)
 
-59 admin pages need the same UX consistency pass. Customer (36 pages) and Provider (34 pages) are complete.
+All ~54 admin pages polished across 5 batches:
+
+| Batch | Scope | Pages |
+|-------|-------|-------|
+| 1 | Cockpit & Core Ops | OpsCockpit, OpsJobs, OpsServiceDays, OpsSupport, OpsBilling, OpsGrowth, OpsDefinitions, OpsZones, OpsZoneDetail, DispatcherQueues, Jobs |
+| 2 | Execution | JobDetail, Scheduling, PlannerDashboard, SchedulingPolicy, SchedulingExceptions, WindowTemplates, ServiceDays, Exceptions, ExceptionAnalytics, AssignmentDashboard, AssignmentConfig |
+| 3 | People & Markets | Billing, Dashboard, CustomerLedger, ProviderLedger, ProviderDetail, Providers, Feedback |
+| 4 | Catalog, Money & Control | SKUs, Plans, Bundles, Payouts, ControlConfig, Audit, LevelAnalytics, NotificationHealth, CronHealth |
+| 5 | Growth, Support & Governance | ApplicationDetail, Applications, SupportTicketDetail, ControlChangeLog, ControlChangeRequests, ControlPayouts, ControlPricing, Playbooks, Reports, TestToggles, ZoneBuilder, Growth, Incentives, Settings, Subscriptions, Zones |
+
+### Admin consistency standards (differs from provider — desktop sidebar layout)
+- `animate-fade-in` on main containers
+- `p-6` padding (no pb-24 — admin uses sidebar, not bottom tab bar)
+- `text-h2` for page titles
+- `ChevronLeft` back navigation with aria-labels on detail pages
+- Semantic color tokens only
+- `max-w-*` constraints OK for admin (desktop layout)
+- Responsive grids (`lg:grid-cols-*`) OK for admin
+
+### Skipped
+- `OpsExceptions.tsx` — split-panel layout (`flex h-[calc(100vh-3rem)]`), no standard header pattern
+- `Capacity.tsx` — redirect only, no page content
+- `Support.tsx` — re-export of SupportDashboard
 
 ## Tech Stack
 
