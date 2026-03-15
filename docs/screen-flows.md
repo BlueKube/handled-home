@@ -1495,7 +1495,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Route**: `/admin/ops/zones/:zoneId`
 
-### Screen 25.5: Jobs Health
+### Screen 25.5: Jobs & Proof Health
 
 **Route**: `/admin/ops/jobs`
 **Purpose**: Active/completed/failed jobs metrics
@@ -1543,7 +1543,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 # FLOW 27: Admin Service Configuration
 
-### Screen 27.1: Zone Management
+### Screen 27.1: Regions & Zones
 
 **Route**: `/admin/zones`
 **Purpose**: Create/edit zones, assign zip codes
@@ -1558,17 +1558,17 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/skus`
 **Purpose**: Service type definitions — names, durations, levels, checklist templates
 
-### Screen 27.4: Plan Management
+### Screen 27.4: Subscription Plans
 
 **Route**: `/admin/plans`
 **Purpose**: Subscription plan configuration — pricing, handles, zone availability
 
-### Screen 27.5: Bundle Management
+### Screen 27.5: Bundles / Routines
 
 **Route**: `/admin/bundles`
 **Purpose**: Service bundle configuration
 
-### Screen 27.6: Service Day Config
+### Screen 27.6: Service Days
 
 **Route**: `/admin/service-days`
 **Purpose**: Service day rules — capacity per day, assignment algorithm
@@ -1670,7 +1670,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/support/macros`
 **Purpose**: Pre-written support response templates
 
-### Screen 30.5: Growth Dashboard
+### Screen 30.5: Growth Console
 
 **Route**: `/admin/growth`
 **Purpose**: Viral loop metrics, BYOC performance, referral conversion

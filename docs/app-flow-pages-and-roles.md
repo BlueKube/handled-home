@@ -111,62 +111,62 @@
 
 | Route | Page |
 |-------|------|
-| `/admin` | Overview Dashboard |
+| `/admin` | Admin Console |
 | `/admin/zones` | Regions & Zones |
 | `/admin/zones/builder` | Zone Builder |
-| `/admin/capacity` | Zone Capacity |
+| `/admin/capacity` | *(redirect → /admin/zones)* |
 | `/admin/skus` | SKU Catalog |
 | `/admin/plans` | Subscription Plans |
-| `/admin/subscriptions` | Active Subscriptions |
-| `/admin/providers` | Provider List |
-| `/admin/providers/:id` | Provider Detail |
-| `/admin/providers/applications` | Provider Applications |
-| `/admin/providers/applications/:id` | Application Detail |
-| `/admin/jobs` | Job List |
+| `/admin/subscriptions` | Subscriptions |
+| `/admin/providers` | Providers |
+| `/admin/providers/:id` | *(dynamic: org name)* |
+| `/admin/providers/applications` | Applications |
+| `/admin/providers/applications/:id` | *(dynamic: applicant name)* |
+| `/admin/jobs` | Jobs |
 | `/admin/jobs/:jobId` | Job Detail |
 | `/admin/scheduling` | Scheduling Operations |
-| `/admin/scheduling/planner` | Scheduling Planner |
+| `/admin/scheduling/planner` | Planner |
 | `/admin/scheduling/policy` | Scheduling Policy |
-| `/admin/scheduling/windows` | Appointment Windows |
+| `/admin/scheduling/windows` | Window Templates |
 | `/admin/scheduling/exceptions` | Scheduling Exceptions |
-| `/admin/assignments` | Assignment Overview |
-| `/admin/assignments/config` | Assignment Configuration |
-| `/admin/service-days` | Service Day Config |
-| `/admin/bundles` | Routine/Bundle Management |
+| `/admin/assignments` | Assignments |
+| `/admin/assignments/config` | Assignment Tuning Dials |
+| `/admin/service-days` | Service Days |
+| `/admin/bundles` | Bundles / Routines |
 | `/admin/support` | Support Console |
-| `/admin/support/tickets/:ticketId` | Ticket Detail |
+| `/admin/support/tickets/:ticketId` | *(dynamic: ticket subject)* |
 | `/admin/support/policies` | Support Policies |
-| `/admin/support/macros` | Response Macros |
-| `/admin/incentives` | Incentive Programs |
-| `/admin/growth` | Growth Dashboard |
+| `/admin/support/macros` | Support Macros |
+| `/admin/incentives` | Incentives |
+| `/admin/growth` | Growth Console |
 | `/admin/feedback` | Customer Feedback |
-| `/admin/playbooks` | Operational Playbooks |
-| `/admin/control/pricing` | Pricing Controls |
-| `/admin/control/payouts` | Payout Controls |
+| `/admin/playbooks` | Playbooks & SOPs |
+| `/admin/control/pricing` | Pricing & Margin |
+| `/admin/control/payouts` | Provider Payout Engine |
 | `/admin/control/config` | System Configuration |
 | `/admin/control/change-requests` | Change Requests |
 | `/admin/control/change-log` | Change Log |
-| `/admin/exceptions` | Exception Queue |
-| `/admin/billing` | Billing Overview |
-| `/admin/billing/customers/:customerId` | Customer Ledger |
-| `/admin/payouts` | Payout Overview |
-| `/admin/payouts/providers/:providerOrgId` | Provider Ledger |
+| `/admin/exceptions` | Exceptions |
+| `/admin/billing` | Billing |
+| `/admin/billing/customers/:customerId` | *(dynamic: customer name)* |
+| `/admin/payouts` | Payouts |
+| `/admin/payouts/providers/:providerOrgId` | *(dynamic: provider name)* |
 | `/admin/ops` | Ops Cockpit |
-| `/admin/ops/zones` | Ops: Zone Health |
-| `/admin/ops/zones/:zoneId` | Ops: Zone Detail |
-| `/admin/ops/service-days` | Ops: Service Days |
-| `/admin/ops/jobs` | Ops: Jobs |
-| `/admin/ops/billing` | Ops: Billing |
-| `/admin/ops/support` | Ops: Support |
-| `/admin/ops/growth` | Ops: Growth |
-| `/admin/ops/definitions` | Ops: Definitions |
-| `/admin/ops/dispatch` | Ops: Dispatch |
-| `/admin/ops/exceptions` | Ops: Exceptions |
-| `/admin/ops/exception-analytics` | Ops: Exception Analytics |
-| `/admin/ops/levels` | Ops: Level Analytics |
+| `/admin/ops/zones` | Zone Health |
+| `/admin/ops/zones/:zoneId` | *(dynamic: zone name)* |
+| `/admin/ops/service-days` | Service Day Health |
+| `/admin/ops/jobs` | Jobs & Proof Health |
+| `/admin/ops/billing` | Billing Health |
+| `/admin/ops/support` | Support Health |
+| `/admin/ops/growth` | Growth Health |
+| `/admin/ops/definitions` | KPI Definitions |
+| `/admin/ops/dispatch` | Dispatcher Queues |
+| `/admin/ops/exceptions` | Ops Exceptions |
+| `/admin/ops/exception-analytics` | Exception Analytics |
+| `/admin/ops/levels` | Level Analytics |
 | `/admin/reports` | Reporting & Analytics |
 | `/admin/audit` | Audit Logs |
-| `/admin/cron-health` | Cron Health Monitor |
+| `/admin/cron-health` | Cron Health |
 | `/admin/notification-health` | Notification Health |
 | `/admin/test-toggles` | Test Toggles |
 | `/admin/settings` | Admin Settings |

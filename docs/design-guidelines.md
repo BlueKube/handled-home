@@ -111,12 +111,36 @@ All transitions: ease-out. No aggressive or decorative animations.
 
 ---
 
+## Admin (Desktop) Layout
+
+Admin pages use a **sidebar + command bar** layout (via `AdminShell`), not the mobile bottom tab bar.
+
+| Pattern | Customer/Provider (Mobile) | Admin (Desktop) |
+|---------|---------------------------|-----------------|
+| Shell | Bottom tab bar (56px) | Sidebar + command bar (h-12) |
+| Container padding | `p-4 pb-24` | `p-6` |
+| Max-width constraints | None (mobile-only) | OK (`max-w-4xl`, `max-w-6xl`) |
+| Responsive grids | None | OK (`lg:grid-cols-*`) |
+| Page heading | `text-h2` | `text-h2` |
+| Entry animation | `animate-fade-in` | `animate-fade-in` |
+| Back navigation | `ChevronLeft` h-5 w-5 + aria-label | `ChevronLeft` h-5 w-5 + aria-label |
+| Touch targets | Min 44px | Standard button sizes |
+
+**Key differences:**
+- No `pb-24` — admin has no bottom tab bar to clear
+- `p-6` padding (not `p-4`) — more spacious desktop layout
+- `max-w-*` constraints are appropriate for desktop readability
+- Responsive grids are used for dashboard-style pages
+
+---
+
 ## Accessibility
 - Semantic headings
 - Visible focus states (ring-2 ring-ring)
 - Proper contrast ratios (WCAG AA)
 - Clear error messaging
 - 16px minimum font for inputs (no iOS zoom)
+- Back buttons include `aria-label` for screen readers
 
 ---
 
