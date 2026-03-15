@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TicketStatusChip } from "@/components/support/TicketStatusChip";
-import { ArrowLeft, CheckCircle2, Clock, FileText, Send, Camera, X } from "lucide-react";
+import { ChevronLeft, CheckCircle2, Clock, FileText, Send, Camera, X } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
 
@@ -37,7 +37,7 @@ export default function ProviderSupportTicketDetail() {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-2xl">
+      <div className="animate-fade-in p-4 pb-24">
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-20 bg-muted/50 rounded-xl animate-pulse" />
@@ -49,7 +49,7 @@ export default function ProviderSupportTicketDetail() {
 
   if (!ticket) {
     return (
-      <div className="p-6 max-w-2xl text-center">
+      <div className="animate-fade-in p-4 pb-24 text-center">
         <p className="text-sm text-muted-foreground">Ticket not found.</p>
         <Button variant="link" onClick={() => navigate("/provider/support")}>← Back to support</Button>
       </div>
@@ -93,11 +93,12 @@ export default function ProviderSupportTicketDetail() {
   };
 
   return (
-    <div className="p-6 max-w-2xl space-y-4 animate-fade-in">
-      <Button variant="ghost" size="sm" className="gap-1 -ml-2" onClick={() => navigate("/provider/support")}>
-        <ArrowLeft className="h-4 w-4" />
-        Support
-      </Button>
+    <div className="animate-fade-in p-4 pb-24 space-y-4">
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" onClick={() => navigate("/provider/support")} aria-label="Back to support">
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+      </div>
 
       {/* Header */}
       <div className="space-y-2">
