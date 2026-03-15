@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 
 const KPI_DEFINITIONS = [
   {
@@ -115,10 +115,10 @@ export default function OpsDefinitions() {
   const nav = useNavigate();
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="animate-fade-in p-6 space-y-4">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => nav("/admin/ops")}>
-          <ArrowLeft className="h-4 w-4" />
+        <Button variant="ghost" size="icon" onClick={() => nav("/admin/ops")} aria-label="Back to Ops Cockpit">
+          <ChevronLeft className="h-5 w-5" />
         </Button>
         <div>
           <h1 className="text-h2">KPI Definitions</h1>

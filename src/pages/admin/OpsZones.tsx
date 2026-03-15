@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, Users, AlertTriangle, TrendingUp } from "lucide-react";
+import { ChevronLeft, Calendar, Users, AlertTriangle, TrendingUp } from "lucide-react";
 import { SparklineChart } from "@/components/SparklineChart";
 
 export default function OpsZones() {
@@ -13,10 +13,10 @@ export default function OpsZones() {
   const nav = useNavigate();
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="animate-fade-in p-6 space-y-4">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => nav("/admin/ops")}>
-          <ArrowLeft className="h-4 w-4" />
+        <Button variant="ghost" size="icon" onClick={() => nav("/admin/ops")} aria-label="Back to Ops Cockpit">
+          <ChevronLeft className="h-5 w-5" />
         </Button>
         <div>
           <h1 className="text-h2">Zone Health</h1>

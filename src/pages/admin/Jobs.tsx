@@ -31,7 +31,7 @@ export default function AdminJobs() {
   });
 
   return (
-    <div className="animate-fade-in p-4 pb-24 space-y-4">
+    <div className="animate-fade-in p-6 space-y-4">
       <h1 className="text-h2">Jobs</h1>
 
       {/* Filters */}

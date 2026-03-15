@@ -115,7 +115,7 @@ export default function OpsCockpit() {
 
   if (isLoading || !m) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="animate-fade-in p-6 space-y-6">
         <h1 className="text-h2">Ops Cockpit</h1>
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -137,7 +137,7 @@ export default function OpsCockpit() {
   const atRiskCount = m.jobsInIssue + m.proofExceptions;
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="animate-fade-in p-6 space-y-5">
       {/* Autopilot Status Banner */}
       {!autopilot.isLoading && (
         <AutopilotBanner status={autopilot.status} reasons={autopilot.reasons} />
