@@ -66,19 +66,21 @@ export function VisitJobCard({
           <div className="flex flex-col gap-0.5 shrink-0 pt-1">
             <Button
               variant="ghost" size="icon"
-              className="h-6 w-6"
+              className="h-9 w-9"
               disabled={!canMoveUp}
+              aria-label="Move up"
               onClick={(e) => { e.stopPropagation(); onMoveUp?.(); }}
             >
-              <ArrowUp className="h-3 w-3" />
+              <ArrowUp className="h-3.5 w-3.5" />
             </Button>
             <Button
               variant="ghost" size="icon"
-              className="h-6 w-6"
+              className="h-9 w-9"
               disabled={!canMoveDown}
+              aria-label="Move down"
               onClick={(e) => { e.stopPropagation(); onMoveDown?.(); }}
             >
-              <ArrowDown className="h-3 w-3" />
+              <ArrowDown className="h-3.5 w-3.5" />
             </Button>
           </div>
         )}
@@ -112,7 +114,7 @@ export function VisitJobCard({
 
             {/* Due-soon badge */}
             {visit.due_status === "due_soon" && (
-              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-warning/10 text-warning-foreground dark:bg-warning/20 dark:text-warning">
                 <AlertTriangle className="h-2.5 w-2.5 mr-0.5" />
                 Due soon
               </Badge>
