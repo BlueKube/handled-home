@@ -50,7 +50,7 @@ export default function AdminJobDetail() {
   }, [data?.photos]);
 
   if (isLoading || !data) {
-    return <div className="p-4 space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-40 w-full rounded-xl" /></div>;
+    return <div className="animate-fade-in p-6 space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-40 w-full rounded-xl" /></div>;
   }
 
   const { job, skus, checklist, photos, issues, events, property } = data;
@@ -79,9 +79,9 @@ export default function AdminJobDetail() {
   };
 
   return (
-    <div className="animate-fade-in p-4 pb-24 space-y-4">
+    <div className="animate-fade-in p-6 space-y-4">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/admin/jobs")}><ChevronLeft className="h-5 w-5" /></Button>
+        <Button variant="ghost" size="icon" onClick={() => navigate("/admin/jobs")} aria-label="Back to jobs"><ChevronLeft className="h-5 w-5" /></Button>
         <div className="flex-1">
           <h1 className="text-h3">Job Detail</h1>
           <p className="text-caption">{property?.street_address ?? "Property"}</p>

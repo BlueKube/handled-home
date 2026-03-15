@@ -55,7 +55,7 @@ export default function AdminScheduling() {
   const isLoading = zonesLoading || assignLoading;
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="p-6 space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-h2">Scheduling Operations</h1>

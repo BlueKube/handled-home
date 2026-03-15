@@ -128,9 +128,9 @@ export default function AssignmentConfig() {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-8">
+    <div className="animate-fade-in p-6 max-w-4xl mx-auto space-y-8">
       <div>
-        <h1 className="text-2xl font-bold">Assignment Tuning Dials</h1>
+        <h1 className="text-h2">Assignment Tuning Dials</h1>
         <p className="text-sm text-muted-foreground">Adjust weights, thresholds, and capacity parameters for the assignment engine</p>
       </div>
 

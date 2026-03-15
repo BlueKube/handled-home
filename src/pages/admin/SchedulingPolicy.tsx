@@ -87,7 +87,7 @@ export default function SchedulingPolicySettings() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="p-6 space-y-6 animate-fade-in">
         <div>
           <h1 className="text-h2 flex items-center gap-2">
             <CalendarClock className="h-5 w-5" />
@@ -109,7 +109,7 @@ export default function SchedulingPolicySettings() {
 
   return (
     <TooltipProvider>
-      <div className="space-y-6 animate-fade-in">
+      <div className="p-6 space-y-6 animate-fade-in">
         <div>
           <h1 className="text-h2 flex items-center gap-2">
             <CalendarClock className="h-5 w-5" />

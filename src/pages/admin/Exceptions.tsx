@@ -12,8 +12,8 @@ export default function AdminExceptions() {
   if (isLoading) return <PageSkeleton />;
 
   return (
-    <div className="px-4 py-6 space-y-4 animate-fade-in pb-20">
-      <h1 className="text-2xl font-bold">Exceptions</h1>
+    <div className="p-6 space-y-4 animate-fade-in">
+      <h1 className="text-h2">Exceptions</h1>
 
       {exceptions.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-12">No open exceptions. 🎉</p>
