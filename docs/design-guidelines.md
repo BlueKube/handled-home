@@ -107,6 +107,7 @@ All transitions: ease-out. No aggressive or decorative animations.
 - `.press-feedback` — active:scale-[0.98] with transition
 - `.safe-top` / `.safe-bottom` — env(safe-area-inset)
 - `.text-h1` through `.text-caption` — typography presets
+- `.animate-fade-in` — translateY(4→0) + opacity fade, applied to all page-level containers on mount
 
 ---
 

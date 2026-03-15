@@ -631,11 +631,21 @@ Handled Home monetizes through the **subscription spread model** — the delta b
 - Switch Kit (safe, scheduled transition from incumbents)
 
 ### Provider
-- curated onboarding + approval
-- job list optimized for "today → next"
-- job detail includes: Level, scope, time target, proof requirements
-- completion includes: proof enforcement + "level sufficient?" feedback + courtesy upgrade (guardrails)
-- simple issue reporting
+- curated onboarding + approval (6-step wizard)
+- job list optimized for "today → next" with route progress tracking
+- job detail includes: Level, scope, time target, proof requirements, sticky action bar, queue position breadcrumb ("Stop X of Y")
+- job checklist completion with task-level tracking
+- photo proof capture (before/after per SKU)
+- completion includes: proof enforcement + "level sufficient?" feedback + courtesy upgrade (guardrails) + route progress + "Next Stop" navigation
+- daily recap card with earnings summary
+- earnings dashboard with period selector, modifier explanations, held earnings detail
+- quality score page with metric breakdown and coaching cues
+- performance insights with trend history
+- payout status and history
+- availability, coverage zones, and work setup management
+- support ticket submission and tracking
+- BYOC center with invite link creation
+- issue reporting with categorized types
 
 ### Admin / Ops
 - zones, capacity, Service Day patterns
@@ -693,9 +703,12 @@ The app must make users **feel** the value, not just **read about** it. Every sc
 6. **Referral Milestones** — Tiered rewards (Starter/Ambassador/Champion) with progress bars. Creates urgency and reciprocity.
 
 ### Provider-Facing UX Strategy
-1. **Earnings Projection** — Show estimated income during onboarding and on dashboard. Kill ambiguity: "At 60% capacity: $X/wk. Full schedule: $Y/wk."
-2. **BYOC Front-and-Center** — Prominent banner on dashboard: "Bring your existing customers. Earn bonus income on top of your guaranteed route pay."
-3. **Capacity Growth Meter** — "You're at X% capacity. Fill your schedule to earn $Y more/mo." Makes growth tangible.
+1. **Earnings Clarity** — Earnings dashboard with period selector (Today/Week/Month), modifier explanations, held earnings breakdown. Daily recap card on dashboard shows today's earnings at a glance.
+2. **Route Awareness** — Route progress card on dashboard + completion screen. Queue position breadcrumb ("Stop X of Y") with prev/next navigation in job detail. Streak tracking on performance page.
+3. **BYOC Front-and-Center** — BYOC Center (via Growth menu) with invite link creation, activation tracking, and pre-written scripts. Founding Partner Program page for customer invitations.
+4. **Quality Coaching** — Quality score page with metric breakdown (on-time rate, photo compliance, issue-free rate). Performance insights with trend history and coaching cues.
+5. **Earnings Projection** — Show estimated income during onboarding and on dashboard. Kill ambiguity: "At 60% capacity: $X/wk. Full schedule: $Y/wk."
+6. **Capacity Growth Meter** — "You're at X% capacity. Fill your schedule to earn $Y more/mo." Makes growth tangible.
 
 ---
 
