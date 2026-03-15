@@ -93,7 +93,7 @@ export default function AssignmentConfig() {
   if (isLoading) {
     return (
       <div className="animate-fade-in p-6 max-w-4xl mx-auto space-y-6">
-        <h1 className="text-h2">Assignment Config</h1>
+        <h1 className="text-h2">Assignment Tuning Dials</h1>
         <div className="space-y-3">
           {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24 w-full" />)}
         </div>
