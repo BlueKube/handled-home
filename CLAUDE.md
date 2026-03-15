@@ -6,6 +6,124 @@ Handled Home is a **managed home-maintenance platform** — "Your home, handled.
 
 Three user roles: **Customer**, **Provider**, **Admin**.
 
+## Your Current Mission
+
+You are continuing a UI/UX overhaul of the Handled Home app. The customer redesign (12 epics) and Provider Batches 1-2 are complete. Your job is to continue through **all remaining provider pages** applying the same quality bar and workflow discipline, then hand off for admin pages.
+
+## Workflow (Non-Negotiable)
+
+Follow this exact sequence for every batch. Do not skip steps.
+
+1. **Re-anchor to the roadmap** — State which provider pages/areas this batch covers and what remains.
+2. **Write a spec before coding** — Every batch needs a markdown spec with: title, why it matters, scope, non-goals, exact file targets, acceptance criteria, regression risks, visual validation checklist.
+3. **Keep batches small** — 1 theme across 1-3 screens. Don't mix unrelated fixes.
+4. **Implement only the spec** — If you find something out of scope, defer it.
+5. **Run independent review** — After implementing, do a thorough self-review focusing on: correctness, spec adherence, UX consistency, accessibility, dark mode, CTA/route behavior.
+6. **Fix all MUST-FIX findings** — Do not merge until review is clear.
+7. **Validate build** — Run `npx tsc --noEmit` and `npm run build` before considering a batch done.
+8. **Reconcile** — After each batch, update which pages are done and what's next.
+
+## Workflow & UX Reference Docs
+
+Read these before starting any batch:
+- `docs/skills/redesign-workflow-guide.md` — Batch execution workflow (MUST follow)
+- `docs/skills/mobile-ui-ux-guide.md` — Mobile UX design principles and review framework
+
+## Key Reference Docs
+
+These are already in the repo under `docs/`. Read all of these before starting work:
+- `docs/screen-flows.md` — The source of truth for all screen layouts, flows, and component specs (~68KB)
+- `docs/design-guidelines.md` — Design tokens, spacing, color, typography, component specs
+- `docs/masterplan.md` — Business model, vision, product strategy (~35KB)
+- `docs/operating-model.md` — Unit economics, pricing mechanics, margin levers, provider payouts (~17KB)
+- `docs/app-flow-pages-and-roles.md` — Complete route tree (141 pages) with role gates and primary user journeys
+- `docs/feature-list.md` — Full feature inventory by area
+
+## What's Already Complete
+
+### Customer Redesign (PR #29 — merged)
+All 12 customer epics complete. 36 customer pages polished.
+
+### Provider Batch 1: Dashboard & Earnings Clarity (PR #30 — merged)
+- New `DailyRecapCard.tsx` component on Dashboard
+- Modifier explanation labels on Earnings
+- Expandable hold detail on Earnings
+- `useProviderEarnings.ts` extended with `ProviderEarning`/`HeldEarning` types, `heldEarnings` array
+- `useProviderJobs.ts` with `"today_all"` filter
+- New `src/utils/format.ts` shared `formatCents` utility
+
+### Provider Batch 2: Job Flow & Navigation Polish (PR #31 — merged)
+- Sticky action bar on `JobDetail.tsx` (fixed bottom-16, pb-48)
+- Queue position breadcrumb ("Stop X of Y") with prev/next navigation
+- Enhanced completion celebration on `JobComplete.tsx` with route progress bar
+- New `RouteProgressCard.tsx` on Dashboard
+- Review fixes: tap targets, aria-live, progress bar min-width, earnings column fix, loading skeleton
+
+## What Remains — Provider Pages
+
+34 provider pages total. ~6 have been polished (Dashboard, Earnings, JobDetail, JobComplete, Jobs list partially). The remaining ~28 pages need the same UX pass:
+
+### High Priority (Core daily workflow)
+- `Jobs.tsx` — Job list view (partially done via Batch 2 additions)
+- `JobChecklist.tsx` — Checklist completion during a job
+- `JobPhotos.tsx` — Photo upload during a job
+- `History.tsx` — Completed job history
+- `Payouts.tsx` — Payout overview
+- `PayoutHistory.tsx` — Payout detail/history
+
+### Medium Priority (Regular provider use)
+- `Availability.tsx` — Provider availability management
+- `Coverage.tsx` — Coverage area settings
+- `Performance.tsx` — Performance metrics
+- `QualityScore.tsx` — Quality score view
+- `Insights.tsx` — Business insights
+- `InsightsHistory.tsx` — Insights history
+- `Settings.tsx` — Provider settings
+- `Organization.tsx` — Org management
+- `SKUs.tsx` — Service catalog view
+- `WorkSetup.tsx` — Work setup/preferences
+- `Support.tsx` — Support page
+- `SupportTicketDetail.tsx` — Support ticket detail
+- `Referrals.tsx` — Referral program
+
+### Lower Priority (Onboarding & growth)
+- `Onboarding.tsx` — Main onboarding flow
+- `OnboardingAgreement.tsx`
+- `OnboardingCapabilities.tsx`
+- `OnboardingCompliance.tsx`
+- `OnboardingCoverage.tsx`
+- `OnboardingOrg.tsx`
+- `OnboardingReview.tsx`
+- `Apply.tsx` — Provider application
+- `ByocCenter.tsx` — Bring Your Own Customers center
+- `ByocCreateLink.tsx` — BYOC link creation
+- `InviteCustomers.tsx` — Customer invitation
+
+### Provider Components (may need updates alongside pages)
+- `ByocBanner.tsx`, `DayPlanComponents.tsx`, `DynamicComplianceRenderer.tsx`
+- `EarningsProjectionCard.tsx`, `LevelSufficiencyForm.tsx`
+- `MarketHeatBanner.tsx`, `NotificationBanners.tsx`, `OnboardingRecruitingSignals.tsx`
+- `OpportunityBanner.tsx`, `ProviderMapView.tsx`
+- `ProviderReportIssueSheet.tsx`, `ProviderSelfHealingSheet.tsx`
+- `ReportIssueSheet.tsx`, `VisitJobCard.tsx`, `WeekDueQueue.tsx`
+
+### Deferred Items from Batch 2 Review
+- L4: Extract shared `RouteProgressBar` component (duplicated in JobComplete + RouteProgressCard)
+- L10: Add focus ring to Proof Required buttons in JobDetail
+- L11: Confirm `replace: true` behavior on breadcrumb navigation
+
+## Suggested Batch Groupings
+
+1. **Job Execution Flow** — JobChecklist, JobPhotos (tight loop with JobDetail)
+2. **Financial Pages** — Payouts, PayoutHistory, Earnings cleanup
+3. **Performance & Insights** — Performance, QualityScore, Insights, InsightsHistory
+4. **Availability & Coverage** — Availability, Coverage, WorkSetup
+5. **Organization & Settings** — Organization, Settings, SKUs
+6. **Support & Referrals** — Support, SupportTicketDetail, Referrals
+7. **BYOC & Invites** — ByocCenter, ByocCreateLink, InviteCustomers
+8. **Onboarding Flow** — All 7 onboarding pages + Apply
+9. **Component Cleanup** — Deferred items, shared component extraction
+
 ## Tech Stack
 
 - **Framework:** React 18 + TypeScript + Vite
@@ -65,10 +183,32 @@ src/
 | Bottom Tab Bar | Fixed bottom, 56px, glass blur `bg-card/90`, 5 tabs |
 | Touch target | Min 44×44px |
 | Icons | Lucide React |
+| Safe area | Use `pb-safe` for iOS safe area |
 
 Button variants: `default` (navy), `accent` (cyan), `outline`, `ghost`, `destructive`, `secondary`.
 
 All colors use CSS custom properties via `hsl(var(--<name>))` — defined in `src/index.css`.
+
+## UX Principles
+
+- The product should feel like a **managed home operating system**, not a marketplace
+- Provider experience should feel **calm, competent, trustworthy**
+- Empty states need: icon, title, body copy, clear next step
+- Every screen should answer: what's next, what's included, what happened
+- Copy tone: calm, competent, specific, non-blaming, operationally clear
+- Don't bury important actions below the fold
+- Use semantic color tokens (bg-success, bg-warning, text-muted-foreground) — no hardcoded colors
+- All additions must work in dark mode
+
+## Screen Review Dimensions
+
+For each page you touch, evaluate:
+1. **Clarity** — Can the provider understand the screen's purpose in 3 seconds?
+2. **Hierarchy** — Are the most important facts above the fold?
+3. **Motion toward action** — Is the next step obvious?
+4. **Trust** — Does it feel finished and premium?
+5. **Density** — Appropriate content density? No voids?
+6. **Proof and feedback** — Does it show progress, earnings, or value?
 
 ## Stitch MCP Server — Design-to-Code Workflow
 
@@ -92,19 +232,27 @@ When implementing a screen from Stitch designs:
 4. **Respect the design system** — Use Tailwind classes with CSS variable colors (`bg-primary`, `text-accent`, etc.), not hardcoded values
 5. **Keep mobile-first** — All customer/provider screens target 390×844 viewport with safe area padding
 
-### Key Design Docs
+## Git Workflow
 
-- `docs/masterplan.md` — Business model, vision, flywheels, and product strategy
-- `docs/operating-model.md` — Unit economics, pricing mechanics, margin levers, provider payouts
-- `docs/screen-flows.md` — 30+ user flows with detailed screen specs (layout, copy, components, states)
-- `docs/app-flow-pages-and-roles.md` — Complete route tree with page names and gates
+- Create a branch per batch: `provider-ux/batch{N}-{short-description}`
+- Commit message format: `feat(provider-ux): Batch N — {Description}`
+- Review fix commits: `fix(provider-ux): resolve Batch N review findings`
+- PR into `main`
+- Squash merge with descriptive commit message
 
-## Development Commands
+## Test Credentials
+
+- customer@test.com / 65406540
+- provider@test.com / 65406540
+- admin@test.com / 65406540
+
+## Commands
 
 ```bash
 npm run dev          # Start dev server
-npm run build        # Production build
-npm run test         # Run Vitest unit tests
+npm run build        # Production build (validates)
+npx tsc --noEmit     # Type check without emit
+npm run test         # Vitest unit tests
 npx playwright test  # Run E2E tests
 ```
 
