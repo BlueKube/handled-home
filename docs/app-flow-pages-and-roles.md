@@ -69,7 +69,7 @@
 | `/provider` | **Dashboard (Home tab)** |
 | `/provider/jobs` | **Job List (Jobs tab)** |
 | `/provider/earnings` | **Earnings Center (Earn tab)** — merged earnings + payouts |
-| `/provider/performance` | **Performance (Score tab)** — performance metrics + gamification |
+| `/provider/performance` | **Score (Score tab)** — performance metrics + gamification |
 | `/provider/more` | **More Menu (tab)** |
 | `/provider/onboarding` | Onboarding Hub |
 | `/provider/onboarding/org` | Step 1: Org Setup |
@@ -83,22 +83,22 @@
 | `/provider/jobs/:jobId/photos` | Job Photos |
 | `/provider/jobs/:jobId/complete` | Job Complete |
 | `/provider/history` | Job History |
-| `/provider/skus` | Authorized SKUs |
+| `/provider/skus` | Service Catalog |
 | `/provider/payouts` | Payout Status (also via Earn tab) |
 | `/provider/payouts/history` | Payout History |
-| `/provider/quality` | Quality Score |
+| `/provider/quality` | Quality & Tier |
 | `/provider/organization` | Org Management (via More) |
-| `/provider/coverage` | Coverage Area (via More) |
+| `/provider/coverage` | Coverage & Capacity (via More) |
 | `/provider/availability` | Availability Management (via More) |
 | `/provider/work-setup` | Work Setup / Preferences (via More) |
 | `/provider/settings` | Account Settings (via More) |
 | `/provider/support` | Support (via More) |
 | `/provider/support/tickets/:ticketId` | Ticket Detail |
-| `/provider/insights` | Growth Insights |
-| `/provider/insights/history` | Insights History |
+| `/provider/insights` | My Performance |
+| `/provider/insights/history` | Weekly Trends |
 | `/provider/byoc` | BYOC Center (via More → Growth) |
 | `/provider/byoc/create-link` | Create BYOC Invite Link |
-| `/provider/referrals` | Referrals (via More → Growth) |
+| `/provider/referrals` | Growth Hub (via More → Growth) |
 | `/provider/referrals/invite-customers` | Invite Customers |
 | `/provider/apply` | Provider Application |
 | `/provider/notifications` | Notification Inbox |
