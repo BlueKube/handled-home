@@ -17,7 +17,7 @@ export default function ProviderSKUs() {
   const { data: skus = [], isLoading } = useSkus({ search: search || undefined });
 
   return (
-    <div className="p-4 md:p-6 space-y-4 animate-fade-in">
+    <div className="animate-fade-in p-4 pb-24 space-y-4">
       <h1 className="text-h2">Service Catalog</h1>
 
       <div className="relative">

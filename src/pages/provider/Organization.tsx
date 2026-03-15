@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,7 @@ import {
   MapPin,
   User,
   FileText,
+  ChevronLeft,
 } from "lucide-react";
 
 interface FormErrors {
@@ -277,11 +279,12 @@ function InfoRow({ icon: Icon, label, value }: { icon: React.ComponentType<{ cla
 }
 
 export default function ProviderOrganization() {
+  const navigate = useNavigate();
   const { org, loading, isError, refetch } = useProviderOrg();
 
   if (loading) {
     return (
-      <div className="animate-fade-in p-4 pb-24 space-y-4 max-w-2xl">
+      <div className="animate-fade-in p-4 pb-24 space-y-4 ">
         <h1 className="text-h2">Organization</h1>
         <Skeleton className="h-40 rounded-xl" />
         <Skeleton className="h-32 rounded-xl" />
@@ -292,7 +295,7 @@ export default function ProviderOrganization() {
 
   if (isError) {
     return (
-      <div className="animate-fade-in p-4 pb-24 space-y-4 max-w-2xl">
+      <div className="animate-fade-in p-4 pb-24 space-y-4 ">
         <h1 className="text-h2">Organization</h1>
         <QueryErrorCard message="Failed to load organization data." onRetry={() => refetch()} />
       </div>
@@ -301,7 +304,7 @@ export default function ProviderOrganization() {
 
   if (!org) {
     return (
-      <div className="animate-fade-in p-4 pb-24 max-w-2xl">
+      <div className="animate-fade-in p-4 pb-24 ">
         <h1 className="text-h2">Organization</h1>
         <Card className="p-6 mt-4">
           <div className="text-center space-y-2">
@@ -316,8 +319,13 @@ export default function ProviderOrganization() {
   }
 
   return (
-    <div className="animate-fade-in p-4 pb-24 space-y-4 max-w-2xl">
-      <h1 className="text-h2">Organization</h1>
+    <div className="animate-fade-in p-4 pb-24 space-y-4">
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" onClick={() => navigate("/provider/settings")} aria-label="Back to settings">
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+        <h1 className="text-h2">Organization</h1>
+      </div>
       <OrgProfileSection />
       <TeamSection />
       <ComplianceSection />
