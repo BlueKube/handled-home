@@ -85,8 +85,8 @@ export function ProviderNotificationBanners() {
               )}
               <button
                 onClick={() => dismiss(n.id)}
-                className="p-2 rounded hover:bg-secondary text-muted-foreground"
-                aria-label="Dismiss"
+                className="p-3 rounded hover:bg-secondary text-muted-foreground"
+                aria-label="Dismiss notification"
               >
                 <X className="h-4 w-4" />
               </button>

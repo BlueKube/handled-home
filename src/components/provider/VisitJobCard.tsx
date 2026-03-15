@@ -66,7 +66,7 @@ export function VisitJobCard({
           <div className="flex flex-col gap-0.5 shrink-0 pt-1">
             <Button
               variant="ghost" size="icon"
-              className="h-9 w-9"
+              className="h-9 w-9 min-h-[44px] min-w-[44px]"
               disabled={!canMoveUp}
               aria-label="Move up"
               onClick={(e) => { e.stopPropagation(); onMoveUp?.(); }}
@@ -75,7 +75,7 @@ export function VisitJobCard({
             </Button>
             <Button
               variant="ghost" size="icon"
-              className="h-9 w-9"
+              className="h-9 w-9 min-h-[44px] min-w-[44px]"
               disabled={!canMoveDown}
               aria-label="Move down"
               onClick={(e) => { e.stopPropagation(); onMoveDown?.(); }}
