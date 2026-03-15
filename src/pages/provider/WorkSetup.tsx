@@ -149,7 +149,7 @@ export default function ProviderWorkSetup() {
 
   if (loading) {
     return (
-      <div className="p-4 space-y-4">
+      <div className="animate-fade-in p-4 pb-24 space-y-4">
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-64 rounded-xl" />
       </div>
@@ -165,13 +165,16 @@ export default function ProviderWorkSetup() {
   }
 
   return (
-    <div className="p-4 pb-24 max-w-lg mx-auto space-y-4">
+    <div className="animate-fade-in p-4 pb-24 space-y-4">
       {/* Header */}
-      <div>
-        <h1 className="text-xl font-bold">Work Setup</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Help us build efficient routes for your area.
-        </p>
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" onClick={() => navigate("/provider/coverage")} aria-label="Back to coverage">
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <h1 className="text-h2">Work Setup</h1>
+          <p className="text-caption mt-0.5">Help us build efficient routes for your area</p>
+        </div>
       </div>
 
       {/* Step indicator */}

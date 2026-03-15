@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { useNavigate } from "react-router-dom";
 import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { useProviderOrg } from "@/hooks/useProviderOrg";
 import { useProviderWorkProfile, type WorkingHours } from "@/hooks/useProviderWorkProfile";
@@ -16,7 +17,7 @@ import { useProviderAvailability } from "@/hooks/useProviderAvailability";
 import { useAssignmentConfig, DIAL_META } from "@/hooks/useAssignmentConfig";
 import { toast } from "sonner";
 import {
-  Clock, Plus, Trash2, AlertTriangle, CheckCircle2, Calendar, MapPin, Shield, Activity,
+  Clock, Plus, Trash2, AlertTriangle, CheckCircle2, Calendar, MapPin, Shield, Activity, ChevronLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -44,6 +45,7 @@ function formatTime(time: string): string {
 }
 
 export default function ProviderAvailability() {
+  const navigate = useNavigate();
   const { org, loading: orgLoading } = useProviderOrg();
   const { data: profile, isLoading: profileLoading, isError: profileError, refetch: refetchProfile } = useProviderWorkProfile(org?.id);
   const { windows, isLoading: windowsLoading, isError: windowsError, refetch: refetchWindows, create, remove } = useProviderBlockedWindows();
@@ -187,7 +189,7 @@ export default function ProviderAvailability() {
 
   if (loading) {
     return (
-      <div className="p-4 space-y-4">
+      <div className="animate-fade-in p-4 pb-24 space-y-4">
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-32 rounded-xl" />
         <Skeleton className="h-64 rounded-xl" />
@@ -207,13 +209,16 @@ export default function ProviderAvailability() {
   }
 
   return (
-    <div className="p-4 pb-24 max-w-lg mx-auto space-y-4">
+    <div className="animate-fade-in p-4 pb-24 space-y-4">
       {/* Header */}
-      <div>
-        <h1 className="text-xl font-bold">Availability</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Manage your schedule and blocked windows for efficient routing.
-        </p>
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" onClick={() => navigate("/provider/coverage")} aria-label="Back to coverage">
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <h1 className="text-h2">Availability</h1>
+          <p className="text-caption mt-0.5">Manage your schedule and blocked windows</p>
+        </div>
       </div>
 
       {/* Availability Health Meter */}
@@ -479,7 +484,7 @@ export default function ProviderAvailability() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
+                    className="h-11 w-11 text-muted-foreground hover:text-destructive shrink-0"
                     onClick={() => handleRemoveWindow(w.id)}
                     disabled={remove.isPending}
                   >
