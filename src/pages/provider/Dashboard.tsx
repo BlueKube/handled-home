@@ -9,10 +9,12 @@ import { useProviderJobs, ProviderJob } from "@/hooks/useProviderJobs";
 import { useProviderEarnings } from "@/hooks/useProviderEarnings";
 import { useProviderRoutePlan } from "@/hooks/useProviderRoutePlan";
 import { useAuth } from "@/contexts/AuthContext";
+import { formatCents } from "@/utils/format";
 import { ProviderNotificationBanners } from "@/components/provider/NotificationBanners";
 import { MarketHeatBanner } from "@/components/provider/MarketHeatBanner";
 import { ByocBanner } from "@/components/provider/ByocBanner";
 import { EarningsProjectionCard } from "@/components/provider/EarningsProjectionCard";
+import { DailyRecapCard } from "@/components/provider/DailyRecapCard";
 import {
   Briefcase,
   Clock,
@@ -27,10 +29,6 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
-
-function formatCents(cents: number) {
-  return `$${(cents / 100).toFixed(2)}`;
-}
 
 function QuickJobCard({ job, index }: { job: ProviderJob; index: number }) {
   const navigate = useNavigate();
@@ -312,6 +310,9 @@ export default function ProviderDashboard() {
 
       {/* BYOC Banner — bring your own customers */}
       <ByocBanner />
+
+      {/* Daily Recap — visible once at least 1 job is completed today */}
+      <DailyRecapCard />
 
       {/* Today's Job Queue */}
       <div>
