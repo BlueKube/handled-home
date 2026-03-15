@@ -24,7 +24,7 @@ export interface ProviderJob {
   issue_count?: number;
 }
 
-export function useProviderJobs(filter: "today" | "upcoming" | "history" = "today") {
+export function useProviderJobs(filter: "today" | "today_all" | "upcoming" | "history" = "today") {
   const { org } = useProviderOrg();
 
   return useQuery({
@@ -45,6 +45,8 @@ export function useProviderJobs(filter: "today" | "upcoming" | "history" = "toda
 
       if (filter === "today") {
         query = query.eq("scheduled_date", today).not("status", "in", '("COMPLETED","CANCELED")');
+      } else if (filter === "today_all") {
+        query = query.eq("scheduled_date", today);
       } else if (filter === "upcoming") {
         query = query.gt("scheduled_date", today).not("status", "in", '("COMPLETED","CANCELED")');
       } else {
@@ -52,7 +54,7 @@ export function useProviderJobs(filter: "today" | "upcoming" | "history" = "toda
       }
 
       // Sort by route_order first (optimized route), then scheduled_date, then created_at as fallback
-      if (filter === "today") {
+      if (filter === "today" || filter === "today_all") {
         query = query.order("route_order", { ascending: true, nullsFirst: false }).order("created_at", { ascending: true });
       } else {
         query = query.order("scheduled_date", { ascending: true });

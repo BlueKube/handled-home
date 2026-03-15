@@ -13,6 +13,7 @@ import { ProviderNotificationBanners } from "@/components/provider/NotificationB
 import { MarketHeatBanner } from "@/components/provider/MarketHeatBanner";
 import { ByocBanner } from "@/components/provider/ByocBanner";
 import { EarningsProjectionCard } from "@/components/provider/EarningsProjectionCard";
+import { DailyRecapCard } from "@/components/provider/DailyRecapCard";
 import {
   Briefcase,
   Clock,
@@ -312,6 +313,9 @@ export default function ProviderDashboard() {
 
       {/* BYOC Banner — bring your own customers */}
       <ByocBanner />
+
+      {/* Daily Recap — visible once at least 1 job is completed today */}
+      <DailyRecapCard />
 
       {/* Today's Job Queue */}
       <div>

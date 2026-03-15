@@ -49,7 +49,7 @@ export function useProviderEarnings(period: EarningsPeriod = "month") {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("provider_earnings")
-        .select("total_cents, status")
+        .select("id, total_cents, status, hold_reason, hold_until, created_at")
         .eq("provider_org_id", org!.id)
         .in("status", ["ELIGIBLE", "HELD", "HELD_UNTIL_READY"]);
       if (error) throw error;
@@ -147,7 +147,8 @@ export function useProviderEarnings(period: EarningsPeriod = "month") {
   const periodTotal = earnings.reduce((s, e) => s + e.total_cents, 0);
   const periodModifiers = earnings.reduce((s, e) => s + e.modifier_cents, 0);
   const eligibleBalance = balances.filter(e => e.status === "ELIGIBLE").reduce((s, e) => s + e.total_cents, 0);
-  const heldBalance = balances.filter(e => ["HELD", "HELD_UNTIL_READY"].includes(e.status)).reduce((s, e) => s + e.total_cents, 0);
+  const heldEarnings = balances.filter(e => ["HELD", "HELD_UNTIL_READY"].includes(e.status));
+  const heldBalance = heldEarnings.reduce((s, e) => s + e.total_cents, 0);
 
   // E02-F2 fix: always use MTD query for projection, not period-dependent
   const monthEarned = (mtdQuery.data ?? []).reduce((s, e) => s + e.total_cents, 0);
@@ -160,6 +161,7 @@ export function useProviderEarnings(period: EarningsPeriod = "month") {
     payoutAccount: payoutAccountQuery.data,
     eligibleBalance,
     heldBalance,
+    heldEarnings,
     periodTotal,
     periodModifiers,
     monthProjection,
