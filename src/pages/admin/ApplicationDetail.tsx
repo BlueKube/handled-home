@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
-  ArrowLeft, Loader2, CheckCircle, XCircle, Clock, FileText,
+  ChevronLeft, Loader2, CheckCircle, XCircle, Clock, FileText,
   Shield, Users, AlertTriangle, Briefcase,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -40,7 +40,7 @@ export default function AdminApplicationDetail() {
 
   if (query.isLoading) {
     return (
-      <div className="p-4 flex items-center justify-center min-h-[60vh]">
+      <div className="p-6 flex items-center justify-center min-h-[60vh]">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
@@ -48,7 +48,7 @@ export default function AdminApplicationDetail() {
 
   if (!query.data) {
     return (
-      <div className="p-4 text-center py-12">
+      <div className="p-6 text-center py-12">
         <p className="text-muted-foreground">Application not found.</p>
         <Button variant="outline" className="mt-4" onClick={() => navigate("/admin/providers/applications")}>
           Back to Applications
@@ -81,9 +81,9 @@ export default function AdminApplicationDetail() {
   };
 
   return (
-    <div className="p-4 max-w-3xl animate-fade-in">
-      <Button variant="ghost" size="sm" className="mb-2" onClick={() => navigate("/admin/providers/applications")}>
-        <ArrowLeft className="h-4 w-4 mr-1" /> Applications
+    <div className="p-6 max-w-3xl animate-fade-in">
+      <Button variant="ghost" size="icon" className="mb-2" onClick={() => navigate("/admin/providers/applications")} aria-label="Back to applications">
+        <ChevronLeft className="h-5 w-5" />
       </Button>
 
       {/* Header */}

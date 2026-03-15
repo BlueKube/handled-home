@@ -75,7 +75,7 @@ export default function AdminReports() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4 animate-fade-in">
+      <div className="p-6 space-y-4 animate-fade-in">
         <Skeleton className="h-8 w-48" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-24" />)}
@@ -86,7 +86,7 @@ export default function AdminReports() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="p-6 space-y-6 animate-fade-in">
       <div>
         <h1 className="text-h2">Reporting & Analytics</h1>
         <p className="text-caption">Revenue, retention, and operational performance</p>

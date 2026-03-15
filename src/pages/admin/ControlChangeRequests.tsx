@@ -53,10 +53,10 @@ export default function ControlChangeRequests() {
   const statusColor = (s: string) => s === "pending" ? "secondary" : s === "approved" ? "default" : "destructive";
 
   return (
-    <div className="p-6 space-y-6 max-w-6xl">
+    <div className="animate-fade-in p-6 space-y-6 max-w-6xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Change Requests</h1>
+          <h1 className="text-h2">Change Requests</h1>
           <p className="text-sm text-muted-foreground mt-1">Submit pricing/payout/config change requests for superuser review.</p>
         </div>
         <Dialog open={submitOpen} onOpenChange={setSubmitOpen}>

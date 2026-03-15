@@ -26,7 +26,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  ArrowLeft, ArrowRight, Loader2, MapPin, Users, Gauge,
+  ArrowLeft, ArrowRight, ChevronLeft, Loader2, MapPin, Users, Gauge,
   AlertTriangle, BarChart3, Check, Pencil, Merge,
 } from "lucide-react";
 import { useRef } from "react";
@@ -326,11 +326,11 @@ export default function ZoneBuilder() {
   );
 
   return (
-    <div className="animate-fade-in space-y-4 pb-24">
+    <div className="animate-fade-in p-6 space-y-4">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => nav("/admin/zones")}>
-          <ArrowLeft className="h-4 w-4" />
+        <Button variant="ghost" size="icon" onClick={() => nav("/admin/zones")} aria-label="Back to zones">
+          <ChevronLeft className="h-5 w-5" />
         </Button>
         <div className="flex-1">
           <h1 className="text-h2">Zone Builder</h1>

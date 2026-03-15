@@ -439,7 +439,7 @@ export default function Playbooks() {
   }, [adminRole, roleFilter]);
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="animate-fade-in p-6 space-y-5">
       <div>
         <h1 className="text-h2 mb-0.5 flex items-center gap-2">
           <BookOpen className="h-5 w-5" />

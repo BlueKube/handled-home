@@ -24,7 +24,7 @@ export default function AdminSubscriptions() {
   const [selectedSubId, setSelectedSubId] = useState<string | null>(null);
 
   return (
-    <div className="p-4 pb-24 space-y-6 animate-fade-in">
+    <div className="p-6 space-y-6 animate-fade-in">
       <h1 className="text-h2">Subscriptions</h1>
 
       <div className="relative">

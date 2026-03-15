@@ -72,7 +72,7 @@ export default function ControlPricing() {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-4">
+      <div className="animate-fade-in p-6 space-y-4">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-96 w-full" />
       </div>
@@ -142,10 +142,10 @@ export default function ControlPricing() {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-6xl">
+    <div className="animate-fade-in p-6 space-y-6 max-w-6xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Pricing & Margin</h1>
+          <h1 className="text-h2">Pricing & Margin</h1>
           <p className="text-sm text-muted-foreground mt-1">Zone-adjusted customer pricing. Superuser-only writes.</p>
         </div>
         {!isSuperuser && <Badge variant="secondary">Read-only</Badge>}

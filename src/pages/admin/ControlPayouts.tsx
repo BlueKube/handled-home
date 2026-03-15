@@ -139,10 +139,10 @@ export default function ControlPayouts() {
   const contractLabel = (t: string) => ({ partner_flat: "Partner Flat", partner_time_guarded: "Time-Guarded", contractor_time_based: "Time-Based" }[t] ?? t);
 
   return (
-    <div className="p-6 space-y-6 max-w-6xl">
+    <div className="animate-fade-in p-6 space-y-6 max-w-6xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Provider Payout Engine</h1>
+          <h1 className="text-h2">Provider Payout Engine</h1>
           <p className="text-sm text-muted-foreground mt-1">Payout tables, contract types, overtime params. Superuser-only writes.</p>
         </div>
         {!isSuperuser && <Badge variant="secondary">Read-only</Badge>}

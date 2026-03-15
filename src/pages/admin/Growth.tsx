@@ -47,10 +47,10 @@ export default function AdminGrowth() {
   const [selectedZone, setSelectedZone] = useState<string>("__all__");
 
   return (
-    <div className="px-4 py-6 space-y-6 animate-fade-in">
+    <div className="p-6 space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Growth Console</h1>
+          <h1 className="text-h2">Growth Console</h1>
           <p className="text-sm text-muted-foreground">Market health, state machine, and autopilot controls</p>
         </div>
       </div>

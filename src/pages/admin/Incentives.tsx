@@ -41,8 +41,8 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function AdminIncentives() {
   return (
-    <div className="px-4 py-6 space-y-6 animate-fade-in">
-      <h1 className="text-2xl font-bold">Incentives</h1>
+    <div className="p-6 space-y-6 animate-fade-in">
+      <h1 className="text-h2">Incentives</h1>
       <Tabs defaultValue="programs">
         <TabsList className="w-full">
           <TabsTrigger value="programs" className="flex-1">Programs</TabsTrigger>

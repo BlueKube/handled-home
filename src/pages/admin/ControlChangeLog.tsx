@@ -37,9 +37,9 @@ export default function ControlChangeLog() {
     ["set_zone_pricing_override"].includes(action);
 
   return (
-    <div className="p-6 space-y-6 max-w-6xl">
+    <div className="animate-fade-in p-6 space-y-6 max-w-6xl">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Change Log</h1>
+        <h1 className="text-h2">Change Log</h1>
         <p className="text-sm text-muted-foreground mt-1">All versioned config changes with rollback.</p>
       </div>
 

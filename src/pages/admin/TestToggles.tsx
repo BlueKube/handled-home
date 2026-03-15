@@ -83,7 +83,7 @@ export default function TestToggles() {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-2xl mx-auto">
+    <div className="animate-fade-in p-6 space-y-6 max-w-2xl mx-auto">
       <Alert className="border-warning bg-warning/10">
         <AlertTriangle className="h-4 w-4 text-warning" />
         <AlertDescription className="text-foreground font-medium">

@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TicketStatusChip } from "@/components/support/TicketStatusChip";
 import { ResolutionOfferCard } from "@/components/support/ResolutionOfferCard";
-import { ArrowLeft, Clock, CheckCircle2, AlertTriangle, Shield, Send, Wand2, RefreshCw, ArrowRightLeft } from "lucide-react";
+import { ChevronLeft, Clock, CheckCircle2, AlertTriangle, Shield, Send, Wand2, RefreshCw, ArrowRightLeft } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -58,7 +58,7 @@ export default function AdminSupportTicketDetail() {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-3xl">
+      <div className="animate-fade-in p-6 max-w-3xl">
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-24 bg-muted/50 rounded-xl animate-pulse" />
@@ -165,9 +165,8 @@ export default function AdminSupportTicketDetail() {
 
   return (
     <div className="p-6 max-w-3xl space-y-4 animate-fade-in">
-      <Button variant="ghost" size="sm" className="gap-1 -ml-2" onClick={() => navigate("/admin/support")}>
-        <ArrowLeft className="h-4 w-4" />
-        Support Console
+      <Button variant="ghost" size="icon" className="-ml-2" onClick={() => navigate("/admin/support")} aria-label="Back to support">
+        <ChevronLeft className="h-5 w-5" />
       </Button>
 
       {/* Header */}
