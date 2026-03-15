@@ -284,7 +284,7 @@ export default function ProviderOrganization() {
 
   if (loading) {
     return (
-      <div className="animate-fade-in p-4 pb-24 space-y-4 ">
+      <div className="animate-fade-in p-4 pb-24 space-y-4">
         <h1 className="text-h2">Organization</h1>
         <Skeleton className="h-40 rounded-xl" />
         <Skeleton className="h-32 rounded-xl" />
@@ -295,7 +295,7 @@ export default function ProviderOrganization() {
 
   if (isError) {
     return (
-      <div className="animate-fade-in p-4 pb-24 space-y-4 ">
+      <div className="animate-fade-in p-4 pb-24 space-y-4">
         <h1 className="text-h2">Organization</h1>
         <QueryErrorCard message="Failed to load organization data." onRetry={() => refetch()} />
       </div>
@@ -304,7 +304,7 @@ export default function ProviderOrganization() {
 
   if (!org) {
     return (
-      <div className="animate-fade-in p-4 pb-24 ">
+      <div className="animate-fade-in p-4 pb-24">
         <h1 className="text-h2">Organization</h1>
         <Card className="p-6 mt-4">
           <div className="text-center space-y-2">
@@ -324,7 +324,10 @@ export default function ProviderOrganization() {
         <Button variant="ghost" size="icon" onClick={() => navigate("/provider/settings")} aria-label="Back to settings">
           <ChevronLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-h2">Organization</h1>
+        <div>
+          <h1 className="text-h2">Organization</h1>
+          <p className="text-caption mt-0.5">Manage your team and organization details</p>
+        </div>
       </div>
       <OrgProfileSection />
       <TeamSection />

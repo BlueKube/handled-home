@@ -98,6 +98,7 @@ export default function ProviderSupportTicketDetail() {
         <Button variant="ghost" size="icon" onClick={() => navigate("/provider/support")} aria-label="Back to support">
           <ChevronLeft className="h-5 w-5" />
         </Button>
+        <h1 className="text-h2">Support Ticket</h1>
       </div>
 
       {/* Header */}
