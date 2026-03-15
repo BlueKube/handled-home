@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
-import { ClipboardCheck, Camera, Bug, DollarSign, Lightbulb, Clock, ChevronRight, TrendingUp } from "lucide-react";
+import { ClipboardCheck, Camera, Bug, DollarSign, Lightbulb, Clock, ChevronRight, TrendingUp, BarChart3 } from "lucide-react";
 
 export default function ProviderInsights() {
   const { org } = useProviderOrg();
@@ -86,7 +86,7 @@ export default function ProviderInsights() {
     if (data.heldCents > 0) cues.push("Some earnings are on hold. Complete outstanding items to release.");
   }
 
-  if (isLoading || !data) {
+  if (isLoading) {
     return (
       <div className="animate-fade-in p-4 pb-24 space-y-4">
         <div className="space-y-1.5">
@@ -95,6 +95,22 @@ export default function ProviderInsights() {
         </div>
         <div className="grid gap-3 grid-cols-2">
           {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24 rounded-2xl" />)}
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="animate-fade-in p-4 pb-24 space-y-5">
+        <div>
+          <h1 className="text-h2">My Performance</h1>
+          <p className="text-caption mt-0.5">How you're doing this week</p>
+        </div>
+        <div className="flex flex-col items-center py-12 text-center">
+          <BarChart3 className="h-10 w-10 text-muted-foreground/40 mb-3" />
+          <p className="font-medium text-sm">No insights yet</p>
+          <p className="text-xs text-muted-foreground mt-1 max-w-[240px]">Complete your first jobs to start seeing performance data here.</p>
         </div>
       </div>
     );
