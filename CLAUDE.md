@@ -256,6 +256,94 @@ npm run test         # Vitest unit tests
 npx playwright test  # Run E2E tests
 ```
 
+## Visual Validation with Playwright
+
+After each batch, visually verify your changes using Playwright screenshots. The repo has a full screenshot catalog setup.
+
+### Quick: Screenshot a specific page
+
+```bash
+# Start dev server first
+npm run dev &
+
+# Take a screenshot of a specific provider page (example: Dashboard)
+npx playwright test e2e/screenshot-catalog.spec.ts -g "provider-dashboard" \
+  --project=chromium
+```
+
+Screenshots are saved to `e2e/milestones/`. Open them to verify your changes rendered correctly.
+
+### Full provider screenshot catalog
+
+```bash
+# Capture all provider screens at once
+npx playwright test e2e/screenshot-catalog.spec.ts -g "Provider Screens" \
+  --project=chromium
+```
+
+### Write a quick one-off validation script
+
+For pages not in the catalog, or to test specific states:
+
+```typescript
+// e2e/validate-batch.spec.ts (temporary, don't commit)
+import { test, expect } from "@playwright/test";
+import path from "path";
+
+test.use({
+  storageState: path.join(__dirname, ".auth", "provider.json"),
+});
+
+test("validate batch changes", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("handled_active_role", "provider");
+  });
+
+  // Navigate to the page you changed
+  await page.goto("/provider/jobs");
+  await page.waitForTimeout(2000);
+  await page.screenshot({ path: "test-results/provider-jobs.png", fullPage: true });
+
+  // Test dark mode too
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: "test-results/provider-jobs-dark.png", fullPage: true });
+});
+```
+
+### Environment variables for auth
+
+The e2e auth setup reads credentials from environment variables:
+
+```bash
+export BASE_URL=http://localhost:5173
+export TEST_CUSTOMER_EMAIL=customer@test.com
+export TEST_CUSTOMER_PASSWORD=65406540
+export TEST_PROVIDER_EMAIL=provider@test.com
+export TEST_PROVIDER_PASSWORD=65406540
+export TEST_ADMIN_EMAIL=admin@test.com
+export TEST_ADMIN_PASSWORD=65406540
+```
+
+Run auth setup before screenshot tests:
+
+```bash
+npx playwright test e2e/auth.setup.ts --project=auth-setup
+```
+
+### What to check in screenshots
+
+1. **Layout** — No overflow, no truncated text, proper spacing
+2. **Dark mode** — Colors readable, no white-on-white or dark-on-dark
+3. **Empty states** — Icon + title + body + CTA (not blank screens)
+4. **Touch targets** — Buttons/links at least 44×44px
+5. **Bottom safe area** — Content not hidden behind tab bar (pb-24)
+6. **New components** — Actually visible and positioned correctly
+
+### Mobile viewport
+
+Playwright is configured for iPhone-like viewport (390×844). All screenshots should match the mobile-first design target.
+
 ## PR Review Workflow
 
 When working on a PR or responding to code review feedback, use `gh` CLI to fetch comments:
