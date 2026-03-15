@@ -91,7 +91,7 @@ export default function TestToggles() {
         </AlertDescription>
       </Alert>
 
-      <h1 className="text-2xl font-bold">Test Toggles</h1>
+      <h1 className="text-h2">Test Toggles</h1>
 
       {/* Zone / Category selector */}
       <div className="grid grid-cols-2 gap-4">
