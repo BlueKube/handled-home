@@ -1085,7 +1085,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Route**: `/provider/onboarding`
 **Who**: New provider with invite code
-**Purpose**: 7-step guided onboarding
+**Purpose**: 6-step guided onboarding
 
 ### Screen 17.1: Invite Code Entry
 
@@ -1173,16 +1173,34 @@ Each menu item: icon + label + ChevronRight, tappable
    - Car icon: "Est. Drive" = X min
    - TrendingUp icon: "This Week" = $XX.XX
 
-6. **Today's Queue**
+6. **Earnings Projection Card** (`EarningsProjectionCard`)
+   - Shows capacity % and estimated monthly earnings
+   - Growth CTA if below 90% capacity
+   - See Flow 34 for full spec
+
+7. **Route Progress Card** (`RouteProgressCard`, added Batch 2)
+   - Segmented progress bar showing completed vs remaining stops today
+   - "X of Y stops complete" label
+   - Trophy icon when all stops done
+   - Only visible when provider has jobs today
+
+8. **BYOC Banner** (`ByocBanner`)
+   - See Flow 35 for full spec
+
+9. **Today's Queue**
    - H3: "Today's Queue" + "See all" link
    - QuickJobCards (repeating):
      - Rank badge (#1, #2…) + address + services + duration + status badge + ChevronRight
    - Button (ghost): "View all jobs →"
    - Empty: MapPin icon + "No jobs scheduled for today" + "Check upcoming jobs or enjoy the day off"
 
-7. **Coming Up**
-   - H3: "Coming Up"
-   - Card with upcoming 3 jobs: CalendarDays icon + address + date + service count
+10. **Daily Recap Card** (`DailyRecapCard`, added Batch 1)
+    - Shows end-of-day summary: jobs completed, total earnings, avg per job
+    - Only visible after provider has completed at least one job today
+
+11. **Coming Up**
+    - H3: "Coming Up"
+    - Card with upcoming 3 jobs: CalendarDays icon + address + date + service count
 
 ---
 
@@ -1207,6 +1225,13 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/provider/jobs/:jobId`
 **Purpose**: Full job info — property details, checklist, photos required, navigation
 
+**Key UI elements (updated Batch 2)**:
+- **Queue breadcrumb**: "Stop X of Y today" with prev/next navigation arrows (ChevronLeft/ChevronRight). Uses `useProviderJobs("today_all")` for queue context.
+- **Sticky action bar**: Fixed bottom-16 with pb-48. Contains primary actions (Start Job, View Checklist, Upload Photos, Complete Job) based on job status.
+- Property details card: address, gate code, dog alert, parking notes
+- SKU checklist with proof-required indicators
+- Report Issue and Self-Healing action sheets
+
 ### Screen 19.3: Job Checklist
 
 **Route**: `/provider/jobs/:jobId/checklist`
@@ -1220,7 +1245,16 @@ Each menu item: icon + label + ChevronRight, tappable
 ### Screen 19.5: Job Complete
 
 **Route**: `/provider/jobs/:jobId/complete`
-**Purpose**: Confirmation screen after marking job complete
+**Purpose**: Confirmation and celebration screen after marking job complete
+
+**Key UI elements (updated Batch 2)**:
+- **Celebration header**: PartyPopper icon with "Job Complete!" headline
+- **Earnings display**: Shows base pay + modifier breakdown with `formatCents` utility
+- **Route progress bar**: Segmented stops showing completed vs remaining, trophy when all done
+- **Next stop CTA**: Button to navigate directly to next uncompleted job
+- **Day complete state**: Trophy card when all stops finished
+- Level sufficiency form (LevelSufficiencyForm) for quality feedback
+- Notes textarea and submit flow
 
 ---
 
@@ -1302,8 +1336,15 @@ Each menu item: icon + label + ChevronRight, tappable
 
 6. **Earnings/Payouts Tabs**
    - Tab "Earnings": Earning cards with address, date, status badge, base/modifier/net breakdown (expandable)
+     - **Modifier explanation labels** (added Batch 1): Each modifier shows a human-readable reason ("Quality tier bonus", "Rush / high-demand bonus", "Adjustment — issue reported")
+     - **Expandable earning cards**: Tap to expand and see full base + modifier + net breakdown
    - Tab "Payouts": Payout cards with date, status badge, amount
    - All payout amounts are per-job, set by SKU + Level + zone. Providers never see customer pricing.
+
+7. **Held Earnings Detail** (added Batch 1)
+   - Expandable section showing held earnings with hold reason labels
+   - Hold reasons: "New provider review period", "Under review — service issue reported", "Payout account setup required"
+   - Estimated release timeline when available
 
 **Empty (earnings)**: DollarSign icon + "No earnings for this period" + "Complete jobs to start earning"
 **Empty (payouts)**: Banknote icon + "No payouts yet"
