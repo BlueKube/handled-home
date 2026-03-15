@@ -22,6 +22,7 @@ Follow this exact sequence for every batch. Do not skip steps.
 6. **Fix all MUST-FIX findings** — Do not merge until review is clear. Re-run review if substantial changes were needed.
 7. **Validate build** — Run `npx tsc --noEmit` and `npm run build` before considering a batch done.
 8. **Reconcile** — After each batch, update which pages are done and what's next.
+9. **Sync documentation after each phase** — After completing a phase (group of related batches), review all key docs for stale info: page names, navigation specs, design patterns, product strategy sections. See `docs/skills/redesign-workflow-guide.md` step 9.
 
 ## Workflow & UX Reference Docs
 

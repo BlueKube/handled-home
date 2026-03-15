@@ -102,6 +102,10 @@ When using this skill, follow this workflow unless the user asks for something n
 - Confirm the intended target state truly renders.
 - Check that the improved screen is better for the target persona, not just technically correct.
 
+7. Sync documentation after each phase.
+- After completing a phase, review key docs for stale page names, navigation specs, and design patterns.
+- See `redesign-workflow-guide.md` step 9 for the full documentation sync checklist.
+
 ## Screen Review Framework
 
 For each screen, evaluate these dimensions:

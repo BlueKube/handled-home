@@ -121,6 +121,31 @@ Do this especially when:
 - the user reminds you of the plan
 - the work risks drifting into local optimizations
 
+9. Sync documentation after each phase.
+After completing a phase (a group of related batches), review all key documentation for stale information. Implementation changes must be back-synced to spec documents so they remain the source of truth.
+
+**Documents to check:**
+- `docs/screen-flows.md` — screen layouts, headers, back navigation, component specs
+- `docs/app-flow-pages-and-roles.md` — route tree, page names, navigation hierarchy
+- `docs/design-guidelines.md` — design tokens, utilities, component patterns
+- `docs/masterplan.md` — product strategy sections referencing UI/UX
+- `docs/feature-list.md` — feature status labels
+- `CLAUDE.md` — project instructions, completion status, roadmap
+
+**What to look for:**
+- Page names/titles that drifted from documentation (e.g., "Quality Score" renamed to "Quality & Tier")
+- Navigation patterns not reflected in specs (back routes, header structures, subtitles)
+- Design system utilities applied in code but not documented (e.g., `animate-fade-in`)
+- Product/strategy sections that describe features differently from what was built
+- Completion status or roadmap sections that are outdated
+
+**When to sync:**
+- After completing a major phase (e.g., all provider pages done)
+- Before starting a new phase (ensure docs are clean for the next implementer)
+- When the user explicitly requests a documentation review
+
+Use subagents to parallelize the review across multiple documents when the scope is large.
+
 ## Roadmap Mapping Rules
 
 When the user has provided an epic list, do not lose it.
