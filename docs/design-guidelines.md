@@ -1,5 +1,7 @@
 # Design Guidelines — Handled Home (Mobile-Native)
 
+> **Last updated:** 2026-03-15 — Corrected color tokens to match index.css. Updated component specs.
+
 ## Platform
 Mobile-first iOS & Android app via Capacitor. No desktop breakpoints.
 
@@ -25,8 +27,8 @@ Line-height ≥ 1.5×
 ## Color System (HSL tokens)
 | Token | Light | Dark |
 |-------|-------|------|
-| `--primary` | 214 65% 14% | 170 77% 40% |
-| `--accent` | 170 77% 40% | 170 77% 40% |
+| `--primary` | 214 65% 14% | 200 80% 50% |
+| `--accent` | 200 80% 50% | 200 80% 50% |
 | `--background` | 220 20% 97% | 214 65% 8% |
 | `--card` | 0 0% 100% | 214 55% 12% |
 | `--border` | 225 14% 91% | 214 50% 22% |
