@@ -34,7 +34,7 @@ export default function AdminProviders() {
   const pendingCount = orgs.filter((o: any) => o.status === "PENDING").length;
 
   return (
-    <div className="p-4 max-w-4xl animate-fade-in">
+    <div className="p-6 max-w-4xl animate-fade-in">
       <div className="flex items-center justify-between mb-1">
         <h1 className="text-h2">Providers</h1>
         {pendingCount > 0 && <Badge variant="destructive">{pendingCount} pending</Badge>}

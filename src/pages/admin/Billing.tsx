@@ -52,7 +52,7 @@ export default function AdminBillingPage() {
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
-      <h1 className="text-2xl font-bold">Billing</h1>
+      <h1 className="text-h2">Billing</h1>
 
       {/* Revenue Stats */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

@@ -5,7 +5,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, CreditCard, RefreshCw, XCircle, Gift } from "lucide-react";
+import { ChevronLeft, CreditCard, RefreshCw, XCircle, Gift } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -48,13 +48,13 @@ export default function AdminCustomerLedger() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="animate-fade-in p-6 space-y-6">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-5 w-5" />
+        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Back">
+          <ChevronLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold">{profile?.full_name || "Customer"}</h1>
+          <h1 className="text-h2">{profile?.full_name || "Customer"}</h1>
           <p className="text-sm text-muted-foreground">Customer Billing Ledger</p>
         </div>
       </div>
