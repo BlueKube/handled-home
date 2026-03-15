@@ -15,6 +15,7 @@ import { MarketHeatBanner } from "@/components/provider/MarketHeatBanner";
 import { ByocBanner } from "@/components/provider/ByocBanner";
 import { EarningsProjectionCard } from "@/components/provider/EarningsProjectionCard";
 import { DailyRecapCard } from "@/components/provider/DailyRecapCard";
+import { RouteProgressCard } from "@/components/provider/RouteProgressCard";
 import {
   Briefcase,
   Clock,
@@ -307,6 +308,9 @@ export default function ProviderDashboard() {
           estimatedFinishTime={estWorkMinutes > 0 ? `${Math.round((estWorkMinutes + estDriveMinutes) / 60)}h` : undefined}
         />
       )}
+
+      {/* B2-4: Route progress card */}
+      <RouteProgressCard />
 
       {/* BYOC Banner — bring your own customers */}
       <ByocBanner />

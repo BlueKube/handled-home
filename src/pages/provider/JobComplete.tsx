@@ -1,16 +1,84 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useJobDetail } from "@/hooks/useJobDetail";
 import { useJobActions } from "@/hooks/useJobActions";
+import { useProviderJobs } from "@/hooks/useProviderJobs";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { ChevronLeft, CheckCircle2, Camera, AlertTriangle, Send, PartyPopper, DollarSign } from "lucide-react";
+import { ChevronLeft, CheckCircle2, Camera, AlertTriangle, Send, PartyPopper, DollarSign, ChevronRight, Trophy } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { toast as sonnerToast } from "sonner";
 import { useState, useMemo } from "react";
 import { LevelSufficiencyForm } from "@/components/provider/LevelSufficiencyForm";
+import { formatCents } from "@/utils/format";
+
+/** Route progress bar — shows stop completion progress for today */
+function RouteProgress({ currentJobId }: { currentJobId: string }) {
+  const { data: todayJobs } = useProviderJobs("today_all");
+  const navigate = useNavigate();
+
+  const progress = useMemo(() => {
+    if (!todayJobs || todayJobs.length === 0) return null;
+    const completed = todayJobs.filter((j) => j.status === "COMPLETED").length;
+    const total = todayJobs.length;
+    const allDone = completed === total;
+
+    // Find next uncompleted job
+    const nextJob = todayJobs.find(
+      (j) => j.id !== currentJobId && !["COMPLETED", "CANCELED"].includes(j.status)
+    );
+
+    return { completed, total, allDone, nextJobId: nextJob?.id ?? null, nextAddress: nextJob?.property?.street_address ?? null };
+  }, [todayJobs, currentJobId]);
+
+  if (!progress) return null;
+
+  return (
+    <div className="space-y-3">
+      {/* Progress bar */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-muted-foreground font-medium">
+            {progress.allDone ? "All stops complete" : `${progress.completed} of ${progress.total} stops complete`}
+          </span>
+          {progress.allDone && <Trophy className="h-4 w-4 text-success" />}
+        </div>
+        <div className="flex gap-1">
+          {Array.from({ length: progress.total }).map((_, i) => (
+            <div
+              key={i}
+              className={`h-2 flex-1 min-w-[4px] rounded-full transition-colors ${
+                i < progress.completed ? "bg-success" : "bg-muted"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Day complete or next stop */}
+      {progress.allDone ? (
+        <Card className="p-4 bg-success/5 border-success/20 text-center animate-fade-in">
+          <Trophy className="h-8 w-8 text-success mx-auto mb-2" />
+          <p className="text-sm font-semibold">Day Complete!</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            All {progress.total} stops finished. Great work today.
+          </p>
+        </Card>
+      ) : progress.nextJobId ? (
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={() => navigate(`/provider/jobs/${progress.nextJobId}`)}
+        >
+          <span className="truncate">Next Stop: {progress.nextAddress ?? "View job"}</span>
+          <ChevronRight className="h-4 w-4 ml-1 shrink-0" />
+        </Button>
+      ) : null}
+    </div>
+  );
+}
 
 export default function ProviderJobComplete() {
   const { jobId } = useParams<{ jobId: string }>();
@@ -71,12 +139,12 @@ export default function ProviderJobComplete() {
       try {
         const { data: earning } = await supabase
           .from("provider_earnings")
-          .select("net_amount_cents")
+          .select("total_cents")
           .eq("job_id", jobId!)
           .maybeSingle();
-        if (earning?.net_amount_cents) {
-          const amount = (earning.net_amount_cents / 100).toFixed(2);
-          setEarnedCents(earning.net_amount_cents);
+        if (earning?.total_cents) {
+          const amount = (earning.total_cents / 100).toFixed(2);
+          setEarnedCents(earning.total_cents);
           sonnerToast.success(`+$${amount} earned`);
         }
       } catch {
@@ -95,23 +163,31 @@ export default function ProviderJobComplete() {
 
   if (submitted) {
     return (
-      <div className="animate-fade-in p-4 flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <PartyPopper className="h-16 w-16 text-accent mb-4" />
-        <h1 className="text-h2 mb-2">Job Submitted!</h1>
-        {earnedCents ? (
-          <div className="flex items-center gap-2 mb-2">
-            <DollarSign className="h-5 w-5 text-success" />
-            <span className="text-lg font-bold text-success">
-              +${(earnedCents / 100).toFixed(2)} earned
-            </span>
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground mb-2">
-            Earnings will appear in your Earn tab
-          </p>
-        )}
-        <p className="text-muted-foreground mb-6">Great work. Your job has been recorded.</p>
-        <Button onClick={() => navigate("/provider/jobs")}>Back to Jobs</Button>
+      <div className="animate-fade-in p-4 pb-24 space-y-6">
+        <div className="flex flex-col items-center justify-center pt-8 text-center">
+          <PartyPopper className="h-16 w-16 text-accent mb-4" />
+          <h1 className="text-h2 mb-2">Job Submitted!</h1>
+          {earnedCents ? (
+            <div className="flex items-center gap-2 mb-2">
+              <DollarSign className="h-5 w-5 text-success" />
+              <span className="text-lg font-bold text-success">
+                +{formatCents(earnedCents)} earned
+              </span>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground mb-2">
+              Earnings will appear in your Earn tab
+            </p>
+          )}
+          <p className="text-muted-foreground mb-6">Great work. Your job has been recorded.</p>
+        </div>
+
+        {/* B2-3: Route progress with next stop navigation */}
+        {jobId && <RouteProgress currentJobId={jobId} />}
+
+        <Button className="w-full" onClick={() => navigate("/provider/jobs")}>
+          Back to Jobs
+        </Button>
       </div>
     );
   }
