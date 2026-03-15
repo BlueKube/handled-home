@@ -16,8 +16,10 @@ import { EntitlementGuardrails } from "@/components/routine/EntitlementGuardrail
 import { SeasonalBoostsSection } from "@/components/routine/SeasonalBoostsSection";
 import { RoutineSuggestion } from "@/components/customer/RoutineSuggestion";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowRight, Sparkles, Loader2 } from "lucide-react";
+import { useSkus } from "@/hooks/useSkus";
 import { toast } from "sonner";
 import type { CadenceType } from "@/hooks/useRoutine";
 
@@ -34,6 +36,7 @@ export default function CustomerRoutine() {
   const { assignment } = useServiceDayAssignment(property?.id);
 
   const hasSub = !!subscription;
+  const { data: availableServices } = useSkus({ status: "active" });
   const planId = subscription?.plan_id ?? null;
   const zoneId = subscription?.zone_id ?? null;
   const { data: entitlements, isLoading: entLoading } = useEntitlements(planId, zoneId);
@@ -163,14 +166,16 @@ export default function CustomerRoutine() {
 
   return (
     <div className="pb-32 animate-fade-in">
-      <TruthBanner
-        planName={planName}
-        serviceWeeks={entitlements?.service_weeks.included_per_billing_cycle ?? 4}
-        serviceDay={assignment?.day_of_week ?? null}
-        billingCycleLabel="28 days"
-        modelLabel={modelLabel}
-        included={included}
-      />
+      {hasSub && (
+        <TruthBanner
+          planName={planName}
+          serviceWeeks={entitlements?.service_weeks.included_per_billing_cycle ?? 4}
+          serviceDay={assignment?.day_of_week ?? null}
+          billingCycleLabel="28 days"
+          modelLabel={modelLabel}
+          included={included}
+        />
+      )}
 
       <div className="p-4 space-y-5">
         <div>
@@ -206,11 +211,36 @@ export default function CustomerRoutine() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-10 space-y-3">
-            <Sparkles className="h-8 w-8 mx-auto text-accent" />
-            <p className="text-sm text-muted-foreground">
+          <div className="flex flex-col items-center py-8 space-y-3">
+            <Sparkles className="h-8 w-8 text-accent" />
+            <p className="text-sm text-muted-foreground text-center">
               {hasSub ? "No services yet. Tap below to add your first." : "Browse available services — subscribe when you're ready."}
             </p>
+
+            {/* Item 6: Service preview cards for unsubscribed users */}
+            {!hasSub && items.length === 0 && availableServices && availableServices.length > 0 && (
+              <div className="w-full space-y-3 pt-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Popular services
+                </p>
+                <div className="space-y-2">
+                  {availableServices.slice(0, 3).map((service) => (
+                    <Card key={service.id} className="p-3 flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                        <Sparkles className="h-4 w-4 text-accent" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{service.name}</p>
+                        <p className="text-xs text-muted-foreground">{service.category ?? "Home service"}</p>
+                      </div>
+                      <p className="text-xs font-semibold text-accent shrink-0">
+                        {service.handle_cost ?? "—"} handles
+                      </p>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -232,10 +262,10 @@ export default function CustomerRoutine() {
               onAdd={handleAddItem}
             />
           )}
-          {/* H3: When no subscription, still allow browsing SKUs if entitlements not loaded */}
           {!hasSub && !entitlements && (
             <Button variant="outline" className="gap-2" onClick={() => navigate("/customer/plans")}>
-              Subscribe to browse services
+              <Sparkles className="h-4 w-4" />
+              Browse services
             </Button>
           )}
         </div>
@@ -265,8 +295,8 @@ export default function CustomerRoutine() {
               size="lg"
               onClick={() => navigate("/customer/plans")}
             >
-              Subscribe to continue
-              <ArrowRight className="h-4 w-4" />
+              <Sparkles className="h-4 w-4" />
+              Browse services
             </Button>
           )}
         </div>
