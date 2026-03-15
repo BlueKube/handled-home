@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Sparkles, RefreshCw, ArrowRightLeft } from "lucide-react";
+import { Sparkles, RefreshCw, ArrowRightLeft, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const POINTS = [
   {
@@ -20,25 +22,44 @@ const POINTS = [
 ];
 
 export function HandlesExplainer() {
+  const [expanded, setExpanded] = useState(false);
+
   return (
-    <Card className="border-dashed border-accent/40 bg-accent/[0.03]">
+    <Card>
       <CardContent className="pt-5 pb-4 space-y-4">
-        <p className="text-sm font-semibold text-foreground">
-          How handles work
-        </p>
-        <div className="space-y-3">
-          {POINTS.map((p, i) => (
-            <div key={i} className="flex items-start gap-3">
-              <div className="mt-0.5 h-7 w-7 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
-                <p.icon className="h-3.5 w-3.5 text-accent" />
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="flex items-center justify-between w-full"
+        >
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-accent" />
+            <p className="text-sm font-semibold text-foreground">
+              How handles work
+            </p>
+          </div>
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 text-muted-foreground transition-transform",
+              expanded && "rotate-180"
+            )}
+          />
+        </button>
+
+        {expanded && (
+          <div className="space-y-3">
+            {POINTS.map((p, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <div className="mt-0.5 h-7 w-7 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+                  <p.icon className="h-3.5 w-3.5 text-accent" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">{p.title}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{p.body}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">{p.title}</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">{p.body}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
