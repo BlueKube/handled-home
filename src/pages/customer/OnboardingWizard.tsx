@@ -559,7 +559,7 @@ function PlanStep({ onSelectPlan }: { onSelectPlan: (planId: string) => Promise<
         const tk = getTierKey(recommended.name);
         return (
           <BundleSavingsCard
-            planPriceCents={recommended.price_cents}
+            planPriceCents={undefined}
             planDisplayPrice={recommended.display_price_text ?? undefined}
             tierKey={tk}
           />
