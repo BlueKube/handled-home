@@ -129,7 +129,7 @@ export default function CustomerPlans() {
         const tierKey = getTierKey(recommended.name);
         return (
           <BundleSavingsCard
-            planPriceCents={recommended.price_cents}
+            planPriceCents={undefined}
             planDisplayPrice={recommended.display_price_text ?? undefined}
             tierKey={tierKey}
           />

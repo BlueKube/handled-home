@@ -45,8 +45,8 @@ export default function AdminDashboard() {
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("zones").select("id", { count: "exact", head: true }).eq("status", "active"),
         supabase.from("subscriptions").select("id", { count: "exact", head: true }).eq("status", "active"),
-        supabase.from("provider_organizations").select("id", { count: "exact", head: true }).eq("status", "active"),
-        supabase.from("provider_applications").select("id", { count: "exact", head: true }).eq("status", "pending_review"),
+        supabase.from("provider_orgs").select("id", { count: "exact", head: true }).eq("status", "active"),
+        supabase.from("provider_applications").select("id", { count: "exact", head: true }).eq("status", "submitted"),
       ]);
       return {
         customers: custRes.count ?? 0,
