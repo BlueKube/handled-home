@@ -60,12 +60,12 @@ export function ProviderNotificationBanners() {
             className={`p-3 flex items-center gap-3 border ${
               isRed
                 ? "bg-destructive/10 border-destructive/30"
-                : "bg-orange-500/10 border-orange-500/30"
+                : "bg-warning/10 border-warning/30"
             }`}
           >
             <ShieldAlert
               className={`h-5 w-5 shrink-0 ${
-                isRed ? "text-destructive" : "text-orange-500"
+                isRed ? "text-destructive" : "text-warning"
               }`}
             />
             <div className="flex-1 min-w-0">
@@ -85,9 +85,10 @@ export function ProviderNotificationBanners() {
               )}
               <button
                 onClick={() => dismiss(n.id)}
-                className="p-1 rounded hover:bg-secondary text-muted-foreground"
+                className="p-3 rounded hover:bg-secondary text-muted-foreground"
+                aria-label="Dismiss notification"
               >
-                <X className="h-3.5 w-3.5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
           </Card>

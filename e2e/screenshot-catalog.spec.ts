@@ -200,6 +200,7 @@ const CUSTOMER_SCREENS: ScreenDef[] = [
 ];
 
 const PROVIDER_SCREENS: ScreenDef[] = [
+  // ── Core Daily Workflow ──
   {
     id: "provider-dashboard",
     route: "/provider",
@@ -209,22 +210,6 @@ const PROVIDER_SCREENS: ScreenDef[] = [
     waitFor: /dashboard|today|jobs|earning|welcome/i,
   },
   {
-    id: "provider-byoc-center",
-    route: "/provider/byoc",
-    flow: "provider-viral",
-    userGoal: "Manage BYOC invite links and track customer conversions",
-    screenType: "dashboard",
-    waitFor: /byoc|invite|customer|bring/i,
-  },
-  {
-    id: "provider-byoc-create",
-    route: "/provider/byoc/create-link",
-    flow: "provider-viral",
-    userGoal: "Create a new branded invite link for an existing customer",
-    screenType: "form",
-    waitFor: /create|invite|link|customer/i,
-  },
-  {
     id: "provider-jobs",
     route: "/provider/jobs",
     flow: "provider-app",
@@ -232,6 +217,16 @@ const PROVIDER_SCREENS: ScreenDef[] = [
     screenType: "list",
     waitFor: /job|today|schedule/i,
   },
+  {
+    id: "provider-history",
+    route: "/provider/history",
+    flow: "provider-app",
+    userGoal: "Browse completed job history with filters",
+    screenType: "list",
+    waitFor: /history|completed|past/i,
+  },
+
+  // ── Financial ──
   {
     id: "provider-earnings",
     route: "/provider/earnings",
@@ -249,12 +244,30 @@ const PROVIDER_SCREENS: ScreenDef[] = [
     waitFor: /payout|deposit|bank/i,
   },
   {
+    id: "provider-payout-history",
+    route: "/provider/payouts/history",
+    flow: "provider-app",
+    userGoal: "View payout history with amounts and dates",
+    screenType: "list",
+    waitFor: /payout|history|deposit/i,
+  },
+
+  // ── Performance & Insights ──
+  {
+    id: "provider-performance",
+    route: "/provider/performance",
+    flow: "provider-app",
+    userGoal: "View performance metrics and gamification score",
+    screenType: "detail",
+    waitFor: /performance|score|metric/i,
+  },
+  {
     id: "provider-quality",
     route: "/provider/quality",
     flow: "provider-app",
-    userGoal: "View quality score and performance metrics",
+    userGoal: "View quality score and tier status",
     screenType: "detail",
-    waitFor: /quality|score|performance|rating/i,
+    waitFor: /quality|score|tier|rating/i,
   },
   {
     id: "provider-insights",
@@ -265,28 +278,22 @@ const PROVIDER_SCREENS: ScreenDef[] = [
     waitFor: /insight|growth|trend|performance/i,
   },
   {
-    id: "provider-apply",
-    route: "/provider/apply",
-    flow: "provider-onboarding",
-    userGoal: "Apply as a service provider with category and coverage",
-    screenType: "form",
-    waitFor: /apply|application|join|provider/i,
-  },
-  {
-    id: "provider-referrals",
-    route: "/provider/referrals",
-    flow: "provider-viral",
-    userGoal: "Refer other providers and invite customers to the platform",
-    screenType: "detail",
-    waitFor: /refer|invite|share/i,
-  },
-  {
-    id: "provider-organization",
-    route: "/provider/organization",
+    id: "provider-insights-history",
+    route: "/provider/insights/history",
     flow: "provider-app",
-    userGoal: "Manage organization profile and business details",
+    userGoal: "View weekly performance trends over time",
+    screenType: "list",
+    waitFor: /history|trend|weekly/i,
+  },
+
+  // ── Work Configuration ──
+  {
+    id: "provider-availability",
+    route: "/provider/availability",
+    flow: "provider-app",
+    userGoal: "Set availability calendar and blocked windows",
     screenType: "form",
-    waitFor: /organization|business|company/i,
+    waitFor: /availability|schedule|calendar|blocked/i,
   },
   {
     id: "provider-coverage",
@@ -297,14 +304,6 @@ const PROVIDER_SCREENS: ScreenDef[] = [
     waitFor: /coverage|zone|area|map/i,
   },
   {
-    id: "provider-skus",
-    route: "/provider/skus",
-    flow: "provider-app",
-    userGoal: "View authorized service categories",
-    screenType: "list",
-    waitFor: /service|sku|category|authorized/i,
-  },
-  {
     id: "provider-work-setup",
     route: "/provider/work-setup",
     flow: "provider-app",
@@ -313,20 +312,20 @@ const PROVIDER_SCREENS: ScreenDef[] = [
     waitFor: /work|setup|preference/i,
   },
   {
-    id: "provider-availability",
-    route: "/provider/availability",
+    id: "provider-organization",
+    route: "/provider/organization",
     flow: "provider-app",
-    userGoal: "Set availability calendar for scheduling",
+    userGoal: "Manage organization profile and business details",
     screenType: "form",
-    waitFor: /availability|schedule|calendar/i,
+    waitFor: /organization|business|company/i,
   },
   {
-    id: "provider-support",
-    route: "/provider/support",
+    id: "provider-skus",
+    route: "/provider/skus",
     flow: "provider-app",
-    userGoal: "Access support and submit operational tickets",
-    screenType: "dashboard",
-    waitFor: /support|help|ticket/i,
+    userGoal: "View authorized service categories",
+    screenType: "list",
+    waitFor: /service|sku|category|authorized/i,
   },
   {
     id: "provider-settings",
@@ -336,6 +335,118 @@ const PROVIDER_SCREENS: ScreenDef[] = [
     screenType: "settings",
     waitFor: /setting|account|profile/i,
   },
+
+  // ── Support & Referrals ──
+  {
+    id: "provider-support",
+    route: "/provider/support",
+    flow: "provider-app",
+    userGoal: "Access support and submit operational tickets",
+    screenType: "dashboard",
+    waitFor: /support|help|ticket/i,
+  },
+  {
+    id: "provider-referrals",
+    route: "/provider/referrals",
+    flow: "provider-viral",
+    userGoal: "Refer other providers and invite customers to the platform",
+    screenType: "detail",
+    waitFor: /refer|invite|share/i,
+  },
+  {
+    id: "provider-invite-customers",
+    route: "/provider/referrals/invite-customers",
+    flow: "provider-viral",
+    userGoal: "Invite existing customers to join the platform",
+    screenType: "form",
+    waitFor: /invite|customer|share/i,
+  },
+
+  // ── BYOC ──
+  {
+    id: "provider-byoc-center",
+    route: "/provider/byoc",
+    flow: "provider-viral",
+    userGoal: "Manage BYOC invite links and track customer conversions",
+    screenType: "dashboard",
+    waitFor: /byoc|invite|customer|bring/i,
+  },
+  {
+    id: "provider-byoc-create",
+    route: "/provider/byoc/create-link",
+    flow: "provider-viral",
+    userGoal: "Create a new branded invite link for an existing customer",
+    screenType: "form",
+    waitFor: /create|invite|link|customer/i,
+  },
+
+  // ── Onboarding ──
+  {
+    id: "provider-onboarding",
+    route: "/provider/onboarding",
+    flow: "provider-onboarding",
+    userGoal: "View onboarding hub with step completion status",
+    screenType: "dashboard",
+    waitFor: /onboarding|step|getting started/i,
+  },
+  {
+    id: "provider-onboarding-org",
+    route: "/provider/onboarding/org",
+    flow: "provider-onboarding",
+    userGoal: "Set up organization name and business details",
+    screenType: "wizard-step",
+    waitFor: /organization|business|company/i,
+  },
+  {
+    id: "provider-onboarding-coverage",
+    route: "/provider/onboarding/coverage",
+    flow: "provider-onboarding",
+    userGoal: "Define service coverage zones during onboarding",
+    screenType: "wizard-step",
+    waitFor: /coverage|zone|area/i,
+  },
+  {
+    id: "provider-onboarding-capabilities",
+    route: "/provider/onboarding/capabilities",
+    flow: "provider-onboarding",
+    userGoal: "Select service capabilities and SKU authorization",
+    screenType: "wizard-step",
+    waitFor: /capabilit|service|sku/i,
+  },
+  {
+    id: "provider-onboarding-compliance",
+    route: "/provider/onboarding/compliance",
+    flow: "provider-onboarding",
+    userGoal: "Upload insurance, tax, and background check documents",
+    screenType: "wizard-step",
+    waitFor: /compliance|insurance|tax|background/i,
+  },
+  {
+    id: "provider-onboarding-agreement",
+    route: "/provider/onboarding/agreement",
+    flow: "provider-onboarding",
+    userGoal: "Review and sign the service agreement",
+    screenType: "wizard-step",
+    waitFor: /agreement|terms|sign/i,
+  },
+  {
+    id: "provider-onboarding-review",
+    route: "/provider/onboarding/review",
+    flow: "provider-onboarding",
+    userGoal: "Final review of all onboarding steps before submission",
+    screenType: "wizard-step",
+    waitFor: /review|submit|complete/i,
+  },
+  {
+    id: "provider-apply",
+    route: "/provider/apply",
+    flow: "provider-onboarding",
+    userGoal: "Apply as a service provider with category and coverage",
+    screenType: "form",
+    waitFor: /apply|application|join|provider/i,
+  },
+
+  // ── Navigation ──
   {
     id: "provider-more",
     route: "/provider/more",
@@ -354,6 +465,7 @@ const PROVIDER_SCREENS: ScreenDef[] = [
 ];
 
 const ADMIN_SCREENS: ScreenDef[] = [
+  // ── Dashboard ──
   {
     id: "admin-dashboard",
     route: "/admin",
@@ -362,6 +474,8 @@ const ADMIN_SCREENS: ScreenDef[] = [
     screenType: "dashboard",
     waitFor: /dashboard|overview|kpi/i,
   },
+
+  // ── Ops Cockpit & Health ──
   {
     id: "admin-ops-cockpit",
     route: "/admin/ops",
@@ -379,12 +493,20 @@ const ADMIN_SCREENS: ScreenDef[] = [
     waitFor: /zone|capacity|health/i,
   },
   {
+    id: "admin-ops-service-days",
+    route: "/admin/ops/service-days",
+    flow: "admin-ops",
+    userGoal: "Monitor service day health and completion rates",
+    screenType: "detail",
+    waitFor: /service.day|health|completion/i,
+  },
+  {
     id: "admin-ops-jobs",
     route: "/admin/ops/jobs",
     flow: "admin-ops",
-    userGoal: "Monitor active jobs across all zones",
+    userGoal: "Monitor jobs and proof-of-work health",
     screenType: "list",
-    waitFor: /job|active|status/i,
+    waitFor: /job|proof|active|status/i,
   },
   {
     id: "admin-ops-billing",
@@ -395,14 +517,6 @@ const ADMIN_SCREENS: ScreenDef[] = [
     waitFor: /billing|revenue|payment/i,
   },
   {
-    id: "admin-ops-growth",
-    route: "/admin/ops/growth",
-    flow: "admin-ops",
-    userGoal: "Monitor growth metrics and funnel analytics",
-    screenType: "detail",
-    waitFor: /growth|funnel|metric/i,
-  },
-  {
     id: "admin-ops-support",
     route: "/admin/ops/support",
     flow: "admin-ops",
@@ -411,12 +525,154 @@ const ADMIN_SCREENS: ScreenDef[] = [
     waitFor: /support|queue|ticket/i,
   },
   {
+    id: "admin-ops-growth",
+    route: "/admin/ops/growth",
+    flow: "admin-ops",
+    userGoal: "Monitor growth metrics and funnel analytics",
+    screenType: "detail",
+    waitFor: /growth|funnel|metric/i,
+  },
+  {
+    id: "admin-ops-definitions",
+    route: "/admin/ops/definitions",
+    flow: "admin-ops",
+    userGoal: "View KPI definitions and metric methodology",
+    screenType: "detail",
+    waitFor: /definition|kpi|metric/i,
+  },
+  {
+    id: "admin-ops-dispatch",
+    route: "/admin/ops/dispatch",
+    flow: "admin-ops",
+    userGoal: "Monitor dispatcher queues and assignment pipeline",
+    screenType: "list",
+    waitFor: /dispatch|queue|assignment/i,
+  },
+  {
+    id: "admin-ops-exceptions",
+    route: "/admin/ops/exceptions",
+    flow: "admin-ops",
+    userGoal: "Triage operational exceptions with split-panel view",
+    screenType: "list",
+    waitFor: /exception|triage|resolve/i,
+  },
+  {
+    id: "admin-ops-exception-analytics",
+    route: "/admin/ops/exception-analytics",
+    flow: "admin-ops",
+    userGoal: "Analyze exception trends and patterns",
+    screenType: "detail",
+    waitFor: /exception|analytic|trend/i,
+  },
+  {
+    id: "admin-ops-levels",
+    route: "/admin/ops/levels",
+    flow: "admin-ops",
+    userGoal: "View level analytics and tier distribution",
+    screenType: "detail",
+    waitFor: /level|analytics|tier/i,
+  },
+
+  // ── Scheduling & Assignments ──
+  {
+    id: "admin-scheduling",
+    route: "/admin/scheduling",
+    flow: "admin-config",
+    userGoal: "View scheduling operations overview",
+    screenType: "dashboard",
+    waitFor: /scheduling|operation/i,
+  },
+  {
+    id: "admin-scheduling-planner",
+    route: "/admin/scheduling/planner",
+    flow: "admin-config",
+    userGoal: "Plan and optimize service schedules",
+    screenType: "dashboard",
+    waitFor: /planner|schedule|optimize/i,
+  },
+  {
+    id: "admin-scheduling-policy",
+    route: "/admin/scheduling/policy",
+    flow: "admin-config",
+    userGoal: "Configure scheduling policies and rules",
+    screenType: "settings",
+    waitFor: /policy|rule|scheduling/i,
+  },
+  {
+    id: "admin-scheduling-windows",
+    route: "/admin/scheduling/windows",
+    flow: "admin-config",
+    userGoal: "Manage appointment window templates",
+    screenType: "list",
+    waitFor: /window|template|appointment/i,
+  },
+  {
+    id: "admin-scheduling-exceptions",
+    route: "/admin/scheduling/exceptions",
+    flow: "admin-config",
+    userGoal: "Manage scheduling exceptions and overrides",
+    screenType: "list",
+    waitFor: /exception|override|scheduling/i,
+  },
+  {
+    id: "admin-assignments",
+    route: "/admin/assignments",
+    flow: "admin-config",
+    userGoal: "View assignment dashboard and provider-job matching",
+    screenType: "dashboard",
+    waitFor: /assignment|match|provider/i,
+  },
+  {
+    id: "admin-assignment-config",
+    route: "/admin/assignments/config",
+    flow: "admin-config",
+    userGoal: "Tune assignment engine weights, thresholds, and capacity parameters",
+    screenType: "settings",
+    waitFor: /tuning|weight|threshold|assignment/i,
+  },
+  {
+    id: "admin-service-days",
+    route: "/admin/service-days",
+    flow: "admin-config",
+    userGoal: "Manage service day assignments and configuration",
+    screenType: "list",
+    waitFor: /service.day|assignment/i,
+  },
+
+  // ── Jobs & Exceptions ──
+  {
+    id: "admin-jobs",
+    route: "/admin/jobs",
+    flow: "admin-ops",
+    userGoal: "Browse and filter all jobs across zones",
+    screenType: "list",
+    waitFor: /job|filter|status/i,
+  },
+  {
+    id: "admin-exceptions",
+    route: "/admin/exceptions",
+    flow: "admin-ops",
+    userGoal: "View and triage the exception queue by severity",
+    screenType: "list",
+    waitFor: /exception|queue|severity/i,
+  },
+
+  // ── Zones & Catalog ──
+  {
     id: "admin-zones",
     route: "/admin/zones",
     flow: "admin-config",
     userGoal: "Manage service regions and zones",
     screenType: "list",
     waitFor: /zone|region|area/i,
+  },
+  {
+    id: "admin-zone-builder",
+    route: "/admin/zones/builder",
+    flow: "admin-config",
+    userGoal: "Build and edit zone boundaries with map editor",
+    screenType: "wizard-step",
+    waitFor: /zone|builder|boundary|map/i,
   },
   {
     id: "admin-skus",
@@ -435,6 +691,24 @@ const ADMIN_SCREENS: ScreenDef[] = [
     waitFor: /plan|subscription|pricing/i,
   },
   {
+    id: "admin-subscriptions",
+    route: "/admin/subscriptions",
+    flow: "admin-config",
+    userGoal: "View and manage active customer subscriptions",
+    screenType: "list",
+    waitFor: /subscription|customer|active/i,
+  },
+  {
+    id: "admin-bundles",
+    route: "/admin/bundles",
+    flow: "admin-config",
+    userGoal: "Manage bundles and routine templates",
+    screenType: "list",
+    waitFor: /bundle|routine|template/i,
+  },
+
+  // ── People ──
+  {
     id: "admin-providers",
     route: "/admin/providers",
     flow: "admin-config",
@@ -450,14 +724,94 @@ const ADMIN_SCREENS: ScreenDef[] = [
     screenType: "list",
     waitFor: /application|review|pending/i,
   },
+
+  // ── Financial ──
   {
-    id: "admin-exceptions",
-    route: "/admin/exceptions",
-    flow: "admin-ops",
-    userGoal: "View and triage the exception queue by severity",
-    screenType: "list",
-    waitFor: /exception|queue|severity/i,
+    id: "admin-billing",
+    route: "/admin/billing",
+    flow: "admin-config",
+    userGoal: "View billing overview and customer payment status",
+    screenType: "dashboard",
+    waitFor: /billing|payment|revenue/i,
   },
+  {
+    id: "admin-payouts",
+    route: "/admin/payouts",
+    flow: "admin-config",
+    userGoal: "View provider payout status and disbursement queue",
+    screenType: "list",
+    waitFor: /payout|provider|disbursement/i,
+  },
+
+  // ── Control Panel ──
+  {
+    id: "admin-control-pricing",
+    route: "/admin/control/pricing",
+    flow: "admin-config",
+    userGoal: "Configure pricing rules and margin targets",
+    screenType: "settings",
+    waitFor: /pricing|margin|rate/i,
+  },
+  {
+    id: "admin-control-payouts",
+    route: "/admin/control/payouts",
+    flow: "admin-config",
+    userGoal: "Configure provider payout engine and split rules",
+    screenType: "settings",
+    waitFor: /payout|engine|split/i,
+  },
+  {
+    id: "admin-control-config",
+    route: "/admin/control/config",
+    flow: "admin-config",
+    userGoal: "Manage system configuration and feature flags",
+    screenType: "settings",
+    waitFor: /config|system|feature/i,
+  },
+  {
+    id: "admin-control-change-requests",
+    route: "/admin/control/change-requests",
+    flow: "admin-config",
+    userGoal: "Review and approve pending configuration change requests",
+    screenType: "list",
+    waitFor: /change.request|pending|approve/i,
+  },
+  {
+    id: "admin-control-change-log",
+    route: "/admin/control/change-log",
+    flow: "admin-config",
+    userGoal: "View audit trail of configuration changes",
+    screenType: "list",
+    waitFor: /change.log|audit|history/i,
+  },
+
+  // ── Support ──
+  {
+    id: "admin-support",
+    route: "/admin/support",
+    flow: "admin-config",
+    userGoal: "Manage support console and ticket queue",
+    screenType: "dashboard",
+    waitFor: /support|ticket|queue/i,
+  },
+  {
+    id: "admin-support-policies",
+    route: "/admin/support/policies",
+    flow: "admin-config",
+    userGoal: "Configure support policies and SLA rules",
+    screenType: "list",
+    waitFor: /polic|sla|rule/i,
+  },
+  {
+    id: "admin-support-macros",
+    route: "/admin/support/macros",
+    flow: "admin-config",
+    userGoal: "Manage support response macros and templates",
+    screenType: "list",
+    waitFor: /macro|template|response/i,
+  },
+
+  // ── Growth & Incentives ──
   {
     id: "admin-growth",
     route: "/admin/growth",
@@ -467,12 +821,97 @@ const ADMIN_SCREENS: ScreenDef[] = [
     waitFor: /growth|referral|byoc|incentive/i,
   },
   {
+    id: "admin-incentives",
+    route: "/admin/incentives",
+    flow: "admin-config",
+    userGoal: "Configure incentive programs and reward rules",
+    screenType: "list",
+    waitFor: /incentive|reward|program/i,
+  },
+  {
     id: "admin-feedback",
     route: "/admin/feedback",
     flow: "admin-config",
     userGoal: "Review user feedback and transparency metrics",
     screenType: "list",
     waitFor: /feedback|review|transparency/i,
+  },
+
+  // ── Governance & Reports ──
+  {
+    id: "admin-playbooks",
+    route: "/admin/playbooks",
+    flow: "admin-config",
+    userGoal: "Manage operational playbooks and SOPs",
+    screenType: "list",
+    waitFor: /playbook|sop|procedure/i,
+  },
+  {
+    id: "admin-reports",
+    route: "/admin/reports",
+    flow: "admin-config",
+    userGoal: "Generate and view reporting and analytics",
+    screenType: "dashboard",
+    waitFor: /report|analytics|data/i,
+  },
+  {
+    id: "admin-audit",
+    route: "/admin/audit",
+    flow: "admin-config",
+    userGoal: "View audit logs for all system actions",
+    screenType: "list",
+    waitFor: /audit|log|action/i,
+  },
+
+  // ── System Health ──
+  {
+    id: "admin-cron-health",
+    route: "/admin/cron-health",
+    flow: "admin-ops",
+    userGoal: "Monitor cron job health and execution status",
+    screenType: "detail",
+    waitFor: /cron|health|job|schedule/i,
+  },
+  {
+    id: "admin-notification-health",
+    route: "/admin/notification-health",
+    flow: "admin-ops",
+    userGoal: "Monitor notification delivery health and failure rates",
+    screenType: "detail",
+    waitFor: /notification|health|delivery/i,
+  },
+  {
+    id: "admin-test-toggles",
+    route: "/admin/test-toggles",
+    flow: "admin-config",
+    userGoal: "Toggle market states and growth surface configs for testing",
+    screenType: "settings",
+    waitFor: /test|toggle|market.state/i,
+  },
+
+  // ── Settings & Navigation ──
+  {
+    id: "admin-settings",
+    route: "/admin/settings",
+    flow: "admin-config",
+    userGoal: "Manage admin account settings",
+    screenType: "settings",
+    waitFor: /setting|account|admin/i,
+  },
+  {
+    id: "admin-more",
+    route: "/admin/more",
+    flow: "admin-config",
+    userGoal: "Access less-frequent admin actions",
+    screenType: "settings",
+  },
+  {
+    id: "admin-notifications",
+    route: "/admin/notifications",
+    flow: "admin-config",
+    userGoal: "View admin notification inbox",
+    screenType: "list",
+    waitFor: /notification|inbox/i,
   },
 ];
 

@@ -343,28 +343,26 @@ function PlaybookCard({ playbook }: { playbook: Playbook }) {
         className="cursor-pointer hover:bg-muted/30 transition-colors py-4"
         onClick={() => setExpanded(!expanded)}
       >
-        <div className="flex items-center justify-between">
+        <div className="space-y-2">
           <div className="flex items-center gap-3">
             {expanded ? (
               <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
             ) : (
               <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
             )}
-            <div>
-              <CardTitle className="text-base">{playbook.title}</CardTitle>
-              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
-                <CheckSquare className="h-3 w-3" />
-                {playbook.checklist}
-              </p>
+            <CardTitle className="text-base flex-1">{playbook.title}</CardTitle>
+            <div className="flex gap-1.5 shrink-0">
+              {playbook.allowedRoles.map((role) => (
+                <Badge key={role} variant="outline" className="text-[10px] px-1.5 py-0 capitalize">
+                  {role}
+                </Badge>
+              ))}
             </div>
           </div>
-          <div className="flex gap-1.5">
-            {playbook.allowedRoles.map((role) => (
-              <Badge key={role} variant="outline" className="text-[10px] px-1.5 py-0 capitalize">
-                {role}
-              </Badge>
-            ))}
-          </div>
+          <p className="text-xs text-muted-foreground flex items-center gap-1.5 ml-7">
+            <CheckSquare className="h-3 w-3 shrink-0" />
+            <span>{playbook.checklist}</span>
+          </p>
         </div>
       </CardHeader>
 
@@ -439,7 +437,7 @@ export default function Playbooks() {
   }, [adminRole, roleFilter]);
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="animate-fade-in p-6 space-y-5">
       <div>
         <h1 className="text-h2 mb-0.5 flex items-center gap-2">
           <BookOpen className="h-5 w-5" />

@@ -1100,7 +1100,7 @@ Each menu item: icon + label + ChevronRight, tappable
    - CardTitle: "Enter Your Invite Code"
    - Input (centered, large, monospace, tracking-widest, placeholder "e.g. HANDLED-2026")
    - Error text (destructive) if invalid
-   - Button (full-width): "Verify Code" + ArrowRight
+   - Button (full-width): "Verify Code" + ChevronRight
 
 **States**:
 - **Loading org**: Full-screen spinner
@@ -1305,6 +1305,8 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/provider/byoc/create-link`
 **Purpose**: Form to create new invite link (select category, zone, cadence)
 
+**Header**: ChevronLeft back → `/provider/byoc` | H2 "Create Invite Link" | Caption "Generate a link for your existing customers"
+
 ---
 
 # FLOW 21: Provider Earnings & Payouts
@@ -1379,25 +1381,47 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/provider/organization`
 **Purpose**: Business profile — name, phone, website, team members
 
+**Header**: ChevronLeft back → `/provider/settings` | H2 "Organization" | Caption "Manage your team and organization details"
+
+**Sections**: Org profile card, team members list, compliance status
+
+**States**: Loading skeleton | Error (QueryErrorCard) | No org (empty state with Building2 icon) | Populated
+
 ### Screen 23.2: Coverage
 
 **Route**: `/provider/coverage`
 **Purpose**: Zone map and capacity assignments
+
+**Header**: ChevronLeft back → `/provider/settings` | H2 "Coverage & Capacity" | Caption "Your zones, availability, and service capabilities"
+
+**Sections**: Zone selection tabs, availability section, SKU capabilities
 
 ### Screen 23.3: Authorized SKUs
 
 **Route**: `/provider/skus`
 **Purpose**: Services this provider is authorized to perform
 
+**Header**: H2 "Service Catalog" (no back nav — accessible from tab flow)
+
+**Sections**: Search input, category-grouped SKU cards with detail sheet
+
 ### Screen 23.4: Work Setup
 
 **Route**: `/provider/work-setup`
 **Purpose**: Working hours, availability preferences
 
+**Header**: ChevronLeft back → `/provider/coverage` | H2 "Work Setup" | Caption "Help us build efficient routes for your area"
+
+**Sections**: 3-step wizard (Location → Services → Schedule)
+
 ### Screen 23.5: Availability
 
 **Route**: `/provider/availability`
 **Purpose**: Schedule availability calendar
+
+**Header**: ChevronLeft back → `/provider/coverage` | H2 "Availability" | Caption "Manage your schedule and blocked windows"
+
+**Sections**: Weekly schedule grid, blocked windows list with add/delete
 
 ---
 
@@ -1422,15 +1446,30 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/provider/settings`
 **Purpose**: Account settings, notification preferences (same pattern as customer settings)
 
+**Header**: H2 "Account Settings" (no back nav — top-level More menu destination)
+
 ### Screen 24.3: Provider Support
 
 **Route**: `/provider/support`
 **Purpose**: Support tickets for providers
 
+**Header**: H2 "Support" | Caption "Claims and disputes involving your jobs" (no back nav — top-level More menu destination)
+
+### Screen 24.3.1: Support Ticket Detail
+
+**Route**: `/provider/support/tickets/:ticketId`
+**Purpose**: Individual ticket detail with actions
+
+**Header**: ChevronLeft back → `/provider/support` | H2 "Support Ticket"
+
+**Sections**: Status chip + date, ticket subject, timeline/events, statement form, review request form
+
 ### Screen 24.4: Provider Referrals
 
 **Route**: `/provider/referrals`
 **Purpose**: Provider referral program + customer invites
+
+**Header**: H2 "Growth Hub" (page title)
 
 ---
 
@@ -1456,7 +1495,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Route**: `/admin/ops/zones/:zoneId`
 
-### Screen 25.5: Jobs Health
+### Screen 25.5: Jobs & Proof Health
 
 **Route**: `/admin/ops/jobs`
 **Purpose**: Active/completed/failed jobs metrics
@@ -1504,7 +1543,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 # FLOW 27: Admin Service Configuration
 
-### Screen 27.1: Zone Management
+### Screen 27.1: Regions & Zones
 
 **Route**: `/admin/zones`
 **Purpose**: Create/edit zones, assign zip codes
@@ -1519,17 +1558,17 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/skus`
 **Purpose**: Service type definitions — names, durations, levels, checklist templates
 
-### Screen 27.4: Plan Management
+### Screen 27.4: Subscription Plans
 
 **Route**: `/admin/plans`
 **Purpose**: Subscription plan configuration — pricing, handles, zone availability
 
-### Screen 27.5: Bundle Management
+### Screen 27.5: Bundles / Routines
 
 **Route**: `/admin/bundles`
 **Purpose**: Service bundle configuration
 
-### Screen 27.6: Service Day Config
+### Screen 27.6: Service Days
 
 **Route**: `/admin/service-days`
 **Purpose**: Service day rules — capacity per day, assignment algorithm
@@ -1631,7 +1670,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/support/macros`
 **Purpose**: Pre-written support response templates
 
-### Screen 30.5: Growth Dashboard
+### Screen 30.5: Growth Console
 
 **Route**: `/admin/growth`
 **Purpose**: Viral loop metrics, BYOC performance, referral conversion

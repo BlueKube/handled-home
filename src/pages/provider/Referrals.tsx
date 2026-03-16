@@ -98,14 +98,14 @@ export default function ProviderReferrals() {
   };
 
   if (isLoading) {
-    return <div className="p-4 space-y-4"><Skeleton className="h-24" /><Skeleton className="h-24" /><Skeleton className="h-48" /></div>;
+    return <div className="animate-fade-in p-4 pb-24 space-y-4"><Skeleton className="h-24" /><Skeleton className="h-24" /><Skeleton className="h-48" /></div>;
   }
 
   return (
-    <div className="px-4 py-6 space-y-6 animate-fade-in">
+    <div className="animate-fade-in p-4 pb-24 space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Growth Hub</h1>
+        <h1 className="text-h2">Growth Hub</h1>
         {isFoundingPartner && (
           <Badge className="bg-gradient-to-r from-amber-500 to-yellow-400 text-white border-0 gap-1">
             <Award className="h-3 w-3" /> Founding Partner

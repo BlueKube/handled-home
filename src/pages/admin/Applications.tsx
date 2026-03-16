@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, ArrowLeft, Eye, FileText, Clock } from "lucide-react";
+import { Loader2, ChevronLeft, Eye, FileText, Clock } from "lucide-react";
 import { format } from "date-fns";
 
 const STATUS_CONFIG: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
@@ -47,16 +47,16 @@ export default function AdminApplications() {
 
   if (applications.isLoading) {
     return (
-      <div className="p-4 flex items-center justify-center min-h-[60vh]">
+      <div className="p-6 flex items-center justify-center min-h-[60vh]">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   return (
-    <div className="p-4 max-w-4xl animate-fade-in">
-      <Button variant="ghost" size="sm" className="mb-2" onClick={() => navigate("/admin/providers")}>
-        <ArrowLeft className="h-4 w-4 mr-1" /> Providers
+    <div className="p-6 max-w-4xl animate-fade-in">
+      <Button variant="ghost" size="icon" className="mb-2" onClick={() => navigate("/admin/providers")} aria-label="Back to providers">
+        <ChevronLeft className="h-5 w-5" />
       </Button>
 
       <div className="flex items-center justify-between mb-1">

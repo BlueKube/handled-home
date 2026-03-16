@@ -81,23 +81,30 @@ When using this skill, follow this workflow unless the user asks for something n
   - regression risks
 - If one item depends on unavailable data or would expand scope too much, mark it as deferred rather than silently broadening the batch.
 
-5. Independent review is mandatory.
-- After implementation, require a separate review pass by a different strong model.
+5. Independent subagent code review is mandatory.
+- After implementation, launch a **fresh subagent** with no prior implementation context to review the batch diff.
+- The subagent receives the git diff, acceptance criteria, and design system rules — but NOT the implementation reasoning.
 - Review should focus on:
   - correctness
   - UX consistency
-  - accessibility
-  - dark mode
+  - accessibility (aria-labels, touch targets ≥ 44px)
+  - dark mode (semantic tokens only)
   - routing/CTA behavior
   - adherence to the written spec
   - whether the work actually improves the intended user state
-- Fix findings until the batch is clear.
+- Findings are categorized: MUST-FIX (blocking), SHOULD-FIX (fix in batch), NICE-TO-HAVE (can defer).
+- Fix all MUST-FIX findings before moving to the next batch.
+- See `redesign-workflow-guide.md` step 5 for full subagent launch instructions.
 
 6. Validate the live UI.
 - Perform live visual validation whenever possible.
 - Prefer checking the actual authenticated screen state over trusting code alone.
 - Confirm the intended target state truly renders.
 - Check that the improved screen is better for the target persona, not just technically correct.
+
+7. Sync documentation after each phase.
+- After completing a phase, review key docs for stale page names, navigation specs, and design patterns.
+- See `redesign-workflow-guide.md` step 9 for the full documentation sync checklist.
 
 ## Screen Review Framework
 

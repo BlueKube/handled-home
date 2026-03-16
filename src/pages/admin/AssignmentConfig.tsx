@@ -92,8 +92,8 @@ export default function AssignmentConfig() {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-4xl mx-auto space-y-6">
-        <h1 className="text-2xl font-bold">Assignment Config</h1>
+      <div className="animate-fade-in p-6 max-w-4xl mx-auto space-y-6">
+        <h1 className="text-h2">Assignment Tuning Dials</h1>
         <div className="space-y-3">
           {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24 w-full" />)}
         </div>
@@ -128,9 +128,9 @@ export default function AssignmentConfig() {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-8">
+    <div className="animate-fade-in p-6 max-w-4xl mx-auto space-y-8">
       <div>
-        <h1 className="text-2xl font-bold">Assignment Tuning Dials</h1>
+        <h1 className="text-h2">Assignment Tuning Dials</h1>
         <p className="text-sm text-muted-foreground">Adjust weights, thresholds, and capacity parameters for the assignment engine</p>
       </div>
 

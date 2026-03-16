@@ -46,7 +46,7 @@ export default function AdminAudit() {
   });
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="animate-fade-in p-6 space-y-4">
       <div>
         <h1 className="text-h2 mb-1">Audit Logs</h1>
         <p className="text-caption">Complete admin action trail with before/after state</p>

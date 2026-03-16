@@ -41,7 +41,7 @@ export default function OnboardingCapabilities() {
   }
 
   return (
-    <div className="p-4 max-w-lg mx-auto animate-fade-in">
+    <div className="animate-fade-in p-4 pb-24">
       <p className="text-caption mb-1">Step 3 of 6</p>
       <h1 className="text-h2 mb-1">Your Capabilities</h1>
       <p className="text-caption mb-6">Select the services you can reliably perform. We'll match you with the right jobs.</p>

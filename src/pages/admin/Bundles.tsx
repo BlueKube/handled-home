@@ -134,7 +134,7 @@ export default function AdminBundles() {
   });
 
   return (
-    <div className="p-4 space-y-4 animate-fade-in">
+    <div className="p-6 space-y-4 animate-fade-in">
       <h1 className="text-h2">Bundles / Routines</h1>
       <p className="text-caption">Read-only view of all customer routines.</p>
 

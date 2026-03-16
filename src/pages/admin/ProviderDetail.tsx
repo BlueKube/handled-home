@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, CheckCircle, AlertTriangle, XCircle, Shield, MapPin, Loader2, User, FileText, Star } from "lucide-react";
+import { ChevronLeft, CheckCircle, AlertTriangle, XCircle, Shield, MapPin, Loader2, User, FileText, Star } from "lucide-react";
 import { toast } from "sonner";
 import { DecisionTraceCard } from "@/components/admin/DecisionTraceCard";
 import { AdminReadOnlyMap } from "@/components/admin/AdminReadOnlyMap";
@@ -64,11 +64,11 @@ export default function AdminProviderDetail() {
     }));
 
   if (isLoading) {
-    return <div className="p-4 flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>;
+    return <div className="p-6 flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>;
   }
 
   if (!org) {
-    return <div className="p-4 text-center py-12 text-muted-foreground">Provider not found.</div>;
+    return <div className="p-6 text-center py-12 text-muted-foreground">Provider not found.</div>;
   }
 
   const handleAction = async () => {
@@ -90,9 +90,9 @@ export default function AdminProviderDetail() {
   const riskFlags = org.provider_risk_flags?.filter((f: any) => f.is_active) || [];
 
   return (
-    <div className="p-4 max-w-4xl animate-fade-in">
-      <Button variant="ghost" size="sm" className="mb-2" onClick={() => navigate("/admin/providers")}>
-        <ArrowLeft className="h-4 w-4 mr-1" />Back
+    <div className="p-6 max-w-4xl animate-fade-in">
+      <Button variant="ghost" size="icon" className="mb-2" onClick={() => navigate("/admin/providers")} aria-label="Back to providers">
+        <ChevronLeft className="h-5 w-5" />
       </Button>
 
       <div className="flex items-center gap-3 mb-4">

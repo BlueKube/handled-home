@@ -1,13 +1,15 @@
+import { useNavigate } from "react-router-dom";
 import { useProviderQualityScore } from "@/hooks/useProviderQualityScore";
 import { useProviderTier, TIER_CONFIG } from "@/hooks/useProviderTier";
 import { useProviderOrg } from "@/hooks/useProviderOrg";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import {
   ShieldCheck, TrendingUp, TrendingDown, Minus, Star, Camera, Clock,
-  AlertTriangle, Award, GraduationCap, CheckCircle2, Lock,
+  AlertTriangle, Award, GraduationCap, CheckCircle2, Lock, ChevronLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -20,16 +22,20 @@ const BAND_CONFIG: Record<string, { color: string; bg: string; label: string }> 
 };
 
 export default function ProviderQualityScore() {
+  const navigate = useNavigate();
   const { org } = useProviderOrg();
   const { score, rollups, scoreEvents, isLoading } = useProviderQualityScore(org?.id);
   const { currentTier, tierConfig, tierEntry, tierHistory, pendingGates, completedGates, isLoading: tierLoading } = useProviderTier(org?.id);
 
   if (isLoading || tierLoading) {
     return (
-      <div className="p-6 max-w-2xl space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-40 w-full" />
-        <Skeleton className="h-32 w-full" />
+      <div className="animate-fade-in p-4 pb-24 max-w-2xl space-y-4">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-11 w-11 rounded-xl" />
+          <Skeleton className="h-7 w-40" />
+        </div>
+        <Skeleton className="h-40 w-full rounded-2xl" />
+        <Skeleton className="h-32 w-full rounded-2xl" />
       </div>
     );
   }
@@ -43,11 +49,17 @@ export default function ProviderQualityScore() {
     : 0;
 
   return (
-    <div className="p-6 max-w-2xl space-y-4">
-      <h1 className="text-h2">Quality & Tier</h1>
-      <p className="text-sm text-muted-foreground">
-        Your rolling 28-day score determines your tier, assignment priority, and payout hold period.
-      </p>
+    <div className="animate-fade-in p-4 pb-24 max-w-2xl space-y-4">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" onClick={() => navigate("/provider/performance")} aria-label="Back to score">
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <h1 className="text-h2">Quality & Tier</h1>
+          <p className="text-caption">Rolling 28-day score</p>
+        </div>
+      </div>
 
       {/* Tier badge card */}
       <Card className={cn("p-4 flex items-center gap-4", tierConfig.bg)}>

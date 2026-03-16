@@ -11,7 +11,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Camera, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Camera, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
 
 const PAGE_SIZE = 25;
 
@@ -134,10 +134,10 @@ export default function OpsJobs() {
   useEffect(() => setPage(0), [status, zoneId, providerOrgId, dateFrom, dateTo, proofFilter, categoryFilter]);
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="animate-fade-in p-6 space-y-4">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => nav("/admin/ops")}>
-          <ArrowLeft className="h-4 w-4" />
+        <Button variant="ghost" size="icon" onClick={() => nav("/admin/ops")} aria-label="Back to Ops Cockpit">
+          <ChevronLeft className="h-5 w-5" />
         </Button>
         <div>
           <h1 className="text-h2">Jobs & Proof Health</h1>

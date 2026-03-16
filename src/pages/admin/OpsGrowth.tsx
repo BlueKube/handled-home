@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Users, Send, Briefcase, Zap, ShieldAlert } from "lucide-react";
+import { ChevronLeft, Users, Send, Briefcase, Zap, ShieldAlert } from "lucide-react";
 
 export default function OpsGrowth() {
   const nav = useNavigate();
@@ -98,10 +98,10 @@ export default function OpsGrowth() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="animate-fade-in p-6 space-y-6">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => nav("/admin/ops")}>
-          <ArrowLeft className="h-4 w-4" />
+        <Button variant="ghost" size="icon" onClick={() => nav("/admin/ops")} aria-label="Back to Ops Cockpit">
+          <ChevronLeft className="h-5 w-5" />
         </Button>
         <div>
           <h1 className="text-h2">Growth Health</h1>

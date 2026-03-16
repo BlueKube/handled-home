@@ -64,18 +64,38 @@ Do not start implementation before the spec exists.
 - Prefer one focused branch or commit stack.
 - Preserve previously cleared work.
 
-5. Run independent review with a separate strong model.
-- Review is mandatory.
+5. Run independent subagent code review.
+- Review is mandatory after every batch implementation.
+- Launch a **fresh subagent** (no prior implementation context) to review the batch diff.
+- The subagent receives: the git diff, the batch spec/acceptance criteria, and the design system rules.
+- The subagent does NOT receive: the implementation reasoning, earlier conversation, or "why" behind choices. This forces it to evaluate the code on its own merits.
 - The reviewer should evaluate:
   - correctness
   - spec adherence
   - UX consistency
-  - accessibility
-  - dark mode
+  - accessibility (aria-labels, touch targets ≥ 44px, keyboard nav)
+  - dark mode (semantic tokens only, no hardcoded colors)
   - CTA and route behavior
   - whether the intended user state actually improved
-- Treat review findings as real until disproven.
-- Fix findings and rerun review until clear.
+  - consistency with existing patterns in the codebase
+  - regressions (functionality removed, broken navigation, missing imports)
+- The subagent returns findings categorized as:
+  - **MUST-FIX**: Bugs, regressions, accessibility violations, broken routes
+  - **SHOULD-FIX**: Inconsistencies, missing polish, non-critical UX issues
+  - **NICE-TO-HAVE**: Suggestions, minor improvements, style preferences
+- Treat MUST-FIX findings as blocking — fix them before moving to the next batch.
+- SHOULD-FIX findings should be fixed in the same batch when feasible.
+- NICE-TO-HAVE findings can be deferred to a later batch.
+- Fix findings and rerun review until all MUST-FIX items are resolved.
+
+### How to launch the review subagent
+
+Use the Agent tool with these parameters:
+- `subagent_type`: general-purpose
+- `description`: "Review Batch N code changes"
+- `prompt`: Include (1) the git diff output, (2) the acceptance criteria from the batch spec, (3) design system rules from CLAUDE.md/design-guidelines.md, and (4) instructions to categorize findings as MUST-FIX / SHOULD-FIX / NICE-TO-HAVE.
+
+The subagent runs in a clean context with no knowledge of the implementation decisions. This simulates a "different reviewer" and catches blind spots the implementer misses.
 
 6. Validate the live UI.
 - Validate the implemented state in the actual app whenever possible.
@@ -100,6 +120,31 @@ Do this especially when:
 - several batches have passed
 - the user reminds you of the plan
 - the work risks drifting into local optimizations
+
+9. Sync documentation after each phase.
+After completing a phase (a group of related batches), review all key documentation for stale information. Implementation changes must be back-synced to spec documents so they remain the source of truth.
+
+**Documents to check:**
+- `docs/screen-flows.md` — screen layouts, headers, back navigation, component specs
+- `docs/app-flow-pages-and-roles.md` — route tree, page names, navigation hierarchy
+- `docs/design-guidelines.md` — design tokens, utilities, component patterns
+- `docs/masterplan.md` — product strategy sections referencing UI/UX
+- `docs/feature-list.md` — feature status labels
+- `CLAUDE.md` — project instructions, completion status, roadmap
+
+**What to look for:**
+- Page names/titles that drifted from documentation (e.g., "Quality Score" renamed to "Quality & Tier")
+- Navigation patterns not reflected in specs (back routes, header structures, subtitles)
+- Design system utilities applied in code but not documented (e.g., `animate-fade-in`)
+- Product/strategy sections that describe features differently from what was built
+- Completion status or roadmap sections that are outdated
+
+**When to sync:**
+- After completing a major phase (e.g., all provider pages done)
+- Before starting a new phase (ensure docs are clean for the next implementer)
+- When the user explicitly requests a documentation review
+
+Use subagents to parallelize the review across multiple documents when the scope is large.
 
 ## Roadmap Mapping Rules
 

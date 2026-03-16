@@ -28,9 +28,9 @@ export default function NotificationHealth() {
     }));
 
   return (
-    <div className="space-y-6">
+    <div className="animate-fade-in p-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Notification Health</h1>
+        <h1 className="text-h2">Notification Health</h1>
         <p className="text-muted-foreground text-sm">
           Delivery status, processing latency, and deadletter queue
         </p>

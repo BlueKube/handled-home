@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Settings, CreditCard, TrendingUp, Camera, RotateCcw, Clock } from "lucide-react";
+import { ChevronLeft, Settings, CreditCard, TrendingUp, Camera, RotateCcw, Clock } from "lucide-react";
 import { AdminReadOnlyMap } from "@/components/admin/AdminReadOnlyMap";
 import { format } from "date-fns";
 
@@ -20,7 +20,7 @@ export default function OpsZoneDetail() {
 
   if (isLoading || !zone) {
     return (
-      <div className="p-6 space-y-4">
+      <div className="animate-fade-in p-6 space-y-4">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-64 rounded-xl" />
       </div>
@@ -58,10 +58,10 @@ export default function OpsZoneDetail() {
     }));
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="animate-fade-in p-6 space-y-6">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => nav("/admin/ops/zones")}>
-          <ArrowLeft className="h-4 w-4" />
+        <Button variant="ghost" size="icon" onClick={() => nav("/admin/ops/zones")} aria-label="Back to Zone Health">
+          <ChevronLeft className="h-5 w-5" />
         </Button>
         <div>
           <h1 className="text-h2">{zone.name}</h1>

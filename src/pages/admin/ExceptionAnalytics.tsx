@@ -72,9 +72,9 @@ export default function ExceptionAnalytics() {
   }));
 
   return (
-    <div className="px-4 py-6 space-y-6 animate-fade-in pb-20">
+    <div className="p-6 space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Exception Analytics</h1>
+        <h1 className="text-h2">Exception Analytics</h1>
         <Select value={String(daysBack)} onValueChange={(v) => setDaysBack(Number(v))}>
           <SelectTrigger className="w-[160px]">
             <SelectValue />

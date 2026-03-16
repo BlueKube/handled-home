@@ -141,7 +141,7 @@ export default function ControlConfig() {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-4">
+      <div className="animate-fade-in p-6 space-y-4">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-32" />
         <Skeleton className="h-32" />
@@ -150,7 +150,7 @@ export default function ControlConfig() {
   }
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="animate-fade-in p-6 space-y-5">
       <div>
         <h1 className="text-h2 flex items-center gap-2">
           <Settings className="h-5 w-5" />

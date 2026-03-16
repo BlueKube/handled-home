@@ -41,7 +41,7 @@ export default function ProviderOnboarding() {
   }
 
   return (
-    <div className="p-4 max-w-lg mx-auto animate-fade-in">
+    <div className="animate-fade-in p-4 pb-24">
       <div className="text-center mb-8 mt-8">
         <Shield className="h-12 w-12 text-accent mx-auto mb-4" />
         <h1 className="text-h2 mb-2">Join the Handled Home Network</h1>
@@ -87,7 +87,7 @@ export default function ProviderOnboarding() {
 
 function SuspendedScreen() {
   return (
-    <div className="p-4 max-w-lg mx-auto animate-fade-in text-center mt-12">
+    <div className="animate-fade-in p-4 pb-24 text-center mt-12">
       <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
       <h1 className="text-h2 mb-2">Account Suspended</h1>
       <p className="text-caption mb-6">Your provider account has been suspended. Please contact support for more information.</p>
@@ -104,7 +104,7 @@ function PendingReviewScreen({ org }: { org: any }) {
   const missingTaxDoc = compliance?.tax_form_attested && !compliance?.tax_doc_url;
 
   return (
-    <div className="p-4 max-w-lg mx-auto animate-fade-in">
+    <div className="animate-fade-in p-4 pb-24">
       <div className="text-center mt-8 mb-8">
         <Clock className="h-12 w-12 text-accent mx-auto mb-4" />
         <h1 className="text-h2 mb-2">Under Review</h1>
@@ -186,7 +186,7 @@ function DraftResumeScreen({ org }: { org: any }) {
   else if (hasOrg && hasCoverage && hasCapabilities && hasCompliance && hasAgreement) nextStep = "/provider/onboarding/review";
 
   return (
-    <div className="p-4 max-w-lg mx-auto animate-fade-in">
+    <div className="animate-fade-in p-4 pb-24">
       <div className="text-center mt-8 mb-8">
         <Shield className="h-12 w-12 text-accent mx-auto mb-4" />
         <h1 className="text-h2 mb-2">Continue Your Application</h1>

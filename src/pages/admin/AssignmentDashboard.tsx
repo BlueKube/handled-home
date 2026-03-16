@@ -188,10 +188,10 @@ export default function AssignmentDashboard() {
 
   return (
     <>
-      <div className="p-6 max-w-6xl mx-auto space-y-6">
+      <div className="animate-fade-in p-6 max-w-6xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Assignments</h1>
+            <h1 className="text-h2">Assignments</h1>
             <p className="text-sm text-muted-foreground">Provider assignment engine — clustered, capacity-constrained</p>
           </div>
           <Button

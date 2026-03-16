@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ import { format, differenceInCalendarDays } from "date-fns";
 import { cn } from "@/lib/utils";
 import {
   MapPin, Wrench, CheckCircle, XCircle, Clock, Camera,
-  CalendarIcon, CalendarOff, Plus, Trash2, AlertTriangle,
+  CalendarIcon, CalendarOff, Plus, Trash2, AlertTriangle, ChevronLeft,
 } from "lucide-react";
 
 interface CoverageRow {
@@ -254,7 +255,7 @@ function AvailabilitySection() {
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="h-7 w-7 shrink-0"
+                    className="h-11 w-11 shrink-0"
                     onClick={() => {
                       cancelBlock.mutate(b.id, {
                         onSuccess: () => toast.success("Time off canceled"),
@@ -420,11 +421,12 @@ function SkuCapabilities() {
 }
 
 export default function ProviderCoverage() {
+  const navigate = useNavigate();
   const { loading, isError, refetch } = useProviderOrg();
 
   if (loading) {
     return (
-      <div className="animate-fade-in p-4 pb-24 space-y-4 max-w-2xl">
+      <div className="animate-fade-in p-4 pb-24 space-y-4">
         <h1 className="text-h2">Coverage & Capacity</h1>
         <Skeleton className="h-32 rounded-xl" />
         <Skeleton className="h-32 rounded-xl" />
@@ -435,7 +437,7 @@ export default function ProviderCoverage() {
 
   if (isError) {
     return (
-      <div className="animate-fade-in p-4 pb-24 space-y-4 max-w-2xl">
+      <div className="animate-fade-in p-4 pb-24 space-y-4">
         <h1 className="text-h2">Coverage & Capacity</h1>
         <QueryErrorCard message="Failed to load organization data." onRetry={() => refetch()} />
       </div>
@@ -443,10 +445,15 @@ export default function ProviderCoverage() {
   }
 
   return (
-    <div className="animate-fade-in p-4 pb-24 space-y-4 max-w-2xl">
-      <div>
-        <h1 className="text-h2">Coverage & Capacity</h1>
-        <p className="text-caption mt-0.5">Your zones, availability, and service capabilities</p>
+    <div className="animate-fade-in p-4 pb-24 space-y-4">
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" onClick={() => navigate("/provider/settings")} aria-label="Back to settings">
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <h1 className="text-h2">Coverage & Capacity</h1>
+          <p className="text-caption mt-0.5">Your zones, availability, and service capabilities</p>
+        </div>
       </div>
       <AvailabilitySection />
       <CoverageZones />

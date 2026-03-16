@@ -72,7 +72,7 @@ export default function ControlPricing() {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-4">
+      <div className="animate-fade-in p-6 space-y-4">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-96 w-full" />
       </div>
@@ -142,13 +142,13 @@ export default function ControlPricing() {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-6xl">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Pricing & Margin</h1>
-          <p className="text-sm text-muted-foreground mt-1">Zone-adjusted customer pricing. Superuser-only writes.</p>
+    <div className="animate-fade-in p-6 space-y-6 max-w-6xl">
+      <div>
+        <div className="flex items-center gap-2">
+          <h1 className="text-h2">Pricing & Margin</h1>
+          {!isSuperuser && <Badge variant="secondary">Read-only</Badge>}
         </div>
-        {!isSuperuser && <Badge variant="secondary">Read-only</Badge>}
+        <p className="text-sm text-muted-foreground mt-1">Zone-adjusted customer pricing. Superuser-only writes.</p>
       </div>
 
       {/* Zone selector + actions */}
@@ -233,11 +233,11 @@ export default function ControlPricing() {
               <TableHeader>
                 <TableRow>
                   <TableHead>SKU</TableHead>
-                  <TableHead className="text-right">Base Price</TableHead>
-                  <TableHead className="text-right">Multiplier</TableHead>
-                  <TableHead className="text-right">Override</TableHead>
-                  <TableHead className="text-right">Effective</TableHead>
-                  <TableHead>Last Changed</TableHead>
+                  <TableHead className="text-right whitespace-nowrap">Base</TableHead>
+                  <TableHead className="text-right whitespace-nowrap">Mult.</TableHead>
+                  <TableHead className="text-right whitespace-nowrap">Override</TableHead>
+                  <TableHead className="text-right whitespace-nowrap">Effective</TableHead>
+                  <TableHead className="whitespace-nowrap">Changed</TableHead>
                   <TableHead>Reason</TableHead>
                   {isSuperuser && <TableHead className="w-40">Actions</TableHead>}
                 </TableRow>

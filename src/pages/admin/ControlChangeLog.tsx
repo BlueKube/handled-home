@@ -14,7 +14,7 @@ import { format } from "date-fns";
 import { RotateCcw, ChevronDown } from "lucide-react";
 
 const ENTITY_TYPES = [
-  { value: "", label: "All" },
+  { value: "__all__", label: "All" },
   { value: "sku_pricing_base", label: "SKU Pricing Base" },
   { value: "sku_pricing_zone_overrides", label: "Zone Pricing Overrides" },
   { value: "provider_payout_base", label: "Payout Base" },
@@ -26,8 +26,8 @@ const ENTITY_TYPES = [
 
 export default function ControlChangeLog() {
   const { isSuperuser } = useAdminMembership();
-  const [entityType, setEntityType] = useState("");
-  const { data: logs, isLoading } = useAuditLog(entityType || undefined, 200);
+  const [entityType, setEntityType] = useState("__all__");
+  const { data: logs, isLoading } = useAuditLog(entityType === "__all__" ? undefined : entityType, 200);
   const rollbackMut = useRollbackPricingMutation();
 
   if (isLoading) return <div className="p-6 space-y-4"><Skeleton className="h-8 w-64" /><Skeleton className="h-96 w-full" /></div>;
@@ -37,9 +37,9 @@ export default function ControlChangeLog() {
     ["set_zone_pricing_override"].includes(action);
 
   return (
-    <div className="p-6 space-y-6 max-w-6xl">
+    <div className="animate-fade-in p-6 space-y-6 max-w-6xl">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Change Log</h1>
+        <h1 className="text-h2">Change Log</h1>
         <p className="text-sm text-muted-foreground mt-1">All versioned config changes with rollback.</p>
       </div>
 

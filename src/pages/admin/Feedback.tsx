@@ -71,7 +71,7 @@ export default function AdminFeedback() {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-4xl space-y-4">
+      <div className="animate-fade-in p-6 max-w-4xl space-y-4">
         <Skeleton className="h-8 w-48" />
         {[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 w-full" />)}
       </div>
@@ -79,7 +79,7 @@ export default function AdminFeedback() {
   }
 
   return (
-    <div className="p-6 max-w-4xl space-y-4">
+    <div className="animate-fade-in p-6 max-w-4xl space-y-4">
       <div>
         <h1 className="text-h2">Customer Feedback</h1>
         <p className="text-sm text-muted-foreground">

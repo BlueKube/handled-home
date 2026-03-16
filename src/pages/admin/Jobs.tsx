@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useAdminJobs } from "@/hooks/useAdminJobs";
 import { useZones } from "@/hooks/useZones";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronRight, Briefcase } from "lucide-react";
+import { ChevronRight, Briefcase, Clock } from "lucide-react";
 import { format } from "date-fns";
 
 const STATUSES = ["", "NOT_STARTED", "IN_PROGRESS", "ISSUE_REPORTED", "PARTIAL_COMPLETE", "COMPLETED", "CANCELED"];
@@ -31,7 +32,7 @@ export default function AdminJobs() {
   });
 
   return (
-    <div className="animate-fade-in p-4 pb-24 space-y-4">
+    <div className="animate-fade-in p-6 space-y-4">
       <h1 className="text-h2">Jobs</h1>
 
       {/* Filters */}
@@ -57,8 +58,16 @@ export default function AdminJobs() {
           </SelectContent>
         </Select>
 
-        <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-36" placeholder="From" />
-        <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-36" placeholder="To" />
+        {(dateFrom || dateTo) ? (
+          <>
+            <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-36" />
+            <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-36" />
+          </>
+        ) : (
+          <Button variant="outline" size="sm" className="h-10 text-muted-foreground" onClick={() => setDateFrom(new Date().toISOString().slice(0, 10))}>
+            <Clock className="h-3.5 w-3.5 mr-1.5" />Date range
+          </Button>
+        )}
       </div>
 
       {loading ? (

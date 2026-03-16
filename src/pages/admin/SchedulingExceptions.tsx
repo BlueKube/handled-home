@@ -82,7 +82,7 @@ export default function SchedulingExceptions() {
   const isLoading = loadingUnbooked || loadingInfeasible || loadingOverdue;
 
   return (
-    <div className="p-4 md:p-6 space-y-6 animate-fade-in">
+    <div className="p-6 space-y-6 animate-fade-in">
       <div>
         <h1 className="text-h2">Scheduling Exceptions</h1>
         <p className="text-sm text-muted-foreground">Unbooked demand, window conflicts, and overdue visits (next 7 days)</p>

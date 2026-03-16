@@ -17,7 +17,7 @@ export default function AdminZones() {
   };
 
   return (
-    <div className="animate-fade-in space-y-4 pb-24">
+    <div className="animate-fade-in p-6 space-y-4">
       <div>
         <h1 className="text-h2">Regions & Zones</h1>
         <p className="text-caption">Territory governance, coverage, and capacity.</p>

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Clock, XCircle, Settings, AlertTriangle, ShieldAlert } from "lucide-react";
+import { ChevronLeft, Clock, XCircle, Settings, AlertTriangle, ShieldAlert } from "lucide-react";
 import { format } from "date-fns";
 
 export default function OpsServiceDays() {
@@ -89,10 +89,10 @@ export default function OpsServiceDays() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="animate-fade-in p-6 space-y-6">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => nav("/admin/ops")}>
-          <ArrowLeft className="h-4 w-4" />
+        <Button variant="ghost" size="icon" onClick={() => nav("/admin/ops")} aria-label="Back to Ops Cockpit">
+          <ChevronLeft className="h-5 w-5" />
         </Button>
         <div>
           <h1 className="text-h2">Service Day Health</h1>

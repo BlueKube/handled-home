@@ -14,10 +14,10 @@ export default function ProviderSupportHome() {
   const activeTickets = tickets.filter((t) => !["resolved", "closed"].includes(t.status) && t.status !== "awaiting_provider");
 
   return (
-    <div className="p-6 max-w-2xl space-y-6 animate-fade-in">
-      <div className="space-y-1">
+    <div className="animate-fade-in p-4 pb-24 space-y-5">
+      <div>
         <h1 className="text-h2">Support</h1>
-        <p className="text-caption">Claims and disputes involving your jobs</p>
+        <p className="text-caption mt-0.5">Claims and disputes involving your jobs</p>
       </div>
 
       {/* Needs your input */}

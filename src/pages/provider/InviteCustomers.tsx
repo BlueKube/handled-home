@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Copy, Link, ArrowLeft, Info, Users, DollarSign, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Copy, Link, ChevronLeft, Info, Users, DollarSign, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,10 +14,7 @@ import { useByocAttributions } from "@/hooks/useByocAttributions";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { differenceInCalendarDays, differenceInWeeks, format } from "date-fns";
-
-function formatCents(cents: number) {
-  return `$${(cents / 100).toFixed(2)}`;
-}
+import { formatCents } from "@/utils/format";
 
 function statusBadgeVariant(s: string): "default" | "secondary" | "outline" | "destructive" {
   switch (s) {
@@ -192,17 +189,17 @@ export default function InviteCustomers() {
     });
   };
 
-  if (codes.isLoading) return <div className="p-4"><Skeleton className="h-48" /></div>;
+  if (codes.isLoading) return <div className="animate-fade-in p-4 pb-24"><Skeleton className="h-48" /></div>;
 
   return (
-    <div className="px-4 py-6 space-y-6 animate-fade-in max-w-2xl">
+    <div className="animate-fade-in p-4 pb-24 space-y-5">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-5 w-5" />
+        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Go back">
+          <ChevronLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-xl font-bold">Founding Partner Program</h1>
-          <p className="text-xs text-muted-foreground">Bring your customers, earn $10/week per active customer for 90 days</p>
+          <h1 className="text-h2">Founding Partner Program</h1>
+          <p className="text-caption mt-0.5">Earn $10/week per active customer for 90 days</p>
         </div>
       </div>
 

@@ -83,7 +83,7 @@ export default function TestToggles() {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-2xl mx-auto">
+    <div className="animate-fade-in p-6 space-y-6 max-w-2xl mx-auto">
       <Alert className="border-warning bg-warning/10">
         <AlertTriangle className="h-4 w-4 text-warning" />
         <AlertDescription className="text-foreground font-medium">
@@ -91,7 +91,7 @@ export default function TestToggles() {
         </AlertDescription>
       </Alert>
 
-      <h1 className="text-2xl font-bold">Test Toggles</h1>
+      <h1 className="text-h2">Test Toggles</h1>
 
       {/* Zone / Category selector */}
       <div className="grid grid-cols-2 gap-4">

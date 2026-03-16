@@ -34,7 +34,7 @@ export default function AdminSKUs() {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-4 animate-fade-in">
+    <div className="p-6 space-y-4 animate-fade-in">
       <div className="flex items-center justify-between">
         <h1 className="text-h2">SKU Catalog</h1>
         <Button size="sm" className="gap-1.5" onClick={() => { setEditingSku(null); setFormOpen(true); }}>

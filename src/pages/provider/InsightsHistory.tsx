@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft, TrendingUp } from "lucide-react";
 
 function weekStart(weeksAgo: number) {
   const d = new Date();
@@ -20,7 +20,7 @@ function formatWeek(d: Date) {
 
 export default function ProviderInsightsHistory() {
   const { org } = useProviderOrg();
-  const nav = useNavigate();
+  const navigate = useNavigate();
 
   const { data, isLoading } = useQuery({
     queryKey: ["provider-insights-history", org?.id],
@@ -44,7 +44,6 @@ export default function ProviderInsightsHistory() {
       const jobs = jobsRes.data ?? [];
       const issues = issuesRes.data ?? [];
 
-      // Build weekly buckets (last 8 weeks)
       const weeks: { label: string; completed: number; issues: number; issueRate: number }[] = [];
       for (let i = 7; i >= 0; i--) {
         const start = weekStart(i);
@@ -72,10 +71,11 @@ export default function ProviderInsightsHistory() {
   });
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="animate-fade-in p-4 pb-24 space-y-5">
+      {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => nav("/provider/insights")}>
-          <ArrowLeft className="h-4 w-4" />
+        <Button variant="ghost" size="icon" onClick={() => navigate("/provider/insights")} aria-label="Back to insights">
+          <ChevronLeft className="h-5 w-5" />
         </Button>
         <div>
           <h1 className="text-h2">Weekly Trends</h1>
@@ -85,25 +85,31 @@ export default function ProviderInsightsHistory() {
 
       {isLoading ? (
         <div className="space-y-3">
-          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 rounded-xl" />)}
+          {[1, 2].map((i) => <Skeleton key={i} className="h-48 rounded-2xl" />)}
         </div>
       ) : !data?.weeks.length ? (
-        <p className="text-muted-foreground text-center py-12">No data available yet.</p>
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <TrendingUp className="h-10 w-10 text-muted-foreground/40 mb-3" />
+          <p className="text-sm font-semibold text-foreground">No data available yet</p>
+          <p className="text-xs text-muted-foreground mt-1 max-w-[240px]">
+            Complete jobs to start seeing weekly performance trends.
+          </p>
+        </div>
       ) : (
-        <div className="space-y-3">
-          {/* Simple bar chart representation */}
-          <Card className="p-4">
-            <h3 className="font-semibold mb-4">Completed Jobs per Week</h3>
-            <div className="flex items-end gap-2 h-32">
+        <div className="space-y-4">
+          {/* Completed jobs chart */}
+          <Card className="p-4 space-y-3">
+            <h3 className="text-sm font-semibold">Completed Jobs per Week</h3>
+            <div className="flex items-end gap-1.5 h-28">
               {data.weeks.map((w, i) => {
                 const max = Math.max(...data.weeks.map((w) => w.completed), 1);
-                const height = (w.completed / max) * 100;
+                const height = Math.max((w.completed / max) * 100, 4);
                 return (
                   <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                    <span className="text-xs font-medium">{w.completed}</span>
-                    <div className="w-full relative" style={{ height: "100px" }}>
+                    <span className="text-[10px] font-medium tabular-nums">{w.completed}</span>
+                    <div className="w-full relative" style={{ height: "80px" }}>
                       <div
-                        className="absolute bottom-0 left-0 right-0 bg-primary rounded-t-sm"
+                        className="absolute bottom-0 left-0 right-0 bg-accent/80 rounded-t-sm transition-all duration-300"
                         style={{ height: `${height}%` }}
                       />
                     </div>
@@ -114,19 +120,20 @@ export default function ProviderInsightsHistory() {
             </div>
           </Card>
 
-          <Card className="p-4">
-            <h3 className="font-semibold mb-4">Issue Rate per Week</h3>
-            <div className="flex items-end gap-2 h-32">
+          {/* Issue rate chart */}
+          <Card className="p-4 space-y-3">
+            <h3 className="text-sm font-semibold">Issue Rate per Week</h3>
+            <div className="flex items-end gap-1.5 h-28">
               {data.weeks.map((w, i) => {
                 const max = Math.max(...data.weeks.map((w) => w.issueRate), 1);
-                const height = (w.issueRate / max) * 100;
+                const height = Math.max((w.issueRate / max) * 100, 4);
                 return (
                   <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                    <span className="text-xs font-medium">{w.issueRate}%</span>
-                    <div className="w-full relative" style={{ height: "100px" }}>
+                    <span className="text-[10px] font-medium tabular-nums">{w.issueRate}%</span>
+                    <div className="w-full relative" style={{ height: "80px" }}>
                       <div
-                        className={`absolute bottom-0 left-0 right-0 rounded-t-sm ${
-                          w.issueRate > 10 ? "bg-destructive" : "bg-muted-foreground/30"
+                        className={`absolute bottom-0 left-0 right-0 rounded-t-sm transition-all duration-300 ${
+                          w.issueRate > 10 ? "bg-destructive/80" : "bg-muted-foreground/30"
                         }`}
                         style={{ height: `${height}%` }}
                       />

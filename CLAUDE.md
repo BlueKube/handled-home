@@ -8,7 +8,7 @@ Three user roles: **Customer**, **Provider**, **Admin**.
 
 ## Your Current Mission
 
-You are continuing a UI/UX overhaul of the Handled Home app. The customer redesign (12 epics) and Provider Batches 1-2 are complete. Your job is to continue through **all remaining provider pages** applying the same quality bar and workflow discipline, then hand off for admin pages.
+You are continuing a UI/UX overhaul of the Handled Home app. The customer redesign (12 epics), all provider pages (11 batches, 34 pages), and all admin pages (5 batches, ~54 pages) are complete. The next phase is **documentation sync** and any remaining cleanup.
 
 ## Workflow (Non-Negotiable)
 
@@ -18,10 +18,11 @@ Follow this exact sequence for every batch. Do not skip steps.
 2. **Write a spec before coding** — Every batch needs a markdown spec with: title, why it matters, scope, non-goals, exact file targets, acceptance criteria, regression risks, visual validation checklist.
 3. **Keep batches small** — 1 theme across 1-3 screens. Don't mix unrelated fixes.
 4. **Implement only the spec** — If you find something out of scope, defer it.
-5. **Run independent review** — After implementing, do a thorough self-review focusing on: correctness, spec adherence, UX consistency, accessibility, dark mode, CTA/route behavior.
-6. **Fix all MUST-FIX findings** — Do not merge until review is clear.
+5. **Run independent subagent code review** — Launch a fresh subagent with NO implementation context. Give it the git diff, acceptance criteria, and design system rules. The subagent categorizes findings as MUST-FIX / SHOULD-FIX / NICE-TO-HAVE. See `docs/skills/redesign-workflow-guide.md` step 5 for details.
+6. **Fix all MUST-FIX findings** — Do not merge until review is clear. Re-run review if substantial changes were needed.
 7. **Validate build** — Run `npx tsc --noEmit` and `npm run build` before considering a batch done.
 8. **Reconcile** — After each batch, update which pages are done and what's next.
+9. **Sync documentation after each phase** — After completing a phase (group of related batches), review all key docs for stale info: page names, navigation specs, design patterns, product strategy sections. See `docs/skills/redesign-workflow-guide.md` step 9.
 
 ## Workflow & UX Reference Docs
 
@@ -59,70 +60,64 @@ All 12 customer epics complete. 36 customer pages polished.
 - New `RouteProgressCard.tsx` on Dashboard
 - Review fixes: tap targets, aria-live, progress bar min-width, earnings column fix, loading skeleton
 
-## What Remains — Provider Pages
+## Provider Redesign (Complete)
 
-34 provider pages total. ~6 have been polished (Dashboard, Earnings, JobDetail, JobComplete, Jobs list partially). The remaining ~28 pages need the same UX pass:
+All 34 provider pages and key provider components have been polished across 11 batches:
 
-### High Priority (Core daily workflow)
-- `Jobs.tsx` — Job list view (partially done via Batch 2 additions)
-- `JobChecklist.tsx` — Checklist completion during a job
-- `JobPhotos.tsx` — Photo upload during a job
-- `History.tsx` — Completed job history
-- `Payouts.tsx` — Payout overview
-- `PayoutHistory.tsx` — Payout detail/history
+| Batch | Scope | Status |
+|-------|-------|--------|
+| 1 | Dashboard, Earnings | Complete (PR #30) |
+| 2 | JobDetail, JobComplete, Jobs | Complete (PR #31) |
+| 3 | JobChecklist, JobPhotos | Complete |
+| 4 | Payouts, PayoutHistory, History | Complete |
+| 5 | Performance, QualityScore, Insights, InsightsHistory | Complete |
+| 6 | Availability, Coverage, WorkSetup | Complete |
+| 7 | Organization, Settings, SKUs | Complete |
+| 8 | Support, SupportTicketDetail, Referrals | Complete |
+| 9 | ByocCenter, ByocCreateLink, InviteCustomers | Complete |
+| 10 | Onboarding (7 pages), Apply, Performance | Complete |
+| 11 | Component Cleanup (VisitJobCard, NotificationBanners, WeekDueQueue) | Complete |
 
-### Medium Priority (Regular provider use)
-- `Availability.tsx` — Provider availability management
-- `Coverage.tsx` — Coverage area settings
-- `Performance.tsx` — Performance metrics
-- `QualityScore.tsx` — Quality score view
-- `Insights.tsx` — Business insights
-- `InsightsHistory.tsx` — Insights history
-- `Settings.tsx` — Provider settings
-- `Organization.tsx` — Org management
-- `SKUs.tsx` — Service catalog view
-- `WorkSetup.tsx` — Work setup/preferences
-- `Support.tsx` — Support page
-- `SupportTicketDetail.tsx` — Support ticket detail
-- `Referrals.tsx` — Referral program
+### Consistency standards applied across all pages
+- `animate-fade-in` on main containers
+- `p-4 pb-24` padding (pb-24 for bottom tab bar clearance)
+- `text-h2` for page titles, `text-caption` for subtitles
+- `ChevronLeft` back navigation with aria-labels
+- 44px minimum touch targets
+- Semantic color tokens only (no hardcoded colors)
+- No `max-w-lg` or `max-w-2xl` constraints (mobile-only app)
+- Shared `formatCents` from `@/utils/format`
 
-### Lower Priority (Onboarding & growth)
-- `Onboarding.tsx` — Main onboarding flow
-- `OnboardingAgreement.tsx`
-- `OnboardingCapabilities.tsx`
-- `OnboardingCompliance.tsx`
-- `OnboardingCoverage.tsx`
-- `OnboardingOrg.tsx`
-- `OnboardingReview.tsx`
-- `Apply.tsx` — Provider application
-- `ByocCenter.tsx` — Bring Your Own Customers center
-- `ByocCreateLink.tsx` — BYOC link creation
-- `InviteCustomers.tsx` — Customer invitation
-
-### Provider Components (may need updates alongside pages)
-- `ByocBanner.tsx`, `DayPlanComponents.tsx`, `DynamicComplianceRenderer.tsx`
-- `EarningsProjectionCard.tsx`, `LevelSufficiencyForm.tsx`
-- `MarketHeatBanner.tsx`, `NotificationBanners.tsx`, `OnboardingRecruitingSignals.tsx`
-- `OpportunityBanner.tsx`, `ProviderMapView.tsx`
-- `ProviderReportIssueSheet.tsx`, `ProviderSelfHealingSheet.tsx`
-- `ReportIssueSheet.tsx`, `VisitJobCard.tsx`, `WeekDueQueue.tsx`
-
-### Deferred Items from Batch 2 Review
-- L4: Extract shared `RouteProgressBar` component (duplicated in JobComplete + RouteProgressCard)
+### Deferred Items
+- L4: Extract shared `RouteProgressBar` component (JobComplete + RouteProgressCard — different semantics, low priority)
 - L10: Add focus ring to Proof Required buttons in JobDetail
 - L11: Confirm `replace: true` behavior on breadcrumb navigation
 
-## Suggested Batch Groupings
+## Admin Redesign (Complete)
 
-1. **Job Execution Flow** — JobChecklist, JobPhotos (tight loop with JobDetail)
-2. **Financial Pages** — Payouts, PayoutHistory, Earnings cleanup
-3. **Performance & Insights** — Performance, QualityScore, Insights, InsightsHistory
-4. **Availability & Coverage** — Availability, Coverage, WorkSetup
-5. **Organization & Settings** — Organization, Settings, SKUs
-6. **Support & Referrals** — Support, SupportTicketDetail, Referrals
-7. **BYOC & Invites** — ByocCenter, ByocCreateLink, InviteCustomers
-8. **Onboarding Flow** — All 7 onboarding pages + Apply
-9. **Component Cleanup** — Deferred items, shared component extraction
+All ~54 admin pages polished across 5 batches:
+
+| Batch | Scope | Pages |
+|-------|-------|-------|
+| 1 | Cockpit & Core Ops | OpsCockpit, OpsJobs, OpsServiceDays, OpsSupport, OpsBilling, OpsGrowth, OpsDefinitions, OpsZones, OpsZoneDetail, DispatcherQueues, Jobs |
+| 2 | Execution | JobDetail, Scheduling, PlannerDashboard, SchedulingPolicy, SchedulingExceptions, WindowTemplates, ServiceDays, Exceptions, ExceptionAnalytics, AssignmentDashboard, AssignmentConfig |
+| 3 | People & Markets | Billing, Dashboard, CustomerLedger, ProviderLedger, ProviderDetail, Providers, Feedback |
+| 4 | Catalog, Money & Control | SKUs, Plans, Bundles, Payouts, ControlConfig, Audit, LevelAnalytics, NotificationHealth, CronHealth |
+| 5 | Growth, Support & Governance | ApplicationDetail, Applications, SupportTicketDetail, ControlChangeLog, ControlChangeRequests, ControlPayouts, ControlPricing, Playbooks, Reports, TestToggles, ZoneBuilder, Growth, Incentives, Settings, Subscriptions, Zones |
+
+### Admin consistency standards (differs from provider — desktop sidebar layout)
+- `animate-fade-in` on main containers
+- `p-6` padding (no pb-24 — admin uses sidebar, not bottom tab bar)
+- `text-h2` for page titles
+- `ChevronLeft` back navigation with aria-labels on detail pages
+- Semantic color tokens only
+- `max-w-*` constraints OK for admin (desktop layout)
+- Responsive grids (`lg:grid-cols-*`) OK for admin
+
+### Skipped
+- `OpsExceptions.tsx` — split-panel layout (`flex h-[calc(100vh-3rem)]`), no standard header pattern
+- `Capacity.tsx` — redirect only, no page content
+- `Support.tsx` — re-export of SupportDashboard
 
 ## Tech Stack
 

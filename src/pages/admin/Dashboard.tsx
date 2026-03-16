@@ -63,7 +63,7 @@ export default function AdminDashboard() {
   return (
     <div className="p-6 space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold">Admin Console</h1>
+        <h1 className="text-h2">Admin Console</h1>
         <p className="text-sm text-muted-foreground">Operations overview</p>
       </div>
 

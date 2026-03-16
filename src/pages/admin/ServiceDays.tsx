@@ -64,7 +64,7 @@ export default function AdminServiceDays() {
   const [selectedZone, setSelectedZone] = useState<{ id: string; name: string } | null>(null);
 
   return (
-    <div className="animate-fade-in space-y-4 pb-24">
+    <div className="animate-fade-in p-6 space-y-4">
       <div>
         <h1 className="text-h2">Service Days</h1>
         <p className="text-caption">Zone utilization, assignments, and overrides.</p>
