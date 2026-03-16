@@ -11,12 +11,64 @@
 --   Via CLI: supabase db execute --file supabase/seed-rich-metro.sql
 -- ============================================================
 
+-- Pre-seed: create auth.users for test accounts and provider org owners
+-- (Each org needs a unique accountable_owner_user_id)
+INSERT INTO auth.users (id, email, raw_user_meta_data, role, aud, email_confirmed_at) VALUES
+  -- Core test users
+  ('7cfa1714-bf93-441f-99c0-4bc3e24a284c', 'customer@test.com', '{"full_name":"Test Customer"}'::jsonb, 'authenticated', 'authenticated', now()),
+  ('f4000000-0000-0000-0000-000000000001', 'provider@test.com', '{"full_name":"Test Provider"}'::jsonb, 'authenticated', 'authenticated', now()),
+  ('f4000000-0000-0000-0000-000000000009', 'admin@test.com',    '{"full_name":"Test Admin"}'::jsonb,    'authenticated', 'authenticated', now()),
+  -- Provider org owners
+  ('f4000000-0000-0000-0000-000000000002', 'provider-org2@seed.local', '{"full_name":"Maria G."}'::jsonb,   'authenticated', 'authenticated', now()),
+  ('f4000000-0000-0000-0000-000000000003', 'provider-org3@seed.local', '{"full_name":"James W."}'::jsonb,   'authenticated', 'authenticated', now()),
+  ('f4000000-0000-0000-0000-000000000004', 'provider-org4@seed.local', '{"full_name":"David K."}'::jsonb,   'authenticated', 'authenticated', now()),
+  ('f4000000-0000-0000-0000-000000000005', 'provider-org5@seed.local', '{"full_name":"Sarah L."}'::jsonb,   'authenticated', 'authenticated', now()),
+  ('f4000000-0000-0000-0000-000000000006', 'provider-org6@seed.local', '{"full_name":"Rachel B."}'::jsonb,  'authenticated', 'authenticated', now()),
+  ('f4000000-0000-0000-0000-000000000007', 'provider-org7@seed.local', '{"full_name":"Kevin P."}'::jsonb,   'authenticated', 'authenticated', now()),
+  ('f4000000-0000-0000-0000-000000000008', 'provider-org8@seed.local', '{"full_name":"Amanda S."}'::jsonb,  'authenticated', 'authenticated', now())
+ON CONFLICT (id) DO NOTHING;
+
+-- Pre-seed: create profiles for test users
+INSERT INTO profiles (id, user_id, full_name) VALUES
+  ('a0000000-0000-0000-0000-000000000001', '7cfa1714-bf93-441f-99c0-4bc3e24a284c', 'Test Customer'),
+  ('a0000000-0000-0000-0000-000000000002', 'f4000000-0000-0000-0000-000000000001', 'Test Provider'),
+  ('a0000000-0000-0000-0000-000000000003', 'f4000000-0000-0000-0000-000000000009', 'Test Admin')
+ON CONFLICT (id) DO NOTHING;
+
+-- Pre-seed: assign roles to test users
+INSERT INTO user_roles (id, user_id, role) VALUES
+  ('a1000000-0000-0000-0000-000000000001', '7cfa1714-bf93-441f-99c0-4bc3e24a284c', 'customer'),
+  ('a1000000-0000-0000-0000-000000000002', 'f4000000-0000-0000-0000-000000000001', 'provider'),
+  ('a1000000-0000-0000-0000-000000000003', 'f4000000-0000-0000-0000-000000000009', 'admin')
+ON CONFLICT (id) DO NOTHING;
+
+-- Pre-seed: create missing service SKUs
+INSERT INTO service_skus (id, name, description, category, duration_minutes, base_price_cents, status, weather_sensitive) VALUES
+  ('c1000000-0000-0000-0000-000000000001', 'Standard Mow',     'Full lawn mowing service',          'mowing',  30, 4900, 'active', true),
+  ('c1000000-0000-0000-0000-000000000002', 'Edge & Trim',      'Edge trimming along all borders',   'mowing',  15, 1500, 'active', true),
+  ('c1000000-0000-0000-0000-000000000003', 'Leaf Cleanup',     'Full leaf removal and disposal',    'mowing',  45, 3500, 'active', true),
+  ('c1000000-0000-0000-0000-000000000004', 'Hedge Trimming',   'Shape and trim all hedges',         'mowing',  30, 2500, 'active', false),
+  ('c1000000-0000-0000-0000-000000000005', 'Weed Treatment',   'Spot weed treatment for beds',      'mowing',  20, 2000, 'active', true),
+  ('c1000000-0000-0000-0000-000000000006', 'Fertilization',    'Lawn fertilizer application',       'mowing',  20, 3000, 'active', true),
+  ('c1000000-0000-0000-0000-000000000007', 'Mulch Application','Spread mulch in garden beds',       'mowing',  45, 4500, 'active', true),
+  ('c1000000-0000-0000-0000-000000000008', 'Spring Prep',      'Full spring yard preparation',      'mowing',  60, 7500, 'active', true)
+ON CONFLICT (id) DO NOTHING;
+
 DO $$
 DECLARE
   -- Resolve test user IDs from auth.users
   v_customer_id uuid := '7cfa1714-bf93-441f-99c0-4bc3e24a284c';
   v_provider_id uuid;
   v_admin_id    uuid;
+
+  -- Provider org owner user IDs (unique per org for accountable_owner_user_id constraint)
+  v_owner2 uuid := 'f4000000-0000-0000-0000-000000000002';
+  v_owner3 uuid := 'f4000000-0000-0000-0000-000000000003';
+  v_owner4 uuid := 'f4000000-0000-0000-0000-000000000004';
+  v_owner5 uuid := 'f4000000-0000-0000-0000-000000000005';
+  v_owner6 uuid := 'f4000000-0000-0000-0000-000000000006';
+  v_owner7 uuid := 'f4000000-0000-0000-0000-000000000007';
+  v_owner8 uuid := 'f4000000-0000-0000-0000-000000000008';
 
   -- ── Known fixture IDs ──
   v_zone1 uuid := 'b1000000-0000-0000-0000-000000000001'; -- Austin Central (existing)
@@ -104,9 +156,9 @@ BEGIN
     ('d3000000-0000-0000-0000-000000000006', v_zone3, 'windows', 'OPEN', '{}'::jsonb),
     ('d3000000-0000-0000-0000-000000000007', v_zone3, 'pest',    'OPEN', '{}'::jsonb),
     ('d3000000-0000-0000-0000-000000000008', v_zone4, 'mowing',  'OPEN', '{}'::jsonb),
-    ('d3000000-0000-0000-0000-000000000009', v_zone4, 'windows', 'WAITLIST', '{}'::jsonb),
+    ('d3000000-0000-0000-0000-000000000009', v_zone4, 'windows', 'WAITLIST_ONLY', '{}'::jsonb),
     ('d3000000-0000-0000-0000-00000000000a', v_zone5, 'mowing',  'OPEN', '{}'::jsonb),
-    ('d3000000-0000-0000-0000-00000000000b', v_zone5, 'windows', 'WAITLIST', '{}'::jsonb)
+    ('d3000000-0000-0000-0000-00000000000b', v_zone5, 'windows', 'WAITLIST_ONLY', '{}'::jsonb)
   ON CONFLICT (id) DO NOTHING;
 
   -- A4. Appointment window templates
@@ -135,9 +187,9 @@ BEGIN
 
   -- B2. Plan entitlement versions
   INSERT INTO plan_entitlement_versions (id, plan_id, version, status, model_type, included_service_weeks_per_billing_cycle, included_minutes, extra_allowed) VALUES
-    (v_ent1, v_plan1, 1, 'active', 'minutes', 4,  60,  false),
-    (v_ent2, v_plan2, 1, 'active', 'minutes', 4,  120, true),
-    (v_ent3, v_plan3, 1, 'active', 'minutes', 4,  240, true)
+    (v_ent1, v_plan1, 1, 'active', 'minutes_per_cycle', 4,  60,  false),
+    (v_ent2, v_plan2, 1, 'active', 'minutes_per_cycle', 4,  120, true),
+    (v_ent3, v_plan3, 1, 'active', 'minutes_per_cycle', 4,  240, true)
   ON CONFLICT (id) DO NOTHING;
 
   -- Link plans to current entitlement version
@@ -162,34 +214,24 @@ BEGIN
 
   -- C1. Provider orgs (org 1 exists)
   INSERT INTO provider_orgs (id, name, status, contact_phone, home_base_zip, created_by_user_id, accountable_owner_user_id, needs_review) VALUES
-    (v_org2, 'Green Thumb Landscaping',    'ACTIVE',    '512-555-0201', '78745', v_customer_id, v_customer_id, false),
-    (v_org3, 'Lone Star Lawn Care',        'ACTIVE',    '512-555-0301', '78721', v_customer_id, v_customer_id, false),
-    (v_org4, 'Capital City Maintenance',   'ACTIVE',    '512-555-0401', '78664', v_customer_id, v_customer_id, false),
-    (v_org5, 'Hill Country Services',      'ACTIVE',    '512-555-0501', '78613', v_customer_id, v_customer_id, false),
-    (v_org6, 'ATX Clean Team',             'ACTIVE',    '512-555-0601', '78703', v_customer_id, v_customer_id, false),
-    (v_org7, 'Sunrise Property Care',      'PROBATION', '512-555-0701', '78748', v_customer_id, v_customer_id, true),
-    (v_org8, 'Premier Pest Solutions',     'PENDING',   '512-555-0801', '78701', v_customer_id, v_customer_id, true)
+    (v_org2, 'Green Thumb Landscaping',    'ACTIVE',    '512-555-0201', '78745', v_owner2, v_owner2, false),
+    (v_org3, 'Lone Star Lawn Care',        'ACTIVE',    '512-555-0301', '78721', v_owner3, v_owner3, false),
+    (v_org4, 'Capital City Maintenance',   'ACTIVE',    '512-555-0401', '78664', v_owner4, v_owner4, false),
+    (v_org5, 'Hill Country Services',      'ACTIVE',    '512-555-0501', '78613', v_owner5, v_owner5, false),
+    (v_org6, 'ATX Clean Team',             'ACTIVE',    '512-555-0601', '78703', v_owner6, v_owner6, false),
+    (v_org7, 'Sunrise Property Care',      'PROBATION', '512-555-0701', '78748', v_owner7, v_owner7, true),
+    (v_org8, 'Premier Pest Solutions',     'PENDING',   '512-555-0801', '78701', v_owner8, v_owner8, true)
   ON CONFLICT (id) DO NOTHING;
 
   -- C2. Provider members
   INSERT INTO provider_members (id, provider_org_id, user_id, role_in_org, display_name, status) VALUES
-    -- Org 2: owner + 1 operator
-    ('f3000000-0000-0000-0000-000000000001', v_org2, v_customer_id, 'OWNER',    'Maria G.',   'ACTIVE'),
-    ('f3000000-0000-0000-0000-000000000002', v_org2, v_customer_id, 'OPERATOR', 'Carlos R.',  'ACTIVE'),
-    -- Org 3: owner + 1 operator
-    ('f3000000-0000-0000-0000-000000000003', v_org3, v_customer_id, 'OWNER',    'James W.',   'ACTIVE'),
-    ('f3000000-0000-0000-0000-000000000004', v_org3, v_customer_id, 'OPERATOR', 'Tyler M.',   'ACTIVE'),
-    -- Org 4: owner only
-    ('f3000000-0000-0000-0000-000000000005', v_org4, v_customer_id, 'OWNER',    'David K.',   'ACTIVE'),
-    -- Org 5: owner + 1 operator
-    ('f3000000-0000-0000-0000-000000000006', v_org5, v_customer_id, 'OWNER',    'Sarah L.',   'ACTIVE'),
-    ('f3000000-0000-0000-0000-000000000007', v_org5, v_customer_id, 'OPERATOR', 'Mike T.',    'ACTIVE'),
-    -- Org 6: owner only
-    ('f3000000-0000-0000-0000-000000000008', v_org6, v_customer_id, 'OWNER',    'Rachel B.',  'ACTIVE'),
-    -- Org 7: owner only (probation)
-    ('f3000000-0000-0000-0000-000000000009', v_org7, v_customer_id, 'OWNER',    'Kevin P.',   'ACTIVE'),
-    -- Org 8: owner only (pending)
-    ('f3000000-0000-0000-0000-00000000000a', v_org8, v_customer_id, 'OWNER',    'Amanda S.',  'ACTIVE')
+    ('f3000000-0000-0000-0000-000000000001', v_org2, v_owner2, 'OWNER',    'Maria G.',   'ACTIVE'),
+    ('f3000000-0000-0000-0000-000000000003', v_org3, v_owner3, 'OWNER',    'James W.',   'ACTIVE'),
+    ('f3000000-0000-0000-0000-000000000005', v_org4, v_owner4, 'OWNER',    'David K.',   'ACTIVE'),
+    ('f3000000-0000-0000-0000-000000000006', v_org5, v_owner5, 'OWNER',    'Sarah L.',   'ACTIVE'),
+    ('f3000000-0000-0000-0000-000000000008', v_org6, v_owner6, 'OWNER',    'Rachel B.',  'ACTIVE'),
+    ('f3000000-0000-0000-0000-000000000009', v_org7, v_owner7, 'OWNER',    'Kevin P.',   'ACTIVE'),
+    ('f3000000-0000-0000-0000-00000000000a', v_org8, v_owner8, 'OWNER',    'Amanda S.',  'ACTIVE')
   ON CONFLICT (id) DO NOTHING;
 
   -- C3. Provider coverage (zone assignments)
@@ -211,7 +253,7 @@ BEGIN
     -- Org 7: South (primary, probation)
     ('d3000000-0000-0000-0000-000000000038', v_org7, v_zone2, 'PRIMARY',   'APPROVED'),
     -- Org 8: Central (pending)
-    ('d3000000-0000-0000-0000-000000000039', v_org8, v_zone1, 'PRIMARY',   'PENDING')
+    ('d3000000-0000-0000-0000-000000000039', v_org8, v_zone1, 'PRIMARY',   'REQUESTED')
   ON CONFLICT (id) DO NOTHING;
 
   -- C4. Provider capabilities
@@ -258,11 +300,11 @@ BEGIN
     -- Central zone
     ('d3000000-0000-0000-0000-000000000060', v_zone1, 'mowing',     v_org1, 'PRIMARY',   1, 'ACTIVE', now() - interval '80 days', 92),
     ('d3000000-0000-0000-0000-000000000061', v_zone1, 'windows',    v_org6, 'PRIMARY',   1, 'ACTIVE', now() - interval '60 days', 88),
-    ('d3000000-0000-0000-0000-000000000062', v_zone1, 'mowing',     v_org6, 'SECONDARY', 2, 'ACTIVE', now() - interval '45 days', 85),
+    ('d3000000-0000-0000-0000-000000000062', v_zone1, 'mowing',     v_org6, 'BACKUP', 2, 'ACTIVE', now() - interval '45 days', 85),
     -- South zone
     ('d3000000-0000-0000-0000-000000000063', v_zone2, 'mowing',     v_org2, 'PRIMARY',   1, 'ACTIVE', now() - interval '70 days', 90),
     ('d3000000-0000-0000-0000-000000000064', v_zone2, 'pest',       v_org2, 'PRIMARY',   1, 'ACTIVE', now() - interval '70 days', 87),
-    ('d3000000-0000-0000-0000-000000000065', v_zone2, 'mowing',     v_org7, 'SECONDARY', 2, 'ACTIVE', now() - interval '20 days', 65),
+    ('d3000000-0000-0000-0000-000000000065', v_zone2, 'mowing',     v_org7, 'BACKUP', 2, 'ACTIVE', now() - interval '20 days', 65),
     -- East zone
     ('d3000000-0000-0000-0000-000000000066', v_zone3, 'mowing',     v_org3, 'PRIMARY',   1, 'ACTIVE', now() - interval '55 days', 91),
     ('d3000000-0000-0000-0000-000000000067', v_zone3, 'windows',    v_org3, 'PRIMARY',   1, 'ACTIVE', now() - interval '55 days', 89),
@@ -274,23 +316,25 @@ BEGIN
 
   -- C7. Quality score snapshots
   INSERT INTO provider_quality_score_snapshots (id, provider_org_id, score, band, score_window_days, computed_at, components) VALUES
-    ('d3000000-0000-0000-0000-000000000070', v_org1, 92, 'excellent',  30, now() - interval '1 day', '{"on_time": 95, "quality": 90, "communication": 91}'::jsonb),
-    ('d3000000-0000-0000-0000-000000000071', v_org2, 88, 'good',      30, now() - interval '1 day', '{"on_time": 90, "quality": 86, "communication": 88}'::jsonb),
-    ('d3000000-0000-0000-0000-000000000072', v_org3, 91, 'excellent',  30, now() - interval '1 day', '{"on_time": 93, "quality": 89, "communication": 91}'::jsonb),
-    ('d3000000-0000-0000-0000-000000000073', v_org4, 85, 'good',      30, now() - interval '1 day', '{"on_time": 87, "quality": 83, "communication": 85}'::jsonb),
-    ('d3000000-0000-0000-0000-000000000074', v_org5, 83, 'good',      30, now() - interval '1 day', '{"on_time": 85, "quality": 80, "communication": 84}'::jsonb),
-    ('d3000000-0000-0000-0000-000000000075', v_org6, 90, 'excellent',  30, now() - interval '1 day', '{"on_time": 92, "quality": 88, "communication": 90}'::jsonb),
-    ('d3000000-0000-0000-0000-000000000076', v_org7, 62, 'probation', 30, now() - interval '1 day', '{"on_time": 60, "quality": 55, "communication": 71}'::jsonb),
-    ('d3000000-0000-0000-0000-000000000077', v_org8, 0,  'pending',   30, now() - interval '1 day', '{"on_time": 0, "quality": 0, "communication": 0}'::jsonb)
+    ('d3000000-0000-0000-0000-000000000070', v_org1, 92, 'GREEN',  30, now() - interval '1 day', '{"on_time": 95, "quality": 90, "communication": 91}'::jsonb),
+    ('d3000000-0000-0000-0000-000000000071', v_org2, 88, 'YELLOW', 30, now() - interval '1 day', '{"on_time": 90, "quality": 86, "communication": 88}'::jsonb),
+    ('d3000000-0000-0000-0000-000000000072', v_org3, 91, 'GREEN',  30, now() - interval '1 day', '{"on_time": 93, "quality": 89, "communication": 91}'::jsonb),
+    ('d3000000-0000-0000-0000-000000000073', v_org4, 85, 'YELLOW', 30, now() - interval '1 day', '{"on_time": 87, "quality": 83, "communication": 85}'::jsonb),
+    ('d3000000-0000-0000-0000-000000000074', v_org5, 83, 'YELLOW', 30, now() - interval '1 day', '{"on_time": 85, "quality": 80, "communication": 84}'::jsonb),
+    ('d3000000-0000-0000-0000-000000000075', v_org6, 90, 'GREEN',  30, now() - interval '1 day', '{"on_time": 92, "quality": 88, "communication": 90}'::jsonb),
+    ('d3000000-0000-0000-0000-000000000076', v_org7, 62, 'ORANGE', 30, now() - interval '1 day', '{"on_time": 60, "quality": 55, "communication": 71}'::jsonb),
+    ('d3000000-0000-0000-0000-000000000077', v_org8, 0,  'RED',    30, now() - interval '1 day', '{"on_time": 0, "quality": 0, "communication": 0}'::jsonb)
   ON CONFLICT (id) DO NOTHING;
 
   -- ════════════════════════════════════════════════════════════
   -- PHASE D: CUSTOMERS (Properties, Subscriptions, Routines)
   -- ════════════════════════════════════════════════════════════
 
-  -- D1. Properties (prop1 exists — 123 Main St; create 24 more across 5 zones)
+  -- D1. Properties (create prop1 + 24 more across 5 zones)
   INSERT INTO properties (id, user_id, street_address, city, state, zip_code, lot_size) VALUES
-    -- Zone 1: Austin Central (prop1 exists, add 4 more)
+    -- Prop1: primary test customer property
+    (v_prop1, v_customer_id, '123 Main St', 'Austin', 'TX', '78701', 'medium'),
+    -- Zone 1: Austin Central (4 more)
     ('d3000000-0000-0000-0000-000000000101', v_customer_id, '1401 Lavaca St',         'Austin', 'TX', '78701', 'medium'),
     ('d3000000-0000-0000-0000-000000000102', v_customer_id, '900 W 5th St',           'Austin', 'TX', '78703', 'large'),
     ('d3000000-0000-0000-0000-000000000103', v_customer_id, '2505 Enfield Rd',        'Austin', 'TX', '78703', 'small'),
@@ -397,17 +441,17 @@ BEGIN
 
   -- D4. Routine versions
   INSERT INTO routine_versions (id, routine_id, version_number, status, effective_date, locked_at) VALUES
-    ('d3000000-0000-0000-0000-000000000401', 'd3000000-0000-0000-0000-000000000301', 1, 'active', (now() - interval '60 days')::date, now() - interval '60 days'),
-    ('d3000000-0000-0000-0000-000000000402', 'd3000000-0000-0000-0000-000000000302', 1, 'active', (now() - interval '45 days')::date, now() - interval '45 days'),
-    ('d3000000-0000-0000-0000-000000000405', 'd3000000-0000-0000-0000-000000000305', 1, 'active', (now() - interval '70 days')::date, now() - interval '70 days'),
-    ('d3000000-0000-0000-0000-000000000406', 'd3000000-0000-0000-0000-000000000306', 1, 'active', (now() - interval '50 days')::date, now() - interval '50 days'),
-    ('d3000000-0000-0000-0000-000000000407', 'd3000000-0000-0000-0000-000000000307', 1, 'active', (now() - interval '55 days')::date, now() - interval '55 days'),
-    ('d3000000-0000-0000-0000-00000000040a', 'd3000000-0000-0000-0000-00000000030a', 1, 'active', (now() - interval '50 days')::date, now() - interval '50 days'),
-    ('d3000000-0000-0000-0000-00000000040b', 'd3000000-0000-0000-0000-00000000030b', 1, 'active', (now() - interval '40 days')::date, now() - interval '40 days'),
-    ('d3000000-0000-0000-0000-00000000040f', 'd3000000-0000-0000-0000-00000000030f', 1, 'active', (now() - interval '35 days')::date, now() - interval '35 days'),
-    ('d3000000-0000-0000-0000-000000000410', 'd3000000-0000-0000-0000-000000000310', 1, 'active', (now() - interval '30 days')::date, now() - interval '30 days'),
-    ('d3000000-0000-0000-0000-000000000414', 'd3000000-0000-0000-0000-000000000314', 1, 'active', (now() - interval '30 days')::date, now() - interval '30 days'),
-    ('d3000000-0000-0000-0000-000000000415', 'd3000000-0000-0000-0000-000000000315', 1, 'active', (now() - interval '25 days')::date, now() - interval '25 days')
+    ('d3000000-0000-0000-0000-000000000401', 'd3000000-0000-0000-0000-000000000301', 1, 'locked', (now() - interval '60 days')::date, now() - interval '60 days'),
+    ('d3000000-0000-0000-0000-000000000402', 'd3000000-0000-0000-0000-000000000302', 1, 'locked', (now() - interval '45 days')::date, now() - interval '45 days'),
+    ('d3000000-0000-0000-0000-000000000405', 'd3000000-0000-0000-0000-000000000305', 1, 'locked', (now() - interval '70 days')::date, now() - interval '70 days'),
+    ('d3000000-0000-0000-0000-000000000406', 'd3000000-0000-0000-0000-000000000306', 1, 'locked', (now() - interval '50 days')::date, now() - interval '50 days'),
+    ('d3000000-0000-0000-0000-000000000407', 'd3000000-0000-0000-0000-000000000307', 1, 'locked', (now() - interval '55 days')::date, now() - interval '55 days'),
+    ('d3000000-0000-0000-0000-00000000040a', 'd3000000-0000-0000-0000-00000000030a', 1, 'locked', (now() - interval '50 days')::date, now() - interval '50 days'),
+    ('d3000000-0000-0000-0000-00000000040b', 'd3000000-0000-0000-0000-00000000030b', 1, 'locked', (now() - interval '40 days')::date, now() - interval '40 days'),
+    ('d3000000-0000-0000-0000-00000000040f', 'd3000000-0000-0000-0000-00000000030f', 1, 'locked', (now() - interval '35 days')::date, now() - interval '35 days'),
+    ('d3000000-0000-0000-0000-000000000410', 'd3000000-0000-0000-0000-000000000310', 1, 'locked', (now() - interval '30 days')::date, now() - interval '30 days'),
+    ('d3000000-0000-0000-0000-000000000414', 'd3000000-0000-0000-0000-000000000314', 1, 'locked', (now() - interval '30 days')::date, now() - interval '30 days'),
+    ('d3000000-0000-0000-0000-000000000415', 'd3000000-0000-0000-0000-000000000315', 1, 'locked', (now() - interval '25 days')::date, now() - interval '25 days')
   ON CONFLICT (id) DO NOTHING;
 
   -- D5. Routine items (varying service mixes)
@@ -647,38 +691,38 @@ BEGIN
     ('d3001000-0000-0000-0000-000000000054', v_customer_id, 'd3000000-0000-0000-0000-000000000107', v_org2, v_zone2, 'IN_PROGRESS', now()::date, now() - interval '15 minutes', NULL, now() - interval '18 minutes', NULL),
     ('d3001000-0000-0000-0000-000000000055', v_customer_id, 'd3000000-0000-0000-0000-00000000010f', v_org4, v_zone4, 'IN_PROGRESS', now()::date, now() - interval '45 minutes', NULL, now() - interval '48 minutes', NULL),
     -- Confirmed (upcoming today)
-    ('d3001000-0000-0000-0000-000000000056', v_customer_id, 'd3000000-0000-0000-0000-000000000106', v_org2, v_zone2, 'CONFIRMED', now()::date, NULL, NULL, NULL, NULL),
-    ('d3001000-0000-0000-0000-000000000057', v_customer_id, 'd3000000-0000-0000-0000-000000000114', v_org5, v_zone5, 'CONFIRMED', now()::date, NULL, NULL, NULL, NULL)
+    ('d3001000-0000-0000-0000-000000000056', v_customer_id, 'd3000000-0000-0000-0000-000000000106', v_org2, v_zone2, 'NOT_STARTED', now()::date, NULL, NULL, NULL, NULL),
+    ('d3001000-0000-0000-0000-000000000057', v_customer_id, 'd3000000-0000-0000-0000-000000000114', v_org5, v_zone5, 'NOT_STARTED', now()::date, NULL, NULL, NULL, NULL)
   ON CONFLICT (id) DO NOTHING;
 
   -- ── E3. UPCOMING JOBS (next 7 days — 20 jobs) ──
   INSERT INTO jobs (id, customer_id, property_id, provider_org_id, zone_id, status, scheduled_date) VALUES
     -- Tomorrow
-    ('d3001000-0000-0000-0000-000000000060', v_customer_id, 'd3000000-0000-0000-0000-000000000102', v_org1, v_zone1, 'CONFIRMED', (now() + interval '1 day')::date),
-    ('d3001000-0000-0000-0000-000000000061', v_customer_id, 'd3000000-0000-0000-0000-00000000010b', v_org3, v_zone3, 'CONFIRMED', (now() + interval '1 day')::date),
-    ('d3001000-0000-0000-0000-000000000062', v_customer_id, 'd3000000-0000-0000-0000-000000000110', v_org4, v_zone4, 'CONFIRMED', (now() + interval '1 day')::date),
+    ('d3001000-0000-0000-0000-000000000060', v_customer_id, 'd3000000-0000-0000-0000-000000000102', v_org1, v_zone1, 'NOT_STARTED', (now() + interval '1 day')::date),
+    ('d3001000-0000-0000-0000-000000000061', v_customer_id, 'd3000000-0000-0000-0000-00000000010b', v_org3, v_zone3, 'NOT_STARTED', (now() + interval '1 day')::date),
+    ('d3001000-0000-0000-0000-000000000062', v_customer_id, 'd3000000-0000-0000-0000-000000000110', v_org4, v_zone4, 'NOT_STARTED', (now() + interval '1 day')::date),
     -- Day +2
-    ('d3001000-0000-0000-0000-000000000063', v_customer_id, v_prop1,                                v_org1, v_zone1, 'CONFIRMED', (now() + interval '2 days')::date),
-    ('d3001000-0000-0000-0000-000000000064', v_customer_id, 'd3000000-0000-0000-0000-000000000105', v_org2, v_zone2, 'CONFIRMED', (now() + interval '2 days')::date),
-    ('d3001000-0000-0000-0000-000000000065', v_customer_id, 'd3000000-0000-0000-0000-000000000115', v_org5, v_zone5, 'CONFIRMED', (now() + interval '2 days')::date),
+    ('d3001000-0000-0000-0000-000000000063', v_customer_id, v_prop1,                                v_org1, v_zone1, 'NOT_STARTED', (now() + interval '2 days')::date),
+    ('d3001000-0000-0000-0000-000000000064', v_customer_id, 'd3000000-0000-0000-0000-000000000105', v_org2, v_zone2, 'NOT_STARTED', (now() + interval '2 days')::date),
+    ('d3001000-0000-0000-0000-000000000065', v_customer_id, 'd3000000-0000-0000-0000-000000000115', v_org5, v_zone5, 'NOT_STARTED', (now() + interval '2 days')::date),
     -- Day +3
-    ('d3001000-0000-0000-0000-000000000066', v_customer_id, 'd3000000-0000-0000-0000-000000000101', v_org1, v_zone1, 'CONFIRMED', (now() + interval '3 days')::date),
-    ('d3001000-0000-0000-0000-000000000067', v_customer_id, 'd3000000-0000-0000-0000-000000000107', v_org2, v_zone2, 'CONFIRMED', (now() + interval '3 days')::date),
-    ('d3001000-0000-0000-0000-000000000068', v_customer_id, 'd3000000-0000-0000-0000-00000000010a', v_org3, v_zone3, 'CONFIRMED', (now() + interval '3 days')::date),
-    ('d3001000-0000-0000-0000-000000000069', v_customer_id, 'd3000000-0000-0000-0000-000000000114', v_org5, v_zone5, 'CONFIRMED', (now() + interval '3 days')::date),
+    ('d3001000-0000-0000-0000-000000000066', v_customer_id, 'd3000000-0000-0000-0000-000000000101', v_org1, v_zone1, 'NOT_STARTED', (now() + interval '3 days')::date),
+    ('d3001000-0000-0000-0000-000000000067', v_customer_id, 'd3000000-0000-0000-0000-000000000107', v_org2, v_zone2, 'NOT_STARTED', (now() + interval '3 days')::date),
+    ('d3001000-0000-0000-0000-000000000068', v_customer_id, 'd3000000-0000-0000-0000-00000000010a', v_org3, v_zone3, 'NOT_STARTED', (now() + interval '3 days')::date),
+    ('d3001000-0000-0000-0000-000000000069', v_customer_id, 'd3000000-0000-0000-0000-000000000114', v_org5, v_zone5, 'NOT_STARTED', (now() + interval '3 days')::date),
     -- Day +4
-    ('d3001000-0000-0000-0000-00000000006a', v_customer_id, 'd3000000-0000-0000-0000-000000000106', v_org2, v_zone2, 'CONFIRMED', (now() + interval '4 days')::date),
-    ('d3001000-0000-0000-0000-00000000006b', v_customer_id, 'd3000000-0000-0000-0000-00000000010f', v_org4, v_zone4, 'CONFIRMED', (now() + interval '4 days')::date),
+    ('d3001000-0000-0000-0000-00000000006a', v_customer_id, 'd3000000-0000-0000-0000-000000000106', v_org2, v_zone2, 'NOT_STARTED', (now() + interval '4 days')::date),
+    ('d3001000-0000-0000-0000-00000000006b', v_customer_id, 'd3000000-0000-0000-0000-00000000010f', v_org4, v_zone4, 'NOT_STARTED', (now() + interval '4 days')::date),
     -- Day +5
-    ('d3001000-0000-0000-0000-00000000006c', v_customer_id, 'd3000000-0000-0000-0000-000000000102', v_org6, v_zone1, 'CONFIRMED', (now() + interval '5 days')::date),
-    ('d3001000-0000-0000-0000-00000000006d', v_customer_id, 'd3000000-0000-0000-0000-000000000105', v_org2, v_zone2, 'CONFIRMED', (now() + interval '5 days')::date),
-    ('d3001000-0000-0000-0000-00000000006e', v_customer_id, 'd3000000-0000-0000-0000-00000000010a', v_org3, v_zone3, 'CONFIRMED', (now() + interval '5 days')::date),
-    ('d3001000-0000-0000-0000-00000000006f', v_customer_id, 'd3000000-0000-0000-0000-000000000110', v_org4, v_zone4, 'CONFIRMED', (now() + interval '5 days')::date),
+    ('d3001000-0000-0000-0000-00000000006c', v_customer_id, 'd3000000-0000-0000-0000-000000000102', v_org6, v_zone1, 'NOT_STARTED', (now() + interval '5 days')::date),
+    ('d3001000-0000-0000-0000-00000000006d', v_customer_id, 'd3000000-0000-0000-0000-000000000105', v_org2, v_zone2, 'NOT_STARTED', (now() + interval '5 days')::date),
+    ('d3001000-0000-0000-0000-00000000006e', v_customer_id, 'd3000000-0000-0000-0000-00000000010a', v_org3, v_zone3, 'NOT_STARTED', (now() + interval '5 days')::date),
+    ('d3001000-0000-0000-0000-00000000006f', v_customer_id, 'd3000000-0000-0000-0000-000000000110', v_org4, v_zone4, 'NOT_STARTED', (now() + interval '5 days')::date),
     -- Day +6
-    ('d3001000-0000-0000-0000-000000000070', v_customer_id, v_prop1,                                v_org1, v_zone1, 'CONFIRMED', (now() + interval '6 days')::date),
-    ('d3001000-0000-0000-0000-000000000071', v_customer_id, 'd3000000-0000-0000-0000-000000000107', v_org2, v_zone2, 'CONFIRMED', (now() + interval '6 days')::date),
-    ('d3001000-0000-0000-0000-000000000072', v_customer_id, 'd3000000-0000-0000-0000-000000000115', v_org5, v_zone5, 'CONFIRMED', (now() + interval '6 days')::date),
-    ('d3001000-0000-0000-0000-000000000073', v_customer_id, 'd3000000-0000-0000-0000-00000000010b', v_org3, v_zone3, 'CONFIRMED', (now() + interval '6 days')::date)
+    ('d3001000-0000-0000-0000-000000000070', v_customer_id, v_prop1,                                v_org1, v_zone1, 'NOT_STARTED', (now() + interval '6 days')::date),
+    ('d3001000-0000-0000-0000-000000000071', v_customer_id, 'd3000000-0000-0000-0000-000000000107', v_org2, v_zone2, 'NOT_STARTED', (now() + interval '6 days')::date),
+    ('d3001000-0000-0000-0000-000000000072', v_customer_id, 'd3000000-0000-0000-0000-000000000115', v_org5, v_zone5, 'NOT_STARTED', (now() + interval '6 days')::date),
+    ('d3001000-0000-0000-0000-000000000073', v_customer_id, 'd3000000-0000-0000-0000-00000000010b', v_org3, v_zone3, 'NOT_STARTED', (now() + interval '6 days')::date)
   ON CONFLICT (id) DO NOTHING;
 
   -- ── E4. JOB SKUs (1-2 services per job — apply to a subset of jobs) ──
@@ -730,19 +774,19 @@ BEGIN
   INSERT INTO job_checklist_items (id, job_id, label, status, is_required) VALUES
     -- Job 053 (in-progress, central)
     ('d3002000-0000-0000-0000-000000000040', 'd3001000-0000-0000-0000-000000000053', 'Mow front yard',           'DONE',        true),
-    ('d3002000-0000-0000-0000-000000000041', 'd3001000-0000-0000-0000-000000000053', 'Mow back yard',            'NOT_STARTED', true),
-    ('d3002000-0000-0000-0000-000000000042', 'd3001000-0000-0000-0000-000000000053', 'Edge walkways',            'NOT_STARTED', true),
-    ('d3002000-0000-0000-0000-000000000043', 'd3001000-0000-0000-0000-000000000053', 'Blow off clippings',       'NOT_STARTED', false),
+    ('d3002000-0000-0000-0000-000000000041', 'd3001000-0000-0000-0000-000000000053', 'Mow back yard',            'PENDING', true),
+    ('d3002000-0000-0000-0000-000000000042', 'd3001000-0000-0000-0000-000000000053', 'Edge walkways',            'PENDING', true),
+    ('d3002000-0000-0000-0000-000000000043', 'd3001000-0000-0000-0000-000000000053', 'Blow off clippings',       'PENDING', false),
     -- Job 054 (in-progress, south)
     ('d3002000-0000-0000-0000-000000000044', 'd3001000-0000-0000-0000-000000000054', 'Mow front yard',           'DONE',        true),
     ('d3002000-0000-0000-0000-000000000045', 'd3001000-0000-0000-0000-000000000054', 'Mow back yard',            'DONE',        true),
-    ('d3002000-0000-0000-0000-000000000046', 'd3001000-0000-0000-0000-000000000054', 'Perimeter pest spray',     'NOT_STARTED', true),
-    ('d3002000-0000-0000-0000-000000000047', 'd3001000-0000-0000-0000-000000000054', 'Inspect entry points',     'NOT_STARTED', true),
+    ('d3002000-0000-0000-0000-000000000046', 'd3001000-0000-0000-0000-000000000054', 'Perimeter pest spray',     'PENDING', true),
+    ('d3002000-0000-0000-0000-000000000047', 'd3001000-0000-0000-0000-000000000054', 'Inspect entry points',     'PENDING', true),
     -- Job 055 (in-progress, Round Rock)
     ('d3002000-0000-0000-0000-000000000048', 'd3001000-0000-0000-0000-000000000055', 'Mow front yard',           'DONE',        true),
     ('d3002000-0000-0000-0000-000000000049', 'd3001000-0000-0000-0000-000000000055', 'Mow side yard',            'DONE',        true),
-    ('d3002000-0000-0000-0000-00000000004a', 'd3001000-0000-0000-0000-000000000055', 'Mow back yard',            'NOT_STARTED', true),
-    ('d3002000-0000-0000-0000-00000000004b', 'd3001000-0000-0000-0000-000000000055', 'Edge walkways and drive',  'NOT_STARTED', true)
+    ('d3002000-0000-0000-0000-00000000004a', 'd3001000-0000-0000-0000-000000000055', 'Mow back yard',            'PENDING', true),
+    ('d3002000-0000-0000-0000-00000000004b', 'd3001000-0000-0000-0000-000000000055', 'Edge walkways and drive',  'PENDING', true)
   ON CONFLICT (id) DO NOTHING;
 
   -- ── E6. JOB PHOTOS (30+ on completed jobs) ──
@@ -786,19 +830,19 @@ BEGIN
 
   -- ── E7. JOB ISSUES (5 total: 2 open, 3 resolved) ──
   INSERT INTO job_issues (id, job_id, issue_type, severity, status, description, created_by_user_id, created_by_role) VALUES
-    ('d3002000-0000-0000-0000-000000000070', 'd3001000-0000-0000-0000-000000000032', 'quality', 'medium', 'OPEN',
+    ('d3002000-0000-0000-0000-000000000070', 'd3001000-0000-0000-0000-000000000032', 'OTHER', 'MED', 'OPEN',
       'Customer reports missed section near back fence. Requesting re-service.',
       v_customer_id, 'customer'),
-    ('d3002000-0000-0000-0000-000000000071', 'd3001000-0000-0000-0000-000000000040', 'quality', 'low', 'OPEN',
+    ('d3002000-0000-0000-0000-000000000071', 'd3001000-0000-0000-0000-000000000040', 'OTHER', 'LOW', 'OPEN',
       'Edge trimming not completed along south side of property.',
       v_customer_id, 'customer'),
-    ('d3002000-0000-0000-0000-000000000072', 'd3001000-0000-0000-0000-000000000022', 'scheduling', 'low', 'RESOLVED',
+    ('d3002000-0000-0000-0000-000000000072', 'd3001000-0000-0000-0000-000000000022', 'CUSTOMER_REQUESTED_CHANGE', 'LOW', 'RESOLVED',
       'Provider arrived 45 minutes late due to traffic.',
       v_admin_id, 'admin'),
-    ('d3002000-0000-0000-0000-000000000073', 'd3001000-0000-0000-0000-000000000013', 'quality', 'high', 'RESOLVED',
+    ('d3002000-0000-0000-0000-000000000073', 'd3001000-0000-0000-0000-000000000013', 'OTHER', 'HIGH', 'RESOLVED',
       'Sprinkler head damaged during mowing. Provider replaced at no cost.',
       v_customer_id, 'customer'),
-    ('d3002000-0000-0000-0000-000000000074', 'd3001000-0000-0000-0000-00000000001c', 'safety', 'medium', 'RESOLVED',
+    ('d3002000-0000-0000-0000-000000000074', 'd3001000-0000-0000-0000-00000000001c', 'SAFETY_CONCERN', 'MED', 'RESOLVED',
       'Gate left open after service. Customer reported dog got out briefly.',
       v_customer_id, 'customer')
   ON CONFLICT (id) DO NOTHING;
@@ -979,10 +1023,10 @@ BEGIN
     ('d3003000-0000-0000-0000-000000000179', 'd3001000-0000-0000-0000-000000000051', v_org2, 4500, 0,    4500, 'ELIGIBLE', NULL),
     ('d3003000-0000-0000-0000-00000000017a', 'd3001000-0000-0000-0000-000000000052', v_org3, 5000, 500,  5500, 'ELIGIBLE', NULL),
 
-    -- HELD earnings (various reasons)
-    ('d3003000-0000-0000-0000-000000000180', 'd3001000-0000-0000-0000-000000000032', v_org2, 5500, 500,  6000, 'HELD', NULL),
-    ('d3003000-0000-0000-0000-000000000181', 'd3001000-0000-0000-0000-00000000001c', v_org1, 4500, 0,    4500, 'HELD', NULL),
-    ('d3003000-0000-0000-0000-000000000182', 'd3001000-0000-0000-0000-000000000013', v_org2, 5500, 500,  6000, 'HELD', NULL)
+    -- HELD earnings (use in-progress/upcoming jobs not yet in earnings)
+    ('d3003000-0000-0000-0000-000000000180', 'd3001000-0000-0000-0000-000000000053', v_org1, 5500, 500,  6000, 'HELD', NULL),
+    ('d3003000-0000-0000-0000-000000000181', 'd3001000-0000-0000-0000-000000000054', v_org2, 4500, 0,    4500, 'HELD', NULL),
+    ('d3003000-0000-0000-0000-000000000182', 'd3001000-0000-0000-0000-000000000055', v_org4, 5500, 500,  6000, 'HELD', NULL)
   ON CONFLICT (id) DO NOTHING;
 
   -- Set hold reasons on held earnings
@@ -1073,23 +1117,26 @@ BEGIN
 
   -- G1. Support tickets (8 total: 3 open, 5 resolved)
   INSERT INTO support_tickets (id, customer_id, ticket_type, category, severity, status, customer_note, zone_id, provider_org_id) VALUES
-    ('d3004000-0000-0000-0000-000000000001', v_customer_id, 'complaint', 'quality',    'medium', 'open',
+    ('d3004000-0000-0000-0000-000000000001', v_customer_id, 'quality',  'quality',    'medium', 'open',
       'Provider missed the edging along my driveway during last visit. Would like a re-service.', v_zone1, v_org1),
-    ('d3004000-0000-0000-0000-000000000002', v_customer_id, 'inquiry',   'billing',    'low',    'open',
+    ('d3004000-0000-0000-0000-000000000002', v_customer_id, 'billing',  'billing',    'low',    'open',
       'I was charged $85 but my plan is Basic at $49. Can you check?', v_zone2, NULL),
-    ('d3004000-0000-0000-0000-000000000003', v_customer_id, 'complaint', 'scheduling', 'high',   'open',
+    ('d3004000-0000-0000-0000-000000000003', v_customer_id, 'missed_item', 'scheduling', 'high',   'open',
       'Provider was a no-show for my appointment yesterday. No notification received.', v_zone3, v_org3),
-    ('d3004000-0000-0000-0000-000000000004', v_customer_id, 'inquiry',   'general',    'low',    'resolved',
+    ('d3004000-0000-0000-0000-000000000004', v_customer_id, 'general',  'general',    'low',    'resolved',
       'How do I add pool service to my existing routine?', v_zone1, NULL),
-    ('d3004000-0000-0000-0000-000000000005', v_customer_id, 'complaint', 'quality',    'medium', 'resolved',
+    ('d3004000-0000-0000-0000-000000000005', v_customer_id, 'quality',  'quality',    'medium', 'resolved',
       'Gate was left open after service. Please add gate protocol.', v_zone2, v_org2),
-    ('d3004000-0000-0000-0000-000000000006', v_customer_id, 'inquiry',   'billing',    'low',    'resolved',
+    ('d3004000-0000-0000-0000-000000000006', v_customer_id, 'billing',  'billing',    'low',    'resolved',
       'Can I get a refund for the week my service was delayed by weather?', v_zone4, NULL),
-    ('d3004000-0000-0000-0000-000000000007', v_customer_id, 'complaint', 'quality',    'high',   'resolved',
+    ('d3004000-0000-0000-0000-000000000007', v_customer_id, 'damage',   'quality',    'high',   'resolved',
       'Sprinkler head damaged during mowing. Need repair or reimbursement.', v_zone1, v_org1),
-    ('d3004000-0000-0000-0000-000000000008', v_customer_id, 'inquiry',   'general',    'low',    'resolved',
+    ('d3004000-0000-0000-0000-000000000008', v_customer_id, 'general',  'general',    'low',    'resolved',
       'What pest control products do you use? I have a dog.', v_zone5, NULL)
   ON CONFLICT (id) DO NOTHING;
+
+  -- Temporarily disable admin-only trigger for seed updates
+  ALTER TABLE support_tickets DISABLE TRIGGER protect_support_ticket_admin_fields_trigger;
 
   -- Set resolution details on resolved tickets
   UPDATE support_tickets SET
@@ -1117,25 +1164,28 @@ BEGIN
     resolution_summary = 'All products are EPA-approved and pet-safe after drying (typically 30 min). Sent product data sheet.'
   WHERE id = 'd3004000-0000-0000-0000-000000000008' AND resolved_at IS NULL;
 
+  -- Re-enable admin-only trigger
+  ALTER TABLE support_tickets ENABLE TRIGGER protect_support_ticket_admin_fields_trigger;
+
   -- G2. Additional ops exceptions (beyond existing 3 in seed-demo-data)
   INSERT INTO ops_exceptions (id, exception_type, severity, status, source, reason_summary, reason_details, customer_id, provider_org_id, zone_id, scheduled_date, sla_target_at) VALUES
-    ('d3004000-0000-0000-0000-000000000010', 'capacity_shortage', 'soon', 'open', 'system',
+    ('d3004000-0000-0000-0000-000000000010', 'coverage_break', 'soon', 'open', 'system_detection',
       'Round Rock zone at 95% capacity — only 1 provider available Monday',
       '{"available_stops": 1, "needed_stops": 5, "zone": "Round Rock"}'::jsonb,
       NULL, NULL, v_zone4, (now() + interval '3 days')::date, now() + interval '48 hours'),
-    ('d3004000-0000-0000-0000-000000000011', 'billing_failure', 'watch', 'open', 'system',
+    ('d3004000-0000-0000-0000-000000000011', 'service_week_at_risk', 'watch', 'open', 'system_detection',
       'Payment failed for 2 past_due subscriptions — retry scheduled',
       '{"failed_count": 2, "total_cents": 13400, "retry_at": "tomorrow"}'::jsonb,
       v_customer_id, NULL, NULL, now()::date, now() + interval '24 hours'),
-    ('d3004000-0000-0000-0000-000000000012', 'quality_alert', 'urgent', 'resolved', 'system',
+    ('d3004000-0000-0000-0000-000000000012', 'quality_block', 'urgent', 'resolved', 'system_detection',
       'Provider Sunrise Property Care quality score dropped below 65 — probation triggered',
       '{"provider_name": "Sunrise Property Care", "score": 62, "threshold": 65}'::jsonb,
       NULL, v_org7, v_zone2, (now() - interval '5 days')::date, now() - interval '4 days'),
-    ('d3004000-0000-0000-0000-000000000013', 'weather_delay', 'watch', 'resolved', 'system',
+    ('d3004000-0000-0000-0000-000000000013', 'weather_safety', 'watch', 'resolved', 'system_detection',
       'Heat advisory — 4 afternoon jobs rescheduled to morning across Austin South',
       '{"affected_jobs": 4, "weather_type": "heat_advisory", "max_temp": 105}'::jsonb,
       NULL, NULL, v_zone2, (now() - interval '10 days')::date, now() - interval '9 days'),
-    ('d3004000-0000-0000-0000-000000000014', 'provider_no_show', 'urgent', 'resolved', 'system',
+    ('d3004000-0000-0000-0000-000000000014', 'provider_unavailable', 'urgent', 'resolved', 'system_detection',
       'Provider missed 2 consecutive appointments in East zone — customer notified',
       '{"missed_count": 2, "provider_name": "Lone Star Lawn Care"}'::jsonb,
       v_customer_id, v_org3, v_zone3, (now() - interval '15 days')::date, now() - interval '14 days')
@@ -1148,7 +1198,7 @@ BEGIN
   -- G3. Provider applications (6 total: various statuses)
   INSERT INTO provider_applications (id, user_id, category, status, zip_codes, founding_partner, submitted_at, requested_categories) VALUES
     ('d3004000-0000-0000-0000-000000000020', v_customer_id, 'mowing',  'submitted',  ARRAY['78749','78748'], false, now() - interval '3 days',  ARRAY['mowing','hedge_trimming']),
-    ('d3004000-0000-0000-0000-000000000021', v_customer_id, 'windows', 'reviewing',  ARRAY['78664','78665'], false, now() - interval '7 days',  ARRAY['windows']),
+    ('d3004000-0000-0000-0000-000000000021', v_customer_id, 'windows', 'under_review',  ARRAY['78664','78665'], false, now() - interval '7 days',  ARRAY['windows']),
     ('d3004000-0000-0000-0000-000000000022', v_customer_id, 'mowing',  'approved',   ARRAY['78613'],         true,  now() - interval '30 days', ARRAY['mowing']),
     ('d3004000-0000-0000-0000-000000000023', v_customer_id, 'pest',    'approved',   ARRAY['78701','78702'], false, now() - interval '45 days', ARRAY['pest']),
     ('d3004000-0000-0000-0000-000000000024', v_customer_id, 'mowing',  'rejected',   ARRAY['78721'],         false, now() - interval '60 days', ARRAY['mowing','power_wash']),
@@ -1211,9 +1261,9 @@ BEGIN
 
   -- I1. Admin audit log (15 entries)
   INSERT INTO admin_audit_log (id, admin_user_id, action, entity_type, entity_id, reason, before, after) VALUES
-    ('d3005000-0000-0000-0000-000000000001', v_admin_id, 'update', 'zone',           v_zone4::text, 'Expanded Round Rock zip codes',           '{"zip_codes": ["78664","78665"]}'::jsonb, '{"zip_codes": ["78664","78665","78681","78717"]}'::jsonb),
-    ('d3005000-0000-0000-0000-000000000002', v_admin_id, 'create', 'zone',           v_zone5::text, 'Launched Cedar Park zone',                NULL, '{"name": "Cedar Park", "status": "active"}'::jsonb),
-    ('d3005000-0000-0000-0000-000000000003', v_admin_id, 'update', 'provider_org',   v_org7::text,  'Placed on probation due to low quality score', '{"status": "ACTIVE"}'::jsonb, '{"status": "PROBATION"}'::jsonb),
+    ('d3005000-0000-0000-0000-000000000001', v_admin_id, 'update', 'zone',           v_zone4, 'Expanded Round Rock zip codes',           '{"zip_codes": ["78664","78665"]}'::jsonb, '{"zip_codes": ["78664","78665","78681","78717"]}'::jsonb),
+    ('d3005000-0000-0000-0000-000000000002', v_admin_id, 'create', 'zone',           v_zone5, 'Launched Cedar Park zone',                NULL, '{"name": "Cedar Park", "status": "active"}'::jsonb),
+    ('d3005000-0000-0000-0000-000000000003', v_admin_id, 'update', 'provider_org',   v_org7,  'Placed on probation due to low quality score', '{"status": "ACTIVE"}'::jsonb, '{"status": "PROBATION"}'::jsonb),
     ('d3005000-0000-0000-0000-000000000004', v_admin_id, 'update', 'plan',           'd1000000-0000-0000-0000-000000000002', 'Updated Standard plan pricing',     '{"display_price_text": "$79/mo"}'::jsonb, '{"display_price_text": "$85/mo"}'::jsonb),
     ('d3005000-0000-0000-0000-000000000005', v_admin_id, 'create', 'plan',           'd1000000-0000-0000-0000-000000000003', 'Created Premium plan',               NULL, '{"name": "Premium", "display_price_text": "$149/mo"}'::jsonb),
     ('d3005000-0000-0000-0000-000000000006', v_admin_id, 'update', 'assignment_config','d3000000-0000-0000-0000-000000000020', 'Increased daily capacity limit', '{"config_value": 10}'::jsonb, '{"config_value": 12}'::jsonb),
@@ -1221,11 +1271,11 @@ BEGIN
     ('d3005000-0000-0000-0000-000000000008', v_admin_id, 'reject', 'provider_application','d3004000-0000-0000-0000-000000000024', 'Insufficient coverage area',       '{"status": "submitted"}'::jsonb, '{"status": "rejected"}'::jsonb),
     ('d3005000-0000-0000-0000-000000000009', v_admin_id, 'update', 'support_ticket', 'd3004000-0000-0000-0000-000000000007', 'Resolved damage claim ticket',     '{"status": "open"}'::jsonb, '{"status": "resolved"}'::jsonb),
     ('d3005000-0000-0000-0000-00000000000a', v_admin_id, 'create', 'customer_credit','d3000000-0000-0000-0000-000000000811', 'Issued quality credit for missed edge', NULL, '{"amount_cents": 1500}'::jsonb),
-    ('d3005000-0000-0000-0000-00000000000b', v_admin_id, 'update', 'zone',           v_zone1::text, 'Updated default service window for Central', '{"default_service_window": null}'::jsonb, '{"default_service_window": "morning"}'::jsonb),
+    ('d3005000-0000-0000-0000-00000000000b', v_admin_id, 'update', 'zone',           v_zone1, 'Updated default service window for Central', '{"default_service_window": null}'::jsonb, '{"default_service_window": "morning"}'::jsonb),
     ('d3005000-0000-0000-0000-00000000000c', v_admin_id, 'update', 'ops_exception',  'd3004000-0000-0000-0000-000000000012', 'Resolved quality alert exception', '{"status": "open"}'::jsonb, '{"status": "resolved"}'::jsonb),
     ('d3005000-0000-0000-0000-00000000000d', v_admin_id, 'create', 'billing_run',    'd3003000-0000-0000-0000-000000000251', 'Triggered monthly billing cycle',  NULL, '{"run_type": "monthly_cycle"}'::jsonb),
     ('d3005000-0000-0000-0000-00000000000e', v_admin_id, 'create', 'payout_run',     'd3003000-0000-0000-0000-000000000008', 'Triggered weekly payout batch',    NULL, '{"total_cents": 2100000}'::jsonb),
-    ('d3005000-0000-0000-0000-00000000000f', v_admin_id, 'update', 'market_zone_category_state','d3000000-0000-0000-0000-000000000009', 'Round Rock windows set to WAITLIST', '{"status": "OPEN"}'::jsonb, '{"status": "WAITLIST"}'::jsonb)
+    ('d3005000-0000-0000-0000-00000000000f', v_admin_id, 'update', 'market_zone_category_state','d3000000-0000-0000-0000-000000000009', 'Round Rock windows set to WAITLIST_ONLY', '{"status": "OPEN"}'::jsonb, '{"status": "WAITLIST_ONLY"}'::jsonb)
   ON CONFLICT (id) DO NOTHING;
 
   -- I2. Admin change requests (4: 1 pending, 2 approved, 1 rejected)
@@ -1282,38 +1332,38 @@ BEGIN
 
   -- Customer notifications
   INSERT INTO notifications (id, user_id, type, title, body, priority, cta_label, cta_route, context_type, context_id, created_at) VALUES
-    ('d3006000-0000-0000-0000-000000000001', v_customer_id, 'job_completed',         'Service Complete!',           'Your lawn at 1401 Lavaca St was serviced today. Check out the before/after photos!',                   'normal', 'View Photos',    '/customer/photos',    'job', 'd3001000-0000-0000-0000-000000000050', now() - interval '3 hours'),
-    ('d3006000-0000-0000-0000-000000000002', v_customer_id, 'job_scheduled',          'Upcoming Visit Tomorrow',     'Your lawn service at 900 W 5th St is scheduled for tomorrow morning.',                                'normal', 'View Schedule',  '/customer/upcoming',  'job', 'd3001000-0000-0000-0000-000000000060', now() - interval '1 hour'),
-    ('d3006000-0000-0000-0000-000000000003', v_customer_id, 'health_score_improved',  'Property Health Up!',         'Your property health score improved from 82 to 88 at 1401 Lavaca St. Keep it up!',                     'low',    'View Score',     '/customer',           NULL,  NULL, now() - interval '2 hours'),
-    ('d3006000-0000-0000-0000-000000000004', v_customer_id, 'invoice_ready',          'Invoice Ready',               'Your monthly invoice for $85.00 at 1401 Lavaca St is ready. Due in 30 days.',                          'normal', 'View Invoice',   '/customer/billing',   'invoice', 'd3003000-0000-0000-0000-000000000210', now() - interval '5 days'),
-    ('d3006000-0000-0000-0000-000000000005', v_customer_id, 'referral_activated',     'Referral Reward!',            'Your neighbor signed up using your referral code! $25 credit has been added to your account.',          'normal', 'View Credits',   '/customer/billing',   NULL,  NULL, now() - interval '10 days'),
-    ('d3006000-0000-0000-0000-000000000006', v_customer_id, 'job_completed',          'Window Cleaning Done!',       'Your windows at 900 W 5th St are sparkling clean. View the results!',                                 'normal', 'View Details',   '/customer/history',   'job', 'd3001000-0000-0000-0000-000000000017', now() - interval '41 days'),
-    ('d3006000-0000-0000-0000-000000000007', v_customer_id, 'job_completed',          'Mowing Complete',             'Your lawn at 5001 W Slaughter Ln was mowed today.',                                                   'normal', 'View Details',   '/customer/history',   'job', 'd3001000-0000-0000-0000-000000000051', now() - interval '2 hours'),
-    ('d3006000-0000-0000-0000-000000000008', v_customer_id, 'health_score_improved',  'Score Going Up!',             'Your Cedar Park property health improved from 80 to 83. Consistent service pays off!',                 'low',    'View Score',     '/customer',           NULL,  NULL, now() - interval '6 days'),
-    ('d3006000-0000-0000-0000-000000000009', v_customer_id, 'job_scheduled',          'Visit This Week',             'Your next service at 2100 E MLK Blvd is scheduled for Friday.',                                       'normal', 'View Schedule',  '/customer/upcoming',  'job', 'd3001000-0000-0000-0000-000000000068', now() - interval '12 hours'),
-    ('d3006000-0000-0000-0000-00000000000a', v_customer_id, 'credit_applied',         'Credit Applied',              'Your $5.00 welcome credit was applied to this month''s invoice.',                                      'low',    'View Billing',   '/customer/billing',   NULL,  NULL, now() - interval '20 days'),
+    ('d3006000-0000-0000-0000-000000000001', v_customer_id, 'job_completed',         'Service Complete!',           'Your lawn at 1401 Lavaca St was serviced today. Check out the before/after photos!',                   'SERVICE', 'View Photos',    '/customer/photos',    'job', 'd3001000-0000-0000-0000-000000000050', now() - interval '3 hours'),
+    ('d3006000-0000-0000-0000-000000000002', v_customer_id, 'job_scheduled',          'Upcoming Visit Tomorrow',     'Your lawn service at 900 W 5th St is scheduled for tomorrow morning.',                                'SERVICE', 'View Schedule',  '/customer/upcoming',  'job', 'd3001000-0000-0000-0000-000000000060', now() - interval '1 hour'),
+    ('d3006000-0000-0000-0000-000000000003', v_customer_id, 'health_score_improved',  'Property Health Up!',         'Your property health score improved from 82 to 88 at 1401 Lavaca St. Keep it up!',                     'MARKETING',    'View Score',     '/customer',           NULL,  NULL, now() - interval '2 hours'),
+    ('d3006000-0000-0000-0000-000000000004', v_customer_id, 'invoice_ready',          'Invoice Ready',               'Your monthly invoice for $85.00 at 1401 Lavaca St is ready. Due in 30 days.',                          'SERVICE', 'View Invoice',   '/customer/billing',   'invoice', 'd3003000-0000-0000-0000-000000000210', now() - interval '5 days'),
+    ('d3006000-0000-0000-0000-000000000005', v_customer_id, 'referral_activated',     'Referral Reward!',            'Your neighbor signed up using your referral code! $25 credit has been added to your account.',          'SERVICE', 'View Credits',   '/customer/billing',   NULL,  NULL, now() - interval '10 days'),
+    ('d3006000-0000-0000-0000-000000000006', v_customer_id, 'job_completed',          'Window Cleaning Done!',       'Your windows at 900 W 5th St are sparkling clean. View the results!',                                 'SERVICE', 'View Details',   '/customer/history',   'job', 'd3001000-0000-0000-0000-000000000017', now() - interval '41 days'),
+    ('d3006000-0000-0000-0000-000000000007', v_customer_id, 'job_completed',          'Mowing Complete',             'Your lawn at 5001 W Slaughter Ln was mowed today.',                                                   'SERVICE', 'View Details',   '/customer/history',   'job', 'd3001000-0000-0000-0000-000000000051', now() - interval '2 hours'),
+    ('d3006000-0000-0000-0000-000000000008', v_customer_id, 'health_score_improved',  'Score Going Up!',             'Your Cedar Park property health improved from 80 to 83. Consistent service pays off!',                 'MARKETING',    'View Score',     '/customer',           NULL,  NULL, now() - interval '6 days'),
+    ('d3006000-0000-0000-0000-000000000009', v_customer_id, 'job_scheduled',          'Visit This Week',             'Your next service at 2100 E MLK Blvd is scheduled for Friday.',                                       'SERVICE', 'View Schedule',  '/customer/upcoming',  'job', 'd3001000-0000-0000-0000-000000000068', now() - interval '12 hours'),
+    ('d3006000-0000-0000-0000-00000000000a', v_customer_id, 'credit_applied',         'Credit Applied',              'Your $5.00 welcome credit was applied to this month''s invoice.',                                      'MARKETING',    'View Billing',   '/customer/billing',   NULL,  NULL, now() - interval '20 days'),
     -- Provider notifications
-    ('d3006000-0000-0000-0000-000000000010', v_provider_id, 'job_assigned',           'New Job Assigned',            'You have a new lawn care job at 1401 Lavaca St scheduled for today.',                                  'high',   'View Job',       '/provider/jobs',      'job', 'd3001000-0000-0000-0000-000000000053', now() - interval '2 hours'),
-    ('d3006000-0000-0000-0000-000000000011', v_provider_id, 'payout_processed',       'Payout Sent — $480.00',       'Your weekly payout of $480.00 has been initiated. Expect it in 2-3 business days.',                    'normal', 'View Earnings',  '/provider/earnings',  NULL,  NULL, now() - interval '5 days'),
-    ('d3006000-0000-0000-0000-000000000012', v_provider_id, 'new_customer_byoc',      'New BYOC Customer!',          'A customer activated their BYOC invite. Your $10 weekly bonus continues!',                             'normal', 'View Customers', '/provider/byoc',      NULL,  NULL, now() - interval '20 days'),
-    ('d3006000-0000-0000-0000-000000000013', v_provider_id, 'quality_score_updated',  'Quality Score: Excellent',    'Your quality score is 92 — Excellent tier! Keep up the great work.',                                   'low',    'View Quality',   '/provider/quality',   NULL,  NULL, now() - interval '1 day'),
-    ('d3006000-0000-0000-0000-000000000014', v_provider_id, 'job_assigned',           'Tomorrow''s Route Ready',     'You have 3 jobs scheduled for tomorrow across Austin Central.',                                        'normal', 'View Jobs',      '/provider/jobs',      NULL,  NULL, now() - interval '6 hours'),
-    ('d3006000-0000-0000-0000-000000000015', v_provider_id, 'earnings_held',          'Earnings Held',               'An earning of $45.00 is held pending resolution of a customer complaint. Expected release in 7 days.',  'high',   'View Earnings',  '/provider/earnings',  NULL,  NULL, now() - interval '3 days'),
-    ('d3006000-0000-0000-0000-000000000016', v_provider_id, 'payout_processed',       'Payout Sent — $425.00',       'Your weekly payout of $425.00 has been processed.',                                                    'normal', 'View Payouts',   '/provider/payouts',   NULL,  NULL, now() - interval '12 days'),
-    ('d3006000-0000-0000-0000-000000000017', v_provider_id, 'job_completed',          'Job Completed',               'Job at 123 Main St marked complete. Earnings: $55.00.',                                                'normal', 'View Job',       '/provider/jobs',      'job', 'd3001000-0000-0000-0000-000000000050', now() - interval '3 hours'),
-    ('d3006000-0000-0000-0000-000000000018', v_provider_id, 'new_customer_byoc',      'Another BYOC Signup!',        'Another customer from your BYOC link signed up. You now have 4 BYOC customers!',                      'normal', 'View BYOC',      '/provider/byoc',      NULL,  NULL, now() - interval '30 days'),
-    ('d3006000-0000-0000-0000-000000000019', v_provider_id, 'quality_score_updated',  'Score Improved',              'Your quality score improved from 89 to 92. You earned Excellent tier!',                                'normal', 'View Performance','/provider/performance',NULL, NULL, now() - interval '8 days'),
+    ('d3006000-0000-0000-0000-000000000010', v_provider_id, 'job_assigned',           'New Job Assigned',            'You have a new lawn care job at 1401 Lavaca St scheduled for today.',                                  'CRITICAL',   'View Job',       '/provider/jobs',      'job', 'd3001000-0000-0000-0000-000000000053', now() - interval '2 hours'),
+    ('d3006000-0000-0000-0000-000000000011', v_provider_id, 'payout_processed',       'Payout Sent — $480.00',       'Your weekly payout of $480.00 has been initiated. Expect it in 2-3 business days.',                    'SERVICE', 'View Earnings',  '/provider/earnings',  NULL,  NULL, now() - interval '5 days'),
+    ('d3006000-0000-0000-0000-000000000012', v_provider_id, 'new_customer_byoc',      'New BYOC Customer!',          'A customer activated their BYOC invite. Your $10 weekly bonus continues!',                             'SERVICE', 'View Customers', '/provider/byoc',      NULL,  NULL, now() - interval '20 days'),
+    ('d3006000-0000-0000-0000-000000000013', v_provider_id, 'quality_score_updated',  'Quality Score: Excellent',    'Your quality score is 92 — Excellent tier! Keep up the great work.',                                   'MARKETING',    'View Quality',   '/provider/quality',   NULL,  NULL, now() - interval '1 day'),
+    ('d3006000-0000-0000-0000-000000000014', v_provider_id, 'job_assigned',           'Tomorrow''s Route Ready',     'You have 3 jobs scheduled for tomorrow across Austin Central.',                                        'SERVICE', 'View Jobs',      '/provider/jobs',      NULL,  NULL, now() - interval '6 hours'),
+    ('d3006000-0000-0000-0000-000000000015', v_provider_id, 'earnings_held',          'Earnings Held',               'An earning of $45.00 is held pending resolution of a customer complaint. Expected release in 7 days.',  'CRITICAL',   'View Earnings',  '/provider/earnings',  NULL,  NULL, now() - interval '3 days'),
+    ('d3006000-0000-0000-0000-000000000016', v_provider_id, 'payout_processed',       'Payout Sent — $425.00',       'Your weekly payout of $425.00 has been processed.',                                                    'SERVICE', 'View Payouts',   '/provider/payouts',   NULL,  NULL, now() - interval '12 days'),
+    ('d3006000-0000-0000-0000-000000000017', v_provider_id, 'job_completed',          'Job Completed',               'Job at 123 Main St marked complete. Earnings: $55.00.',                                                'SERVICE', 'View Job',       '/provider/jobs',      'job', 'd3001000-0000-0000-0000-000000000050', now() - interval '3 hours'),
+    ('d3006000-0000-0000-0000-000000000018', v_provider_id, 'new_customer_byoc',      'Another BYOC Signup!',        'Another customer from your BYOC link signed up. You now have 4 BYOC customers!',                      'SERVICE', 'View BYOC',      '/provider/byoc',      NULL,  NULL, now() - interval '30 days'),
+    ('d3006000-0000-0000-0000-000000000019', v_provider_id, 'quality_score_updated',  'Score Improved',              'Your quality score improved from 89 to 92. You earned Excellent tier!',                                'SERVICE', 'View Performance','/provider/performance',NULL, NULL, now() - interval '8 days'),
     -- Admin notifications
-    ('d3006000-0000-0000-0000-000000000020', v_admin_id, 'exception_created',         'New Exception — Capacity',    'Round Rock zone at 95% capacity. Only 1 provider available Monday. Action needed.',                    'high',   'View Exception', '/admin/exceptions',   'ops_exception', 'd3004000-0000-0000-0000-000000000010', now() - interval '1 hour'),
-    ('d3006000-0000-0000-0000-000000000021', v_admin_id, 'provider_application',      'New Application',             'New mowing provider application for Austin South (78749, 78748). Review needed.',                      'normal', 'Review',         '/admin/providers/applications', 'provider_application', 'd3004000-0000-0000-0000-000000000020', now() - interval '3 days'),
-    ('d3006000-0000-0000-0000-000000000022', v_admin_id, 'kpi_alert',                 'Weekly KPI Summary',          '25 active customers, 8 providers, 42 jobs completed this week. Revenue: $2,350.',                      'low',    'View Dashboard', '/admin',              NULL,  NULL, now() - interval '7 days'),
-    ('d3006000-0000-0000-0000-000000000023', v_admin_id, 'billing_alert',             'Past Due Alert',              '2 subscriptions are past due totaling $134.00. Dunning step 1 initiated.',                             'high',   'View Billing',   '/admin/billing',      NULL,  NULL, now() - interval '5 days'),
-    ('d3006000-0000-0000-0000-000000000024', v_admin_id, 'quality_alert',             'Provider on Probation',       'Sunrise Property Care quality score dropped to 62. Auto-placed on probation.',                         'high',   'View Provider',  '/admin/providers',    'provider_org', v_org7::text, now() - interval '5 days'),
-    ('d3006000-0000-0000-0000-000000000025', v_admin_id, 'capacity_warning',          'Cedar Park Growing',          'Cedar Park zone at 80% capacity. Consider recruiting additional providers.',                            'normal', 'View Zones',     '/admin/zones',        NULL,  NULL, now() - interval '10 days'),
-    ('d3006000-0000-0000-0000-000000000026', v_admin_id, 'payout_complete',           'Weekly Payouts Processed',    'Payout batch completed: 7 providers, $2,700 total. All payouts successful.',                           'low',    'View Payouts',   '/admin/payouts',      NULL,  NULL, now() - interval '5 days'),
-    ('d3006000-0000-0000-0000-000000000027', v_admin_id, 'growth_milestone',          'Growth Milestone!',           'Austin Metro reached 25 active customers across 5 zones. BYOC driving 40% of growth.',                'low',    'View Growth',    '/admin/growth',       NULL,  NULL, now() - interval '2 days'),
-    ('d3006000-0000-0000-0000-000000000028', v_admin_id, 'exception_created',         'Payment Failure',             '2 payments failed during billing cycle. Auto-retry scheduled for 3 days.',                             'normal', 'View Billing',   '/admin/billing',      NULL,  NULL, now() - interval '5 days'),
-    ('d3006000-0000-0000-0000-000000000029', v_admin_id, 'cron_failure',              'Notification Cron Failed',    'Daily notification cron failed with push_provider_timeout. 5 of 15 sent. Investigate.',                'high',   'View Health',    '/admin/cron-health',  NULL,  NULL, now() - interval '8 hours')
+    ('d3006000-0000-0000-0000-000000000020', v_admin_id, 'exception_created',         'New Exception — Capacity',    'Round Rock zone at 95% capacity. Only 1 provider available Monday. Action needed.',                    'CRITICAL',   'View Exception', '/admin/exceptions',   'ops_exception', 'd3004000-0000-0000-0000-000000000010', now() - interval '1 hour'),
+    ('d3006000-0000-0000-0000-000000000021', v_admin_id, 'provider_application',      'New Application',             'New mowing provider application for Austin South (78749, 78748). Review needed.',                      'SERVICE', 'Review',         '/admin/providers/applications', 'provider_application', 'd3004000-0000-0000-0000-000000000020', now() - interval '3 days'),
+    ('d3006000-0000-0000-0000-000000000022', v_admin_id, 'kpi_alert',                 'Weekly KPI Summary',          '25 active customers, 8 providers, 42 jobs completed this week. Revenue: $2,350.',                      'MARKETING',    'View Dashboard', '/admin',              NULL,  NULL, now() - interval '7 days'),
+    ('d3006000-0000-0000-0000-000000000023', v_admin_id, 'billing_alert',             'Past Due Alert',              '2 subscriptions are past due totaling $134.00. Dunning step 1 initiated.',                             'CRITICAL',   'View Billing',   '/admin/billing',      NULL,  NULL, now() - interval '5 days'),
+    ('d3006000-0000-0000-0000-000000000024', v_admin_id, 'quality_alert',             'Provider on Probation',       'Sunrise Property Care quality score dropped to 62. Auto-placed on probation.',                         'CRITICAL',   'View Provider',  '/admin/providers',    'provider_org', v_org7, now() - interval '5 days'),
+    ('d3006000-0000-0000-0000-000000000025', v_admin_id, 'capacity_warning',          'Cedar Park Growing',          'Cedar Park zone at 80% capacity. Consider recruiting additional providers.',                            'SERVICE', 'View Zones',     '/admin/zones',        NULL,  NULL, now() - interval '10 days'),
+    ('d3006000-0000-0000-0000-000000000026', v_admin_id, 'payout_complete',           'Weekly Payouts Processed',    'Payout batch completed: 7 providers, $2,700 total. All payouts successful.',                           'MARKETING',    'View Payouts',   '/admin/payouts',      NULL,  NULL, now() - interval '5 days'),
+    ('d3006000-0000-0000-0000-000000000027', v_admin_id, 'growth_milestone',          'Growth Milestone!',           'Austin Metro reached 25 active customers across 5 zones. BYOC driving 40% of growth.',                'MARKETING',    'View Growth',    '/admin/growth',       NULL,  NULL, now() - interval '2 days'),
+    ('d3006000-0000-0000-0000-000000000028', v_admin_id, 'exception_created',         'Payment Failure',             '2 payments failed during billing cycle. Auto-retry scheduled for 3 days.',                             'SERVICE', 'View Billing',   '/admin/billing',      NULL,  NULL, now() - interval '5 days'),
+    ('d3006000-0000-0000-0000-000000000029', v_admin_id, 'cron_failure',              'Notification Cron Failed',    'Daily notification cron failed with push_provider_timeout. 5 of 15 sent. Investigate.',                'CRITICAL',   'View Health',    '/admin/cron-health',  NULL,  NULL, now() - interval '8 hours')
   ON CONFLICT (id) DO NOTHING;
 
   -- Mark some notifications as read
@@ -1328,20 +1378,20 @@ BEGIN
 
   -- I5. Notification delivery records (sample)
   INSERT INTO notification_delivery (id, notification_id, channel, status, attempted_at) VALUES
-    ('d3005000-0000-0000-0000-000000000040', 'd3006000-0000-0000-0000-000000000001', 'push',  'delivered', now() - interval '3 hours'),
-    ('d3005000-0000-0000-0000-000000000041', 'd3006000-0000-0000-0000-000000000001', 'email', 'delivered', now() - interval '3 hours'),
-    ('d3005000-0000-0000-0000-000000000042', 'd3006000-0000-0000-0000-000000000002', 'push',  'delivered', now() - interval '1 hour'),
-    ('d3005000-0000-0000-0000-000000000043', 'd3006000-0000-0000-0000-000000000004', 'email', 'delivered', now() - interval '5 days'),
-    ('d3005000-0000-0000-0000-000000000044', 'd3006000-0000-0000-0000-000000000010', 'push',  'delivered', now() - interval '2 hours'),
-    ('d3005000-0000-0000-0000-000000000045', 'd3006000-0000-0000-0000-000000000011', 'push',  'delivered', now() - interval '5 days'),
-    ('d3005000-0000-0000-0000-000000000046', 'd3006000-0000-0000-0000-000000000011', 'email', 'delivered', now() - interval '5 days'),
-    ('d3005000-0000-0000-0000-000000000047', 'd3006000-0000-0000-0000-000000000015', 'push',  'delivered', now() - interval '3 days'),
-    ('d3005000-0000-0000-0000-000000000048', 'd3006000-0000-0000-0000-000000000020', 'push',  'delivered', now() - interval '1 hour'),
-    ('d3005000-0000-0000-0000-000000000049', 'd3006000-0000-0000-0000-000000000020', 'email', 'delivered', now() - interval '1 hour'),
-    ('d3005000-0000-0000-0000-00000000004a', 'd3006000-0000-0000-0000-000000000023', 'push',  'delivered', now() - interval '5 days'),
-    ('d3005000-0000-0000-0000-00000000004b', 'd3006000-0000-0000-0000-000000000023', 'email', 'delivered', now() - interval '5 days'),
-    ('d3005000-0000-0000-0000-00000000004c', 'd3006000-0000-0000-0000-000000000029', 'push',  'failed',   now() - interval '8 hours'),
-    ('d3005000-0000-0000-0000-00000000004d', 'd3006000-0000-0000-0000-000000000029', 'email', 'delivered', now() - interval '8 hours')
+    ('d3005000-0000-0000-0000-000000000040', 'd3006000-0000-0000-0000-000000000001', 'PUSH',  'SENT', now() - interval '3 hours'),
+    ('d3005000-0000-0000-0000-000000000041', 'd3006000-0000-0000-0000-000000000001', 'EMAIL', 'SENT', now() - interval '3 hours'),
+    ('d3005000-0000-0000-0000-000000000042', 'd3006000-0000-0000-0000-000000000002', 'PUSH',  'SENT', now() - interval '1 hour'),
+    ('d3005000-0000-0000-0000-000000000043', 'd3006000-0000-0000-0000-000000000004', 'EMAIL', 'SENT', now() - interval '5 days'),
+    ('d3005000-0000-0000-0000-000000000044', 'd3006000-0000-0000-0000-000000000010', 'PUSH',  'SENT', now() - interval '2 hours'),
+    ('d3005000-0000-0000-0000-000000000045', 'd3006000-0000-0000-0000-000000000011', 'PUSH',  'SENT', now() - interval '5 days'),
+    ('d3005000-0000-0000-0000-000000000046', 'd3006000-0000-0000-0000-000000000011', 'EMAIL', 'SENT', now() - interval '5 days'),
+    ('d3005000-0000-0000-0000-000000000047', 'd3006000-0000-0000-0000-000000000015', 'PUSH',  'SENT', now() - interval '3 days'),
+    ('d3005000-0000-0000-0000-000000000048', 'd3006000-0000-0000-0000-000000000020', 'PUSH',  'SENT', now() - interval '1 hour'),
+    ('d3005000-0000-0000-0000-000000000049', 'd3006000-0000-0000-0000-000000000020', 'EMAIL', 'SENT', now() - interval '1 hour'),
+    ('d3005000-0000-0000-0000-00000000004a', 'd3006000-0000-0000-0000-000000000023', 'PUSH',  'SENT', now() - interval '5 days'),
+    ('d3005000-0000-0000-0000-00000000004b', 'd3006000-0000-0000-0000-000000000023', 'EMAIL', 'SENT', now() - interval '5 days'),
+    ('d3005000-0000-0000-0000-00000000004c', 'd3006000-0000-0000-0000-000000000029', 'PUSH',  'FAILED',   now() - interval '8 hours'),
+    ('d3005000-0000-0000-0000-00000000004d', 'd3006000-0000-0000-0000-000000000029', 'EMAIL', 'SENT', now() - interval '8 hours')
   ON CONFLICT (id) DO NOTHING;
 
   UPDATE notification_delivery SET error_code = 'push_provider_timeout', error_message = 'APNs timeout after 30s' WHERE id = 'd3005000-0000-0000-0000-00000000004c' AND error_code IS NULL;
