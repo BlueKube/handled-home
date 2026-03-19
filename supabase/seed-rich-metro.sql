@@ -25,7 +25,13 @@ INSERT INTO auth.users (id, email, raw_user_meta_data, role, aud, email_confirme
   ('f4000000-0000-0000-0000-000000000005', 'provider-org5@seed.local', '{"full_name":"Sarah L."}'::jsonb,   'authenticated', 'authenticated', now()),
   ('f4000000-0000-0000-0000-000000000006', 'provider-org6@seed.local', '{"full_name":"Rachel B."}'::jsonb,  'authenticated', 'authenticated', now()),
   ('f4000000-0000-0000-0000-000000000007', 'provider-org7@seed.local', '{"full_name":"Kevin P."}'::jsonb,   'authenticated', 'authenticated', now()),
-  ('f4000000-0000-0000-0000-000000000008', 'provider-org8@seed.local', '{"full_name":"Amanda S."}'::jsonb,  'authenticated', 'authenticated', now())
+  ('f4000000-0000-0000-0000-000000000008', 'provider-org8@seed.local', '{"full_name":"Amanda S."}'::jsonb,  'authenticated', 'authenticated', now()),
+  -- Provider org operators (crew members for multi-person orgs)
+  ('f4000000-0000-0000-0000-00000000000a', 'operator-org2a@seed.local', '{"full_name":"Carlos R."}'::jsonb,  'authenticated', 'authenticated', now()),
+  ('f4000000-0000-0000-0000-00000000000b', 'operator-org3a@seed.local', '{"full_name":"Tyler M."}'::jsonb,  'authenticated', 'authenticated', now()),
+  ('f4000000-0000-0000-0000-00000000000c', 'operator-org4a@seed.local', '{"full_name":"Ryan T."}'::jsonb,   'authenticated', 'authenticated', now()),
+  ('f4000000-0000-0000-0000-00000000000d', 'operator-org4b@seed.local', '{"full_name":"Miguel F."}'::jsonb, 'authenticated', 'authenticated', now()),
+  ('f4000000-0000-0000-0000-00000000000e', 'operator-org5a@seed.local', '{"full_name":"Jake H."}'::jsonb,   'authenticated', 'authenticated', now())
 ON CONFLICT (id) DO NOTHING;
 
 -- Pre-seed: create profiles for test users
@@ -69,6 +75,13 @@ DECLARE
   v_owner6 uuid := 'f4000000-0000-0000-0000-000000000006';
   v_owner7 uuid := 'f4000000-0000-0000-0000-000000000007';
   v_owner8 uuid := 'f4000000-0000-0000-0000-000000000008';
+
+  -- Operator (crew member) user IDs
+  v_op2a uuid := 'f4000000-0000-0000-0000-00000000000a'; -- Green Thumb crew
+  v_op3a uuid := 'f4000000-0000-0000-0000-00000000000b'; -- Lone Star crew
+  v_op4a uuid := 'f4000000-0000-0000-0000-00000000000c'; -- Capital City crew 1
+  v_op4b uuid := 'f4000000-0000-0000-0000-00000000000d'; -- Capital City crew 2
+  v_op5a uuid := 'f4000000-0000-0000-0000-00000000000e'; -- Hill Country crew
 
   -- ── Known fixture IDs ──
   v_zone1 uuid := 'b1000000-0000-0000-0000-000000000001'; -- Austin Central (existing)
@@ -232,6 +245,15 @@ BEGIN
     ('f3000000-0000-0000-0000-000000000008', v_org6, v_owner6, 'OWNER',    'Rachel B.',  'ACTIVE'),
     ('f3000000-0000-0000-0000-000000000009', v_org7, v_owner7, 'OWNER',    'Kevin P.',   'ACTIVE'),
     ('f3000000-0000-0000-0000-00000000000a', v_org8, v_owner8, 'OWNER',    'Amanda S.',  'ACTIVE')
+  ON CONFLICT (id) DO NOTHING;
+
+  -- C2b. Operator (crew) members for multi-person orgs
+  INSERT INTO provider_members (id, provider_org_id, user_id, role_in_org, display_name, status) VALUES
+    ('f3000000-0000-0000-0000-00000000000b', v_org2, v_op2a, 'OPERATOR', 'Carlos R.',  'ACTIVE'),  -- Green Thumb crew
+    ('f3000000-0000-0000-0000-00000000000c', v_org3, v_op3a, 'OPERATOR', 'Tyler M.',   'ACTIVE'),  -- Lone Star crew
+    ('f3000000-0000-0000-0000-00000000000d', v_org4, v_op4a, 'OPERATOR', 'Ryan T.',    'ACTIVE'),  -- Capital City crew 1
+    ('f3000000-0000-0000-0000-00000000000e', v_org4, v_op4b, 'OPERATOR', 'Miguel F.',  'ACTIVE'),  -- Capital City crew 2
+    ('f3000000-0000-0000-0000-00000000000f', v_org5, v_op5a, 'OPERATOR', 'Jake H.',    'ACTIVE')   -- Hill Country crew
   ON CONFLICT (id) DO NOTHING;
 
   -- C3. Provider coverage (zone assignments)
