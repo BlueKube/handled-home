@@ -18,11 +18,18 @@ Follow this exact sequence for every batch. Do not skip steps.
 2. **Write a spec before coding** — Every batch needs a markdown spec with: title, why it matters, scope, non-goals, exact file targets, acceptance criteria, regression risks, visual validation checklist.
 3. **Keep batches small** — 1 theme across 1-3 screens. Don't mix unrelated fixes.
 4. **Implement only the spec** — If you find something out of scope, defer it.
-5. **Run independent subagent code review** — Launch a fresh subagent with NO implementation context. Give it the git diff, acceptance criteria, and design system rules. The subagent categorizes findings as MUST-FIX / SHOULD-FIX / NICE-TO-HAVE. See `docs/skills/redesign-workflow-guide.md` step 5 for details.
+5. **Run code review after every commit/phase** — After committing changes (no PR required), run `/code-review` to review the committed diff against the base branch. This is mandatory at every phase — do not wait for a PR. The review categorizes findings as MUST-FIX / SHOULD-FIX / NICE-TO-HAVE. See `docs/skills/redesign-workflow-guide.md` step 5 for details.
 6. **Fix all MUST-FIX findings** — Do not merge until review is clear. Re-run review if substantial changes were needed.
 7. **Validate build** — Run `npx tsc --noEmit` and `npm run build` before considering a batch done.
 8. **Reconcile** — After each batch, update which pages are done and what's next.
 9. **Sync documentation after each phase** — After completing a phase (group of related batches), review all key docs for stale info: page names, navigation specs, design patterns, product strategy sections. See `docs/skills/redesign-workflow-guide.md` step 9.
+
+## Slash Commands
+
+- `/kickoff` — Start a new batch or phase. Reads the roadmap, identifies what's next, writes the spec, and asks for approval before coding.
+- `/code-review` — Review changes for bugs and CLAUDE.md compliance. Works in two modes:
+  - **Phase mode** (no args): Reviews committed changes on the current branch vs main. Use this after every commit/phase — no PR required.
+  - **PR mode** (`/code-review 123`): Reviews a specific pull request and comments on it.
 
 ## Workflow & UX Reference Docs
 
