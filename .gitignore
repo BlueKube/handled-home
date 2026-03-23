@@ -30,3 +30,4 @@ e2e/.auth/
 
 # Supabase CLI temp
 supabase/.temp/
+__pycache__/
