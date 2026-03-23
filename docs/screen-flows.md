@@ -686,8 +686,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Caption: "Choose services and how often they happen."
 
 3. **Entitlement Guardrails** (conditional)
-   - Budget usage bar: credits used vs included vs max
-   - "Auto-fit" button if over limit
+   - Budget usage bar: credits used vs included vs max — progress bar with status badge
+   - Button (accent, sm): "Auto-Fit" if over limit
 
 4. **Service Items** (list of RoutineItemCards)
    - Each card: service name, level selector, cadence selector (weekly/biweekly/monthly), remove button
@@ -720,7 +720,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 1. **Header**: ChevronLeft + "Back to Builder" | H2 "Review Your Routine"
 2. **Service Summary Card**: list of selected services with level, cadence, and per-cycle cost
 3. **4-Week Preview Timeline**: visual week-by-week schedule of upcoming visits
-4. **Cost Breakdown**: included credits used, extras cost, total per cycle with help text explaining each line item
+4. **Cost Breakdown**: included credits used, extras cost, total per cycle with help text explaining each line item — status badge showing "Within Budget" or "Over Limit"
 5. **Bottom CTA** (fixed, blur bg): Button (accent, xl, full-width): "Confirm Routine"
 
 **Empty State**: ListChecks icon + "Your routine review will appear here once you select services in the builder."
@@ -1159,7 +1159,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 4. **Referral List**
    - H3: "Your Referrals"
-   - Cards per referral: ID preview + milestone badges (Signed up, Subscribed, First visit, Paid cycle)
+   - Cards per referral: ID preview + status badge (Signed up, Subscribed, First visit, Paid cycle)
    - Empty: "No referrals yet. Share your code to get started!"
 
 **Success**: Toast "Referral code generated — share it to start earning."
@@ -1866,6 +1866,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/providers/:id`
 **Purpose**: Full provider profile — org info, coverage, capabilities, quality, earnings
 
+**Empty State**: User icon + "Provider profile is loading — details will appear once the provider record is fetched."
 **Error State**: "Provider profile couldn't be loaded — the provider record may be incomplete. Go back and try again."
 
 ### Screen 26.3: Application Queue
@@ -1881,6 +1882,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/providers/applications/:id`
 **Purpose**: Individual application review with approve/reject actions
 
+**Empty State**: FileText icon + "Application details will appear here once the record is loaded."
 **Error State**: "Application details couldn't be loaded — go back to the queue and try again."
 
 ---
@@ -1947,6 +1949,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/jobs/:jobId`
 **Purpose**: Full job view with admin actions
 
+**Empty State**: Briefcase icon + "Job details will load once the record is fetched."
 **Error State**: "Job record couldn't be loaded — the job ID may be invalid. Go back to the job list."
 
 ### Screen 28.3: Exception Queue
@@ -2030,6 +2033,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/support/tickets/:ticketId`
 **Purpose**: Full ticket view with admin resolution tools
 
+**Empty State**: MessageCircle icon + "Ticket details will appear once the record is loaded."
 **Error State**: "Ticket details failed to load — the ticket may have been merged or deleted. Go back to the console."
 
 ### Screen 30.3: Support Policies
