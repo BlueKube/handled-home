@@ -887,6 +887,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
      - Tap → `/customer/visits/:jobId`
    - Empty state: Clock icon + "No completed services yet" + "Your service history will build here over time."
 
+**Validation**: Feedback submissions require a selection before saving
 **Loading**: Skeleton stat pills and timeline placeholder cards
 **Error State**: "Your activity history couldn't be loaded — your home records are safe. Check your connection and try again."
 
@@ -1059,6 +1060,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Help text: info tooltip "Your plan bills every 4 weeks. Changes take effect next cycle."
 
 **Success**: Toast "Payment method updated."
+**Validation**: Payment method changes require card number validation before save
 **Loading**: Skeleton plan card and payment method row
 **Empty State**: Wallet icon + "No billing activity yet — your first invoice will appear here once your membership begins."
 **Error State**: "Your billing information couldn't be loaded — your membership is still active. Try again in a moment."
@@ -1118,6 +1120,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Inbox icon (muted, 40×40) + "No issues yet — that's great!"
 
 **Success**: Toast "Ticket submitted — we'll respond within 24 hours."
+**Validation**: Issue resolution form requires category selection
 **Loading**: Skeleton cards for resolve CTA and ticket list
 **Error State**: "Your support information couldn't be loaded — we'll still respond to your open tickets. Try again."
 
@@ -2081,6 +2084,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Purpose**: Viral loop metrics, BYOC performance, referral conversion
 
 **Empty State**: Rocket icon + "No growth events yet — your signups, BYOC activations, and referral conversions will appear here."
+**Validation**: Date range filters required for analytics queries
 **Error State**: "Growth data couldn't be loaded — analytics pipeline may be delayed. Check back shortly."
 
 ### Screen 30.6: Feedback
@@ -2103,6 +2107,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/incentives`
 **Purpose**: Referral program configuration, BYOC bonus rules
 
+**Validation**: Program configuration requires name, type, and reward amount
 **Empty State**: Gift icon + "No incentive programs configured — create referral or BYOC bonus rules to get started."
 **Error State**: "Incentive program data couldn't be loaded — active programs are still running. Retry."
 
