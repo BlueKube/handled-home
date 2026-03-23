@@ -39,11 +39,12 @@ export default function ShareLanding() {
         context: { share_code: shareCode },
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shareCode, data]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-background animate-fade-in">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
@@ -67,7 +68,7 @@ export default function ShareLanding() {
 
   if (!data || data.expired) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6 text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6 text-center animate-fade-in">
         <img src={handledLogo} alt="Handled Home" className="h-10 mb-6" />
         <h1 className="text-h2 mb-2">This share has expired</h1>
         <p className="text-sm text-muted-foreground mb-6">The link is no longer active.</p>
