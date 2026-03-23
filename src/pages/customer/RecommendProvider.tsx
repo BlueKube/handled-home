@@ -69,7 +69,7 @@ export default function RecommendProvider() {
 
   if (view === "confirmed") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 space-y-6 animate-fade-in">
+      <div className="flex flex-col items-center justify-center min-h-[80vh] p-4 pb-24 space-y-6 animate-fade-in">
         <CheckCircle className="h-16 w-16 text-accent animate-fade-in" />
         <h2 className="text-h2 text-center">We've received your recommendation</h2>
         <p className="text-base font-semibold text-center">{providerName}</p>
@@ -99,7 +99,7 @@ export default function RecommendProvider() {
 
         <button
           onClick={() => navigate("/customer/recommend-provider/status")}
-          className="text-sm text-accent underline"
+          className="text-sm text-accent underline min-h-[44px] flex items-center"
         >
           Track this recommendation
         </button>

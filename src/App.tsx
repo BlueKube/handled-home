@@ -219,8 +219,8 @@ const App = () => (
                 <Route path="/customer/services" element={<CustomerPropertyGate><CustomerServices /></CustomerPropertyGate>} />
                 <Route path="/customer/more" element={<CustomerPropertyGate><MoreMenuPage /></CustomerPropertyGate>} />
                 <Route path="/customer/notifications" element={<SharedNotifications />} />
-                <Route path="/customer/recommend-provider" element={<CustomerRecommendProvider />} />
-                <Route path="/customer/recommend-provider/status" element={<CustomerRecommendProviderStatus />} />
+                <Route path="/customer/recommend-provider" element={<CustomerPropertyGate><CustomerRecommendProvider /></CustomerPropertyGate>} />
+                <Route path="/customer/recommend-provider/status" element={<CustomerPropertyGate><CustomerRecommendProviderStatus /></CustomerPropertyGate>} />
               </Route>
 
               {/* Provider App */}
