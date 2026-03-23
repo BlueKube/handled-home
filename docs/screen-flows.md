@@ -241,6 +241,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (outline, large, full-width): "I'm a provider"
 
 5. **Footer Logo** (centered, h-6, opacity-60)
+   - Help text: "How it works — view proof of completed service and share it with anyone."
 
 **States**:
 - **Loading**: Full-screen centered spinner
@@ -684,7 +685,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 7. **4-Week Preview Timeline** (visual week-by-week schedule)
 
-8. **Add Services Button** → opens AddServicesSheet
+8. **Add Services Button** → opens AddServicesSheet — explainer on first visit: "How it works — add services, set frequency, and we'll build your schedule."
 
 9. **Bottom CTA** (fixed above tab bar, blur bg)
    - If subscribed: "Review Routine" + ArrowRight (disabled if over limit)
@@ -722,7 +723,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 2. **Effective Date Card**: "Your routine is effective next cycle." + next service date
 3. **Back Button**: ChevronLeft + "Review" (navigate back to routine review)
 4. **Summary**: services confirmed, cadence, estimated monthly cost
-4. **Next Steps**: caption "Your provider will follow this routine on your service day."
+4. **Next Steps**: caption "Your provider will follow this routine on your service day." — explainer: "How it works — your routine repeats automatically each cycle until you change it."
 5. **CTA**: Button (accent, lg, full-width): "View Your Schedule"
 
 **Loading**: Spinner while routine changes are saved
@@ -917,6 +918,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 13. **Issue Section**
     - If issue exists: warning card with status, note, resolution
     - If no issue: Button (outline): "Report a problem"
+    - Help text: explainer "How it works — if anything looks off, report it and we'll resolve within 24 hours."
 
 **Sheets**:
 - ReportIssueSheet: structured issue reporting with reason categories
@@ -1169,6 +1171,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 Each menu item: icon + label + ChevronRight, tappable
 
+**Explainer**: help text on Role Switcher "How it works — switch between customer and provider accounts if you have both."
 **Loading**: Skeleton menu rows
 **Error State**: "Menu couldn't load — try closing and reopening the app."
 **Note**: "Plans & Subscription" replaces the former Plans primary tab. It links to `/customer/plans` which serves as both plan browsing (for new/upgrading customers) and subscription management (for active subscribers).
@@ -1305,6 +1308,7 @@ Each menu item: icon + label + ChevronRight, tappable
 7. **Bottom CTA**: Button (accent, xl, full-width): "Save and Continue"
 
 **Success**: Toast "Documents uploaded — continuing to agreement."
+**Explainer**: info tooltip "How it works — upload your documents once and we'll keep them on file."
 **Loading**: Skeleton upload cards while compliance status loads
 **Error State**: "Upload failed — check your file size (max 10MB) and try again."
 
@@ -1340,6 +1344,7 @@ Each menu item: icon + label + ChevronRight, tappable
 7. **Agreement Card**: acceptance status (CheckCircle icon)
 8. **Bottom CTA**: Button (accent, xl, full-width): "Submit Application"
 
+**Explainer**: help text "How it works — review all your details before submitting. You can edit any section."
 **Loading**: Skeleton summary cards while application data loads
 **Success Feedback**: Toast "Application submitted — we'll review within 2 business days."
 
@@ -1406,6 +1411,7 @@ Each menu item: icon + label + ChevronRight, tappable
     - H3: "Coming Up"
     - Card with upcoming 3 jobs: CalendarDays icon + address + date + service count
 
+**Explainer**: help text on Stats Grid — "How it works — your daily stats update in real time as you complete jobs."
 **Loading**: Skeleton greeting, stat grid placeholders, and job card shimmers
 **Error State**: "Dashboard couldn't load — pull down to refresh. Your route and jobs are unaffected."
 
@@ -1424,7 +1430,7 @@ Each menu item: icon + label + ChevronRight, tappable
 4. **Day Plan Summary**: overview of today's route
 5. **Job Cards** (repeating): rank, address, services, status badge, duration, reorder buttons — tap to open job
 6. **Map/List View Toggle**: segmented control
-7. **Route Optimization Button**: Button (outline, sm): "Optimize Route"
+7. **Route Optimization Button**: Button (outline, sm): "Optimize Route" — tooltip: "How it works — reorders your stops for the shortest drive time."
 8. **Week Due Queue**: upcoming jobs preview
 9. **Primary CTA**: Button (accent, lg, full-width): "Start Next Job" (navigates to first incomplete job)
 
@@ -1441,7 +1447,7 @@ Each menu item: icon + label + ChevronRight, tappable
 2. **Queue Breadcrumb**: "Stop X of Y today" with prev/next navigation arrows (ChevronLeft/ChevronRight)
 3. **Property Details Card**: address, gate code, dog alert, parking notes
 4. **SKU Checklist**: items with proof-required indicators and status badges
-5. **Report Issue**: Button (outline, sm): "Report Issue" — opens action sheet
+5. **Report Issue**: Button (outline, sm): "Report Issue" — opens action sheet with help text "How it works — report access issues, hazards, or problems and we'll help resolve them."
 6. **Sticky Action Bar** (fixed bottom-16, pb-48): Button (accent, xl, full-width): "Start Job" / "View Checklist" / "Complete Job" (changes based on job status)
 
 **Loading**: Skeleton shimmer while job details load
@@ -1454,7 +1460,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Sections**:
 1. **Back Button**: ChevronLeft + "Job Detail"
-2. **Progress Counter**: "Item X of Y" with progress bar
+2. **Progress Counter**: "Item X of Y" with progress bar — explainer on first use: "How it works — complete each item, then mark it done to continue."
 3. **Current Task Card**: service name, task description, proof-required badge if applicable
 4. **Action Area**: checkbox or toggle to mark item complete
 5. **Bottom CTA**: Button (accent, xl, full-width): "Mark Complete and Continue" / "Finish Checklist" (on last item)
@@ -1470,7 +1476,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Sections**:
 1. **Back Button**: ChevronLeft + "Checklist"
 2. **Header**: H2 "Upload Photos"
-3. **Required Photos Grid**: cards per SKU showing before/after slots, Camera icon tap to capture
+3. **Required Photos Grid**: cards per SKU showing before/after slots, Camera icon tap to capture — help text: "How it works — take clear before and after photos for each service as proof of work."
 4. **Upload Progress**: progress bar per photo during upload
 5. **Validation**: required markers on mandatory photos
 6. **Bottom CTA**: Button (accent, xl, full-width): "Submit Photos and Complete"
@@ -1488,7 +1494,7 @@ Each menu item: icon + label + ChevronRight, tappable
 2. **Celebration Header**: PartyPopper icon (48×48) + H2 "Job Complete!"
 2. **Earnings Display**: base pay + modifier breakdown with `formatCents` utility
 3. **Route Progress Bar**: segmented stops showing completed vs remaining, trophy when all done
-4. **Level Sufficiency Form**: quality feedback form (LevelSufficiencyForm)
+4. **Level Sufficiency Form**: quality feedback form (LevelSufficiencyForm) — explainer: "How it works — rate if the service level was sufficient for this property."
 5. **Notes**: Textarea for optional completion notes
 6. **Next Stop CTA**: Button (accent, xl, full-width): "Continue to Next Stop" / "View Your Earnings" (if day complete)
 7. **Day Complete State**: Trophy card + "All stops finished — great work today!" when all jobs done
@@ -1540,6 +1546,7 @@ Each menu item: icon + label + ChevronRight, tappable
 8. **Inactive Links** (collapsed section)
 
 **Gate**: Must be approved provider. Otherwise shows locked screen.
+**Explainer**: help text "How it works — create invite links, share with your existing customers, and earn bonuses when they join."
 **Success**: Toast "Invite link created — share it with your customers."
 **Loading**: Skeleton stats grid and link cards
 **Error State**: "BYOC data couldn't be loaded — your invite links are still active. Pull down to refresh."
