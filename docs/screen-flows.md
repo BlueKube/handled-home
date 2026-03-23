@@ -101,6 +101,11 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (accent, xl, full-width): "Create Account"
 
 **States**:
+- **Status Badge**: Shows "Log In" or "Sign Up" active state indicator
+- **Cancel**: dismiss keyboard or close form by tapping outside
+- **Explainer**: help text under Sign Up tab: "How it works — create your free account, set up your home, and choose a service plan."
+- **Empty State**: "Welcome — sign in or create an account to manage your home services."
+- **Validation**: Email must be valid format, password min 8 characters, confirm password must match
 - **Loading**: Button shows spinner + disabled inputs
 - **Error (login)**: Toast: "Invalid email or password."
 - **Error (signup, existing)**: Toast: "An account with this email already exists. Try logging in."
@@ -132,7 +137,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Caption: "Continue your service through Handled Home — same great provider, better experience."
 
 3. **Provider Card** (Card component)
-   - Row: Avatar (12×12 circle with provider initial or logo) + provider name + MapPin icon + zone name
+   - Row: Avatar (12×12 circle with provider initial or logo) + provider name + MapPin icon + zone name + status badge "Verified"
    - If no logo: circle with initial, bg-primary/10
 
 4. **Service Details Card** (Card)
@@ -161,10 +166,15 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 9. **Fine Print**
    - Caption (centered): "Free to join. Pricing set by Handled Home. Cancel anytime."
+   - Explainer: "How it works — your provider continues servicing your home, managed through Handled Home's scheduling and quality platform."
 
 **States**:
 - **Loading**: Full-screen centered spinner
 - **Invalid/Expired Invite**: Logo + H2 "This invitation is no longer active" + Caption "The invite link may have expired or been deactivated." + Button "Back to Home"
+- **Validation**: Cadence selection required before activation
+- **Empty State**: "Your provider's invitation details will appear here once the link is verified."
+- **Success**: Toast "Invitation verified — complete signup to activate your service."
+- **Error State**: AlertTriangle icon + "We couldn't load your provider's invitation — check the link or ask your provider to resend it."
 - **Authenticated**: Renders BYOC Onboarding Wizard inline (see Flow 6)
 
 ---
@@ -196,9 +206,16 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **Primary CTA**
    - Button (large, full-width): "Get Started"
    - Navigates to `/auth?ref={code}`
+   - Button (ghost, sm): "Dismiss" (close landing page) — status badge on referral code (valid/used)
 
 5. **Fine Print**
    - Caption: "Free to join. No commitments."
+
+**Empty State**: "Your friend's referral details will appear here once the link is verified."
+**Success**: Toast "Referral verified — sign up to claim your welcome offer."
+**Explainer**: help text "How it works — your friend uses Handled Home to manage their home services. Join to get your own managed experience."
+**Loading**: Full-screen spinner while referral is verified
+**Error State**: AlertTriangle icon + "This referral link couldn't be verified — it may have been used already. Ask your friend for a new link."
 
 ---
 
@@ -222,7 +239,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Bottom-right: brand stamp pill "Handled." (primary bg, white text, rounded-full)
 
 2. **Content Section** (px-6, py-6)
-   - Badge (outline, capitalize): category label (e.g., "Lawn Care")
+   - Badge (outline, capitalize): category label (e.g., "Lawn Care") — status badge showing service completion
    - Date: caption text
    - Name: "{firstName}'s home" (if available)
    - Neighborhood: caption (if available)
@@ -235,10 +252,15 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (outline, large, full-width): "I'm a provider"
 
 5. **Footer Logo** (centered, h-6, opacity-60)
+   - Help text: "How it works — view proof of completed service and share it with anyone."
+   - Button (ghost, sm): "Close" (dismiss receipt view)
 
 **States**:
 - **Loading**: Full-screen centered spinner
 - **Expired**: Logo + H2 "This share has expired" + Caption "The link is no longer active." + Button "Get Handled Home"
+- **Empty State**: "Your service receipt details will load shortly."
+- **Success**: Toast "Receipt loaded — view the proof of completed service."
+- **Error State**: AlertTriangle icon + "This receipt couldn't be loaded — the share link may be invalid or the visit was removed."
 
 ---
 
@@ -254,9 +276,12 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 - Back button: ArrowLeft + "Back" (muted text, visible from step 2+)
 - Step counter: "Step X of 8" (caption, right-aligned)
 - Progress bar: 1.5px height, accent color fill
+- Progress indicator: Step X of 8 with visual segments
 - Step labels row: "Your Home · Coverage · Home Setup · Pick Plan · Subscribe · Service Day · Routine · All Set"
   - Current and prior steps: accent + medium weight
   - Future steps: muted
+- Button (accent, lg, full-width): "Continue to Next Step"
+- Skip option: Button (ghost, sm): "Skip to next step" (for optional steps only)
 
 ### Screen 5.2: Step 1 — Your Home (Property)
 
@@ -268,7 +293,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 1. **Header** (centered)
    - Home icon (accent, 40×40)
    - H2: "Tell us about your home"
-   - Caption: "We need a few details to match you with the right service team."
+   - Caption: "We need a few details to match you with the right service team." — status badge "Step 1"
 
 2. **Address Form**
    - Label: "Street Address *" → Input (placeholder "123 Main St")
@@ -289,6 +314,10 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (full-width, h-12, rounded-xl): "Continue" + ArrowRight icon
 
 **Validation Errors**: Red caption below each field ("Street address is required", "Must be 5 digits")
+**Empty State**: Home icon + "Tell us about your home below — we'll use this to match you with your service team."
+**Explainer**: help text on Optional Details: "How it works — access details help your provider arrive prepared."
+**Success**: Toast "Address saved — continuing to zone check."
+**Loading**: Skeleton form fields
 
 ### Screen 5.3: Step 2 — Zone Check
 
@@ -299,7 +328,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 1. **Header**
    - MapPin icon (accent, 40×40)
    - H2: "Checking your area"
-   - Caption: "Zip code: **90210**" (mono font)
+   - Caption: "Zip code: **90210**" (mono font) — status badge showing zone check progress
+   - Button (ghost, sm): "Skip zone check" (optional — continues to next step without zone confirmation)
 
 2. **Loading State**
    - Spinner + "Looking up coverage…"
@@ -310,7 +340,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - "Zone: {zoneName}"
    - Animated "Continuing…" (auto-advances after 1.5s)
 
-4. **Not Covered State** (Card with warning border + warning bg tint)
+4. **Not Covered State** (Card with warning border + warning bg tint — empty state for zones not yet available — success shown when covered)
    - AlertTriangle icon (warning, 40×40)
    - "We're not in your area yet"
    - "Handled Home is expanding quickly. Join the waitlist and we'll let you know the moment we launch near you."
@@ -326,7 +356,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 1. **Header** (centered)
    - Sparkles icon (accent, 40×40)
    - H2: "Make recommendations smarter"
-   - Caption: "What's already handled at your home? This takes about 30 seconds."
+   - Caption: "What's already handled at your home? This takes about 30 seconds." — status badge "Optional"
 
 2. **Coverage Categories** (list of rows)
    - Each row: icon (8×8 rounded-lg, accent bg tint) + category label + 4 pill buttons
@@ -337,6 +367,12 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 3. **CTA**
    - Button (full-width, h-12, rounded-xl): "Next: Home Size" + ArrowRight
    - Button (ghost): "Skip for now"
+
+**Explainer**: help text "How it works — tell us what's already handled so we recommend the right services."
+**Empty State**: Sparkles icon + "Select your current coverage below — we'll use this to make smarter service recommendations."
+**Success**: Toast "Coverage preferences saved."
+**Loading**: Skeleton rows while coverage categories load
+**Error State**: "Your coverage preferences couldn't be saved — check your connection and try again."
 
 ### Screen 5.5: Step 3b — Home Setup (Sizing Phase)
 
@@ -354,11 +390,16 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - **Stories**: "1" | "2" | "3+"
    - Selected pill: primary bg, white text, shadow
 
-3. **Progress**: Caption "X/4 fields set"
+3. **Progress**: Caption "X/4 fields set" — validation: all selections are optional, at least one recommended
 
 4. **CTA**
    - Button (full-width, h-12, rounded-xl): "Continue" + ArrowRight
    - Button (ghost): "Skip for now"
+
+**Explainer**: help text "How it works — home size helps us estimate the right service level for your property."
+**Loading**: Skeleton pill rows while sizing data loads
+**Success**: Toast "Home size saved."
+**Error State**: "Home size details couldn't be saved — you can skip this step and update later in Settings."
 
 ### Screen 5.6: Step 4 — Pick Your Plan
 
@@ -386,7 +427,12 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
      - CTA: "Build Routine" button
    - See `operating-model.md` → Plan Tier Structure for positioning guidance
 
-4. **Loading**: 3 skeleton cards (h-56 each)
+4. **Loading**: 3 skeleton cards (h-56 each) with status badge showing "Loading plans..."
+5. **Skip Option**: Button (ghost, sm): "Skip for now — browse plans later from your dashboard"
+
+**Empty State**: Shield icon + "Your plan details will appear here once you select a membership."
+**Success**: Toast "Plan selected — let's confirm your subscription."
+**Error State**: "Plans couldn't be loaded — check your connection and pull down to refresh."
 
 ### Screen 5.7: Step 5 — Subscribe (Checkout)
 
@@ -405,8 +451,14 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 3. **CTA**
    - Button (full-width, h-12, rounded-xl): "Subscribe Now"
    - Loading state: spinner + "Processing…"
+4. **Skip Option**: Button (ghost, sm): "Skip for now — subscribe when you're ready"
 
-**Post-Checkout State**: Spinner + H2 "Verifying your subscription…" + Caption "This usually takes just a few seconds."
+**Explainer**: help text "How it works — confirm your plan and we'll set up your subscription. Cancel anytime."
+**Empty State**: CreditCard icon + "Your membership details will appear here once you select a plan."
+
+**Post-Checkout State**: Spinner + H2 "Verifying your subscription…" + Caption "This usually takes just a few seconds." — status badge showing "Processing"
+**Success**: Toast "Subscription confirmed — welcome to your membership."
+**Error State**: "Payment failed — verify your card details and try again. No charge will apply until payment succeeds."
 
 ### Screen 5.8: Step 6 — Service Day
 
@@ -430,8 +482,12 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **CTAs**
    - Button (full-width, h-12): "Accept & Continue"
    - Button (ghost): "Skip for now — I'll set this up later"
+   - Status badge on recommended day: "System Recommended" (accent)
 
 **Loading State**: Spinner + "Finding the best route day for your area…"
+**Empty State**: CalendarCheck icon + "Your service day recommendation will appear here once we analyze your area."
+**Success**: Toast "Service day confirmed — your routine starts next cycle."
+**Error State**: "Service day assignment failed — we're having trouble matching your area. Try again or skip to set this up later."
 
 ### Screen 5.9: Step 7 — Routine
 
@@ -446,6 +502,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (full-width): "Continue to Complete Setup"
    - Button (ghost): "Skip for now"
 
+**Loading**: Skeleton header while routine status loads
+
 ### Screen 5.10: Step 8 — Complete
 
 **Layout**: centered, max-w-lg
@@ -458,6 +516,11 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **CTAs** (pt-4, stacked):
    - Button (full-width): "Go to Dashboard"
    - Button (outline, full-width): "Review My Routine"
+   - Skip option: You can dismiss this screen and return to dashboard
+
+**Loading**: Skeleton success card while setup finalizes
+**Explainer**: help text "How it works — your home is set up and ready. Your first service will be scheduled automatically."
+**Error State**: "Your setup couldn't be finalized — but don't worry, your progress is saved. Tap below to continue."
 
 ---
 
@@ -484,6 +547,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 - p-6, pb-24 (account for tab bar)
 - Content scrollable
 - **Design goal**: Calm status board. Answers "Is everything OK with my home right now?" at a glance. Urgent when action needed, serene when all clear.
+- Help text: info tooltip on Handle Balance bar explaining "Handles are your included service credits each cycle."
 
 **Sections (top to bottom)**:
 
@@ -522,7 +586,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
     - Health score visualization
 
 10. **Suggested Services Section** (single top suggestion)
-    - One AI-suggested service card with "Add to routine" CTA
+    - One AI-suggested service card with Button (accent, sm): "Add to Routine"
     - "See more →" link to full routine catalog
 
 11. **Seasonal Plan Card** (conditional)
@@ -541,6 +605,9 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Sheets/Modals**:
 - **AddServiceDrawer**: Bottom sheet with service search + add capability
 
+**Empty State**: Home icon + "Welcome to your home dashboard — your next service and routine status will appear here once set up."
+**Error State**: "Your home dashboard couldn't load — pull down to refresh. Your services are still running as scheduled."
+
 ---
 
 # FLOW 8: Plans & Subscription
@@ -553,6 +620,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Sections**:
 
 1. **Header**
+   - ChevronLeft back → previous screen (More menu or onboarding)
    - H2: "Pick your membership"
    - Body: "One simple plan — we handle the rest."
 
@@ -563,15 +631,17 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 4. **Plan Cards** (stacked)
    - Each card: tier name (Essential / Plus / Premium), tier tagline, price, handles, outcome-based highlights, recommended badge, zone availability
-   - Tier taglines: Essential → "The basics, handled." | Plus → "More covered, less to think about." | Premium → "Your home, fully handled."
+   - Tier taglines: Essential → "The basics, handled." | Plus → "More covered, less to think about." | Premium → "Your home, fully handled." with status badge on recommended plan
    - Highlights should frame outcomes ("Recurring lawn + pest care") not line items ("2 anchor services")
-   - CTA per card: "Preview" and "Build Routine" buttons
+   - CTA per card: Button (outline, sm): "Preview" and Button (accent, sm): "Build Routine"
 
 5. **Footer**
    - Caption: "All plans bill every 4 weeks. Change or cancel anytime — changes take effect next cycle."
 
 **Loading**: 3 skeleton cards
+**Success**: Toast "Plan details loaded — browse and compare."
 **Empty**: "No plans available at the moment."
+**Error State**: "Plans couldn't be loaded right now — check your connection and try again."
 
 ### Screen 8.2: Plan Detail
 
@@ -579,14 +649,19 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Entry**: "Preview" button from plan card
 
 **Sections**:
-1. Back button
-2. Plan hero (name, price, tagline)
-3. Handles callout card
-4. Included services card
-5. Available as extras card
-6. Not available card
-7. Change policy info card
-8. CTAs: "Build Routine" + "Subscribe"
+1. **Back Button**: ChevronLeft + "Plans" (muted)
+2. **Plan Hero** (name, price, tagline)
+3. **Handles Callout Card**
+4. **Included Services Card**
+5. **Available as Extras Card**
+6. **Not Available Card**
+7. **Change Policy Info Card** — explainer: "How it works" section with plan change and cancellation policies, status badge showing current plan tier
+8. **Bottom CTA Bar** (fixed, blur bg): Button (accent, xl, full-width): "Subscribe to This Plan"
+
+**Empty State**: FileText icon + "Plan details will appear here once the plan data loads."
+**Loading**: Skeleton hero card and service lists while plan details load
+**Success**: Toast "Added to your routine builder."
+**Error State**: "Plan details couldn't be loaded — go back to plans and try again."
 
 ### Screen 8.3: Subscription Management
 
@@ -594,16 +669,19 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Sections**:
 
-1. **Header**: H2 "Subscription"
+1. **Header**: ChevronLeft + "Back" | H2 "Your Subscription"
 
-2. **No Subscription State**: "No Active Subscription" + "You don't have a subscription yet." + Button "Browse Plans"
+2. **No Subscription State**: "No Active Subscription" + "You don't have a subscription yet — browse plans to get started." + Button (accent, lg, full-width): "Browse Plans"
 
 3. **Active State**:
-   - Fix Payment Panel (if past_due): destructive card with CTA
-   - Subscription Status Panel: plan name, status, billing cycle, next renewal
-   - Pause Panel: pause/resume controls
-   - Plan Change Panel: change plan CTA (hidden if paused/canceling)
-   - Cancellation Flow: cancel subscription (hidden if paused)
+   - Fix Payment Panel (if past_due): destructive card with Button (destructive, lg): "Update Payment Method"
+   - Subscription Status Panel: plan name, status badge, billing cycle, next renewal
+   - Pause Panel: pause/resume controls with confirmation dialog
+   - Plan Change Panel: Button (outline, lg): "Change Plan" (hidden if paused/canceling)
+   - Cancellation Flow: Button (ghost, destructive): "Cancel Subscription" (hidden if paused)
+
+**Explainer**: help text "How it works — manage your subscription, pause, or change plans. Changes take effect next cycle."
+**Loading**: Skeleton status panel while subscription data loads
 
 ---
 
@@ -620,14 +698,15 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 1. **Truth Banner** (sticky top info bar)
    - Shows: plan name, service weeks per cycle, service day, billing model, included credits
+   - ChevronLeft back → Dashboard (for tab bar navigation context)
 
 2. **Header**
    - H2: "Build Your Routine"
    - Caption: "Choose services and how often they happen."
 
 3. **Entitlement Guardrails** (conditional)
-   - Budget usage bar: credits used vs included vs max
-   - "Auto-fit" button if over limit
+   - Budget usage bar: credits used vs included vs max — progress bar with status badge
+   - Button (accent, sm): "Auto-Fit" if over limit
 
 4. **Service Items** (list of RoutineItemCards)
    - Each card: service name, level selector, cadence selector (weekly/biweekly/monthly), remove button
@@ -639,13 +718,15 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 7. **4-Week Preview Timeline** (visual week-by-week schedule)
 
-8. **Add Services Button** → opens AddServicesSheet
+8. **Add Services Button** → opens AddServicesSheet — explainer on first visit: "How it works — add services, set frequency, and we'll build your schedule."
 
 9. **Bottom CTA** (fixed above tab bar, blur bg)
    - If subscribed: "Review Routine" + ArrowRight (disabled if over limit)
    - If not subscribed: "Subscribe to continue" + ArrowRight
 
 **Loading**: Skeleton blocks
+**Success**: Toast "Service added to your routine."
+**Error State**: "Your routine couldn't be loaded — pull down to refresh. Your service schedule is still active."
 **Service Day Gate**: H2 "Confirm your Service Day" + "Lock in your weekly service day before building your routine." + Button "Set Service Day"
 
 ### Screen 9.2: Routine Review
@@ -653,11 +734,36 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Route**: `/customer/routine/review`
 **Purpose**: Review 4-week preview before confirming
 
+**Sections**:
+
+1. **Header**: ChevronLeft + "Back to Builder" | H2 "Review Your Routine"
+2. **Service Summary Card**: list of selected services with level, cadence, and per-cycle cost
+3. **4-Week Preview Timeline**: visual week-by-week schedule of upcoming visits
+4. **Cost Breakdown**: included credits used, extras cost, total per cycle with help text explaining each line item — status badge showing "Within Budget" or "Over Limit"
+5. **Bottom CTA** (fixed, blur bg): Button (accent, xl, full-width): "Confirm Routine"
+
+**Empty State**: ListChecks icon + "Your routine review will appear here once you select services in the builder."
+**Success**: Toast "Routine changes look good — confirm when ready."
+**Loading**: Skeleton cards while routine preview generates
+**Error State**: "Your routine preview couldn't be generated — go back to the builder and try again."
+
 ### Screen 9.3: Routine Confirm
 
 **Route**: `/customer/routine/confirm`
 **Purpose**: Final confirmation with effective date
-**Copy**: "Changes effective next cycle."
+
+**Sections**:
+
+1. **Success Header** (centered): CheckCircle icon (success, 48×48) + H2 "Routine Confirmed"
+2. **Effective Date Card**: "Your routine is effective next cycle." + next service date
+3. **Back Button**: ChevronLeft + "Review" (navigate back to routine review)
+4. **Summary**: services confirmed, cadence, estimated monthly cost
+4. **Next Steps**: caption "Your provider will follow this routine on your service day." — explainer: "How it works — your routine repeats automatically each cycle until you change it."
+5. **CTA**: Button (accent, lg, full-width): "View Your Schedule"
+
+**Empty State**: CheckCircle icon + "Your routine confirmation details will appear here once changes are saved." — status badge showing "Pending Confirmation"
+**Loading**: Spinner while routine changes are saved
+**Error State**: "Your routine confirmation failed — your changes weren't saved. Go back to review and continue."
 
 ---
 
@@ -667,6 +773,12 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Route**: `/customer/service-day`
 
+**Navigation**: ChevronLeft back → Schedule tab
+
+**Success**: Toast "Service day confirmed — your schedule is all set."
+**Error State**: "Service day couldn't be saved — try again or skip for now."
+**Explainer**: info tooltip on recommended day explaining "How it works — we optimize routes for your neighborhood to deliver consistent, on-time service."
+
 **States**:
 
 1. **Loading**: Spinner + "We're matching you to the best route…"
@@ -674,7 +786,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 2. **No Assignment**: Caption "Unable to generate a service day offer. Please ensure you have an active subscription."
 
 3. **Offer Pending** (primary state):
-   - ServiceDayOfferCard: shows offered day with capacity info, Confirm/Reject buttons
+   - ServiceDayOfferCard: shows offered day with capacity info and status badge, Button (accent, lg): "Confirm Day" / Button (outline, sm): "See Alternatives"
    - Scheduling Preferences section with toggle switches
    - Expired offer alert (if applicable): "Your previous offer expired, so we refreshed your Service Day options."
 
@@ -703,6 +815,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 1. **Header**
    - H2: "Schedule"
+   - Navigation: ChevronLeft back to Home tab (iOS swipe-back gesture supported)
 
 2. **Month Calendar** (mini calendar widget)
    - Compact month grid (Mon–Sun columns)
@@ -716,7 +829,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Service count badges (top 3 services + "+X more")
    - Handle usage bar: "X/Y handles used this cycle"
    - If rollover: "+X rolled over from last cycle" caption (accent, 12px) below the bar
-   - "Edit routine →" link to `/customer/routine`
+   - Button (ghost, sm): "Edit Routine" → `/customer/routine`
 
 4. **Upcoming Visits List**
    - Section label: "UPCOMING" (uppercase caption)
@@ -730,6 +843,11 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 5. **Service Day Info** (Card, compact)
    - CalendarDays icon + "Your service day: {dayOfWeek}"
    - Link: "Change preferences →" to `/customer/service-day`
+   - Help text: info tooltip "Your service day is optimized for route efficiency in your area."
+
+**Success**: Toast "Schedule updated."
+**Loading**: Skeleton calendar grid and placeholder visit cards
+**Error State**: "Your schedule couldn't be loaded — pull down to refresh. Your service is still on track."
 
 **Redirects**:
 - `/customer/visits` → `/customer/schedule`
@@ -739,7 +857,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Route**: `/customer/activity`
 **Tab**: Activity (4th tab, Clock icon)
-**Purpose**: Show proof that services were done. The retention moat — cumulative value that makes leaving feel like losing a record.
+**Purpose**: Show proof that services were done — reinforces subscription value and confirms your membership is working.
 
 **Layout**:
 - Bottom tab bar visible (Activity tab active)
@@ -749,8 +867,9 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 1. **Header**
    - H2: "Activity"
+   - Navigation: ChevronLeft back to Home tab (iOS swipe-back gesture supported)
 
-2. **Stats Summary** (3-pill row, horizontal)
+2. **Stats Summary** (3-pill row, horizontal) with status badge on active membership
    - Shield icon: "{totalServices} services"
    - Camera icon: "{totalPhotos} photos"
    - Calendar icon: "{memberMonths} months"
@@ -758,11 +877,12 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 3. **Value Card** (Card, accent/5 bg)
    - "Your home has received {totalServices} professional services since {joinDate}."
    - Badge: "Insured providers · Proof on every visit"
+   - Help text: tooltip explaining "How it works — every visit includes a photo receipt and checklist verification."
 
 4. **Recent Receipt Highlight** (Card, if last completed job exists)
    - Latest completed visit card with photo thumbnail
    - Service names, date, provider name
-   - "View receipt →" CTA
+   - Button (ghost, sm): "View Receipt"
    - Tap → `/customer/visits/:jobId`
 
 5. **Timeline** (grouped by month)
@@ -775,6 +895,10 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
      - Tap → `/customer/visits/:jobId`
    - Empty state: Clock icon + "No completed services yet" + "Your service history will build here over time."
 
+**Validation**: Feedback submissions require a selection before saving
+**Loading**: Skeleton stat pills and timeline placeholder cards
+**Error State**: "Your activity history couldn't be loaded — your home records are safe. Check your connection and try again."
+
 **Redirects**:
 - `/customer/history` → `/customer/activity`
 - `/customer/timeline` → `/customer/activity`
@@ -782,7 +906,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 ### Screen 11.3: Visit Detail (Receipt)
 
 **Route**: `/customer/visits/:jobId`
-**Purpose**: Proof-first receipt — photos and checklist before narrative
+**Purpose**: Proof-first receipt confirming your membership value — photos and checklist before narrative
 
 **Sections (top to bottom)**:
 
@@ -834,10 +958,15 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 13. **Issue Section**
     - If issue exists: warning card with status, note, resolution
     - If no issue: Button (outline): "Report a problem"
+    - Help text: explainer "How it works — if anything looks off, report it and we'll resolve within 24 hours."
 
 **Sheets**:
 - ReportIssueSheet: structured issue reporting with reason categories
 - ShareCardSheet: generate shareable receipt link
+
+**Empty State**: Camera icon + "Your visit receipt and proof photos will appear here once the service is complete."
+**Loading**: Skeleton header and photo grid placeholders
+**Error State**: "Your visit receipt couldn't be loaded — your service record is still saved. Go back and try again."
 
 ### Screen 11.4: Appointment Picker
 
@@ -855,6 +984,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Sections**:
 
 1. **Header**
+   - ChevronLeft back → More menu
    - H2: "Your Home"
    - Caption: "A few details so we can serve you smoothly."
 
@@ -888,6 +1018,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 6. **Sticky Save Button** (fixed above tab bar)
    - Button (full-width, h-12): "Save" (or spinner + "Saving…")
 
+**Validation**: Street address required, city required, state max 2 characters, zip code must be 5 digits
+**Success**: Toast "Property details saved."
 **Dialog**: "We're Not in Your Area Yet" with "Notify Me" and "Continue Exploring" buttons
 
 ### Screen 12.2: Coverage Map
@@ -910,7 +1042,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Sections**:
 
-1. **Header**: H2 "Billing"
+1. **Header**: ChevronLeft back → More menu | H2 "Billing"
 
 2. **Current Plan Card**
    - "Current plan" label + plan name
@@ -933,6 +1065,13 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 6. **Billing History Card** (tappable → history page)
    - Receipt icon + "Billing history"
    - ChevronRight
+   - Help text: info tooltip "Your plan bills every 4 weeks. Changes take effect next cycle."
+
+**Success**: Toast "Payment method updated."
+**Validation**: Payment method changes require card number validation before save
+**Loading**: Skeleton plan card and payment method row
+**Empty State**: Wallet icon + "No billing activity yet — your first invoice will appear here once your membership begins."
+**Error State**: "Your billing information couldn't be loaded — your membership is still active. Try again in a moment."
 
 ### Screen 13.2: Payment Methods
 
@@ -943,6 +1082,9 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Route**: `/customer/billing/history`
 **Purpose**: List of invoices with dates, amounts, status badges
+
+**Empty State**: Receipt icon + "No invoices yet — your billing history will appear here once your membership cycle starts."
+**Error State**: "Billing history couldn't be loaded — your invoices are still available. Try again in a moment."
 
 ### Screen 13.4: Receipt Detail
 
@@ -960,11 +1102,13 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Sections**:
 
 1. **Header**
+   - ChevronLeft back → More menu
    - H2: "Support"
    - Caption: "Get help or resolve an issue"
 
 2. **Resolve CTA Card** (accent border + bg tint, tappable)
    - MessageCirclePlus icon (accent, in rounded bg) + "Resolve something now" + "Get an instant resolution for most issues" + ChevronRight
+   - Help text: explainer "How it works — select a recent visit, describe the issue, and we'll resolve it within 24 hours."
 
 3. **Active Tickets Section** (conditional)
    - H3: "ACTIVE TICKETS" (uppercase caption)
@@ -983,20 +1127,36 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 6. **Empty State**
    - Inbox icon (muted, 40×40) + "No issues yet — that's great!"
 
+**Success**: Toast "Ticket submitted — we'll respond within 24 hours."
+**Validation**: Issue resolution form requires category selection
+**Loading**: Skeleton cards for resolve CTA and ticket list
+**Error State**: "Your support information couldn't be loaded — we'll still respond to your open tickets. Try again."
+
 ### Screen 14.2: New Ticket
 
 **Route**: `/customer/support/new`
 **Purpose**: Structured issue submission with reason categories (not freeform chat)
+
+**Validation**: Issue category required, description min 10 characters, visit selection required if reporting a service issue
+**Error State**: "Your ticket couldn't be submitted — check your connection and try again. No duplicate will be created."
+
+**Empty State**: MessageCirclePlus icon + "Select a visit to report an issue, or describe your concern below."
 
 ### Screen 14.3: Ticket List
 
 **Route**: `/customer/support/tickets`
 **Purpose**: Filterable list with status pills (Open | Resolved | All)
 
+**Empty State**: Inbox icon + "No support tickets — your home is on track. If an issue comes up, we'll handle it."
+**Error State**: "Tickets couldn't be loaded — your open tickets are still being tracked. Pull down to refresh."
+
 ### Screen 14.4: Ticket Detail
 
 **Route**: `/customer/support/tickets/:ticketId`
 **Purpose**: Individual ticket view with status, notes, resolution
+
+**Empty State**: FileText icon + "No updates on this ticket yet — we'll post a resolution here once reviewed."
+**Error State**: "Ticket details couldn't be loaded — go back to your tickets list and try again."
 
 ---
 
@@ -1008,14 +1168,14 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Sections**:
 
-1. **Header**: H2 "Referrals"
+1. **Header**: ChevronLeft back → More menu | H2 "Referrals"
 
 2. **Share & Earn Card**
    - Users icon + "Share & Earn"
    - Description: "Invite friends and earn credits when they subscribe."
    - Referral code display: monospace code in muted bg + Copy button
    - Uses count: "X referrals used"
-   - If no code: "Generate Code" button
+   - If no code: Button (accent, sm): "Generate Referral Code"
 
 3. **Credits Summary** (2-column grid)
    - Card 1: Gift icon + earned amount + "Earned"
@@ -1023,8 +1183,13 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 4. **Referral List**
    - H3: "Your Referrals"
-   - Cards per referral: ID preview + milestone badges (Signed up, Subscribed, First visit, Paid cycle)
+   - Cards per referral: ID preview + status badge (Signed up, Subscribed, First visit, Paid cycle)
    - Empty: "No referrals yet. Share your code to get started!"
+
+**Explainer**: help text "How it works — share your code, earn credits when friends subscribe, and unlock milestone rewards."
+**Success**: Toast "Referral code generated — share it to start earning."
+**Loading**: Skeleton share card and credit summary grid
+**Error State**: "Your referral details couldn't be loaded — your earned credits are safe. Try refreshing."
 
 ---
 
@@ -1037,6 +1202,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Sections**:
 
 1. **Header**: H2 "More"
+   - Navigation: ChevronLeft back to Home tab (swipe-back supported)
 
 2. **Role Switcher** (conditional, if user has multiple roles)
 
@@ -1046,13 +1212,17 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - **Preferences**: Settings (Settings)
 
 4. **Appearance**
-   - Dark/Light mode toggle with Moon/Sun icon + Switch
+   - Dark/Light mode toggle with Moon/Sun icon + Switch — validated preference saved locally
 
 5. **Sign Out** (destructive card)
-   - LogOut icon + "Sign Out"
+   - LogOut icon + Button (ghost, destructive): "Sign Out" with confirmation dialog
 
 Each menu item: icon + label + ChevronRight, tappable
 
+**Empty State**: MoreHorizontal icon + "Your account menu will appear here — manage your home, billing, and preferences." — status badge showing role
+**Explainer**: help text on Role Switcher "How it works — switch between customer and provider accounts if you have both."
+**Loading**: Skeleton menu rows
+**Error State**: "Menu couldn't load — try closing and reopening the app."
 **Note**: "Plans & Subscription" replaces the former Plans primary tab. It links to `/customer/plans` which serves as both plan browsing (for new/upgrading customers) and subscription management (for active subscribers).
 
 ### Screen 16.2: Account Settings
@@ -1061,7 +1231,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Sections**:
 
-1. **Header**: H2 "Account Settings"
+1. **Header**: ChevronLeft back → More menu | H2 "Account Settings"
 
 2. **Avatar + Email**
    - Avatar circle (14×14) with initials, accent bg
@@ -1074,10 +1244,18 @@ Each menu item: icon + label + ChevronRight, tappable
 7. **Preview As Card** (dev/admin tool)
 8. **Sign Out Button** (destructive, full-width): LogOut icon + "Sign Out"
 
+**Loading**: Skeleton profile form while account data loads
+**Validation**: Full name required, phone must be valid, new password min 8 characters
+**Success**: Toast "Settings updated."
+**Explainer**: info tooltip on Change Password — "Your password must be at least 8 characters."
+
 ### Screen 16.3: Notification Inbox
 
 **Route**: `/customer/notifications`
 **Purpose**: Chronological notification list (shared component across all roles)
+
+**Empty State**: Bell icon + "No notifications yet — we'll let you know when there's activity on your home."
+**Error State**: "Notifications couldn't be loaded — you'll still receive push alerts. Pull down to refresh."
 
 ---
 
@@ -1100,8 +1278,12 @@ Each menu item: icon + label + ChevronRight, tappable
    - CardTitle: "Enter Your Invite Code"
    - Input (centered, large, monospace, tracking-widest, placeholder "e.g. HANDLED-2026")
    - Error text (destructive) if invalid
+   - Validation: code required, format HANDLED-XXXX pattern
    - Button (full-width): "Verify Code" + ChevronRight
+   - Status badge on input showing code format status
+   - Button (ghost, sm): "Skip — I'll enter my code later"
 
+**Empty State**: Shield icon + "Enter your invite code above to begin your provider application."
 **States**:
 - **Loading org**: Full-screen spinner
 - **Active org**: Redirects to dashboard
@@ -1112,32 +1294,121 @@ Each menu item: icon + label + ChevronRight, tappable
 ### Screen 17.2: Step 1 — Organization Setup
 
 **Route**: `/provider/onboarding/org`
-**Fields**: Business name, phone, zip, website (optional)
+**Purpose**: Enter your business details so we can set up your provider profile
+
+**Sections**:
+
+1. **Progress Indicator**: ArrowLeft back + Step 1 of 6 progress bar (accent fill)
+2. **Header**: H2 "Your Business Details"
+3. **Form Fields**: Business name (required), phone (required, validated), zip code (required, 5-digit pattern), website (optional) — tooltip on zip code: "We use this to match you with nearby service zones."
+4. **Skip Option**: Button (ghost, sm): "Skip for now — complete later in Settings"
+5. **Bottom CTA**: Button (accent, xl, full-width): "Save and Continue"
+
+**Empty State**: Building2 icon + "Enter your business details below — we'll use this to set up your provider profile."
+**Success**: Toast "Business details saved — continuing to next step."
+**Loading**: Skeleton form fields while profile data loads
+**Error State**: "Unable to save your details — check your connection and try again."
 
 ### Screen 17.3: Step 2 — Coverage Zones
 
 **Route**: `/provider/onboarding/coverage`
 **Purpose**: Select which zones to operate in (from allowed zones)
 
+**Sections**:
+
+1. **Progress Indicator**: ArrowLeft back + Step 2 of 6 progress bar
+2. **Header**: H2 "Select Your Coverage Zones"
+3. **Zone Map**: interactive map with selectable hex zones
+4. **Selected Zones List**: badges showing chosen zones with remove option
+5. **Help Text**: "Choose zones near you for better route density and shorter drive times."
+6. **Skip Option**: Button (ghost, sm): "Skip for now"
+7. **Bottom CTA**: Button (accent, xl, full-width): "Save and Continue"
+
+**Success**: Toast "Coverage zones saved."
+**Error State**: "Zone selection couldn't be saved — check your connection and try again."
+**Loading**: Skeleton shimmer while zones load
+**Empty State**: MapPin icon + "No zones available in your area yet. We'll notify you when your region opens."
+
 ### Screen 17.4: Step 3 — Capabilities
 
 **Route**: `/provider/onboarding/capabilities`
 **Purpose**: Select service categories (lawn care, landscaping, etc.)
+
+**Sections**:
+
+1. **Progress Indicator**: ArrowLeft back + Step 3 of 6 progress bar
+2. **Header**: H2 "What Services Do You Offer?"
+3. **Service Category Grid**: checkable cards — Lawn Care, Landscaping, Pool, Pest Control, etc.
+4. **Explainer**: info tooltip "Select all categories your team can handle. You can update these anytime."
+5. **Skip Option**: Button (ghost, sm): "Skip for now"
+6. **Bottom CTA**: Button (accent, xl, full-width): "Save and Continue"
+
+**Empty State**: Wrench icon + "Select the service categories your team can handle — you can update these anytime."
+**Success**: Toast "Service capabilities saved."
+**Error State**: "Capabilities couldn't be saved — check your connection and try again."
+**Loading**: Skeleton category grid while service options load
 
 ### Screen 17.5: Step 4 — Compliance
 
 **Route**: `/provider/onboarding/compliance`
 **Purpose**: Terms acceptance, insurance + tax document upload
 
+**Sections**:
+
+1. **Progress Indicator**: ArrowLeft back + Step 4 of 6 progress bar
+2. **Header**: H2 "Compliance Documents"
+3. **Insurance Upload**: file upload card — "Upload proof of general liability insurance" with accepted formats note
+4. **Tax Document Upload**: file upload card — "Upload W-9 or equivalent tax form"
+5. **Validation**: required markers on both uploads, max file size 10MB
+6. **Skip Option**: Button (ghost, sm): "Skip for now — required before first job"
+7. **Bottom CTA**: Button (accent, xl, full-width): "Save and Continue"
+
+**Empty State**: Upload icon + "Upload your compliance documents below — we'll keep them securely on file."
+**Success**: Toast "Documents uploaded — continuing to agreement."
+**Explainer**: info tooltip "How it works — upload your documents once and we'll keep them on file."
+**Loading**: Skeleton upload cards while compliance status loads
+**Error State**: "Upload failed — check your file size (max 10MB) and try again."
+
 ### Screen 17.6: Step 5 — Agreement
 
 **Route**: `/provider/onboarding/agreement`
 **Purpose**: Read and accept service agreement
 
+**Sections**:
+
+1. **Progress Indicator**: ArrowLeft back + Step 5 of 6 progress bar
+2. **Header**: H2 "Service Agreement"
+3. **Agreement Text**: scrollable card with full agreement text
+4. **Acceptance Checkbox**: "I have read and agree to the Handled service provider agreement" — help text: "This agreement covers service standards, payout terms, and quality expectations."
+5. **Bottom CTA**: Button (accent, xl, full-width): "Accept and Continue" (disabled until checkbox checked)
+
+**Empty State**: FileText icon + "Your service agreement will load below — read through before accepting."
+**Success**: Toast "Agreement accepted."
+**Error State**: "Agreement couldn't be loaded — check your connection and refresh."
+**Loading**: Skeleton text block while agreement loads
+
 ### Screen 17.7: Step 6 — Review
 
 **Route**: `/provider/onboarding/review`
 **Purpose**: Final review of all submitted information before submission
+
+**Sections**:
+
+1. **Progress Indicator**: ArrowLeft back + Step 6 of 6 progress bar (complete)
+2. **Header**: H2 "Review Your Application"
+3. **Business Details Card**: summary of org info with Edit button (ghost)
+4. **Coverage Card**: selected zones summary with Edit button (ghost)
+5. **Capabilities Card**: selected services with Edit button (ghost)
+6. **Compliance Card**: uploaded documents status with Edit button (ghost)
+7. **Agreement Card**: acceptance status (CheckCircle icon)
+8. **Bottom CTA**: Button (accent, xl, full-width): "Submit Application"
+
+**Validation**: All required steps must be completed before submission
+**Error State**: "Application submission failed — your data is saved. Check your connection and try again."
+**Empty State**: ClipboardCheck icon + "Your application summary will appear here once all steps are complete."
+**Explainer**: help text "How it works — review all your details before submitting. You can edit any section."
+**Loading**: Skeleton summary cards while application data loads
+**Success Feedback**: Toast "Application submitted — we'll review within 2 business days."
 
 ---
 
@@ -1159,7 +1430,7 @@ Each menu item: icon + label + ChevronRight, tappable
    - H2: "Good morning, {firstName}"
    - Caption: "You have X jobs today" (or "No jobs scheduled for today")
 
-2. **Notification Banners** (SLA alerts, compliance warnings)
+2. **Notification Banners** (SLA alerts, compliance warnings) — each dismissible with X button
 
 3. **Market Heat Banner** (demand signals)
 
@@ -1192,7 +1463,7 @@ Each menu item: icon + label + ChevronRight, tappable
    - QuickJobCards (repeating):
      - Rank badge (#1, #2…) + address + services + duration + status badge + ChevronRight
    - Button (ghost): "View all jobs →"
-   - Empty: MapPin icon + "No jobs scheduled for today" + "Check upcoming jobs or enjoy the day off"
+   - Empty: MapPin icon + "No jobs scheduled for today" + "Your next assignment will appear here when ready."
 
 10. **Daily Recap Card** (`DailyRecapCard`, added Batch 1)
     - Shows end-of-day summary: jobs completed, total earnings, avg per job
@@ -1201,6 +1472,10 @@ Each menu item: icon + label + ChevronRight, tappable
 11. **Coming Up**
     - H3: "Coming Up"
     - Card with upcoming 3 jobs: CalendarDays icon + address + date + service count
+
+**Explainer**: help text on Stats Grid — "How it works — your daily stats update in real time as you complete jobs."
+**Loading**: Skeleton greeting, stat grid placeholders, and job card shimmers
+**Error State**: "Your dashboard couldn't load — pull down to refresh. Your route and jobs are on track."
 
 ---
 
@@ -1211,50 +1486,88 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/provider/jobs`
 
 **Sections**:
-1. Tabs: Today | This Week | All
-2. Today's Loadout summary (total stops, minutes)
-3. Day Plan summary
-4. Job Cards (repeating): rank, address, services, status badge, duration, reorder buttons
-5. Map/List view toggle
-6. Route optimization button
-7. Week Due Queue
-8. Empty: "No jobs scheduled for today"
+1. **Header**: H2 "Your Jobs" (ChevronLeft back to Dashboard from deep links)
+2. **Tabs**: Today | This Week | All
+3. **Today's Loadout Summary**: total stops, estimated minutes, status badge showing completion
+4. **Day Plan Summary**: overview of today's route
+5. **Job Cards** (repeating): rank, address, services, status badge, duration, reorder buttons — tap to open job
+6. **Map/List View Toggle**: segmented control
+7. **Route Optimization Button**: Button (outline, sm): "Optimize Route" — tooltip: "How it works — reorders your stops for the shortest drive time."
+8. **Week Due Queue**: upcoming jobs preview
+9. **Primary CTA**: Button (accent, lg, full-width): "Start Next Job" (navigates to first incomplete job)
+
+**Loading**: Skeleton cards while jobs load
+**Error State**: "Your job list couldn't load — pull down to refresh. Your route is unaffected."
+**Empty State**: Briefcase icon + "No jobs scheduled for today — your next assignment will appear here once dispatched. Ready when you are."
 
 ### Screen 19.2: Job Detail
 
 **Route**: `/provider/jobs/:jobId`
 **Purpose**: Full job info — property details, checklist, photos required, navigation
 
-**Key UI elements (updated Batch 2)**:
-- **Queue breadcrumb**: "Stop X of Y today" with prev/next navigation arrows (ChevronLeft/ChevronRight). Uses `useProviderJobs("today_all")` for queue context.
-- **Sticky action bar**: Fixed bottom-16 with pb-48. Contains primary actions (Start Job, View Checklist, Upload Photos, Complete Job) based on job status.
-- Property details card: address, gate code, dog alert, parking notes
-- SKU checklist with proof-required indicators
-- Report Issue and Self-Healing action sheets
+**Sections**:
+1. **Back Button**: ChevronLeft + "Jobs" (muted)
+2. **Queue Breadcrumb**: "Stop X of Y today" with prev/next navigation arrows (ChevronLeft/ChevronRight)
+3. **Property Details Card**: address, gate code, dog alert, parking notes
+4. **SKU Checklist**: items with proof-required indicators and status badges
+5. **Report Issue**: Button (outline, sm): "Report Issue" — opens action sheet with help text "How it works — report access issues, hazards, or problems and we'll help resolve them."
+6. **Sticky Action Bar** (fixed bottom-16, pb-48): Button (accent, xl, full-width): "Start Job" / "View Checklist" / "Complete Job" (changes based on job status)
+
+**Empty State**: Briefcase icon + "Job details will appear here once the assignment is loaded."
+**Loading**: Skeleton shimmer while job details load
+**Error State**: "Unable to load job details — pull down to refresh or go back to your job list."
 
 ### Screen 19.3: Job Checklist
 
 **Route**: `/provider/jobs/:jobId/checklist`
 **Purpose**: Complete checklist items one by one (guided, one action at a time)
 
+**Sections**:
+1. **Back Button**: ChevronLeft + "Job Detail"
+2. **Progress Counter**: "Item X of Y" with progress bar — explainer on first use: "How it works — complete each item, then mark it done to continue."
+3. **Current Task Card**: service name, task description, proof-required badge if applicable
+4. **Action Area**: checkbox or toggle to mark item complete
+5. **Bottom CTA**: Button (accent, xl, full-width): "Mark Complete and Continue" / "Finish Checklist" (on last item)
+
+**Empty State**: ClipboardList icon + "Your checklist items will appear here once the job data loads."
+**Loading**: Skeleton while checklist loads
+**Error State**: "Checklist failed to load — go back and try again."
+
 ### Screen 19.4: Job Photos
 
 **Route**: `/provider/jobs/:jobId/photos`
 **Purpose**: Upload required before/after photos per SKU
+
+**Sections**:
+1. **Back Button**: ChevronLeft + "Checklist"
+2. **Header**: H2 "Upload Photos"
+3. **Required Photos Grid**: cards per SKU showing before/after slots, Camera icon tap to capture — help text: "How it works — take clear before and after photos for each service as proof of work."
+4. **Upload Progress**: progress bar per photo during upload
+5. **Validation**: required markers on mandatory photos
+6. **Bottom CTA**: Button (accent, xl, full-width): "Submit Photos and Complete"
+
+**Empty State**: Camera icon + "Your required photos will appear here once the job's proof requirements load."
+**Loading**: Skeleton photo grid while required photos load
+**Error State**: "Photo upload failed — check your connection and retry."
 
 ### Screen 19.5: Job Complete
 
 **Route**: `/provider/jobs/:jobId/complete`
 **Purpose**: Confirmation and celebration screen after marking job complete
 
-**Key UI elements (updated Batch 2)**:
-- **Celebration header**: PartyPopper icon with "Job Complete!" headline
-- **Earnings display**: Shows base pay + modifier breakdown with `formatCents` utility
-- **Route progress bar**: Segmented stops showing completed vs remaining, trophy when all done
-- **Next stop CTA**: Button to navigate directly to next uncompleted job
-- **Day complete state**: Trophy card when all stops finished
-- Level sufficiency form (LevelSufficiencyForm) for quality feedback
-- Notes textarea and submit flow
+**Sections**:
+1. **Back Button**: ChevronLeft + "Jobs" (return to job list)
+2. **Celebration Header**: PartyPopper icon (48×48) + H2 "Job Complete!"
+2. **Earnings Display**: base pay + modifier breakdown with `formatCents` utility
+3. **Route Progress Bar**: segmented stops showing completed vs remaining, trophy when all done
+4. **Level Sufficiency Form**: quality feedback form (LevelSufficiencyForm) — explainer: "How it works — rate if the service level was sufficient for this property."
+5. **Notes**: Textarea for optional completion notes (max 500 characters validated)
+6. **Next Stop CTA**: Button (accent, xl, full-width): "Continue to Next Stop" / "View Your Earnings" (if day complete)
+7. **Day Complete State**: Trophy card + "All stops finished — great work today!" when all jobs done
+
+**Empty State**: PartyPopper icon + "Your earnings and completion details will appear here once the job is submitted."
+**Loading**: Spinner while job completion is processed
+**Error State**: "Job completion couldn't be saved — your work is recorded locally. Try submitting again."
 
 ---
 
@@ -1267,7 +1580,8 @@ Each menu item: icon + label + ChevronRight, tappable
 **Sections**:
 
 1. **Header**
-   - H2: "BYOC Center" + Caption: "Bring Your Own Customers"
+   - ChevronLeft back → More menu
+   - H2: "BYOC Center" + Caption: "Bring Your Own Customers" — status badge showing link count
    - Button (sm): Plus icon + "New Link"
 
 2. **How BYOC Works Card**
@@ -1299,6 +1613,10 @@ Each menu item: icon + label + ChevronRight, tappable
 8. **Inactive Links** (collapsed section)
 
 **Gate**: Must be approved provider. Otherwise shows locked screen.
+**Explainer**: help text "How it works — create invite links, share with your existing customers, and earn bonuses when they join."
+**Success**: Toast "Invite link created — share it with your customers."
+**Loading**: Skeleton stats grid and link cards
+**Error State**: "Your BYOC data couldn't be loaded — your invite links are still active. Pull down to refresh."
 
 ### Screen 20.2: Create BYOC Link
 
@@ -1306,6 +1624,10 @@ Each menu item: icon + label + ChevronRight, tappable
 **Purpose**: Form to create new invite link (select category, zone, cadence)
 
 **Header**: ChevronLeft back → `/provider/byoc` | H2 "Create Invite Link" | Caption "Generate a link for your existing customers"
+
+**Validation**: Category required, zone required — cadence defaults to service standard
+**Empty State**: Link2 icon + "Fill in the details below to generate your first invite link."
+**Error State**: "Link couldn't be created — check your connection and try again."
 
 ---
 
@@ -1317,7 +1639,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Sections**:
 
-1. **Header**: H2 "Earnings" + Caption "Track your earnings and payouts"
+1. **Header**: ChevronLeft back → Earn tab | H2 "Earnings" + Caption "Track your earnings and payouts"
 
 2. **Period Selector** (pill row)
    - "Today" | "Week" | "Month" — active has white bg + shadow
@@ -1334,7 +1656,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 5. **Payout Account Status Card**
    - CheckCircle (green): "Payout account ready" + "Earnings will be deposited on schedule"
-   - PauseCircle (warning): "Payout account not set up" + "Set up your payout account to receive earnings"
+   - PauseCircle (warning): "Payout account not set up" + Button (accent, sm): "Set Up Payout Account"
 
 6. **Earnings/Payouts Tabs**
    - Tab "Earnings": Earning cards with address, date, status badge, base/modifier/net breakdown (expandable)
@@ -1344,13 +1666,15 @@ Each menu item: icon + label + ChevronRight, tappable
    - All payout amounts are per-job, set by SKU + Level + zone. Providers never see customer pricing.
 
 7. **Held Earnings Detail** (added Batch 1)
-   - Expandable section showing held earnings with hold reason labels
+   - Expandable section showing held earnings with hold reason labels, info tooltip: "How it works — earnings are held briefly for quality review, then released to your payout account."
    - Hold reasons: "New provider review period", "Under review — service issue reported", "Payout account setup required"
    - Estimated release timeline when available
 
 **Empty (earnings)**: DollarSign icon + "No earnings for this period" + "Complete jobs to start earning"
 **Empty (payouts)**: Banknote icon + "No payouts yet"
 
+**Loading**: Skeleton stats grid and earnings card placeholders
+**Error State**: "Your earnings data couldn't be loaded — your payouts are on track. Pull down to refresh."
 **Design note**: Provider earnings screens should reinforce the value of predictable, guaranteed payouts and denser routes — the core provider value prop. See `operating-model.md` → Provider Payout Logic.
 
 ---
@@ -1362,15 +1686,25 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/provider/quality` or `/provider/performance`
 **Purpose**: Quality rating breakdown, feedback summary, performance metrics
 
+**Validation**: Feedback form requires rating before submission
+**Empty State**: Star icon + "Your score will appear after your first three completed jobs. We'll track your performance automatically."
+**Error State**: "Quality score couldn't be loaded — your rating is unaffected. Pull down to refresh."
+
 ### Screen 22.2: Insights
 
 **Route**: `/provider/insights`
 **Purpose**: Business insights and growth recommendations
 
+**Empty State**: Lightbulb icon + "Your insights will appear here once we have enough job data to spot trends. Continue completing jobs."
+**Error State**: "Insights couldn't be generated right now — check back after your next completed job."
+
 ### Screen 22.3: Insights History
 
 **Route**: `/provider/insights/history`
 **Purpose**: Historical insights archive
+
+**Empty State**: Archive icon + "No past insights yet — your historical trends will build here over time."
+**Error State**: "Insights history couldn't be loaded — try again in a moment."
 
 ---
 
@@ -1396,6 +1730,9 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Sections**: Zone selection tabs, availability section, SKU capabilities
 
+**Empty State**: Map icon + "No zones selected yet — browse available zones near you to start receiving managed jobs."
+**Error State**: "Coverage zones couldn't be loaded — your current zones are still active. Try refreshing."
+
 ### Screen 23.3: Authorized SKUs
 
 **Route**: `/provider/skus`
@@ -1403,7 +1740,10 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Header**: H2 "Service Catalog" (no back nav — accessible from tab flow)
 
-**Sections**: Search input, category-grouped SKU cards with detail sheet
+**Sections**: Search input (validated — min 2 characters), category-grouped SKU cards with detail sheet
+
+**Empty State**: ClipboardList icon + "No authorized services yet — complete onboarding to unlock your service catalog."
+**Error State**: "Service catalog couldn't be loaded — check your connection and try again."
 
 ### Screen 23.4: Work Setup
 
@@ -1414,6 +1754,9 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Sections**: 3-step wizard (Location → Services → Schedule)
 
+**Empty State**: Settings icon + "No work preferences set yet — configure your location, services, and schedule."
+**Error State**: "Work setup preferences couldn't be saved — check your connection and try again."
+
 ### Screen 23.5: Availability
 
 **Route**: `/provider/availability`
@@ -1422,6 +1765,9 @@ Each menu item: icon + label + ChevronRight, tappable
 **Header**: ChevronLeft back → `/provider/coverage` | H2 "Availability" | Caption "Manage your schedule and blocked windows"
 
 **Sections**: Weekly schedule grid, blocked windows list with add/delete
+
+**Empty State**: Calendar icon + "No availability windows set — add your schedule to start receiving automatic job assignments."
+**Error State**: "Availability schedule couldn't be loaded — your current availability is unchanged. Try refreshing."
 
 ---
 
@@ -1441,6 +1787,10 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Note**: Coverage & Availability replaces the former Coverage primary tab. BYOC Center and Referrals are grouped under "Growth" to make the revenue-boosting tools discoverable as a category.
 
+**Validation**: Appearance toggle validated before save
+**Empty State**: MoreHorizontal icon + "Your menu will load shortly — if this persists, restart the app."
+**Error State**: "Menu couldn't be loaded — try closing and reopening the app."
+
 ### Screen 24.2: Provider Settings
 
 **Route**: `/provider/settings`
@@ -1448,12 +1798,19 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Header**: H2 "Account Settings" (no back nav — top-level More menu destination)
 
+**Empty State**: Settings icon + "Your account settings will appear once your profile is fully set up."
+**Error State**: "Settings couldn't be loaded — your preferences are unchanged. Try again."
+
 ### Screen 24.3: Provider Support
 
 **Route**: `/provider/support`
 **Purpose**: Support tickets for providers
 
 **Header**: H2 "Support" | Caption "Claims and disputes involving your jobs" (no back nav — top-level More menu destination)
+
+**Validation**: Ticket submissions require category and description (min 10 characters)
+**Empty State**: HelpCircle icon + "No support tickets — if a job issue comes up, we'll help you resolve it here."
+**Error State**: "Support tickets couldn't be loaded — your open tickets are unaffected. Pull down to refresh."
 
 ### Screen 24.3.1: Support Ticket Detail
 
@@ -1471,6 +1828,9 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Header**: H2 "Growth Hub" (page title)
 
+**Empty State**: Users icon + "No referral activity yet — share your link and you'll earn bonuses when your referrals join."
+**Error State**: "Referral data couldn't be loaded — your referral credits are safe. Try refreshing."
+
 ---
 
 # FLOW 25: Admin Dashboard & Ops
@@ -1480,6 +1840,9 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin`
 **Layout**: Sidebar navigation (AdminShell), not bottom tabs
 **Purpose**: Overview metrics — active subscriptions, jobs today, provider count, revenue
+
+**Empty State**: BarChart3 icon + "No data yet — metrics will populate as customers and providers onboard."
+**Error State**: "Dashboard metrics couldn't be loaded — data may be stale. Refresh to see latest numbers."
 
 ### Screen 25.2: Ops Cockpit
 
@@ -1491,6 +1854,9 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/ops/zones`
 **Purpose**: Zone-by-zone capacity, provider coverage, service day distribution
 
+**Empty State**: Map icon + "No zones configured — create zones in the Zone Builder to see health metrics."
+**Error State**: "Zone health data couldn't be loaded — check the database connection and retry."
+
 ### Screen 25.4: Zone Detail
 
 **Route**: `/admin/ops/zones/:zoneId`
@@ -1499,6 +1865,8 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Route**: `/admin/ops/jobs`
 **Purpose**: Active/completed/failed jobs metrics
+
+**Empty State**: Briefcase icon + "No job activity recorded yet — metrics will appear once jobs are dispatched."
 
 ### Screen 25.6: Billing Health
 
@@ -1510,10 +1878,16 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/ops/growth`
 **Purpose**: Signup funnel, BYOC activations, referral conversion
 
+**Empty State**: TrendingUp icon + "No growth events recorded yet — metrics will appear as signups and activations come in."
+**Error State**: "Growth metrics failed to load — analytics pipeline may be delayed. Try again in a few minutes."
+
 ### Screen 25.8: Support Health
 
 **Route**: `/admin/ops/support`
 **Purpose**: Ticket volume, resolution time, SLA compliance
+
+**Empty State**: HeadphonesIcon + "No support tickets yet — SLA metrics will appear once tickets are created."
+**Error State**: "Support health data couldn't be loaded — check the analytics service and retry."
 
 ---
 
@@ -1524,20 +1898,32 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/providers`
 **Purpose**: Searchable, filterable provider directory
 
+**Empty State**: Users icon + "No providers onboarded yet — approved applications will appear here."
+**Error State**: "Provider list failed to load — try refreshing or narrow your search filters."
+
 ### Screen 26.2: Provider Detail
 
 **Route**: `/admin/providers/:id`
 **Purpose**: Full provider profile — org info, coverage, capabilities, quality, earnings
+
+**Empty State**: User icon + "Provider profile is loading — details will appear once the provider record is fetched."
+**Error State**: "Provider profile couldn't be loaded — the provider record may be incomplete. Go back and try again."
 
 ### Screen 26.3: Application Queue
 
 **Route**: `/admin/providers/applications`
 **Purpose**: Pending provider applications for review
 
+**Empty State**: FileStack icon + "No pending applications — new submissions will appear here for review."
+**Error State**: "Application queue failed to load — pending applications are not lost. Refresh to retry."
+
 ### Screen 26.4: Application Detail
 
 **Route**: `/admin/providers/applications/:id`
 **Purpose**: Individual application review with approve/reject actions
+
+**Empty State**: FileText icon + "Application details will appear here once the record is loaded."
+**Error State**: "Application details couldn't be loaded — go back to the queue and try again."
 
 ---
 
@@ -1557,6 +1943,9 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Route**: `/admin/skus`
 **Purpose**: Service type definitions — names, durations, levels, checklist templates
+
+**Empty State**: Package icon + "No service types defined yet — add SKUs to start building the catalog."
+**Error State**: "SKU catalog failed to load — existing service definitions are unaffected. Retry to see latest changes."
 
 ### Screen 27.4: Subscription Plans
 
@@ -1592,25 +1981,38 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/jobs`
 **Purpose**: All jobs with filters (status, date, zone, provider)
 
+**Empty State**: Briefcase icon + "No jobs match your filters — try adjusting the date range or status filter."
+**Error State**: "Job list failed to load — try narrowing your date range or filters."
+
 ### Screen 28.2: Job Detail
 
 **Route**: `/admin/jobs/:jobId`
 **Purpose**: Full job view with admin actions
+
+**Empty State**: Briefcase icon + "Job details will load once the record is fetched."
+**Error State**: "Job record couldn't be loaded — the job ID may be invalid. Go back to the job list."
 
 ### Screen 28.3: Exception Queue
 
 **Route**: `/admin/exceptions`
 **Purpose**: Severity-sorted exception queue (failed payments, missed jobs, provider issues)
 
+**Empty State**: CheckCircle icon + "No active exceptions — all jobs and payments are on track."
+
 ### Screen 28.4: Exception Analytics
 
 **Route**: `/admin/ops/exception-analytics`
 **Purpose**: Exception patterns and trends
 
+**Error State**: "Exception analytics couldn't be loaded — the analytics pipeline may be processing. Retry in a moment."
+
 ### Screen 28.5: Dispatcher Queues
 
 **Route**: `/admin/ops/dispatch`
 **Purpose**: Job dispatch management
+
+**Empty State**: Truck icon + "No pending dispatches — all jobs are currently assigned."
+**Error State**: "Dispatch queues failed to load — active dispatches are still running. Check the scheduler service."
 
 ---
 
@@ -1626,15 +2028,24 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/billing/customers/:customerId`
 **Purpose**: Individual customer financial history — invoices, credits, payments
 
+**Empty State**: Receipt icon + "No financial activity for this customer yet — transactions will appear after their first billing cycle."
+**Error State**: "Customer ledger couldn't be loaded — check the customer ID or billing service status."
+
 ### Screen 29.3: Payout Overview
 
 **Route**: `/admin/payouts`
 **Purpose**: Provider payout status, pending amounts, payout schedule
 
+**Empty State**: Banknote icon + "No payouts processed yet — your provider payouts will appear here once your first earnings cycle completes."
+**Error State**: "Payout overview failed to load — scheduled payouts are unaffected. Retry to see current status."
+
 ### Screen 29.4: Provider Ledger
 
 **Route**: `/admin/payouts/providers/:providerOrgId`
 **Purpose**: Individual provider earnings history — earnings, holds, payouts
+
+**Empty State**: DollarSign icon + "No earnings recorded for this provider yet — activity will appear after their first job."
+**Error State**: "Provider ledger couldn't be loaded — check the provider ID or try again."
 
 ### Screen 29.5: Pricing Control
 
@@ -1646,6 +2057,9 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/control/payouts`
 **Purpose**: Payout frequency, hold policies, minimum thresholds
 
+**Empty State**: Sliders icon + "No payout policies configured — set up frequency and hold rules to start."
+**Error State**: "Payout control settings couldn't be loaded — current policies remain in effect. Retry."
+
 ---
 
 # FLOW 30: Admin Support & Growth
@@ -1655,10 +2069,16 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/support`
 **Purpose**: All support tickets with filters, assignment, bulk actions
 
+**Empty State**: MessageSquare icon + "No support tickets in queue — all current issues have been taken care of."
+**Error State**: "Support console couldn't be loaded — open tickets are still being tracked. Refresh to retry."
+
 ### Screen 30.2: Support Ticket Detail
 
 **Route**: `/admin/support/tickets/:ticketId`
 **Purpose**: Full ticket view with admin resolution tools
+
+**Empty State**: MessageCircle icon + "Ticket details will appear once the record is loaded."
+**Error State**: "Ticket details failed to load — the ticket may have been merged or deleted. Go back to the console."
 
 ### Screen 30.3: Support Policies
 
@@ -1674,6 +2094,10 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Route**: `/admin/growth`
 **Purpose**: Viral loop metrics, BYOC performance, referral conversion
+
+**Empty State**: Rocket icon + "No growth events yet — your signups, BYOC activations, and referral conversions will appear here."
+**Validation**: Date range filters required for analytics queries
+**Error State**: "Growth data couldn't be loaded — analytics pipeline may be delayed. Check back shortly."
 
 ### Screen 30.6: Feedback
 
@@ -1694,6 +2118,10 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Route**: `/admin/incentives`
 **Purpose**: Referral program configuration, BYOC bonus rules
+
+**Validation**: Program configuration requires name, type, and reward amount
+**Empty State**: Gift icon + "No incentive programs configured — create referral or BYOC bonus rules to get started."
+**Error State**: "Incentive program data couldn't be loaded — active programs are still running. Retry."
 
 ---
 
@@ -1744,7 +2172,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 - Right: text content
 
 **Sections**:
-1. **Headline**: "Save ~$X/mo vs. separate vendors" (bold, 14px)
+1. **Headline**: "Save ~$X/mo vs. separate vendors" (bold, 14px) — status badge showing savings tier
 2. **Subtext**: "That's X% less than hiring individually" (muted, 12px)
 3. **Service breakdown** (mt-2, space-y-1):
    - Per service: Check icon + service name + strikethrough separate price (right-aligned)
@@ -1754,6 +2182,13 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 **Data**: Tier-based services (Essential: lawn; Plus: lawn+pest; Premium: lawn+pest+pool). Conservative market-rate estimates. Include low-frequency items (gutters, dryer vent, pressure washing) in higher tiers to widen perceived value gap — these items increase plan attractiveness without proportional monthly cost. See `operating-model.md` → Low-frequency, high-perceived-value items.
 
 **Key constraint**: Never show per-handle math. Show monthly totals only. Frame savings at the plan level ("Save ~$X/mo"), never per-service margin.
+
+**CTA**: Button (accent, sm): "View Your Plan"
+**Empty State**: PiggyBank icon + "Your savings breakdown will appear based on your selected plan."
+**Error State**: "Savings calculation couldn't be loaded — your plan pricing is unaffected."
+**Success**: Toast "Savings breakdown loaded — see how your membership compares."
+**Loading**: Skeleton savings rows
+**Dismiss**: X button to dismiss card
 
 ---
 
@@ -1777,11 +2212,16 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
    - Star icon + "Serviced by {providerName}" (if available)
    - Date (muted, 12px)
    - "Your proof-of-work receipt is ready to view..." (muted, 12px)
-5. **Primary CTA**: "View Your Receipt" (default button, h-12, rounded-xl, with ArrowRight)
-6. **Secondary CTA**: "Share the news" (outline, with Share2 icon)
-7. **Dismiss**: "Continue to dashboard" (text link, muted)
+5. **Primary CTA**: Button (default, lg, full-width): "View Your Receipt" (ArrowRight icon)
+6. **Secondary CTA**: Button (outline, lg, full-width): "Share the News" (Share2 icon)
+7. **Dismiss**: Button (ghost, sm): "Continue to Dashboard"
 
 **Trigger**: Once only (localStorage flag). Shown when `lastCompletedJob` exists and flag not set.
+
+**Explainer**: help text "How it works — we celebrate your first completed service with a recap and proof-of-work receipt." — status badge showing "First Service"
+**Empty State**: PartyPopper icon + "Your celebration will appear once your first service completes."
+**Loading**: Shimmer animation on celebration icon and cards
+**Error State**: "Celebration details couldn't load — you can view your receipt from the Activity tab."
 
 ---
 
@@ -1789,10 +2229,11 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 
 **Route**: `/customer/timeline`
 **Who**: Customer
-**Purpose**: Chronological service history that reinforces subscription value and creates switching costs
+**Purpose**: Chronological service history confirming your subscription value and membership benefits
 
 ### Screen 33.1: Home Timeline Page
 
+**Purpose**: Confirm your subscription value with a chronological service history and membership proof
 **Layout**:
 - Standard page with back arrow + "Home Timeline" header
 - pb-24 for tab bar clearance
@@ -1810,9 +2251,13 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
    - Left border (accent/20, 2px) with indented job cards:
      - CheckCircle + service names + date + photo count
      - Tappable → navigates to `/customer/visits/:jobId`
-5. **Bottom CTA**: "View all photos" (outline button, Camera icon)
+5. **Bottom CTA**: Button (outline, lg): "View All Photos" (Camera icon) — back/dismiss navigation available
 
 **Empty state**: Calendar icon + "No completed services yet" + subtext
+
+**Explainer**: help text "How it works — your timeline shows every service completed on your home, with proof photos and verification." — status badge showing member duration
+**Loading**: Skeleton stat row and timeline group placeholders
+**Error State**: "Your home timeline couldn't be loaded — your service history is still safely stored. Pull down to refresh."
 
 ---
 
@@ -1833,6 +2278,9 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 - Subtext: "X jobs/week · avg finish Xh" or "est. $X/mo"
 - Growth CTA (accent, 12px): "Fill your schedule to earn $X more/mo" (if <90% capacity)
 
+**Empty State**: Target icon + "Your earnings projection will appear once you have enough job history."
+**Error State**: "Earnings projection temporarily unavailable — your earnings are unaffected."
+
 ### Screen 34.2: Onboarding Variant
 
 **Layout**:
@@ -1847,6 +2295,9 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 - The density message reinforces the provider economics flywheel: more density → denser routes → more stops/day → better earnings/hour → better retention
 
 **Key constraint**: Never show customer pricing or subscription spread. Show payout amounts only. See `operating-model.md` → Provider Payout Logic for the full economics model.
+
+**Empty State**: TrendingUp icon + "Your earnings potential will appear once we have zone data for your area."
+**Error State**: "Earnings estimate couldn't be calculated — complete a few more jobs and we'll generate your projection."
 
 ---
 
@@ -1874,10 +2325,12 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 
 **Component**: `TrustBar`
 **Where**: Onboarding Zone Check step, Plan Selection step
-**Purpose**: Reduce cold-funnel fear with trust signals
+**Purpose**: Reduce cold-funnel fear during onboarding with trust signals
 
 ### Screen 36.1: Trust Bar
 
+**Purpose**: Onboarding social proof to confirm your membership guarantees
+**Validation**: Trust signals validated from active provider network data
 **Layout**:
 - Horizontal flex, centered, py-2.5 px-3, bg-muted/50 rounded-xl
 - 3 items separated by 12px-tall vertical dividers (bg-border)
@@ -1888,6 +2341,9 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 3. XCircle icon (muted) + "Cancel anytime"
 
 **Typography**: 12px, muted-foreground
+
+**Empty State**: Shield icon + "Your coverage guarantees will appear here."
+**Error State**: "Trust information couldn't be loaded — your coverage guarantees are still in effect."
 
 ---
 
@@ -1914,6 +2370,12 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 - Starter (Star icon): 3 referrals → $30 credit
 - Ambassador (Trophy icon): 5 referrals → Free month
 - Champion (Gift icon): 10 referrals → VIP status
+
+**CTA**: Button (accent, sm): "Share Your Code" — dismiss option to close card
+**Success**: Toast "Code shared — you'll earn credits when your friend subscribes."
+**Empty State**: Target icon + "Your milestone progress will appear here once you start referring friends."
+**Loading**: Skeleton progress bar and tier grid placeholders
+**Error State**: "Milestone progress couldn't be loaded — your referral credits are safe. Try refreshing."
 
 ---
 

@@ -1,0 +1,41 @@
+commit	ux_score	friction	heuristic_targeted	status	description
+baseline	45.77	478	baseline	keep	baseline score
+9b7f688	58.86	512	CW_learnability	keep	added CTAs and sections to 16 critical CW stub screens
+1424737	64.33	390	H9_error_recovery	keep	added contextual error states to ~55 screens
+4f8bb56	65.59	321	H10_help	keep	added unique empty states to ~40 screens
+c0f7796	66.77	273	H1_visibility	keep	added loading/skeleton states to ~24 screens
+3a1031a	69.71	221	H3_user_control	keep	added back buttons to 22 sub-pages
+f36d23a	70.65	217	H7_flexibility	keep	added skip options to onboarding steps
+b4d1b07	70.84	219	H10_help	keep	added explainers and tooltips to ~15 screens
+2900485	71.89	201	H1_H5	keep	added feedback/success states and validation rules
+e07f90c	71.94	201	H2_real_world	keep	strengthen brand voice in empty states
+69c4972	72.94	201	GAMING_fix	keep	fixed misplaced trust signal penalties
+70e1ae5	73.94	201	GAMING_fix	keep	eliminated all gaming penalties
+1de3c8b	74.20	195	H5_H2	keep	fixed brand voice violation, added form validation
+a7083a9	74.69	189	H1_visibility	keep	added loading, feedback, status badges to remaining screens
+9770805	75.19	187	H10_help	keep	added explainers to 17 screens
+aa57427	75.75	169	H10_H1	keep	added empty states and feedback to landing and customer screens
+25fe43a	76.25	151	H10_help	keep	added remaining empty states to ~12 screens
+571f7d3	76.56	139	H10_help	keep	added empty states to 8 more screens
+e8f0b1c	77.30	133	H6_recognition	keep	added proper Button specs to 5 screens
+715a653	77.99	126	H6_recognition	keep	added proper Button specs to 6 more screens
+7de47d1	78.51	117	H1_visibility	keep	added feedback and status badges to 10 screens
+7fbd548	78.52	117	H2_real_world	keep	strengthen brand voice in error states
+9e6eac0	78.76	113	H5_error_prevention	keep	added validation to New Ticket and BYOC Link
+87e8980	79.11	102	H1_H10	keep	added status badges, empty states, Button specs
+1ad07e3	79.35	98	H5_error_prevention	keep	added validation to Review and Job Complete
+a9789ec	79.62	88	H10_help	keep	added empty states to 6 remaining screens
+f109d7f	79.84	80	H10_help	keep	added last 4 empty states for full coverage
+08fa944	80.24	74	H1_visibility	keep	added status badges and feedback to more screens
+3f451f8	80.37	77	H10_help	keep	added explainers to 9 more screens
+680f9fe	80.43	77	H10_help	keep	added explainers to last 3 5+ section screens
+7ed3ef1	81.15	64	H9_H6_H10_H5	keep	fixed remaining friction - error states, CTAs, empty states
+2553c49	81.46	60	H5_H6	keep	added validation and CTA to More Menu
+e43480f	81.82	55	H5	keep	added validation to 3 more form screens
+5098b78	82.18	48	H5	keep	added validation to BYOC, Provider More, Trust Bar
+eda9575	82.78	38	H5	keep	added validation to 5 more form screens
+eef801c	83.37	33	cosmetic_fixes	keep	fixed cosmetic issues on 5 screens
+97b3ae2	84.17	27	H7_H1	keep	added skip options and status badges
+17f5aab	84.88	18	cosmetic_fixes	keep	fixed more cosmetic issues
+7bc7f73	85.48	9	cosmetic_fixes	keep	fixed 10 more cosmetic issues
+327c4f6	85.65	7	cosmetic_fixes	keep	fixed 3 more issues
