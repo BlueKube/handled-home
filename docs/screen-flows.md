@@ -295,6 +295,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (full-width, h-12, rounded-xl): "Continue" + ArrowRight icon
 
 **Validation Errors**: Red caption below each field ("Street address is required", "Must be 5 digits")
+**Loading**: Skeleton form fields
 
 ### Screen 5.3: Step 2 — Zone Check
 
@@ -981,6 +982,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Receipt icon + "Billing history"
    - ChevronRight
 
+**Empty State**: Wallet icon + "No billing activity yet — your first invoice will appear here after your subscription starts."
 **Error State**: "Billing information couldn't be loaded — your subscription is still active. Try again in a moment."
 
 ### Screen 13.2: Payment Methods
@@ -993,6 +995,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Route**: `/customer/billing/history`
 **Purpose**: List of invoices with dates, amounts, status badges
 
+**Empty State**: Receipt icon + "No invoices yet — your billing history will appear here after your first charge."
 **Error State**: "Billing history couldn't be loaded — your invoices are still available. Try again in a moment."
 
 ### Screen 13.4: Receipt Detail
@@ -1043,11 +1046,14 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Error State**: "Your ticket couldn't be submitted — check your connection and try again. No duplicate will be created."
 
+**Empty State**: MessageCirclePlus icon + "Select a visit to report an issue, or describe your concern below."
+
 ### Screen 14.3: Ticket List
 
 **Route**: `/customer/support/tickets`
 **Purpose**: Filterable list with status pills (Open | Resolved | All)
 
+**Empty State**: Inbox icon + "No support tickets — everything looks good. If an issue comes up, we're here."
 **Error State**: "Tickets couldn't be loaded — your open tickets are still being tracked. Pull down to refresh."
 
 ### Screen 14.4: Ticket Detail
@@ -1055,6 +1061,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Route**: `/customer/support/tickets/:ticketId`
 **Purpose**: Individual ticket view with status, notes, resolution
 
+**Empty State**: FileText icon + "No updates on this ticket yet — we'll post a resolution here once reviewed."
 **Error State**: "Ticket details couldn't be loaded — go back to your tickets list and try again."
 
 ---
@@ -1141,6 +1148,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/customer/notifications`
 **Purpose**: Chronological notification list (shared component across all roles)
 
+**Empty State**: Bell icon + "No notifications yet — we'll alert you when there's activity on your account."
 **Error State**: "Notifications couldn't be loaded — you'll still receive push alerts. Pull down to refresh."
 
 ---
@@ -1469,6 +1477,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Header**: ChevronLeft back → `/provider/byoc` | H2 "Create Invite Link" | Caption "Generate a link for your existing customers"
 
+**Empty State**: Link2 icon + "Fill in the details below to generate your first invite link."
 **Error State**: "Link couldn't be created — check your connection and try again."
 
 ---
@@ -1527,6 +1536,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/provider/quality` or `/provider/performance`
 **Purpose**: Quality rating breakdown, feedback summary, performance metrics
 
+**Empty State**: Star icon + "Your quality score will appear after your first three completed jobs."
 **Error State**: "Quality score couldn't be loaded — your rating is unaffected. Pull down to refresh."
 
 ### Screen 22.2: Insights
@@ -1534,6 +1544,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/provider/insights`
 **Purpose**: Business insights and growth recommendations
 
+**Empty State**: Lightbulb icon + "Insights will appear here once you have enough job data to spot trends."
 **Error State**: "Insights couldn't be generated right now — check back after your next completed job."
 
 ### Screen 22.3: Insights History
@@ -1541,6 +1552,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/provider/insights/history`
 **Purpose**: Historical insights archive
 
+**Empty State**: Archive icon + "No past insights yet — your historical trends will build here over time."
 **Error State**: "Insights history couldn't be loaded — try again in a moment."
 
 ---
@@ -1567,6 +1579,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Sections**: Zone selection tabs, availability section, SKU capabilities
 
+**Empty State**: Map icon + "No zones selected yet — choose zones near you to start receiving jobs."
 **Error State**: "Coverage zones couldn't be loaded — your current zones are still active. Try refreshing."
 
 ### Screen 23.3: Authorized SKUs
@@ -1578,6 +1591,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Sections**: Search input, category-grouped SKU cards with detail sheet
 
+**Empty State**: ClipboardList icon + "No authorized services yet — complete onboarding to unlock your service catalog."
 **Error State**: "Service catalog couldn't be loaded — check your connection and try again."
 
 ### Screen 23.4: Work Setup
@@ -1589,6 +1603,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Sections**: 3-step wizard (Location → Services → Schedule)
 
+**Empty State**: Settings icon + "No work preferences set yet — configure your location, services, and schedule."
 **Error State**: "Work setup preferences couldn't be saved — check your connection and try again."
 
 ### Screen 23.5: Availability
@@ -1600,6 +1615,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Sections**: Weekly schedule grid, blocked windows list with add/delete
 
+**Empty State**: Calendar icon + "No availability windows set — add your working hours to start receiving job assignments."
 **Error State**: "Availability schedule couldn't be loaded — your current availability is unchanged. Try refreshing."
 
 ---
@@ -1620,6 +1636,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Note**: Coverage & Availability replaces the former Coverage primary tab. BYOC Center and Referrals are grouped under "Growth" to make the revenue-boosting tools discoverable as a category.
 
+**Empty State**: MoreHorizontal icon + "Your menu will load shortly — if this persists, restart the app."
 **Error State**: "Menu couldn't be loaded — try closing and reopening the app."
 
 ### Screen 24.2: Provider Settings
@@ -1629,6 +1646,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Header**: H2 "Account Settings" (no back nav — top-level More menu destination)
 
+**Empty State**: Settings icon + "Your account settings will appear once your profile is fully set up."
 **Error State**: "Settings couldn't be loaded — your preferences are unchanged. Try again."
 
 ### Screen 24.3: Provider Support
@@ -1638,6 +1656,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Header**: H2 "Support" | Caption "Claims and disputes involving your jobs" (no back nav — top-level More menu destination)
 
+**Empty State**: HelpCircle icon + "No support tickets — if a job issue comes up, you can file a claim here."
 **Error State**: "Support tickets couldn't be loaded — your open tickets are unaffected. Pull down to refresh."
 
 ### Screen 24.3.1: Support Ticket Detail
@@ -1656,6 +1675,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Header**: H2 "Growth Hub" (page title)
 
+**Empty State**: Users icon + "No referral activity yet — invite fellow providers or share your link with customers to earn bonuses."
 **Error State**: "Referral data couldn't be loaded — your referral credits are safe. Try refreshing."
 
 ---
@@ -1668,6 +1688,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Layout**: Sidebar navigation (AdminShell), not bottom tabs
 **Purpose**: Overview metrics — active subscriptions, jobs today, provider count, revenue
 
+**Empty State**: BarChart3 icon + "No data yet — metrics will populate as customers and providers onboard."
 **Error State**: "Dashboard metrics couldn't be loaded — data may be stale. Refresh to see latest numbers."
 
 ### Screen 25.2: Ops Cockpit
@@ -1680,6 +1701,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/ops/zones`
 **Purpose**: Zone-by-zone capacity, provider coverage, service day distribution
 
+**Empty State**: Map icon + "No zones configured — create zones in the Zone Builder to see health metrics."
 **Error State**: "Zone health data couldn't be loaded — check the database connection and retry."
 
 ### Screen 25.4: Zone Detail
@@ -1701,6 +1723,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/ops/growth`
 **Purpose**: Signup funnel, BYOC activations, referral conversion
 
+**Empty State**: TrendingUp icon + "No growth events recorded yet — metrics will appear as signups and activations come in."
 **Error State**: "Growth metrics failed to load — analytics pipeline may be delayed. Try again in a few minutes."
 
 ### Screen 25.8: Support Health
@@ -1708,6 +1731,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/ops/support`
 **Purpose**: Ticket volume, resolution time, SLA compliance
 
+**Empty State**: HeadphonesIcon + "No support tickets yet — SLA metrics will appear once tickets are created."
 **Error State**: "Support health data couldn't be loaded — check the analytics service and retry."
 
 ---
@@ -1719,6 +1743,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/providers`
 **Purpose**: Searchable, filterable provider directory
 
+**Empty State**: Users icon + "No providers onboarded yet — approved applications will appear here."
 **Error State**: "Provider list failed to load — try refreshing or narrow your search filters."
 
 ### Screen 26.2: Provider Detail
@@ -1733,6 +1758,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/providers/applications`
 **Purpose**: Pending provider applications for review
 
+**Empty State**: FileStack icon + "No pending applications — new submissions will appear here for review."
 **Error State**: "Application queue failed to load — pending applications are not lost. Refresh to retry."
 
 ### Screen 26.4: Application Detail
@@ -1761,6 +1787,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/skus`
 **Purpose**: Service type definitions — names, durations, levels, checklist templates
 
+**Empty State**: Package icon + "No service types defined yet — add SKUs to start building the catalog."
 **Error State**: "SKU catalog failed to load — existing service definitions are unaffected. Retry to see latest changes."
 
 ### Screen 27.4: Subscription Plans
@@ -1797,6 +1824,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/jobs`
 **Purpose**: All jobs with filters (status, date, zone, provider)
 
+**Empty State**: Briefcase icon + "No jobs match your filters — try adjusting the date range or status filter."
 **Error State**: "Job list failed to load — try narrowing your date range or filters."
 
 ### Screen 28.2: Job Detail
@@ -1821,6 +1849,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/ops/dispatch`
 **Purpose**: Job dispatch management
 
+**Empty State**: Truck icon + "No pending dispatches — all jobs are currently assigned."
 **Error State**: "Dispatch queues failed to load — active dispatches are still running. Check the scheduler service."
 
 ---
@@ -1837,6 +1866,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/billing/customers/:customerId`
 **Purpose**: Individual customer financial history — invoices, credits, payments
 
+**Empty State**: Receipt icon + "No financial activity for this customer yet — transactions will appear after their first billing cycle."
 **Error State**: "Customer ledger couldn't be loaded — check the customer ID or billing service status."
 
 ### Screen 29.3: Payout Overview
@@ -1844,6 +1874,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/payouts`
 **Purpose**: Provider payout status, pending amounts, payout schedule
 
+**Empty State**: Banknote icon + "No payouts processed yet — provider payouts will appear after the first earning cycle."
 **Error State**: "Payout overview failed to load — scheduled payouts are unaffected. Retry to see current status."
 
 ### Screen 29.4: Provider Ledger
@@ -1851,6 +1882,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/payouts/providers/:providerOrgId`
 **Purpose**: Individual provider earnings history — earnings, holds, payouts
 
+**Empty State**: DollarSign icon + "No earnings recorded for this provider yet — activity will appear after their first job."
 **Error State**: "Provider ledger couldn't be loaded — check the provider ID or try again."
 
 ### Screen 29.5: Pricing Control
@@ -1863,6 +1895,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/control/payouts`
 **Purpose**: Payout frequency, hold policies, minimum thresholds
 
+**Empty State**: Sliders icon + "No payout policies configured — set up frequency and hold rules to start."
 **Error State**: "Payout control settings couldn't be loaded — current policies remain in effect. Retry."
 
 ---
@@ -1874,6 +1907,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/support`
 **Purpose**: All support tickets with filters, assignment, bulk actions
 
+**Empty State**: MessageSquare icon + "No support tickets in queue — all current issues have been resolved."
 **Error State**: "Support console couldn't be loaded — open tickets are still being tracked. Refresh to retry."
 
 ### Screen 30.2: Support Ticket Detail
@@ -1898,6 +1932,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/growth`
 **Purpose**: Viral loop metrics, BYOC performance, referral conversion
 
+**Empty State**: Rocket icon + "No growth events yet — signups, BYOC activations, and referral conversions will appear here."
 **Error State**: "Growth data couldn't be loaded — analytics pipeline may be delayed. Check back shortly."
 
 ### Screen 30.6: Feedback
@@ -1920,6 +1955,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/incentives`
 **Purpose**: Referral program configuration, BYOC bonus rules
 
+**Empty State**: Gift icon + "No incentive programs configured — create referral or BYOC bonus rules to get started."
 **Error State**: "Incentive program data couldn't be loaded — active programs are still running. Retry."
 
 ---
