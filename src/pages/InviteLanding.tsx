@@ -15,7 +15,7 @@ export default function InviteLanding() {
   const hasTracked = useRef(false);
 
   // Validate referral code exists and is usable
-  const { data: referral, isLoading } = useQuery({
+  const { data: referral, isLoading, isError } = useQuery({
     queryKey: ["referral-code-public", code],
     enabled: !!code,
     queryFn: async () => {
@@ -41,22 +41,60 @@ export default function InviteLanding() {
         context: { invite_code: code },
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code, referral]);
+
+  // No code in URL — show neutral fallback
+  if (!code) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-background animate-fade-in">
+        <div className="max-w-md w-full text-center space-y-4">
+          <img src={handledLogo} alt="Handled Home" className="h-12 mx-auto" />
+          <h1 className="text-2xl font-bold">Invalid referral link</h1>
+          <p className="text-sm text-muted-foreground">
+            This link appears to be incomplete. Ask your friend to resend the referral link.
+          </p>
+          <Button onClick={() => navigate("/auth")} size="lg" className="w-full">
+            Get Started
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-background animate-fade-in">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
-  // Error state — invalid or used code
+  // Network/RLS error state
+  if (isError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-background animate-fade-in">
+        <div className="max-w-md w-full text-center space-y-4">
+          <img src={handledLogo} alt="Handled Home" className="h-12 mx-auto" />
+          <AlertTriangle className="h-12 w-12 text-warning mx-auto" />
+          <h1 className="text-2xl font-bold">Something went wrong</h1>
+          <p className="text-sm text-muted-foreground">
+            We couldn't verify this referral link. Please try again later.
+          </p>
+          <Button onClick={() => navigate("/auth")} size="lg" className="w-full">
+            Get Started
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Invalid or inactive code
   if (!referral || !referral.is_active) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-background">
-        <div className="max-w-md w-full text-center space-y-4 animate-fade-in">
+      <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-background animate-fade-in">
+        <div className="max-w-md w-full text-center space-y-4">
           <img src={handledLogo} alt="Handled Home" className="h-12 mx-auto" />
           <AlertTriangle className="h-12 w-12 text-warning mx-auto" />
           <h1 className="text-2xl font-bold">This referral link couldn't be verified</h1>
@@ -128,8 +166,7 @@ export default function InviteLanding() {
         {/* Dismiss */}
         <Button
           variant="ghost"
-          size="sm"
-          className="text-muted-foreground"
+          className="text-muted-foreground min-h-[44px]"
           onClick={() => navigate("/")}
         >
           Dismiss

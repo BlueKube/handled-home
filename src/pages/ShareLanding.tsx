@@ -51,7 +51,7 @@ export default function ShareLanding() {
 
   if (isError) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6 text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6 text-center animate-fade-in">
         <img src={handledLogo} alt="Handled Home" className="h-10 mb-6" />
         <AlertTriangle className="h-10 w-10 text-warning mx-auto mb-4" />
         <h1 className="text-h2 mb-2">This receipt couldn't be loaded</h1>
@@ -153,9 +153,14 @@ export default function ShareLanding() {
           <img src={handledLogo} alt="Handled Home" className="h-6 opacity-60" />
           <Button
             variant="ghost"
-            size="sm"
-            className="text-muted-foreground"
-            onClick={() => window.close()}
+            className="text-muted-foreground min-h-[44px]"
+            onClick={() => {
+              if (window.history.length > 1) {
+                navigate(-1);
+              } else {
+                navigate("/");
+              }
+            }}
           >
             Close
           </Button>
