@@ -187,7 +187,7 @@ export default function ByocCenter() {
       )}
 
       {/* Customer Referral Cross-Sell */}
-      <Card className="border-muted bg-muted/30">
+      <Card className="border-border bg-muted/30">
         <CardContent className="py-4 px-4">
           <div className="flex items-start gap-3">
             <Users className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
