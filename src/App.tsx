@@ -49,6 +49,8 @@ import CustomerAppointmentPicker from "@/pages/customer/AppointmentPicker";
 import CustomerSchedule from "@/pages/customer/Schedule";
 import CustomerActivity from "@/pages/customer/Activity";
 import CustomerReschedule from "@/pages/customer/Reschedule";
+import CustomerRecommendProvider from "@/pages/customer/RecommendProvider";
+import CustomerRecommendProviderStatus from "@/pages/customer/RecommendProviderStatus";
 // Provider pages
 import ProviderDashboard from "@/pages/provider/Dashboard";
 import ProviderJobs from "@/pages/provider/Jobs";
@@ -217,6 +219,8 @@ const App = () => (
                 <Route path="/customer/services" element={<CustomerPropertyGate><CustomerServices /></CustomerPropertyGate>} />
                 <Route path="/customer/more" element={<CustomerPropertyGate><MoreMenuPage /></CustomerPropertyGate>} />
                 <Route path="/customer/notifications" element={<SharedNotifications />} />
+                <Route path="/customer/recommend-provider" element={<CustomerRecommendProvider />} />
+                <Route path="/customer/recommend-provider/status" element={<CustomerRecommendProviderStatus />} />
               </Route>
 
               {/* Provider App */}
