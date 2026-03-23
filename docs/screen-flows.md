@@ -567,7 +567,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
     - Health score visualization
 
 10. **Suggested Services Section** (single top suggestion)
-    - One AI-suggested service card with "Add to routine" CTA
+    - One AI-suggested service card with Button (accent, sm): "Add to Routine"
     - "See more →" link to full routine catalog
 
 11. **Seasonal Plan Card** (conditional)
@@ -614,7 +614,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Each card: tier name (Essential / Plus / Premium), tier tagline, price, handles, outcome-based highlights, recommended badge, zone availability
    - Tier taglines: Essential → "The basics, handled." | Plus → "More covered, less to think about." | Premium → "Your home, fully handled."
    - Highlights should frame outcomes ("Recurring lawn + pest care") not line items ("2 anchor services")
-   - CTA per card: "Preview" and "Build Routine" buttons
+   - CTA per card: Button (outline, sm): "Preview" and Button (accent, sm): "Build Routine"
 
 5. **Footer**
    - Caption: "All plans bill every 4 weeks. Change or cancel anytime — changes take effect next cycle."
@@ -762,7 +762,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 2. **No Assignment**: Caption "Unable to generate a service day offer. Please ensure you have an active subscription."
 
 3. **Offer Pending** (primary state):
-   - ServiceDayOfferCard: shows offered day with capacity info, Confirm/Reject buttons
+   - ServiceDayOfferCard: shows offered day with capacity info, Button (accent, lg): "Confirm Day" / Button (outline, sm): "See Alternatives"
    - Scheduling Preferences section with toggle switches
    - Expired offer alert (if applicable): "Your previous offer expired, so we refreshed your Service Day options."
 
@@ -1144,7 +1144,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Description: "Invite friends and earn credits when they subscribe."
    - Referral code display: monospace code in muted bg + Copy button
    - Uses count: "X referrals used"
-   - If no code: "Generate Code" button
+   - If no code: Button (accent, sm): "Generate Referral Code"
 
 3. **Credits Summary** (2-column grid)
    - Card 1: Gift icon + earned amount + "Earned"
@@ -2184,7 +2184,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
    - Left border (accent/20, 2px) with indented job cards:
      - CheckCircle + service names + date + photo count
      - Tappable → navigates to `/customer/visits/:jobId`
-5. **Bottom CTA**: "View all photos" (outline button, Camera icon)
+5. **Bottom CTA**: Button (outline, lg): "View All Photos" (Camera icon)
 
 **Empty state**: Calendar icon + "No completed services yet" + subtext
 
