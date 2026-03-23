@@ -809,7 +809,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Route**: `/customer/activity`
 **Tab**: Activity (4th tab, Clock icon)
-**Purpose**: Show proof that services were done. The retention moat — cumulative value that makes leaving feel like losing a record.
+**Purpose**: Show proof that services were done — reinforces subscription value and confirms your membership is working.
 
 **Layout**:
 - Bottom tab bar visible (Activity tab active)
@@ -857,7 +857,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 ### Screen 11.3: Visit Detail (Receipt)
 
 **Route**: `/customer/visits/:jobId`
-**Purpose**: Proof-first receipt — photos and checklist before narrative
+**Purpose**: Proof-first receipt confirming your membership value — photos and checklist before narrative
 
 **Sections (top to bottom)**:
 
@@ -2119,7 +2119,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 
 **Route**: `/customer/timeline`
 **Who**: Customer
-**Purpose**: Chronological service history that reinforces subscription value and creates switching costs
+**Purpose**: Chronological service history confirming your subscription value and membership benefits
 
 ### Screen 33.1: Home Timeline Page
 
@@ -2211,7 +2211,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 
 **Component**: `TrustBar`
 **Where**: Onboarding Zone Check step, Plan Selection step
-**Purpose**: Reduce cold-funnel fear with trust signals
+**Purpose**: Reduce cold-funnel fear during onboarding with trust signals
 
 ### Screen 36.1: Trust Bar
 
