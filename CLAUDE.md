@@ -19,7 +19,7 @@ Follow this exact sequence for every batch. Do not skip steps.
 3. **Keep batches small** — 1 theme across 1-3 screens. Don't mix unrelated fixes.
 4. **Implement only the spec** — If you find something out of scope, defer it.
 5. **Run code review after every commit/phase** — After committing, run `/code-review` to review the diff against main. This launches 5 parallel Sonnet agents (CLAUDE.md compliance, bug scan, historical context, prior feedback, code comment compliance) with confidence scoring. See `.claude/commands/code-review.md` for details.
-6. **Fix MUST-FIX and SHOULD-FIX findings** — MUST-FIX (score 75+) must be resolved. SHOULD-FIX (score 50–74) should be resolved if straightforward. Re-run review if substantial changes were needed.
+6. **Fix findings until clear** — MUST-FIX (75+) and SHOULD-FIX (50–74) must be resolved. After committing fixes, the review automatically re-runs to verify fixes are real and didn't introduce new issues. This loops until clean (max 3 passes).
 7. **Validate build** — Run `npx tsc --noEmit` and `npm run build` before considering a batch done.
 8. **Reconcile** — After each batch, update which pages are done and what's next.
 9. **Sync documentation after each phase** — After completing a phase (group of related batches), review all key docs for stale info: page names, navigation specs, design patterns, product strategy sections. See `docs/skills/redesign-workflow-guide.md` step 9.

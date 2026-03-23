@@ -51,7 +51,7 @@ Drop issues scoring below 50. Categorize the rest:
 
 Format:
 ```
-### Code review
+### Code review (pass N)
 Found N issues (X must-fix, Y should-fix):
 
 **MUST-FIX:**
@@ -62,6 +62,15 @@ Found N issues (X must-fix, Y should-fix):
 ```
 
 Or if clean: "No issues found. Checked for bugs and CLAUDE.md compliance."
+
+### 8. Recheck loop (phase mode only)
+After fixes are committed for any MUST-FIX or SHOULD-FIX findings, **re-run steps 1–7 automatically** on the new diff. This verifies that:
+- Each original finding was actually resolved (not just claimed fixed)
+- The fix itself didn't introduce new issues
+
+Keep looping until a pass comes back clean (no issues scoring 50+). Cap at **3 passes** to avoid infinite loops — if issues persist after 3 passes, report the remaining findings and stop.
+
+Label each pass in output: "Code review (pass 1)", "Code review (pass 2)", etc.
 
 ## False positives (skip these)
 - Pre-existing issues not introduced by this diff
