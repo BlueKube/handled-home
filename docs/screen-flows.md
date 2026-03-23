@@ -254,9 +254,11 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 - Back button: ArrowLeft + "Back" (muted text, visible from step 2+)
 - Step counter: "Step X of 8" (caption, right-aligned)
 - Progress bar: 1.5px height, accent color fill
+- Progress indicator: Step X of 8 with visual segments
 - Step labels row: "Your Home · Coverage · Home Setup · Pick Plan · Subscribe · Service Day · Routine · All Set"
   - Current and prior steps: accent + medium weight
   - Future steps: muted
+- Button (accent, lg, full-width): "Continue to Next Step"
 
 ### Screen 5.2: Step 1 — Your Home (Property)
 
@@ -579,14 +581,14 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Entry**: "Preview" button from plan card
 
 **Sections**:
-1. Back button
-2. Plan hero (name, price, tagline)
-3. Handles callout card
-4. Included services card
-5. Available as extras card
-6. Not available card
-7. Change policy info card
-8. CTAs: "Build Routine" + "Subscribe"
+1. **Back Button**: ChevronLeft + "Plans" (muted)
+2. **Plan Hero** (name, price, tagline)
+3. **Handles Callout Card**
+4. **Included Services Card**
+5. **Available as Extras Card**
+6. **Not Available Card**
+7. **Change Policy Info Card**
+8. **Bottom CTA Bar** (fixed, blur bg): Button (accent, xl, full-width): "Subscribe to This Plan"
 
 ### Screen 8.3: Subscription Management
 
@@ -594,16 +596,16 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Sections**:
 
-1. **Header**: H2 "Subscription"
+1. **Header**: ChevronLeft + "Back" | H2 "Your Subscription"
 
-2. **No Subscription State**: "No Active Subscription" + "You don't have a subscription yet." + Button "Browse Plans"
+2. **No Subscription State**: "No Active Subscription" + "You don't have a subscription yet — browse plans to get started." + Button (accent, lg, full-width): "Browse Plans"
 
 3. **Active State**:
-   - Fix Payment Panel (if past_due): destructive card with CTA
-   - Subscription Status Panel: plan name, status, billing cycle, next renewal
-   - Pause Panel: pause/resume controls
-   - Plan Change Panel: change plan CTA (hidden if paused/canceling)
-   - Cancellation Flow: cancel subscription (hidden if paused)
+   - Fix Payment Panel (if past_due): destructive card with Button (destructive, lg): "Update Payment Method"
+   - Subscription Status Panel: plan name, status badge, billing cycle, next renewal
+   - Pause Panel: pause/resume controls with confirmation dialog
+   - Plan Change Panel: Button (outline, lg): "Change Plan" (hidden if paused/canceling)
+   - Cancellation Flow: Button (ghost, destructive): "Cancel Subscription" (hidden if paused)
 
 ---
 
@@ -653,11 +655,26 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Route**: `/customer/routine/review`
 **Purpose**: Review 4-week preview before confirming
 
+**Sections**:
+
+1. **Header**: ChevronLeft + "Back to Builder" | H2 "Review Your Routine"
+2. **Service Summary Card**: list of selected services with level, cadence, and per-cycle cost
+3. **4-Week Preview Timeline**: visual week-by-week schedule of upcoming visits
+4. **Cost Breakdown**: included credits used, extras cost, total per cycle
+5. **Bottom CTA** (fixed, blur bg): Button (accent, xl, full-width): "Confirm Routine"
+
 ### Screen 9.3: Routine Confirm
 
 **Route**: `/customer/routine/confirm`
 **Purpose**: Final confirmation with effective date
-**Copy**: "Changes effective next cycle."
+
+**Sections**:
+
+1. **Success Header** (centered): CheckCircle icon (success, 48×48) + H2 "Routine Confirmed"
+2. **Effective Date Card**: "Your routine is effective next cycle." + next service date
+3. **Summary**: services confirmed, cadence, estimated monthly cost
+4. **Next Steps**: caption "Your provider will follow this routine on your service day."
+5. **CTA**: Button (accent, lg, full-width): "View Your Schedule"
 
 ---
 
@@ -1112,32 +1129,97 @@ Each menu item: icon + label + ChevronRight, tappable
 ### Screen 17.2: Step 1 — Organization Setup
 
 **Route**: `/provider/onboarding/org`
-**Fields**: Business name, phone, zip, website (optional)
+**Purpose**: Enter your business details so we can set up your provider profile
+
+**Sections**:
+
+1. **Progress Indicator**: Step 1 of 6 progress bar (accent fill)
+2. **Header**: H2 "Your Business Details"
+3. **Form Fields**: Business name (required), phone (required, validated), zip code (required, 5-digit pattern), website (optional)
+4. **Skip Option**: Button (ghost, sm): "Skip for now — complete later in Settings"
+5. **Bottom CTA**: Button (accent, xl, full-width): "Save and Continue"
+
+**Error State**: "Unable to save your details — check your connection and try again."
 
 ### Screen 17.3: Step 2 — Coverage Zones
 
 **Route**: `/provider/onboarding/coverage`
 **Purpose**: Select which zones to operate in (from allowed zones)
 
+**Sections**:
+
+1. **Progress Indicator**: Step 2 of 6 progress bar
+2. **Header**: H2 "Select Your Coverage Zones"
+3. **Zone Map**: interactive map with selectable hex zones
+4. **Selected Zones List**: badges showing chosen zones with remove option
+5. **Help Text**: "Choose zones near you for better route density and shorter drive times."
+6. **Skip Option**: Button (ghost, sm): "Skip for now"
+7. **Bottom CTA**: Button (accent, xl, full-width): "Save and Continue"
+
+**Loading**: Skeleton shimmer while zones load
+**Empty State**: MapPin icon + "No zones available in your area yet. We'll notify you when your region opens."
+
 ### Screen 17.4: Step 3 — Capabilities
 
 **Route**: `/provider/onboarding/capabilities`
 **Purpose**: Select service categories (lawn care, landscaping, etc.)
+
+**Sections**:
+
+1. **Progress Indicator**: Step 3 of 6 progress bar
+2. **Header**: H2 "What Services Do You Offer?"
+3. **Service Category Grid**: checkable cards — Lawn Care, Landscaping, Pool, Pest Control, etc.
+4. **Explainer**: info tooltip "Select all categories your team can handle. You can update these anytime."
+5. **Skip Option**: Button (ghost, sm): "Skip for now"
+6. **Bottom CTA**: Button (accent, xl, full-width): "Save and Continue"
 
 ### Screen 17.5: Step 4 — Compliance
 
 **Route**: `/provider/onboarding/compliance`
 **Purpose**: Terms acceptance, insurance + tax document upload
 
+**Sections**:
+
+1. **Progress Indicator**: Step 4 of 6 progress bar
+2. **Header**: H2 "Compliance Documents"
+3. **Insurance Upload**: file upload card — "Upload proof of general liability insurance" with accepted formats note
+4. **Tax Document Upload**: file upload card — "Upload W-9 or equivalent tax form"
+5. **Validation**: required markers on both uploads, max file size 10MB
+6. **Skip Option**: Button (ghost, sm): "Skip for now — required before first job"
+7. **Bottom CTA**: Button (accent, xl, full-width): "Save and Continue"
+
+**Error State**: "Upload failed — check your file size (max 10MB) and try again."
+
 ### Screen 17.6: Step 5 — Agreement
 
 **Route**: `/provider/onboarding/agreement`
 **Purpose**: Read and accept service agreement
 
+**Sections**:
+
+1. **Progress Indicator**: Step 5 of 6 progress bar
+2. **Header**: H2 "Service Agreement"
+3. **Agreement Text**: scrollable card with full agreement text
+4. **Acceptance Checkbox**: "I have read and agree to the Handled service provider agreement"
+5. **Bottom CTA**: Button (accent, xl, full-width): "Accept and Continue" (disabled until checkbox checked)
+
 ### Screen 17.7: Step 6 — Review
 
 **Route**: `/provider/onboarding/review`
 **Purpose**: Final review of all submitted information before submission
+
+**Sections**:
+
+1. **Progress Indicator**: Step 6 of 6 progress bar (complete)
+2. **Header**: H2 "Review Your Application"
+3. **Business Details Card**: summary of org info with Edit button (ghost)
+4. **Coverage Card**: selected zones summary with Edit button (ghost)
+5. **Capabilities Card**: selected services with Edit button (ghost)
+6. **Compliance Card**: uploaded documents status with Edit button (ghost)
+7. **Agreement Card**: acceptance status (CheckCircle icon)
+8. **Bottom CTA**: Button (accent, xl, full-width): "Submit Application"
+
+**Success Feedback**: Toast "Application submitted — we'll review within 2 business days."
 
 ---
 
@@ -1211,50 +1293,78 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/provider/jobs`
 
 **Sections**:
-1. Tabs: Today | This Week | All
-2. Today's Loadout summary (total stops, minutes)
-3. Day Plan summary
-4. Job Cards (repeating): rank, address, services, status badge, duration, reorder buttons
-5. Map/List view toggle
-6. Route optimization button
-7. Week Due Queue
-8. Empty: "No jobs scheduled for today"
+1. **Header**: H2 "Your Jobs"
+2. **Tabs**: Today | This Week | All
+3. **Today's Loadout Summary**: total stops, estimated minutes, status badge showing completion
+4. **Day Plan Summary**: overview of today's route
+5. **Job Cards** (repeating): rank, address, services, status badge, duration, reorder buttons — tap to open job
+6. **Map/List View Toggle**: segmented control
+7. **Route Optimization Button**: Button (outline, sm): "Optimize Route"
+8. **Week Due Queue**: upcoming jobs preview
+9. **Primary CTA**: Button (accent, lg, full-width): "Start Next Job" (navigates to first incomplete job)
+
+**Loading**: Skeleton cards while jobs load
+**Empty State**: Briefcase icon + "No jobs scheduled for today — your next assignment will appear here when dispatched."
 
 ### Screen 19.2: Job Detail
 
 **Route**: `/provider/jobs/:jobId`
 **Purpose**: Full job info — property details, checklist, photos required, navigation
 
-**Key UI elements (updated Batch 2)**:
-- **Queue breadcrumb**: "Stop X of Y today" with prev/next navigation arrows (ChevronLeft/ChevronRight). Uses `useProviderJobs("today_all")` for queue context.
-- **Sticky action bar**: Fixed bottom-16 with pb-48. Contains primary actions (Start Job, View Checklist, Upload Photos, Complete Job) based on job status.
-- Property details card: address, gate code, dog alert, parking notes
-- SKU checklist with proof-required indicators
-- Report Issue and Self-Healing action sheets
+**Sections**:
+1. **Back Button**: ChevronLeft + "Jobs" (muted)
+2. **Queue Breadcrumb**: "Stop X of Y today" with prev/next navigation arrows (ChevronLeft/ChevronRight)
+3. **Property Details Card**: address, gate code, dog alert, parking notes
+4. **SKU Checklist**: items with proof-required indicators and status badges
+5. **Report Issue**: Button (outline, sm): "Report Issue" — opens action sheet
+6. **Sticky Action Bar** (fixed bottom-16, pb-48): Button (accent, xl, full-width): "Start Job" / "View Checklist" / "Complete Job" (changes based on job status)
+
+**Loading**: Skeleton shimmer while job details load
+**Error State**: "Unable to load job details — pull down to refresh or go back to your job list."
 
 ### Screen 19.3: Job Checklist
 
 **Route**: `/provider/jobs/:jobId/checklist`
 **Purpose**: Complete checklist items one by one (guided, one action at a time)
 
+**Sections**:
+1. **Back Button**: ChevronLeft + "Job Detail"
+2. **Progress Counter**: "Item X of Y" with progress bar
+3. **Current Task Card**: service name, task description, proof-required badge if applicable
+4. **Action Area**: checkbox or toggle to mark item complete
+5. **Bottom CTA**: Button (accent, xl, full-width): "Mark Complete and Continue" / "Finish Checklist" (on last item)
+
+**Loading**: Skeleton while checklist loads
+**Error State**: "Checklist failed to load — go back and try again."
+
 ### Screen 19.4: Job Photos
 
 **Route**: `/provider/jobs/:jobId/photos`
 **Purpose**: Upload required before/after photos per SKU
+
+**Sections**:
+1. **Back Button**: ChevronLeft + "Checklist"
+2. **Header**: H2 "Upload Photos"
+3. **Required Photos Grid**: cards per SKU showing before/after slots, Camera icon tap to capture
+4. **Upload Progress**: progress bar per photo during upload
+5. **Validation**: required markers on mandatory photos
+6. **Bottom CTA**: Button (accent, xl, full-width): "Submit Photos and Complete"
+
+**Error State**: "Photo upload failed — check your connection and retry."
 
 ### Screen 19.5: Job Complete
 
 **Route**: `/provider/jobs/:jobId/complete`
 **Purpose**: Confirmation and celebration screen after marking job complete
 
-**Key UI elements (updated Batch 2)**:
-- **Celebration header**: PartyPopper icon with "Job Complete!" headline
-- **Earnings display**: Shows base pay + modifier breakdown with `formatCents` utility
-- **Route progress bar**: Segmented stops showing completed vs remaining, trophy when all done
-- **Next stop CTA**: Button to navigate directly to next uncompleted job
-- **Day complete state**: Trophy card when all stops finished
-- Level sufficiency form (LevelSufficiencyForm) for quality feedback
-- Notes textarea and submit flow
+**Sections**:
+1. **Celebration Header**: PartyPopper icon (48×48) + H2 "Job Complete!"
+2. **Earnings Display**: base pay + modifier breakdown with `formatCents` utility
+3. **Route Progress Bar**: segmented stops showing completed vs remaining, trophy when all done
+4. **Level Sufficiency Form**: quality feedback form (LevelSufficiencyForm)
+5. **Notes**: Textarea for optional completion notes
+6. **Next Stop CTA**: Button (accent, xl, full-width): "Continue to Next Stop" / "View Your Earnings" (if day complete)
+7. **Day Complete State**: Trophy card + "All stops finished — great work today!" when all jobs done
 
 ---
 
