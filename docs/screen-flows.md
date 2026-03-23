@@ -181,9 +181,9 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 # FLOW 2B: BYOP — Recommend a Provider (Customer → Platform)
 
-**Route**: `/customer/recommend-provider`
+**Route**: `/customer/recommend-provider` (alias: `/byop/recommend`)
 **Who**: Authenticated customer who wants to bring a trusted provider into the network
-**Purpose**: Customer recommends a provider for possible network inclusion — reduces switching friction for incumbent-loyal households (see `masterplan.md` → BYOP)
+**Purpose**: BYOP landing page — customer recommends a provider for possible network inclusion. Reduces switching friction for incumbent-loyal households (see `masterplan.md` → BYOP)
 
 ### Screen 2B.1: Recommend a Provider
 
@@ -627,9 +627,53 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Route**: `/customer/onboarding/byoc/:token` (or inline at `/byoc/activate/:token` when authenticated)
 **Who**: Customer who signed up via provider's BYOC invite link
-**Purpose**: Streamlined onboarding variant — property details are pre-contextualized with the provider's service
+**Purpose**: Streamlined onboarding — provider, category, and cadence pre-filled from invite context. Fewer steps than standard Flow 5.
 
-> Similar to Flow 5 but with provider context baked in. The service category, provider, and cadence are pre-filled from the invite. Steps may be reduced.
+### Screen 6.1: Confirm Your Service
+
+**Layout**: Full-screen wizard step, progress indicator (step 1 of 3)
+
+**Sections**:
+1. **Provider Context Card** (Card, bg-accent/5)
+   - Avatar + provider name + "Your provider" badge
+   - Category badge + cadence (pre-filled from invite)
+   - Caption: "This is already set up from your provider's invitation."
+2. **Address Input** (Card)
+   - H3: "Confirm Your Address"
+   - Input: Street address (pre-filled if available from auth, editable)
+   - Input: City, State, ZIP
+3. **CTA**: Button (default, lg, full-width): "Next" (ArrowRight icon)
+4. **Skip option**: Button (ghost, sm): "Skip for now — finish setup later"
+
+**Validation**: Address required. ZIP must match provider's coverage zone.
+**Error State**: "This address isn't in your provider's coverage area — contact them or try a different address."
+
+### Screen 6.2: Choose Your Plan
+
+**Layout**: Full-screen wizard step, progress indicator (step 2 of 3)
+
+**Sections**:
+1. **Plan Cards** (3 tiers, stacked)
+   - Essential / Plus / Premium tier cards with inclusions
+   - Pre-selected tier highlighted based on invite context
+   - Each card: tier name + price + key inclusions + "Select" button
+2. **Caption**: "Your provider's service is included in all plans."
+3. **CTA**: Button (default, lg, full-width): "Continue" (ArrowRight icon)
+4. **Skip option**: Button (ghost, sm): "Skip for now"
+
+### Screen 6.3: Activation Confirmation
+
+**Layout**: Full-screen confirmation, centered
+
+**Sections**:
+1. **Icon**: CheckCircle (64px, accent) with spring animation
+2. **Headline**: H2 "You're all set!"
+3. **Summary Card**: Provider name + category + cadence + plan tier + address
+4. **Caption**: "Your first service will be scheduled automatically. You'll get a notification before each visit."
+5. **CTA**: Button (default, lg, full-width): "Go to Dashboard" (ArrowRight icon)
+6. **Secondary**: Button (outline, lg): "Explore Your Plan"
+
+**Success**: Toast "Welcome to Handled Home — your service is activated."
 
 ---
 
@@ -1051,7 +1095,13 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 11. **Share CTA**
     - Button (outline, full-width): Share2 icon + "Share the after photo"
 
-12. **Receipt Suggestions** (growth surface)
+12. **Referral Card** (growth surface, Card, bg-accent/5)
+    - Users icon + "Your neighbors would love this"
+    - Caption: "Share your referral code and earn credits when friends subscribe."
+    - Inline referral code display (monospace, copy button)
+    - Button (accent, sm): "Share Code" → deep link to Flow 15
+
+13. **Receipt Suggestions** (growth surface)
     - Related services to add to routine
 
 13. **Issue Section**
@@ -1307,7 +1357,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 3. **Menu Sections** (grouped cards with dividers):
    - **Account**: Plans & Subscription (CreditCard) | Property (MapPin) | Billing (Wallet)
-   - **Community**: Referrals (Users) | Support (HelpCircle)
+   - **Community**: Referrals (Users) | Recommend a Provider (UserPlus) | Support (HelpCircle)
    - **Preferences**: Settings (Settings)
 
 4. **Appearance**
@@ -1711,6 +1761,11 @@ Each menu item: icon + label + ChevronRight, tappable
 
 8. **Inactive Links** (collapsed section)
 
+9. **Customer Referral Cross-Sell** (Card, subtle)
+   - Users icon + "Your customers can refer their neighbors too"
+   - Caption: "Activated customers get a referral code — more neighbors means denser routes and better earnings for you."
+   - Link: "Learn about customer referrals" → info tooltip
+
 **Gate**: Must be approved provider. Otherwise shows locked screen.
 **Explainer**: help text "How it works — create invite links, share with your existing customers, and earn bonuses when they join."
 **Success**: Toast "Invite link created — share it with your customers."
@@ -1923,9 +1978,14 @@ Each menu item: icon + label + ChevronRight, tappable
 ### Screen 24.4: Provider Referrals
 
 **Route**: `/provider/referrals`
-**Purpose**: Provider referral program + customer invites
+**Purpose**: Provider referral program + customer invites — Growth Hub co-locates BYOC Center link and referral tools
 
 **Header**: H2 "Growth Hub" (page title)
+
+**Sections**:
+1. **BYOC Quick Link** (Card, bg-accent/5): UserPlus icon + "BYOC Center" + "Invite your existing customers" + ChevronRight → Flow 20
+2. **Provider Referral Code**: monospace code + Copy button + "Earn bonuses when referred providers join"
+3. **Referral Activity**: list of referred providers with status badges
 
 **Empty State**: Users icon + "No referral activity yet — share your link and you'll earn bonuses when your referrals join."
 **Error State**: "Referral data couldn't be loaded — your referral credits are safe. Try refreshing."
@@ -2311,9 +2371,13 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
    - Star icon + "Serviced by {providerName}" (if available)
    - Date (muted, 12px)
    - "Your proof-of-work receipt is ready to view..." (muted, 12px)
-5. **Primary CTA**: Button (default, lg, full-width): "View Your Receipt" (ArrowRight icon)
-6. **Secondary CTA**: Button (outline, lg, full-width): "Share the News" (Share2 icon)
-7. **Dismiss**: Button (ghost, sm): "Continue to Dashboard"
+5. **Primary CTA**: Button (default, lg, full-width): "View Your Receipt" (ArrowRight icon) — navigates to receipt page (Screen 11.3)
+6. **Secondary CTA**: Button (outline, lg, full-width): "Share the News" (Share2 icon) — opens share landing (Flow 4) link generator. Recipient lands on share receipt page with proof photos and sign-up CTA.
+7. **Referral Card** (Card, bg-accent/5, border-accent/20):
+   - Users icon + "Know someone who'd love this?"
+   - Caption: "Earn a $30 credit when a friend subscribes."
+   - Button (accent, sm): "Get Your Referral Code" → navigates to Flow 15 referral hub
+8. **Dismiss**: Button (ghost, sm): "Continue to Dashboard"
 
 **Trigger**: Once only (localStorage flag). Shown when `lastCompletedJob` exists and flag not set.
 
