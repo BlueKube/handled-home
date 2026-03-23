@@ -311,7 +311,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 1. **Header**
    - MapPin icon (accent, 40×40)
    - H2: "Checking your area"
-   - Caption: "Zip code: **90210**" (mono font)
+   - Caption: "Zip code: **90210**" (mono font) — status badge showing zone check progress
 
 2. **Loading State**
    - Spinner + "Looking up coverage…"
@@ -376,6 +376,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (full-width, h-12, rounded-xl): "Continue" + ArrowRight
    - Button (ghost): "Skip for now"
 
+**Loading**: Skeleton pill rows while sizing data loads
 **Success**: Toast "Home size saved."
 **Error State**: "Home size details couldn't be saved — you can skip this step and update later in Settings."
 
@@ -473,6 +474,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (full-width): "Continue to Complete Setup"
    - Button (ghost): "Skip for now"
 
+**Loading**: Skeleton header while routine status loads
+
 ### Screen 5.10: Step 8 — Complete
 
 **Layout**: centered, max-w-lg
@@ -486,6 +489,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (full-width): "Go to Dashboard"
    - Button (outline, full-width): "Review My Routine"
 
+**Loading**: Skeleton success card while setup finalizes
 **Error State**: "Your setup couldn't be finalized — but don't worry, your progress is saved. Tap below to continue."
 
 ---
@@ -622,6 +626,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 7. **Change Policy Info Card** — explainer: "How it works" section with plan change and cancellation policies
 8. **Bottom CTA Bar** (fixed, blur bg): Button (accent, xl, full-width): "Subscribe to This Plan"
 
+**Loading**: Skeleton hero card and service lists while plan details load
 **Success**: Toast "Added to your routine builder."
 **Error State**: "Plan details couldn't be loaded — go back to plans and try again."
 
@@ -641,6 +646,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Pause Panel: pause/resume controls with confirmation dialog
    - Plan Change Panel: Button (outline, lg): "Change Plan" (hidden if paused/canceling)
    - Cancellation Flow: Button (ghost, destructive): "Cancel Subscription" (hidden if paused)
+
+**Loading**: Skeleton status panel while subscription data loads
 
 ---
 
@@ -700,6 +707,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **Cost Breakdown**: included credits used, extras cost, total per cycle with help text explaining each line item
 5. **Bottom CTA** (fixed, blur bg): Button (accent, xl, full-width): "Confirm Routine"
 
+**Success**: Toast "Routine changes look good — confirm when ready."
 **Loading**: Skeleton cards while routine preview generates
 **Error State**: "Routine preview couldn't be generated — go back to the builder and try again."
 
@@ -1184,6 +1192,7 @@ Each menu item: icon + label + ChevronRight, tappable
 7. **Preview As Card** (dev/admin tool)
 8. **Sign Out Button** (destructive, full-width): LogOut icon + "Sign Out"
 
+**Loading**: Skeleton profile form while account data loads
 **Validation**: Full name required, phone must be valid, new password min 8 characters
 **Success**: Toast "Settings updated."
 **Explainer**: info tooltip on Change Password — "Your password must be at least 8 characters."
@@ -1531,6 +1540,7 @@ Each menu item: icon + label + ChevronRight, tappable
 8. **Inactive Links** (collapsed section)
 
 **Gate**: Must be approved provider. Otherwise shows locked screen.
+**Success**: Toast "Invite link created — share it with your customers."
 **Loading**: Skeleton stats grid and link cards
 **Error State**: "BYOC data couldn't be loaded — your invite links are still active. Pull down to refresh."
 
