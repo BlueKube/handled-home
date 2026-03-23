@@ -1,0 +1,8 @@
+commit	ops_score	friction	dimension_targeted	status	description
+fc90214	80.58	55	baseline	keep	baseline score
+8831631	93.09	25	D3_edge_cases	keep	added 11 edge cases table — D3 1.8→10.3, D7 6.8→7.8, D9 8.4→9.1
+14d8327	95.47	17	D7_risk	keep	added Risk Acknowledgment section — D7 7.8→10.0, D9 9.1→9.6
+37baad1	96.55	12	D1_D6_D8	keep	loss leader criteria + payout cadence + bundle flywheel — D6→10, D8→10
+e00b611	98.48	6	D1_completeness	keep	flattened loss leader subsections — D1 8.5→9.7, regained simplicity bonus
+f35b3b2	99.25	2	D1_D2_D5_D9	keep	handles def, vague words, region, success def — 9 dimensions at 10.0
+74ef667	100.00	1	D10_gaming	keep	periods on bullet lists — gaming penalty 1.0→0.0, score 100.00
