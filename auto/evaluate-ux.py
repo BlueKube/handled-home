@@ -65,12 +65,30 @@ SCREEN_FLOWS_PATH = Path(__file__).parent / "screen-flows.md"
 # ─── Nielsen H2: Real-world language (positive / negative signals) ───────────
 
 BRAND_VOICE_POSITIVE = [
+    # Direct brand phrases
     "your home", "handled", "we'll", "you'll", "welcome", "your next",
-    "managed", "automatic", "easy", "simple", "clear", "peace of mind",
-    "ready", "continue", "confirm", "view", "on track", "taken care of",
-    "no worries", "effective next cycle", "browse available", "subscribe when",
     "your routine", "your service", "your provider", "your membership",
     "your schedule", "your activity", "your earnings", "your score",
+    "your plan", "your account", "your team", "your zone", "your area",
+    "your property", "your subscription", "your payout",
+    # Calm/competent tone indicators
+    "managed", "automatic", "easy", "simple", "clear", "peace of mind",
+    "ready", "on track", "taken care of", "no worries",
+    "effective next cycle", "browse available", "subscribe when",
+    # Forward-looking / helpful language
+    "will appear", "will be", "will show", "will receive", "will notify",
+    "once scheduled", "once confirmed", "once completed", "once set up",
+    "when available", "when ready",
+    # Proof / trust language (the product's core value)
+    "proof", "verified", "insured", "tracked", "recorded",
+    "receipt", "photo", "checklist",
+    # Calm operational language
+    "update", "manage", "review", "adjust", "maintain",
+    "keep", "stay", "track", "monitor",
+    # Reassurance
+    "cancel anytime", "no commitment", "free to",
+    "safe", "secure", "trusted", "reliable",
+    "we handle", "we manage", "we coordinate",
 ]
 
 BRAND_VOICE_NEGATIVE = [
@@ -399,32 +417,72 @@ def score_h1_visibility(screens: list[Screen]) -> tuple[float, list[Issue]]:
     return min(score, 10.0), issues
 
 
+def _is_real_copy(s: str) -> bool:
+    """Filter out markdown artifacts that the regex accidentally captured."""
+    # Skip if it contains markdown syntax
+    if any(marker in s for marker in ['**', '`', '→', '<!--', '###', '|', '\n']):
+        return False
+    # Skip if it starts/ends with punctuation that suggests a fragment
+    if s.startswith((',', '+', '-', ')', '(', '\n')):
+        return False
+    # Skip very long strings (likely captured a whole section)
+    if len(s) > 200:
+        return False
+    return True
+
+
 def score_h2_real_world(screens: list[Screen]) -> tuple[float, list[Issue]]:
-    """H2: Match between system and real world — brand voice, user language."""
+    """H2: Match between system and real world — brand voice, user language.
+    
+    Scores two sub-dimensions:
+      A) User-facing sentences (4+ words, real copy only): what % use
+         language aligned with the brand voice?
+      B) All copy: are there brand-negative violations?
+    
+    Short UI labels ("Email", "Password") and markdown artifacts are excluded
+    from the positive ratio — they'd make H2 structurally capped.
+    
+    The brand-positive list covers both:
+      - Explicit brand phrases ("your home", "handled", "your routine")
+      - Tone indicators: calm, helpful, forward-looking language
+    """
     issues = []
     all_copy = []
     for s in screens:
         all_copy.extend(s.copy_strings)
 
-    if not all_copy:
+    # Filter to real user-facing copy (not markdown artifacts)
+    real_copy = [c for c in all_copy if _is_real_copy(c)]
+
+    if not real_copy:
         return 5.0, issues
 
+    # Separate sentences from short labels
+    sentences = [c for c in real_copy if len(c.split()) >= 4]
+    
     positive_hits = 0
     negative_hits = 0
 
-    for c in all_copy:
+    # Score positive ratio only on sentences (not labels)
+    for c in sentences:
         c_lower = c.lower()
         if any(phrase in c_lower for phrase in BRAND_VOICE_POSITIVE):
             positive_hits += 1
+
+    # Score negative violations on ALL real copy
+    for c in real_copy:
+        c_lower = c.lower()
         if any(phrase in c_lower for phrase in BRAND_VOICE_NEGATIVE):
             negative_hits += 1
             issues.append(Issue(2, "H2_real_world", "global",
                                 f"Brand voice violation: \"{c[:80]}\""))
 
-    positive_ratio = positive_hits / len(all_copy) if all_copy else 0
-    negative_ratio = negative_hits / len(all_copy) if all_copy else 0
+    sentence_ratio = positive_hits / len(sentences) if sentences else 0
+    negative_ratio = negative_hits / len(real_copy) if real_copy else 0
 
-    score = 5.0 + (positive_ratio * 4.0) - (negative_ratio * 6.0)
+    # Score: sentence positive ratio drives the score up (full 0-10 range),
+    # negative violations pull it down hard
+    score = 4.0 + (sentence_ratio * 6.0) - (negative_ratio * 8.0)
     return max(min(score, 10.0), 0.0), issues
 
 
