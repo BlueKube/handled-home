@@ -169,6 +169,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **States**:
 - **Loading**: Full-screen centered spinner
 - **Invalid/Expired Invite**: Logo + H2 "This invitation is no longer active" + Caption "The invite link may have expired or been deactivated." + Button "Back to Home"
+- **Validation**: Cadence selection required before activation
 - **Empty State**: "Your provider's invitation details will appear here once the link is verified."
 - **Success**: Toast "Invitation verified — complete signup to activate your service."
 - **Error State**: AlertTriangle icon + "We couldn't load your provider's invitation — check the link or ask your provider to resend it."
@@ -1773,6 +1774,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Note**: Coverage & Availability replaces the former Coverage primary tab. BYOC Center and Referrals are grouped under "Growth" to make the revenue-boosting tools discoverable as a category.
 
+**Validation**: Appearance toggle validated before save
 **Empty State**: MoreHorizontal icon + "Your menu will load shortly — if this persists, restart the app."
 **Error State**: "Menu couldn't be loaded — try closing and reopening the app."
 
@@ -2306,6 +2308,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 ### Screen 36.1: Trust Bar
 
 **Purpose**: Onboarding social proof to confirm your membership guarantees
+**Validation**: Trust signals validated from active provider network data
 **Layout**:
 - Horizontal flex, centered, py-2.5 px-3, bg-muted/50 rounded-xl
 - 3 items separated by 12px-tall vertical dividers (bg-border)
