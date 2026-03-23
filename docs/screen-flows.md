@@ -636,7 +636,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 ### Screen 6.1: Confirm Your Service
 
-**Layout**: Full-screen wizard step, progress indicator (step 1 of 3)
+**Layout**: Full-screen wizard step, progress indicator (step 1 of 2)
 
 **Sections**:
 1. **Provider Context Card** (Card, bg-accent/5)
@@ -653,9 +653,9 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Validation**: Address required. ZIP must match provider's coverage zone.
 **Error State**: "This address isn't in your provider's coverage area — contact them or try a different address."
 
-### Screen 6.2: Choose Your Plan
+### Screen 6.2: Choose Plan & Activate
 
-**Layout**: Full-screen wizard step, progress indicator (step 2 of 3)
+**Layout**: Full-screen wizard step, progress indicator (step 2 of 2)
 
 **Sections**:
 1. **Plan Cards** (3 tiers, stacked)
@@ -663,22 +663,10 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Pre-selected tier highlighted based on invite context
    - Each card: tier name + price + key inclusions + "Select" button
 2. **Caption**: "Your provider's service is included in all plans."
-3. **CTA**: Button (default, lg, full-width): "Continue" (ArrowRight icon)
+3. **CTA**: Button (default, lg, full-width): "Activate Service" (ArrowRight icon)
 4. **Skip option**: Button (ghost, sm): "Skip for now"
 
-### Screen 6.3: Activation Confirmation
-
-**Layout**: Full-screen confirmation, centered
-
-**Sections**:
-1. **Icon**: CheckCircle (64px, accent) with spring animation
-2. **Headline**: H2 "You're all set!"
-3. **Summary Card**: Provider name + category + cadence + plan tier + address
-4. **Caption**: "Your first service will be scheduled automatically. You'll get a notification before each visit."
-5. **CTA**: Button (default, lg, full-width): "Go to Dashboard" (ArrowRight icon)
-6. **Secondary**: Button (outline, lg): "Explore Your Plan"
-
-**Success**: Toast "Welcome to Handled Home — your service is activated."
+**Success**: On activation, inline confirmation replaces form: CheckCircle icon + "You're all set!" + Summary card (provider name + category + cadence + plan tier + address) + "Your first service will be scheduled automatically." + Button "Go to Dashboard" + Button (outline): "Explore Your Plan"
 
 ---
 
