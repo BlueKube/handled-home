@@ -805,7 +805,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Service count badges (top 3 services + "+X more")
    - Handle usage bar: "X/Y handles used this cycle"
    - If rollover: "+X rolled over from last cycle" caption (accent, 12px) below the bar
-   - "Edit routine →" link to `/customer/routine`
+   - Button (ghost, sm): "Edit Routine" → `/customer/routine`
 
 4. **Upcoming Visits List**
    - Section label: "UPCOMING" (uppercase caption)
@@ -857,7 +857,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **Recent Receipt Highlight** (Card, if last completed job exists)
    - Latest completed visit card with photo thumbnail
    - Service names, date, provider name
-   - "View receipt →" CTA
+   - Button (ghost, sm): "View Receipt"
    - Tap → `/customer/visits/:jobId`
 
 5. **Timeline** (grouped by month)
@@ -1421,7 +1421,7 @@ Each menu item: icon + label + ChevronRight, tappable
    - QuickJobCards (repeating):
      - Rank badge (#1, #2…) + address + services + duration + status badge + ChevronRight
    - Button (ghost): "View all jobs →"
-   - Empty: MapPin icon + "No jobs scheduled for today" + "Check upcoming jobs or enjoy the day off"
+   - Empty: MapPin icon + "No jobs scheduled for today" + "Your next assignment will appear here when ready."
 
 10. **Daily Recap Card** (`DailyRecapCard`, added Batch 1)
     - Shows end-of-day summary: jobs completed, total earnings, avg per job
@@ -1612,7 +1612,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 5. **Payout Account Status Card**
    - CheckCircle (green): "Payout account ready" + "Earnings will be deposited on schedule"
-   - PauseCircle (warning): "Payout account not set up" + "Set up your payout account to receive earnings"
+   - PauseCircle (warning): "Payout account not set up" + Button (accent, sm): "Set Up Payout Account"
 
 6. **Earnings/Payouts Tabs**
    - Tab "Earnings": Earning cards with address, date, status badge, base/modifier/net breakdown (expandable)
@@ -2146,9 +2146,9 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
    - Star icon + "Serviced by {providerName}" (if available)
    - Date (muted, 12px)
    - "Your proof-of-work receipt is ready to view..." (muted, 12px)
-5. **Primary CTA**: "View Your Receipt" (default button, h-12, rounded-xl, with ArrowRight)
-6. **Secondary CTA**: "Share the news" (outline, with Share2 icon)
-7. **Dismiss**: "Continue to dashboard" (text link, muted)
+5. **Primary CTA**: Button (default, lg, full-width): "View Your Receipt" (ArrowRight icon)
+6. **Secondary CTA**: Button (outline, lg, full-width): "Share the News" (Share2 icon)
+7. **Dismiss**: Button (ghost, sm): "Continue to Dashboard"
 
 **Trigger**: Once only (localStorage flag). Shown when `lastCompletedJob` exists and flag not set.
 
