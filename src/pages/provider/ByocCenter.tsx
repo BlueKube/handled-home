@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Loader2, Plus, Copy, Link2, Users, Gift, ChevronDown, CheckCircle, XCircle, AlertTriangle, Info } from "lucide-react";
+import { Loader2, Plus, Copy, Link2, Users, Gift, ChevronDown, CheckCircle, XCircle, AlertTriangle, Info, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -185,6 +185,21 @@ export default function ByocCenter() {
           </CardContent>
         </Card>
       )}
+
+      {/* Customer Referral Cross-Sell */}
+      <Card className="border-muted bg-muted/30">
+        <CardContent className="py-4 px-4">
+          <div className="flex items-start gap-3">
+            <Users className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+            <div className="space-y-1.5 flex-1 min-w-0">
+              <p className="text-sm font-medium">Your customers can refer their neighbors too</p>
+              <p className="text-xs text-muted-foreground">
+                Activated customers get a referral code — more neighbors means denser routes and better earnings for you.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
