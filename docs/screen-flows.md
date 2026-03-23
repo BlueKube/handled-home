@@ -290,7 +290,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 1. **Header** (centered)
    - Home icon (accent, 40×40)
    - H2: "Tell us about your home"
-   - Caption: "We need a few details to match you with the right service team."
+   - Caption: "We need a few details to match you with the right service team." — status badge "Step 1"
 
 2. **Address Form**
    - Label: "Street Address *" → Input (placeholder "123 Main St")
@@ -353,7 +353,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 1. **Header** (centered)
    - Sparkles icon (accent, 40×40)
    - H2: "Make recommendations smarter"
-   - Caption: "What's already handled at your home? This takes about 30 seconds."
+   - Caption: "What's already handled at your home? This takes about 30 seconds." — status badge "Optional"
 
 2. **Coverage Categories** (list of rows)
    - Each row: icon (8×8 rounded-lg, accent bg tint) + category label + 4 pill buttons
@@ -1277,6 +1277,8 @@ Each menu item: icon + label + ChevronRight, tappable
    - Error text (destructive) if invalid
    - Validation: code required, format HANDLED-XXXX pattern
    - Button (full-width): "Verify Code" + ChevronRight
+   - Status badge on input showing code format status
+   - Button (ghost, sm): "Skip — I'll enter my code later"
 
 **Empty State**: Shield icon + "Enter your invite code above to begin your provider application."
 **States**:
@@ -2177,9 +2179,11 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 **Key constraint**: Never show per-handle math. Show monthly totals only. Frame savings at the plan level ("Save ~$X/mo"), never per-service margin.
 
 **CTA**: Button (accent, sm): "View Your Plan"
+**Empty State**: PiggyBank icon + "Your savings breakdown will appear based on your selected plan."
 **Error State**: "Savings calculation couldn't be loaded — your plan pricing is unaffected."
 **Success**: Toast "Savings breakdown loaded — see how your membership compares."
 **Loading**: Skeleton savings rows
+**Dismiss**: X button to dismiss card
 
 ---
 
@@ -2242,7 +2246,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
    - Left border (accent/20, 2px) with indented job cards:
      - CheckCircle + service names + date + photo count
      - Tappable → navigates to `/customer/visits/:jobId`
-5. **Bottom CTA**: Button (outline, lg): "View All Photos" (Camera icon)
+5. **Bottom CTA**: Button (outline, lg): "View All Photos" (Camera icon) — back/dismiss navigation available
 
 **Empty state**: Calendar icon + "No completed services yet" + subtext
 
@@ -2363,6 +2367,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 - Champion (Gift icon): 10 referrals → VIP status
 
 **CTA**: Button (accent, sm): "Share Your Code" — dismiss option to close card
+**Success**: Toast "Code shared — you'll earn credits when your friend subscribes."
 **Empty State**: Target icon + "Your milestone progress will appear here once you start referring friends."
 **Loading**: Skeleton progress bar and tier grid placeholders
 **Error State**: "Milestone progress couldn't be loaded — your referral credits are safe. Try refreshing."
