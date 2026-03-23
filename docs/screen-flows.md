@@ -134,7 +134,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 2. **Header** (centered)
    - H2: "Your Provider invited you"
-   - Caption: "Continue your service through Handled Home — same great provider, better experience."
+   - Caption: "See your service details and benefits below — same great provider, managed through Handled Home."
 
 3. **Provider Card** (Card component)
    - Row: Avatar (12×12 circle with provider initial or logo) + provider name + MapPin icon + zone name + status badge "Verified"
@@ -282,7 +282,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Route**: `/invite/:code`
 **Who**: Person who received a customer referral link
-**Purpose**: Marketing page → Sign up
+**Purpose**: Show value proposition and feature benefits → convert to new account
 
 ### Screen 3.1: Invite Landing
 
@@ -302,13 +302,18 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Card 2: Camera icon (primary) + "Proof photos after each visit"
    - Card 3: CheckCircle icon (primary) + "Manage your home services in one place"
 
-4. **Primary CTA**
+4. **Welcome Offer Card** (Card, bg-accent/5, border-accent/20)
+   - Gift icon + "Welcome bonus"
+   - Caption: "Your friend's referral earns you a credit toward your first service."
+   - Fine print: "Credit applied automatically after your first paid cycle."
+
+5. **Primary CTA**
    - Button (large, full-width): "Get Started"
    - Navigates to `/auth?ref={code}`
    - Button (ghost, sm): "Dismiss" (close landing page) — status badge on referral code (valid/used)
 
-5. **Fine Print**
-   - Caption: "Free to join. No commitments."
+6. **Fine Print**
+   - Caption: "Free to join. Cancel anytime. No commitments."
 
 **Empty State**: "Your friend's referral details will appear here once the link is verified."
 **Success**: Toast "Referral verified — sign up to claim your welcome offer."
@@ -1339,6 +1344,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Success**: Toast "Referral code generated — share it to start earning."
 **Loading**: Skeleton share card and credit summary grid
 **Error State**: "Your referral details couldn't be loaded — your earned credits are safe. Try refreshing."
+**Fraud Prevention**: One referral code per customer. Code is single-use per referred household — already-used codes show "This code has already been redeemed." Self-referral blocked (same email/phone). Duplicate referral detection: if referred email matches existing account, code is invalid.
+**Rate Limiting**: Referral code share limit: 20 shares per day via in-app share sheet. Bulk-share attempts throttled.
 
 ---
 
@@ -1779,7 +1786,8 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Header**: ChevronLeft back → `/provider/byoc` | H2 "Create Invite Link" | Caption "Generate a link for your existing customers"
 
-**Validation**: Category required, zone required — cadence defaults to service standard
+**Validation**: Category required, zone required — cadence defaults to service standard. Daily limit: max 10 links per provider per day. If limit reached, show: "You've reached today's invite limit. Try again tomorrow."
+**Rate Limiting**: Max 10 active links per provider. If exceeded: "You have 10 active links — deactivate an unused link before creating a new one."
 **Empty State**: Link2 icon + "Fill in the details below to generate your first invite link."
 **Error State**: "Link couldn't be created — check your connection and try again."
 
