@@ -46,10 +46,11 @@ export function useByopRecommendations() {
 
   const submit = useMutation({
     mutationFn: async (payload: ByopSubmitPayload) => {
+      if (!user) throw new Error("Not authenticated");
       const { data, error } = await supabase
         .from("byop_recommendations")
         .insert({
-          customer_id: user!.id,
+          customer_id: user.id,
           provider_name: payload.provider_name,
           category: payload.category,
           phone: payload.phone || null,

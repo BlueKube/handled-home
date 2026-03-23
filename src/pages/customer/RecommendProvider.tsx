@@ -69,7 +69,7 @@ export default function RecommendProvider() {
 
   if (view === "confirmed") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[80vh] p-4 pb-24 space-y-6 animate-fade-in">
+      <div className="flex flex-col items-center justify-center min-h-screen p-4 pb-24 space-y-6 animate-fade-in">
         <CheckCircle className="h-16 w-16 text-accent animate-fade-in" />
         <h2 className="text-h2 text-center">We've received your recommendation</h2>
         <p className="text-base font-semibold text-center">{providerName}</p>
@@ -244,19 +244,13 @@ export default function RecommendProvider() {
 
       {/* Primary CTA */}
       <Button
-        className="w-full h-14 text-base"
+        className="w-full"
         size="lg"
         onClick={handleSubmit}
-        disabled={submit.isPending}
+        loading={submit.isPending}
       >
-        {submit.isPending ? (
-          "Submitting..."
-        ) : (
-          <>
-            Submit Recommendation
-            <ArrowRight className="h-5 w-5 ml-2" />
-          </>
-        )}
+        Submit Recommendation
+        <ArrowRight className="h-5 w-5 ml-2" />
       </Button>
 
       {/* Fine Print */}
