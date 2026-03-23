@@ -415,7 +415,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
      - CTA: "Build Routine" button
    - See `operating-model.md` → Plan Tier Structure for positioning guidance
 
-4. **Loading**: 3 skeleton cards (h-56 each)
+4. **Loading**: 3 skeleton cards (h-56 each) with status badge showing "Loading plans..."
 5. **Skip Option**: Button (ghost, sm): "Skip for now — browse plans later from your dashboard"
 
 **Empty State**: Shield icon + "Your plan details will appear here once you select a membership."
@@ -466,6 +466,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **CTAs**
    - Button (full-width, h-12): "Accept & Continue"
    - Button (ghost): "Skip for now — I'll set this up later"
+   - Status badge on recommended day: "System Recommended" (accent)
 
 **Loading State**: Spinner + "Finding the best route day for your area…"
 **Empty State**: CalendarCheck icon + "Your service day recommendation will appear here once we analyze your area."
@@ -620,6 +621,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Caption: "All plans bill every 4 weeks. Change or cancel anytime — changes take effect next cycle."
 
 **Loading**: 3 skeleton cards
+**Success**: Toast "Plan details loaded — browse and compare."
 **Empty**: "No plans available at the moment."
 **Error State**: "Plans couldn't be loaded right now — check your connection and try again."
 
@@ -704,6 +706,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - If not subscribed: "Subscribe to continue" + ArrowRight
 
 **Loading**: Skeleton blocks
+**Success**: Toast "Service added to your routine."
 **Error State**: "Your routine couldn't be loaded — pull down to refresh. Your current routine is still active."
 **Service Day Gate**: H2 "Confirm your Service Day" + "Lock in your weekly service day before building your routine." + Button "Set Service Day"
 
@@ -821,6 +824,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Link: "Change preferences →" to `/customer/service-day`
    - Help text: info tooltip "Your service day is optimized for route efficiency in your area."
 
+**Success**: Toast "Schedule updated."
 **Loading**: Skeleton calendar grid and placeholder visit cards
 **Error State**: "Your schedule couldn't be loaded — pull down to refresh. Your service day is still active."
 
@@ -844,7 +848,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - H2: "Activity"
    - Navigation: ChevronLeft back to Home tab (iOS swipe-back gesture supported)
 
-2. **Stats Summary** (3-pill row, horizontal)
+2. **Stats Summary** (3-pill row, horizontal) with status badge on active membership
    - Shield icon: "{totalServices} services"
    - Camera icon: "{totalPhotos} photos"
    - Calendar icon: "{memberMonths} months"
@@ -1041,6 +1045,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - ChevronRight
    - Help text: info tooltip "Your plan bills every 4 weeks. Changes take effect next cycle."
 
+**Success**: Toast "Payment method updated."
 **Loading**: Skeleton plan card and payment method row
 **Empty State**: Wallet icon + "No billing activity yet — your first invoice will appear here once your membership begins."
 **Error State**: "Billing information couldn't be loaded — your subscription is still active. Try again in a moment."
@@ -1099,6 +1104,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 6. **Empty State**
    - Inbox icon (muted, 40×40) + "No issues yet — that's great!"
 
+**Success**: Toast "Ticket submitted — we'll respond within 24 hours."
 **Loading**: Skeleton cards for resolve CTA and ticket list
 **Error State**: "Support information couldn't be loaded — check your connection and try again."
 
@@ -1155,6 +1161,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Cards per referral: ID preview + milestone badges (Signed up, Subscribed, First visit, Paid cycle)
    - Empty: "No referrals yet. Share your code to get started!"
 
+**Success**: Toast "Referral code generated — share it to start earning."
 **Loading**: Skeleton share card and credit summary grid
 **Error State**: "Referral details couldn't be loaded — your credits are safe. Try refreshing."
 
