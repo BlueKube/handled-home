@@ -214,7 +214,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - "We won't share your contact info with the provider. We'll reach out to them directly and professionally."
 
 5. **BYOP Credit Notice** (Card, subtle)
-   - Gift icon + "You'll earn a $25 BYOP credit if your recommended provider is accepted and completes onboarding."
+   - Gift icon + "You'll earn a $30 BYOP credit if your recommended provider is accepted and completes onboarding."
 
 6. **Primary CTA**
    - Button (large, full-width, h-14): "Submit Recommendation" (ArrowRight icon)
@@ -270,7 +270,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 3. **BYOP Credits Card** (Card)
    - Gift icon + "BYOP Credits Earned" + amount
-   - Caption: "You earn $25 for each accepted provider recommendation."
+   - Caption: "You earn $30 for each accepted provider recommendation."
 
 **Empty State**: UserPlus icon + "Your provider recommendations will appear here. Recommend a provider you trust to get started."
 **Loading**: Skeleton recommendation cards.
@@ -2248,7 +2248,13 @@ Each menu item: icon + label + ChevronRight, tappable
 ### Screen 30.5: Growth Console
 
 **Route**: `/admin/growth`
-**Purpose**: Viral loop metrics, BYOC performance, referral conversion
+**Purpose**: Viral loop metrics, BYOC performance, referral conversion, provider-import conversion funnel dashboard (per Program D deliverables)
+
+**Sections**:
+1. **BYOC Activation Funnel**: invites sent → landing views → signups → activated (conversion rates per step)
+2. **Referral Conversion Funnel**: codes shared → landing views → signups → subscribed → first visit
+3. **BYOP Recommendation Tracker**: recommendations submitted → under review → accepted → onboarded
+4. **K-factor Summary**: invites sent vs activations per loop, conversion rate trend
 
 **Empty State**: Rocket icon + "No growth events yet — your signups, BYOC activations, and referral conversions will appear here."
 **Validation**: Date range filters required for analytics queries
