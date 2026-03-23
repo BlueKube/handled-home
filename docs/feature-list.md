@@ -350,6 +350,18 @@
 
 ---
 
+## XXVIII-B. BYOP (Bring Your Own Provider) `density-driver` `trust-builder`
+
+198b. Customer provider recommendation form (name, category, phone/email, note) — DONE
+198c. Recommendation confirmation screen with status tracking — DONE
+198d. BYOP recommendation tracker page showing all submissions with status badges — DONE
+198e. Admin BYOP funnel metrics on Growth Console (submitted → under review → accepted) — DONE
+198f. Provider Growth Hub cross-navigation (BYOC Center ↔ Referrals) — DONE
+198g. Viral loop wiring: referral cards on JobComplete + customer Receipt — DONE
+198h. Admin Growth Console with 4 funnels (BYOC, Referral, BYOP, K-factor summary) — DONE
+
+---
+
 ## XXIX. Seasonal Services `margin-lever` `mental-load-reduction`
 
 198. Seasonal service templates per zone with time windows — DONE
@@ -564,9 +576,11 @@
 
 ---
 
-## XLI. BYOC Onboarding Wizard (PRD-301) `density-driver` `provider-value`
+## XLI. BYOC Onboarding Wizard (PRD-301) — 2-Step Flow `density-driver` `provider-value`
 
-326. 7-screen provider-referred customer onboarding flow (60–90 second target) — DONE
+> **Note:** Wizard was simplified from a 7-screen flow to a streamlined 2-step flow (Batch 2 rewrite). Core functionality preserved; steps consolidated for faster onboarding.
+
+326. Streamlined 2-step provider-referred customer onboarding flow (under 60 seconds) — DONE
 327. Provider recognition screen preserving existing relationship trust — DONE
 328. Confirm existing service screen with editable cadence — DONE
 329. Property creation with address and home type — DONE
@@ -580,6 +594,9 @@
 337. Invite validation with fallback screen for expired/revoked/inactive tokens — DONE
 338. Already-activated 409 handling with dashboard redirect — DONE
 339. BYOC attribution tracking preserved separate from provider-customer relationship — DONE
+340. BYOC rate limits: max 10 active links per provider, max 10 new links per day — DONE
+341. Referral one-code-per-customer enforcement with DB re-check — DONE
+342. Cryptographically secure token generation (crypto.getRandomValues) — DONE
 
 ---
 

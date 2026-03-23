@@ -47,6 +47,8 @@
 | `/customer/coverage-map` | Coverage Map | PropertyGate |
 | `/customer/home-assistant` | Home Assistant | PropertyGate |
 | `/customer/referrals` | Referrals | PropertyGate |
+| `/customer/recommend-provider` | Recommend a Provider (BYOP) | PropertyGate |
+| `/customer/recommend-provider/status` | Provider Recommendations Tracker | PropertyGate |
 | `/customer/services` | Service Catalog | PropertyGate |
 | `/customer/onboarding` | Customer Onboarding | — |
 | `/customer/onboarding/byoc/:token` | BYOC Customer Onboarding | — |
@@ -180,10 +182,10 @@
 | Role | Pages |
 |------|-------|
 | Public | 4 |
-| Customer | 40 |
+| Customer | 42 |
 | Provider | 36 |
 | Admin | 61 |
-| **Total** | **141** |
+| **Total** | **143** |
 
 ---
 

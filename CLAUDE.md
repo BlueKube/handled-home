@@ -8,7 +8,7 @@ Three user roles: **Customer**, **Provider**, **Admin**.
 
 ## Your Current Mission
 
-You are continuing a UI/UX overhaul of the Handled Home app. The customer redesign (12 epics), all provider pages (11 batches, 34 pages), and all admin pages (5 batches, ~54 pages) are complete. The next phase is **documentation sync** and any remaining cleanup.
+You are continuing the Handled Home app overhaul. Complete: customer redesign (12 epics, 36 pages), provider redesign (11 batches, 34 pages), admin redesign (5 batches, ~54 pages), and growth operations (6 batches: BYOP flow, BYOC rewrite, viral loop, growth hubs, admin funnels, abuse prevention). The next phase is remaining **implementation batches** (7–11) and final cleanup.
 
 ## Workflow (Non-Negotiable)
 
@@ -126,6 +126,32 @@ All ~54 admin pages polished across 5 batches:
 - `Capacity.tsx` — redirect only, no page content
 - `Support.tsx` — re-export of SupportDashboard
 
+## Growth Batches (Viral Loop & Growth Operations)
+
+All 6 growth-focused batches complete.
+
+| Batch | Scope | Status |
+|-------|-------|--------|
+| 1 | BYOP Flow 2B — 3 new customer pages (ByopSearch, ByopConfirm, ByopThankYou) + useByopRecommendation hook + routes | Complete |
+| 2 | BYOC Onboarding Wizard rewrite — simplified to 2-step flow | Complete |
+| 3 | Viral Loop Wiring — referral cards on JobComplete + customer Receipt | Complete |
+| 4 | Provider Growth Hub — ByocCenter ↔ Referrals cross-navigation cards | Complete |
+| 5 | Admin Growth Console — Funnels tab (BYOC, Referral, BYOP, K-factor) + 3 new hooks | Complete |
+| 6 | Abuse Prevention — BYOC rate limits (10/day, 10 active), referral one-code-per-customer, crypto.getRandomValues | Complete |
+
+### New hooks (Growth)
+- `useByopRecommendation.ts` — BYOP form submission + tracking
+- `useByocFunnelStats` / `useReferralFunnelStats` / `useByopFunnelStats` — Admin funnel metrics (in `useGrowthEvents.ts`)
+
+### Remaining Implementation Batches
+| Batch | Theme | Est. Size |
+|-------|-------|-----------|
+| 7 | Subscription lifecycle correctness (downgrade, cancel, pause, dunning) | Medium |
+| 8 | Operational resilience (provider exit/suspension, zone coverage gaps) | Large |
+| 9 | Conversion funnel polish (invite, BYOC, share landing pages) | Small |
+| 10 | Nielsen heuristic compliance (empty states, loading skeletons, help tooltips) | Large |
+| 11 | Operating model visibility (success metric gauges, risk alerts) | Medium |
+
 ## Tech Stack
 
 - **Framework:** React 18 + TypeScript + Vite
@@ -152,7 +178,7 @@ src/
 │   ├── settings/    # Settings components
 │   └── support/     # Support/help components
 ├── pages/
-│   ├── customer/    # 36 customer pages
+│   ├── customer/    # 38 customer pages (incl. 2 BYOP pages)
 │   ├── provider/    # 42 provider pages
 │   ├── admin/       # 59 admin pages
 │   └── shared/      # Shared pages
