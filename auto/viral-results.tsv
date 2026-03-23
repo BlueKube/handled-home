@@ -6,3 +6,4 @@ ddec20c	89.47	119	V9_V2	keep	rate limiting, fraud prevention, value-before-signu
 f9e840f	90.07	119	V2_gating	keep	fix Flow 2 sign-up gating — V2 7.5→8.0
 021a34a	90.75	119	V5_bonus	keep	BYOC bonus amount reference — V5 8.62→9.31
 a1c567a	92.53	118	V2_friction	keep	merge Flow 6 screens — BYOC 4→3 steps, V2 8.0→9.5
+e5f989e	95.13	118	V7_V8_gaming	keep	growth funnel dashboards, fix speculative penalty — V5→10, V7→10, V8→10, V9→10
