@@ -130,7 +130,7 @@ export default function ByocOnboardingWizard() {
 
       if (!freshInvite?.is_active) {
         toast.error("This invitation is no longer active.");
-        setStep("success");
+        navigate("/customer");
         return;
       }
 
@@ -334,13 +334,22 @@ function ConfirmServiceStep({
     try {
       const saved = await save(normalized);
       onNext(saved?.id);
-    } catch {}
+    } catch {
+      toast.error("Couldn't save your address — check your connection and try again.");
+    }
   };
 
   const isValid = Object.keys(validateProperty(form)).length === 0;
 
   return (
     <div className="space-y-6">
+      <div className="text-center">
+        <h1 className="text-h2">Confirm Your Service</h1>
+        <p className="text-muted-foreground text-sm mt-1">
+          This is already set up from your provider's invitation.
+        </p>
+      </div>
+
       {/* Provider Context Card */}
       <Card className="bg-accent/5 border-accent/20">
         <CardContent className="pt-4 flex gap-4 items-center">
@@ -369,10 +378,6 @@ function ConfirmServiceStep({
           </div>
         </CardContent>
       </Card>
-
-      <p className="text-caption text-muted-foreground">
-        This is already set up from your provider's invitation.
-      </p>
 
       {/* Address Input */}
       <Card>
@@ -635,7 +640,7 @@ function InviteFallbackScreen() {
       <div className="w-full text-center space-y-4 animate-fade-in">
         <img src={handledLogo} alt="Handled Home" className="h-10 mx-auto" />
         <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto" />
-        <h1 className="text-xl font-bold">This invitation is no longer active</h1>
+        <h1 className="text-h2">This invitation is no longer active</h1>
         <p className="text-sm text-muted-foreground">
           The invite link may have expired or been deactivated.
         </p>
