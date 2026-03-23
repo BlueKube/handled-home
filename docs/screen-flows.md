@@ -330,7 +330,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - "Zone: {zoneName}"
    - Animated "Continuing…" (auto-advances after 1.5s)
 
-4. **Not Covered State** (Card with warning border + warning bg tint)
+4. **Not Covered State** (Card with warning border + warning bg tint — empty state for zones not yet available)
    - AlertTriangle icon (warning, 40×40)
    - "We're not in your area yet"
    - "Handled Home is expanding quickly. Join the waitlist and we'll let you know the moment we launch near you."
@@ -440,6 +440,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (full-width, h-12, rounded-xl): "Subscribe Now"
    - Loading state: spinner + "Processing…"
 4. **Skip Option**: Button (ghost, sm): "Skip for now — subscribe when you're ready"
+
+**Empty State**: CreditCard icon + "Your membership details will appear here once you select a plan."
 
 **Post-Checkout State**: Spinner + H2 "Verifying your subscription…" + Caption "This usually takes just a few seconds."
 **Error State**: "Payment failed — verify your card details and try again. No charge will apply until payment succeeds."
@@ -1194,6 +1196,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 Each menu item: icon + label + ChevronRight, tappable
 
+**Empty State**: MoreHorizontal icon + "Your account menu will appear here — manage your home, billing, and preferences."
 **Explainer**: help text on Role Switcher "How it works — switch between customer and provider accounts if you have both."
 **Loading**: Skeleton menu rows
 **Error State**: "Menu couldn't load — try closing and reopening the app."
@@ -1255,6 +1258,7 @@ Each menu item: icon + label + ChevronRight, tappable
    - Validation: code required, format HANDLED-XXXX pattern
    - Button (full-width): "Verify Code" + ChevronRight
 
+**Empty State**: Shield icon + "Enter your invite code above to begin your provider application."
 **States**:
 - **Loading org**: Full-screen spinner
 - **Active org**: Redirects to dashboard
