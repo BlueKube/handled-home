@@ -1672,6 +1672,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/provider/quality` or `/provider/performance`
 **Purpose**: Quality rating breakdown, feedback summary, performance metrics
 
+**Validation**: Feedback form requires rating before submission
 **Empty State**: Star icon + "Your score will appear after your first three completed jobs. We'll track your performance automatically."
 **Error State**: "Quality score couldn't be loaded — your rating is unaffected. Pull down to refresh."
 
@@ -1725,7 +1726,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Header**: H2 "Service Catalog" (no back nav — accessible from tab flow)
 
-**Sections**: Search input, category-grouped SKU cards with detail sheet
+**Sections**: Search input (validated — min 2 characters), category-grouped SKU cards with detail sheet
 
 **Empty State**: ClipboardList icon + "No authorized services yet — complete onboarding to unlock your service catalog."
 **Error State**: "Service catalog couldn't be loaded — check your connection and try again."
@@ -1792,6 +1793,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Header**: H2 "Support" | Caption "Claims and disputes involving your jobs" (no back nav — top-level More menu destination)
 
+**Validation**: Ticket submissions require category and description (min 10 characters)
 **Empty State**: HelpCircle icon + "No support tickets — if a job issue comes up, we'll help you resolve it here."
 **Error State**: "Support tickets couldn't be loaded — your open tickets are unaffected. Pull down to refresh."
 
