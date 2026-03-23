@@ -264,6 +264,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
   - Current and prior steps: accent + medium weight
   - Future steps: muted
 - Button (accent, lg, full-width): "Continue to Next Step"
+- Skip option: Button (ghost, sm): "Skip to next step" (for optional steps only)
 
 ### Screen 5.2: Step 1 — Your Home (Property)
 
@@ -400,6 +401,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - See `operating-model.md` → Plan Tier Structure for positioning guidance
 
 4. **Loading**: 3 skeleton cards (h-56 each)
+5. **Skip Option**: Button (ghost, sm): "Skip for now — browse plans later from your dashboard"
 
 **Error State**: "Plans couldn't be loaded — check your connection and pull down to refresh."
 
@@ -420,6 +422,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 3. **CTA**
    - Button (full-width, h-12, rounded-xl): "Subscribe Now"
    - Loading state: spinner + "Processing…"
+4. **Skip Option**: Button (ghost, sm): "Skip for now — subscribe when you're ready"
 
 **Post-Checkout State**: Spinner + H2 "Verifying your subscription…" + Caption "This usually takes just a few seconds."
 **Error State**: "Payment failed — double-check your card details and try again. You won't be charged until payment succeeds."
