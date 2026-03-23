@@ -123,38 +123,45 @@ export function useByocFunnelStats(dateRange?: { start: string; end: string }) {
     queryFn: async () => {
       let linksQuery = (supabase as any)
         .from("byoc_invite_links")
-        .select("id, created_at", { count: "exact", head: false });
+        .select("id", { count: "exact", head: true });
       let activationsQuery = (supabase as any)
         .from("byoc_activations")
-        .select("id, created_at", { count: "exact", head: false });
+        .select("id", { count: "exact", head: true });
+      let eventsQuery = (supabase as any)
+        .from("growth_events")
+        .select("event_type")
+        .in("event_type", ["byoc_landing_viewed", "byoc_signup_completed"]);
 
       if (dateRange?.start) {
         linksQuery = linksQuery.gte("created_at", dateRange.start);
         activationsQuery = activationsQuery.gte("created_at", dateRange.start);
+        eventsQuery = eventsQuery.gte("created_at", dateRange.start);
       }
       if (dateRange?.end) {
         linksQuery = linksQuery.lte("created_at", dateRange.end);
         activationsQuery = activationsQuery.lte("created_at", dateRange.end);
+        eventsQuery = eventsQuery.lte("created_at", dateRange.end);
       }
 
-      const [links, activations, events] = await Promise.all([
+      const [links, activations, eventsResult] = await Promise.all([
         linksQuery,
         activationsQuery,
-        (supabase as any)
-          .from("growth_events")
-          .select("event_type")
-          .in("event_type", ["byoc_landing_viewed", "byoc_signup_completed"])
-          .then((r: any) => r.data ?? []),
+        eventsQuery,
       ]);
 
+      if (links.error) throw links.error;
+      if (activations.error) throw activations.error;
+      if (eventsResult.error) throw eventsResult.error;
+
+      const events = eventsResult.data ?? [];
       const views = events.filter((e: any) => e.event_type === "byoc_landing_viewed").length;
       const signups = events.filter((e: any) => e.event_type === "byoc_signup_completed").length;
 
       return {
-        invitesSent: links.data?.length ?? 0,
+        invitesSent: links.count ?? 0,
         landingViews: views,
         signups,
-        activated: activations.data?.length ?? 0,
+        activated: activations.count ?? 0,
       };
     },
   });
@@ -167,29 +174,29 @@ export function useReferralFunnelStats(dateRange?: { start: string; end: string 
       let codesQuery = (supabase as any)
         .from("referral_codes")
         .select("id", { count: "exact", head: true });
-      let referralsQuery = (supabase as any)
-        .from("referrals")
-        .select("id, status");
+      let eventsQuery = (supabase as any)
+        .from("growth_events")
+        .select("event_type")
+        .in("event_type", ["referral_landing_viewed", "referral_signup_completed", "referral_subscribed", "referral_first_visit"]);
 
       if (dateRange?.start) {
         codesQuery = codesQuery.gte("created_at", dateRange.start);
-        referralsQuery = referralsQuery.gte("created_at", dateRange.start);
+        eventsQuery = eventsQuery.gte("created_at", dateRange.start);
       }
       if (dateRange?.end) {
         codesQuery = codesQuery.lte("created_at", dateRange.end);
-        referralsQuery = referralsQuery.lte("created_at", dateRange.end);
+        eventsQuery = eventsQuery.lte("created_at", dateRange.end);
       }
 
-      const [codes, referrals, events] = await Promise.all([
+      const [codes, eventsResult] = await Promise.all([
         codesQuery,
-        referralsQuery,
-        (supabase as any)
-          .from("growth_events")
-          .select("event_type")
-          .in("event_type", ["referral_landing_viewed", "referral_signup_completed", "referral_subscribed", "referral_first_visit"])
-          .then((r: any) => r.data ?? []),
+        eventsQuery,
       ]);
 
+      if (codes.error) throw codes.error;
+      if (eventsResult.error) throw eventsResult.error;
+
+      const events = eventsResult.data ?? [];
       const views = events.filter((e: any) => e.event_type === "referral_landing_viewed").length;
       const signups = events.filter((e: any) => e.event_type === "referral_signup_completed").length;
       const subscribed = events.filter((e: any) => e.event_type === "referral_subscribed").length;
