@@ -4,3 +4,4 @@ c135d30	80.36	121	baseline	keep	baseline score
 88b27a2	87.75	119	V1_V4_V10_multi	keep	Flow 6 expanded, celebration→Flow 4→referral, receipt cross-sell — V10→10.0
 ddec20c	89.47	119	V9_V2	keep	rate limiting, fraud prevention, value-before-signup fix — V9 7.86→9.29, V2 7.0→7.5
 f9e840f	90.07	119	V2_gating	keep	fix Flow 2 sign-up gating — V2 7.5→8.0
+021a34a	90.75	119	V5_bonus	keep	BYOC bonus amount reference — V5 8.62→9.31
