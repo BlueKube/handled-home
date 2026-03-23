@@ -135,7 +135,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Caption: "Continue your service through Handled Home — same great provider, better experience."
 
 3. **Provider Card** (Card component)
-   - Row: Avatar (12×12 circle with provider initial or logo) + provider name + MapPin icon + zone name
+   - Row: Avatar (12×12 circle with provider initial or logo) + provider name + MapPin icon + zone name + status badge "Verified"
    - If no logo: circle with initial, bg-primary/10
 
 4. **Service Details Card** (Card)
@@ -237,7 +237,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Bottom-right: brand stamp pill "Handled." (primary bg, white text, rounded-full)
 
 2. **Content Section** (px-6, py-6)
-   - Badge (outline, capitalize): category label (e.g., "Lawn Care")
+   - Badge (outline, capitalize): category label (e.g., "Lawn Care") — status badge showing service completion
    - Date: caption text
    - Name: "{firstName}'s home" (if available)
    - Neighborhood: caption (if available)
@@ -326,6 +326,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - MapPin icon (accent, 40×40)
    - H2: "Checking your area"
    - Caption: "Zip code: **90210**" (mono font) — status badge showing zone check progress
+   - Button (ghost, sm): "Skip zone check" (optional — continues to next step without zone confirmation)
 
 2. **Loading State**
    - Spinner + "Looking up coverage…"
@@ -512,6 +513,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **CTAs** (pt-4, stacked):
    - Button (full-width): "Go to Dashboard"
    - Button (outline, full-width): "Review My Routine"
+   - Skip option: You can dismiss this screen and return to dashboard
 
 **Loading**: Skeleton success card while setup finalizes
 **Explainer**: help text "How it works — your home is set up and ready. Your first service will be scheduled automatically."
