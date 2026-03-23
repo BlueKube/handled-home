@@ -118,7 +118,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Route**: `/byoc/activate/:token`
 **Who**: Unauthenticated person who received a provider's invite link
-**Purpose**: See provider info and sign up to activate service
+**Purpose**: See provider details, service info, and benefits → activate service
 
 ### Screen 2.1: BYOC Invite Landing (Unauthenticated)
 
