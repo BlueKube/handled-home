@@ -309,6 +309,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (full-width, h-12, rounded-xl): "Continue" + ArrowRight icon
 
 **Validation Errors**: Red caption below each field ("Street address is required", "Must be 5 digits")
+**Empty State**: Home icon + "Tell us about your home below — we'll use this to match you with your service team."
 **Explainer**: help text on Optional Details: "How it works — access details help your provider arrive prepared."
 **Success**: Toast "Address saved — continuing to zone check."
 **Loading**: Skeleton form fields
@@ -1310,6 +1311,7 @@ Each menu item: icon + label + ChevronRight, tappable
 7. **Bottom CTA**: Button (accent, xl, full-width): "Save and Continue"
 
 **Success**: Toast "Coverage zones saved."
+**Error State**: "Zone selection couldn't be saved — check your connection and try again."
 **Loading**: Skeleton shimmer while zones load
 **Empty State**: MapPin icon + "No zones available in your area yet. We'll notify you when your region opens."
 
@@ -1329,6 +1331,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Empty State**: Wrench icon + "Select the service categories your team can handle — you can update these anytime."
 **Success**: Toast "Service capabilities saved."
+**Error State**: "Capabilities couldn't be saved — check your connection and try again."
 **Loading**: Skeleton category grid while service options load
 
 ### Screen 17.5: Step 4 — Compliance
@@ -1367,6 +1370,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Empty State**: FileText icon + "Your service agreement will load below — read through before accepting."
 **Success**: Toast "Agreement accepted."
+**Error State**: "Agreement couldn't be loaded — check your connection and refresh."
 **Loading**: Skeleton text block while agreement loads
 
 ### Screen 17.7: Step 6 — Review
@@ -1386,6 +1390,7 @@ Each menu item: icon + label + ChevronRight, tappable
 8. **Bottom CTA**: Button (accent, xl, full-width): "Submit Application"
 
 **Validation**: All required steps must be completed before submission
+**Error State**: "Application submission failed — your data is saved. Check your connection and try again."
 **Empty State**: ClipboardCheck icon + "Your application summary will appear here once all steps are complete."
 **Explainer**: help text "How it works — review all your details before submitting. You can edit any section."
 **Loading**: Skeleton summary cards while application data loads
@@ -1478,6 +1483,7 @@ Each menu item: icon + label + ChevronRight, tappable
 9. **Primary CTA**: Button (accent, lg, full-width): "Start Next Job" (navigates to first incomplete job)
 
 **Loading**: Skeleton cards while jobs load
+**Error State**: "Your job list couldn't load — pull down to refresh. Your route is unaffected."
 **Empty State**: Briefcase icon + "No jobs scheduled for today — your next assignment will appear here once dispatched. Ready when you are."
 
 ### Screen 19.2: Job Detail
@@ -2156,6 +2162,8 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 
 **Key constraint**: Never show per-handle math. Show monthly totals only. Frame savings at the plan level ("Save ~$X/mo"), never per-service margin.
 
+**CTA**: Button (accent, sm): "View Your Plan"
+
 ---
 
 # FLOW 32: First Service Celebration
@@ -2336,6 +2344,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 - Ambassador (Trophy icon): 5 referrals → Free month
 - Champion (Gift icon): 10 referrals → VIP status
 
+**CTA**: Button (accent, sm): "Share Your Code"
 **Empty State**: Target icon + "Your milestone progress will appear here once you start referring friends."
 **Loading**: Skeleton progress bar and tier grid placeholders
 **Error State**: "Milestone progress couldn't be loaded — your referral credits are safe. Try refreshing."
