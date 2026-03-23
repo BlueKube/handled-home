@@ -161,6 +161,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 9. **Fine Print**
    - Caption (centered): "Free to join. Pricing set by Handled Home. Cancel anytime."
+   - Explainer: "How it works — your provider continues servicing your home, managed through Handled Home's scheduling and quality platform."
 
 **States**:
 - **Loading**: Full-screen centered spinner
@@ -506,6 +507,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 - p-6, pb-24 (account for tab bar)
 - Content scrollable
 - **Design goal**: Calm status board. Answers "Is everything OK with my home right now?" at a glance. Urgent when action needed, serene when all clear.
+- Help text: info tooltip on Handle Balance bar explaining "Handles are your included service credits each cycle."
 
 **Sections (top to bottom)**:
 
@@ -611,7 +613,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **Included Services Card**
 5. **Available as Extras Card**
 6. **Not Available Card**
-7. **Change Policy Info Card**
+7. **Change Policy Info Card** — explainer: "How it works" section with plan change and cancellation policies
 8. **Bottom CTA Bar** (fixed, blur bg): Button (accent, xl, full-width): "Subscribe to This Plan"
 
 **Error State**: "Plan details couldn't be loaded — go back to plans and try again."
@@ -688,7 +690,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 1. **Header**: ChevronLeft + "Back to Builder" | H2 "Review Your Routine"
 2. **Service Summary Card**: list of selected services with level, cadence, and per-cycle cost
 3. **4-Week Preview Timeline**: visual week-by-week schedule of upcoming visits
-4. **Cost Breakdown**: included credits used, extras cost, total per cycle
+4. **Cost Breakdown**: included credits used, extras cost, total per cycle with help text explaining each line item
 5. **Bottom CTA** (fixed, blur bg): Button (accent, xl, full-width): "Confirm Routine"
 
 **Loading**: Skeleton cards while routine preview generates
@@ -720,6 +722,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Route**: `/customer/service-day`
 
 **Navigation**: ChevronLeft back → Schedule tab
+
+**Explainer**: info tooltip on recommended day explaining "How it works — we optimize routes for your neighborhood to deliver consistent, on-time service."
 
 **States**:
 
@@ -785,6 +789,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 5. **Service Day Info** (Card, compact)
    - CalendarDays icon + "Your service day: {dayOfWeek}"
    - Link: "Change preferences →" to `/customer/service-day`
+   - Help text: info tooltip "Your service day is optimized for route efficiency in your area."
 
 **Loading**: Skeleton calendar grid and placeholder visit cards
 **Error State**: "Your schedule couldn't be loaded — pull down to refresh. Your service day is still active."
@@ -817,6 +822,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 3. **Value Card** (Card, accent/5 bg)
    - "Your home has received {totalServices} professional services since {joinDate}."
    - Badge: "Insured providers · Proof on every visit"
+   - Help text: tooltip explaining "How it works — every visit includes a photo receipt and checklist verification."
 
 4. **Recent Receipt Highlight** (Card, if last completed job exists)
    - Latest completed visit card with photo thumbnail
@@ -999,6 +1005,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 6. **Billing History Card** (tappable → history page)
    - Receipt icon + "Billing history"
    - ChevronRight
+   - Help text: info tooltip "Your plan bills every 4 weeks. Changes take effect next cycle."
 
 **Loading**: Skeleton plan card and payment method row
 **Empty State**: Wallet icon + "No billing activity yet — your first invoice will appear here after your subscription starts."
@@ -1039,6 +1046,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 2. **Resolve CTA Card** (accent border + bg tint, tappable)
    - MessageCirclePlus icon (accent, in rounded bg) + "Resolve something now" + "Get an instant resolution for most issues" + ChevronRight
+   - Help text: explainer "How it works — select a recent visit, describe the issue, and we'll resolve it within 24 hours."
 
 3. **Active Tickets Section** (conditional)
    - H3: "ACTIVE TICKETS" (uppercase caption)
@@ -1167,6 +1175,8 @@ Each menu item: icon + label + ChevronRight, tappable
 7. **Preview As Card** (dev/admin tool)
 8. **Sign Out Button** (destructive, full-width): LogOut icon + "Sign Out"
 
+**Explainer**: info tooltip on Change Password — "Your password must be at least 8 characters."
+
 ### Screen 16.3: Notification Inbox
 
 **Route**: `/customer/notifications`
@@ -1214,7 +1224,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 1. **Progress Indicator**: ArrowLeft back + Step 1 of 6 progress bar (accent fill)
 2. **Header**: H2 "Your Business Details"
-3. **Form Fields**: Business name (required), phone (required, validated), zip code (required, 5-digit pattern), website (optional)
+3. **Form Fields**: Business name (required), phone (required, validated), zip code (required, 5-digit pattern), website (optional) — tooltip on zip code: "We use this to match you with nearby service zones."
 4. **Skip Option**: Button (ghost, sm): "Skip for now — complete later in Settings"
 5. **Bottom CTA**: Button (accent, xl, full-width): "Save and Continue"
 
@@ -1283,7 +1293,7 @@ Each menu item: icon + label + ChevronRight, tappable
 1. **Progress Indicator**: ArrowLeft back + Step 5 of 6 progress bar
 2. **Header**: H2 "Service Agreement"
 3. **Agreement Text**: scrollable card with full agreement text
-4. **Acceptance Checkbox**: "I have read and agree to the Handled service provider agreement"
+4. **Acceptance Checkbox**: "I have read and agree to the Handled service provider agreement" — help text: "This agreement covers service standards, payout terms, and quality expectations."
 5. **Bottom CTA**: Button (accent, xl, full-width): "Accept and Continue" (disabled until checkbox checked)
 
 **Loading**: Skeleton text block while agreement loads
@@ -1554,7 +1564,7 @@ Each menu item: icon + label + ChevronRight, tappable
    - All payout amounts are per-job, set by SKU + Level + zone. Providers never see customer pricing.
 
 7. **Held Earnings Detail** (added Batch 1)
-   - Expandable section showing held earnings with hold reason labels
+   - Expandable section showing held earnings with hold reason labels, info tooltip: "How it works — earnings are held briefly for quality review, then released to your payout account."
    - Hold reasons: "New provider review period", "Under review — service issue reported", "Payout account setup required"
    - Estimated release timeline when available
 
