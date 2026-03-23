@@ -96,6 +96,17 @@ These items increase the perceived completeness and value of a plan without crea
 4. **Design for perceived value at the plan level** — each tier should feel like it obviously includes more, even if the marginal fulfillment cost is small.
 5. **Reserve the highest-frequency, highest-cost items for higher tiers** — this creates natural upgrade pressure.
 
+### Bundle expansion flywheel
+
+1. Customer activates with anchor service (lawn, pest, pool) →
+2. App surfaces seasonal and preventive recommendations based on property profile →
+3. Customer adds 2nd service at near-zero incremental CAC →
+4. Household contribution margin improves (each added SKU is high-margin) →
+5. Higher attach rate funds more aggressive entry pricing on the anchor →
+6. Lower anchor price increases conversion → more households enter at step 1
+
+**Breakpoint:** If step 3 stalls (attach rate < 1.5 SKUs/household by month 6), the flywheel does not self-fund. Review anchor pricing and recommendation targeting.
+
 ---
 
 ## Plan Tier Structure
@@ -149,14 +160,29 @@ The smart part is that higher tiers can include many things that feel important 
 
 Some services can be used as loss leaders or near-break-even entry services if they reliably create downstream profit.
 
-### What makes a good loss leader
+### Qualifying criteria
 
-A service qualifies as a loss leader when it:
-- is easy for the customer to say yes to
-- happens regularly enough to create habit and app engagement
-- gives Handled Home permission to manage more of the home
-- leads to profitable add-ons later
-- helps build density in a zone
+A service qualifies as a loss leader when it meets all five conditions:
+1. **Low decision friction** — customer acquisition cost < $25 and conversion rate > 40% on first offer
+2. **Recurring cadence** — at least monthly frequency to create app habit
+3. **Platform permission** — gives Handled Home visibility into the property for cross-sell
+4. **Proven attach path** — historical cohort data shows ≥30% of entrants add a 2nd service within 60 days
+5. **Density contribution** — service stacks on existing zone routes without adding net provider stops
+
+### Success metrics
+
+A loss leader is working when:
+- Attach rate ≥1.5 SKUs/household by day 90
+- Cohort retention ≥80% at 6 months
+- Household contribution margin turns positive by month 4
+
+### Exit criteria
+
+Kill the loss leader if:
+- Cohort attach rate < 30% at 90 days (minimum cohort: 50 households)
+- Cohort attach rate < 15% at 120 days regardless of cohort size
+- Household contribution margin negative at month 6 with no improvement trend
+- Re-evaluate quarterly. No loss leader runs longer than 2 quarters without meeting success metrics.
 
 ### Possible loss leader candidates
 
@@ -329,7 +355,7 @@ This is a real economic advantage. A provider earning $45/job independently but 
 - Payouts are **per job**, set by SKU + Level + zone
 - Payouts are **guaranteed and predictable** — no tip dependency, no surge pricing
 - Providers **never see customer pricing** — they see only their payout
-- Payouts are **reviewed periodically** based on market data, density, and provider feedback
+- Payouts are **reviewed quarterly** based on market data, density, and provider feedback
 
 ### Provider economics flywheel
 
