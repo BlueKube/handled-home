@@ -18,8 +18,8 @@ Follow this exact sequence for every batch. Do not skip steps.
 2. **Write a spec before coding** — Every batch needs a markdown spec with: title, why it matters, scope, non-goals, exact file targets, acceptance criteria, regression risks, visual validation checklist.
 3. **Keep batches small** — 1 theme across 1-3 screens. Don't mix unrelated fixes.
 4. **Implement only the spec** — If you find something out of scope, defer it.
-5. **Run code review after every commit/phase** — After committing changes (no PR required), run `/code-review` to review the committed diff against the base branch. This is mandatory at every phase — do not wait for a PR. The review categorizes findings as MUST-FIX / SHOULD-FIX / NICE-TO-HAVE. See `docs/skills/redesign-workflow-guide.md` step 5 for details.
-6. **Fix all MUST-FIX findings** — Do not merge until review is clear. Re-run review if substantial changes were needed.
+5. **Run code review after every commit/phase** — After committing, run `/code-review` to review the diff against main. This launches 5 parallel Sonnet agents (CLAUDE.md compliance, bug scan, historical context, prior feedback, code comment compliance) with confidence scoring. See `.claude/commands/code-review.md` for details.
+6. **Fix MUST-FIX and SHOULD-FIX findings** — MUST-FIX (score 75+) must be resolved. SHOULD-FIX (score 50–74) should be resolved if straightforward. Re-run review if substantial changes were needed.
 7. **Validate build** — Run `npx tsc --noEmit` and `npm run build` before considering a batch done.
 8. **Reconcile** — After each batch, update which pages are done and what's next.
 9. **Sync documentation after each phase** — After completing a phase (group of related batches), review all key docs for stale info: page names, navigation specs, design patterns, product strategy sections. See `docs/skills/redesign-workflow-guide.md` step 9.
@@ -27,9 +27,7 @@ Follow this exact sequence for every batch. Do not skip steps.
 ## Slash Commands
 
 - `/kickoff` — Start a new batch or phase. Reads the roadmap, identifies what's next, writes the spec, and asks for approval before coding.
-- `/code-review` — Review changes for bugs and CLAUDE.md compliance. Works in two modes:
-  - **Phase mode** (no args): Reviews committed changes on the current branch vs main. Use this after every commit/phase — no PR required.
-  - **PR mode** (`/code-review 123`): Reviews a specific pull request and comments on it.
+- `/code-review` — Review changes for bugs and CLAUDE.md compliance. Runs 5 parallel Sonnet agents with confidence scoring. Two modes: phase mode (no args, reviews branch diff vs main) or PR mode (`/code-review 123`).
 
 ## Workflow & UX Reference Docs
 
@@ -44,7 +42,7 @@ These are already in the repo under `docs/`. Read all of these before starting w
 - `docs/design-guidelines.md` — Design tokens, spacing, color, typography, component specs
 - `docs/masterplan.md` — Business model, vision, product strategy (~35KB)
 - `docs/operating-model.md` — Unit economics, pricing mechanics, margin levers, provider payouts (~17KB)
-- `docs/app-flow-pages-and-roles.md` — Complete route tree (141 pages) with role gates and primary user journeys
+- `docs/app-flow-pages-and-roles.md` — Complete route tree (143 pages) with role gates and primary user journeys
 - `docs/feature-list.md` — Full feature inventory by area
 
 ## What's Already Complete
@@ -262,11 +260,10 @@ When implementing a screen from Stitch designs:
 
 ## Git Workflow
 
-- Create a branch per batch: `provider-ux/batch{N}-{short-description}`
-- Commit message format: `feat(provider-ux): Batch N — {Description}`
-- Review fix commits: `fix(provider-ux): resolve Batch N review findings`
-- PR into `main`
-- Squash merge with descriptive commit message
+- Develop on the designated feature branch (see task instructions)
+- Commit message format: `feat(<scope>): Batch N — {Description}`
+- Review fix commits: `fix(<scope>): resolve Batch N review findings`
+- Push to feature branch after each batch; PR into `main` when phase is complete
 
 ## Test Credentials
 
@@ -374,23 +371,7 @@ Playwright is configured for iPhone-like viewport (390×844). All screenshots sh
 
 ## PR Review Workflow
 
-When working on a PR or responding to code review feedback, use `gh` CLI to fetch comments:
-
-```bash
-# Quick: fetch all review data for a PR
-./scripts/fetch-pr-review.sh <PR_NUMBER>
-
-# Individual commands:
-gh pr view <NUMBER> --comments                              # Conversation comments
-gh api repos/{owner}/{repo}/pulls/<NUMBER>/comments         # Inline code review comments
-gh api repos/{owner}/{repo}/pulls/<NUMBER>/reviews          # Review verdicts (approved, changes requested)
-```
-
-**Steps when addressing review feedback:**
-1. Run `./scripts/fetch-pr-review.sh <PR#>` to see all pending comments
-2. Address each comment — fix code, respond, or discuss
-3. Commit fixes and push to the PR branch
-4. Optionally reply to resolved comments via `gh api`
+When responding to PR review feedback: `./scripts/fetch-pr-review.sh <PR_NUMBER>` to see all comments, then fix, commit, and push.
 
 ## Conventions
 
