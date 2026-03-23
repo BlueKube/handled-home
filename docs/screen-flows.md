@@ -179,6 +179,105 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 ---
 
+# FLOW 2B: BYOP — Recommend a Provider (Customer → Platform)
+
+**Route**: `/customer/recommend-provider`
+**Who**: Authenticated customer who wants to bring a trusted provider into the network
+**Purpose**: Customer recommends a provider for possible network inclusion — reduces switching friction for incumbent-loyal households (see `masterplan.md` → BYOP)
+
+### Screen 2B.1: Recommend a Provider
+
+**Layout**:
+- Standard customer page, bottom tab bar visible
+- p-4, pb-24
+
+**Sections (top to bottom)**:
+
+1. **Header**
+   - ChevronLeft back → More menu
+   - H2: "Recommend a Provider"
+   - Caption: "Tell us about a provider you already trust — we'll reach out to see if they'd be a good fit for the Handled Home network."
+
+2. **Why Recommend Card** (Card, bg-accent/5, border-accent/20)
+   - Heart icon (accent) + "Keep working with providers you trust"
+   - Caption: "If accepted, they'll join your home team and service you through Handled Home — same relationship, better management."
+
+3. **Provider Info Form** (Card)
+   - H3: "Provider Details"
+   - Input: Provider or business name (required)
+   - Select: Service category (required) — dropdown with standard SKU categories
+   - Input: Phone number (optional)
+   - Input: Email (optional)
+   - Textarea: "How do you know this provider?" (optional, max 200 chars)
+
+4. **Trust Language** (Caption)
+   - "We won't share your contact info with the provider. We'll reach out to them directly and professionally."
+
+5. **BYOP Credit Notice** (Card, subtle)
+   - Gift icon + "You'll earn a $25 BYOP credit if your recommended provider is accepted and completes onboarding."
+
+6. **Primary CTA**
+   - Button (large, full-width, h-14): "Submit Recommendation" (ArrowRight icon)
+
+7. **Fine Print**
+   - Caption: "Not all providers will be eligible. We review qualifications, insurance, and coverage area. We'll let you know what happens."
+
+**Validation**: Provider name and service category required. Phone or email recommended but not required.
+**Empty State**: UserPlus icon + "Fill in the details below to recommend a provider you trust."
+**Success**: Toast "Recommendation submitted — we'll review and keep you posted."
+**Loading**: Skeleton form while categories load.
+**Error State**: AlertTriangle icon + "Your recommendation couldn't be submitted — check your connection and try again."
+
+### Screen 2B.2: Recommendation Submitted
+
+**Layout**:
+- Full-screen confirmation, no tab bar
+- Content centered, max-w-sm, space-y-6
+
+**Sections**:
+
+1. **Icon**: CheckCircle (64px, accent) with fade-in animation
+2. **Headline**: H2 "We've received your recommendation" (centered)
+3. **Provider Name**: "{providerName}" (bold, centered)
+4. **Status Card** (Card)
+   - Caption: "What happens next:"
+   - Step 1: "We review their qualifications and coverage area."
+   - Step 2: "If they're a good fit, we reach out to invite them."
+   - Step 3: "Once accepted, they'll appear in your home team."
+   - Estimated timeline: "Most reviews complete within 5–10 business days."
+5. **BYOP Conversion Tracking**
+   - Caption: "Track this recommendation" link → Screen 2B.3
+6. **Primary CTA**: Button (default, lg, full-width): "Back to Dashboard"
+7. **Secondary CTA**: Button (outline, lg, full-width): "Recommend Another Provider"
+
+### Screen 2B.3: BYOP Recommendation Tracker
+
+**Route**: `/customer/recommend-provider/status`
+**Purpose**: Customer tracks their BYOP recommendation status and BYOP conversion metrics
+
+**Sections**:
+
+1. **Header**
+   - ChevronLeft back → More menu
+   - H2: "Provider Recommendations"
+   - Caption: "Track the status of providers you've recommended."
+
+2. **Active Recommendations** (list)
+   - Per recommendation: provider name + category badge + status chip
+   - Status values: Received → Under Review → Accepted / Not a Fit
+   - If Accepted: accent border + "Great news — {providerName} has joined the Handled Home network." + Button: "Add to My Routine"
+   - If Not a Fit: muted border + "This provider wasn't a match for our coverage area right now." + Caption: "We appreciate the recommendation."
+
+3. **BYOP Credits Card** (Card)
+   - Gift icon + "BYOP Credits Earned" + amount
+   - Caption: "You earn $25 for each accepted provider recommendation."
+
+**Empty State**: UserPlus icon + "Your provider recommendations will appear here. Recommend a provider you trust to get started."
+**Loading**: Skeleton recommendation cards.
+**Error State**: "Recommendation status couldn't be loaded — your submissions are saved. Pull down to refresh."
+
+---
+
 # FLOW 3: Referral Invite Landing
 
 **Route**: `/invite/:code`
