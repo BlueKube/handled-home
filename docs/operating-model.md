@@ -337,6 +337,20 @@ More density → denser routes → more stops/day → better provider earnings/h
 
 ---
 
+## Risk Acknowledgment
+
+Risks specific to the operating model. Cross-references `masterplan.md` Risks & Mitigations section for strategic-level risks.
+
+| Risk | Failure Mode | Mitigation | Review Cadence |
+|------|-------------|------------|----------------|
+| **BYOC/BYOP thin margin risk** | Migrated households never expand beyond entry service. Platform holds below-standard margin indefinitely. | Attach nudge sequence at weeks 4, 8, 12. If attach rate < 1.5 SKUs/household at 90 days, flag cohort for ops review. Kill BYOC bonus for originating provider if their cohort attach stays below 1.0 at 120 days. | Quarterly |
+| **Margin compression over time** | Provider payouts trend upward (labor market pressure) while customer prices stay flat. Spread erodes without proportional price increases. | Payout reviews quarterly with zone-level margin floor of 15%. If zone gross margin drops below 15% for 2 consecutive quarters, trigger customer price adjustment or provider payout renegotiation. Cap annual payout increases at 5% unless density improvement offsets. | Quarterly |
+| **Loss leader doesn't convert** | Loss-leader service stays unprofitable and fails to drive attach, density, or retention. | 90-day attach window. If cohort attach rate < 30% by day 90, reduce offer scope. If < 15% by day 120, kill the loss leader entirely. Minimum cohort size of 50 households before evaluating. | Quarterly |
+| **Pricing exception abuse** | Exceptions normalize and become the standard, eroding margin discipline. | All exceptions expire after 90 days or 1,000 jobs (whichever first). No exception renewed more than twice. Ops dashboard tracks exception-to-standard ratio — flag if exceptions exceed 10% of active payouts. | Monthly |
+| **Provider churn cascading** | High provider attrition in a zone destabilizes service quality, causing customer churn that further reduces density. | Monitor provider attrition quarterly. If zone provider churn exceeds 20% annualized, trigger retention review: payout competitiveness, route quality, job volume. Provider exit interviews mandatory. | Quarterly |
+
+---
+
 ## Operational Exception Handling
 
 Every scenario below has a concrete resolution. No case-by-case discretion.
