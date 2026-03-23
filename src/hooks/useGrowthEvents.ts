@@ -116,3 +116,117 @@ export function useGrowthEventStats(zoneId?: string, dateRange?: { start: string
     },
   });
 }
+
+export function useByocFunnelStats(dateRange?: { start: string; end: string }) {
+  return useQuery({
+    queryKey: ["byoc-funnel-stats", dateRange?.start, dateRange?.end],
+    queryFn: async () => {
+      let linksQuery = (supabase as any)
+        .from("byoc_invite_links")
+        .select("id, created_at", { count: "exact", head: false });
+      let activationsQuery = (supabase as any)
+        .from("byoc_activations")
+        .select("id, created_at", { count: "exact", head: false });
+
+      if (dateRange?.start) {
+        linksQuery = linksQuery.gte("created_at", dateRange.start);
+        activationsQuery = activationsQuery.gte("created_at", dateRange.start);
+      }
+      if (dateRange?.end) {
+        linksQuery = linksQuery.lte("created_at", dateRange.end);
+        activationsQuery = activationsQuery.lte("created_at", dateRange.end);
+      }
+
+      const [links, activations, events] = await Promise.all([
+        linksQuery,
+        activationsQuery,
+        (supabase as any)
+          .from("growth_events")
+          .select("event_type")
+          .in("event_type", ["byoc_landing_viewed", "byoc_signup_completed"])
+          .then((r: any) => r.data ?? []),
+      ]);
+
+      const views = events.filter((e: any) => e.event_type === "byoc_landing_viewed").length;
+      const signups = events.filter((e: any) => e.event_type === "byoc_signup_completed").length;
+
+      return {
+        invitesSent: links.data?.length ?? 0,
+        landingViews: views,
+        signups,
+        activated: activations.data?.length ?? 0,
+      };
+    },
+  });
+}
+
+export function useReferralFunnelStats(dateRange?: { start: string; end: string }) {
+  return useQuery({
+    queryKey: ["referral-funnel-stats", dateRange?.start, dateRange?.end],
+    queryFn: async () => {
+      let codesQuery = (supabase as any)
+        .from("referral_codes")
+        .select("id", { count: "exact", head: true });
+      let referralsQuery = (supabase as any)
+        .from("referrals")
+        .select("id, status");
+
+      if (dateRange?.start) {
+        codesQuery = codesQuery.gte("created_at", dateRange.start);
+        referralsQuery = referralsQuery.gte("created_at", dateRange.start);
+      }
+      if (dateRange?.end) {
+        codesQuery = codesQuery.lte("created_at", dateRange.end);
+        referralsQuery = referralsQuery.lte("created_at", dateRange.end);
+      }
+
+      const [codes, referrals, events] = await Promise.all([
+        codesQuery,
+        referralsQuery,
+        (supabase as any)
+          .from("growth_events")
+          .select("event_type")
+          .in("event_type", ["referral_landing_viewed", "referral_signup_completed", "referral_subscribed", "referral_first_visit"])
+          .then((r: any) => r.data ?? []),
+      ]);
+
+      const views = events.filter((e: any) => e.event_type === "referral_landing_viewed").length;
+      const signups = events.filter((e: any) => e.event_type === "referral_signup_completed").length;
+      const subscribed = events.filter((e: any) => e.event_type === "referral_subscribed").length;
+      const firstVisit = events.filter((e: any) => e.event_type === "referral_first_visit").length;
+
+      return {
+        codesShared: codes.count ?? 0,
+        landingViews: views,
+        signups,
+        subscribed,
+        firstVisit,
+      };
+    },
+  });
+}
+
+export function useByopFunnelStats(dateRange?: { start: string; end: string }) {
+  return useQuery({
+    queryKey: ["byop-funnel-stats", dateRange?.start, dateRange?.end],
+    queryFn: async () => {
+      let query = (supabase as any)
+        .from("byop_recommendations")
+        .select("status");
+
+      if (dateRange?.start) query = query.gte("created_at", dateRange.start);
+      if (dateRange?.end) query = query.lte("created_at", dateRange.end);
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      const rows = data ?? [];
+      return {
+        submitted: rows.length,
+        underReview: rows.filter((r: any) => r.status === "under_review").length,
+        accepted: rows.filter((r: any) => r.status === "accepted").length,
+        notAFit: rows.filter((r: any) => r.status === "not_a_fit").length,
+      };
+    },
+  });
+}
