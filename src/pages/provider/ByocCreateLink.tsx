@@ -60,7 +60,7 @@ export default function ByocCreateLink() {
   const handleCreate = async () => {
     if (!canCreate) return;
     try {
-      const result = await createLink.mutateAsync({
+      await createLink.mutateAsync({
         category_key: selectedCategory,
         zone_id: selectedZone,
         sku_id: selectedSku || undefined,

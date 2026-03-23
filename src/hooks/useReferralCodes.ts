@@ -5,10 +5,9 @@ import { toast } from "sonner";
 
 function generateCode(length = 8): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = crypto.getRandomValues(new Uint8Array(length));
   let result = "";
-  for (let i = 0; i < length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
+  for (const b of bytes) result += chars[b % chars.length];
   return result;
 }
 
@@ -30,12 +29,17 @@ export function useReferralCodes() {
     },
   });
 
-  const hasActiveCode = (codes.data ?? []).length > 0;
+  const hasActiveCode = codes.isSuccess && (codes.data ?? []).length > 0;
 
   const generateCodeMutation = useMutation({
     mutationFn: async (programId: string) => {
-      // Enforce one code per customer
-      if (hasActiveCode) {
+      // Enforce one code per customer — re-check from DB to avoid stale cache
+      const { count, error: countError } = await supabase
+        .from("referral_codes")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user!.id);
+      if (countError) throw countError;
+      if ((count ?? 0) > 0) {
         throw new Error("You already have a referral code. Only one code per account is allowed.");
       }
       const code = generateCode();

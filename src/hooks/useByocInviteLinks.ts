@@ -92,7 +92,8 @@ export function useByocInviteLinks() {
       const { error } = await supabase
         .from("byoc_invite_links")
         .update({ is_active: false })
-        .eq("id", linkId);
+        .eq("id", linkId)
+        .eq("org_id", orgId!);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["byoc-invite-links"] }),
@@ -125,9 +126,8 @@ export function useByocInviteLinks() {
 
 function generateToken(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = crypto.getRandomValues(new Uint8Array(8));
   let token = "HH-";
-  for (let i = 0; i < 8; i++) {
-    token += chars[Math.floor(Math.random() * chars.length)];
-  }
+  for (const b of bytes) token += chars[b % chars.length];
   return token;
 }
