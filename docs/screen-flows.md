@@ -2004,6 +2004,8 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/ops/exception-analytics`
 **Purpose**: Exception patterns and trends
 
+**Error State**: "Exception analytics couldn't be loaded — the analytics pipeline may be processing. Retry in a moment."
+
 ### Screen 28.5: Dispatcher Queues
 
 **Route**: `/admin/ops/dispatch`
@@ -2170,7 +2172,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 - Right: text content
 
 **Sections**:
-1. **Headline**: "Save ~$X/mo vs. separate vendors" (bold, 14px)
+1. **Headline**: "Save ~$X/mo vs. separate vendors" (bold, 14px) — status badge showing savings tier
 2. **Subtext**: "That's X% less than hiring individually" (muted, 12px)
 3. **Service breakdown** (mt-2, space-y-1):
    - Per service: Check icon + service name + strikethrough separate price (right-aligned)
