@@ -1829,6 +1829,8 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/ops/jobs`
 **Purpose**: Active/completed/failed jobs metrics
 
+**Empty State**: Briefcase icon + "No job activity recorded yet — metrics will appear once jobs are dispatched."
+
 ### Screen 25.6: Billing Health
 
 **Route**: `/admin/ops/billing`
@@ -1957,6 +1959,8 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Route**: `/admin/exceptions`
 **Purpose**: Severity-sorted exception queue (failed payments, missed jobs, provider issues)
+
+**Empty State**: CheckCircle icon + "No active exceptions — all jobs and payments are on track."
 
 ### Screen 28.4: Exception Analytics
 
@@ -2224,6 +2228,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 - Subtext: "X jobs/week · avg finish Xh" or "est. $X/mo"
 - Growth CTA (accent, 12px): "Fill your schedule to earn $X more/mo" (if <90% capacity)
 
+**Empty State**: Target icon + "Your earnings projection will appear once you have enough job history."
 **Error State**: "Earnings projection temporarily unavailable — your earnings are unaffected."
 
 ### Screen 34.2: Onboarding Variant
@@ -2241,6 +2246,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 
 **Key constraint**: Never show customer pricing or subscription spread. Show payout amounts only. See `operating-model.md` → Provider Payout Logic for the full economics model.
 
+**Empty State**: TrendingUp icon + "Your earnings potential will appear once we have zone data for your area."
 **Error State**: "Earnings estimate couldn't be calculated — complete a few more jobs and we'll generate your projection."
 
 ---
@@ -2285,6 +2291,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 
 **Typography**: 12px, muted-foreground
 
+**Empty State**: Shield icon + "Your coverage guarantees will appear here."
 **Error State**: "Trust information couldn't be loaded — your coverage guarantees are still in effect."
 
 ---
