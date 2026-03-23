@@ -2,7 +2,9 @@
 
 This document defines how Handled Home makes money, prices services, pays providers, and designs plans. It is the tactical companion to `masterplan.md` — the masterplan says *why we exist*, this document says *how we sustain the business*.
 
-Developers building pricing, plan selection, payout, admin, or bundle-related features should reference this document directly.
+Developers building pricing, plan selection, payout, admin, or bundle-related features should reference this document directly. Zones are grouped into regions for market-level pricing and ops oversight.
+
+**What success looks like**: a healthy operating model delivers gross margin per zone ≥25% at scale (50+ households/zone), attach rate ≥2.0 SKUs/household by month 6, monthly household churn <2%, and provider utilization ≥80% of available hours.
 
 ---
 
@@ -12,12 +14,12 @@ Developers building pricing, plan selection, payout, admin, or bundle-related fe
 
 The unit of value is the **household**, not the individual service. A single lawn mow or window-cleaning job is not where the business makes its money. The business makes money from:
 
-- recurring subscription revenue across a growing basket of services
-- attach rate expanding over time as customers add more to their plan
-- route density improving provider cost-per-stop
-- reduced admin and selling burden lowering provider churn
-- packaging low-frequency services into high-perceived-value plans
-- retaining households long enough for the economics to compound
+- Recurring subscription revenue across an expanding basket of services (target: 2+ SKUs/household by month 6).
+- Attach rate rising as customers add more to their plan.
+- Route density driving provider cost-per-stop down 15–20% at 25+ households/zone.
+- Reduced admin and selling burden lowering provider churn.
+- Packaging low-frequency services into high-perceived-value plans.
+- Retaining households long enough for the economics to compound.
 
 Profitability should be measured at the **household contribution margin** level — total plan revenue minus total provider payout minus support/ops cost minus payment/platform overhead — not at the individual SKU level.
 
@@ -31,7 +33,7 @@ Handled Home monetizes through the **subscription spread** — the delta between
 
 - Customers pay a fixed monthly subscription for a plan (e.g., $159/mo)
 - Providers receive a fixed, predictable payout per job — set independently from customer pricing
-- Neither side sees the other's pricing — the **handles abstraction layer** hides the spread
+- Neither side sees the other's pricing — the **handles abstraction layer** hides the spread. A handle = one allowance of a service per cycle (e.g., 2 lawn handles/month = 2 mows)
 - Zone-based multipliers allow margin optimization per market without changing the customer or provider experience
 
 ### Why this model wins
@@ -67,10 +69,10 @@ Handled Home monetizes through the **subscription spread** — the delta between
 This is one of the most important economic concepts in the business.
 
 A plan can include:
-- **anchor services** that happen often and create recurring habit
-- **low-frequency services** that sound valuable but don't hit cost every month
-- **high-margin add-ons** that feel like natural extensions
-- **route-efficient services** that stack well with existing stops
+- **Anchor services** that recur weekly or biweekly and create habit.
+- **Low-frequency services** that sound valuable but don't hit cost every month.
+- **High-margin add-ons** that feel like natural extensions.
+- **Route-efficient services** that stack well with existing stops.
 
 The result: the plan feels like *"Wow, this includes a lot"* without forcing expensive monthly fulfillment on every line item.
 
@@ -95,6 +97,17 @@ These items increase the perceived completeness and value of a plan without crea
 3. **Frame plans by outcome, not line items** — the customer buys "managed home maintenance," not a checklist.
 4. **Design for perceived value at the plan level** — each tier should feel like it obviously includes more, even if the marginal fulfillment cost is small.
 5. **Reserve the highest-frequency, highest-cost items for higher tiers** — this creates natural upgrade pressure.
+
+### Bundle expansion flywheel
+
+1. Customer activates with anchor service (lawn, pest, pool) →
+2. App surfaces seasonal and preventive recommendations based on property profile →
+3. Customer adds 2nd service at near-zero incremental CAC →
+4. Household contribution margin improves (each added SKU is high-margin) →
+5. Higher attach rate funds more aggressive entry pricing on the anchor →
+6. Lower anchor price increases conversion → more households enter at step 1
+
+**Breakpoint:** If step 3 stalls (attach rate < 1.5 SKUs/household by month 6), the flywheel does not self-fund. Review anchor pricing and recommendation targeting.
 
 ---
 
@@ -141,35 +154,21 @@ Positioning: *"Your home, fully handled."*
 
 ### Tier design principle
 
-The smart part is that higher tiers can include many things that feel important without every item creating proportionally higher monthly labor cost. The perceived jump in value should exceed the actual jump in fulfillment cost.
+Higher tiers can include 8–12 items that feel important without every item creating proportionally higher monthly labor cost. The perceived jump in value should exceed the actual jump in fulfillment cost.
 
 ---
 
 ## Loss Leader Strategy
 
-Some services can be used as loss leaders or near-break-even entry services if they reliably create downstream profit.
+Certain services can be used as loss leaders or near-break-even entry services if they reliably create downstream profit.
 
-### What makes a good loss leader
+**Qualifying criteria** — a service qualifies as a loss leader when it meets all five conditions: (1) low decision friction — CAC < $25, conversion > 40% on first offer; (2) recurring cadence — at least monthly to create app habit; (3) platform permission — gives Handled Home visibility into the property for cross-sell; (4) proven attach path — ≥30% of entrants add a 2nd service within 60 days; (5) density contribution — stacks on existing zone routes without adding net provider stops.
 
-A service qualifies as a loss leader when it:
-- is easy for the customer to say yes to
-- happens regularly enough to create habit and app engagement
-- gives Handled Home permission to manage more of the home
-- leads to profitable add-ons later
-- helps build density in a zone
+**Success metrics** — attach rate ≥1.5 SKUs/household by day 90; cohort retention ≥80% at 6 months; household contribution margin positive by month 4.
 
-### Possible loss leader candidates
+**Exit criteria** — kill the loss leader if cohort attach rate < 30% at 90 days (minimum cohort: 50 households), < 15% at 120 days regardless of cohort size, or household contribution margin negative at month 6. Re-evaluate quarterly. No loss leader runs longer than 2 quarters without meeting success metrics. If it does not improve acquisition, retention, attach rate, density, or contribution margin, it should not remain a core offer.
 
-- Basic lawn mowing (low barrier, high frequency)
-- Entry-tier pest service (recurring, easy to standardize)
-- Introductory exterior window cleaning (visible result)
-- Initial home setup / first bundled maintenance visit (onboarding hook)
-
-### The rule
-
-**Only keep a loss leader if it improves acquisition, retention, attach rate, density, or downstream contribution margin.**
-
-If a loss-leader service stays unprofitable and does not unlock bigger household value later, it should not remain a core offer. Review loss leaders quarterly against household-level contribution margin data.
+Candidates: basic lawn mowing (low barrier, high frequency), entry-tier pest (recurring, easy to standardize), introductory exterior window cleaning (visible result), initial home setup visit (onboarding hook).
 
 ---
 
@@ -180,11 +179,11 @@ If a loss-leader service stays unprofitable and does not unlock bigger household
 Handled Home sets payout by **SKU + Level + zone**. Providers choose to accept or not.
 
 No constant one-off negotiation. Standardized pricing is the default because it enables:
-- cleaner margins and easier forecasting
-- faster provider onboarding
-- fewer special cases in billing/payout systems
-- apples-to-apples provider comparison
-- simpler admin operations
+- Cleaner margins and easier forecasting.
+- Faster provider onboarding.
+- Fewer special cases in billing/payout systems.
+- Apples-to-apples provider comparison.
+- Simpler admin operations.
 
 ### When exceptions are allowed
 
@@ -222,9 +221,9 @@ The path to profitability: the migrated household adds services over time. A cus
 ### BYOP (customer brings their provider)
 
 When a homeowner wants to keep a trusted provider:
-- Preserve that customer-provider relationship at similar pricing initially
-- Reduce switching friction to win the household into the app
-- Accept thin margin on the incumbent service
+- Preserve that customer-provider relationship at similar pricing initially.
+- Reduce switching friction to win the household into the app.
+- Accept thin margin on the incumbent service.
 
 The path to profitability: the household is now in the system. Even if the original provider relationship runs at weak margin, the household becomes profitable when additional services are added through Handled Home's curated network.
 
@@ -243,17 +242,17 @@ These are illustrative examples, not final locked numbers. They show how the mar
 ### Example 1: Core household
 
 A customer subscribes to a plan that includes:
-- biweekly lawn care
-- quarterly pest control
-- annual gutter cleaning
-- annual dryer vent cleaning
+- Biweekly lawn care.
+- Quarterly pest control.
+- Annual gutter cleaning.
+- Annual dryer vent cleaning.
 
 **Why this works:**
-- Lawn anchors the relationship with regular visits
-- Pest adds recurring value at good margin
-- Gutters + dryer vent increase perceived plan completeness
-- The annual items make the plan feel richer than the monthly cost profile suggests
-- Household contribution margin is healthy from month 1
+- Lawn anchors the relationship with regular visits.
+- Pest adds recurring value at good margin.
+- Gutters + dryer vent increase perceived plan completeness.
+- The annual items make the plan feel richer than the monthly cost profile suggests.
+- Household contribution margin is healthy from month 1.
 
 ### Example 2: BYOC migrated customer
 
@@ -293,10 +292,10 @@ This is one of the most important long-term margin levers. It requires no pricin
 ### Zone-level controls
 
 Admins can independently adjust per zone:
-- **Customer price multipliers** — higher-cost markets can command higher plan prices
-- **Provider payout rates** — set by SKU + Level + zone
-- **Capacity caps** — prevent overselling before density supports quality delivery
-- **Service Day patterns** — optimize routing and scheduling efficiency
+- **Customer price multipliers** — higher-cost markets can command higher plan prices.
+- **Provider payout rates** — set by SKU + Level + zone.
+- **Capacity caps** — prevent overselling before density supports quality delivery.
+- **Service Day patterns** — optimize routing and scheduling efficiency.
 
 These controls allow per-market margin optimization without changing the customer or provider experience in other zones.
 
@@ -326,14 +325,49 @@ This is a real economic advantage. A provider earning $45/job independently but 
 
 ### Payout structure
 
-- Payouts are **per job**, set by SKU + Level + zone
-- Payouts are **guaranteed and predictable** — no tip dependency, no surge pricing
-- Providers **never see customer pricing** — they see only their payout
-- Payouts are **reviewed periodically** based on market data, density, and provider feedback
+- Payouts are **per job**, set by SKU + Level + zone.
+- Payouts are **guaranteed and predictable** — no tip dependency, no surge pricing.
+- Providers **never see customer pricing** — they see only their payout.
+- Payouts are **reviewed quarterly** based on market data, density, and provider feedback.
 
 ### Provider economics flywheel
 
 More density → denser routes → more stops/day → better provider earnings/hour → better provider retention → better service quality → better customer retention → more density
+
+---
+
+## Risk Acknowledgment
+
+Risks specific to the operating model. Cross-references `masterplan.md` Risks & Mitigations section for strategic-level risks.
+
+| Risk | Failure Mode | Mitigation | Review Cadence |
+|------|-------------|------------|----------------|
+| **BYOC/BYOP thin margin risk** | Migrated households never expand beyond entry service. Platform holds below-standard margin indefinitely. | Attach nudge sequence at weeks 4, 8, 12. If attach rate < 1.5 SKUs/household at 90 days, flag cohort for ops review. Kill BYOC bonus for originating provider if their cohort attach stays below 1.0 at 120 days. | Quarterly |
+| **Margin compression over time** | Provider payouts trend upward (labor market pressure) while customer prices stay flat. Spread erodes without proportional price increases. | Payout reviews quarterly with zone-level margin floor of 15%. If zone gross margin drops below 15% for 2 consecutive quarters, trigger customer price adjustment or provider payout renegotiation. Cap annual payout increases at 5% unless density improvement offsets. | Quarterly |
+| **Loss leader doesn't convert** | Loss-leader service stays unprofitable and fails to drive attach, density, or retention. | 90-day attach window. If cohort attach rate < 30% by day 90, reduce offer scope. If < 15% by day 120, kill the loss leader entirely. Minimum cohort size of 50 households before evaluating. | Quarterly |
+| **Pricing exception abuse** | Exceptions normalize and become the standard, eroding margin discipline. | All exceptions expire after 90 days or 1,000 jobs (whichever first). No exception renewed more than twice. Ops dashboard tracks exception-to-standard ratio — flag if exceptions exceed 10% of active payouts. | Monthly |
+| **Provider churn cascading** | High provider attrition in a zone destabilizes service quality, causing customer churn that further reduces density. | Monitor provider attrition quarterly. If zone provider churn exceeds 20% annualized, trigger retention review: payout competitiveness, route quality, job volume. Provider exit interviews mandatory. | Quarterly |
+
+---
+
+## Operational Exception Handling
+
+Every scenario below has a concrete resolution. No case-by-case discretion.
+
+| Scenario | Trigger | Resolution | Owner |
+|----------|---------|------------|-------|
+| **Customer downgrade mid-cycle** | Customer reduces plan tier before cycle end | Downgrade takes effect at next billing cycle. Current cycle fulfills at existing tier. No partial refund for current cycle. | Billing engine |
+| **Customer cancel mid-cycle** | Customer cancels subscription | Cancel effective at cycle end. No partial refund — service continues through paid period. Pro-rated refund only if Handled Home fails to deliver scheduled services. | Billing engine |
+| **Customer plan pause** | Customer requests temporary hold on plan | Pause suspends subscription billing for up to 2 cycles (max 60 days). Scheduled jobs cancel. Resume reactivates at same tier. If pause exceeds 60 days, subscription auto-cancels. | Billing engine |
+| **Failed payment / dunning** | Payment fails on billing run | Retry at day 3, day 7, day 10. Grace period: 14 days. During grace, service continues. After day 14 with no successful charge, subscription enters past-due status — jobs suspend, customer notified. Account enters dunning state. After 30 days past-due, subscription cancels. | Billing engine |
+| **Provider leaves or exits network** | Provider offboards or terminates agreement | 14-day notice period required. During notice, ops reassigns all scheduled jobs to other ACTIVE providers in the zone. Affected households receive notification of provider change. If zone has no replacement, escalate to coverage gap protocol (see below). | Ops team |
+| **Provider suspended (PROBATION → SUSPENDED)** | Provider quality score drops below threshold or policy violation | Provider enters PROBATION for 30 days. If not remediated, state transitions to SUSPENDED. All assigned jobs immediately reassign to other zone providers. Provider's scheduled households get next-available provider. SUSPENDED providers cannot receive new assignments until reinstated by ops review. | Ops team |
+| **Provider dispute or quality issue** | Customer complaint or failed photo compliance on a job | Job flagged for review. If provider quality score drops below 3.5/5 over trailing 30 days, provider enters PROBATION. Affected customer receives service recovery credit. Provider notified of specific deficiency. | Ops team |
+| **Zone coverage gap (too few providers)** | Zone has demand but fewer than 2 active providers per category | System triggers provider recruiting flag on zone. New household activations for uncovered categories enter waitlist (`waitlist_entries`). Existing households with scheduled jobs get extended windows. Ops team targets recruiting within 21 days. If gap persists 45+ days, affected households offered refund or zone transfer. | Ops team |
+| **Zone never reaches density threshold** | Zone stays below 10 households for 6+ months after launch | Zone declared underperforming. Ops reviews: if density fails to reach 15 households by month 9, zone enters wind-down. Remaining households offered transfer to adjacent zone or full refund. Providers redeployed to denser zones. Zone status set to INACTIVE. | Ops team |
+| **Zone oversaturated** | Demand exceeds provider capacity cap in zone | Capacity cap enforced — new activations enter waitlist. Triggers provider recruiting and potential zone split. Existing households unaffected. Waitlisted customers notified of estimated activation date. | Ops team |
+| **BYOC customer churns after migration** | BYOC-migrated household cancels within 90 days | Provider retains no special relationship — standard cancel policy applies. Churn tracked separately for BYOC cohort analytics. If BYOC churn exceeds 25% within 90 days, ops reviews the originating provider's migration quality and adjusts BYOC bonus eligibility. | Ops team |
+| **BYOP provider declines or becomes unavailable** | Customer's preferred BYOP provider leaves or is unavailable | Customer transitioned to standard network provider within 7 days. Customer notified with option to approve new provider or cancel. If no suitable provider in zone, coverage gap protocol applies. Transition pricing preserved for 1 cycle to reduce friction. | Ops team |
 
 ---
 
