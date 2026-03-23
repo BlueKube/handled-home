@@ -370,7 +370,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - **Stories**: "1" | "2" | "3+"
    - Selected pill: primary bg, white text, shadow
 
-3. **Progress**: Caption "X/4 fields set"
+3. **Progress**: Caption "X/4 fields set" — validation: all selections are optional, at least one recommended
 
 4. **CTA**
    - Button (full-width, h-12, rounded-xl): "Continue" + ArrowRight
@@ -431,7 +431,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **Skip Option**: Button (ghost, sm): "Skip for now — subscribe when you're ready"
 
 **Post-Checkout State**: Spinner + H2 "Verifying your subscription…" + Caption "This usually takes just a few seconds."
-**Error State**: "Payment failed — double-check your card details and try again. You won't be charged until payment succeeds."
+**Error State**: "Payment failed — verify your card details and try again. No charge will apply until payment succeeds."
 
 ### Screen 5.8: Step 6 — Service Day
 
@@ -1217,6 +1217,7 @@ Each menu item: icon + label + ChevronRight, tappable
    - CardTitle: "Enter Your Invite Code"
    - Input (centered, large, monospace, tracking-widest, placeholder "e.g. HANDLED-2026")
    - Error text (destructive) if invalid
+   - Validation: code required, format HANDLED-XXXX pattern
    - Button (full-width): "Verify Code" + ChevronRight
 
 **States**:
