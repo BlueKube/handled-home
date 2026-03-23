@@ -204,6 +204,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **Primary CTA**
    - Button (large, full-width): "Get Started"
    - Navigates to `/auth?ref={code}`
+   - Button (ghost, sm): "Dismiss" (close landing page)
 
 5. **Fine Print**
    - Caption: "Free to join. No commitments."
@@ -769,6 +770,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Navigation**: ChevronLeft back → Schedule tab
 
+**Success**: Toast "Service day confirmed — your schedule is all set."
+**Error State**: "Service day couldn't be saved — try again or skip for now."
 **Explainer**: info tooltip on recommended day explaining "How it works — we optimize routes for your neighborhood to deliver consistent, on-time service."
 
 **States**:
@@ -2172,6 +2175,9 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 **Key constraint**: Never show per-handle math. Show monthly totals only. Frame savings at the plan level ("Save ~$X/mo"), never per-service margin.
 
 **CTA**: Button (accent, sm): "View Your Plan"
+**Error State**: "Savings calculation couldn't be loaded — your plan pricing is unaffected."
+**Success**: Toast "Savings breakdown loaded — see how your membership compares."
+**Loading**: Skeleton savings rows
 
 ---
 
@@ -2354,7 +2360,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 - Ambassador (Trophy icon): 5 referrals → Free month
 - Champion (Gift icon): 10 referrals → VIP status
 
-**CTA**: Button (accent, sm): "Share Your Code"
+**CTA**: Button (accent, sm): "Share Your Code" — dismiss option to close card
 **Empty State**: Target icon + "Your milestone progress will appear here once you start referring friends."
 **Loading**: Skeleton progress bar and tier grid placeholders
 **Error State**: "Milestone progress couldn't be loaded — your referral credits are safe. Try refreshing."
