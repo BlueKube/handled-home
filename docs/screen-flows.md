@@ -2123,6 +2123,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 
 ### Screen 33.1: Home Timeline Page
 
+**Purpose**: Confirm your subscription value with a chronological service history and membership proof
 **Layout**:
 - Standard page with back arrow + "Home Timeline" header
 - pb-24 for tab bar clearance
@@ -2215,6 +2216,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 
 ### Screen 36.1: Trust Bar
 
+**Purpose**: Onboarding social proof to confirm your membership guarantees
 **Layout**:
 - Horizontal flex, centered, py-2.5 px-3, bg-muted/50 rounded-xl
 - 3 items separated by 12px-tall vertical dividers (bg-border)
