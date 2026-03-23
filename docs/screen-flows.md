@@ -574,6 +574,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Sections**:
 
 1. **Header**
+   - ChevronLeft back → previous screen (More menu or onboarding)
    - H2: "Pick your membership"
    - Body: "One simple plan — we handle the rest."
 
@@ -644,6 +645,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 1. **Truth Banner** (sticky top info bar)
    - Shows: plan name, service weeks per cycle, service day, billing model, included credits
+   - ChevronLeft back → Dashboard (for tab bar navigation context)
 
 2. **Header**
    - H2: "Build Your Routine"
@@ -698,7 +700,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 1. **Success Header** (centered): CheckCircle icon (success, 48×48) + H2 "Routine Confirmed"
 2. **Effective Date Card**: "Your routine is effective next cycle." + next service date
-3. **Summary**: services confirmed, cadence, estimated monthly cost
+3. **Back Button**: ChevronLeft + "Review" (navigate back to routine review)
+4. **Summary**: services confirmed, cadence, estimated monthly cost
 4. **Next Steps**: caption "Your provider will follow this routine on your service day."
 5. **CTA**: Button (accent, lg, full-width): "View Your Schedule"
 
@@ -712,6 +715,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 ### Screen 10.1: Service Day
 
 **Route**: `/customer/service-day`
+
+**Navigation**: ChevronLeft back → Schedule tab
 
 **States**:
 
@@ -749,6 +754,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 1. **Header**
    - H2: "Schedule"
+   - Navigation: ChevronLeft back to Home tab (iOS swipe-back gesture supported)
 
 2. **Month Calendar** (mini calendar widget)
    - Compact month grid (Mon–Sun columns)
@@ -798,6 +804,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 1. **Header**
    - H2: "Activity"
+   - Navigation: ChevronLeft back to Home tab (iOS swipe-back gesture supported)
 
 2. **Stats Summary** (3-pill row, horizontal)
    - Shield icon: "{totalServices} services"
@@ -910,6 +917,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Sections**:
 
 1. **Header**
+   - ChevronLeft back → More menu
    - H2: "Your Home"
    - Caption: "A few details so we can serve you smoothly."
 
@@ -965,7 +973,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Sections**:
 
-1. **Header**: H2 "Billing"
+1. **Header**: ChevronLeft back → More menu | H2 "Billing"
 
 2. **Current Plan Card**
    - "Current plan" label + plan name
@@ -1022,6 +1030,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Sections**:
 
 1. **Header**
+   - ChevronLeft back → More menu
    - H2: "Support"
    - Caption: "Get help or resolve an issue"
 
@@ -1083,7 +1092,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Sections**:
 
-1. **Header**: H2 "Referrals"
+1. **Header**: ChevronLeft back → More menu | H2 "Referrals"
 
 2. **Share & Earn Card**
    - Users icon + "Share & Earn"
@@ -1115,6 +1124,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Sections**:
 
 1. **Header**: H2 "More"
+   - Navigation: ChevronLeft back to Home tab (swipe-back supported)
 
 2. **Role Switcher** (conditional, if user has multiple roles)
 
@@ -1141,7 +1151,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Sections**:
 
-1. **Header**: H2 "Account Settings"
+1. **Header**: ChevronLeft back → More menu | H2 "Account Settings"
 
 2. **Avatar + Email**
    - Avatar circle (14×14) with initials, accent bg
@@ -1199,7 +1209,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Sections**:
 
-1. **Progress Indicator**: Step 1 of 6 progress bar (accent fill)
+1. **Progress Indicator**: ArrowLeft back + Step 1 of 6 progress bar (accent fill)
 2. **Header**: H2 "Your Business Details"
 3. **Form Fields**: Business name (required), phone (required, validated), zip code (required, 5-digit pattern), website (optional)
 4. **Skip Option**: Button (ghost, sm): "Skip for now — complete later in Settings"
@@ -1215,7 +1225,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Sections**:
 
-1. **Progress Indicator**: Step 2 of 6 progress bar
+1. **Progress Indicator**: ArrowLeft back + Step 2 of 6 progress bar
 2. **Header**: H2 "Select Your Coverage Zones"
 3. **Zone Map**: interactive map with selectable hex zones
 4. **Selected Zones List**: badges showing chosen zones with remove option
@@ -1233,7 +1243,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Sections**:
 
-1. **Progress Indicator**: Step 3 of 6 progress bar
+1. **Progress Indicator**: ArrowLeft back + Step 3 of 6 progress bar
 2. **Header**: H2 "What Services Do You Offer?"
 3. **Service Category Grid**: checkable cards — Lawn Care, Landscaping, Pool, Pest Control, etc.
 4. **Explainer**: info tooltip "Select all categories your team can handle. You can update these anytime."
@@ -1249,7 +1259,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Sections**:
 
-1. **Progress Indicator**: Step 4 of 6 progress bar
+1. **Progress Indicator**: ArrowLeft back + Step 4 of 6 progress bar
 2. **Header**: H2 "Compliance Documents"
 3. **Insurance Upload**: file upload card — "Upload proof of general liability insurance" with accepted formats note
 4. **Tax Document Upload**: file upload card — "Upload W-9 or equivalent tax form"
@@ -1267,7 +1277,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Sections**:
 
-1. **Progress Indicator**: Step 5 of 6 progress bar
+1. **Progress Indicator**: ArrowLeft back + Step 5 of 6 progress bar
 2. **Header**: H2 "Service Agreement"
 3. **Agreement Text**: scrollable card with full agreement text
 4. **Acceptance Checkbox**: "I have read and agree to the Handled service provider agreement"
@@ -1282,7 +1292,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Sections**:
 
-1. **Progress Indicator**: Step 6 of 6 progress bar (complete)
+1. **Progress Indicator**: ArrowLeft back + Step 6 of 6 progress bar (complete)
 2. **Header**: H2 "Review Your Application"
 3. **Business Details Card**: summary of org info with Edit button (ghost)
 4. **Coverage Card**: selected zones summary with Edit button (ghost)
@@ -1369,7 +1379,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/provider/jobs`
 
 **Sections**:
-1. **Header**: H2 "Your Jobs"
+1. **Header**: H2 "Your Jobs" (ChevronLeft back to Dashboard from deep links)
 2. **Tabs**: Today | This Week | All
 3. **Today's Loadout Summary**: total stops, estimated minutes, status badge showing completion
 4. **Day Plan Summary**: overview of today's route
@@ -1435,7 +1445,8 @@ Each menu item: icon + label + ChevronRight, tappable
 **Purpose**: Confirmation and celebration screen after marking job complete
 
 **Sections**:
-1. **Celebration Header**: PartyPopper icon (48×48) + H2 "Job Complete!"
+1. **Back Button**: ChevronLeft + "Jobs" (return to job list)
+2. **Celebration Header**: PartyPopper icon (48×48) + H2 "Job Complete!"
 2. **Earnings Display**: base pay + modifier breakdown with `formatCents` utility
 3. **Route Progress Bar**: segmented stops showing completed vs remaining, trophy when all done
 4. **Level Sufficiency Form**: quality feedback form (LevelSufficiencyForm)
@@ -1457,6 +1468,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Sections**:
 
 1. **Header**
+   - ChevronLeft back → More menu
    - H2: "BYOC Center" + Caption: "Bring Your Own Customers"
    - Button (sm): Plus icon + "New Link"
 
@@ -1512,7 +1524,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Sections**:
 
-1. **Header**: H2 "Earnings" + Caption "Track your earnings and payouts"
+1. **Header**: ChevronLeft back → Earn tab | H2 "Earnings" + Caption "Track your earnings and payouts"
 
 2. **Period Selector** (pill row)
    - "Today" | "Week" | "Month" — active has white bg + shadow
