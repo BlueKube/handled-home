@@ -101,6 +101,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (accent, xl, full-width): "Create Account"
 
 **States**:
+- **Empty State**: "Welcome — sign in or create an account to manage your home services."
 - **Validation**: Email must be valid format, password min 8 characters, confirm password must match
 - **Loading**: Button shows spinner + disabled inputs
 - **Error (login)**: Toast: "Invalid email or password."
@@ -1469,6 +1470,7 @@ Each menu item: icon + label + ChevronRight, tappable
 5. **Report Issue**: Button (outline, sm): "Report Issue" — opens action sheet with help text "How it works — report access issues, hazards, or problems and we'll help resolve them."
 6. **Sticky Action Bar** (fixed bottom-16, pb-48): Button (accent, xl, full-width): "Start Job" / "View Checklist" / "Complete Job" (changes based on job status)
 
+**Empty State**: Briefcase icon + "Job details will appear here once the assignment is loaded."
 **Loading**: Skeleton shimmer while job details load
 **Error State**: "Unable to load job details — pull down to refresh or go back to your job list."
 
@@ -1484,6 +1486,7 @@ Each menu item: icon + label + ChevronRight, tappable
 4. **Action Area**: checkbox or toggle to mark item complete
 5. **Bottom CTA**: Button (accent, xl, full-width): "Mark Complete and Continue" / "Finish Checklist" (on last item)
 
+**Empty State**: ClipboardList icon + "Your checklist items will appear here once the job data loads."
 **Loading**: Skeleton while checklist loads
 **Error State**: "Checklist failed to load — go back and try again."
 
@@ -1500,6 +1503,7 @@ Each menu item: icon + label + ChevronRight, tappable
 5. **Validation**: required markers on mandatory photos
 6. **Bottom CTA**: Button (accent, xl, full-width): "Submit Photos and Complete"
 
+**Empty State**: Camera icon + "Your required photos will appear here once the job's proof requirements load."
 **Loading**: Skeleton photo grid while required photos load
 **Error State**: "Photo upload failed — check your connection and retry."
 
@@ -2148,6 +2152,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 
 **Trigger**: Once only (localStorage flag). Shown when `lastCompletedJob` exists and flag not set.
 
+**Empty State**: PartyPopper icon + "Your celebration will appear once your first service completes."
 **Loading**: Shimmer animation on celebration icon and cards
 **Error State**: "Celebration details couldn't load — you can view your receipt from the Activity tab."
 
@@ -2294,6 +2299,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 - Ambassador (Trophy icon): 5 referrals → Free month
 - Champion (Gift icon): 10 referrals → VIP status
 
+**Empty State**: Target icon + "Your milestone progress will appear here once you start referring friends."
 **Loading**: Skeleton progress bar and tier grid placeholders
 **Error State**: "Milestone progress couldn't be loaded — your referral credits are safe. Try refreshing."
 
