@@ -1200,10 +1200,10 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - **Preferences**: Settings (Settings)
 
 4. **Appearance**
-   - Dark/Light mode toggle with Moon/Sun icon + Switch
+   - Dark/Light mode toggle with Moon/Sun icon + Switch — validated preference saved locally
 
 5. **Sign Out** (destructive card)
-   - LogOut icon + "Sign Out"
+   - LogOut icon + Button (ghost, destructive): "Sign Out" with confirmation dialog
 
 Each menu item: icon + label + ChevronRight, tappable
 
