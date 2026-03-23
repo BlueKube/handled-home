@@ -337,6 +337,27 @@ More density → denser routes → more stops/day → better provider earnings/h
 
 ---
 
+## Operational Exception Handling
+
+Every scenario below has a concrete resolution. No case-by-case discretion.
+
+| Scenario | Trigger | Resolution | Owner |
+|----------|---------|------------|-------|
+| **Customer downgrade mid-cycle** | Customer reduces plan tier before cycle end | Downgrade takes effect at next billing cycle. Current cycle fulfills at existing tier. No partial refund for current cycle. | Billing engine |
+| **Customer cancel mid-cycle** | Customer cancels subscription | Cancel effective at cycle end. No partial refund — service continues through paid period. Pro-rated refund only if Handled Home fails to deliver scheduled services. | Billing engine |
+| **Customer plan pause** | Customer requests temporary hold on plan | Pause suspends subscription billing for up to 2 cycles (max 60 days). Scheduled jobs cancel. Resume reactivates at same tier. If pause exceeds 60 days, subscription auto-cancels. | Billing engine |
+| **Failed payment / dunning** | Payment fails on billing run | Retry at day 3, day 7, day 10. Grace period: 14 days. During grace, service continues. After day 14 with no successful charge, subscription enters past-due status — jobs suspend, customer notified. Account enters dunning state. After 30 days past-due, subscription cancels. | Billing engine |
+| **Provider leaves or exits network** | Provider offboards or terminates agreement | 14-day notice period required. During notice, ops reassigns all scheduled jobs to other ACTIVE providers in the zone. Affected households receive notification of provider change. If zone has no replacement, escalate to coverage gap protocol (see below). | Ops team |
+| **Provider suspended (PROBATION → SUSPENDED)** | Provider quality score drops below threshold or policy violation | Provider enters PROBATION for 30 days. If not remediated, state transitions to SUSPENDED. All assigned jobs immediately reassign to other zone providers. Provider's scheduled households get next-available provider. SUSPENDED providers cannot receive new assignments until reinstated by ops review. | Ops team |
+| **Provider dispute or quality issue** | Customer complaint or failed photo compliance on a job | Job flagged for review. If provider quality score drops below 3.5/5 over trailing 30 days, provider enters PROBATION. Affected customer receives service recovery credit. Provider notified of specific deficiency. | Ops team |
+| **Zone coverage gap (too few providers)** | Zone has demand but fewer than 2 active providers per category | System triggers provider recruiting flag on zone. New household activations for uncovered categories enter waitlist (`waitlist_entries`). Existing households with scheduled jobs get extended windows. Ops team targets recruiting within 21 days. If gap persists 45+ days, affected households offered refund or zone transfer. | Ops team |
+| **Zone never reaches density threshold** | Zone stays below 10 households for 6+ months after launch | Zone declared underperforming. Ops reviews: if density fails to reach 15 households by month 9, zone enters wind-down. Remaining households offered transfer to adjacent zone or full refund. Providers redeployed to denser zones. Zone status set to INACTIVE. | Ops team |
+| **Zone oversaturated** | Demand exceeds provider capacity cap in zone | Capacity cap enforced — new activations enter waitlist. Triggers provider recruiting and potential zone split. Existing households unaffected. Waitlisted customers notified of estimated activation date. | Ops team |
+| **BYOC customer churns after migration** | BYOC-migrated household cancels within 90 days | Provider retains no special relationship — standard cancel policy applies. Churn tracked separately for BYOC cohort analytics. If BYOC churn exceeds 25% within 90 days, ops reviews the originating provider's migration quality and adjusts BYOC bonus eligibility. | Ops team |
+| **BYOP provider declines or becomes unavailable** | Customer's preferred BYOP provider leaves or is unavailable | Customer transitioned to standard network provider within 7 days. Customer notified with option to approve new provider or cancel. If no suitable provider in zone, coverage gap protocol applies. Transition pricing preserved for 1 cycle to reduce friction. | Ops team |
+
+---
+
 ## Key Pricing Principles (Summary)
 
 1. **Never expose per-handle or per-service economics to customers** — frame plans as managed coverage, not itemized costs
