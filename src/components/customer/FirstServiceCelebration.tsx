@@ -118,8 +118,8 @@ export function FirstServiceCelebration({ jobId, providerName, serviceDate }: Fi
                         Earn a $30 credit when a friend subscribes.
                       </p>
                       <Button
-                        size="sm"
-                        className="bg-accent text-accent-foreground hover:bg-accent/90 gap-1 mt-1"
+                        variant="accent"
+                        className="gap-1 mt-1 min-h-[44px]"
                         onClick={() => {
                           dismiss();
                           navigate("/customer/referrals");
@@ -134,7 +134,7 @@ export function FirstServiceCelebration({ jobId, providerName, serviceDate }: Fi
 
               <button
                 onClick={dismiss}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors min-h-[44px]"
               >
                 Continue to dashboard
               </button>

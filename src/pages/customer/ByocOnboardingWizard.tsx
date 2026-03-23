@@ -122,6 +122,11 @@ export default function ByocOnboardingWizard() {
   // Activation logic
   const attemptActivation = useCallback(async () => {
     try {
+      if (!user) {
+        navigate("/auth");
+        return;
+      }
+
       const { data: freshInvite } = await supabase
         .from("byoc_invite_links")
         .select("is_active")
@@ -139,7 +144,7 @@ export default function ByocOnboardingWizard() {
         const { data: prop } = await supabase
           .from("properties")
           .select("id")
-          .eq("user_id", user!.id)
+          .eq("user_id", user.id)
           .order("updated_at", { ascending: false })
           .limit(1)
           .maybeSingle();
@@ -181,7 +186,7 @@ export default function ByocOnboardingWizard() {
 
   const visibleSteps: ByocStep[] = ["confirm", "plan"];
   const visibleIndex = visibleSteps.indexOf(step as ByocStep);
-  const progressPercent = step === "success" ? 100 : Math.round(((visibleIndex >= 0 ? visibleIndex : 0) / (visibleSteps.length - 1)) * 100);
+  const progressPercent = step === "success" ? 100 : Math.round(((visibleIndex >= 0 ? visibleIndex + 1 : 1) / visibleSteps.length) * 100);
 
   const canGoBack = step === "plan";
   const handleBack = () => setStep("confirm");
@@ -241,7 +246,9 @@ export default function ByocOnboardingWizard() {
             onSkip={() => {
               setStep("activating");
               setActivationError(null);
-              void attemptActivation();
+              attemptActivation().catch((err) => {
+                setActivationError(err?.message || "Connection failed. Please try again.");
+              });
             }}
           />
         )}
@@ -418,7 +425,7 @@ function ConfirmServiceStep({
         <ArrowRight className="h-4 w-4 ml-2" />
       </Button>
 
-      <Button variant="ghost" className="w-full text-sm" onClick={onSkip}>
+      <Button variant="ghost" className="w-full text-sm min-h-[44px]" onClick={onSkip}>
         Skip for now — finish setup later
       </Button>
     </div>
@@ -527,7 +534,7 @@ function PlanActivateStep({
         <ArrowRight className="h-4 w-4 ml-2" />
       </Button>
 
-      <Button variant="ghost" className="w-full text-sm" onClick={onSkip}>
+      <Button variant="ghost" className="w-full text-sm min-h-[44px]" onClick={onSkip}>
         Skip for now
       </Button>
     </div>
@@ -546,17 +553,27 @@ function ActivatingScreen({
   onRetry: () => void;
   onSkip: () => void;
 }) {
-  if (error) {
+  const [timedOut, setTimedOut] = useState(false);
+
+  useEffect(() => {
+    if (error) return;
+    const timer = setTimeout(() => setTimedOut(true), 15000);
+    return () => clearTimeout(timer);
+  }, [error]);
+
+  const displayError = error || (timedOut ? "Connection timed out. Please try again." : null);
+
+  if (displayError) {
     return (
       <div className="space-y-6 text-center py-16 animate-fade-in">
         <AlertTriangle className="h-12 w-12 text-destructive mx-auto" />
         <h1 className="text-h2">Something went wrong</h1>
-        <p className="text-sm text-muted-foreground">{error}</p>
+        <p className="text-sm text-muted-foreground">{displayError}</p>
         <div className="space-y-2 pt-2">
           <Button onClick={onRetry} className="w-full h-12 text-base font-semibold rounded-xl">
             Try Again
           </Button>
-          <Button variant="ghost" className="w-full text-sm" onClick={onSkip}>
+          <Button variant="ghost" className="w-full text-sm min-h-[44px]" onClick={onSkip}>
             Skip and continue setup
           </Button>
         </div>
@@ -645,10 +662,10 @@ function InviteFallbackScreen() {
           The invite link may have expired or been deactivated.
         </p>
         <div className="space-y-2">
-          <Button className="w-full" onClick={() => navigate("/customer")}>
+          <Button className="w-full h-12" onClick={() => navigate("/customer")}>
             Continue to Dashboard
           </Button>
-          <Button variant="outline" className="w-full" onClick={() => navigate("/customer/onboarding")}>
+          <Button variant="outline" className="w-full h-12" onClick={() => navigate("/customer/onboarding")}>
             Set up your home
           </Button>
         </div>

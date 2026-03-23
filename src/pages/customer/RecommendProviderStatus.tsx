@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, Gift, UserPlus } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,7 +12,7 @@ import { formatCents } from "@/utils/format";
 const STATUS_CONFIG: Record<ByopStatus, { label: string; variant: "default" | "secondary" | "outline" | "destructive"; className?: string }> = {
   received: { label: "Received", variant: "secondary" },
   under_review: { label: "Under Review", variant: "outline", className: "border-warning text-warning" },
-  accepted: { label: "Accepted", variant: "default", className: "bg-success text-white" },
+  accepted: { label: "Accepted", variant: "default", className: "bg-success text-success-foreground" },
   not_a_fit: { label: "Not a Fit", variant: "secondary", className: "text-muted-foreground" },
 };
 
@@ -22,7 +22,7 @@ export default function RecommendProviderStatus() {
 
   if (recommendations.isLoading) {
     return (
-      <div className="p-4 space-y-4 animate-fade-in">
+      <div className="p-4 pb-24 space-y-4 animate-fade-in">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-32" />
         <Skeleton className="h-32" />
@@ -93,8 +93,8 @@ export default function RecommendProviderStatus() {
                           Great news — {rec.provider_name} has joined the Handled Home network.
                         </p>
                         <Button
-                          size="sm"
                           variant="accent"
+                          className="min-h-[44px]"
                           onClick={() => navigate("/customer/routine")}
                         >
                           Add to My Routine

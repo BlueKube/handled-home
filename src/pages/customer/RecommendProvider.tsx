@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  ChevronLeft, Heart, Gift, ArrowRight, AlertTriangle, UserPlus,
+  ChevronLeft, Heart, Gift, ArrowRight,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -74,7 +74,7 @@ export default function RecommendProvider() {
         <h2 className="text-h2 text-center">We've received your recommendation</h2>
         <p className="text-base font-semibold text-center">{providerName}</p>
 
-        <Card className="w-full max-w-sm">
+        <Card className="w-full w-full">
           <CardContent className="pt-4 space-y-3">
             <p className="text-caption text-muted-foreground">What happens next:</p>
             <ol className="space-y-2 text-sm">
@@ -104,7 +104,7 @@ export default function RecommendProvider() {
           Track this recommendation
         </button>
 
-        <div className="w-full max-w-sm space-y-3">
+        <div className="w-full w-full space-y-3">
           <Button
             className="w-full h-12"
             onClick={() => navigate("/customer")}

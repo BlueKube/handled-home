@@ -326,11 +326,15 @@ export default function CustomerVisitDetail() {
                 </p>
                 {firstCode && (
                   <div className="flex items-center gap-2 mt-2">
-                    <code className="text-xs font-mono bg-secondary/50 px-2 py-1 rounded">{firstCode}</code>
+                    <code className="text-xs font-mono bg-card px-2 py-1 rounded border border-border">{firstCode}</code>
                     <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(firstCode);
-                        toast.success("Code copied!");
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(firstCode);
+                          toast.success("Code copied!");
+                        } catch {
+                          toast.error("Couldn't copy — try selecting the code manually.");
+                        }
                       }}
                       className="p-1.5 rounded hover:bg-secondary text-muted-foreground min-h-[44px] min-w-[44px] flex items-center justify-center"
                       aria-label="Copy referral code"
@@ -340,8 +344,8 @@ export default function CustomerVisitDetail() {
                   </div>
                 )}
                 <Button
-                  size="sm"
-                  className="bg-accent text-accent-foreground hover:bg-accent/90 gap-1 mt-1"
+                  variant="accent"
+                  className="gap-1 mt-1 min-h-[44px]"
                   onClick={() => navigate("/customer/referrals")}
                 >
                   Share Code
