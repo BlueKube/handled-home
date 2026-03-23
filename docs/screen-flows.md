@@ -101,6 +101,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (accent, xl, full-width): "Create Account"
 
 **States**:
+- **Validation**: Email must be valid format, password min 8 characters, confirm password must match
 - **Loading**: Button shows spinner + disabled inputs
 - **Error (login)**: Toast: "Invalid email or password."
 - **Error (signup, existing)**: Toast: "An account with this email already exists. Try logging in."
@@ -298,6 +299,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (full-width, h-12, rounded-xl): "Continue" + ArrowRight icon
 
 **Validation Errors**: Red caption below each field ("Street address is required", "Must be 5 digits")
+**Success**: Toast "Address saved — continuing to zone check."
 **Loading**: Skeleton form fields
 
 ### Screen 5.3: Step 2 — Zone Check
@@ -348,6 +350,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (full-width, h-12, rounded-xl): "Next: Home Size" + ArrowRight
    - Button (ghost): "Skip for now"
 
+**Success**: Toast "Coverage preferences saved."
 **Loading**: Skeleton rows while coverage categories load
 **Error State**: "Your coverage preferences couldn't be saved — check your connection and try again."
 
@@ -373,6 +376,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (full-width, h-12, rounded-xl): "Continue" + ArrowRight
    - Button (ghost): "Skip for now"
 
+**Success**: Toast "Home size saved."
 **Error State**: "Home size details couldn't be saved — you can skip this step and update later in Settings."
 
 ### Screen 5.6: Step 4 — Pick Your Plan
@@ -404,6 +408,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **Loading**: 3 skeleton cards (h-56 each)
 5. **Skip Option**: Button (ghost, sm): "Skip for now — browse plans later from your dashboard"
 
+**Success**: Toast "Plan selected — let's confirm your subscription."
 **Error State**: "Plans couldn't be loaded — check your connection and pull down to refresh."
 
 ### Screen 5.7: Step 5 — Subscribe (Checkout)
@@ -452,6 +457,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (ghost): "Skip for now — I'll set this up later"
 
 **Loading State**: Spinner + "Finding the best route day for your area…"
+**Success**: Toast "Service day confirmed — your routine starts next cycle."
 **Error State**: "Service day assignment failed — we're having trouble matching your area. Try again or skip to set this up later."
 
 ### Screen 5.9: Step 7 — Routine
@@ -616,6 +622,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 7. **Change Policy Info Card** — explainer: "How it works" section with plan change and cancellation policies
 8. **Bottom CTA Bar** (fixed, blur bg): Button (accent, xl, full-width): "Subscribe to This Plan"
 
+**Success**: Toast "Added to your routine builder."
 **Error State**: "Plan details couldn't be loaded — go back to plans and try again."
 
 ### Screen 8.3: Subscription Management
@@ -960,6 +967,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 6. **Sticky Save Button** (fixed above tab bar)
    - Button (full-width, h-12): "Save" (or spinner + "Saving…")
 
+**Validation**: Street address required, city required, state max 2 characters, zip code must be 5 digits
+**Success**: Toast "Property details saved."
 **Dialog**: "We're Not in Your Area Yet" with "Notify Me" and "Continue Exploring" buttons
 
 ### Screen 12.2: Coverage Map
@@ -1175,6 +1184,8 @@ Each menu item: icon + label + ChevronRight, tappable
 7. **Preview As Card** (dev/admin tool)
 8. **Sign Out Button** (destructive, full-width): LogOut icon + "Sign Out"
 
+**Validation**: Full name required, phone must be valid, new password min 8 characters
+**Success**: Toast "Settings updated."
 **Explainer**: info tooltip on Change Password — "Your password must be at least 8 characters."
 
 ### Screen 16.3: Notification Inbox
@@ -1228,6 +1239,7 @@ Each menu item: icon + label + ChevronRight, tappable
 4. **Skip Option**: Button (ghost, sm): "Skip for now — complete later in Settings"
 5. **Bottom CTA**: Button (accent, xl, full-width): "Save and Continue"
 
+**Success**: Toast "Business details saved — continuing to next step."
 **Loading**: Skeleton form fields while profile data loads
 **Error State**: "Unable to save your details — check your connection and try again."
 
@@ -1246,6 +1258,7 @@ Each menu item: icon + label + ChevronRight, tappable
 6. **Skip Option**: Button (ghost, sm): "Skip for now"
 7. **Bottom CTA**: Button (accent, xl, full-width): "Save and Continue"
 
+**Success**: Toast "Coverage zones saved."
 **Loading**: Skeleton shimmer while zones load
 **Empty State**: MapPin icon + "No zones available in your area yet. We'll notify you when your region opens."
 
@@ -1263,6 +1276,7 @@ Each menu item: icon + label + ChevronRight, tappable
 5. **Skip Option**: Button (ghost, sm): "Skip for now"
 6. **Bottom CTA**: Button (accent, xl, full-width): "Save and Continue"
 
+**Success**: Toast "Service capabilities saved."
 **Loading**: Skeleton category grid while service options load
 
 ### Screen 17.5: Step 4 — Compliance
@@ -1280,6 +1294,7 @@ Each menu item: icon + label + ChevronRight, tappable
 6. **Skip Option**: Button (ghost, sm): "Skip for now — required before first job"
 7. **Bottom CTA**: Button (accent, xl, full-width): "Save and Continue"
 
+**Success**: Toast "Documents uploaded — continuing to agreement."
 **Loading**: Skeleton upload cards while compliance status loads
 **Error State**: "Upload failed — check your file size (max 10MB) and try again."
 
@@ -1296,6 +1311,7 @@ Each menu item: icon + label + ChevronRight, tappable
 4. **Acceptance Checkbox**: "I have read and agree to the Handled service provider agreement" — help text: "This agreement covers service standards, payout terms, and quality expectations."
 5. **Bottom CTA**: Button (accent, xl, full-width): "Accept and Continue" (disabled until checkbox checked)
 
+**Success**: Toast "Agreement accepted."
 **Loading**: Skeleton text block while agreement loads
 
 ### Screen 17.7: Step 6 — Review
