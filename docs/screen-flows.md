@@ -209,6 +209,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Empty State**: "Your friend's referral details will appear here once the link is verified."
 **Success**: Toast "Referral verified — sign up to claim your welcome offer."
+**Explainer**: help text "How it works — your friend uses Handled Home to manage their home services. Join to get your own managed experience."
 **Loading**: Full-screen spinner while referral is verified
 **Error State**: AlertTriangle icon + "This referral link couldn't be verified — it may have been used already. Ask your friend for a new link."
 
@@ -2183,6 +2184,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 
 **Trigger**: Once only (localStorage flag). Shown when `lastCompletedJob` exists and flag not set.
 
+**Explainer**: help text "How it works — we celebrate your first completed service with a recap and proof-of-work receipt."
 **Empty State**: PartyPopper icon + "Your celebration will appear once your first service completes."
 **Loading**: Shimmer animation on celebration icon and cards
 **Error State**: "Celebration details couldn't load — you can view your receipt from the Activity tab."
@@ -2219,6 +2221,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 
 **Empty state**: Calendar icon + "No completed services yet" + subtext
 
+**Explainer**: help text "How it works — your timeline shows every service completed on your home, with proof photos and verification."
 **Loading**: Skeleton stat row and timeline group placeholders
 **Error State**: "Your home timeline couldn't be loaded — your service history is still safely stored. Pull down to refresh."
 
