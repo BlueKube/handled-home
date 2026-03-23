@@ -201,6 +201,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 5. **Fine Print**
    - Caption: "Free to join. No commitments."
 
+**Loading**: Full-screen spinner while referral is verified
 **Error State**: AlertTriangle icon + "This referral link couldn't be verified — it may have been used already. Ask your friend for a new link."
 
 ---
@@ -345,6 +346,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (full-width, h-12, rounded-xl): "Next: Home Size" + ArrowRight
    - Button (ghost): "Skip for now"
 
+**Loading**: Skeleton rows while coverage categories load
 **Error State**: "Your coverage preferences couldn't be saved — check your connection and try again."
 
 ### Screen 5.5: Step 3b — Home Setup (Sizing Phase)
@@ -684,6 +686,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **Cost Breakdown**: included credits used, extras cost, total per cycle
 5. **Bottom CTA** (fixed, blur bg): Button (accent, xl, full-width): "Confirm Routine"
 
+**Loading**: Skeleton cards while routine preview generates
 **Error State**: "Routine preview couldn't be generated — go back to the builder and try again."
 
 ### Screen 9.3: Routine Confirm
@@ -699,6 +702,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **Next Steps**: caption "Your provider will follow this routine on your service day."
 5. **CTA**: Button (accent, lg, full-width): "View Your Schedule"
 
+**Loading**: Spinner while routine changes are saved
 **Error State**: "Routine confirmation failed — your changes weren't saved. Go back to review and try again."
 
 ---
@@ -773,6 +777,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - CalendarDays icon + "Your service day: {dayOfWeek}"
    - Link: "Change preferences →" to `/customer/service-day`
 
+**Loading**: Skeleton calendar grid and placeholder visit cards
 **Error State**: "Your schedule couldn't be loaded — pull down to refresh. Your service day is still active."
 
 **Redirects**:
@@ -819,6 +824,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
      - Tap → `/customer/visits/:jobId`
    - Empty state: Clock icon + "No completed services yet" + "Your service history will build here over time."
 
+**Loading**: Skeleton stat pills and timeline placeholder cards
 **Error State**: "Your activity history couldn't be loaded — check your connection and try again."
 
 **Redirects**:
@@ -885,6 +891,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 - ReportIssueSheet: structured issue reporting with reason categories
 - ShareCardSheet: generate shareable receipt link
 
+**Loading**: Skeleton header and photo grid placeholders
 **Error State**: "This visit receipt couldn't be loaded — the visit may still be processing. Go back and try again."
 
 ### Screen 11.4: Appointment Picker
@@ -982,6 +989,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Receipt icon + "Billing history"
    - ChevronRight
 
+**Loading**: Skeleton plan card and payment method row
 **Empty State**: Wallet icon + "No billing activity yet — your first invoice will appear here after your subscription starts."
 **Error State**: "Billing information couldn't be loaded — your subscription is still active. Try again in a moment."
 
@@ -1037,6 +1045,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 6. **Empty State**
    - Inbox icon (muted, 40×40) + "No issues yet — that's great!"
 
+**Loading**: Skeleton cards for resolve CTA and ticket list
 **Error State**: "Support information couldn't be loaded — check your connection and try again."
 
 ### Screen 14.2: New Ticket
@@ -1092,6 +1101,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Cards per referral: ID preview + milestone badges (Signed up, Subscribed, First visit, Paid cycle)
    - Empty: "No referrals yet. Share your code to get started!"
 
+**Loading**: Skeleton share card and credit summary grid
 **Error State**: "Referral details couldn't be loaded — your credits are safe. Try refreshing."
 
 ---
@@ -1121,6 +1131,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 Each menu item: icon + label + ChevronRight, tappable
 
+**Loading**: Skeleton menu rows
 **Error State**: "Menu couldn't load — try closing and reopening the app."
 **Note**: "Plans & Subscription" replaces the former Plans primary tab. It links to `/customer/plans` which serves as both plan browsing (for new/upgrading customers) and subscription management (for active subscribers).
 
@@ -1194,6 +1205,7 @@ Each menu item: icon + label + ChevronRight, tappable
 4. **Skip Option**: Button (ghost, sm): "Skip for now — complete later in Settings"
 5. **Bottom CTA**: Button (accent, xl, full-width): "Save and Continue"
 
+**Loading**: Skeleton form fields while profile data loads
 **Error State**: "Unable to save your details — check your connection and try again."
 
 ### Screen 17.3: Step 2 — Coverage Zones
@@ -1228,6 +1240,8 @@ Each menu item: icon + label + ChevronRight, tappable
 5. **Skip Option**: Button (ghost, sm): "Skip for now"
 6. **Bottom CTA**: Button (accent, xl, full-width): "Save and Continue"
 
+**Loading**: Skeleton category grid while service options load
+
 ### Screen 17.5: Step 4 — Compliance
 
 **Route**: `/provider/onboarding/compliance`
@@ -1243,6 +1257,7 @@ Each menu item: icon + label + ChevronRight, tappable
 6. **Skip Option**: Button (ghost, sm): "Skip for now — required before first job"
 7. **Bottom CTA**: Button (accent, xl, full-width): "Save and Continue"
 
+**Loading**: Skeleton upload cards while compliance status loads
 **Error State**: "Upload failed — check your file size (max 10MB) and try again."
 
 ### Screen 17.6: Step 5 — Agreement
@@ -1257,6 +1272,8 @@ Each menu item: icon + label + ChevronRight, tappable
 3. **Agreement Text**: scrollable card with full agreement text
 4. **Acceptance Checkbox**: "I have read and agree to the Handled service provider agreement"
 5. **Bottom CTA**: Button (accent, xl, full-width): "Accept and Continue" (disabled until checkbox checked)
+
+**Loading**: Skeleton text block while agreement loads
 
 ### Screen 17.7: Step 6 — Review
 
@@ -1274,6 +1291,7 @@ Each menu item: icon + label + ChevronRight, tappable
 7. **Agreement Card**: acceptance status (CheckCircle icon)
 8. **Bottom CTA**: Button (accent, xl, full-width): "Submit Application"
 
+**Loading**: Skeleton summary cards while application data loads
 **Success Feedback**: Toast "Application submitted — we'll review within 2 business days."
 
 ---
@@ -1339,6 +1357,7 @@ Each menu item: icon + label + ChevronRight, tappable
     - H3: "Coming Up"
     - Card with upcoming 3 jobs: CalendarDays icon + address + date + service count
 
+**Loading**: Skeleton greeting, stat grid placeholders, and job card shimmers
 **Error State**: "Dashboard couldn't load — pull down to refresh. Your route and jobs are unaffected."
 
 ---
@@ -1407,6 +1426,7 @@ Each menu item: icon + label + ChevronRight, tappable
 5. **Validation**: required markers on mandatory photos
 6. **Bottom CTA**: Button (accent, xl, full-width): "Submit Photos and Complete"
 
+**Loading**: Skeleton photo grid while required photos load
 **Error State**: "Photo upload failed — check your connection and retry."
 
 ### Screen 19.5: Job Complete
@@ -1423,6 +1443,7 @@ Each menu item: icon + label + ChevronRight, tappable
 6. **Next Stop CTA**: Button (accent, xl, full-width): "Continue to Next Stop" / "View Your Earnings" (if day complete)
 7. **Day Complete State**: Trophy card + "All stops finished — great work today!" when all jobs done
 
+**Loading**: Spinner while job completion is processed
 **Error State**: "Job completion couldn't be saved — your work is recorded locally. Try submitting again."
 
 ---
@@ -1468,6 +1489,7 @@ Each menu item: icon + label + ChevronRight, tappable
 8. **Inactive Links** (collapsed section)
 
 **Gate**: Must be approved provider. Otherwise shows locked screen.
+**Loading**: Skeleton stats grid and link cards
 **Error State**: "BYOC data couldn't be loaded — your invite links are still active. Pull down to refresh."
 
 ### Screen 20.2: Create BYOC Link
@@ -1524,6 +1546,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Empty (earnings)**: DollarSign icon + "No earnings for this period" + "Complete jobs to start earning"
 **Empty (payouts)**: Banknote icon + "No payouts yet"
 
+**Loading**: Skeleton stats grid and earnings card placeholders
 **Error State**: "Earnings data couldn't be loaded — your payouts are unaffected. Pull down to refresh."
 **Design note**: Provider earnings screens should reinforce the value of predictable, guaranteed payouts and denser routes — the core provider value prop. See `operating-model.md` → Provider Payout Logic.
 
@@ -2046,6 +2069,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 
 **Trigger**: Once only (localStorage flag). Shown when `lastCompletedJob` exists and flag not set.
 
+**Loading**: Shimmer animation on celebration icon and cards
 **Error State**: "Celebration details couldn't load — you can view your receipt from the Activity tab."
 
 ---
@@ -2079,6 +2103,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 
 **Empty state**: Calendar icon + "No completed services yet" + subtext
 
+**Loading**: Skeleton stat row and timeline group placeholders
 **Error State**: "Timeline couldn't be loaded — your service history is still safely stored. Pull down to refresh."
 
 ---
@@ -2188,6 +2213,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 - Ambassador (Trophy icon): 5 referrals → Free month
 - Champion (Gift icon): 10 referrals → VIP status
 
+**Loading**: Skeleton progress bar and tier grid placeholders
 **Error State**: "Milestone progress couldn't be loaded — your referral credits are safe. Try refreshing."
 
 ---
