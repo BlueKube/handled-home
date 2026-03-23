@@ -588,7 +588,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 - **AddServiceDrawer**: Bottom sheet with service search + add capability
 
 **Empty State**: Home icon + "Welcome to your home dashboard — your next service and routine status will appear here once set up."
-**Error State**: "Your dashboard couldn't load — pull down to refresh. Your services are still running as scheduled."
+**Error State**: "Your home dashboard couldn't load — pull down to refresh. Your services are still running as scheduled."
 
 ---
 
@@ -707,7 +707,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Loading**: Skeleton blocks
 **Success**: Toast "Service added to your routine."
-**Error State**: "Your routine couldn't be loaded — pull down to refresh. Your current routine is still active."
+**Error State**: "Your routine couldn't be loaded — pull down to refresh. Your service schedule is still active."
 **Service Day Gate**: H2 "Confirm your Service Day" + "Lock in your weekly service day before building your routine." + Button "Set Service Day"
 
 ### Screen 9.2: Routine Review
@@ -726,7 +726,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Empty State**: ListChecks icon + "Your routine review will appear here once you select services in the builder."
 **Success**: Toast "Routine changes look good — confirm when ready."
 **Loading**: Skeleton cards while routine preview generates
-**Error State**: "Routine preview couldn't be generated — go back to the builder and try again."
+**Error State**: "Your routine preview couldn't be generated — go back to the builder and try again."
 
 ### Screen 9.3: Routine Confirm
 
@@ -744,7 +744,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Empty State**: CheckCircle icon + "Your routine confirmation details will appear here once changes are saved."
 **Loading**: Spinner while routine changes are saved
-**Error State**: "Routine confirmation failed — your changes weren't saved. Go back to review and try again."
+**Error State**: "Your routine confirmation failed — your changes weren't saved. Go back to review and continue."
 
 ---
 
@@ -826,7 +826,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Success**: Toast "Schedule updated."
 **Loading**: Skeleton calendar grid and placeholder visit cards
-**Error State**: "Your schedule couldn't be loaded — pull down to refresh. Your service day is still active."
+**Error State**: "Your schedule couldn't be loaded — pull down to refresh. Your service is still on track."
 
 **Redirects**:
 - `/customer/visits` → `/customer/schedule`
@@ -875,7 +875,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Empty state: Clock icon + "No completed services yet" + "Your service history will build here over time."
 
 **Loading**: Skeleton stat pills and timeline placeholder cards
-**Error State**: "Your activity history couldn't be loaded — check your connection and try again."
+**Error State**: "Your activity history couldn't be loaded — your home records are safe. Check your connection and try again."
 
 **Redirects**:
 - `/customer/history` → `/customer/activity`
@@ -944,7 +944,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Empty State**: Camera icon + "Your visit receipt and proof photos will appear here once the service is complete."
 **Loading**: Skeleton header and photo grid placeholders
-**Error State**: "This visit receipt couldn't be loaded — the visit may still be processing. Go back and try again."
+**Error State**: "Your visit receipt couldn't be loaded — your service record is still saved. Go back and try again."
 
 ### Screen 11.4: Appointment Picker
 
@@ -1048,7 +1048,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Success**: Toast "Payment method updated."
 **Loading**: Skeleton plan card and payment method row
 **Empty State**: Wallet icon + "No billing activity yet — your first invoice will appear here once your membership begins."
-**Error State**: "Billing information couldn't be loaded — your subscription is still active. Try again in a moment."
+**Error State**: "Your billing information couldn't be loaded — your membership is still active. Try again in a moment."
 
 ### Screen 13.2: Payment Methods
 
@@ -1106,7 +1106,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Success**: Toast "Ticket submitted — we'll respond within 24 hours."
 **Loading**: Skeleton cards for resolve CTA and ticket list
-**Error State**: "Support information couldn't be loaded — check your connection and try again."
+**Error State**: "Your support information couldn't be loaded — we'll still respond to your open tickets. Try again."
 
 ### Screen 14.2: New Ticket
 
@@ -1163,7 +1163,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Success**: Toast "Referral code generated — share it to start earning."
 **Loading**: Skeleton share card and credit summary grid
-**Error State**: "Referral details couldn't be loaded — your credits are safe. Try refreshing."
+**Error State**: "Your referral details couldn't be loaded — your earned credits are safe. Try refreshing."
 
 ---
 
@@ -1440,7 +1440,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Explainer**: help text on Stats Grid — "How it works — your daily stats update in real time as you complete jobs."
 **Loading**: Skeleton greeting, stat grid placeholders, and job card shimmers
-**Error State**: "Dashboard couldn't load — pull down to refresh. Your route and jobs are unaffected."
+**Error State**: "Your dashboard couldn't load — pull down to refresh. Your route and jobs are on track."
 
 ---
 
@@ -1580,7 +1580,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Explainer**: help text "How it works — create invite links, share with your existing customers, and earn bonuses when they join."
 **Success**: Toast "Invite link created — share it with your customers."
 **Loading**: Skeleton stats grid and link cards
-**Error State**: "BYOC data couldn't be loaded — your invite links are still active. Pull down to refresh."
+**Error State**: "Your BYOC data couldn't be loaded — your invite links are still active. Pull down to refresh."
 
 ### Screen 20.2: Create BYOC Link
 
@@ -1637,7 +1637,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Empty (payouts)**: Banknote icon + "No payouts yet"
 
 **Loading**: Skeleton stats grid and earnings card placeholders
-**Error State**: "Earnings data couldn't be loaded — your payouts are unaffected. Pull down to refresh."
+**Error State**: "Your earnings data couldn't be loaded — your payouts are on track. Pull down to refresh."
 **Design note**: Provider earnings screens should reinforce the value of predictable, guaranteed payouts and denser routes — the core provider value prop. See `operating-model.md` → Provider Payout Logic.
 
 ---
@@ -2196,7 +2196,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 **Empty state**: Calendar icon + "No completed services yet" + subtext
 
 **Loading**: Skeleton stat row and timeline group placeholders
-**Error State**: "Timeline couldn't be loaded — your service history is still safely stored. Pull down to refresh."
+**Error State**: "Your home timeline couldn't be loaded — your service history is still safely stored. Pull down to refresh."
 
 ---
 
