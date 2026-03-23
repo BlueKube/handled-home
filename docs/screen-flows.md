@@ -165,6 +165,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **States**:
 - **Loading**: Full-screen centered spinner
 - **Invalid/Expired Invite**: Logo + H2 "This invitation is no longer active" + Caption "The invite link may have expired or been deactivated." + Button "Back to Home"
+- **Error State**: AlertTriangle icon + "We couldn't load your provider's invitation — check the link or ask your provider to resend it."
 - **Authenticated**: Renders BYOC Onboarding Wizard inline (see Flow 6)
 
 ---
@@ -199,6 +200,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 5. **Fine Print**
    - Caption: "Free to join. No commitments."
+
+**Error State**: AlertTriangle icon + "This referral link couldn't be verified — it may have been used already. Ask your friend for a new link."
 
 ---
 
@@ -239,6 +242,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **States**:
 - **Loading**: Full-screen centered spinner
 - **Expired**: Logo + H2 "This share has expired" + Caption "The link is no longer active." + Button "Get Handled Home"
+- **Error State**: AlertTriangle icon + "This receipt couldn't be loaded — the share link may be invalid or the visit was removed."
 
 ---
 
@@ -340,6 +344,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (full-width, h-12, rounded-xl): "Next: Home Size" + ArrowRight
    - Button (ghost): "Skip for now"
 
+**Error State**: "Your coverage preferences couldn't be saved — check your connection and try again."
+
 ### Screen 5.5: Step 3b — Home Setup (Sizing Phase)
 
 **Sections**:
@@ -361,6 +367,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **CTA**
    - Button (full-width, h-12, rounded-xl): "Continue" + ArrowRight
    - Button (ghost): "Skip for now"
+
+**Error State**: "Home size details couldn't be saved — you can skip this step and update later in Settings."
 
 ### Screen 5.6: Step 4 — Pick Your Plan
 
@@ -390,6 +398,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 4. **Loading**: 3 skeleton cards (h-56 each)
 
+**Error State**: "Plans couldn't be loaded — check your connection and pull down to refresh."
+
 ### Screen 5.7: Step 5 — Subscribe (Checkout)
 
 **Sections**:
@@ -409,6 +419,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Loading state: spinner + "Processing…"
 
 **Post-Checkout State**: Spinner + H2 "Verifying your subscription…" + Caption "This usually takes just a few seconds."
+**Error State**: "Payment failed — double-check your card details and try again. You won't be charged until payment succeeds."
 
 ### Screen 5.8: Step 6 — Service Day
 
@@ -434,6 +445,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (ghost): "Skip for now — I'll set this up later"
 
 **Loading State**: Spinner + "Finding the best route day for your area…"
+**Error State**: "Service day assignment failed — we're having trouble matching your area. Try again or skip to set this up later."
 
 ### Screen 5.9: Step 7 — Routine
 
@@ -460,6 +472,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **CTAs** (pt-4, stacked):
    - Button (full-width): "Go to Dashboard"
    - Button (outline, full-width): "Review My Routine"
+
+**Error State**: "Your setup couldn't be finalized — but don't worry, your progress is saved. Tap below to continue."
 
 ---
 
@@ -543,6 +557,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Sheets/Modals**:
 - **AddServiceDrawer**: Bottom sheet with service search + add capability
 
+**Error State**: "Your dashboard couldn't load — pull down to refresh. Your services are still running as scheduled."
+
 ---
 
 # FLOW 8: Plans & Subscription
@@ -574,6 +590,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Loading**: 3 skeleton cards
 **Empty**: "No plans available at the moment."
+**Error State**: "Plans couldn't be loaded right now — check your connection and try again."
 
 ### Screen 8.2: Plan Detail
 
@@ -589,6 +606,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 6. **Not Available Card**
 7. **Change Policy Info Card**
 8. **Bottom CTA Bar** (fixed, blur bg): Button (accent, xl, full-width): "Subscribe to This Plan"
+
+**Error State**: "Plan details couldn't be loaded — go back to plans and try again."
 
 ### Screen 8.3: Subscription Management
 
@@ -648,6 +667,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - If not subscribed: "Subscribe to continue" + ArrowRight
 
 **Loading**: Skeleton blocks
+**Error State**: "Your routine couldn't be loaded — pull down to refresh. Your current routine is still active."
 **Service Day Gate**: H2 "Confirm your Service Day" + "Lock in your weekly service day before building your routine." + Button "Set Service Day"
 
 ### Screen 9.2: Routine Review
@@ -663,6 +683,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **Cost Breakdown**: included credits used, extras cost, total per cycle
 5. **Bottom CTA** (fixed, blur bg): Button (accent, xl, full-width): "Confirm Routine"
 
+**Error State**: "Routine preview couldn't be generated — go back to the builder and try again."
+
 ### Screen 9.3: Routine Confirm
 
 **Route**: `/customer/routine/confirm`
@@ -675,6 +697,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 3. **Summary**: services confirmed, cadence, estimated monthly cost
 4. **Next Steps**: caption "Your provider will follow this routine on your service day."
 5. **CTA**: Button (accent, lg, full-width): "View Your Schedule"
+
+**Error State**: "Routine confirmation failed — your changes weren't saved. Go back to review and try again."
 
 ---
 
@@ -748,6 +772,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - CalendarDays icon + "Your service day: {dayOfWeek}"
    - Link: "Change preferences →" to `/customer/service-day`
 
+**Error State**: "Your schedule couldn't be loaded — pull down to refresh. Your service day is still active."
+
 **Redirects**:
 - `/customer/visits` → `/customer/schedule`
 - `/customer/upcoming` → `/customer/schedule`
@@ -791,6 +817,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
      - Camera icon + photo count (if photos exist)
      - Tap → `/customer/visits/:jobId`
    - Empty state: Clock icon + "No completed services yet" + "Your service history will build here over time."
+
+**Error State**: "Your activity history couldn't be loaded — check your connection and try again."
 
 **Redirects**:
 - `/customer/history` → `/customer/activity`
@@ -855,6 +883,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Sheets**:
 - ReportIssueSheet: structured issue reporting with reason categories
 - ShareCardSheet: generate shareable receipt link
+
+**Error State**: "This visit receipt couldn't be loaded — the visit may still be processing. Go back and try again."
 
 ### Screen 11.4: Appointment Picker
 
@@ -951,6 +981,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Receipt icon + "Billing history"
    - ChevronRight
 
+**Error State**: "Billing information couldn't be loaded — your subscription is still active. Try again in a moment."
+
 ### Screen 13.2: Payment Methods
 
 **Route**: `/customer/billing/methods`
@@ -960,6 +992,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Route**: `/customer/billing/history`
 **Purpose**: List of invoices with dates, amounts, status badges
+
+**Error State**: "Billing history couldn't be loaded — your invoices are still available. Try again in a moment."
 
 ### Screen 13.4: Receipt Detail
 
@@ -1000,20 +1034,28 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 6. **Empty State**
    - Inbox icon (muted, 40×40) + "No issues yet — that's great!"
 
+**Error State**: "Support information couldn't be loaded — check your connection and try again."
+
 ### Screen 14.2: New Ticket
 
 **Route**: `/customer/support/new`
 **Purpose**: Structured issue submission with reason categories (not freeform chat)
+
+**Error State**: "Your ticket couldn't be submitted — check your connection and try again. No duplicate will be created."
 
 ### Screen 14.3: Ticket List
 
 **Route**: `/customer/support/tickets`
 **Purpose**: Filterable list with status pills (Open | Resolved | All)
 
+**Error State**: "Tickets couldn't be loaded — your open tickets are still being tracked. Pull down to refresh."
+
 ### Screen 14.4: Ticket Detail
 
 **Route**: `/customer/support/tickets/:ticketId`
 **Purpose**: Individual ticket view with status, notes, resolution
+
+**Error State**: "Ticket details couldn't be loaded — go back to your tickets list and try again."
 
 ---
 
@@ -1043,6 +1085,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Cards per referral: ID preview + milestone badges (Signed up, Subscribed, First visit, Paid cycle)
    - Empty: "No referrals yet. Share your code to get started!"
 
+**Error State**: "Referral details couldn't be loaded — your credits are safe. Try refreshing."
+
 ---
 
 # FLOW 16: Customer More & Settings
@@ -1070,6 +1114,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 Each menu item: icon + label + ChevronRight, tappable
 
+**Error State**: "Menu couldn't load — try closing and reopening the app."
 **Note**: "Plans & Subscription" replaces the former Plans primary tab. It links to `/customer/plans` which serves as both plan browsing (for new/upgrading customers) and subscription management (for active subscribers).
 
 ### Screen 16.2: Account Settings
@@ -1095,6 +1140,8 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Route**: `/customer/notifications`
 **Purpose**: Chronological notification list (shared component across all roles)
+
+**Error State**: "Notifications couldn't be loaded — you'll still receive push alerts. Pull down to refresh."
 
 ---
 
@@ -1284,6 +1331,8 @@ Each menu item: icon + label + ChevronRight, tappable
     - H3: "Coming Up"
     - Card with upcoming 3 jobs: CalendarDays icon + address + date + service count
 
+**Error State**: "Dashboard couldn't load — pull down to refresh. Your route and jobs are unaffected."
+
 ---
 
 # FLOW 19: Provider Job Execution
@@ -1366,6 +1415,8 @@ Each menu item: icon + label + ChevronRight, tappable
 6. **Next Stop CTA**: Button (accent, xl, full-width): "Continue to Next Stop" / "View Your Earnings" (if day complete)
 7. **Day Complete State**: Trophy card + "All stops finished — great work today!" when all jobs done
 
+**Error State**: "Job completion couldn't be saved — your work is recorded locally. Try submitting again."
+
 ---
 
 # FLOW 20: Provider BYOC Center
@@ -1409,6 +1460,7 @@ Each menu item: icon + label + ChevronRight, tappable
 8. **Inactive Links** (collapsed section)
 
 **Gate**: Must be approved provider. Otherwise shows locked screen.
+**Error State**: "BYOC data couldn't be loaded — your invite links are still active. Pull down to refresh."
 
 ### Screen 20.2: Create BYOC Link
 
@@ -1416,6 +1468,8 @@ Each menu item: icon + label + ChevronRight, tappable
 **Purpose**: Form to create new invite link (select category, zone, cadence)
 
 **Header**: ChevronLeft back → `/provider/byoc` | H2 "Create Invite Link" | Caption "Generate a link for your existing customers"
+
+**Error State**: "Link couldn't be created — check your connection and try again."
 
 ---
 
@@ -1461,6 +1515,7 @@ Each menu item: icon + label + ChevronRight, tappable
 **Empty (earnings)**: DollarSign icon + "No earnings for this period" + "Complete jobs to start earning"
 **Empty (payouts)**: Banknote icon + "No payouts yet"
 
+**Error State**: "Earnings data couldn't be loaded — your payouts are unaffected. Pull down to refresh."
 **Design note**: Provider earnings screens should reinforce the value of predictable, guaranteed payouts and denser routes — the core provider value prop. See `operating-model.md` → Provider Payout Logic.
 
 ---
@@ -1472,15 +1527,21 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/provider/quality` or `/provider/performance`
 **Purpose**: Quality rating breakdown, feedback summary, performance metrics
 
+**Error State**: "Quality score couldn't be loaded — your rating is unaffected. Pull down to refresh."
+
 ### Screen 22.2: Insights
 
 **Route**: `/provider/insights`
 **Purpose**: Business insights and growth recommendations
 
+**Error State**: "Insights couldn't be generated right now — check back after your next completed job."
+
 ### Screen 22.3: Insights History
 
 **Route**: `/provider/insights/history`
 **Purpose**: Historical insights archive
+
+**Error State**: "Insights history couldn't be loaded — try again in a moment."
 
 ---
 
@@ -1506,6 +1567,8 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Sections**: Zone selection tabs, availability section, SKU capabilities
 
+**Error State**: "Coverage zones couldn't be loaded — your current zones are still active. Try refreshing."
+
 ### Screen 23.3: Authorized SKUs
 
 **Route**: `/provider/skus`
@@ -1514,6 +1577,8 @@ Each menu item: icon + label + ChevronRight, tappable
 **Header**: H2 "Service Catalog" (no back nav — accessible from tab flow)
 
 **Sections**: Search input, category-grouped SKU cards with detail sheet
+
+**Error State**: "Service catalog couldn't be loaded — check your connection and try again."
 
 ### Screen 23.4: Work Setup
 
@@ -1524,6 +1589,8 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Sections**: 3-step wizard (Location → Services → Schedule)
 
+**Error State**: "Work setup preferences couldn't be saved — check your connection and try again."
+
 ### Screen 23.5: Availability
 
 **Route**: `/provider/availability`
@@ -1532,6 +1599,8 @@ Each menu item: icon + label + ChevronRight, tappable
 **Header**: ChevronLeft back → `/provider/coverage` | H2 "Availability" | Caption "Manage your schedule and blocked windows"
 
 **Sections**: Weekly schedule grid, blocked windows list with add/delete
+
+**Error State**: "Availability schedule couldn't be loaded — your current availability is unchanged. Try refreshing."
 
 ---
 
@@ -1551,6 +1620,8 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Note**: Coverage & Availability replaces the former Coverage primary tab. BYOC Center and Referrals are grouped under "Growth" to make the revenue-boosting tools discoverable as a category.
 
+**Error State**: "Menu couldn't be loaded — try closing and reopening the app."
+
 ### Screen 24.2: Provider Settings
 
 **Route**: `/provider/settings`
@@ -1558,12 +1629,16 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Header**: H2 "Account Settings" (no back nav — top-level More menu destination)
 
+**Error State**: "Settings couldn't be loaded — your preferences are unchanged. Try again."
+
 ### Screen 24.3: Provider Support
 
 **Route**: `/provider/support`
 **Purpose**: Support tickets for providers
 
 **Header**: H2 "Support" | Caption "Claims and disputes involving your jobs" (no back nav — top-level More menu destination)
+
+**Error State**: "Support tickets couldn't be loaded — your open tickets are unaffected. Pull down to refresh."
 
 ### Screen 24.3.1: Support Ticket Detail
 
@@ -1581,6 +1656,8 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Header**: H2 "Growth Hub" (page title)
 
+**Error State**: "Referral data couldn't be loaded — your referral credits are safe. Try refreshing."
+
 ---
 
 # FLOW 25: Admin Dashboard & Ops
@@ -1591,6 +1668,8 @@ Each menu item: icon + label + ChevronRight, tappable
 **Layout**: Sidebar navigation (AdminShell), not bottom tabs
 **Purpose**: Overview metrics — active subscriptions, jobs today, provider count, revenue
 
+**Error State**: "Dashboard metrics couldn't be loaded — data may be stale. Refresh to see latest numbers."
+
 ### Screen 25.2: Ops Cockpit
 
 **Route**: `/admin/ops`
@@ -1600,6 +1679,8 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Route**: `/admin/ops/zones`
 **Purpose**: Zone-by-zone capacity, provider coverage, service day distribution
+
+**Error State**: "Zone health data couldn't be loaded — check the database connection and retry."
 
 ### Screen 25.4: Zone Detail
 
@@ -1620,10 +1701,14 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/ops/growth`
 **Purpose**: Signup funnel, BYOC activations, referral conversion
 
+**Error State**: "Growth metrics failed to load — analytics pipeline may be delayed. Try again in a few minutes."
+
 ### Screen 25.8: Support Health
 
 **Route**: `/admin/ops/support`
 **Purpose**: Ticket volume, resolution time, SLA compliance
+
+**Error State**: "Support health data couldn't be loaded — check the analytics service and retry."
 
 ---
 
@@ -1634,20 +1719,28 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/providers`
 **Purpose**: Searchable, filterable provider directory
 
+**Error State**: "Provider list failed to load — try refreshing or narrow your search filters."
+
 ### Screen 26.2: Provider Detail
 
 **Route**: `/admin/providers/:id`
 **Purpose**: Full provider profile — org info, coverage, capabilities, quality, earnings
+
+**Error State**: "Provider profile couldn't be loaded — the provider record may be incomplete. Go back and try again."
 
 ### Screen 26.3: Application Queue
 
 **Route**: `/admin/providers/applications`
 **Purpose**: Pending provider applications for review
 
+**Error State**: "Application queue failed to load — pending applications are not lost. Refresh to retry."
+
 ### Screen 26.4: Application Detail
 
 **Route**: `/admin/providers/applications/:id`
 **Purpose**: Individual application review with approve/reject actions
+
+**Error State**: "Application details couldn't be loaded — go back to the queue and try again."
 
 ---
 
@@ -1667,6 +1760,8 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Route**: `/admin/skus`
 **Purpose**: Service type definitions — names, durations, levels, checklist templates
+
+**Error State**: "SKU catalog failed to load — existing service definitions are unaffected. Retry to see latest changes."
 
 ### Screen 27.4: Subscription Plans
 
@@ -1702,10 +1797,14 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/jobs`
 **Purpose**: All jobs with filters (status, date, zone, provider)
 
+**Error State**: "Job list failed to load — try narrowing your date range or filters."
+
 ### Screen 28.2: Job Detail
 
 **Route**: `/admin/jobs/:jobId`
 **Purpose**: Full job view with admin actions
+
+**Error State**: "Job record couldn't be loaded — the job ID may be invalid. Go back to the job list."
 
 ### Screen 28.3: Exception Queue
 
@@ -1722,6 +1821,8 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/ops/dispatch`
 **Purpose**: Job dispatch management
 
+**Error State**: "Dispatch queues failed to load — active dispatches are still running. Check the scheduler service."
+
 ---
 
 # FLOW 29: Admin Billing & Payouts
@@ -1736,15 +1837,21 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/billing/customers/:customerId`
 **Purpose**: Individual customer financial history — invoices, credits, payments
 
+**Error State**: "Customer ledger couldn't be loaded — check the customer ID or billing service status."
+
 ### Screen 29.3: Payout Overview
 
 **Route**: `/admin/payouts`
 **Purpose**: Provider payout status, pending amounts, payout schedule
 
+**Error State**: "Payout overview failed to load — scheduled payouts are unaffected. Retry to see current status."
+
 ### Screen 29.4: Provider Ledger
 
 **Route**: `/admin/payouts/providers/:providerOrgId`
 **Purpose**: Individual provider earnings history — earnings, holds, payouts
+
+**Error State**: "Provider ledger couldn't be loaded — check the provider ID or try again."
 
 ### Screen 29.5: Pricing Control
 
@@ -1756,6 +1863,8 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/control/payouts`
 **Purpose**: Payout frequency, hold policies, minimum thresholds
 
+**Error State**: "Payout control settings couldn't be loaded — current policies remain in effect. Retry."
+
 ---
 
 # FLOW 30: Admin Support & Growth
@@ -1765,10 +1874,14 @@ Each menu item: icon + label + ChevronRight, tappable
 **Route**: `/admin/support`
 **Purpose**: All support tickets with filters, assignment, bulk actions
 
+**Error State**: "Support console couldn't be loaded — open tickets are still being tracked. Refresh to retry."
+
 ### Screen 30.2: Support Ticket Detail
 
 **Route**: `/admin/support/tickets/:ticketId`
 **Purpose**: Full ticket view with admin resolution tools
+
+**Error State**: "Ticket details failed to load — the ticket may have been merged or deleted. Go back to the console."
 
 ### Screen 30.3: Support Policies
 
@@ -1784,6 +1897,8 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Route**: `/admin/growth`
 **Purpose**: Viral loop metrics, BYOC performance, referral conversion
+
+**Error State**: "Growth data couldn't be loaded — analytics pipeline may be delayed. Check back shortly."
 
 ### Screen 30.6: Feedback
 
@@ -1804,6 +1919,8 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Route**: `/admin/incentives`
 **Purpose**: Referral program configuration, BYOC bonus rules
+
+**Error State**: "Incentive program data couldn't be loaded — active programs are still running. Retry."
 
 ---
 
@@ -1893,6 +2010,8 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 
 **Trigger**: Once only (localStorage flag). Shown when `lastCompletedJob` exists and flag not set.
 
+**Error State**: "Celebration details couldn't load — you can view your receipt from the Activity tab."
+
 ---
 
 # FLOW 33: Home Timeline
@@ -1924,6 +2043,8 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 
 **Empty state**: Calendar icon + "No completed services yet" + subtext
 
+**Error State**: "Timeline couldn't be loaded — your service history is still safely stored. Pull down to refresh."
+
 ---
 
 # FLOW 34: Provider Earnings Projection
@@ -1943,6 +2064,8 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 - Subtext: "X jobs/week · avg finish Xh" or "est. $X/mo"
 - Growth CTA (accent, 12px): "Fill your schedule to earn $X more/mo" (if <90% capacity)
 
+**Error State**: "Earnings projection temporarily unavailable — your earnings are unaffected."
+
 ### Screen 34.2: Onboarding Variant
 
 **Layout**:
@@ -1957,6 +2080,8 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 - The density message reinforces the provider economics flywheel: more density → denser routes → more stops/day → better earnings/hour → better retention
 
 **Key constraint**: Never show customer pricing or subscription spread. Show payout amounts only. See `operating-model.md` → Provider Payout Logic for the full economics model.
+
+**Error State**: "Earnings estimate couldn't be calculated — complete a few more jobs and we'll generate your projection."
 
 ---
 
@@ -1999,6 +2124,8 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 
 **Typography**: 12px, muted-foreground
 
+**Error State**: "Trust information couldn't be loaded — your coverage guarantees are still in effect."
+
 ---
 
 # FLOW 37: Referral Milestones
@@ -2024,6 +2151,8 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 - Starter (Star icon): 3 referrals → $30 credit
 - Ambassador (Trophy icon): 5 referrals → Free month
 - Champion (Gift icon): 10 referrals → VIP status
+
+**Error State**: "Milestone progress couldn't be loaded — your referral credits are safe. Try refreshing."
 
 ---
 
