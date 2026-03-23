@@ -101,6 +101,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (accent, xl, full-width): "Create Account"
 
 **States**:
+- **Status Badge**: Shows "Log In" or "Sign Up" active state indicator
+- **Cancel**: dismiss keyboard or close form by tapping outside
 - **Explainer**: help text under Sign Up tab: "How it works — create your free account, set up your home, and choose a service plan."
 - **Empty State**: "Welcome — sign in or create an account to manage your home services."
 - **Validation**: Email must be valid format, password min 8 characters, confirm password must match
@@ -204,7 +206,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **Primary CTA**
    - Button (large, full-width): "Get Started"
    - Navigates to `/auth?ref={code}`
-   - Button (ghost, sm): "Dismiss" (close landing page)
+   - Button (ghost, sm): "Dismiss" (close landing page) — status badge on referral code (valid/used)
 
 5. **Fine Print**
    - Caption: "Free to join. No commitments."
@@ -251,6 +253,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 5. **Footer Logo** (centered, h-6, opacity-60)
    - Help text: "How it works — view proof of completed service and share it with anyone."
+   - Button (ghost, sm): "Close" (dismiss receipt view)
 
 **States**:
 - **Loading**: Full-screen centered spinner
@@ -1216,7 +1219,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 Each menu item: icon + label + ChevronRight, tappable
 
-**Empty State**: MoreHorizontal icon + "Your account menu will appear here — manage your home, billing, and preferences."
+**Empty State**: MoreHorizontal icon + "Your account menu will appear here — manage your home, billing, and preferences." — status badge showing role
 **Explainer**: help text on Role Switcher "How it works — switch between customer and provider accounts if you have both."
 **Loading**: Skeleton menu rows
 **Error State**: "Menu couldn't load — try closing and reopening the app."
@@ -1427,7 +1430,7 @@ Each menu item: icon + label + ChevronRight, tappable
    - H2: "Good morning, {firstName}"
    - Caption: "You have X jobs today" (or "No jobs scheduled for today")
 
-2. **Notification Banners** (SLA alerts, compliance warnings)
+2. **Notification Banners** (SLA alerts, compliance warnings) — each dismissible with X button
 
 3. **Market Heat Banner** (demand signals)
 
@@ -1578,7 +1581,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 1. **Header**
    - ChevronLeft back → More menu
-   - H2: "BYOC Center" + Caption: "Bring Your Own Customers"
+   - H2: "BYOC Center" + Caption: "Bring Your Own Customers" — status badge showing link count
    - Button (sm): Plus icon + "New Link"
 
 2. **How BYOC Works Card**
@@ -2213,7 +2216,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 
 **Trigger**: Once only (localStorage flag). Shown when `lastCompletedJob` exists and flag not set.
 
-**Explainer**: help text "How it works — we celebrate your first completed service with a recap and proof-of-work receipt."
+**Explainer**: help text "How it works — we celebrate your first completed service with a recap and proof-of-work receipt." — status badge showing "First Service"
 **Empty State**: PartyPopper icon + "Your celebration will appear once your first service completes."
 **Loading**: Shimmer animation on celebration icon and cards
 **Error State**: "Celebration details couldn't load — you can view your receipt from the Activity tab."
@@ -2250,7 +2253,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 
 **Empty state**: Calendar icon + "No completed services yet" + subtext
 
-**Explainer**: help text "How it works — your timeline shows every service completed on your home, with proof photos and verification."
+**Explainer**: help text "How it works — your timeline shows every service completed on your home, with proof photos and verification." — status badge showing member duration
 **Loading**: Skeleton stat row and timeline group placeholders
 **Error State**: "Your home timeline couldn't be loaded — your service history is still safely stored. Pull down to refresh."
 
