@@ -2,7 +2,9 @@
 
 This document defines how Handled Home makes money, prices services, pays providers, and designs plans. It is the tactical companion to `masterplan.md` — the masterplan says *why we exist*, this document says *how we sustain the business*.
 
-Developers building pricing, plan selection, payout, admin, or bundle-related features should reference this document directly.
+Developers building pricing, plan selection, payout, admin, or bundle-related features should reference this document directly. Zones are grouped into regions for market-level pricing and ops oversight.
+
+**What success looks like**: a healthy operating model delivers gross margin per zone ≥25% at scale (50+ households/zone), attach rate ≥2.0 SKUs/household by month 6, monthly household churn <2%, and provider utilization ≥80% of available hours.
 
 ---
 
@@ -12,9 +14,9 @@ Developers building pricing, plan selection, payout, admin, or bundle-related fe
 
 The unit of value is the **household**, not the individual service. A single lawn mow or window-cleaning job is not where the business makes its money. The business makes money from:
 
-- recurring subscription revenue across a growing basket of services
-- attach rate expanding over time as customers add more to their plan
-- route density improving provider cost-per-stop
+- recurring subscription revenue across an expanding basket of services (target: 2+ SKUs/household by month 6)
+- attach rate rising as customers add more to their plan
+- route density driving provider cost-per-stop down 15–20% at 25+ households/zone
 - reduced admin and selling burden lowering provider churn
 - packaging low-frequency services into high-perceived-value plans
 - retaining households long enough for the economics to compound
@@ -31,7 +33,7 @@ Handled Home monetizes through the **subscription spread** — the delta between
 
 - Customers pay a fixed monthly subscription for a plan (e.g., $159/mo)
 - Providers receive a fixed, predictable payout per job — set independently from customer pricing
-- Neither side sees the other's pricing — the **handles abstraction layer** hides the spread
+- Neither side sees the other's pricing — the **handles abstraction layer** hides the spread. A handle = one allowance of a service per cycle (e.g., 2 lawn handles/month = 2 mows)
 - Zone-based multipliers allow margin optimization per market without changing the customer or provider experience
 
 ### Why this model wins
@@ -67,7 +69,7 @@ Handled Home monetizes through the **subscription spread** — the delta between
 This is one of the most important economic concepts in the business.
 
 A plan can include:
-- **anchor services** that happen often and create recurring habit
+- **anchor services** that recur weekly or biweekly and create habit
 - **low-frequency services** that sound valuable but don't hit cost every month
 - **high-margin add-ons** that feel like natural extensions
 - **route-efficient services** that stack well with existing stops
@@ -152,13 +154,13 @@ Positioning: *"Your home, fully handled."*
 
 ### Tier design principle
 
-The smart part is that higher tiers can include many things that feel important without every item creating proportionally higher monthly labor cost. The perceived jump in value should exceed the actual jump in fulfillment cost.
+Higher tiers can include 8–12 items that feel important without every item creating proportionally higher monthly labor cost. The perceived jump in value should exceed the actual jump in fulfillment cost.
 
 ---
 
 ## Loss Leader Strategy
 
-Some services can be used as loss leaders or near-break-even entry services if they reliably create downstream profit.
+Certain services can be used as loss leaders or near-break-even entry services if they reliably create downstream profit.
 
 **Qualifying criteria** — a service qualifies as a loss leader when it meets all five conditions: (1) low decision friction — CAC < $25, conversion > 40% on first offer; (2) recurring cadence — at least monthly to create app habit; (3) platform permission — gives Handled Home visibility into the property for cross-sell; (4) proven attach path — ≥30% of entrants add a 2nd service within 60 days; (5) density contribution — stacks on existing zone routes without adding net provider stops.
 
