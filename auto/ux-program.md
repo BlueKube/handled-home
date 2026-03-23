@@ -160,7 +160,7 @@ LOOP FOREVER:
 5. **git commit**: Descriptive message.
 6. **Run evaluation**: `python auto/evaluate-ux.py docs/screen-flows.md > auto/run.log 2>&1`
 7. **Read results**: `grep "^ux_score:\|^h[0-9].*:\|^cw_score:\|^gaming_penalty:\|^total_friction:" auto/run.log`
-8. **Log to results.tsv** (do NOT commit results.tsv).
+8. **Log to results.tsv** (commit results.tsv with each kept experiment).
 9. **Keep or discard**:
    - `ux_score` improved → keep the commit
    - `ux_score` equal or worse → `git reset --hard HEAD~1`

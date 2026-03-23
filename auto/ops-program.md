@@ -183,7 +183,7 @@ LOOP FOREVER:
    ```
    grep "^ops_score:\|^d[0-9].*:\|^gaming_penalty:\|^total_friction:\|^simplicity_bonus:" auto/run.log
    ```
-8. **Log to results.tsv** (do NOT commit results.tsv — it is local state only).
+8. **Log to results.tsv** (commit results.tsv with each kept experiment).
 9. **Keep or discard**:
    - `ops_score` improved → keep the commit
    - `ops_score` equal or worse → `git reset --hard HEAD~1`
