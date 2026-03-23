@@ -7,8 +7,9 @@ import { useUpdateRoutineItemLevel } from "@/hooks/useRoutineActions";
 import { useAddRoutineItem } from "@/hooks/useRoutineActions";
 import { useRoutine } from "@/hooks/useRoutine";
 import { useProperty } from "@/hooks/useProperty";
+import { useReferralCodes } from "@/hooks/useReferralCodes";
 import { toast } from "sonner";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PhotoGallery } from "@/components/customer/PhotoGallery";
@@ -19,7 +20,7 @@ import { ReceiptSuggestions } from "@/components/customer/ReceiptSuggestions";
 
 import { QuickFeedbackCard } from "@/components/customer/QuickFeedbackCard";
 import { PrivateReviewCard } from "@/components/customer/PrivateReviewCard";
-import { ArrowLeft, Clock, CheckCircle2, XCircle, AlertTriangle, Share2, ArrowUpCircle, Lightbulb } from "lucide-react";
+import { ArrowLeft, Clock, CheckCircle2, XCircle, AlertTriangle, Share2, ArrowUpCircle, Lightbulb, Users, Copy } from "lucide-react";
 import { format } from "date-fns";
 
 export default function CustomerVisitDetail() {
@@ -35,6 +36,8 @@ export default function CustomerVisitDetail() {
   const { data: routineData } = useRoutine(property?.id);
   const updateLevel = useUpdateRoutineItemLevel();
   const addItem = useAddRoutineItem();
+  const { codes: referralCodes } = useReferralCodes();
+  const firstCode = referralCodes.data?.[0]?.code ?? null;
 
   const handleUpdateLevel = (levelId: string, skuId: string) => {
     if (!routineData) {
@@ -308,6 +311,45 @@ export default function CustomerVisitDetail() {
         >
           <Share2 className="h-4 w-4" /> Share the after photo
         </Button>
+      )}
+
+      {/* Referral Card */}
+      {job.status === "COMPLETED" && (
+        <Card className="border-accent/20 bg-accent/5">
+          <CardContent className="py-4 px-4">
+            <div className="flex items-start gap-3">
+              <Users className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+              <div className="space-y-1.5 flex-1 min-w-0">
+                <p className="text-sm font-medium">Your neighbors would love this</p>
+                <p className="text-xs text-muted-foreground">
+                  Share your referral code and earn credits when friends subscribe.
+                </p>
+                {firstCode && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <code className="text-xs font-mono bg-secondary/50 px-2 py-1 rounded">{firstCode}</code>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(firstCode);
+                        toast.success("Code copied!");
+                      }}
+                      className="p-1.5 rounded hover:bg-secondary text-muted-foreground min-h-[44px] min-w-[44px] flex items-center justify-center"
+                      aria-label="Copy referral code"
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
+                <Button
+                  size="sm"
+                  className="bg-accent text-accent-foreground hover:bg-accent/90 gap-1 mt-1"
+                  onClick={() => navigate("/customer/referrals")}
+                >
+                  Share Code
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Receipt Growth Surface — suggestions related to completed job */}

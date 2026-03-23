@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { PartyPopper, Share2, ArrowRight, Star } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { PartyPopper, Share2, ArrowRight, Star, Users } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const CELEBRATION_KEY = "first_service_celebrated";
@@ -105,6 +106,31 @@ export function FirstServiceCelebration({ jobId, providerName, serviceDate }: Fi
                 <Share2 className="h-4 w-4" />
                 Share the news
               </Button>
+
+              {/* Referral Card */}
+              <Card className="border-accent/20 bg-accent/5 text-left">
+                <CardContent className="py-4 px-4">
+                  <div className="flex items-start gap-3">
+                    <Users className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+                    <div className="space-y-1.5">
+                      <p className="text-sm font-medium">Know someone who'd love this?</p>
+                      <p className="text-xs text-muted-foreground">
+                        Earn a $30 credit when a friend subscribes.
+                      </p>
+                      <Button
+                        size="sm"
+                        className="bg-accent text-accent-foreground hover:bg-accent/90 gap-1 mt-1"
+                        onClick={() => {
+                          dismiss();
+                          navigate("/customer/referrals");
+                        }}
+                      >
+                        Get Your Referral Code
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
               <button
                 onClick={dismiss}
