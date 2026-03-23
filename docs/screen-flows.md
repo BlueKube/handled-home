@@ -357,6 +357,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (full-width, h-12, rounded-xl): "Next: Home Size" + ArrowRight
    - Button (ghost): "Skip for now"
 
+**Empty State**: Sparkles icon + "Select your current coverage below — we'll use this to make smarter service recommendations."
 **Success**: Toast "Coverage preferences saved."
 **Loading**: Skeleton rows while coverage categories load
 **Error State**: "Your coverage preferences couldn't be saved — check your connection and try again."
@@ -737,6 +738,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **Next Steps**: caption "Your provider will follow this routine on your service day." — explainer: "How it works — your routine repeats automatically each cycle until you change it."
 5. **CTA**: Button (accent, lg, full-width): "View Your Schedule"
 
+**Empty State**: CheckCircle icon + "Your routine confirmation details will appear here once changes are saved."
 **Loading**: Spinner while routine changes are saved
 **Error State**: "Routine confirmation failed — your changes weren't saved. Go back to review and try again."
 
@@ -935,6 +937,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 - ReportIssueSheet: structured issue reporting with reason categories
 - ShareCardSheet: generate shareable receipt link
 
+**Empty State**: Camera icon + "Your visit receipt and proof photos will appear here once the service is complete."
 **Loading**: Skeleton header and photo grid placeholders
 **Error State**: "This visit receipt couldn't be loaded — the visit may still be processing. Go back and try again."
 
@@ -1263,6 +1266,7 @@ Each menu item: icon + label + ChevronRight, tappable
 4. **Skip Option**: Button (ghost, sm): "Skip for now — complete later in Settings"
 5. **Bottom CTA**: Button (accent, xl, full-width): "Save and Continue"
 
+**Empty State**: Building2 icon + "Enter your business details below — we'll use this to set up your provider profile."
 **Success**: Toast "Business details saved — continuing to next step."
 **Loading**: Skeleton form fields while profile data loads
 **Error State**: "Unable to save your details — check your connection and try again."
@@ -1300,6 +1304,7 @@ Each menu item: icon + label + ChevronRight, tappable
 5. **Skip Option**: Button (ghost, sm): "Skip for now"
 6. **Bottom CTA**: Button (accent, xl, full-width): "Save and Continue"
 
+**Empty State**: Wrench icon + "Select the service categories your team can handle — you can update these anytime."
 **Success**: Toast "Service capabilities saved."
 **Loading**: Skeleton category grid while service options load
 
@@ -1318,6 +1323,7 @@ Each menu item: icon + label + ChevronRight, tappable
 6. **Skip Option**: Button (ghost, sm): "Skip for now — required before first job"
 7. **Bottom CTA**: Button (accent, xl, full-width): "Save and Continue"
 
+**Empty State**: Upload icon + "Upload your compliance documents below — we'll keep them securely on file."
 **Success**: Toast "Documents uploaded — continuing to agreement."
 **Explainer**: info tooltip "How it works — upload your documents once and we'll keep them on file."
 **Loading**: Skeleton upload cards while compliance status loads
@@ -1336,6 +1342,7 @@ Each menu item: icon + label + ChevronRight, tappable
 4. **Acceptance Checkbox**: "I have read and agree to the Handled service provider agreement" — help text: "This agreement covers service standards, payout terms, and quality expectations."
 5. **Bottom CTA**: Button (accent, xl, full-width): "Accept and Continue" (disabled until checkbox checked)
 
+**Empty State**: FileText icon + "Your service agreement will load below — read through before accepting."
 **Success**: Toast "Agreement accepted."
 **Loading**: Skeleton text block while agreement loads
 
@@ -1355,6 +1362,7 @@ Each menu item: icon + label + ChevronRight, tappable
 7. **Agreement Card**: acceptance status (CheckCircle icon)
 8. **Bottom CTA**: Button (accent, xl, full-width): "Submit Application"
 
+**Empty State**: ClipboardCheck icon + "Your application summary will appear here once all steps are complete."
 **Explainer**: help text "How it works — review all your details before submitting. You can edit any section."
 **Loading**: Skeleton summary cards while application data loads
 **Success Feedback**: Toast "Application submitted — we'll review within 2 business days."
@@ -1510,6 +1518,7 @@ Each menu item: icon + label + ChevronRight, tappable
 6. **Next Stop CTA**: Button (accent, xl, full-width): "Continue to Next Stop" / "View Your Earnings" (if day complete)
 7. **Day Complete State**: Trophy card + "All stops finished — great work today!" when all jobs done
 
+**Empty State**: PartyPopper icon + "Your earnings and completion details will appear here once the job is submitted."
 **Loading**: Spinner while job completion is processed
 **Error State**: "Job completion couldn't be saved — your work is recorded locally. Try submitting again."
 
