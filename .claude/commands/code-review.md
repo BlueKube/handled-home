@@ -41,9 +41,9 @@ For each issue, launch a parallel Haiku agent to score confidence (0–100):
 For CLAUDE.md-flagged issues, the agent must verify the CLAUDE.md actually calls it out.
 
 ### 6. Filter and categorize
-Drop issues scoring below 50. Categorize the rest:
+Drop issues scoring below 25. Categorize the rest:
 - **MUST-FIX** (75+): Must be resolved before batch is done.
-- **SHOULD-FIX** (50–74): Should be resolved in the same batch if straightforward.
+- **SHOULD-FIX** (25–74): Should be resolved in the same batch if straightforward.
 
 ### 7. Report results
 - **Phase mode**: Output results directly to the conversation.
@@ -68,7 +68,7 @@ After fixes are committed for any MUST-FIX or SHOULD-FIX findings, **re-run step
 - Each original finding was actually resolved (not just claimed fixed)
 - The fix itself didn't introduce new issues
 
-Keep looping until a pass comes back clean (no issues scoring 50+). Cap at **3 passes** to avoid infinite loops — if issues persist after 3 passes, report the remaining findings and stop.
+Keep looping until a pass comes back clean (no issues scoring 25+). Cap at **3 passes** to avoid infinite loops — if issues persist after 3 passes, report the remaining findings and stop.
 
 Label each pass in output: "Code review (pass 1)", "Code review (pass 2)", etc.
 
