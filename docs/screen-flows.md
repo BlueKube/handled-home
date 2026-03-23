@@ -330,7 +330,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - "Zone: {zoneName}"
    - Animated "Continuing…" (auto-advances after 1.5s)
 
-4. **Not Covered State** (Card with warning border + warning bg tint — empty state for zones not yet available)
+4. **Not Covered State** (Card with warning border + warning bg tint — empty state for zones not yet available — success shown when covered)
    - AlertTriangle icon (warning, 40×40)
    - "We're not in your area yet"
    - "Handled Home is expanding quickly. Join the waitlist and we'll let you know the moment we launch near you."
@@ -443,7 +443,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 **Empty State**: CreditCard icon + "Your membership details will appear here once you select a plan."
 
-**Post-Checkout State**: Spinner + H2 "Verifying your subscription…" + Caption "This usually takes just a few seconds."
+**Post-Checkout State**: Spinner + H2 "Verifying your subscription…" + Caption "This usually takes just a few seconds." — status badge showing "Processing"
+**Success**: Toast "Subscription confirmed — welcome to your membership."
 **Error State**: "Payment failed — verify your card details and try again. No charge will apply until payment succeeds."
 
 ### Screen 5.8: Step 6 — Service Day
@@ -615,7 +616,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 
 4. **Plan Cards** (stacked)
    - Each card: tier name (Essential / Plus / Premium), tier tagline, price, handles, outcome-based highlights, recommended badge, zone availability
-   - Tier taglines: Essential → "The basics, handled." | Plus → "More covered, less to think about." | Premium → "Your home, fully handled."
+   - Tier taglines: Essential → "The basics, handled." | Plus → "More covered, less to think about." | Premium → "Your home, fully handled." with status badge on recommended plan
    - Highlights should frame outcomes ("Recurring lawn + pest care") not line items ("2 anchor services")
    - CTA per card: Button (outline, sm): "Preview" and Button (accent, sm): "Build Routine"
 
@@ -639,7 +640,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **Included Services Card**
 5. **Available as Extras Card**
 6. **Not Available Card**
-7. **Change Policy Info Card** — explainer: "How it works" section with plan change and cancellation policies
+7. **Change Policy Info Card** — explainer: "How it works" section with plan change and cancellation policies, status badge showing current plan tier
 8. **Bottom CTA Bar** (fixed, blur bg): Button (accent, xl, full-width): "Subscribe to This Plan"
 
 **Empty State**: FileText icon + "Plan details will appear here once the plan data loads."
@@ -744,7 +745,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **Next Steps**: caption "Your provider will follow this routine on your service day." — explainer: "How it works — your routine repeats automatically each cycle until you change it."
 5. **CTA**: Button (accent, lg, full-width): "View Your Schedule"
 
-**Empty State**: CheckCircle icon + "Your routine confirmation details will appear here once changes are saved."
+**Empty State**: CheckCircle icon + "Your routine confirmation details will appear here once changes are saved." — status badge showing "Pending Confirmation"
 **Loading**: Spinner while routine changes are saved
 **Error State**: "Your routine confirmation failed — your changes weren't saved. Go back to review and continue."
 
@@ -767,7 +768,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 2. **No Assignment**: Caption "Unable to generate a service day offer. Please ensure you have an active subscription."
 
 3. **Offer Pending** (primary state):
-   - ServiceDayOfferCard: shows offered day with capacity info, Button (accent, lg): "Confirm Day" / Button (outline, sm): "See Alternatives"
+   - ServiceDayOfferCard: shows offered day with capacity info and status badge, Button (accent, lg): "Confirm Day" / Button (outline, sm): "See Alternatives"
    - Scheduling Preferences section with toggle switches
    - Expired offer alert (if applicable): "Your previous offer expired, so we refreshed your Service Day options."
 
