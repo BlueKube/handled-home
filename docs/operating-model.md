@@ -14,12 +14,12 @@ Developers building pricing, plan selection, payout, admin, or bundle-related fe
 
 The unit of value is the **household**, not the individual service. A single lawn mow or window-cleaning job is not where the business makes its money. The business makes money from:
 
-- recurring subscription revenue across an expanding basket of services (target: 2+ SKUs/household by month 6)
-- attach rate rising as customers add more to their plan
-- route density driving provider cost-per-stop down 15–20% at 25+ households/zone
-- reduced admin and selling burden lowering provider churn
-- packaging low-frequency services into high-perceived-value plans
-- retaining households long enough for the economics to compound
+- Recurring subscription revenue across an expanding basket of services (target: 2+ SKUs/household by month 6).
+- Attach rate rising as customers add more to their plan.
+- Route density driving provider cost-per-stop down 15–20% at 25+ households/zone.
+- Reduced admin and selling burden lowering provider churn.
+- Packaging low-frequency services into high-perceived-value plans.
+- Retaining households long enough for the economics to compound.
 
 Profitability should be measured at the **household contribution margin** level — total plan revenue minus total provider payout minus support/ops cost minus payment/platform overhead — not at the individual SKU level.
 
@@ -69,10 +69,10 @@ Handled Home monetizes through the **subscription spread** — the delta between
 This is one of the most important economic concepts in the business.
 
 A plan can include:
-- **anchor services** that recur weekly or biweekly and create habit
-- **low-frequency services** that sound valuable but don't hit cost every month
-- **high-margin add-ons** that feel like natural extensions
-- **route-efficient services** that stack well with existing stops
+- **Anchor services** that recur weekly or biweekly and create habit.
+- **Low-frequency services** that sound valuable but don't hit cost every month.
+- **High-margin add-ons** that feel like natural extensions.
+- **Route-efficient services** that stack well with existing stops.
 
 The result: the plan feels like *"Wow, this includes a lot"* without forcing expensive monthly fulfillment on every line item.
 
@@ -179,11 +179,11 @@ Candidates: basic lawn mowing (low barrier, high frequency), entry-tier pest (re
 Handled Home sets payout by **SKU + Level + zone**. Providers choose to accept or not.
 
 No constant one-off negotiation. Standardized pricing is the default because it enables:
-- cleaner margins and easier forecasting
-- faster provider onboarding
-- fewer special cases in billing/payout systems
-- apples-to-apples provider comparison
-- simpler admin operations
+- Cleaner margins and easier forecasting.
+- Faster provider onboarding.
+- Fewer special cases in billing/payout systems.
+- Apples-to-apples provider comparison.
+- Simpler admin operations.
 
 ### When exceptions are allowed
 
@@ -221,9 +221,9 @@ The path to profitability: the migrated household adds services over time. A cus
 ### BYOP (customer brings their provider)
 
 When a homeowner wants to keep a trusted provider:
-- Preserve that customer-provider relationship at similar pricing initially
-- Reduce switching friction to win the household into the app
-- Accept thin margin on the incumbent service
+- Preserve that customer-provider relationship at similar pricing initially.
+- Reduce switching friction to win the household into the app.
+- Accept thin margin on the incumbent service.
 
 The path to profitability: the household is now in the system. Even if the original provider relationship runs at weak margin, the household becomes profitable when additional services are added through Handled Home's curated network.
 
@@ -242,17 +242,17 @@ These are illustrative examples, not final locked numbers. They show how the mar
 ### Example 1: Core household
 
 A customer subscribes to a plan that includes:
-- biweekly lawn care
-- quarterly pest control
-- annual gutter cleaning
-- annual dryer vent cleaning
+- Biweekly lawn care.
+- Quarterly pest control.
+- Annual gutter cleaning.
+- Annual dryer vent cleaning.
 
 **Why this works:**
-- Lawn anchors the relationship with regular visits
-- Pest adds recurring value at good margin
-- Gutters + dryer vent increase perceived plan completeness
-- The annual items make the plan feel richer than the monthly cost profile suggests
-- Household contribution margin is healthy from month 1
+- Lawn anchors the relationship with regular visits.
+- Pest adds recurring value at good margin.
+- Gutters + dryer vent increase perceived plan completeness.
+- The annual items make the plan feel richer than the monthly cost profile suggests.
+- Household contribution margin is healthy from month 1.
 
 ### Example 2: BYOC migrated customer
 
@@ -292,10 +292,10 @@ This is one of the most important long-term margin levers. It requires no pricin
 ### Zone-level controls
 
 Admins can independently adjust per zone:
-- **Customer price multipliers** — higher-cost markets can command higher plan prices
-- **Provider payout rates** — set by SKU + Level + zone
-- **Capacity caps** — prevent overselling before density supports quality delivery
-- **Service Day patterns** — optimize routing and scheduling efficiency
+- **Customer price multipliers** — higher-cost markets can command higher plan prices.
+- **Provider payout rates** — set by SKU + Level + zone.
+- **Capacity caps** — prevent overselling before density supports quality delivery.
+- **Service Day patterns** — optimize routing and scheduling efficiency.
 
 These controls allow per-market margin optimization without changing the customer or provider experience in other zones.
 
@@ -325,10 +325,10 @@ This is a real economic advantage. A provider earning $45/job independently but 
 
 ### Payout structure
 
-- Payouts are **per job**, set by SKU + Level + zone
-- Payouts are **guaranteed and predictable** — no tip dependency, no surge pricing
-- Providers **never see customer pricing** — they see only their payout
-- Payouts are **reviewed quarterly** based on market data, density, and provider feedback
+- Payouts are **per job**, set by SKU + Level + zone.
+- Payouts are **guaranteed and predictable** — no tip dependency, no surge pricing.
+- Providers **never see customer pricing** — they see only their payout.
+- Payouts are **reviewed quarterly** based on market data, density, and provider feedback.
 
 ### Provider economics flywheel
 
