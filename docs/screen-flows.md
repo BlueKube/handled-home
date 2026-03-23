@@ -167,6 +167,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **States**:
 - **Loading**: Full-screen centered spinner
 - **Invalid/Expired Invite**: Logo + H2 "This invitation is no longer active" + Caption "The invite link may have expired or been deactivated." + Button "Back to Home"
+- **Empty State**: "Your provider's invitation details will appear here once the link is verified."
+- **Success**: Toast "Invitation verified — complete signup to activate your service."
 - **Error State**: AlertTriangle icon + "We couldn't load your provider's invitation — check the link or ask your provider to resend it."
 - **Authenticated**: Renders BYOC Onboarding Wizard inline (see Flow 6)
 
@@ -203,6 +205,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 5. **Fine Print**
    - Caption: "Free to join. No commitments."
 
+**Empty State**: "Your friend's referral details will appear here once the link is verified."
+**Success**: Toast "Referral verified — sign up to claim your welcome offer."
 **Loading**: Full-screen spinner while referral is verified
 **Error State**: AlertTriangle icon + "This referral link couldn't be verified — it may have been used already. Ask your friend for a new link."
 
@@ -246,6 +250,8 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **States**:
 - **Loading**: Full-screen centered spinner
 - **Expired**: Logo + H2 "This share has expired" + Caption "The link is no longer active." + Button "Get Handled Home"
+- **Empty State**: "Your service receipt details will load shortly."
+- **Success**: Toast "Receipt loaded — view the proof of completed service."
 - **Error State**: AlertTriangle icon + "This receipt couldn't be loaded — the share link may be invalid or the visit was removed."
 
 ---
@@ -410,6 +416,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **Loading**: 3 skeleton cards (h-56 each)
 5. **Skip Option**: Button (ghost, sm): "Skip for now — browse plans later from your dashboard"
 
+**Empty State**: Shield icon + "Your plan details will appear here once you select a membership."
 **Success**: Toast "Plan selected — let's confirm your subscription."
 **Error State**: "Plans couldn't be loaded — check your connection and pull down to refresh."
 
@@ -459,6 +466,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (ghost): "Skip for now — I'll set this up later"
 
 **Loading State**: Spinner + "Finding the best route day for your area…"
+**Empty State**: CalendarCheck icon + "Your service day recommendation will appear here once we analyze your area."
 **Success**: Toast "Service day confirmed — your routine starts next cycle."
 **Error State**: "Service day assignment failed — we're having trouble matching your area. Try again or skip to set this up later."
 
@@ -576,6 +584,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Sheets/Modals**:
 - **AddServiceDrawer**: Bottom sheet with service search + add capability
 
+**Empty State**: Home icon + "Welcome to your home dashboard — your next service and routine status will appear here once set up."
 **Error State**: "Your dashboard couldn't load — pull down to refresh. Your services are still running as scheduled."
 
 ---
@@ -627,6 +636,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 7. **Change Policy Info Card** — explainer: "How it works" section with plan change and cancellation policies
 8. **Bottom CTA Bar** (fixed, blur bg): Button (accent, xl, full-width): "Subscribe to This Plan"
 
+**Empty State**: FileText icon + "Plan details will appear here once the plan data loads."
 **Loading**: Skeleton hero card and service lists while plan details load
 **Success**: Toast "Added to your routine builder."
 **Error State**: "Plan details couldn't be loaded — go back to plans and try again."
@@ -708,6 +718,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 4. **Cost Breakdown**: included credits used, extras cost, total per cycle with help text explaining each line item
 5. **Bottom CTA** (fixed, blur bg): Button (accent, xl, full-width): "Confirm Routine"
 
+**Empty State**: ListChecks icon + "Your routine review will appear here once you select services in the builder."
 **Success**: Toast "Routine changes look good — confirm when ready."
 **Loading**: Skeleton cards while routine preview generates
 **Error State**: "Routine preview couldn't be generated — go back to the builder and try again."
