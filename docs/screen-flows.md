@@ -1745,7 +1745,7 @@ Each menu item: icon + label + ChevronRight, tappable
    - 3 numbered steps:
      1. "Create an invite link for your service category and zone."
      2. "Share the link with your existing customers via text or email."
-     3. "When they sign up, you earn BYOC bonuses and keep servicing them."
+     3. "When they sign up, you earn BYOC bonuses and keep servicing them — payout amounts configured by admin in incentive programs."
 
 3. **Compliance Reminder** (Alert)
    - AlertTriangle: "Do not promise permanent pricing. Transition credits may apply. All pricing is set by Handled Home."
