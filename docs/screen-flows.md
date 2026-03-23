@@ -1113,6 +1113,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Route**: `/customer/support/new`
 **Purpose**: Structured issue submission with reason categories (not freeform chat)
 
+**Validation**: Issue category required, description min 10 characters, visit selection required if reporting a service issue
 **Error State**: "Your ticket couldn't be submitted — check your connection and try again. No duplicate will be created."
 
 **Empty State**: MessageCirclePlus icon + "Select a visit to report an issue, or describe your concern below."
@@ -1589,6 +1590,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Header**: ChevronLeft back → `/provider/byoc` | H2 "Create Invite Link" | Caption "Generate a link for your existing customers"
 
+**Validation**: Category required, zone required — cadence defaults to service standard
 **Empty State**: Link2 icon + "Fill in the details below to generate your first invite link."
 **Error State**: "Link couldn't be created — check your connection and try again."
 
