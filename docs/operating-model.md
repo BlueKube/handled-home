@@ -160,42 +160,13 @@ The smart part is that higher tiers can include many things that feel important 
 
 Some services can be used as loss leaders or near-break-even entry services if they reliably create downstream profit.
 
-### Qualifying criteria
+**Qualifying criteria** — a service qualifies as a loss leader when it meets all five conditions: (1) low decision friction — CAC < $25, conversion > 40% on first offer; (2) recurring cadence — at least monthly to create app habit; (3) platform permission — gives Handled Home visibility into the property for cross-sell; (4) proven attach path — ≥30% of entrants add a 2nd service within 60 days; (5) density contribution — stacks on existing zone routes without adding net provider stops.
 
-A service qualifies as a loss leader when it meets all five conditions:
-1. **Low decision friction** — customer acquisition cost < $25 and conversion rate > 40% on first offer
-2. **Recurring cadence** — at least monthly frequency to create app habit
-3. **Platform permission** — gives Handled Home visibility into the property for cross-sell
-4. **Proven attach path** — historical cohort data shows ≥30% of entrants add a 2nd service within 60 days
-5. **Density contribution** — service stacks on existing zone routes without adding net provider stops
+**Success metrics** — attach rate ≥1.5 SKUs/household by day 90; cohort retention ≥80% at 6 months; household contribution margin positive by month 4.
 
-### Success metrics
+**Exit criteria** — kill the loss leader if cohort attach rate < 30% at 90 days (minimum cohort: 50 households), < 15% at 120 days regardless of cohort size, or household contribution margin negative at month 6. Re-evaluate quarterly. No loss leader runs longer than 2 quarters without meeting success metrics. If it does not improve acquisition, retention, attach rate, density, or contribution margin, it should not remain a core offer.
 
-A loss leader is working when:
-- Attach rate ≥1.5 SKUs/household by day 90
-- Cohort retention ≥80% at 6 months
-- Household contribution margin turns positive by month 4
-
-### Exit criteria
-
-Kill the loss leader if:
-- Cohort attach rate < 30% at 90 days (minimum cohort: 50 households)
-- Cohort attach rate < 15% at 120 days regardless of cohort size
-- Household contribution margin negative at month 6 with no improvement trend
-- Re-evaluate quarterly. No loss leader runs longer than 2 quarters without meeting success metrics.
-
-### Possible loss leader candidates
-
-- Basic lawn mowing (low barrier, high frequency)
-- Entry-tier pest service (recurring, easy to standardize)
-- Introductory exterior window cleaning (visible result)
-- Initial home setup / first bundled maintenance visit (onboarding hook)
-
-### The rule
-
-**Only keep a loss leader if it improves acquisition, retention, attach rate, density, or downstream contribution margin.**
-
-If a loss-leader service stays unprofitable and does not unlock bigger household value later, it should not remain a core offer. Review loss leaders quarterly against household-level contribution margin data.
+Candidates: basic lawn mowing (low barrier, high frequency), entry-tier pest (recurring, easy to standardize), introductory exterior window cleaning (visible result), initial home setup visit (onboarding hook).
 
 ---
 
