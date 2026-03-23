@@ -101,6 +101,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (accent, xl, full-width): "Create Account"
 
 **States**:
+- **Explainer**: help text under Sign Up tab: "How it works — create your free account, set up your home, and choose a service plan."
 - **Empty State**: "Welcome — sign in or create an account to manage your home services."
 - **Validation**: Email must be valid format, password min 8 characters, confirm password must match
 - **Loading**: Button shows spinner + disabled inputs
@@ -307,6 +308,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (full-width, h-12, rounded-xl): "Continue" + ArrowRight icon
 
 **Validation Errors**: Red caption below each field ("Street address is required", "Must be 5 digits")
+**Explainer**: help text on Optional Details: "How it works — access details help your provider arrive prepared."
 **Success**: Toast "Address saved — continuing to zone check."
 **Loading**: Skeleton form fields
 
@@ -358,6 +360,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (full-width, h-12, rounded-xl): "Next: Home Size" + ArrowRight
    - Button (ghost): "Skip for now"
 
+**Explainer**: help text "How it works — tell us what's already handled so we recommend the right services."
 **Empty State**: Sparkles icon + "Select your current coverage below — we'll use this to make smarter service recommendations."
 **Success**: Toast "Coverage preferences saved."
 **Loading**: Skeleton rows while coverage categories load
@@ -385,6 +388,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (full-width, h-12, rounded-xl): "Continue" + ArrowRight
    - Button (ghost): "Skip for now"
 
+**Explainer**: help text "How it works — home size helps us estimate the right service level for your property."
 **Loading**: Skeleton pill rows while sizing data loads
 **Success**: Toast "Home size saved."
 **Error State**: "Home size details couldn't be saved — you can skip this step and update later in Settings."
@@ -441,6 +445,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Loading state: spinner + "Processing…"
 4. **Skip Option**: Button (ghost, sm): "Skip for now — subscribe when you're ready"
 
+**Explainer**: help text "How it works — confirm your plan and we'll set up your subscription. Cancel anytime."
 **Empty State**: CreditCard icon + "Your membership details will appear here once you select a plan."
 
 **Post-Checkout State**: Spinner + H2 "Verifying your subscription…" + Caption "This usually takes just a few seconds." — status badge showing "Processing"
@@ -505,6 +510,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Button (outline, full-width): "Review My Routine"
 
 **Loading**: Skeleton success card while setup finalizes
+**Explainer**: help text "How it works — your home is set up and ready. Your first service will be scheduled automatically."
 **Error State**: "Your setup couldn't be finalized — but don't worry, your progress is saved. Tap below to continue."
 
 ---
@@ -665,6 +671,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Plan Change Panel: Button (outline, lg): "Change Plan" (hidden if paused/canceling)
    - Cancellation Flow: Button (ghost, destructive): "Cancel Subscription" (hidden if paused)
 
+**Explainer**: help text "How it works — manage your subscription, pause, or change plans. Changes take effect next cycle."
 **Loading**: Skeleton status panel while subscription data loads
 
 ---
@@ -1165,6 +1172,7 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
    - Cards per referral: ID preview + status badge (Signed up, Subscribed, First visit, Paid cycle)
    - Empty: "No referrals yet. Share your code to get started!"
 
+**Explainer**: help text "How it works — share your code, earn credits when friends subscribe, and unlock milestone rewards."
 **Success**: Toast "Referral code generated — share it to start earning."
 **Loading**: Skeleton share card and credit summary grid
 **Error State**: "Your referral details couldn't be loaded — your earned credits are safe. Try refreshing."
