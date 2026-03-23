@@ -1371,6 +1371,7 @@ Each menu item: icon + label + ChevronRight, tappable
 7. **Agreement Card**: acceptance status (CheckCircle icon)
 8. **Bottom CTA**: Button (accent, xl, full-width): "Submit Application"
 
+**Validation**: All required steps must be completed before submission
 **Empty State**: ClipboardCheck icon + "Your application summary will appear here once all steps are complete."
 **Explainer**: help text "How it works — review all your details before submitting. You can edit any section."
 **Loading**: Skeleton summary cards while application data loads
@@ -1526,7 +1527,7 @@ Each menu item: icon + label + ChevronRight, tappable
 2. **Earnings Display**: base pay + modifier breakdown with `formatCents` utility
 3. **Route Progress Bar**: segmented stops showing completed vs remaining, trophy when all done
 4. **Level Sufficiency Form**: quality feedback form (LevelSufficiencyForm) — explainer: "How it works — rate if the service level was sufficient for this property."
-5. **Notes**: Textarea for optional completion notes
+5. **Notes**: Textarea for optional completion notes (max 500 characters validated)
 6. **Next Stop CTA**: Button (accent, xl, full-width): "Continue to Next Stop" / "View Your Earnings" (if day complete)
 7. **Day Complete State**: Trophy card + "All stops finished — great work today!" when all jobs done
 
