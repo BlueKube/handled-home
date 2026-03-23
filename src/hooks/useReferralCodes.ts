@@ -30,8 +30,14 @@ export function useReferralCodes() {
     },
   });
 
+  const hasActiveCode = (codes.data ?? []).length > 0;
+
   const generateCodeMutation = useMutation({
     mutationFn: async (programId: string) => {
+      // Enforce one code per customer
+      if (hasActiveCode) {
+        throw new Error("You already have a referral code. Only one code per account is allowed.");
+      }
       const code = generateCode();
       const { data, error } = await supabase
         .from("referral_codes")
@@ -43,10 +49,10 @@ export function useReferralCodes() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["referral-codes"] });
-      toast.success("Referral code generated");
+      toast.success("Referral code generated — share it to start earning.");
     },
     onError: (e: any) => toast.error(e.message),
   });
 
-  return { codes, generateCode: generateCodeMutation };
+  return { codes, generateCode: generateCodeMutation, hasActiveCode };
 }

@@ -21,6 +21,34 @@ export function useByocInviteLinks() {
     },
   });
 
+  const activeLinks = links.data?.filter((l) => l.is_active) ?? [];
+  const activeCount = activeLinks.length;
+
+  const todayLinksQuery = useQuery({
+    queryKey: ["byoc-invite-links-today", orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const { count, error } = await supabase
+        .from("byoc_invite_links")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", orgId!)
+        .gte("created_at", todayStart.toISOString());
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
+  const todayCount = todayLinksQuery.data ?? 0;
+  const canCreateLink = activeCount < 10 && todayCount < 10;
+  const rateLimitReason =
+    activeCount >= 10
+      ? "You have 10 active links — deactivate an unused link before creating a new one."
+      : todayCount >= 10
+      ? "You've reached today's invite limit. Try again tomorrow."
+      : null;
+
   const createLink = useMutation({
     mutationFn: async (payload: {
       category_key: string;
@@ -30,6 +58,12 @@ export function useByocInviteLinks() {
       default_cadence?: string;
     }) => {
       if (!orgId) throw new Error("No org");
+      if (activeCount >= 10) {
+        throw new Error("You have 10 active links — deactivate an unused link before creating a new one.");
+      }
+      if (todayCount >= 10) {
+        throw new Error("You've reached today's invite limit. Try again tomorrow.");
+      }
       const token = generateToken();
       const { data, error } = await supabase
         .from("byoc_invite_links")
@@ -47,7 +81,10 @@ export function useByocInviteLinks() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["byoc-invite-links"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["byoc-invite-links"] });
+      qc.invalidateQueries({ queryKey: ["byoc-invite-links-today"] });
+    },
   });
 
   const deactivateLink = useMutation({
@@ -83,7 +120,7 @@ export function useByocInviteLinks() {
     },
   });
 
-  return { links, createLink, deactivateLink, events };
+  return { links, createLink, deactivateLink, events, canCreateLink, rateLimitReason };
 }
 
 function generateToken(): string {
