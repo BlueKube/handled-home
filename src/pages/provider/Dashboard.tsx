@@ -16,6 +16,7 @@ import { ByocBanner } from "@/components/provider/ByocBanner";
 import { EarningsProjectionCard } from "@/components/provider/EarningsProjectionCard";
 import { DailyRecapCard } from "@/components/provider/DailyRecapCard";
 import { RouteProgressCard } from "@/components/provider/RouteProgressCard";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Briefcase,
   Clock,
@@ -94,15 +95,12 @@ function TodaysJobsList() {
 
   if (!jobs || jobs.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-10 text-center">
-        <MapPin className="h-8 w-8 text-muted-foreground/30 mb-2" />
-        <p className="text-sm text-muted-foreground font-medium">
-          No jobs scheduled for today
-        </p>
-        <p className="text-xs text-muted-foreground/60 mt-1">
-          Check upcoming jobs or enjoy the day off
-        </p>
-      </div>
+      <EmptyState
+        compact
+        icon={MapPin}
+        title="No jobs scheduled for today"
+        body="Check upcoming jobs or enjoy the day off."
+      />
     );
   }
 
@@ -139,9 +137,12 @@ function UpcomingPreview() {
 
   if (upcoming.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground text-center py-4">
-        No upcoming jobs scheduled
-      </p>
+      <EmptyState
+        compact
+        icon={CalendarDays}
+        title="No upcoming jobs"
+        body="Jobs will appear here when assigned to your schedule."
+      />
     );
   }
 

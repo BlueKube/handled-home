@@ -7,6 +7,7 @@ import { StatCard } from "@/components/StatCard";
 import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { useProviderEarnings, type EarningsPeriod, type ProviderEarning, type HeldEarning } from "@/hooks/useProviderEarnings";
 import { formatCents } from "@/utils/format";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   DollarSign,
   TrendingUp,
@@ -177,11 +178,12 @@ function EarningsList({ period }: { period: EarningsPeriod }) {
 
   if (earnings.length === 0) {
     return (
-      <div className="text-center py-10">
-        <DollarSign className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
-        <p className="text-sm text-muted-foreground">No earnings for this period</p>
-        <p className="text-xs text-muted-foreground/60 mt-1">Complete jobs to start earning</p>
-      </div>
+      <EmptyState
+        compact
+        icon={DollarSign}
+        title="No earnings for this period"
+        body="Complete jobs to start earning. Earnings appear here after each service."
+      />
     );
   }
 
@@ -213,10 +215,12 @@ function PayoutsList() {
 
   if (payouts.length === 0) {
     return (
-      <div className="text-center py-10">
-        <Banknote className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
-        <p className="text-sm text-muted-foreground">No payouts yet</p>
-      </div>
+      <EmptyState
+        compact
+        icon={Banknote}
+        title="No payouts yet"
+        body="Payouts are processed weekly on Fridays. Complete jobs to get started."
+      />
     );
   }
 

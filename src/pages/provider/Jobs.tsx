@@ -13,6 +13,7 @@ import { ProviderMapView } from "@/components/provider/ProviderMapView";
 import { TodayLoadout, DayPlanSummary } from "@/components/provider/DayPlanComponents";
 import { VisitJobCard } from "@/components/provider/VisitJobCard";
 import { WeekDueQueue } from "@/components/provider/WeekDueQueue";
+import { EmptyState } from "@/components/ui/empty-state";
 import { MapPin, Clock, ChevronRight, ArrowUp, ArrowDown, Route, Loader2, Lock, Map as MapIcon, List, ShieldCheck, Timer, CalendarClock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -182,11 +183,12 @@ function TodayJobList() {
 
   if (!displayJobs || displayJobs.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <MapPin className="h-10 w-10 text-muted-foreground/40 mb-3" />
-        <p className="text-muted-foreground font-medium">No jobs scheduled for today</p>
-        <p className="text-xs text-muted-foreground/70 mt-1">Jobs will appear here when assigned</p>
-      </div>
+      <EmptyState
+        compact
+        icon={MapPin}
+        title="No jobs scheduled for today"
+        body="Jobs will appear here when assigned to your route."
+      />
     );
   }
 
@@ -278,11 +280,12 @@ function UpcomingJobList() {
 
   if (!jobs || jobs.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <MapPin className="h-10 w-10 text-muted-foreground/40 mb-3" />
-        <p className="text-muted-foreground font-medium">No upcoming jobs</p>
-        <p className="text-xs text-muted-foreground/70 mt-1">Jobs will appear here when assigned</p>
-      </div>
+      <EmptyState
+        compact
+        icon={MapPin}
+        title="No upcoming jobs"
+        body="Jobs will appear here when assigned to your schedule."
+      />
     );
   }
 
@@ -331,11 +334,12 @@ function WeekView() {
 
       {/* Daily breakdown */}
       {sortedDates.length === 0 && dueVisits.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <CalendarClock className="h-10 w-10 text-muted-foreground/40 mb-3" />
-          <p className="text-muted-foreground font-medium">No visits this week</p>
-          <p className="text-xs text-muted-foreground/70 mt-1">Visits will appear here when scheduled</p>
-        </div>
+        <EmptyState
+          compact
+          icon={CalendarClock}
+          title="No visits this week"
+          body="Visits will appear here when scheduled for your route."
+        />
       )}
 
       {sortedDates.map((date) => {
