@@ -1,7 +1,7 @@
 # Implementation Plan: Design Guidelines Conformance
 
 **PRD:** `docs/working/prd.md`
-**Branch:** `autoresearch-design/mar24b`
+**Branch:** `claude/improve-design-guidelines-dtTVf`
 **Total phases:** 6
 **Total batches:** 24
 **Estimated scope:** Large
