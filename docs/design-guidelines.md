@@ -293,22 +293,34 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 ### Button (`button.tsx`)
 - Sizes: `sm` 36px, `default` h-11 (44px), `lg` 48px, `xl` 52px, `icon` 44×44
 - Variants: `default`, `accent`, `soft`, `soft-destructive`, `outline`, `secondary`, `ghost`, `link`, `destructive`
-- Slot anatomy: icon-left (16px) + label + icon-right (16px); icon-only uses `icon` size
-- States: hover → `opacity-90`; active → `scale-[0.97]` 150ms; focus → `ring-2 ring-ring ring-offset-2`; disabled → `opacity-50 pointer-events-none`; loading → spinner replaces label, disabled state via `loading` prop
 - Use when: primary CTA, form submission, navigation action. Avoid ghost for primary actions.
+
+#### Anatomy
+Slot anatomy: icon-left (16px) + label + icon-right (16px); icon-only uses `icon` size
+
+#### States
+hover → `opacity-90`; active → `scale-[0.97]` 150ms; focus → `ring-2 ring-ring ring-offset-2`; disabled → `opacity-50 pointer-events-none`; loading → spinner replaces label, disabled state via `loading` prop
 
 ### Card (`card.tsx`)
 - Default: `bg-card` rounded-2xl shadow-sm p-4
 - Variants: `interactive` (hover → shadow-md, active → `scale-[0.98]` press feedback), `glass` (backdrop-blur-xl `bg-card/80`), `elevated` (shadow-lg)
-- States: hover → shadow-md (interactive only); active → `scale-[0.98]`; focus → `ring-2 ring-ring`; disabled → `opacity-60`
-- Slot anatomy: CardHeader (icon + title + description) → CardContent → CardFooter (actions)
 - Use when: grouping related content. Use `interactive` for tappable list items. Use `glass` for overlays on images.
+
+#### Anatomy
+Slot anatomy: CardHeader (icon + title + description) → CardContent → CardFooter (actions)
+
+#### States
+hover → shadow-md (interactive only); active → `scale-[0.98]`; focus → `ring-2 ring-ring`; disabled → `opacity-60`
 
 ### Input (`input.tsx`)
 - Height: h-12 (48px), rounded-xl, `border-input` 1px, 16px font-size (prevents iOS zoom)
-- States: empty → placeholder in `text-muted-foreground`; focused → `ring-2 ring-ring` + `bg-card`; filled → `text-foreground`; error → `border-destructive ring-destructive`; disabled → `opacity-50 bg-muted`
-- Slot anatomy: label (above) → prefix icon (left 16px) → input → suffix icon/action (right)
 - Use when: single-line text entry. Use Textarea for multi-line.
+
+#### Anatomy
+Slot anatomy: label (above) → prefix icon (left 16px) → input → suffix icon/action (right)
+
+#### States
+empty → placeholder in `text-muted-foreground`; focused → `ring-2 ring-ring` + `bg-card`; filled → `text-foreground`; error → `border-destructive ring-destructive`; disabled → `opacity-50 bg-muted`
 
 ### Textarea (`textarea.tsx`)
 - Min-height: 80px, rounded-xl, same border/focus treatment as Input
@@ -344,16 +356,24 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 ### Dialog (`dialog.tsx`)
 - Overlay: `bg-black/50`, entry `.animate-scale-in` 200ms
 - Content: `bg-card` rounded-2xl p-6 shadow-lg max-w-sm centered
-- Slot anatomy: DialogHeader (title `.text-h3` + description) → DialogContent → DialogFooter (actions, right-aligned)
-- States: open → overlay + scale-in; closing → fade-out 150ms; hover (close button) → `opacity-70`; focus → focus trap cycles through content; active → standard button press on footer actions; disabled → footer buttons show `opacity-50`; loading → footer CTA shows spinner
 - Use when: confirmations, destructive action gates. Do not use for forms — use Sheet instead.
+
+#### Anatomy
+Slot anatomy: DialogHeader (title `.text-h3` + description) → DialogContent → DialogFooter (actions, right-aligned)
+
+#### States
+open → overlay + scale-in; closing → fade-out 150ms; hover (close button) → `opacity-70`; focus → focus trap cycles through content; active → standard button press on footer actions; disabled → footer buttons show `opacity-50`; loading → footer CTA shows spinner
 
 ### BottomSheet (`sheet.tsx`)
 - Slides from bottom, entry `.animate-slide-up` 250ms, overlay `bg-black/50`
-- Slot anatomy: drag handle (leading, top) → header (title + close) → content area → footer actions (trailing)
 - Content: `bg-card` rounded-t-2xl p-4 pb-safe, max-height 85vh, drag-to-dismiss handle (40px × 4px rounded-full `bg-muted` centered)
-- States: open → slide-up + overlay; dragging → follows finger; dismissed → slide-down 200ms; hover (handle) → `bg-muted-foreground/40`; focus → focus trap within sheet; active → drag gesture; disabled → handle hidden, no dismiss; loading → content replaced by skeleton
 - Use when: forms, pickers, detail views that don't warrant a full page.
+
+#### Anatomy
+Slot anatomy: drag handle (leading, top) → header (title + close) → content area → footer actions (trailing)
+
+#### States
+open → slide-up + overlay; dragging → follows finger; dismissed → slide-down 200ms; hover (handle) → `bg-muted-foreground/40`; focus → focus trap within sheet; active → drag gesture; disabled → handle hidden, no dismiss; loading → content replaced by skeleton
 
 ### Drawer (`drawer.tsx`)
 - Slot anatomy: drag handle (leading) → content area → footer actions (trailing)
