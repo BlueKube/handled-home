@@ -6,6 +6,7 @@ import { ZoneHealthTable } from "@/components/admin/ZoneHealthTable";
 import { AutopilotThresholdsDialog } from "@/components/admin/AutopilotThresholdsDialog";
 import { RecentActionsCard } from "@/components/admin/RecentActionsCard";
 import { BusinessHealthCard } from "@/components/admin/BusinessHealthCard";
+import { RiskAlertsCard } from "@/components/admin/RiskAlertsCard";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -310,8 +311,9 @@ export default function OpsCockpit() {
         </div>
       </div>
 
-      {/* Business Health Gauges */}
+      {/* Business Health Gauges + Risk Alerts */}
       <BusinessHealthCard />
+      <RiskAlertsCard />
 
       {/* Zone Health + Recent Actions */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
