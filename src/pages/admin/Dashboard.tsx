@@ -73,11 +73,13 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
         </div>
-      ) : !counts?.customers && !counts?.activeProviders && !counts?.activeSubs ? (
+      ) : counts && !counts.customers && !counts.activeProviders && !counts.activeSubs ? (
         <EmptyState
           icon={BarChart3}
           title="No data yet"
           body="Metrics will populate as customers and providers onboard."
+          ctaLabel="View Providers"
+          ctaAction={() => nav("/admin/providers")}
         />
       ) : (
         <>
