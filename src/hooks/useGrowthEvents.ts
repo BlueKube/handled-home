@@ -56,7 +56,7 @@ export function useFrequencyCapCheck(
         since.setDate(since.getDate() - 7);
       } else {
         // Default: today
-        since.setHours(0, 0, 0, 0);
+        since.setUTCHours(0, 0, 0, 0);
       }
 
       // Fetch config to get cap value
@@ -120,6 +120,7 @@ export function useGrowthEventStats(zoneId?: string, dateRange?: { start: string
 export function useByocFunnelStats(dateRange?: { start: string; end: string }) {
   return useQuery({
     queryKey: ["byoc-funnel-stats", dateRange?.start, dateRange?.end],
+    staleTime: 5 * 60_000,
     queryFn: async () => {
       let linksQuery = (supabase as any)
         .from("byoc_invite_links")
@@ -130,7 +131,8 @@ export function useByocFunnelStats(dateRange?: { start: string; end: string }) {
       let eventsQuery = (supabase as any)
         .from("growth_events")
         .select("event_type")
-        .in("event_type", ["byoc_landing_viewed", "byoc_signup_completed"]);
+        .in("event_type", ["byoc_landing_viewed", "byoc_signup_completed"])
+        .limit(5000);
 
       if (dateRange?.start) {
         linksQuery = linksQuery.gte("created_at", dateRange.start);
@@ -170,6 +172,7 @@ export function useByocFunnelStats(dateRange?: { start: string; end: string }) {
 export function useReferralFunnelStats(dateRange?: { start: string; end: string }) {
   return useQuery({
     queryKey: ["referral-funnel-stats", dateRange?.start, dateRange?.end],
+    staleTime: 5 * 60_000,
     queryFn: async () => {
       let codesQuery = (supabase as any)
         .from("referral_codes")
@@ -177,7 +180,8 @@ export function useReferralFunnelStats(dateRange?: { start: string; end: string 
       let eventsQuery = (supabase as any)
         .from("growth_events")
         .select("event_type")
-        .in("event_type", ["referral_landing_viewed", "referral_signup_completed", "referral_subscribed", "referral_first_visit"]);
+        .in("event_type", ["referral_landing_viewed", "referral_signup_completed", "referral_subscribed", "referral_first_visit"])
+        .limit(5000);
 
       if (dateRange?.start) {
         codesQuery = codesQuery.gte("created_at", dateRange.start);
@@ -216,6 +220,7 @@ export function useReferralFunnelStats(dateRange?: { start: string; end: string 
 export function useByopFunnelStats(dateRange?: { start: string; end: string }) {
   return useQuery({
     queryKey: ["byop-funnel-stats", dateRange?.start, dateRange?.end],
+    staleTime: 5 * 60_000,
     queryFn: async () => {
       let query = (supabase as any)
         .from("byop_recommendations")

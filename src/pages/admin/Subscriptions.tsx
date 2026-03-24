@@ -15,7 +15,7 @@ import { Search } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
-const STATUSES = ["all", "active", "trialing", "past_due", "canceled"];
+const STATUSES = ["all", "active", "trialing", "past_due", "paused", "canceling", "canceled"];
 
 export default function AdminSubscriptions() {
   const [statusFilter, setStatusFilter] = useState("all");
@@ -117,9 +117,13 @@ function SubscriptionDetailSheet({ subscriptionId, onClose }: { subscriptionId: 
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction onClick={async () => {
-                        await markComped.mutateAsync({ subscriptionId: data.subscription.id, reason, adminUserId: user!.id });
-                        toast.success("Marked as comped");
-                        setReason("");
+                        try {
+                          await markComped.mutateAsync({ subscriptionId: data.subscription.id, reason, adminUserId: user!.id });
+                          toast.success("Marked as comped");
+                          setReason("");
+                        } catch (e: any) {
+                          toast.error(e.message || "Failed to mark as comped");
+                        }
                       }}>Confirm</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
@@ -134,9 +138,13 @@ function SubscriptionDetailSheet({ subscriptionId, onClose }: { subscriptionId: 
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction onClick={async () => {
-                        await forceCancel.mutateAsync({ subscriptionId: data.subscription.id, reason, adminUserId: user!.id });
-                        toast.success("Subscription force-canceled");
-                        setReason("");
+                        try {
+                          await forceCancel.mutateAsync({ subscriptionId: data.subscription.id, reason, adminUserId: user!.id });
+                          toast.success("Subscription force-canceled");
+                          setReason("");
+                        } catch (e: any) {
+                          toast.error(e.message || "Failed to force cancel");
+                        }
                       }} className="bg-destructive text-destructive-foreground">Force Cancel</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>

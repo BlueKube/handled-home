@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Activity, Shield, TrendingUp, AlertTriangle, Lock, RefreshCw, ChevronRight, Sliders, BarChart3, Inbox, Settings2, Rocket, UserPlus, Users, GitBranch } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -515,12 +515,12 @@ function FunnelBar({ steps }: { steps: { label: string; count: number }[] }) {
 function FunnelsTab() {
   const [dateRange, setDateRange] = useState<"7d" | "30d" | "all">("30d");
 
-  const dateFilter = (() => {
+  const dateFilter = useMemo(() => {
     if (dateRange === "all") return undefined;
     const start = new Date();
     start.setDate(start.getDate() - (dateRange === "7d" ? 7 : 30));
     return { start: start.toISOString(), end: new Date().toISOString() };
-  })();
+  }, [dateRange]);
 
   const byoc = useByocFunnelStats(dateFilter);
   const referral = useReferralFunnelStats(dateFilter);
@@ -542,7 +542,7 @@ function FunnelsTab() {
   return (
     <div className="space-y-4 mt-4">
       <div className="flex items-center gap-3">
-        <Select value={dateRange} onValueChange={(v) => setDateRange(v as any)}>
+        <Select value={dateRange} onValueChange={(v) => setDateRange(v as "7d" | "30d" | "all")}>
           <SelectTrigger className="w-32">
             <SelectValue />
           </SelectTrigger>
@@ -660,12 +660,12 @@ const FUNNEL_STEPS = [
 function EventsTab({ selectedZone, setSelectedZone }: { selectedZone: string; setSelectedZone: (v: string) => void }) {
   const [dateRange, setDateRange] = useState<"7d" | "30d" | "all">("30d");
 
-  const dateFilter = (() => {
+  const dateFilter = useMemo(() => {
     if (dateRange === "all") return undefined;
     const start = new Date();
     start.setDate(start.getDate() - (dateRange === "7d" ? 7 : 30));
     return { start: start.toISOString(), end: new Date().toISOString() };
-  })();
+  }, [dateRange]);
 
   const stats = useGrowthEventStats(selectedZone === "__all__" ? undefined : selectedZone, dateFilter);
 
@@ -688,7 +688,7 @@ function EventsTab({ selectedZone, setSelectedZone }: { selectedZone: string; se
     <div className="space-y-4 mt-4">
       <div className="flex items-center gap-3">
         <ZoneFilter selectedZone={selectedZone} setSelectedZone={setSelectedZone} />
-        <Select value={dateRange} onValueChange={(v) => setDateRange(v as any)}>
+        <Select value={dateRange} onValueChange={(v) => setDateRange(v as "7d" | "30d" | "all")}>
           <SelectTrigger className="w-32">
             <SelectValue />
           </SelectTrigger>

@@ -58,10 +58,23 @@ export function useByocInviteLinks() {
       default_cadence?: string;
     }) => {
       if (!orgId) throw new Error("No org");
-      if (activeCount >= 10) {
+      // Re-check limits from DB to prevent stale-cache bypass
+      const { count: freshActiveCount } = await supabase
+        .from("byoc_invite_links")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", orgId)
+        .eq("is_active", true);
+      if ((freshActiveCount ?? 0) >= 10) {
         throw new Error("You have 10 active links — deactivate an unused link before creating a new one.");
       }
-      if (todayCount >= 10) {
+      const todayStart = new Date();
+      todayStart.setUTCHours(0, 0, 0, 0);
+      const { count: freshTodayCount } = await supabase
+        .from("byoc_invite_links")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", orgId)
+        .gte("created_at", todayStart.toISOString());
+      if ((freshTodayCount ?? 0) >= 10) {
         throw new Error("You've reached today's invite limit. Try again tomorrow.");
       }
       const token = generateToken();
@@ -127,8 +140,15 @@ export function useByocInviteLinks() {
 
 function generateToken(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const bytes = crypto.getRandomValues(new Uint8Array(8));
+  const limit = 256 - (256 % chars.length); // 248 — reject bytes >= limit to avoid modulo bias
   let token = "HH-";
-  for (const b of bytes) token += chars[b % chars.length];
+  let i = 0;
+  while (i < 8) {
+    const [b] = crypto.getRandomValues(new Uint8Array(1));
+    if (b < limit) {
+      token += chars[b % chars.length];
+      i++;
+    }
+  }
   return token;
 }

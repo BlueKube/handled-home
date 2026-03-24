@@ -340,7 +340,12 @@ serve(async (req) => {
         if (stripeSubId) {
           await supabase
             .from("subscriptions")
-            .update({ status: "active" })
+            .update({
+              status: "active",
+              dunning_step: 0,
+              dunning_started_at: null,
+              last_dunning_at: null,
+            })
             .eq("stripe_subscription_id", stripeSubId);
 
           const { data: internalSub } = await supabase

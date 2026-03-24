@@ -62,12 +62,12 @@ BEGIN
       v_result := 'paused';
     WHEN 5 THEN
       v_action := 'cancel_subscription';
-      v_notify_title := 'Subscription Cancelled';
-      v_explain_customer := 'Your subscription has been cancelled due to prolonged payment failure. You can resubscribe anytime.';
-      v_explain_admin := 'Step 5: Subscription cancelled after 14-day dunning sequence.';
+      v_notify_title := 'Subscription Canceled';
+      v_explain_customer := 'Your subscription has been canceled due to prolonged payment failure. You can resubscribe anytime.';
+      v_explain_admin := 'Step 5: Subscription canceled after 14-day dunning sequence.';
       -- FIX Finding 13: include updated_at
-      UPDATE subscriptions SET status = 'cancelled', cancelled_at = now(), updated_at = now() WHERE id = p_subscription_id;
-      v_result := 'cancelled';
+      UPDATE subscriptions SET status = 'canceled', canceled_at = now(), updated_at = now() WHERE id = p_subscription_id;
+      v_result := 'canceled';
     ELSE
       RETURN jsonb_build_object('status', 'skipped', 'reason', 'max_steps_reached');
   END CASE;

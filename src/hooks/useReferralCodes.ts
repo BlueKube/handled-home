@@ -5,9 +5,16 @@ import { toast } from "sonner";
 
 function generateCode(length = 8): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const bytes = crypto.getRandomValues(new Uint8Array(length));
+  const limit = 256 - (256 % chars.length); // 248 — reject bytes >= limit to avoid modulo bias
   let result = "";
-  for (const b of bytes) result += chars[b % chars.length];
+  let i = 0;
+  while (i < length) {
+    const [b] = crypto.getRandomValues(new Uint8Array(1));
+    if (b < limit) {
+      result += chars[b % chars.length];
+      i++;
+    }
+  }
   return result;
 }
 

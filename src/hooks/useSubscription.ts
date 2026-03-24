@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -62,33 +62,3 @@ export function useCustomerSubscription(refetchInterval?: number) {
   });
 }
 
-export function useCancelSubscription() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (subscriptionId: string) => {
-      const { error } = await supabase
-        .from("subscriptions")
-        .update({ cancel_at_period_end: true, status: "canceling" } as any)
-        .eq("id", subscriptionId);
-      if (error) throw error;
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["subscription"] }),
-  });
-}
-
-export function useChangePlan() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ subscriptionId, newPlanId, billingCycleEndAt }: { subscriptionId: string; newPlanId: string; billingCycleEndAt?: string | null }) => {
-      const { error } = await supabase
-        .from("subscriptions")
-        .update({
-          pending_plan_id: newPlanId,
-          pending_effective_at: billingCycleEndAt ?? null,
-        } as any)
-        .eq("id", subscriptionId);
-      if (error) throw error;
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["subscription"] }),
-  });
-}
