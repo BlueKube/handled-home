@@ -7,8 +7,51 @@ Mobile-first iOS & Android app via Capacitor. No desktop breakpoints.
 
 ---
 
-## Emotional Tone
-Calm concierge — confident, kind, predictable. "Your home is handled."
+## Brand and Emotional Design
+
+Brand personality: **calm concierge** — confident, kind, predictable. Tagline: "Your home, handled." See `docs/masterplan.md` for full brand positioning.
+
+### Personality-to-Design Mappings
+
+| Personality Trait | Visual Decision | Implementation |
+|-------------------|----------------|----------------|
+| **Calm** | Slow easing curves, muted palette, minimal motion | `cubic-bezier(0.25, 0.1, 0.25, 1.0)` for transitions; navy `hsl(214 65% 14%)` primary, no saturated reds in default UI |
+| **Competent** | Consistent 12px radius, structured spacing, clear hierarchy | `rounded-xl` on all interactive elements; 8px grid; `.text-h2` for page titles |
+| **Trustworthy** | Navy primary conveys authority; proof-of-work imagery; no flashy gradients | `bg-primary` for CTAs; before/after photo pairs; shadow-sm for subtle depth |
+| **Kind** | Warm success messages, gentle error copy, rounded shapes | `rounded-2xl` cards; "We'll take care of it" not "Error occurred" |
+| **Premium** | Generous whitespace, Inter 300–700 weight range, glass surface treatment | `p-4` card padding; `.glass` utility with backdrop-blur-xl |
+
+### UI Copy Tone Examples
+
+- **Success toast**: "Service confirmed — your lawn is on the schedule."
+- **Error toast**: "We couldn't save that change. Check your connection and try again."
+- **Empty state (no services)**: "No services yet. Let's get your home set up."
+- **Confirmation dialog**: "Cancel this service? You can re-add it anytime from your plan."
+- **Notification**: "Your pool service is complete. View the proof-of-work photos."
+- **Onboarding**: "Tell us about your home so we can recommend the right plan."
+
+### Imagery and Illustration Direction
+
+- Photography: warm, natural lighting; residential settings; no stock-photo feel
+- Illustration style: outlined Lucide icons at 24px with 1.5px stroke width; accent tint for icon containers using `bg-accent/10` with `rounded-full`
+- Icon sizes: 16px inline, 20px in buttons, 24px standalone, 40px in empty states
+- Spot illustrations for empty states: single-color line art using `text-muted-foreground`
+- No decorative gradients — visual language is flat with subtle shadow depth
+
+### Celebration and Delight Moments
+
+- **Service completion**: success toast with checkmark icon + `.animate-scale-in` at 200ms
+- **Plan activation**: confetti-style milestone card with accent border and `bg-accent/5` tint
+- **Onboarding completion**: congratulations screen with achievement icon at 48px
+- **First service booked**: reward badge pulse animation, scale(1.0→1.05→1.0) over 300ms
+
+### Brand Anti-Patterns
+
+- Never use aggressive language: avoid "URGENT", "ACT NOW", "Don't miss out"
+- Never use red for non-destructive actions — `bg-destructive` is reserved for errors and delete confirmations
+- Do not show raw error codes or stack traces to users
+- Avoid dense data tables in customer-facing screens — use StatCard summaries instead
+- Never auto-play video or sound — the app should feel quiet and controlled
 
 ---
 
@@ -243,7 +286,3 @@ Admin pages use a **sidebar + command bar** layout (via `AdminShell`), not the m
 - 16px minimum font for inputs (no iOS zoom)
 - Back buttons include `aria-label` for screen readers
 
----
-
-## Voice
-Calm, competent, kind. Never blame users. Reinforce: "Your home is handled."
