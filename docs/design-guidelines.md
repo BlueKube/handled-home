@@ -154,7 +154,7 @@ Purpose-based aliases that map primitives to roles. Use these in components.
 - **Feedback warning** → `bg-warning` / `text-warning` — advisory alerts
 - **Feedback destructive** → `bg-destructive` / `text-destructive` — errors, delete actions
 
-### Component-Level Token Overrides
+### scoped token overrides
 
 Specific tokens scoped to individual components:
 
@@ -201,7 +201,7 @@ In dark mode, elevation is communicated through surface luminance rather than sh
 - Use `text-foreground` for illustration line strokes (adapts automatically)
 - Placeholder/skeleton shimmer gradient shifts from `hsl(214 55% 12%)` to `hsl(214 55% 16%)`
 
-### .dark component overrides
+### .dark class overrides
 
 - **Button (default)**: flips from navy `bg-primary` to cyan `bg-primary` — foreground becomes dark `hsl(214 65% 8%)`
 - **Card**: border becomes visible at `hsl(214 50% 22%)` since shadow is ineffective
@@ -312,6 +312,7 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 
 ### Textarea (`textarea.tsx`)
 - Min-height: 80px, rounded-xl, same border/focus treatment as Input
+- Slot anatomy: label (above) → textarea content area → character count suffix (optional, trailing)
 - States: empty → placeholder `text-muted-foreground`; focused → `ring-2 ring-ring` + `bg-card`; filled → `text-foreground`; hover → `border-ring`; error → `border-destructive`; disabled → `opacity-50 bg-muted`; loading → not applicable
 - Use when: multi-line text (notes, descriptions, access instructions).
 
@@ -345,27 +346,32 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 
 ### BottomSheet (`sheet.tsx`)
 - Slides from bottom, entry `.animate-slide-up` 250ms, overlay `bg-black/50`
+- Slot anatomy: drag handle (leading, top) → header (title + close) → content area → footer actions (trailing)
 - Content: `bg-card` rounded-t-2xl p-4 pb-safe, max-height 85vh, drag-to-dismiss handle (40px × 4px rounded-full `bg-muted` centered)
 - States: open → slide-up + overlay; dragging → follows finger; dismissed → slide-down 200ms; hover (handle) → `bg-muted-foreground/40`; focus → focus trap within sheet; active → drag gesture; disabled → handle hidden, no dismiss; loading → content replaced by skeleton
 - Use when: forms, pickers, detail views that don't warrant a full page.
 
 ### Drawer (`drawer.tsx`)
+- Slot anatomy: drag handle (leading) → content area → footer actions (trailing)
 - Wraps Vaul for native drag-to-dismiss behavior, same `.animate-slide-up` 250ms entry
 - States: open → slide-up + overlay `bg-black/50`; active/dragging → follows finger position; hover (handle) → `bg-muted-foreground/50`; disabled → not applicable; loading → content area shows skeleton
 - Use when: complex forms or multi-step flows from bottom of screen.
 
 ### Tabs (`tabs.tsx`)
+- Slot anatomy: TabsList container → TabsTrigger items (label text) → TabsContent panels
 - Height: 44px, `bg-muted` rounded-xl container, active tab `bg-card` shadow-sm rounded-lg
 - States: default → `text-muted-foreground`; active → `text-foreground bg-card shadow-sm`; hover → `text-foreground`; focus → `ring-2 ring-ring`
 - Use when: switching between 2–4 content panels (e.g., Login/Signup, service categories).
 
 ### Avatar (`avatar.tsx`)
+- Slot anatomy: image content (primary) → fallback initials label (when image fails)
 - Sizes: 32px (inline), 40px (list items), 48px (profile), 64px (detail view)
 - Shape: rounded-full, `bg-muted` fallback with initials in `text-muted-foreground`
 - States: loaded → shows image with `object-cover`; loading → `bg-muted` pulse animation; error → fallback initials; hover → `opacity-80` (if interactive); focus → `ring-2 ring-ring`; active → opens profile; disabled → `opacity-50 grayscale`
 - Use when: user/provider profile images, assignee indicators.
 
 ### Progress (`progress.tsx`)
+- Slot anatomy: track (full width, `bg-muted`) → fill bar (leading, `bg-primary`) → label (optional, trailing)
 - Height: 8px, rounded-full, track `bg-muted`, fill `bg-primary`
 - Variants: default (primary fill), accent (`bg-accent` fill), small (4px height)
 - States: determinate → width percent; indeterminate → shimmer animation; loading → track only, no fill; error → fill turns `bg-destructive`; hover → not applicable; focus → `ring-2 ring-ring` (if interactive); active → not applicable; disabled → `opacity-40`
@@ -429,12 +435,14 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 - Use when: inline informational messages, validation summaries. Not for transient notifications (use Toast).
 
 ### Accordion (`accordion.tsx`)
+- Slot anatomy: trigger (label text + trailing ChevronDown icon) → collapsible content area
 - Trigger: h-12 (48px), full width, text left, `ChevronDown` icon right (16px), rotates 180° on open
 - Content: `py-3 px-0`, animate height 250ms `ease-out-expo`
 - States: collapsed → chevron pointing down; expanded → chevron rotated 180°; hover → `bg-muted/50`; focus → `ring-2 ring-ring`; active → press scale not used (too subtle); disabled → `opacity-50 pointer-events-none`; loading → content skeleton
 - Use when: FAQ sections, collapsible detail groups. Use Collapsible for single toggle.
 
 ### Collapsible (`collapsible.tsx`)
+- Slot anatomy: trigger element (leading) → collapsible content panel
 - Trigger: any interactive element; content animates height 200ms `ease-default`
 - States: collapsed → content hidden (height: 0); expanded → content visible; hover → trigger highlight; focus → `ring-2 ring-ring` on trigger; active → trigger press; disabled → `opacity-50`; loading → content skeleton
 - Use when: progressive disclosure (show more details). Use Accordion for multiple sections.
@@ -503,7 +511,7 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 - **Swipe-to-dismiss**: follows finger with spring-back if <30% threshold, completes at >30%
 - **List item stagger**: each item delays 30ms from previous, max 5 items staggered (150ms total cap)
 
-### Reduced Motion (`prefers-reduced-motion`)
+### prefers-reduced-motion handling
 
 When the user has `prefers-reduced-motion: reduce` enabled:
 - Disable all transform-based animations (translateY, scale) — replace with simple opacity crossfade at 150ms
