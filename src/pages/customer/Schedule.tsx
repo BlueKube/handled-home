@@ -326,7 +326,7 @@ export default function Schedule() {
 
   if (isLoading) {
     return (
-      <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4">
+      <div className="p-4 pb-24 space-y-4 animate-fade-in">
         <h1 className="text-h2">Schedule</h1>
         <Skeleton className="h-[320px] rounded-2xl" />
         {[1, 2].map((i) => (
@@ -338,7 +338,7 @@ export default function Schedule() {
 
   if (isError) {
     return (
-      <div className="px-4 py-6 pb-24 max-w-lg mx-auto">
+      <div className="p-4 pb-24 animate-fade-in">
         <h1 className="text-h2 mb-4">Schedule</h1>
         <QueryErrorCard message="Failed to load your schedule." onRetry={() => refetch()} />
       </div>
@@ -346,7 +346,7 @@ export default function Schedule() {
   }
 
   return (
-    <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4 animate-fade-in">
+    <div className="p-4 pb-24 space-y-4 animate-fade-in">
       {/* Header */}
       <h1 className="text-h2">Schedule <HelpTip text="Your schedule shows upcoming and past visits. Tap any visit for details, photos, and checklists." /></h1>
 

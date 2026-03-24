@@ -299,9 +299,9 @@
 | 3 | 9: Dark Elevation & Borders | ✅ | Pushed. 1 MUST-FIX resolved (layer specificity). |
 | 3 | 10: Dark Overlay & Images | ✅ | Pushed. Clean review — 0 findings. |
 | 3 | 11: Dark Component Sweep | ✅ | Pushed. Clean review — 0 findings. |
-| 4 | 12: Focus Trap & Restore | ⬜ | |
-| 4 | 13: ARIA & Screen Reader | ⬜ | |
-| 4 | 14: Color-Independent Status | ⬜ | |
+| 4 | 12: Focus Trap & Restore | ✅ | Pushed. Verification only — Radix handles focus. |
+| 4 | 13: ARIA & Screen Reader | ✅ | Pushed. 1 MUST-FIX resolved (conditional role=alert). |
+| 4 | 14: Color-Independent Status | ✅ | Pushed. Verification only — landmarks done in Batch 3. |
 | 5 | 15: Customer Dashboard & Tabs | ⬜ | |
 | 5 | 16: Customer Detail & Forms | ⬜ | |
 | 5 | 17: Customer Billing/Support | ⬜ | |

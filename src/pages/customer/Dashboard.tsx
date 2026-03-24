@@ -114,7 +114,7 @@ export default function CustomerDashboard() {
   );
 
   return (
-    <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4 animate-fade-in">
+    <div className="p-4 pb-24 space-y-4 animate-fade-in">
       {/* Header */}
       <div>
         {subscription ? (
