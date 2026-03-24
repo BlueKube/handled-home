@@ -21,22 +21,37 @@ export function RiskAlertsCard() {
 
   const alerts: RiskAlert[] = [];
 
-  // Attach rate below 1.5 — operating model critical threshold
-  if (health.attachRate < 1.5) {
+  // 90-day cohort attach rate below 1.5 — operating model critical threshold
+  if (health.attachRate90d < 1.5) {
     alerts.push({
-      id: "attach-critical",
+      id: "attach-90d-critical",
       severity: "critical",
-      title: "Attach rate below minimum",
-      detail: `${health.attachRate} SKUs/household — target is ≥ 1.5 at 90 days, ≥ 2.0 at scale`,
+      title: "90-day cohort attach rate below minimum",
+      detail: `${health.attachRate90d} SKUs/household — target is ≥ 1.5 at 90 days`,
       action: "Review plans & bundles",
       href: "/admin/plans",
     });
-  } else if (health.attachRate < 2.0) {
+  }
+
+  // 6-month flywheel breakpoint
+  if (!health.flywheelHealthy) {
     alerts.push({
-      id: "attach-warning",
+      id: "flywheel-warning",
       severity: "warning",
-      title: "Attach rate below target",
-      detail: `${health.attachRate} SKUs/household — target is ≥ 2.0`,
+      title: "6-month flywheel below breakpoint",
+      detail: `${health.attachRate180d} SKUs/household — flywheel self-funds at ≥ 1.5`,
+      action: "Review cross-sell strategy",
+      href: "/admin/plans",
+    });
+  }
+
+  // Global attach rate still tracked for overall health
+  if (health.attachRateGlobal < 2.0 && health.attachRate90d >= 1.5) {
+    alerts.push({
+      id: "attach-global-warning",
+      severity: "warning",
+      title: "Global attach rate below target",
+      detail: `${health.attachRateGlobal} SKUs/household — target is ≥ 2.0`,
       action: "Review plans & bundles",
       href: "/admin/plans",
     });
