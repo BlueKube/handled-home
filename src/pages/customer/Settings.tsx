@@ -8,6 +8,7 @@ import { NotificationPreferences } from "@/components/settings/NotificationPrefe
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LogOut, Mail, ChevronLeft } from "lucide-react";
+import { HelpTip } from "@/components/ui/help-tip";
 
 export default function CustomerSettings() {
   const { user, profile, signOut } = useAuth();

@@ -24,6 +24,7 @@ import { useZoneStateRecommendations } from "@/hooks/useZoneStateRecommendations
 import { ZoneCategoryDetailPanel } from "@/components/admin/ZoneCategoryDetailPanel";
 import { RecommendationsInbox } from "@/components/admin/RecommendationsInbox";
 import { ThresholdDials } from "@/components/admin/ThresholdDials";
+import { HelpTip } from "@/components/ui/help-tip";
 
 const STATES = ["CLOSED", "WAITLIST_ONLY", "PROVIDER_RECRUITING", "SOFT_LAUNCH", "OPEN", "PROTECT_QUALITY"] as const;
 const CATEGORIES = ["lawn_care", "cleaning", "landscaping", "pest_control", "pool_care"];

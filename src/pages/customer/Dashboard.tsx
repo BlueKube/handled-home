@@ -24,6 +24,7 @@ import { FloatingAddButton } from "@/components/customer/FloatingAddButton";
 import { AddServiceDrawer } from "@/components/customer/AddServiceDrawer";
 import { SeasonalPlanCard } from "@/components/customer/SeasonalPlanCard";
 import { CycleStatsRow } from "@/components/customer/CycleStatsRow";
+import { HelpTip } from "@/components/ui/help-tip";
 import { HomeTeamCard } from "@/components/customer/HomeTeamCard";
 import { HomeTeamExpandCard } from "@/components/customer/HomeTeamExpandCard";
 import { FirstServiceCelebration } from "@/components/customer/FirstServiceCelebration";
@@ -270,7 +271,13 @@ export default function CustomerDashboard() {
 
       {/* Handles Balance */}
       {handleBalance != null && planHandles && planHandles.handles_per_cycle > 0 && (
-        <HandleBalanceBar balance={handleBalance} perCycle={planHandles.handles_per_cycle} />
+        <div className="space-y-1">
+          <div className="flex items-center gap-1">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Handle Balance</p>
+            <HelpTip text="Handles are your service allowances — each handle equals one visit of a service per cycle. Your balance shows how many you have left this period." />
+          </div>
+          <HandleBalanceBar balance={handleBalance} perCycle={planHandles.handles_per_cycle} />
+        </div>
       )}
 
       {/* Property Health Score */}

@@ -18,6 +18,7 @@ import {
 import { CATEGORY_ORDER, CATEGORY_LABELS } from "@/lib/serviceCategories";
 import { useByopRecommendations } from "@/hooks/useByopRecommendation";
 import { CheckCircle } from "lucide-react";
+import { HelpTip } from "@/components/ui/help-tip";
 
 type ViewState = "form" | "confirmed";
 

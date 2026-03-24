@@ -21,6 +21,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowRight, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { HelpTip } from "@/components/ui/help-tip";
 import type { CadenceType } from "@/hooks/useRoutine";
 
 const MODEL_LABELS: Record<string, string> = {
@@ -180,7 +181,7 @@ export default function CustomerRoutine() {
 
       <div className="p-4 space-y-5">
         <div>
-          <h1 className="text-h2 mb-1">Build Your Routine</h1>
+          <h1 className="text-h2 mb-1">Build Your Routine <HelpTip text="How it works — add services, set frequency, and we'll build your schedule. Changes take effect next cycle." /></h1>
           <p className="text-caption">Choose services and how often they happen.</p>
         </div>
 

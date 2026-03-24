@@ -21,6 +21,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { HelpTip } from "@/components/ui/help-tip";
 
 interface FieldErrors {
   street_address?: string;

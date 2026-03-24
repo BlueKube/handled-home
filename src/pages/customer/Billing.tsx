@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { CreditCard, Clock, Receipt, ChevronRight, AlertTriangle, Gift, ChevronLeft } from "lucide-react";
 import { PageSkeleton } from "@/components/PageSkeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { HelpTip } from "@/components/ui/help-tip";
 
 function formatCents(cents: number) {
   return `$${(cents / 100).toFixed(2)}`;
@@ -28,7 +29,7 @@ export default function CustomerBillingPage() {
           <ChevronLeft className="h-4 w-4" />
           <span className="text-sm">More</span>
         </button>
-        <h1 className="text-h2">Billing</h1>
+        <h1 className="text-h2">Billing <HelpTip text="Your billing cycle renews automatically. You can pause, change plans, or cancel anytime from this page." /></h1>
         <EmptyState
           icon={CreditCard}
           title="No billing activity yet"

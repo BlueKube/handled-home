@@ -21,6 +21,7 @@ import { ReceiptSuggestions } from "@/components/customer/ReceiptSuggestions";
 import { QuickFeedbackCard } from "@/components/customer/QuickFeedbackCard";
 import { PrivateReviewCard } from "@/components/customer/PrivateReviewCard";
 import { ArrowLeft, Clock, CheckCircle2, XCircle, AlertTriangle, Share2, ArrowUpCircle, Lightbulb, Users, Copy } from "lucide-react";
+import { HelpTip } from "@/components/ui/help-tip";
 import { format } from "date-fns";
 
 export default function CustomerVisitDetail() {

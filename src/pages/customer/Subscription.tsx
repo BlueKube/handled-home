@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Shield } from "lucide-react";
 import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
+import { HelpTip } from "@/components/ui/help-tip";
 
 export default function CustomerSubscription() {
   const navigate = useNavigate();

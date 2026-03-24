@@ -11,6 +11,7 @@ import { useReferrals } from "@/hooks/useReferrals";
 import { useReferralRewards } from "@/hooks/useReferralRewards";
 import { useReferralPrograms } from "@/hooks/useReferralPrograms";
 import { Skeleton } from "@/components/ui/skeleton";
+import { HelpTip } from "@/components/ui/help-tip";
 
 const MILESTONE_LABELS: Record<string, string> = {
   installed: "Signed up",

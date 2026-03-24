@@ -11,6 +11,7 @@ import { ServiceDayConfirmed } from "@/components/customer/ServiceDayConfirmed";
 import { SchedulingPreferences, type SchedulingPrefs } from "@/components/customer/SchedulingPreferences";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info, Loader2 } from "lucide-react";
+import { HelpTip } from "@/components/ui/help-tip";
 
 export default function CustomerServiceDay() {
   const { property, isLoading: propLoading } = useProperty();
@@ -136,7 +137,10 @@ export default function CustomerServiceDay() {
   if (assignment.status === "confirmed") {
     return (
       <div className="px-4 py-6 pb-24 max-w-lg mx-auto animate-fade-in space-y-6">
-        <ServiceDayConfirmed dayOfWeek={assignment.day_of_week} />
+        <div className="flex items-center gap-1">
+          <ServiceDayConfirmed dayOfWeek={assignment.day_of_week} />
+          <HelpTip text="Your recommended day is optimized for route efficiency — choosing it helps your provider serve your neighborhood faster." />
+        </div>
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-foreground">Scheduling preferences</h3>
           <SchedulingPreferences

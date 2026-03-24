@@ -30,6 +30,7 @@ import {
   Timer,
 } from "lucide-react";
 import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
+import { HelpTip } from "@/components/ui/help-tip";
 
 function formatVisitDate(dateStr: string): string {
   const date = parseISO(dateStr);

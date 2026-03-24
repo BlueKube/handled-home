@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { DollarSign, TrendingDown, TrendingUp, Users } from "lucide-react";
+import { HelpTip } from "@/components/ui/help-tip";
 
 function fmt(cents: number) {
   return `$${(cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;

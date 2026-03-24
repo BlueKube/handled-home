@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { TicketStatusChip } from "@/components/support/TicketStatusChip";
 import { MessageCirclePlus, ChevronRight, ChevronLeft, Inbox, Clock } from "lucide-react";
 import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
+import { HelpTip } from "@/components/ui/help-tip";
 import { format } from "date-fns";
 
 export default function CustomerSupportHome() {

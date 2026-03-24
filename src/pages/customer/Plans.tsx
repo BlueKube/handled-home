@@ -10,6 +10,7 @@ import { BundleSavingsCard } from "@/components/plans/BundleSavingsCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
+import { HelpTip } from "@/components/ui/help-tip";
 
 /**
  * Fallback tier highlights (used when plan_handles has no DB rows yet).
@@ -108,7 +109,7 @@ export default function CustomerPlans() {
           <ChevronLeft className="h-4 w-4" />
           <span className="text-sm">More</span>
         </button>
-        <h1 className="text-h2">Pick your membership</h1>
+        <h1 className="text-h2">Pick your membership <HelpTip text="Plans set how many handles you get each cycle. Higher tiers include more services and priority scheduling." /></h1>
         <p className="text-muted-foreground mt-1">
           One simple plan — we handle the rest.
         </p>
