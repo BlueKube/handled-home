@@ -20,14 +20,20 @@ Use a Haiku agent to locate any CLAUDE.md files in the repo root and in director
 ### 3. Summarize changes
 Use a Haiku agent to return a brief summary of the diff.
 
-### 4. Parallel code review (5 Sonnet agents)
-Launch 5 Sonnet agents in parallel. Each returns a list of issues with reasons:
+### 4. Parallel code review (5 lanes × 2 tiers = 10 agents)
+Launch 10 agents in parallel: one Sonnet agent and one Haiku agent per lane. Each lane has a single review focus — agents within the same lane may find overlapping issues (that's intentional redundancy), but agents should not cross into another lane's focus.
 
-a. **CLAUDE.md compliance** — Audit changes against CLAUDE.md rules.
-b. **Bug scan** — Shallow scan for obvious bugs in the changed code. Focus on real bugs, not nitpicks.
-c. **Historical context** — Read git blame/history of modified code to spot issues informed by past changes.
-d. **Prior feedback** — Check previous PRs/commits that touched these files for recurring review comments.
-e. **Code comment compliance** — Verify changes comply with guidance in code comments in modified files.
+The Sonnet agent in each lane does the deep analysis. The Haiku agent in each lane acts as a fast, independent second set of eyes on the same scope. Both return a list of issues with reasons.
+
+**Lanes:**
+
+a. **CLAUDE.md compliance** — Audit changes against CLAUDE.md rules. Only flag violations that the CLAUDE.md specifically calls out.
+b. **Bug scan** — Shallow scan for obvious bugs in the changed code only. No extra context, no git history, no nitpicks — just the diff.
+c. **Historical context** — Read git blame/history of modified code to spot regressions or issues informed by past changes. Do not cross into the bug scan lane; focus on what the history reveals.
+d. **Prior feedback** — Check previous PRs/commits that touched these files for recurring review comments that may apply here.
+e. **Code comment compliance** — Verify changes comply with inline guidance (TODOs, FIXMEs, doc comments) in the modified files. Do not cross into the CLAUDE.md lane.
+
+After all 10 agents return, merge and deduplicate findings across both tiers before proceeding to confidence scoring.
 
 ### 5. Confidence scoring
 For each issue, launch a parallel Haiku agent to score confidence (0–100):

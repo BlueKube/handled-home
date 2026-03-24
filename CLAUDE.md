@@ -18,7 +18,13 @@ Follow this exact sequence for every batch. Do not skip steps.
 2. **Write a spec before coding** — Every batch needs a markdown spec with: title, why it matters, scope, non-goals, exact file targets, acceptance criteria, regression risks, visual validation checklist.
 3. **Keep batches small** — 1 theme across 1-3 screens. Don't mix unrelated fixes.
 4. **Implement only the spec** — If you find something out of scope, defer it.
-5. **Run code review after every commit/phase** — After committing, run `/code-review` to review the diff against main. This launches 5 parallel Sonnet agents (CLAUDE.md compliance, bug scan, historical context, prior feedback, code comment compliance) with confidence scoring. See `.claude/commands/code-review.md` for details.
+5. **Run code review after every commit/phase** — After committing, run `/code-review` to review the diff against main. This launches 10 agents in parallel across 5 review lanes:
+   - CLAUDE.md compliance
+   - Bug scan (diff only, no extra context)
+   - Historical context (git blame / history)
+   - Prior PR feedback on the same files
+   - Code comment compliance
+   Each lane gets one Sonnet agent (deep analysis) and one Haiku agent (fast second opinion). Findings from both tiers are merged and then scored for confidence. See `.claude/commands/code-review.md` for details.
 6. **Fix findings until clear** — MUST-FIX (75+) and SHOULD-FIX (25–74) must be resolved. After committing fixes, the review automatically re-runs to verify fixes are real and didn't introduce new issues. This loops until clean (max 3 passes).
 7. **Validate build** — Run `npx tsc --noEmit` and `npm run build` before considering a batch done.
 8. **Reconcile** — After each batch, update which pages are done and what's next.
@@ -27,7 +33,7 @@ Follow this exact sequence for every batch. Do not skip steps.
 ## Slash Commands
 
 - `/kickoff` — Start a new batch or phase. Reads the roadmap, identifies what's next, writes the spec, and asks for approval before coding.
-- `/code-review` — Review changes for bugs and CLAUDE.md compliance. Runs 5 parallel Sonnet agents with confidence scoring. Two modes: phase mode (no args, reviews branch diff vs main) or PR mode (`/code-review 123`).
+- `/code-review` — Review changes for bugs and CLAUDE.md compliance. Runs 10 agents (5 lanes × 2 tiers: Sonnet + Haiku) with confidence scoring. Two modes: phase mode (no args, reviews branch diff vs main) or PR mode (`/code-review 123`).
 
 ## Workflow & UX Reference Docs
 
