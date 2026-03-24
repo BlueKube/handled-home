@@ -50,9 +50,12 @@ This workflow turns a Product Requirements Document (PRD) into shipped code thro
 ### Step 1: Re-anchor to the plan
 
 Before starting any batch:
+- **Read `docs/working/plan.md`** — re-read the full plan to stay aligned with phases, batches, dependencies, and progress
 - State which phase and batch you're working on
 - State what's already complete and what remains
-- Reference `docs/working/plan.md` to stay aligned
+
+At the **start of each phase** (i.e., the first batch of a new phase):
+- **Read `docs/working/prd.md`** — re-read the full PRD to re-ground in the original requirements, goals, and success criteria before entering a new phase of work
 
 ### Step 2: Write the batch spec
 
@@ -487,7 +490,15 @@ Together, these six documents form a complete context layer:
 - The **feature list** tells you what's done and what's left
 - The **design guidelines** tell you how everything should look
 
-Claude reads all six at the start of a session. Together they provide full product context without needing to read every source file. When they're current, Claude makes informed decisions about where to put new code, what patterns to follow, and what the business expects. When they're stale, Claude makes decisions based on outdated assumptions — and stale assumptions compound silently across batches until the product drifts far from intent.
+Claude reads all six at the start of every session. This is **mandatory** — no exceptions. Together they provide full product context without needing to read every source file. When they're current, Claude makes informed decisions about where to put new code, what patterns to follow, and what the business expects. When they're stale, Claude makes decisions based on outdated assumptions — and stale assumptions compound silently across batches until the product drifts far from intent.
+
+### Context reading cadence (summary)
+
+| What to read | When |
+|---|---|
+| All 6 north star documents | Start of every session |
+| `docs/working/prd.md` | Start of each phase (first batch of a new phase) |
+| `docs/working/plan.md` | Start of each batch (re-anchor step) |
 
 ### Living document rules
 
