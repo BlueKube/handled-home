@@ -22,7 +22,7 @@ Read and follow `docs/skills/prd-to-production-workflow.md` before starting any 
 
 ### Slash commands
 
-- `/code-review` — 10-agent review (5 lanes × 2 tiers). Phase mode (no args) or PR mode (`/code-review 123`).
+- `/code-review` — 10-agent review (4 parallel lanes + 1 synthesis lane × 2 tiers). Phase mode (no args) or PR mode (`/code-review 123`).
 
 ### Working folder structure
 
