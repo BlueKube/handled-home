@@ -46,7 +46,7 @@ export function ProviderStatusBanner({ status }: ProviderStatusBannerProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 shrink-0 -mt-1 -mr-1"
+            className="shrink-0 -mt-1 -mr-1"
             onClick={() => setDismissed(true)}
             aria-label="Dismiss notice"
           >

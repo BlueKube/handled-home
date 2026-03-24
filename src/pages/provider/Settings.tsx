@@ -99,7 +99,6 @@ export default function ProviderSettings() {
           </p>
           <Button
             variant="outline"
-            size="sm"
             className="text-destructive border-destructive/30 hover:bg-destructive/5"
             onClick={() => setExitDialogOpen(true)}
           >

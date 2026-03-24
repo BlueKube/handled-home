@@ -246,7 +246,7 @@ export default function ProviderDashboard() {
   };
 
   return (
-    <div className="animate-fade-in p-4 pb-24 space-y-5 max-w-2xl">
+    <div className="animate-fade-in p-4 pb-24 space-y-5">
       {/* Greeting */}
       <div>
         <h1 className="text-h2">
