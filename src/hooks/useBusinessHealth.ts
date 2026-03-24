@@ -39,10 +39,10 @@ export function useBusinessHealth() {
       const thirtyDaysAgo = daysAgoStr(30);
       const ninetyDaysAgo = daysAgoStr(90);
 
+      // Phase 1: parallel queries that don't depend on each other
       const [
         activeSubsRes,
         canceledSubsRes,
-        subItemsRes,
         activeProvidersRes,
         exitedProvidersRes,
         zonesRes,
@@ -58,11 +58,6 @@ export function useBusinessHealth() {
           .select("id", { count: "exact", head: true })
           .eq("status", "canceled")
           .gte("updated_at", thirtyDaysAgo),
-        // Subscription items (SKUs) for active subs — count distinct SKUs per household
-        supabase
-          .from("subscription_items")
-          .select("subscription_id, sku_id")
-          .eq("status", "active" as any),
         // Active provider orgs
         supabase
           .from("provider_orgs")
@@ -81,13 +76,20 @@ export function useBusinessHealth() {
           .neq("status", "archived"),
       ]);
 
-      // Attach rate
+      // Phase 2: fetch subscription items scoped to active subs only
       const activeSubs = activeSubsRes.data ?? [];
       const activeHouseholds = activeSubs.length;
-      const activeSubIds = new Set(activeSubs.map((s) => s.id));
-      const totalActiveSKUs = (subItemsRes.data ?? []).filter(
-        (si: any) => activeSubIds.has(si.subscription_id)
-      ).length;
+      const activeSubIds = activeSubs.map((s) => s.id);
+
+      let totalActiveSKUs = 0;
+      if (activeSubIds.length > 0) {
+        const { count } = await supabase
+          .from("subscription_items")
+          .select("id", { count: "exact", head: true })
+          .in("subscription_id", activeSubIds)
+          .eq("status", "active" as any);
+        totalActiveSKUs = count ?? 0;
+      }
       const attachRate = activeHouseholds > 0
         ? Math.round((totalActiveSKUs / activeHouseholds) * 100) / 100
         : 0;
@@ -100,11 +102,12 @@ export function useBusinessHealth() {
         : 0;
 
       // Provider churn (annualized from 90d window)
+      // Denominator approximates start-of-period: active now + those who left ≈ active 90d ago
       const totalActiveProviders = activeProvidersRes.count ?? 0;
       const providersExitedLast90d = exitedProvidersRes.count ?? 0;
-      const providerBase = totalActiveProviders + providersExitedLast90d;
-      const providerChurnPct = providerBase > 0
-        ? Math.round(((providersExitedLast90d / providerBase) * 4) * 10) / 10 // × 4 to annualize 90d
+      const startOfPeriodProviders = totalActiveProviders + providersExitedLast90d;
+      const providerChurnPct = startOfPeriodProviders > 0
+        ? Math.round(((providersExitedLast90d / startOfPeriodProviders) * 4) * 10) / 10 // × 4 to annualize 90d
         : 0;
 
       // Zone density
