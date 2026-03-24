@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
-export type ByopStatus = "received" | "under_review" | "accepted" | "not_a_fit";
+export type ByopStatus = "received" | "under_review" | "accepted" | "not_a_fit" | "provider_unavailable";
 
 export interface ByopRecommendation {
   id: string;

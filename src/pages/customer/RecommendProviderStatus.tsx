@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, Gift, UserPlus } from "lucide-react";
+import { ChevronLeft, Gift, UserPlus, UserX } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ const STATUS_CONFIG: Record<ByopStatus, { label: string; variant: "default" | "s
   under_review: { label: "Under Review", variant: "outline", className: "border-warning text-warning" },
   accepted: { label: "Accepted", variant: "default", className: "bg-success text-success-foreground" },
   not_a_fit: { label: "Not a Fit", variant: "secondary", className: "text-muted-foreground" },
+  provider_unavailable: { label: "Provider Unavailable", variant: "destructive" },
 };
 
 export default function RecommendProviderStatus() {
@@ -71,9 +72,11 @@ export default function RecommendProviderStatus() {
                   className={
                     rec.status === "accepted"
                       ? "border-accent"
-                      : rec.status === "not_a_fit"
-                        ? "border-muted"
-                        : ""
+                      : rec.status === "provider_unavailable"
+                        ? "border-warning/40"
+                        : rec.status === "not_a_fit"
+                          ? "border-muted"
+                          : ""
                   }
                 >
                   <CardContent className="pt-4 space-y-2">
@@ -110,6 +113,31 @@ export default function RecommendProviderStatus() {
                         <p className="text-caption text-muted-foreground mt-1">
                           We appreciate the recommendation.
                         </p>
+                      </div>
+                    )}
+
+                    {rec.status === "provider_unavailable" && (
+                      <div className="pt-2 space-y-3">
+                        <div className="flex items-start gap-2 rounded-lg bg-warning/10 border border-warning/20 p-3">
+                          <UserX className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+                          <div>
+                            <p className="text-sm font-medium">
+                              {rec.provider_name} is no longer available
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              We're assigning a qualified replacement provider from our network.
+                              Your service will continue uninterrupted, and your current pricing
+                              is preserved for the next billing cycle.
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="outline"
+                          className="min-h-[44px]"
+                          onClick={() => navigate("/customer/routine")}
+                        >
+                          View My Routine
+                        </Button>
                       </div>
                     )}
                   </CardContent>

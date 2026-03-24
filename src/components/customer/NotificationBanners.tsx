@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, CloudRain, X } from "lucide-react";
+import { AlertTriangle, CloudRain, UserX, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
@@ -30,6 +30,7 @@ export function CustomerNotificationBanners() {
           "CUSTOMER_PAYMENT_FAILED",
           "CUSTOMER_SUBSCRIPTION_PAUSED",
           "CUSTOMER_SCHEDULE_CHANGED_WEATHER",
+          "CUSTOMER_PROVIDER_CHANGE",
         ])
         .is("read_at", null)
         .order("created_at", { ascending: false })
@@ -59,6 +60,7 @@ export function CustomerNotificationBanners() {
           n.type === "CUSTOMER_PAYMENT_FAILED" ||
           n.type === "CUSTOMER_SUBSCRIPTION_PAUSED";
         const isWeather = n.type === "CUSTOMER_SCHEDULE_CHANGED_WEATHER";
+        const isProviderChange = n.type === "CUSTOMER_PROVIDER_CHANGE";
 
         return (
           <Card
@@ -66,11 +68,15 @@ export function CustomerNotificationBanners() {
             className={`p-3 flex items-center gap-3 border ${
               isPayment
                 ? "bg-destructive/10 border-destructive/30"
-                : "bg-accent/10 border-accent/30"
+                : isProviderChange
+                  ? "bg-warning/10 border-warning/30"
+                  : "bg-accent/10 border-accent/30"
             }`}
           >
             {isPayment ? (
               <AlertTriangle className="h-5 w-5 text-destructive shrink-0" />
+            ) : isProviderChange ? (
+              <UserX className="h-5 w-5 text-warning shrink-0" />
             ) : (
               <CloudRain className="h-5 w-5 text-accent shrink-0" />
             )}
@@ -86,7 +92,7 @@ export function CustomerNotificationBanners() {
                   className="text-xs h-7"
                   onClick={() => navigate(n.cta_route!)}
                 >
-                  {isPayment ? "Fix" : "View"}
+                  {isPayment ? "Fix" : isProviderChange ? "Details" : "View"}
                 </Button>
               )}
               <button
