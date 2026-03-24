@@ -297,7 +297,7 @@
 | 2 | 7: Display Components | ✅ | Pushed. Clean review — 0 findings. |
 | 2 | 8: Composite Components | ✅ | Pushed. Clean review — 0 findings. |
 | 3 | 9: Dark Elevation & Borders | ✅ | Pushed. 1 MUST-FIX resolved (layer specificity). |
-| 3 | 10: Dark Overlay & Images | ⬜ | |
+| 3 | 10: Dark Overlay & Images | ✅ | Pushed. Clean review — 0 findings. |
 | 3 | 11: Dark Component Sweep | ⬜ | |
 | 4 | 12: Focus Trap & Restore | ⬜ | |
 | 4 | 13: ARIA & Screen Reader | ⬜ | |
