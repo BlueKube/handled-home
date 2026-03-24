@@ -253,7 +253,7 @@ export default function OnboardingCompliance() {
         Continue
         <ArrowRight className="h-4 w-4 ml-2" />
       </Button>
-      {!fallbackMerged.requiresGlInsurance && !fallbackMerged.requiresLicense && !fallbackMerged.requiresBackgroundCheck && !fallbackMerged.requiresCoiUpload && (
+      {termsAccepted && !fallbackMerged.requiresGlInsurance && !fallbackMerged.requiresLicense && !fallbackMerged.requiresBackgroundCheck && !fallbackMerged.requiresCoiUpload && !fallbackMerged.requiresWorkersComp && (
         <Button
           variant="ghost"
           className="w-full text-muted-foreground mt-2"
