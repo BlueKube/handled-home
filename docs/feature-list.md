@@ -217,6 +217,8 @@
 120. Calm in-app banner: "We couldn't process your payment. Update your card." — DONE
 121. Auto-pause subscription scheduling after N failures (preserves receipt/history access) — DONE
 122. Auto-apply earned referral credits to offset failed payments — DONE
+122b. Dunning timeline UI: retry schedule visualization (day 3/7/10), grace period countdown, suspension warning — DONE
+122c. Fix Payment panel: failure reason display, retry history, Stripe portal integration — DONE
 123. Auto-release provider earning holds on schedule — DONE
 
 ---
@@ -227,7 +229,7 @@
 125. Pending plan change banner with effective date — DONE
 126. Cancel pending plan change — DONE
 127. Cancellation flow: reason survey → 5-handle retention offer → confirm — DONE
-128. Subscription pause (1–4 weeks) with frozen handles messaging — DONE
+128. Subscription pause (up to 8 weeks / 60 days) with visual timeline, auto-cancel warnings, and frozen handles messaging — DONE
 
 ---
 
@@ -321,7 +323,7 @@
 179. Milestone-based reward system: signup → subscribe → first visit → paid cycle — DONE
 180. Idempotent reward creation: unique per (program, user, milestone, type) — DONE
 181. Customer credits and provider bonuses flow through Module 11 ledgers — DONE
-182. Fraud controls: hold-until-milestone, caps per referrer, risk flags, admin exception queue — DONE
+182. Fraud controls: hold-until-milestone, caps per referrer, velocity caps (time-windowed rate limits), typed fraud flag categories (velocity_cap, suspicious_ip, same_household, self_referral, rapid_redemption), risk flags, admin exception queue — DONE
 183. Admin end-to-end audit: referral → milestones → reward → ledger → invoice/payout — DONE
 
 ---
@@ -359,6 +361,7 @@
 198f. Provider Growth Hub cross-navigation (BYOC Center ↔ Referrals) — DONE
 198g. Viral loop wiring: referral cards on JobComplete + customer Receipt — DONE
 198h. Admin Growth Console with 4 funnels (BYOC, Referral, BYOP, K-factor summary) — DONE
+198i. BYOP provider decline: admin action to mark recommendations as provider_unavailable, customer decline notification, funnel tracking of provider declines — DONE
 
 ---
 
@@ -392,8 +395,12 @@
 213. Growth health: referrals, provider invites, applications, fraud holds — DONE
 214. KPI definitions page with formulas, time windows, data sources, and caveats — DONE
 215. Daily snapshot rollup via `snapshot-rollup` edge function — DONE
-216. Business Health gauges on Ops Cockpit: attach rate, household churn, provider churn, zone density bands — green/amber/red threshold indicators from operating model — DONE
-217. Risk Alerts card on Ops Cockpit: operating model threshold violations surfaced as actionable alerts with severity (warning/critical) and deep links to resolution pages — DONE
+216. Business Health gauges on Ops Cockpit: attach rate (global, 90-day cohort, 6-month cohort), household churn, provider churn, zone density bands — green/amber/red threshold indicators from operating model, flywheel alert when 6-month attach rate < 1.5 — DONE
+216b. Gross Margin gauge on Ops Cockpit (MONEY column): percentage with target ≥25%, green/yellow/red status — DONE
+216c. Provider Utilization gauge on Ops Cockpit (NOW column): percentage with target ≥80%, green/yellow/red status — DONE
+216d. Payout Review cadence card on Ops Cockpit (MONEY column): last review date, next due, status indicator, link to Payouts page — DONE
+217. Risk Alerts card on Ops Cockpit: operating model threshold violations surfaced as actionable alerts with severity (warning/critical) and deep links to resolution pages — includes 90-day cohort attach rate alert and 6-month flywheel breakpoint alert — DONE
+217b. Loss Leader review tab on Admin Reports: per-plan profitability table, cohort attach rate cards (30d/60d/90d/120d), exit criteria alerts for plans below attach thresholds — DONE
 
 ---
 
@@ -644,4 +651,4 @@
 
 ---
 
-*Total features: 366 | Last updated: 2026-03-13 | Value-prop tags added per section*
+*Total features: 375 | Last updated: 2026-03-24 | Value-prop tags added per section*
