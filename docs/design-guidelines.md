@@ -2,8 +2,45 @@
 
 > **Last updated:** 2026-03-15 — Corrected color tokens to match index.css. Updated component specs.
 
-## Platform
-Mobile-first iOS & Android app via Capacitor. No desktop breakpoints.
+## Platform and Responsive Behavior
+
+Mobile-first iOS & Android app via Capacitor. Admin uses desktop sidebar layout — see Admin Layout section below. Reference `docs/app-flow-pages-and-roles.md` for the full route tree.
+
+### Device Tiers
+
+| Tier | Viewport | Example | Notes |
+|------|----------|---------|-------|
+| Compact | 320px–375px | iPhone SE | Reduce p-4 to p-3, stack horizontal layouts vertically |
+| Regular | 376px–428px | iPhone 15 (390px) | **Design target** — all specs reference this tier |
+| Max | 429px–480px | iPhone 15 Pro Max (430px) | Extra breathing room, no layout changes needed |
+
+### Orientation Handling
+
+- Lock customer/provider screens to portrait via Capacitor `Screen.lock({ orientation: 'portrait' })`
+- Admin desktop: landscape-optimized sidebar + content layout, min-width 1024px
+- If a customer rotates to landscape, content reflows naturally — no special breakpoints
+
+### Dynamic Type and Font Scaling
+
+- Base font: 16px Inter on regular tier. All typography uses rem units internally
+- Respect iOS Dynamic Type: Capacitor's WebView inherits system font-size preferences
+- Maximum scale: 1.4× (set via `viewport` meta `maximum-scale` to prevent layout breakage)
+- Minimum body text: 13px (`.text-caption`) — never smaller, even at reduced accessibility sizes
+
+### Keyboard Avoidance
+
+- Capacitor `Keyboard.setResizeMode({ mode: 'native' })` — WebView resizes when keyboard opens
+- Scroll focused input into view: `input.scrollIntoView({ behavior: 'smooth', block: 'center' })` on focus
+- Bottom-docked CTAs (like "Save" buttons) must use `pb-safe` and shift above keyboard
+- Sheet/drawer content scrolls independently — keyboard push doesn't affect overlay position
+
+### Capacitor and Native Integration
+
+- **Safe areas**: `.safe-top` applies `env(safe-area-inset-top)` for notch; `.safe-bottom` for home indicator
+- **Status bar**: light-content on dark backgrounds (navy sidebar), dark-content on light backgrounds
+- **Haptic feedback**: `Haptics.impact({ style: 'light' })` on button press, `medium` on toggle, `heavy` on destructive confirm
+- **Splash screen**: navy `hsl(214 65% 14%)` background with centered logo, auto-hide after app mount
+- **Deep links**: Capacitor App plugin handles `handledapp://` scheme for push notification targets
 
 ---
 
