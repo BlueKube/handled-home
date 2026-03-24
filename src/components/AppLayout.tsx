@@ -8,8 +8,9 @@ export function AppLayout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <a href="#main-content" className="skip-nav">Skip to main content</a>
       <AppHeader />
-      <main className="flex-1 overflow-auto pb-20">
+      <main id="main-content" className="flex-1 overflow-auto pb-20">
         <Outlet />
       </main>
       <BottomTabBar />

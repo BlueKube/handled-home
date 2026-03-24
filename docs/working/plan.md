@@ -288,8 +288,8 @@
 
 | Phase | Batch | Status | Notes |
 |-------|-------|--------|-------|
-| 1 | 1: Motion CSS | ⬜ | |
-| 1 | 2: Spacing/Z-Index/Surface | ⬜ | |
+| 1 | 1: Motion CSS | ✅ | Pushed. 2 SHOULD-FIX resolved in fix commit. |
+| 1 | 2: Spacing/Z-Index/Surface | ✅ | Pushed. Clean review — 0 findings. |
 | 1 | 3: A11y Foundation CSS | ⬜ | |
 | 2 | 4: Button/Card/Badge/Tabs | ⬜ | |
 | 2 | 5: Form Components | ⬜ | |
