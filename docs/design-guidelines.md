@@ -317,21 +317,25 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 - Use when: multi-line text (notes, descriptions, access instructions).
 
 ### Select Dropdown (`select.tsx`)
+- Slot anatomy: trigger (label + trailing chevron icon) → dropdown content panel → option items
 - Height: h-12 (48px), rounded-xl, chevron-down trailing icon 16px
 - States: default → `border-input`; hover → `border-ring`; focused/open → `ring-2 ring-ring`; active → dropdown `.animate-scale-in` 150ms; filled → selected value in `text-foreground`; disabled → `opacity-50`; error → `border-destructive`; loading → spinner replaces chevron
 - Use when: choosing from 4+ predefined options. Use radio for 2–3 options.
 
 ### Checkbox (`checkbox.tsx`)
+- Slot anatomy: checkbox box (leading) → label text (trailing)
 - Size: 20px × 20px, rounded-md (4px radius), `border-input`
 - States: unchecked → `border-input bg-background`; checked → `bg-primary` + check icon in `text-primary-foreground`; hover → `border-ring`; focus → `ring-2 ring-ring`; disabled → `opacity-50`
 - Use when: multi-select options, terms acceptance.
 
 ### Switch (`switch.tsx`)
+- Slot anatomy: track (container) → thumb circle (leading/trailing based on state) → label text
 - Track: 44px × 24px, rounded-full; Thumb: 20px circle
 - States: off → `bg-muted`; on → `bg-primary`; hover → `opacity-90`; focus → `ring-2 ring-ring`; disabled → `opacity-50`
 - Use when: binary toggle with immediate effect (notifications on/off). Prefer over checkbox for settings.
 
 ### Badge (`badge.tsx`)
+- Slot anatomy: leading dot/icon (optional) → label text content
 - Height: min-h 24px, rounded-full, px-3, text-caption size (13px)
 - Variants: `default` (bg-primary), `secondary` (bg-secondary), `outline` (border only), `destructive` (bg-destructive)
 - States: default → static display; hover → `opacity-90` (if interactive); active → `scale-[0.97]`; focus → `ring-2 ring-ring`; disabled → `opacity-50`
@@ -378,12 +382,14 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 - Use when: upload progress, onboarding completion, step indicators.
 
 ### LoadingSkeleton (`skeleton.tsx`)
+- Slot anatomy: placeholder content blocks — each slot mirrors the real content's label and layout position
 - Base: `bg-muted` rounded-xl, `.animate-shimmer` gradient sweep 1.5s infinite
 - Variants: `line` (h-4 rounded), `circle` (rounded-full), `card` (rounded-2xl h-32)
 - States: loading → shimmer animation active; loaded → crossfade to real content 200ms; error → replaced by error state; disabled → static `bg-muted` no animation; hover → not applicable
 - Use when: content is loading. Match skeleton shape to expected content layout.
 
 ### Tooltip (`tooltip.tsx`)
+- Slot anatomy: trigger element → tooltip content panel (label text + optional trailing arrow)
 - Background: `bg-popover` rounded-lg p-2 shadow-md, 13px text
 - Entry: `.animate-scale-in` 200ms; delay 300ms on hover
 - States: hover → appear after 300ms delay; focus → appear immediately; active → remains visible; dismissed → fade-out 100ms; disabled → tooltip not shown; loading → not applicable; error → not applicable
@@ -396,16 +402,19 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 - Use when: lists with no data, first-time screens. Every empty state must have icon + title + body + CTA.
 
 ### Popover (`popover.tsx`)
+- Slot anatomy: trigger element → popover content panel (with optional leading icon and trailing close)
 - Content: `bg-popover` rounded-xl shadow-lg p-4, entry `.animate-scale-in` 200ms
 - States: open → scale-in from trigger; closed → fade-out 150ms; hover (trigger) → `opacity-80`; focus → `ring-2 ring-ring` on trigger, focus trap in content; active → click/tap opens; disabled → trigger `opacity-50 pointer-events-none`; loading → content shows skeleton
 - Use when: contextual menus, filter dropdowns. Not for full forms — use Sheet.
 
 ### ScrollArea (`scroll-area.tsx`)
+- Slot anatomy: viewport content area → vertical scrollbar (trailing) → horizontal scrollbar (end)
 - Custom scrollbar: 4px wide, rounded-full, `bg-muted` track, `bg-muted-foreground/30` thumb
 - States: idle → scrollbar hidden; hover → scrollbar visible at `opacity-80`; active/scrolling → thumb visible `bg-muted-foreground/50`; disabled → `overflow-hidden`; focus → keyboard scroll enabled
 - Use when: constrained-height content areas (sidebars, long lists in sheets).
 
 ### Separator (`separator.tsx`)
+- Slot anatomy: single line element (no content slots — purely decorative)
 - Height: 1px, `bg-border`, full width
 - Variants: horizontal (default), vertical
 - States: default → visible `bg-border`; hover → not applicable; active → not applicable; focus → not applicable; disabled → `opacity-30`
@@ -418,11 +427,13 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 - Use when: above every form input. Always pair with `htmlFor` for accessibility.
 
 ### Slider (`slider.tsx`)
+- Slot anatomy: track → fill (leading portion) → thumb handle → label/tooltip (above thumb)
 - Track: h-2 (8px) rounded-full `bg-muted`; fill `bg-primary`; thumb 20px circle `bg-primary-foreground` with shadow-md
 - States: default → thumb at position; hover → thumb scale(1.1) 100ms; active/dragging → thumb scale(1.2), `ring-4 ring-ring/20`; focus → `ring-2 ring-ring`; disabled → `opacity-50 pointer-events-none`; loading → track only, no thumb
 - Use when: numeric ranges (service frequency, budget slider).
 
 ### RadioGroup (`radio-group.tsx`)
+- Slot anatomy: radio circle (leading) → label text content → optional suffix/description
 - Size: 20px circle, `border-2 border-input`, inner dot 10px `bg-primary` when selected
 - States: unselected → empty circle `border-input`; selected → inner dot `bg-primary`; hover → `border-ring`; focus → `ring-2 ring-ring`; active → scale(0.95) 100ms; disabled → `opacity-50`; error → `border-destructive`
 - Use when: single selection from 2–3 visible options. Use Select for 4+.
