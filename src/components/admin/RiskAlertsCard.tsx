@@ -146,12 +146,12 @@ export function RiskAlertsCard() {
             onClick={() => navigate(alert.href)}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") navigate(alert.href); }}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate(alert.href); } }}
           >
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
                 <p className={`text-sm font-medium ${
-                  alert.severity === "critical" ? "text-destructive" : "text-warning-foreground"
+                  alert.severity === "critical" ? "text-destructive" : "text-warning"
                 }`}>
                   {alert.title}
                 </p>
