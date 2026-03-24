@@ -3,6 +3,8 @@ import { useSupportTickets } from "@/hooks/useSupportTickets";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TicketStatusChip } from "@/components/support/TicketStatusChip";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { AlertTriangle, ChevronRight, Inbox, ShieldAlert } from "lucide-react";
 import { format } from "date-fns";
 
@@ -20,8 +22,17 @@ export default function ProviderSupportHome() {
         <p className="text-caption mt-0.5">Claims and disputes involving your jobs</p>
       </div>
 
+      {/* Loading skeleton */}
+      {isLoading && (
+        <div className="space-y-3">
+          {[1, 2].map((i) => (
+            <Skeleton key={i} className="h-20 w-full rounded-2xl" />
+          ))}
+        </div>
+      )}
+
       {/* Needs your input */}
-      {needsInput.length > 0 && (
+      {!isLoading && needsInput.length > 0 && (
         <section className="space-y-3">
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-warning" />
@@ -54,7 +65,7 @@ export default function ProviderSupportHome() {
       )}
 
       {/* Other active tickets */}
-      {activeTickets.length > 0 && (
+      {!isLoading && activeTickets.length > 0 && (
         <section className="space-y-3">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Active tickets</h2>
           {activeTickets.map((ticket) => (
@@ -79,10 +90,12 @@ export default function ProviderSupportHome() {
 
       {/* Empty state */}
       {!isLoading && tickets.length === 0 && (
-        <div className="text-center py-10 space-y-2">
-          <ShieldAlert className="h-10 w-10 text-muted-foreground/40 mx-auto" />
-          <p className="text-sm text-muted-foreground">No support tickets — keep up the great work!</p>
-        </div>
+        <EmptyState
+          compact
+          icon={ShieldAlert}
+          title="No support tickets"
+          body="Keep up the great work! Tickets will appear here if any issues arise."
+        />
       )}
     </div>
   );

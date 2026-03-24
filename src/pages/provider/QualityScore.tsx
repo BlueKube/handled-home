@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+import { HelpTip } from "@/components/ui/help-tip";
 import {
   ShieldCheck, TrendingUp, TrendingDown, Minus, Star, Camera, Clock,
   AlertTriangle, Award, GraduationCap, CheckCircle2, Lock, ChevronLeft,
@@ -29,7 +30,7 @@ export default function ProviderQualityScore() {
 
   if (isLoading || tierLoading) {
     return (
-      <div className="animate-fade-in p-4 pb-24 max-w-2xl space-y-4">
+      <div className="animate-fade-in p-4 pb-24 space-y-4">
         <div className="flex items-center gap-3">
           <Skeleton className="h-11 w-11 rounded-xl" />
           <Skeleton className="h-7 w-40" />
@@ -49,7 +50,7 @@ export default function ProviderQualityScore() {
     : 0;
 
   return (
-    <div className="animate-fade-in p-4 pb-24 max-w-2xl space-y-4">
+    <div className="animate-fade-in p-4 pb-24 space-y-4">
       {/* Header */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => navigate("/provider/performance")} aria-label="Back to score">
@@ -67,9 +68,15 @@ export default function ProviderQualityScore() {
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <span className={cn("text-lg font-bold", tierConfig.color)}>{tierConfig.label} Tier</span>
-            <Badge variant="outline" className="text-xs">{tierConfig.holdDays}-day hold</Badge>
+            <Badge variant="outline" className="text-xs flex items-center gap-0.5">
+              {tierConfig.holdDays}-day hold
+              <HelpTip text="How long earnings are held before becoming available for payout." />
+            </Badge>
             {tierConfig.priorityMod > 0 && (
-              <Badge variant="secondary" className="text-xs">+{tierConfig.priorityMod} priority</Badge>
+              <Badge variant="secondary" className="text-xs flex items-center gap-0.5">
+                +{tierConfig.priorityMod} priority
+                <HelpTip text="Higher priority means you're assigned jobs before lower-tier providers." />
+              </Badge>
             )}
           </div>
           <p className="text-xs text-muted-foreground mt-1">
@@ -143,10 +150,10 @@ export default function ProviderQualityScore() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <ComponentMetric icon={<Star className="h-4 w-4" />} label="Customer Rating" value={components.rating_score} weight="35%" />
-            <ComponentMetric icon={<AlertTriangle className="h-4 w-4" />} label="Issue/Redo Rate" value={components.issue_score} weight="25%" />
-            <ComponentMetric icon={<Camera className="h-4 w-4" />} label="Photo Compliance" value={components.photo_score} weight="20%" />
-            <ComponentMetric icon={<Clock className="h-4 w-4" />} label="On-Time Performance" value={components.ontime_score} weight="20%" />
+            <ComponentMetric icon={<Star className="h-4 w-4" />} label="Customer Rating" value={components.rating_score} weight="35%" helpText="Average star rating from customer reviews over the last 28 days." />
+            <ComponentMetric icon={<AlertTriangle className="h-4 w-4" />} label="Issue/Redo Rate" value={components.issue_score} weight="25%" helpText="Lower is better. Based on the % of jobs with reported issues or redo requests." />
+            <ComponentMetric icon={<Camera className="h-4 w-4" />} label="Photo Compliance" value={components.photo_score} weight="20%" helpText="% of jobs where required before/after photos were uploaded on time." />
+            <ComponentMetric icon={<Clock className="h-4 w-4" />} label="On-Time Performance" value={components.ontime_score} weight="20%" helpText="% of jobs where you arrived within the scheduled service window." />
           </div>
 
           {score.computed_at && (
@@ -306,12 +313,15 @@ export default function ProviderQualityScore() {
   );
 }
 
-function ComponentMetric({ icon, label, value, weight }: { icon: React.ReactNode; label: string; value?: number; weight: string }) {
+function ComponentMetric({ icon, label, value, weight, helpText }: { icon: React.ReactNode; label: string; value?: number; weight: string; helpText?: string }) {
   return (
     <div className="flex items-center gap-2 p-2 rounded-lg bg-background/50">
       <div className="text-muted-foreground">{icon}</div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium truncate">{label}</p>
+        <p className="text-xs font-medium truncate flex items-center gap-0.5">
+          {label}
+          {helpText && <HelpTip text={helpText} />}
+        </p>
         <p className="text-xs text-muted-foreground">{weight} weight</p>
       </div>
       <span className="text-sm font-semibold tabular-nums">{value != null ? Number(value).toFixed(0) : "—"}</span>

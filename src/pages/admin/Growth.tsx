@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Activity, Shield, TrendingUp, AlertTriangle, Lock, RefreshCw, ChevronRight, Sliders, BarChart3, Inbox, Settings2 } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Activity, Shield, TrendingUp, AlertTriangle, Lock, RefreshCw, ChevronRight, Sliders, BarChart3, Inbox, Settings2, Rocket, UserPlus, Users, GitBranch } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ import { useMarketZoneState, type ZoneCategoryState } from "@/hooks/useMarketZon
 import { useMarketHealth, type HealthSnapshot } from "@/hooks/useMarketHealth";
 import { useAutopilotActions } from "@/hooks/useAutopilotActions";
 import { useGrowthSurfaceConfig } from "@/hooks/useGrowthSurfaceConfig";
-import { useGrowthEventStats } from "@/hooks/useGrowthEvents";
+import { useGrowthEventStats, useByocFunnelStats, useReferralFunnelStats, useByopFunnelStats } from "@/hooks/useGrowthEvents";
 import { useZoneStateRecommendations } from "@/hooks/useZoneStateRecommendations";
 import { ZoneCategoryDetailPanel } from "@/components/admin/ZoneCategoryDetailPanel";
 import { RecommendationsInbox } from "@/components/admin/RecommendationsInbox";
@@ -67,8 +67,12 @@ export default function AdminGrowth() {
           <TabsTrigger value="health" className="flex-1">Health</TabsTrigger>
           <TabsTrigger value="actions" className="flex-1">Actions</TabsTrigger>
           <TabsTrigger value="surfaces" className="flex-1">Surfaces</TabsTrigger>
+          <TabsTrigger value="funnels" className="flex-1">
+            <GitBranch className="h-3.5 w-3.5 mr-1" /> Funnels
+          </TabsTrigger>
           <TabsTrigger value="events" className="flex-1">Events</TabsTrigger>
         </TabsList>
+        <TabsContent value="funnels"><FunnelsTab /></TabsContent>
         <TabsContent value="matrix"><ZoneMatrixTab selectedZone={selectedZone} setSelectedZone={setSelectedZone} /></TabsContent>
         <TabsContent value="recommendations"><RecommendationsInbox /></TabsContent>
         <TabsContent value="thresholds"><ThresholdDials /></TabsContent>
@@ -483,6 +487,168 @@ function SurfacesTab({ selectedZone, setSelectedZone }: { selectedZone: string; 
   );
 }
 
+function FunnelBar({ steps }: { steps: { label: string; count: number }[] }) {
+  const max = Math.max(1, ...steps.map((s) => s.count));
+  return (
+    <div className="space-y-2">
+      {steps.map((step, i) => (
+        <div key={step.label} className="flex items-center gap-3">
+          <span className="text-xs w-24 text-muted-foreground">{step.label}</span>
+          <div className="flex-1 h-6 bg-muted rounded-sm overflow-hidden">
+            <div
+              className="h-full bg-primary/70 rounded-sm transition-all"
+              style={{ width: `${(step.count / max) * 100}%`, minWidth: step.count > 0 ? "2px" : 0 }}
+            />
+          </div>
+          <span className="text-xs font-medium w-12 text-right">{step.count}</span>
+          {i > 0 && steps[i - 1].count > 0 && (
+            <span className="text-xs text-muted-foreground w-12 text-right">
+              {Math.round((step.count / steps[i - 1].count) * 100)}%
+            </span>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function FunnelsTab() {
+  const [dateRange, setDateRange] = useState<"7d" | "30d" | "all">("30d");
+
+  const dateFilter = useMemo(() => {
+    if (dateRange === "all") return undefined;
+    const start = new Date();
+    start.setDate(start.getDate() - (dateRange === "7d" ? 7 : 30));
+    return { start: start.toISOString(), end: new Date().toISOString() };
+  }, [dateRange]);
+
+  const byoc = useByocFunnelStats(dateFilter);
+  const referral = useReferralFunnelStats(dateFilter);
+  const byop = useByopFunnelStats(dateFilter);
+
+  const isLoading = byoc.isLoading || referral.isLoading || byop.isLoading;
+  if (isLoading) return <div className="space-y-4 mt-4"><Skeleton className="h-48" /><Skeleton className="h-48" /><Skeleton className="h-48" /></div>;
+
+  const byocData = byoc.data ?? { invitesSent: 0, landingViews: 0, signups: 0, activated: 0 };
+  const refData = referral.data ?? { codesShared: 0, landingViews: 0, signups: 0, subscribed: 0, firstVisit: 0 };
+  const byopData = byop.data ?? { submitted: 0, underReview: 0, accepted: 0, notAFit: 0 };
+
+  // K-factor: activations per invite sent
+  const byocKFactor = byocData.invitesSent > 0 ? (byocData.activated / byocData.invitesSent) : 0;
+  const refKFactor = refData.codesShared > 0 ? (refData.signups / refData.codesShared) : 0;
+
+  const hasAnyData = byocData.invitesSent > 0 || refData.codesShared > 0 || byopData.submitted > 0;
+
+  return (
+    <div className="space-y-4 mt-4">
+      <div className="flex items-center gap-3">
+        <Select value={dateRange} onValueChange={(v) => setDateRange(v as "7d" | "30d" | "all")}>
+          <SelectTrigger className="w-32">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="7d">Last 7 days</SelectItem>
+            <SelectItem value="30d">Last 30 days</SelectItem>
+            <SelectItem value="all">All time</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {!hasAnyData && (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <Rocket className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+            <p className="text-sm font-medium">No growth events yet</p>
+            <p className="text-xs text-muted-foreground mt-1">Your signups, BYOC activations, and referral conversions will appear here.</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* BYOC Activation Funnel */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <UserPlus className="h-4 w-4" />
+            BYOC Activation Funnel
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <FunnelBar steps={[
+            { label: "Invites Sent", count: byocData.invitesSent },
+            { label: "Landing Views", count: byocData.landingViews },
+            { label: "Signups", count: byocData.signups },
+            { label: "Activated", count: byocData.activated },
+          ]} />
+        </CardContent>
+      </Card>
+
+      {/* Referral Conversion Funnel */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Referral Conversion Funnel
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <FunnelBar steps={[
+            { label: "Codes Shared", count: refData.codesShared },
+            { label: "Landing Views", count: refData.landingViews },
+            { label: "Signups", count: refData.signups },
+            { label: "Subscribed", count: refData.subscribed },
+            { label: "First Visit", count: refData.firstVisit },
+          ]} />
+        </CardContent>
+      </Card>
+
+      {/* BYOP Recommendation Tracker */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
+            BYOP Recommendation Tracker
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <FunnelBar steps={[
+            { label: "Submitted", count: byopData.submitted },
+            { label: "Under Review", count: byopData.underReview },
+            { label: "Accepted", count: byopData.accepted },
+          ]} />
+          {byopData.notAFit > 0 && (
+            <p className="text-xs text-muted-foreground mt-2">{byopData.notAFit} marked as not a fit</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* K-factor Summary */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            K-factor Summary
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">Activations per invite sent by loop</p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center">
+              <p className="text-2xl font-bold">{byocKFactor.toFixed(2)}</p>
+              <p className="text-xs text-muted-foreground">BYOC K-factor</p>
+              <p className="text-xs text-muted-foreground">{byocData.activated} / {byocData.invitesSent} invites</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold">{refKFactor.toFixed(2)}</p>
+              <p className="text-xs text-muted-foreground">Referral K-factor</p>
+              <p className="text-xs text-muted-foreground">{refData.signups} / {refData.codesShared} codes</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 const FUNNEL_STEPS = [
   { key: "prompt_shown", label: "Prompted" },
   { key: "share_initiated", label: "Initiated" },
@@ -494,12 +660,12 @@ const FUNNEL_STEPS = [
 function EventsTab({ selectedZone, setSelectedZone }: { selectedZone: string; setSelectedZone: (v: string) => void }) {
   const [dateRange, setDateRange] = useState<"7d" | "30d" | "all">("30d");
 
-  const dateFilter = (() => {
+  const dateFilter = useMemo(() => {
     if (dateRange === "all") return undefined;
     const start = new Date();
     start.setDate(start.getDate() - (dateRange === "7d" ? 7 : 30));
     return { start: start.toISOString(), end: new Date().toISOString() };
-  })();
+  }, [dateRange]);
 
   const stats = useGrowthEventStats(selectedZone === "__all__" ? undefined : selectedZone, dateFilter);
 
@@ -522,7 +688,7 @@ function EventsTab({ selectedZone, setSelectedZone }: { selectedZone: string; se
     <div className="space-y-4 mt-4">
       <div className="flex items-center gap-3">
         <ZoneFilter selectedZone={selectedZone} setSelectedZone={setSelectedZone} />
-        <Select value={dateRange} onValueChange={(v) => setDateRange(v as any)}>
+        <Select value={dateRange} onValueChange={(v) => setDateRange(v as "7d" | "30d" | "all")}>
           <SelectTrigger className="w-32">
             <SelectValue />
           </SelectTrigger>

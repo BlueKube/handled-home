@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useGrowthEvents } from "@/hooks/useGrowthEvents";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, ImageIcon, Loader2, ArrowRight } from "lucide-react";
+import { CheckCircle2, ImageIcon, Loader2, ArrowRight, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { useEffect, useRef } from "react";
 import handledLogo from "@/assets/handled-home-logo.png";
@@ -15,7 +15,7 @@ export default function ShareLanding() {
   const { recordEvent } = useGrowthEvents();
   const hasTracked = useRef(false);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["share-landing", shareCode],
     enabled: !!shareCode,
     queryFn: async () => {
@@ -39,24 +39,41 @@ export default function ShareLanding() {
         context: { share_code: shareCode },
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shareCode, data]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-background animate-fade-in">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6 text-center animate-fade-in">
+        <img src={handledLogo} alt="Handled Home" className="h-10 mb-6" />
+        <AlertTriangle className="h-10 w-10 text-warning mx-auto mb-4" />
+        <h1 className="text-h2 mb-2">This receipt couldn't be loaded</h1>
+        <p className="text-sm text-muted-foreground mb-6">
+          The share link may be invalid or the visit was removed.
+        </p>
+        <Button onClick={() => navigate("/auth")} size="lg" className="gap-2">
+          Get Handled Home <ArrowRight className="h-4 w-4" />
+        </Button>
       </div>
     );
   }
 
   if (!data || data.expired) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6 text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6 text-center animate-fade-in">
         <img src={handledLogo} alt="Handled Home" className="h-10 mb-6" />
         <h1 className="text-h2 mb-2">This share has expired</h1>
         <p className="text-sm text-muted-foreground mb-6">The link is no longer active.</p>
-        <Button onClick={() => navigate("/auth")} size="lg">
-          Get Handled Home <ArrowRight className="h-4 w-4 ml-1" />
+        <Button onClick={() => navigate("/auth")} size="lg" className="gap-2">
+          Get Handled Home <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
     );
@@ -133,8 +150,21 @@ export default function ShareLanding() {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-center pt-4">
+        <div className="flex flex-col items-center gap-3 pt-4">
           <img src={handledLogo} alt="Handled Home" className="h-6 opacity-60" />
+          <Button
+            variant="ghost"
+            className="text-muted-foreground min-h-[44px]"
+            onClick={() => {
+              if (window.history.length > 1) {
+                navigate(-1);
+              } else {
+                navigate("/");
+              }
+            }}
+          >
+            Close
+          </Button>
         </div>
       </div>
     </div>

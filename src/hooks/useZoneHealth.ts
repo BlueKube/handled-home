@@ -153,11 +153,12 @@ export function useZoneHealthDetail(zoneId: string | null) {
     queryFn: async () => {
       const sevenDaysAgo = daysAgoStr(7);
 
-      const [capsRes, providersRes, jobsRes, issuesRes] = await Promise.all([
+      const [capsRes, providersRes, jobsRes, issuesRes, categoryProvidersRes] = await Promise.all([
         supabase.from("zone_service_day_capacity").select("*").eq("zone_id", zoneId!),
         supabase.from("zone_provider_assignments").select("*, provider_orgs(business_name)").eq("zone_id", zoneId!),
         supabase.from("jobs").select("id, provider_org_id, status, completed_at, scheduled_date, arrived_at, departed_at").eq("zone_id", zoneId!).gte("scheduled_date", sevenDaysAgo),
         supabase.from("job_issues").select("id, job_id, issue_type, status").eq("status", "OPEN"),
+        supabase.from("zone_category_providers").select("category, provider_org_id, status, provider_orgs(name)").eq("zone_id", zoneId!),
       ]);
 
       const allJobs = jobsRes.data ?? [];
@@ -211,9 +212,33 @@ export function useZoneHealthDetail(zoneId: string | null) {
         jobs7d: jobsByProvider[p.provider_org_id] || 0,
       }));
 
+      // Build category coverage: group providers by category, flag gaps (<2 active)
+      const categoryMap: Record<string, { providers: { orgId: string; name: string; status: string }[] }> = {};
+      (categoryProvidersRes.data ?? []).forEach((cp: any) => {
+        const cat = cp.category ?? "uncategorized";
+        if (!categoryMap[cat]) categoryMap[cat] = { providers: [] };
+        categoryMap[cat].providers.push({
+          orgId: cp.provider_org_id,
+          name: cp.provider_orgs?.name ?? "Unknown",
+          status: cp.status,
+        });
+      });
+
+      const categoryCoverage = Object.entries(categoryMap).map(([category, data]) => {
+        const activeCount = data.providers.filter((p) => p.status === "ACTIVE").length;
+        return {
+          category,
+          activeProviders: activeCount,
+          totalProviders: data.providers.length,
+          hasGap: activeCount < 2,
+          providers: data.providers,
+        };
+      }).sort((a, b) => (a.hasGap === b.hasGap ? a.category.localeCompare(b.category) : a.hasGap ? -1 : 1));
+
       return {
         capacities: capsRes.data ?? [],
         providers,
+        categoryCoverage,
         jobs: allJobs,
         openIssues: issuesRes.data ?? [],
         proofCompliance,

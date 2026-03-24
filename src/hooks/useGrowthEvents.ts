@@ -56,7 +56,7 @@ export function useFrequencyCapCheck(
         since.setDate(since.getDate() - 7);
       } else {
         // Default: today
-        since.setHours(0, 0, 0, 0);
+        since.setUTCHours(0, 0, 0, 0);
       }
 
       // Fetch config to get cap value
@@ -113,6 +113,132 @@ export function useGrowthEventStats(zoneId?: string, dateRange?: { start: string
       });
 
       return { byType, bySurface, total: data?.length ?? 0 };
+    },
+  });
+}
+
+export function useByocFunnelStats(dateRange?: { start: string; end: string }) {
+  return useQuery({
+    queryKey: ["byoc-funnel-stats", dateRange?.start, dateRange?.end],
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      let linksQuery = (supabase as any)
+        .from("byoc_invite_links")
+        .select("id", { count: "exact", head: true });
+      let activationsQuery = (supabase as any)
+        .from("byoc_activations")
+        .select("id", { count: "exact", head: true });
+      let eventsQuery = (supabase as any)
+        .from("growth_events")
+        .select("event_type")
+        .in("event_type", ["byoc_landing_viewed", "byoc_signup_completed"])
+        .limit(5000);
+
+      if (dateRange?.start) {
+        linksQuery = linksQuery.gte("created_at", dateRange.start);
+        activationsQuery = activationsQuery.gte("created_at", dateRange.start);
+        eventsQuery = eventsQuery.gte("created_at", dateRange.start);
+      }
+      if (dateRange?.end) {
+        linksQuery = linksQuery.lte("created_at", dateRange.end);
+        activationsQuery = activationsQuery.lte("created_at", dateRange.end);
+        eventsQuery = eventsQuery.lte("created_at", dateRange.end);
+      }
+
+      const [links, activations, eventsResult] = await Promise.all([
+        linksQuery,
+        activationsQuery,
+        eventsQuery,
+      ]);
+
+      if (links.error) throw links.error;
+      if (activations.error) throw activations.error;
+      if (eventsResult.error) throw eventsResult.error;
+
+      const events = eventsResult.data ?? [];
+      const views = events.filter((e: any) => e.event_type === "byoc_landing_viewed").length;
+      const signups = events.filter((e: any) => e.event_type === "byoc_signup_completed").length;
+
+      return {
+        invitesSent: links.count ?? 0,
+        landingViews: views,
+        signups,
+        activated: activations.count ?? 0,
+      };
+    },
+  });
+}
+
+export function useReferralFunnelStats(dateRange?: { start: string; end: string }) {
+  return useQuery({
+    queryKey: ["referral-funnel-stats", dateRange?.start, dateRange?.end],
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      let codesQuery = (supabase as any)
+        .from("referral_codes")
+        .select("id", { count: "exact", head: true });
+      let eventsQuery = (supabase as any)
+        .from("growth_events")
+        .select("event_type")
+        .in("event_type", ["referral_landing_viewed", "referral_signup_completed", "referral_subscribed", "referral_first_visit"])
+        .limit(5000);
+
+      if (dateRange?.start) {
+        codesQuery = codesQuery.gte("created_at", dateRange.start);
+        eventsQuery = eventsQuery.gte("created_at", dateRange.start);
+      }
+      if (dateRange?.end) {
+        codesQuery = codesQuery.lte("created_at", dateRange.end);
+        eventsQuery = eventsQuery.lte("created_at", dateRange.end);
+      }
+
+      const [codes, eventsResult] = await Promise.all([
+        codesQuery,
+        eventsQuery,
+      ]);
+
+      if (codes.error) throw codes.error;
+      if (eventsResult.error) throw eventsResult.error;
+
+      const events = eventsResult.data ?? [];
+      const views = events.filter((e: any) => e.event_type === "referral_landing_viewed").length;
+      const signups = events.filter((e: any) => e.event_type === "referral_signup_completed").length;
+      const subscribed = events.filter((e: any) => e.event_type === "referral_subscribed").length;
+      const firstVisit = events.filter((e: any) => e.event_type === "referral_first_visit").length;
+
+      return {
+        codesShared: codes.count ?? 0,
+        landingViews: views,
+        signups,
+        subscribed,
+        firstVisit,
+      };
+    },
+  });
+}
+
+export function useByopFunnelStats(dateRange?: { start: string; end: string }) {
+  return useQuery({
+    queryKey: ["byop-funnel-stats", dateRange?.start, dateRange?.end],
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      let query = (supabase as any)
+        .from("byop_recommendations")
+        .select("status");
+
+      if (dateRange?.start) query = query.gte("created_at", dateRange.start);
+      if (dateRange?.end) query = query.lte("created_at", dateRange.end);
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      const rows = data ?? [];
+      return {
+        submitted: rows.length,
+        underReview: rows.filter((r: any) => r.status === "under_review").length,
+        accepted: rows.filter((r: any) => r.status === "accepted").length,
+        notAFit: rows.filter((r: any) => r.status === "not_a_fit").length,
+      };
     },
   });
 }

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ChevronLeft, TrendingUp } from "lucide-react";
 
 function weekStart(weeksAgo: number) {
@@ -88,13 +89,12 @@ export default function ProviderInsightsHistory() {
           {[1, 2].map((i) => <Skeleton key={i} className="h-48 rounded-2xl" />)}
         </div>
       ) : !data?.weeks.length ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <TrendingUp className="h-10 w-10 text-muted-foreground/40 mb-3" />
-          <p className="text-sm font-semibold text-foreground">No data available yet</p>
-          <p className="text-xs text-muted-foreground mt-1 max-w-[240px]">
-            Complete jobs to start seeing weekly performance trends.
-          </p>
-        </div>
+        <EmptyState
+          compact
+          icon={TrendingUp}
+          title="No data available yet"
+          body="Complete jobs to start seeing weekly performance trends."
+        />
       ) : (
         <div className="space-y-4">
           {/* Completed jobs chart */}

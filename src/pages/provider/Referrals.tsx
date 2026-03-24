@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Award, Copy, Link, Users, DollarSign, Clock, AlertTriangle, ChevronRight, TrendingUp, Megaphone } from "lucide-react";
+import { Award, Copy, Link, Users, UserPlus, DollarSign, Clock, AlertTriangle, ChevronRight, TrendingUp, Megaphone } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -125,6 +125,24 @@ export default function ProviderReferrals() {
           </CardContent>
         </Card>
       )}
+
+      {/* BYOC Quick Link */}
+      <Card
+        className="border-accent/20 bg-accent/5 cursor-pointer hover:shadow-md transition-shadow"
+        role="button"
+        tabIndex={0}
+        onClick={() => navigate("/provider/byoc")}
+        onKeyDown={(e) => e.key === "Enter" && navigate("/provider/byoc")}
+      >
+        <CardContent className="py-4 px-4 flex items-center gap-3 min-h-[44px]">
+          <UserPlus className="h-5 w-5 text-accent shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold">BYOC Center</p>
+            <p className="text-xs text-muted-foreground">Invite your existing customers</p>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+        </CardContent>
+      </Card>
 
       {/* Milestone share prompt */}
       {hasNewEarned && providerShareEnabled && (

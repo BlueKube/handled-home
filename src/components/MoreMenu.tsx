@@ -36,6 +36,7 @@ const customerSections: MenuSection[] = [
     title: "Community",
     items: [
       { label: "Referrals", icon: Users, path: "/customer/referrals" },
+      { label: "Recommend a Provider", icon: UserPlus, path: "/customer/recommend-provider" },
       { label: "Support", icon: HelpCircle, path: "/customer/support" },
     ],
   },

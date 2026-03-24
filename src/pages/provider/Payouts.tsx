@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   DollarSign, AlertTriangle, ChevronRight, ChevronLeft,
   Clock, CheckCircle2, Calendar, Wallet,
@@ -124,13 +125,12 @@ export default function ProviderPayouts() {
 
       {/* Zero balance empty state */}
       {eligibleBalance === 0 && heldBalance === 0 && isAccountReady && (
-        <div className="flex flex-col items-center justify-center py-8 text-center">
-          <Wallet className="h-10 w-10 text-muted-foreground/40 mb-3" />
-          <p className="text-sm font-semibold text-foreground">No pending payouts</p>
-          <p className="text-xs text-muted-foreground mt-1 max-w-[260px]">
-            Complete jobs to start earning. Payouts are processed every Friday.
-          </p>
-        </div>
+        <EmptyState
+          compact
+          icon={Wallet}
+          title="No pending payouts"
+          body="Complete jobs to start earning. Payouts are processed every Friday."
+        />
       )}
 
       {/* History link */}

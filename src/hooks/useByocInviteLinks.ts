@@ -21,6 +21,34 @@ export function useByocInviteLinks() {
     },
   });
 
+  const activeLinks = links.data?.filter((l) => l.is_active) ?? [];
+  const activeCount = activeLinks.length;
+
+  const todayLinksQuery = useQuery({
+    queryKey: ["byoc-invite-links-today", orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const todayStart = new Date();
+      todayStart.setUTCHours(0, 0, 0, 0);
+      const { count, error } = await supabase
+        .from("byoc_invite_links")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", orgId!)
+        .gte("created_at", todayStart.toISOString());
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
+  const todayCount = todayLinksQuery.data ?? 0;
+  const canCreateLink = todayLinksQuery.isSuccess && activeCount < 10 && todayCount < 10;
+  const rateLimitReason =
+    activeCount >= 10
+      ? "You have 10 active links — deactivate an unused link before creating a new one."
+      : todayCount >= 10
+      ? "You've reached today's invite limit. Try again tomorrow."
+      : null;
+
   const createLink = useMutation({
     mutationFn: async (payload: {
       category_key: string;
@@ -30,6 +58,25 @@ export function useByocInviteLinks() {
       default_cadence?: string;
     }) => {
       if (!orgId) throw new Error("No org");
+      // Re-check limits from DB to prevent stale-cache bypass
+      const { count: freshActiveCount } = await supabase
+        .from("byoc_invite_links")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", orgId)
+        .eq("is_active", true);
+      if ((freshActiveCount ?? 0) >= 10) {
+        throw new Error("You have 10 active links — deactivate an unused link before creating a new one.");
+      }
+      const todayStart = new Date();
+      todayStart.setUTCHours(0, 0, 0, 0);
+      const { count: freshTodayCount } = await supabase
+        .from("byoc_invite_links")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", orgId)
+        .gte("created_at", todayStart.toISOString());
+      if ((freshTodayCount ?? 0) >= 10) {
+        throw new Error("You've reached today's invite limit. Try again tomorrow.");
+      }
       const token = generateToken();
       const { data, error } = await supabase
         .from("byoc_invite_links")
@@ -47,15 +94,20 @@ export function useByocInviteLinks() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["byoc-invite-links"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["byoc-invite-links"] });
+      qc.invalidateQueries({ queryKey: ["byoc-invite-links-today"] });
+    },
   });
 
   const deactivateLink = useMutation({
     mutationFn: async (linkId: string) => {
+      if (!orgId) throw new Error("No org");
       const { error } = await supabase
         .from("byoc_invite_links")
         .update({ is_active: false })
-        .eq("id", linkId);
+        .eq("id", linkId)
+        .eq("org_id", orgId);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["byoc-invite-links"] }),
@@ -83,14 +135,20 @@ export function useByocInviteLinks() {
     },
   });
 
-  return { links, createLink, deactivateLink, events };
+  return { links, createLink, deactivateLink, events, canCreateLink, rateLimitReason };
 }
 
 function generateToken(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const limit = 256 - (256 % chars.length); // 248 — reject bytes >= limit to avoid modulo bias
   let token = "HH-";
-  for (let i = 0; i < 8; i++) {
-    token += chars[Math.floor(Math.random() * chars.length)];
+  let i = 0;
+  while (i < 8) {
+    const [b] = crypto.getRandomValues(new Uint8Array(1));
+    if (b < limit) {
+      token += chars[b % chars.length];
+      i++;
+    }
   }
   return token;
 }

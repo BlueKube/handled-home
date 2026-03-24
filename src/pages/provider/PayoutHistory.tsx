@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ChevronLeft, DollarSign, Banknote, Clock } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageSkeleton } from "@/components/PageSkeleton";
@@ -66,13 +67,12 @@ export default function ProviderPayoutHistory() {
 
         <TabsContent value="earnings" className="space-y-4 mt-3">
           {earnings.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <DollarSign className="h-10 w-10 text-muted-foreground/40 mb-3" />
-              <p className="text-sm font-semibold text-foreground">No earnings yet</p>
-              <p className="text-xs text-muted-foreground mt-1 max-w-[240px]">
-                Complete jobs to start earning. Your earnings will appear here.
-              </p>
-            </div>
+            <EmptyState
+              compact
+              icon={DollarSign}
+              title="No earnings yet"
+              body="Complete jobs to start earning. Your earnings will appear here."
+            />
           ) : (
             earningsByDate.map(([date, dateEarnings]) => (
               <div key={date} className="space-y-2">
@@ -109,13 +109,12 @@ export default function ProviderPayoutHistory() {
 
         <TabsContent value="payouts" className="space-y-2 mt-3">
           {payouts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Banknote className="h-10 w-10 text-muted-foreground/40 mb-3" />
-              <p className="text-sm font-semibold text-foreground">No payouts yet</p>
-              <p className="text-xs text-muted-foreground mt-1 max-w-[240px]">
-                Payouts are processed weekly on Fridays. Your payout history will appear here.
-              </p>
-            </div>
+            <EmptyState
+              compact
+              icon={Banknote}
+              title="No payouts yet"
+              body="Payouts are processed weekly on Fridays. Your payout history will appear here."
+            />
           ) : (
             payouts.map((p) => (
               <Card key={p.id}>

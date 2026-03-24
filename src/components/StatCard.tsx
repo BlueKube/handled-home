@@ -1,5 +1,6 @@
 import { type LucideIcon, TrendingUp, TrendingDown } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { HelpTip } from "@/components/ui/help-tip";
 import { cn } from "@/lib/utils";
 
 interface StatCardProps {
@@ -12,9 +13,10 @@ interface StatCardProps {
   };
   compact?: boolean;
   className?: string;
+  helpText?: string;
 }
 
-export function StatCard({ icon: Icon, label, value, trend, compact = false, className }: StatCardProps) {
+export function StatCard({ icon: Icon, label, value, trend, compact = false, className, helpText }: StatCardProps) {
   if (compact) {
     return (
       <div className={cn("flex items-center gap-3 py-2", className)}>
@@ -45,7 +47,10 @@ export function StatCard({ icon: Icon, label, value, trend, compact = false, cla
           <Icon className="h-5 w-5 text-accent" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-muted-foreground">{label}</p>
+          <p className="text-sm text-muted-foreground flex items-center gap-0.5">
+            {label}
+            {helpText && <HelpTip text={helpText} />}
+          </p>
           <div className="flex items-baseline gap-2 mt-0.5">
             <p className="text-2xl font-bold tracking-tight">{value}</p>
             {trend && (

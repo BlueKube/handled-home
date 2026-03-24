@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Loader2, Plus, Copy, Link2, Users, Gift, ChevronDown, CheckCircle, XCircle, AlertTriangle, Info } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Plus, Copy, Link2, Users, Gift, ChevronDown, CheckCircle, XCircle, AlertTriangle, Info, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -20,8 +21,21 @@ export default function ByocCenter() {
 
   if (orgLoading || links.isLoading) {
     return (
-      <div className="p-4 flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="animate-fade-in p-4 pb-24 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-3 w-44" />
+          </div>
+          <Skeleton className="h-9 w-24 rounded-xl" />
+        </div>
+        <Skeleton className="h-28 rounded-2xl" />
+        <div className="grid grid-cols-3 gap-3">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-20 rounded-xl" />
+          ))}
+        </div>
+        <Skeleton className="h-32 rounded-2xl" />
       </div>
     );
   }
@@ -185,6 +199,27 @@ export default function ByocCenter() {
           </CardContent>
         </Card>
       )}
+
+      {/* Customer Referral Cross-Sell */}
+      <Card className="border-border bg-muted/50">
+        <CardContent className="py-4 px-4">
+          <div className="flex items-start gap-3">
+            <Users className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+            <div className="space-y-1.5 flex-1 min-w-0">
+              <p className="text-sm font-medium">Your customers can refer their neighbors too</p>
+              <p className="text-xs text-muted-foreground">
+                Activated customers get a referral code — more neighbors means denser routes and better earnings for you.
+              </p>
+              <button
+                onClick={() => navigate("/provider/referrals")}
+                className="text-xs text-accent underline min-h-[44px] flex items-center"
+              >
+                Learn about customer referrals
+              </button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -248,7 +283,7 @@ function InviteLinkCard({
           {inactive ? (
             <XCircle className="h-3 w-3 text-muted-foreground" />
           ) : (
-            <CheckCircle className="h-3 w-3 text-green-500" />
+            <CheckCircle className="h-3 w-3 text-success" />
           )}
         </div>
         <span className="text-xs text-muted-foreground font-mono">{link.token}</span>

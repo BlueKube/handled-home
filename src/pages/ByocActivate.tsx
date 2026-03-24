@@ -7,7 +7,7 @@ import { getCategoryLabel } from "@/lib/serviceCategories";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ArrowRight, Clock, MapPin, Shield, Camera, Sparkles } from "lucide-react";
+import { Loader2, ArrowRight, Clock, MapPin, Shield, Camera, Sparkles, BadgeCheck } from "lucide-react";
 import handledLogo from "@/assets/handled-home-logo.png";
 import CustomerByocOnboardingWizard from "@/pages/customer/ByocOnboardingWizard";
 
@@ -161,8 +161,14 @@ export default function ByocActivate() {
                 {providerInitial}
               </div>
             )}
-            <div>
-              <p className="font-semibold">{providerName}</p>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <p className="font-semibold">{providerName}</p>
+                <Badge variant="outline" className="text-xs gap-1 shrink-0">
+                  <BadgeCheck className="h-3 w-3 text-accent" />
+                  Verified
+                </Badge>
+              </div>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <MapPin className="h-3 w-3" />
                 {invite?.zone_name || "Your area"}
@@ -255,6 +261,11 @@ export default function ByocActivate() {
 
         <p className="text-xs text-muted-foreground text-center">
           Free to join. Pricing set by Handled Home. Cancel anytime.
+        </p>
+
+        <p className="text-xs text-muted-foreground/70 text-center">
+          How it works — your provider continues servicing your home, managed through
+          Handled Home's scheduling and quality platform.
         </p>
       </div>
     </div>

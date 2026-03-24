@@ -7,6 +7,8 @@ import { StatCard } from "@/components/StatCard";
 import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { useProviderEarnings, type EarningsPeriod, type ProviderEarning, type HeldEarning } from "@/hooks/useProviderEarnings";
 import { formatCents } from "@/utils/format";
+import { EmptyState } from "@/components/ui/empty-state";
+import { HelpTip } from "@/components/ui/help-tip";
 import {
   DollarSign,
   TrendingUp,
@@ -177,11 +179,12 @@ function EarningsList({ period }: { period: EarningsPeriod }) {
 
   if (earnings.length === 0) {
     return (
-      <div className="text-center py-10">
-        <DollarSign className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
-        <p className="text-sm text-muted-foreground">No earnings for this period</p>
-        <p className="text-xs text-muted-foreground/60 mt-1">Complete jobs to start earning</p>
-      </div>
+      <EmptyState
+        compact
+        icon={DollarSign}
+        title="No earnings for this period"
+        body="Complete jobs to start earning. Earnings appear here after each service."
+      />
     );
   }
 
@@ -213,10 +216,12 @@ function PayoutsList() {
 
   if (payouts.length === 0) {
     return (
-      <div className="text-center py-10">
-        <Banknote className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
-        <p className="text-sm text-muted-foreground">No payouts yet</p>
-      </div>
+      <EmptyState
+        compact
+        icon={Banknote}
+        title="No payouts yet"
+        body="Payouts are processed weekly on Fridays. Complete jobs to get started."
+      />
     );
   }
 
@@ -263,7 +268,7 @@ export default function ProviderEarnings() {
   const periodLabel = period === "today" ? "Today" : period === "week" ? "This Week" : "This Month";
 
   return (
-    <div className="animate-fade-in p-4 pb-24 space-y-5 max-w-2xl">
+    <div className="animate-fade-in p-4 pb-24 space-y-5">
       <div>
         <h1 className="text-h2">Earnings</h1>
         <p className="text-caption mt-0.5">Track your earnings and payouts</p>
@@ -292,16 +297,19 @@ export default function ProviderEarnings() {
           icon={DollarSign}
           label={`${periodLabel} Earned`}
           value={isLoading ? "—" : formatCents(periodTotal)}
+          helpText="Total earnings from completed jobs in this period, before holds."
         />
         <StatCard
           icon={Zap}
           label="Modifiers"
           value={isLoading ? "—" : `${periodModifiers >= 0 ? "+" : ""}${formatCents(periodModifiers)}`}
+          helpText="Bonuses (rush, quality tier) and adjustments applied to your base pay."
         />
         <StatCard
           icon={TrendingUp}
           label="Available"
           value={isLoading ? "—" : formatCents(eligibleBalance)}
+          helpText="Earnings ready for your next payout. Processed weekly on Fridays."
         />
         <div
           role={heldBalance > 0 ? "button" : undefined}
@@ -316,6 +324,7 @@ export default function ProviderEarnings() {
             icon={Clock}
             label={heldBalance > 0 ? `On Hold ${holdExpanded ? "▲" : "▼"}` : "On Hold"}
             value={isLoading ? "—" : formatCents(heldBalance)}
+            helpText="Earnings under review or awaiting payout setup. Released after confirmation."
           />
         </div>
       </div>

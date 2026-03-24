@@ -7,7 +7,8 @@ import { useByocInviteLinks } from "@/hooks/useByocInviteLinks";
 import { useSkuLevels } from "@/hooks/useSkuLevels";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Loader2, Link2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ChevronLeft, Loader2, Link2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
 const CADENCES = [
@@ -22,7 +23,7 @@ export default function ByocCreateLink() {
   const { org } = useProviderOrg();
   const { coverage } = useProviderCoverage(org?.id);
   const { capabilities } = useProviderCapabilities(org?.id);
-  const { createLink } = useByocInviteLinks();
+  const { createLink, canCreateLink, rateLimitReason } = useByocInviteLinks();
 
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedZone, setSelectedZone] = useState("");
@@ -59,7 +60,7 @@ export default function ByocCreateLink() {
   const handleCreate = async () => {
     if (!canCreate) return;
     try {
-      const result = await createLink.mutateAsync({
+      await createLink.mutateAsync({
         category_key: selectedCategory,
         zone_id: selectedZone,
         sku_id: selectedSku || undefined,
@@ -228,10 +229,18 @@ export default function ByocCreateLink() {
         </CardContent>
       </Card>
 
+      {/* Rate limit warning */}
+      {rateLimitReason && (
+        <Alert variant="destructive" className="animate-fade-in">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>{rateLimitReason}</AlertDescription>
+        </Alert>
+      )}
+
       {/* Create */}
       <Button
         className="w-full"
-        disabled={!canCreate || createLink.isPending}
+        disabled={!canCreate || !canCreateLink || createLink.isPending}
         onClick={handleCreate}
       >
         {createLink.isPending ? (

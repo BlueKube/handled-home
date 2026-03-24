@@ -47,6 +47,8 @@
 | `/customer/coverage-map` | Coverage Map | PropertyGate |
 | `/customer/home-assistant` | Home Assistant | PropertyGate |
 | `/customer/referrals` | Referrals | PropertyGate |
+| `/customer/recommend-provider` | Recommend a Provider (BYOP) | PropertyGate |
+| `/customer/recommend-provider/status` | Provider Recommendations Tracker | PropertyGate |
 | `/customer/services` | Service Catalog | PropertyGate |
 | `/customer/onboarding` | Customer Onboarding | — |
 | `/customer/onboarding/byoc/:token` | BYOC Customer Onboarding | — |
@@ -180,10 +182,10 @@
 | Role | Pages |
 |------|-------|
 | Public | 4 |
-| Customer | 40 |
+| Customer | 42 |
 | Provider | 36 |
 | Admin | 61 |
-| **Total** | **141** |
+| **Total** | **143** |
 
 ---
 
@@ -262,11 +264,11 @@ BYOC (Bring Your Own Customers):
 5. Customer onboarded into Handled Home with provider connection preserved
 
 BYOP (Bring Your Own Provider):
-1. Customer navigates to `/customer/byop` (via More → Community or in-app prompt)
+1. Customer navigates to `/customer/recommend-provider` (via More → Community or in-app prompt)
 2. Submits provider recommendation: name, service category, contact info, optional note
-3. Admin reviews nomination at `/admin/providers/byop` — decides to invite, reject, or flag duplicate
+3. Admin reviews nomination via `/admin/providers/applications` — decides to invite, reject, or flag duplicate
 4. If invited: provider receives Handled Home onboarding invite (standard provider onboarding flow)
-5. Customer sees nomination status updates at `/customer/byop/status`
+5. Customer sees nomination status updates at `/customer/recommend-provider/status`
 6. If provider joins and is approved: admin can assign them to the customer's zone/route
 
 Admin Exception Triage:

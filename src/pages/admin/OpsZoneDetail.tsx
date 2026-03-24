@@ -6,7 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ChevronLeft, Settings, CreditCard, TrendingUp, Camera, RotateCcw, Clock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ChevronLeft, Settings, CreditCard, TrendingUp, Camera, RotateCcw, Clock, AlertTriangle, Users, ShieldAlert } from "lucide-react";
 import { AdminReadOnlyMap } from "@/components/admin/AdminReadOnlyMap";
 import { format } from "date-fns";
 
@@ -29,6 +30,8 @@ export default function OpsZoneDetail() {
 
   const capacities = detail?.capacities ?? [];
   const providers = detail?.providers ?? [];
+  const categoryCoverage = detail?.categoryCoverage ?? [];
+  const gapCategories = categoryCoverage.filter((c) => c.hasGap);
 
   // Fetch today's jobs with coordinates for the map
   const today = format(new Date(), "yyyy-MM-dd");
@@ -68,6 +71,30 @@ export default function OpsZoneDetail() {
           <p className="text-caption">{zone.regionName} • {zone.defaultServiceDay}</p>
         </div>
       </div>
+
+      {/* Coverage Gap Alert */}
+      {gapCategories.length > 0 && (
+        <div className="rounded-xl border border-warning/30 bg-warning/10 p-4" role="alert">
+          <div className="flex items-start gap-3">
+            <ShieldAlert className="h-5 w-5 text-warning shrink-0 mt-0.5" />
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-warning-foreground">
+                Coverage Gap — {gapCategories.length} {gapCategories.length === 1 ? "category" : "categories"} below minimum
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Zones need at least 2 active providers per service category. Categories below threshold may trigger waitlisting for new activations.
+              </p>
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {gapCategories.map((g) => (
+                  <Badge key={g.category} variant="outline" className="text-warning border-warning/40 capitalize">
+                    {g.category} ({g.activeProviders}/{2})
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Capacity */}
       <Card className="p-4 space-y-3">
@@ -171,6 +198,57 @@ export default function OpsZoneDetail() {
           </div>
         )}
       </Card>
+
+      {/* Category Coverage Breakdown */}
+      {categoryCoverage.length > 0 && (
+        <Card className="p-4 space-y-3">
+          <h2 className="font-semibold flex items-center gap-2">
+            <Users className="h-4 w-4 text-muted-foreground" />
+            Coverage by Category
+          </h2>
+          <div className="space-y-3">
+            {categoryCoverage.map((cat) => (
+              <div key={cat.category} className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium capitalize">{cat.category}</span>
+                    {cat.hasGap ? (
+                      <Badge variant="outline" className="text-destructive border-destructive/40 text-xs">
+                        <AlertTriangle className="h-3 w-3 mr-1" />
+                        Gap
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-success border-success/40 text-xs">
+                        Covered
+                      </Badge>
+                    )}
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {cat.activeProviders} active / {cat.totalProviders} total
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {cat.providers.map((p) => (
+                    <Badge
+                      key={p.orgId}
+                      variant={p.status === "ACTIVE" ? "secondary" : "outline"}
+                      className={`text-xs ${p.status !== "ACTIVE" ? "opacity-60" : ""}`}
+                    >
+                      {p.name}
+                      {p.status !== "ACTIVE" && (
+                        <span className="ml-1 lowercase">({p.status})</span>
+                      )}
+                    </Badge>
+                  ))}
+                  {cat.providers.length === 0 && (
+                    <span className="text-xs text-muted-foreground">No providers</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       {/* Route Map */}
       {mapStops.length > 0 && (
