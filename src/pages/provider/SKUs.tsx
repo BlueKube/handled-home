@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Search, Clock, CloudRain, Package } from "lucide-react";
 import { useSkus, FULFILLMENT_MODE_LABELS } from "@/hooks/useSkus";
@@ -27,7 +28,21 @@ export default function ProviderSKUs() {
       </div>
 
       {isLoading ? (
-        <p className="text-center text-muted-foreground py-8">Loading…</p>
+        <div className="grid gap-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex gap-3 p-3">
+              <Skeleton className="w-16 h-16 rounded-lg shrink-0" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-48" />
+                <div className="flex gap-1.5">
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                  <Skeleton className="h-5 w-20 rounded-full" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       ) : skus.length === 0 ? (
         <EmptyState
           compact

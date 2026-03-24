@@ -11,6 +11,7 @@ import { useProviderQualityScore } from "@/hooks/useProviderQualityScore";
 import { useProviderTier } from "@/hooks/useProviderTier";
 import { useProviderOrg } from "@/hooks/useProviderOrg";
 import { EmptyState } from "@/components/ui/empty-state";
+import { HelpTip } from "@/components/ui/help-tip";
 import {
   CheckCircle,
   Clock,
@@ -27,7 +28,7 @@ import {
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
-function MetricRing({ value, label, color }: { value: number | null; label: string; color: string }) {
+function MetricRing({ value, label, color, helpText }: { value: number | null; label: string; color: string; helpText?: string }) {
   const display = value !== null ? `${value}%` : "—";
   const circumference = 2 * Math.PI * 36;
   const offset = value !== null ? circumference - (value / 100) * circumference : circumference;
@@ -54,7 +55,10 @@ function MetricRing({ value, label, color }: { value: number | null; label: stri
           <span className="text-lg font-bold">{display}</span>
         </div>
       </div>
-      <span className="text-xs text-muted-foreground text-center">{label}</span>
+      <span className="text-xs text-muted-foreground text-center flex items-center gap-0.5">
+        {label}
+        {helpText && <HelpTip text={helpText} />}
+      </span>
     </div>
   );
 }
@@ -233,9 +237,9 @@ export default function ProviderPerformance() {
         </CardHeader>
         <CardContent>
           <div className="flex justify-around py-2">
-            <MetricRing value={stats?.onTimeRate ?? null} label="On-Time Rate" color="hsl(var(--success))" />
-            <MetricRing value={proofCompliance} label="Photo Compliance" color="hsl(var(--accent))" />
-            <MetricRing value={issueRate !== null ? Math.max(0, 100 - issueRate) : null} label="Issue-Free" color="hsl(var(--warning))" />
+            <MetricRing value={stats?.onTimeRate ?? null} label="On-Time Rate" color="hsl(var(--success))" helpText="% of jobs where you arrived within the scheduled window." />
+            <MetricRing value={proofCompliance} label="Photo Compliance" color="hsl(var(--accent))" helpText="% of jobs with required before/after photos uploaded." />
+            <MetricRing value={issueRate !== null ? Math.max(0, 100 - issueRate) : null} label="Issue-Free" color="hsl(var(--warning))" helpText="% of jobs completed without any reported issues or redo requests." />
           </div>
         </CardContent>
       </Card>

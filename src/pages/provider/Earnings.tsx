@@ -8,6 +8,7 @@ import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { useProviderEarnings, type EarningsPeriod, type ProviderEarning, type HeldEarning } from "@/hooks/useProviderEarnings";
 import { formatCents } from "@/utils/format";
 import { EmptyState } from "@/components/ui/empty-state";
+import { HelpTip } from "@/components/ui/help-tip";
 import {
   DollarSign,
   TrendingUp,
@@ -296,16 +297,19 @@ export default function ProviderEarnings() {
           icon={DollarSign}
           label={`${periodLabel} Earned`}
           value={isLoading ? "—" : formatCents(periodTotal)}
+          helpText="Total earnings from completed jobs in this period, before holds."
         />
         <StatCard
           icon={Zap}
           label="Modifiers"
           value={isLoading ? "—" : `${periodModifiers >= 0 ? "+" : ""}${formatCents(periodModifiers)}`}
+          helpText="Bonuses (rush, quality tier) and adjustments applied to your base pay."
         />
         <StatCard
           icon={TrendingUp}
           label="Available"
           value={isLoading ? "—" : formatCents(eligibleBalance)}
+          helpText="Earnings ready for your next payout. Processed weekly on Fridays."
         />
         <div
           role={heldBalance > 0 ? "button" : undefined}
@@ -320,6 +324,7 @@ export default function ProviderEarnings() {
             icon={Clock}
             label={heldBalance > 0 ? `On Hold ${holdExpanded ? "▲" : "▼"}` : "On Hold"}
             value={isLoading ? "—" : formatCents(heldBalance)}
+            helpText="Earnings under review or awaiting payout setup. Released after confirmation."
           />
         </div>
       </div>

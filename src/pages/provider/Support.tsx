@@ -3,6 +3,7 @@ import { useSupportTickets } from "@/hooks/useSupportTickets";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TicketStatusChip } from "@/components/support/TicketStatusChip";
+import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { AlertTriangle, ChevronRight, Inbox, ShieldAlert } from "lucide-react";
 import { format } from "date-fns";
@@ -21,8 +22,17 @@ export default function ProviderSupportHome() {
         <p className="text-caption mt-0.5">Claims and disputes involving your jobs</p>
       </div>
 
+      {/* Loading skeleton */}
+      {isLoading && (
+        <div className="space-y-3">
+          {[1, 2].map((i) => (
+            <Skeleton key={i} className="h-20 w-full rounded-2xl" />
+          ))}
+        </div>
+      )}
+
       {/* Needs your input */}
-      {needsInput.length > 0 && (
+      {!isLoading && needsInput.length > 0 && (
         <section className="space-y-3">
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-warning" />
@@ -55,7 +65,7 @@ export default function ProviderSupportHome() {
       )}
 
       {/* Other active tickets */}
-      {activeTickets.length > 0 && (
+      {!isLoading && activeTickets.length > 0 && (
         <section className="space-y-3">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Active tickets</h2>
           {activeTickets.map((ticket) => (
