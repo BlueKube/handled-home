@@ -137,10 +137,11 @@ export default function CustomerServiceDay() {
   if (assignment.status === "confirmed") {
     return (
       <div className="px-4 py-6 pb-24 max-w-lg mx-auto animate-fade-in space-y-6">
-        <div className="flex items-center gap-1">
-          <ServiceDayConfirmed dayOfWeek={assignment.day_of_week} />
+        <div className="flex items-center gap-1 mb-1">
+          <h1 className="text-h2">Your Service Day</h1>
           <HelpTip text="Your recommended day is optimized for route efficiency — choosing it helps your provider serve your neighborhood faster." />
         </div>
+        <ServiceDayConfirmed dayOfWeek={assignment.day_of_week} />
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-foreground">Scheduling preferences</h3>
           <SchedulingPreferences
