@@ -6,7 +6,7 @@
 
 Mobile-first iOS & Android app via Capacitor. Admin uses desktop sidebar layout — see Admin Layout section below. Reference `docs/app-flow-pages-and-roles.md` for the full route tree.
 
-### Device Tiers
+### device size tiers
 
 | Tier | Viewport | Example | Notes |
 |------|----------|---------|-------|
@@ -14,27 +14,27 @@ Mobile-first iOS & Android app via Capacitor. Admin uses desktop sidebar layout 
 | Regular | 376px–428px | iPhone 15 (390px) | **Design target** — all specs reference this tier |
 | Max | 429px–480px | iPhone 15 Pro Max (430px) | Extra breathing room, no layout changes needed |
 
-### Orientation Handling
+### orientation handling
 
 - Lock customer/provider screens to portrait via Capacitor `Screen.lock({ orientation: 'portrait' })`
 - Admin desktop: landscape-optimized sidebar + content layout, min-width 1024px
 - If a customer rotates to landscape, content reflows naturally — no special breakpoints
 
-### Dynamic Type and Font Scaling
+### dynamic type and font scaling
 
 - Base font: 16px Inter on regular tier. All typography uses rem units internally
 - Respect iOS Dynamic Type: Capacitor's WebView inherits system font-size preferences
 - Maximum scale: 1.4× (set via `viewport` meta `maximum-scale` to prevent layout breakage)
 - Minimum body text: 13px (`.text-caption`) — never smaller, even at reduced accessibility sizes
 
-### Keyboard Avoidance
+### keyboard avoidance
 
 - Capacitor `Keyboard.setResizeMode({ mode: 'native' })` — WebView resizes when keyboard opens
 - Scroll focused input into view: `input.scrollIntoView({ behavior: 'smooth', block: 'center' })` on focus
 - Bottom-docked CTAs (like "Save" buttons) must use `pb-safe` and shift above keyboard
 - Sheet/drawer content scrolls independently — keyboard push doesn't affect overlay position
 
-### Capacitor and Native Integration
+### capacitor and native integration
 
 - **Safe areas**: `.safe-top` applies `env(safe-area-inset-top)` for notch; `.safe-bottom` for home indicator
 - **Status bar**: light-content on dark backgrounds (navy sidebar), dark-content on light backgrounds
@@ -48,7 +48,7 @@ Mobile-first iOS & Android app via Capacitor. Admin uses desktop sidebar layout 
 
 Brand personality: **calm concierge** — confident, kind, predictable. Tagline: "Your home, handled." See `docs/masterplan.md` for full brand positioning.
 
-### Personality-to-Design Mappings
+### personality → design mappings
 
 | Personality Trait | Visual Decision | Implementation |
 |-------------------|----------------|----------------|
@@ -58,7 +58,7 @@ Brand personality: **calm concierge** — confident, kind, predictable. Tagline:
 | **Kind** | Warm success messages, gentle error copy, rounded shapes | `rounded-2xl` cards; "We'll take care of it" not "Error occurred" |
 | **Premium** | Generous whitespace, Inter 300–700 weight range, glass surface treatment | `p-4` card padding; `.glass` utility with backdrop-blur-xl |
 
-### UI Copy Tone Examples
+### copy tone examples
 
 - **Success toast**: "Service confirmed — your lawn is on the schedule."
 - **Error toast**: "We couldn't save that change. Check your connection and try again."
@@ -67,7 +67,7 @@ Brand personality: **calm concierge** — confident, kind, predictable. Tagline:
 - **Notification**: "Your pool service is complete. View the proof-of-work photos."
 - **Onboarding**: "Tell us about your home so we can recommend the right plan."
 
-### Imagery and Illustration Direction
+### imagery + illustration direction
 
 - Photography: warm, natural lighting; residential settings; no stock-photo feel
 - Illustration style: outlined Lucide icons at 24px with 1.5px stroke width; accent tint for icon containers using `bg-accent/10` with `rounded-full`
@@ -75,14 +75,14 @@ Brand personality: **calm concierge** — confident, kind, predictable. Tagline:
 - Spot illustrations for empty states: single-color line art using `text-muted-foreground`
 - No decorative gradients — visual language is flat with subtle shadow depth
 
-### Celebration and Delight Moments
+### celebration + delight moments
 
 - **Service completion**: success toast with checkmark icon + `.animate-scale-in` at 200ms
 - **Plan activation**: confetti-style milestone card with accent border and `bg-accent/5` tint
 - **Onboarding completion**: congratulations screen with achievement icon at 48px
 - **First service booked**: reward badge pulse animation, scale(1.0→1.05→1.0) over 300ms
 
-### Brand Anti-Patterns
+### brand anti-patterns
 
 - Never use aggressive language: avoid "URGENT", "ACT NOW", "Don't miss out"
 - Never use red for non-destructive actions — `bg-destructive` is reserved for errors and delete confirmations
@@ -108,7 +108,7 @@ Line-height ≥ 1.5×
 
 All colors use CSS custom properties via `hsl(var(--<name>))` — defined in `src/index.css`. WCAG AA compliance required.
 
-### Primitive Tokens
+### primitive tokens (raw values)
 
 Core palette values. These are raw HSL values — never reference primitives directly in components, use semantic tokens instead.
 
@@ -139,7 +139,7 @@ Core palette values. These are raw HSL values — never reference primitives dir
 | `--ring` | 200 80% 50% | 200 80% 50% |
 | `--radius` | 0.75rem | 0.75rem |
 
-### Semantic Tokens
+### semantic tokens (aliases)
 
 Purpose-based aliases that map primitives to roles. Use these in components.
 
@@ -166,7 +166,7 @@ Specific tokens scoped to individual components:
 | `--sidebar-accent` | 214 55% 20% | 214 55% 15% | Sidebar hover state |
 | `--sidebar-border` | 214 50% 22% | 214 50% 15% | Sidebar dividers |
 
-### Token Naming Convention
+### --token naming convention
 
 Naming pattern: `--{category}-{role}-{modifier}`. Examples following this token naming convention:
 - `--background` — base surface color (single-tier shorthand)
@@ -182,7 +182,7 @@ Naming pattern: `--{category}-{role}-{modifier}`. Examples following this token 
 
 Dark theme is applied via the `.dark` class on `<html>`. All tokens in the color table above include explicit dark values from `src/index.css`.
 
-### Dark Elevation Model
+### dark elevation model
 
 In dark mode, elevation is communicated through surface luminance rather than shadow — higher surfaces are lighter. Shadow opacity is reduced to 40% of light-mode values since shadows are less visible against dark backgrounds.
 
@@ -193,7 +193,7 @@ In dark mode, elevation is communicated through surface luminance rather than sh
 | 2 — Overlay | `bg-popover` | shadow-md | `hsl(214 55% 12%)` — same as card, border distinguishes |
 | 3 — Sidebar | `bg-sidebar-background` | none | `hsl(214 65% 6%)` — darker than base for contrast |
 
-### Dark Image and Illustration Guidance
+### dark image + illustration guidance
 
 - Apply `brightness(0.85)` filter to photos in dark mode to reduce glare
 - Reduce illustration saturation by 10% — overly vivid colors clash with muted dark surfaces
@@ -201,7 +201,7 @@ In dark mode, elevation is communicated through surface luminance rather than sh
 - Use `text-foreground` for illustration line strokes (adapts automatically)
 - Placeholder/skeleton shimmer gradient shifts from `hsl(214 55% 12%)` to `hsl(214 55% 16%)`
 
-### Dark Component Overrides
+### .dark component overrides
 
 - **Button (default)**: flips from navy `bg-primary` to cyan `bg-primary` — foreground becomes dark `hsl(214 65% 8%)`
 - **Card**: border becomes visible at `hsl(214 50% 22%)` since shadow is ineffective
@@ -213,7 +213,7 @@ In dark mode, elevation is communicated through surface luminance rather than sh
 - **Dialog/Sheet**: overlay darkness increases from `rgba(0,0,0,0.5)` to `rgba(0,0,0,0.7)`
 - **Navigation sidebar**: `hsl(214 65% 6%)` — darker than page background for clear boundary
 
-### Dark Mode Testing Checklist
+### dark mode testing checklist
 
 - [ ] Verify all text passes WCAG AA (4.5:1 body, 3:1 large text) against dark surfaces
 - [ ] Check card borders are visible — shadow-only differentiation fails in dark mode
@@ -225,7 +225,7 @@ In dark mode, elevation is communicated through surface luminance rather than sh
 
 ## Spacing and Layout
 
-### Spacing Scale
+### 8pt spacing scale
 
 8pt base grid. All spacing uses these values:
 
@@ -242,7 +242,7 @@ In dark mode, elevation is communicated through surface luminance rather than sh
 | `space-12` | 48px | `p-12` | Page-level vertical separation |
 | `space-16` | 64px | `p-16` | Major section breaks |
 
-### Touch Targets
+### 44px touch targets
 
 - Minimum tap target: 44×44px (iOS HIG)
 - Input height: 48px (prevents iOS auto-zoom on focus)
@@ -260,7 +260,7 @@ In dark mode, elevation is communicated through surface luminance rather than sh
 | Modal overlay | z-index: 50 | `z-50` | Dialog overlays, confirmation modals |
 | Toast | z-index: 60 | `z-[60]` | Toast notifications (always on top) |
 
-### Content Density
+### content density modes
 
 | Mode | Card padding | List item gap | Section gap | When |
 |------|-------------|--------------|-------------|------|
@@ -268,14 +268,14 @@ In dark mode, elevation is communicated through surface luminance rather than sh
 | Default | p-4 (16px) | gap-3 (12px) | gap-4 (16px) | Standard customer pages |
 | Comfortable | p-6 (24px) | gap-4 (16px) | gap-6 (24px) | Admin dashboard, landing sections |
 
-### Page Layout Templates
+### page layout templates
 
 - **List page**: `.text-h2` title → filter tabs → ScrollArea list with gap-3 items → `pb-24` bottom clearance
 - **Detail page**: back button + `.text-h2` title → hero card → info sections stacked with gap-4 → sticky bottom CTA
 - **Form page**: back button + `.text-h2` title → form fields with gap-5 vertical → sticky bottom submit
 - **Dashboard**: `.text-h2` greeting → stat cards grid → action cards → activity list
 
-### Scroll and Overflow Behavior
+### scroll + overflow behavior
 
 - Main page: native scroll with momentum (`-webkit-overflow-scrolling: touch`)
 - Sticky tab bar: `position: fixed bottom-0 z-40` with `.safe-bottom` padding
@@ -439,7 +439,7 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 - States: collapsed → content hidden (height: 0); expanded → content visible; hover → trigger highlight; focus → `ring-2 ring-ring` on trigger; active → trigger press; disabled → `opacity-50`; loading → content skeleton
 - Use when: progressive disclosure (show more details). Use Accordion for multiple sections.
 
-### Error State Patterns
+### error state patterns
 
 | Error Type | Visual Treatment | User Action |
 |-----------|-----------------|-------------|
@@ -454,7 +454,7 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 
 ## Motion System
 
-### Easing Curves
+### easing curves (cubic-bezier)
 
 | Name | Value | Use |
 |------|-------|-----|
@@ -463,7 +463,7 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 | **ease-in-out** | `cubic-bezier(0.42, 0, 0.58, 1)` | Symmetric motions — toggles, switches |
 | **ease-spring** | `cubic-bezier(0.34, 1.56, 0.64, 1)` | Playful feedback — checkbox check, badge pulse |
 
-### Duration Scale
+### duration scale (ms)
 
 | Tier | Duration | Use |
 |------|----------|-----|
@@ -472,7 +472,7 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 | **Normal** | 250ms | Sheet slide-up, dialog open, page transition |
 | **Gentle** | 350ms | Complex multi-element stagger, drawer open |
 
-### Keyframe Animations
+### @keyframe animations
 
 | Name | Keyframe | Duration | Easing | Use |
 |------|----------|----------|--------|-----|
@@ -482,7 +482,7 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 | `.animate-fade-in` | translateY(4px→0) + opacity 0→1 | 200ms | ease-default | Page mount transitions |
 | `.press-feedback` | active:scale-[0.98] | 100ms | ease-default | Button, card tap feedback |
 
-### Entry/Exit Pairs
+### entry ↔ exit pairs
 
 | Component | Entry | Exit |
 |-----------|-------|------|
@@ -493,7 +493,7 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 | **Drawer** | slide-up from bottom 350ms (Vaul spring) | drag-down dismiss or slide-down 250ms |
 | **Menu/Dropdown** | `.animate-scale-in` 150ms from trigger edge | fade-out 100ms |
 
-### Micro-Interaction Specs
+### micro-interaction specs
 
 - **Toggle/Switch**: thumb slides 44px over 100ms `ease-in-out`, track color crossfade 150ms
 - **Checkbox**: check icon scales from 0→1 over 100ms `ease-spring`, bg fills simultaneously
@@ -516,7 +516,7 @@ When the user has `prefers-reduced-motion: reduce` enabled:
 
 ## Surfaces and Visual Depth
 
-### Gradient Definitions
+### gradient definitions (CSS)
 
 Subtle, purposeful gradients only — the brand is "calm concierge," not "tech keynote."
 
@@ -527,7 +527,7 @@ Subtle, purposeful gradients only — the brand is "calm concierge," not "tech k
 | **Skeleton sweep** | `linear-gradient(90deg, transparent 0%, hsl(220 14% 93%) 50%, transparent 100%)` | `.animate-shimmer` overlay |
 | **Surface fade** | `radial-gradient(ellipse at top, hsl(220 20% 97%) 0%, hsl(0 0% 100%) 100%)` | Page background subtle depth |
 
-### Shadow and Elevation Scale
+### shadow + elevation scale
 
 | Level | Token | CSS Value | Use |
 |-------|-------|-----------|-----|
@@ -540,14 +540,14 @@ Subtle, purposeful gradients only — the brand is "calm concierge," not "tech k
 
 In dark mode, reduce shadow opacity to 40% of light values — use surface luminance for primary elevation cue.
 
-### Surface Treatments
+### surface treatments (glass, blur, tint)
 
 - **Glass**: `.glass` utility — `bg-card/80 backdrop-blur-xl border-border/50`. Use for tab bar, floating headers, overlay panels
 - **Frosted**: `backdrop-blur-lg bg-background/70`. Use for status bar overlays on scrolled content
 - **Tinted surface**: `bg-accent/5` or `bg-success/5`. Use for subtle highlight backgrounds on feature cards
 - **Noise texture**: not used — keeps the UI clean. Reserve for marketing materials only
 
-### Image Treatment Rules
+### image treatment rules
 
 - Aspect ratios: hero images 16:9, thumbnail 1:1 (rounded-xl), avatar rounded-full
 - Object fit: `object-cover` for all photos, `object-contain` for logos/icons
