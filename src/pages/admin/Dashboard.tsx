@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Users, DollarSign, MapPin, TrendingUp, Gauge, Briefcase,
   AlertTriangle, ChevronRight, Building2, CreditCard,
-  ShieldAlert, Clock, Sparkles, CheckCircle, Package,
+  ShieldAlert, Clock, Sparkles, CheckCircle, Package, BarChart3,
 } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { SparklineChart } from "@/components/SparklineChart";
@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 
 function formatCents(cents: number) {
   return "$" + (cents / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -72,6 +73,12 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
         </div>
+      ) : !counts?.customers && !counts?.activeProviders && !counts?.activeSubs ? (
+        <EmptyState
+          icon={BarChart3}
+          title="No data yet"
+          body="Metrics will populate as customers and providers onboard."
+        />
       ) : (
         <>
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
