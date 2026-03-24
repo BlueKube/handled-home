@@ -95,7 +95,7 @@ export function useReferralAdmin() {
     mutationFn: async ({ flagId, action, note, category }: { flagId: string; action: "reviewed" | "dismissed"; note?: string; category?: FraudFlagCategory }) => {
       const { error } = await supabase
         .from("referral_risk_flags")
-        .update({ status: action, reviewed_by_admin_user_id: (await supabase.auth.getUser()).data.user?.id, reviewed_at: new Date().toISOString(), review_note: note } as any)
+        .update({ status: action, reviewed_by_admin_user_id: (await supabase.auth.getUser()).data.user?.id, reviewed_at: new Date().toISOString(), review_note: note, ...(category ? { flag_type: category } : {}) } as any)
         .eq("id", flagId);
       if (error) throw error;
     },

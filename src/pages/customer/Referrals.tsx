@@ -80,7 +80,7 @@ export default function CustomerReferrals() {
               {myCode ? (
                 <div className="flex items-center gap-2">
                   <code className="flex-1 bg-muted px-3 py-2 rounded-lg text-sm font-mono">{myCode.code}</code>
-                  <Button size="sm" variant="outline" onClick={handleCopyLink} disabled={isRateLimited} aria-label={copied ? "Copied" : "Copy referral link"}>
+                  <Button size="sm" variant="outline" onClick={handleCopyLink} aria-label={copied ? "Copied" : "Copy referral link"}>
                     {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
@@ -206,7 +206,7 @@ export default function CustomerReferrals() {
             body="Share your code with friends and earn rewards when they subscribe."
             ctaLabel={myCode ? "Copy your referral link" : "Generate referral code"}
             ctaAction={myCode ? handleCopyLink : handleGenerateCode}
-            ctaDisabled={!myCode && generateCode.isPending}
+            ctaDisabled={(!myCode && generateCode.isPending) || (!myCode && isRateLimited)}
           />
         )}
       </div>
