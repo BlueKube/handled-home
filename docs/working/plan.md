@@ -101,8 +101,8 @@ Each batch follows the workflow checklist:
 | 1 | 6 | P3-2: Skip Options | ✅ Complete |
 | 1 | 7 | P3-1: Help Tooltips | ✅ Complete |
 | 2 | 8 | P2-4: Referral Fraud Prevention | ✅ Complete |
-| 2 | 9 | P2-2: BYOP Provider Decline | ⬜ Not Started |
-| 2 | 10 | P2-1: Operational Exception Handling | ⬜ Not Started |
+| 2 | 9 | P2-2: BYOP Provider Decline | ✅ Complete |
+| 2 | 10 | P2-1: Operational Exception Handling | ✅ Complete |
 | 3 | 11 | P2-6: Payout Review Cadence | ⬜ Not Started |
 | 3 | 12 | 4.3: Bundle Flywheel Cohort Filtering | ⬜ Not Started |
 | 3 | 13 | 4.4: Success Metrics Gauges | ⬜ Not Started |
