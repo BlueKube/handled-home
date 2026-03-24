@@ -8,14 +8,28 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { User, Phone } from "lucide-react";
 
+const phoneRegex = /^\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})$/;
+
 export function ProfileForm() {
   const { user, profile } = useAuth();
   const [fullName, setFullName] = useState(profile?.full_name ?? "");
   const [phone, setPhone] = useState(profile?.phone ?? "");
   const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSave = async () => {
     if (!user) return;
+    const newErrors: Record<string, string> = {};
+    if (!fullName.trim()) {
+      newErrors.fullName = "Full name is required";
+    }
+    if (phone && !phoneRegex.test(phone.trim())) {
+      newErrors.phone = "Enter a valid phone number (e.g., (555) 123-4567)";
+    }
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
     setSaving(true);
     const { error } = await supabase
       .from("profiles")
@@ -40,15 +54,34 @@ export function ProfileForm() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="fullName">Full Name</Label>
-          <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Your name" />
+          <Label htmlFor="fullName">Full Name <span className="text-destructive">*</span></Label>
+          <Input
+            id="fullName"
+            value={fullName}
+            onChange={(e) => { setFullName(e.target.value); setErrors((prev) => ({ ...prev, fullName: "" })); }}
+            placeholder="Your name"
+            aria-describedby={errors.fullName ? "fullName-error" : undefined}
+          />
+          {errors.fullName && (
+            <p id="fullName-error" className="text-sm text-destructive mt-1" role="alert">{errors.fullName}</p>
+          )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone</Label>
+          <Label htmlFor="phone">Phone <span className="text-destructive">*</span></Label>
           <div className="relative">
             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(555) 123-4567" className="pl-9" />
+            <Input
+              id="phone"
+              value={phone}
+              onChange={(e) => { setPhone(e.target.value); setErrors((prev) => ({ ...prev, phone: "" })); }}
+              placeholder="(555) 123-4567"
+              className="pl-9"
+              aria-describedby={errors.phone ? "phone-error" : undefined}
+            />
           </div>
+          {errors.phone && (
+            <p id="phone-error" className="text-sm text-destructive mt-1" role="alert">{errors.phone}</p>
+          )}
         </div>
         <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
           {saving ? "Saving…" : "Save Changes"}
