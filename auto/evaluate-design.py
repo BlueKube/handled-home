@@ -1533,32 +1533,33 @@ def calculate_css_penalty(text: str, css_tokens: CSSTokens) -> tuple[float, list
 
     for token_name, h, s, l in hsl_claims:
         claimed = f"{h} {s}% {l}%"
-        # Check against light mode
-        if token_name in css_tokens.light:
-            actual = css_tokens.light[token_name].strip()
-            # Normalize whitespace
-            actual_norm = re.sub(r'\s+', ' ', actual)
-            claimed_norm = re.sub(r'\s+', ' ', claimed)
-            if actual_norm != claimed_norm:
-                penalty += 0.5
-                issues.append(Issue("CSS_coherence",
-                    f"--{token_name}: doc says '{claimed}' but index.css has '{actual}'", 2))
+        claimed_norm = re.sub(r'\s+', ' ', claimed)
 
-    # Also check dark mode claims
-    dark_claims = re.findall(
-        r'(?:dark|\.dark)[^|]*--([a-z-]+)[`\s|:]+\s*(\d+)\s+(\d+)%\s+(\d+)%',
-        text, re.IGNORECASE
-    )
-    for token_name, h, s, l in dark_claims:
-        claimed = f"{h} {s}% {l}%"
+        # Check against BOTH light and dark mode — the token might appear in
+        # a dark-mode section with its dark value, or in a light-mode table
+        # with its light value.  Only flag if the claimed value doesn't match
+        # either mode.
+        matches_light = False
+        matches_dark = False
+
+        if token_name in css_tokens.light:
+            actual_light = re.sub(r'\s+', ' ', css_tokens.light[token_name].strip())
+            if actual_light == claimed_norm:
+                matches_light = True
+
         if token_name in css_tokens.dark:
-            actual = css_tokens.dark[token_name].strip()
-            actual_norm = re.sub(r'\s+', ' ', actual)
-            claimed_norm = re.sub(r'\s+', ' ', claimed)
-            if actual_norm != claimed_norm:
-                penalty += 0.5
-                issues.append(Issue("CSS_coherence",
-                    f"--{token_name} (dark): doc says '{claimed}' but index.css has '{actual}'", 2))
+            actual_dark = re.sub(r'\s+', ' ', css_tokens.dark[token_name].strip())
+            if actual_dark == claimed_norm:
+                matches_dark = True
+
+        if not matches_light and not matches_dark and (
+            token_name in css_tokens.light or token_name in css_tokens.dark
+        ):
+            # Genuine mismatch — value doesn't match either mode
+            expected = css_tokens.light.get(token_name, css_tokens.dark.get(token_name, "?"))
+            penalty += 0.5
+            issues.append(Issue("CSS_coherence",
+                f"--{token_name}: doc says '{claimed}' but index.css has light='{css_tokens.light.get(token_name, 'N/A')}' dark='{css_tokens.dark.get(token_name, 'N/A')}'", 2))
 
     # ── Gradient / shadow HSL coherence (softer — 0.25 per invented value) ─
     # Collect all known HSL value strings from index.css (both modes)

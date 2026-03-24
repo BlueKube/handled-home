@@ -113,6 +113,50 @@ WCAG AA compliance required (4.5:1 body text, 3:1 large text 18px+).
 
 ---
 
+## Dark Mode
+
+Applied via `.dark` class on `<html>`. All token values above include explicit dark columns from `src/index.css`.
+
+### dark elevation model
+
+In dark mode, elevation uses surface luminance (lighter = higher) rather than shadow depth. Reduce shadow opacity to 40% of light values.
+
+| Level | Surface | Light treatment | Dark treatment |
+|-------|---------|----------------|----------------|
+| 0 — Base | `bg-background` | none | `--background` 214 65% 8% |
+| 1 — Raised | `bg-card` | shadow-sm | `--card` 214 55% 12% — 4% lighter than base |
+| 2 — Overlay | `bg-popover` | shadow-md | `--popover` 214 55% 12% + `border-border` for definition |
+| 3 — Sidebar | `--sidebar-background` | none | 214 65% 6% — darker than base for contrast |
+
+### dark image and illustration guidance
+
+- Apply `brightness(0.85)` filter on photos to reduce glare against dark surfaces
+- Desaturate illustrations by ~10% — vivid colors clash with muted dark backgrounds
+- Overlay `rgba(0,0,0,0.15)` dimming layer on hero images
+- Skeleton shimmer: sweep from `--muted` to 4% lighter (214 50% 22%)
+
+### dark component-specific overrides
+
+- **Button** (default): flips from navy `bg-primary` to cyan; foreground becomes `--primary-foreground` 214 65% 8%
+- **Card**: border becomes visible (`border-border` 214 50% 22%) since shadow is barely perceptible
+- **Input**: `bg-input` shifts to 214 50% 22%; focus ring remains `--ring` cyan
+- **Badge**: reduce background opacity to 80% to avoid oversaturation
+- **Toast**: use `bg-card` surface with 1px `border-border` for definition
+- **Tab bar**: glass blur remains; opacity shifts to `bg-card/85` for legibility
+- **Skeleton**: shimmer sweeps from `--muted` 214 50% 18% to ~4% brighter
+- **Dialog/Sheet**: overlay increases from `rgba(0,0,0,0.5)` to `rgba(0,0,0,0.7)`
+- **Navigation sidebar**: 214 65% 6% — darker than page background for clear boundary
+
+### dark mode testing checklist
+
+- [ ] Verify all text passes WCAG AA contrast against dark surfaces
+- [ ] Check card borders visible — shadow-only differentiation fails in dark mode
+- [ ] Validate toast readability over dark backgrounds
+- [ ] Test skeleton shimmer contrast — perceptible but not flashy
+- [ ] Audit image brightness — no pure-white glare on dark pages
+
+---
+
 ## Spacing & Touch
 - 8pt grid system
 - Minimum tap target: 44px (iOS HIG)
