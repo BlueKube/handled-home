@@ -302,13 +302,13 @@
 | 4 | 12: Focus Trap & Restore | ✅ | Pushed. Verification only — Radix handles focus. |
 | 4 | 13: ARIA & Screen Reader | ✅ | Pushed. 1 MUST-FIX resolved (conditional role=alert). |
 | 4 | 14: Color-Independent Status | ✅ | Pushed. Verification only — landmarks done in Batch 3. |
-| 5 | 15: Customer Dashboard & Tabs | ⬜ | |
-| 5 | 16: Customer Detail & Forms | ⬜ | |
-| 5 | 17: Customer Billing/Support | ⬜ | |
-| 5 | 18: Customer Remaining | ⬜ | |
-| 5 | 19: Provider Dashboard & Tabs | ⬜ | |
-| 5 | 20: Provider Detail & Forms | ⬜ | |
-| 5 | 21: Provider Remaining | ⬜ | |
-| 5 | 22: Admin Sweep | ⬜ | |
+| 5 | 15: Customer Dashboard & Tabs | ✅ | Pushed. 1 MUST-FIX resolved (Routine CTA max-w). |
+| 5 | 16: Customer Detail & Forms | ✅ | Pushed. Bulk sweep — 26 files fixed. |
+| 5 | 17: Customer Billing/Support | ✅ | Pushed. Part of 16-18 sweep. |
+| 5 | 18: Customer Remaining | ✅ | Pushed. Part of 16-18 sweep. |
+| 5 | 19: Provider Dashboard & Tabs | ✅ | Pushed. 4 files fixed. |
+| 5 | 20: Provider Detail & Forms | ✅ | Pushed. Part of 19-21 sweep. |
+| 5 | 21: Provider Remaining | ✅ | Pushed. Part of 19-21 sweep. |
+| 5 | 22: Admin Sweep | ✅ | Pushed. 1 page fixed (OpsExceptions). Rest verified. |
 | 6 | 23: Build Validation | ⬜ | |
 | 6 | 24: Doc Sync & Archive | ⬜ | |
