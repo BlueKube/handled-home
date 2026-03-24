@@ -24,6 +24,56 @@ Read and follow `docs/skills/prd-to-production-workflow.md` before starting any 
 
 - `/code-review` — 10-agent review (4 parallel lanes + 1 synthesis lane × 2 tiers). Phase mode (no args) or PR mode (`/code-review 123`).
 
+### Mandatory Code Review — Non-Negotiable
+
+**After committing every batch, you MUST run the 10-agent code review before moving to the next batch.** No exceptions — even if the user says "keep going," "don't stop," or "finish everything." The review is part of the definition of done for a batch, not a separate optional step.
+
+**If you catch yourself starting Batch N+1 without having reviewed Batch N, STOP immediately and run the review first.**
+
+A batch is not complete until: `implement → commit → code review → fix loop → validate build → push`. Skipping the review and pushing is a workflow violation.
+
+#### Code review procedure (inline reference)
+
+The full `/code-review` skill is defined in `docs/skills/prd-to-production-workflow.md`. This inline summary exists so the procedure is never lost to context compression.
+
+**Stage 1 — 4 parallel lanes × 2 tiers = 8 agents (launched simultaneously):**
+
+| Lane | Focus | What to check |
+|------|-------|---------------|
+| **a. Spec completeness** | Cross-reference every requirement, acceptance criterion, and edge case in the batch spec (`docs/working/batch-specs/`) against the diff. Flag anything specified but not implemented, partially implemented, or implemented differently. **Most important lane.** |
+| **b. Bug scan** | Shallow scan for obvious bugs in changed code only. No extra context, no history, no nitpicks — just the diff. |
+| **c. Historical context** | Read git blame/history of modified files. Spot regressions or issues informed by past changes. Do not duplicate Lane b. |
+| **d. Prior feedback** | Check previous fix commits on these files for recurring review comments that may apply here. |
+
+Each lane runs one Sonnet agent (deep analysis) and one Haiku agent (fast second set of eyes). Both tiers in the same lane may find overlapping issues — that's intentional redundancy. Agents must not cross into another lane's focus.
+
+**Stage 2 — 1 synthesis lane × 2 tiers = 2 agents (after all Stage 1 agents complete):**
+
+| Lane | Focus |
+|------|-------|
+| **e. Synthesis & cross-check** | Receives all findings from Lanes a–d (both tiers). De-duplicates, resolves contradictions, connects related issues, catches inter-lane gaps, and scores each finding 0–100. |
+
+**Scoring rules (applied by synthesis agent):**
+- Cross-tier agreement (both Sonnet and Haiku flagged it): **+30**
+- Cross-lane agreement (multiple lanes flagged it): **+20 per additional lane**
+- Severity (regression, security, data loss, missing spec item): **+20–40**
+- Specificity (exact file:line with clear explanation): **+10**
+- Style-only (formatting, naming preference): **cap at 20**
+
+**Categorization:**
+- **MUST-FIX (75+):** Resolve before batch is done.
+- **SHOULD-FIX (25–74):** Resolve in the same batch if straightforward.
+- **Drop below 25.**
+
+**Fix loop:**
+After fixing MUST-FIX and SHOULD-FIX findings, run a **lightweight re-review** (Lanes a + b + e only = 6 agents) to verify fixes. Cap at **3 passes** to avoid infinite loops.
+
+**False positives to skip:**
+- Pre-existing issues not introduced by this diff
+- Things a linter/typechecker/compiler would catch
+- General code quality opinions not tied to spec or conventions
+- Issues on lines the user did not modify
+
 ### Working folder structure
 
 ```
