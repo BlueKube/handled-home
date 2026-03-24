@@ -439,6 +439,17 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 - States: collapsed → content hidden (height: 0); expanded → content visible; hover → trigger highlight; focus → `ring-2 ring-ring` on trigger; active → trigger press; disabled → `opacity-50`; loading → content skeleton
 - Use when: progressive disclosure (show more details). Use Accordion for multiple sections.
 
+### Error State Patterns
+
+| Error Type | Visual Treatment | User Action |
+|-----------|-----------------|-------------|
+| **Network error** | Toast with `AlertTriangle` icon, `text-destructive`, "Check your connection and try again" | Retry button in toast or inline |
+| **Validation error** | Inline `text-destructive` below field, `border-destructive` on input, `role="alert"` | Fix field and re-submit |
+| **Not found** | EmptyState with `Search` icon, "We couldn't find that" title, back/home CTA | Navigate away |
+| **Timeout** | Toast with clock icon, "This is taking longer than expected" | Auto-retry after 3s or manual retry |
+| **Offline** | Persistent banner at top `bg-warning/10 border-warning`, "You're offline" | Auto-dismiss when connection restores |
+| **Permission denied** | EmptyState with `Lock` icon, "You don't have access" body, contact support CTA | Request access or go back |
+
 ---
 
 ## Motion System
