@@ -80,7 +80,7 @@ export default function RoutineReview() {
 
   if (isLoading) {
     return (
-      <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4">
+      <div className="p-4 pb-24 space-y-4">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-32 w-full" />
         <Skeleton className="h-32 w-full" />
@@ -93,7 +93,7 @@ export default function RoutineReview() {
   entitlements?.skus.forEach((s) => skuStatusMap.set(s.sku_id, s.status));
 
   return (
-    <div className="pb-24 animate-fade-in max-w-lg mx-auto">
+    <div className="pb-24 animate-fade-in">
       <div className="p-4 space-y-5">
         <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Back
@@ -158,7 +158,7 @@ export default function RoutineReview() {
       </div>
 
       {/* Bottom CTA */}
-      <div className="fixed bottom-16 left-0 right-0 z-40 p-4 bg-card/95 backdrop-blur border-t border-border max-w-lg mx-auto">
+      <div className="fixed bottom-16 left-0 right-0 z-40 p-4 bg-card/95 backdrop-blur border-t border-border">
         <Button
           className="w-full gap-2"
           size="lg"

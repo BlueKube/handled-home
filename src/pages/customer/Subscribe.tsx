@@ -52,7 +52,7 @@ export default function CustomerSubscribe() {
 
   if (isSuccess) {
     return (
-      <div className="p-4 pb-24 space-y-6 animate-fade-in max-w-lg mx-auto text-center">
+      <div className="p-4 pb-24 space-y-6 animate-fade-in text-center">
         <CheckCircle className="h-16 w-16 text-accent mx-auto" />
         <h1 className="text-h2">You're All Set!</h1>
         <p className="text-muted-foreground">Access is active now. Welcome to {plan?.name ?? "your plan"}!</p>
@@ -87,7 +87,7 @@ export default function CustomerSubscribe() {
   }
 
   return (
-    <div className="p-4 pb-24 space-y-6 animate-fade-in max-w-lg mx-auto">
+    <div className="p-4 pb-24 space-y-6 animate-fade-in">
       <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Back
       </button>

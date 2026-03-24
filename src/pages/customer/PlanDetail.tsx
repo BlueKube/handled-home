@@ -44,7 +44,7 @@ export default function CustomerPlanDetail() {
   const blockedSkus = entitlements?.skus.filter((s) => s.status === "blocked") ?? [];
 
   return (
-    <div className="p-4 pb-24 space-y-6 animate-fade-in max-w-lg mx-auto">
+    <div className="p-4 pb-24 space-y-6 animate-fade-in">
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"

@@ -80,7 +80,7 @@ export default function CustomerVisitDetail() {
 
   if (isLoading) {
     return (
-      <div className="px-4 py-6 pb-24 max-w-lg mx-auto">
+      <div className="p-4 pb-24">
         <div className="h-6 w-32 bg-muted/50 rounded animate-pulse mb-4" />
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
@@ -93,7 +93,7 @@ export default function CustomerVisitDetail() {
 
   if (!data) {
     return (
-      <div className="px-4 py-6 pb-24 max-w-lg mx-auto text-center">
+      <div className="p-4 pb-24 text-center">
         <p className="text-sm text-muted-foreground">Visit not found.</p>
         <Button variant="link" onClick={() => navigate("/customer/visits")}>← Back to visits</Button>
       </div>
@@ -118,7 +118,7 @@ export default function CustomerVisitDetail() {
     : job.status === "COMPLETED" ? "completed" : job.status.toLowerCase();
 
   return (
-    <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4 animate-fade-in">
+    <div className="p-4 pb-24 space-y-4 animate-fade-in">
       {/* Back button */}
       <Button variant="ghost" size="sm" className="gap-1 -ml-2" onClick={() => navigate("/customer/visits")}>
         <ArrowLeft className="h-4 w-4" />

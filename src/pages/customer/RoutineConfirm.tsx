@@ -113,7 +113,7 @@ export default function RoutineConfirm() {
   };
 
   return (
-    <div className="pb-24 animate-fade-in max-w-lg mx-auto">
+    <div className="pb-24 animate-fade-in">
       <div className="p-4 space-y-6">
         <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Back

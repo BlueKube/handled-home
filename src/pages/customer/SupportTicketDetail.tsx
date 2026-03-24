@@ -22,7 +22,7 @@ export default function CustomerSupportTicketDetail() {
 
   if (isLoading) {
     return (
-      <div className="px-4 py-6 max-w-lg mx-auto">
+      <div className="p-4">
         <div className="h-6 w-32 bg-muted/50 rounded animate-pulse mb-4" />
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
@@ -35,7 +35,7 @@ export default function CustomerSupportTicketDetail() {
 
   if (!ticket) {
     return (
-      <div className="px-4 py-6 max-w-lg mx-auto text-center">
+      <div className="p-4 text-center">
         <p className="text-sm text-muted-foreground">Ticket not found.</p>
         <Button variant="link" onClick={() => navigate("/customer/support")}>← Back to support</Button>
       </div>
@@ -79,7 +79,7 @@ export default function CustomerSupportTicketDetail() {
   }));
 
   return (
-    <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4 animate-fade-in">
+    <div className="p-4 pb-24 space-y-4 animate-fade-in">
       <Button variant="ghost" size="sm" className="gap-1 -ml-2" onClick={() => navigate("/customer/support/tickets")}>
         <ArrowLeft className="h-4 w-4" />
         Tickets

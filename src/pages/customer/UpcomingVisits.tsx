@@ -287,7 +287,7 @@ export default function UpcomingVisits() {
 
   if (isLoading) {
     return (
-      <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4">
+      <div className="p-4 pb-24 space-y-4">
         <div>
           <h1 className="text-h2">Upcoming Visits</h1>
           <p className="text-caption mt-0.5">Your scheduled home care.</p>
@@ -301,14 +301,14 @@ export default function UpcomingVisits() {
 
   if (isError) {
     return (
-      <div className="px-4 py-6 pb-24 max-w-lg mx-auto">
+      <div className="p-4 pb-24">
         <QueryErrorCard message="Failed to load upcoming visits." onRetry={() => refetch()} />
       </div>
     );
   }
 
   return (
-    <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4 animate-fade-in">
+    <div className="p-4 pb-24 space-y-4 animate-fade-in">
       <div>
         <h1 className="text-h2">Upcoming Visits</h1>
         <p className="text-caption mt-0.5">Your scheduled home care.</p>

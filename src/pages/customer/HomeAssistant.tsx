@@ -58,7 +58,7 @@ export default function HomeAssistantBooking() {
 
   if (!isActiveMember) {
     return (
-      <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4 animate-fade-in">
+      <div className="p-4 pb-24 space-y-4 animate-fade-in">
         <h1 className="text-h2 flex items-center gap-2"><Home className="h-5 w-5" /> Home Assistant</h1>
         <Card className="border-accent/20">
           <CardContent className="py-6 text-center space-y-3">
@@ -77,7 +77,7 @@ export default function HomeAssistantBooking() {
   }
 
   return (
-    <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4 animate-fade-in">
+    <div className="p-4 pb-24 space-y-4 animate-fade-in">
       <div>
         <h1 className="text-h2 flex items-center gap-2"><Home className="h-5 w-5" /> Home Assistant</h1>
         <p className="text-caption mt-1">Scheduled in-home help. Book as soon as tomorrow.</p>
