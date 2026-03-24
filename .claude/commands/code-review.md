@@ -2,7 +2,7 @@
 allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git blame:*), Bash(git show:*), Bash(gh pr diff:*), Bash(gh pr view:*), Bash(gh pr comment:*)
 description: Code review changes — works on a PR number or the latest committed phase
 ---
-Review code changes for bugs and CLAUDE.md compliance.
+Review code changes for bugs, spec completeness, and project compliance.
 
 **Modes:**
 - No argument: **Phase mode** — reviews `git diff main...HEAD`
@@ -27,11 +27,11 @@ The Sonnet agent in each lane does the deep analysis. The Haiku agent in each la
 
 **Lanes:**
 
-a. **CLAUDE.md compliance** — Audit changes against CLAUDE.md rules. Only flag violations that the CLAUDE.md specifically calls out.
+a. **Spec completeness audit** — Cross-reference every requirement, acceptance criterion, and edge case in the batch spec (from `docs/working/batch-specs/`) against the diff. Flag anything specified but not implemented, partially implemented, or implemented differently than specified. This is the most important lane — it prevents incomplete work from shipping as "done."
 b. **Bug scan** — Shallow scan for obvious bugs in the changed code only. No extra context, no git history, no nitpicks — just the diff.
 c. **Historical context** — Read git blame/history of modified code to spot regressions or issues informed by past changes. Do not cross into the bug scan lane; focus on what the history reveals.
 d. **Prior feedback** — Check previous PRs/commits that touched these files for recurring review comments that may apply here.
-e. **Code comment compliance** — Verify changes comply with inline guidance (TODOs, FIXMEs, doc comments) in the modified files. Do not cross into the CLAUDE.md lane.
+e. **Code comment compliance** — Verify changes comply with inline guidance (TODOs, FIXMEs, doc comments) and CLAUDE.md conventions in the modified files.
 
 After all 10 agents return, merge and deduplicate findings across both tiers before proceeding to confidence scoring.
 
@@ -39,12 +39,12 @@ After all 10 agents return, merge and deduplicate findings across both tiers bef
 For each issue, launch a parallel Haiku agent to score confidence (0–100):
 
 - **0**: False positive, doesn't hold up to scrutiny, or pre-existing issue.
-- **25**: Might be real, might be false positive. Stylistic issues not called out in CLAUDE.md.
+- **25**: Might be real, might be false positive. Stylistic issues not tied to spec requirements.
 - **50**: Verified real issue but minor — a nitpick or rarely hit in practice. (SHOULD-FIX)
-- **75**: Confirmed real issue that will be hit in practice, or directly called out in CLAUDE.md. (MUST-FIX)
-- **100**: Definitely real, will happen frequently, evidence confirms it. (MUST-FIX)
+- **75**: Confirmed real issue that will be hit in practice, or a spec requirement that is missing/incomplete. (MUST-FIX)
+- **100**: Definitely real, will happen frequently, or a clearly specified requirement that was not implemented at all. (MUST-FIX)
 
-For CLAUDE.md-flagged issues, the agent must verify the CLAUDE.md actually calls it out.
+For spec-completeness issues, the agent must cite the specific spec requirement that was not satisfied.
 
 ### 6. Filter and categorize
 Drop issues scoring below 25. Categorize the rest:
@@ -67,7 +67,7 @@ Found N issues (X must-fix, Y should-fix):
 1. Description — reason (file:line reference)
 ```
 
-Or if clean: "No issues found. Checked for bugs and CLAUDE.md compliance."
+Or if clean: "No issues found. All spec items verified, no bugs detected."
 
 ### 8. Recheck loop (phase mode only)
 After fixes are committed for any MUST-FIX or SHOULD-FIX findings, **re-run steps 1–7 automatically** on the new diff. This verifies that:
@@ -81,7 +81,7 @@ Label each pass in output: "Code review (pass 1)", "Code review (pass 2)", etc.
 ## False positives (skip these)
 - Pre-existing issues not introduced by this diff
 - Things a linter/typechecker/compiler would catch
-- General code quality opinions not called out in CLAUDE.md
+- General code quality opinions not tied to spec requirements or project conventions
 - Intentional functionality changes related to the broader change
 - Issues on lines the user did not modify
 

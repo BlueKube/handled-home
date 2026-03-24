@@ -108,7 +108,7 @@ Launch all 10 agents **in parallel** using the Agent tool. Each lane gets two ag
 
 | Lane | What it checks | Deep tier | Fast tier |
 |------|----------------|-----------|-----------|
-| 1. Project rules compliance | Does the diff follow CLAUDE.md / project conventions? | Sonnet | Haiku |
+| 1. Spec completeness audit | Does the implementation satisfy every requirement, acceptance criterion, and edge case in the batch spec? | Sonnet | Haiku |
 | 2. Bug scan (diff only) | Bugs visible in the diff alone — no extra context, no codebase knowledge | Sonnet | Haiku |
 | 3. Historical context | git blame / git log on changed files — did we break something intentional? | Sonnet | Haiku |
 | 4. Prior feedback | Have these files had PR review comments before? Are we repeating past mistakes? | Sonnet | Haiku |
@@ -129,11 +129,13 @@ Every agent gets:
 3. **Project rules** — relevant sections of CLAUDE.md (design system, conventions, consistency standards)
 
 Additionally, per lane:
-- **Lane 1:** Full CLAUDE.md + design-guidelines.md
+- **Lane 1:** The full batch spec from `docs/working/batch-specs/` — every requirement, acceptance criterion, scope item, and edge case. The agent cross-references each spec line against the diff and flags anything specified but not built, partially built, or built differently than specified. This is the lane that prevents "finished" batches from shipping incomplete.
 - **Lane 2:** Diff only, no extra context (forces the agent to find bugs from code alone)
 - **Lane 3:** `git blame` and `git log` output for every changed file
 - **Lane 4:** PR review comments from previous PRs touching the same files (via `gh api`)
 - **Lane 5:** The full content of every changed file (not just the diff), so the agent can check comments against surrounding code
+
+> **Why Lane 1 checks spec completeness instead of CLAUDE.md compliance:** CLAUDE.md conventions (semantic tokens, touch targets, padding, aria-labels) are already covered by the Bug Scan, Historical Context, and Code Comment lanes — they naturally catch deviations from project patterns. What no other lane catches is *missing work* — requirements that were specified but never implemented. This gap caused an entire cleanup PRD after a previous implementation shipped "complete" with 7 unfinished items. The spec completeness audit closes that gap at the review stage.
 
 #### Agent prompts
 
@@ -142,7 +144,35 @@ Each agent prompt must include:
 - File and line number references for every finding
 - No access to implementation reasoning — the agent reviews the code on its own merits, as if it were a different developer
 
-Example agent launch (Lane 2, Sonnet tier):
+Example agent launch (Lane 1, Sonnet tier — Spec Completeness):
+```
+Agent tool:
+  model: sonnet
+  description: "Spec completeness audit — Sonnet"
+  prompt: |
+    You are a spec completeness auditor. Your job is to verify that
+    every requirement in the batch spec was actually implemented.
+
+    BATCH SPEC:
+    [paste full batch spec]
+
+    DIFF:
+    [paste diff here]
+
+    For each requirement/acceptance criterion in the spec:
+    1. Check if the diff contains an implementation that satisfies it
+    2. Check if partial implementations exist (built but incomplete)
+    3. Check if the implementation diverges from what was specified
+
+    Return findings as:
+    - MUST-FIX (spec item → file:line): "X was specified but not implemented"
+    - MUST-FIX (spec item → file:line): "X was partially implemented — missing Y"
+    - SHOULD-FIX (spec item → file:line): "X was built differently than specified — spec says A, code does B"
+
+    If every spec item is fully implemented, say "All spec items verified."
+```
+
+Example agent launch (Lane 2, Sonnet tier — Bug Scan):
 ```
 Agent tool:
   model: sonnet
@@ -499,7 +529,7 @@ docs: sync documentation after phase N      # Doc sync
 This workflow is project-agnostic. To use it on a new project:
 
 1. **Create your core docs** — You don't need all 7 docs from day one. Start with `CLAUDE.md` (project instructions) and `docs/masterplan.md` (what you're building and why). Add others as the project grows.
-2. **Adjust review lanes** — The 5 review lanes work for most projects. If your project has specific concerns (security, performance, i18n), swap a lane or add one.
+2. **Adjust review lanes** — The 5 review lanes work for most projects. Lane 1 (spec completeness) is the most important — it prevents incomplete work from shipping as "done." If your project has specific concerns (security, performance, i18n), swap a lane or add one.
 3. **Adjust batch size** — For greenfield projects, batches can be larger. For mature codebases, keep them smaller.
 4. **Skip visual validation** if you're building a CLI, API, or backend system. Replace with integration test validation.
 5. **The working folder structure is the constant** — PRD + Plan + Batch Specs, always in one place, always referenced.
