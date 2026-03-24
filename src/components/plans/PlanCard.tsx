@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/StatusBadge";
 import { Star, Sparkles, Check } from "lucide-react";
 import type { Plan } from "@/hooks/usePlans";
 
@@ -57,10 +58,11 @@ export function PlanCard({
 
       <CardHeader className="pb-1 pt-6">
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex items-center gap-2">
             <Badge variant="outline" className={`text-xs font-semibold ${TIER_ACCENT[tierKey]}`}>
               {plan.name}
             </Badge>
+            {isRecommended && <StatusBadge status="recommended" />}
           </div>
         </div>
         {plan.tagline && (

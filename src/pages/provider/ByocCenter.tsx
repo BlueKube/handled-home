@@ -6,6 +6,7 @@ import { useInviteScripts } from "@/hooks/useInviteScripts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/StatusBadge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -277,14 +278,10 @@ function InviteLinkCard({
     <div className={`border rounded-lg p-3 space-y-2 ${inactive ? "opacity-60" : ""}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Badge variant={inactive ? "secondary" : "default"} className="text-xs">
+          <Badge variant={inactive ? "secondary" : "default"} className="text-xs capitalize">
             {link.category_key.replace(/_/g, " ")}
           </Badge>
-          {inactive ? (
-            <XCircle className="h-3 w-3 text-muted-foreground" />
-          ) : (
-            <CheckCircle className="h-3 w-3 text-success" />
-          )}
+          <StatusBadge status={inactive ? "inactive" : "active"} />
         </div>
         <span className="text-xs text-muted-foreground font-mono">{link.token}</span>
       </div>
