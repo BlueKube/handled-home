@@ -53,15 +53,33 @@ export function useLossLeaderMetrics() {
         { cohortLabel: "120-day", daysRange: [91, 120], householdCount: 71, attachRate: 1.7, target: 1.8 },
       ];
 
-      const exitAlerts: ExitAlert[] = [
-        {
-          planName: "Starter Promo",
-          cohortLabel: "90-day",
-          attachRate: 0.8,
-          threshold: 0.3,
-          action: "Consider discontinuing — attach rate below 30% at 90 days",
-        },
-      ];
+      // Compute exit alerts from cohort data
+      // Exit criteria: attach < 1.5 SKUs/hh at 90d, or < 1.5 at 120d
+      const exitAlerts: ExitAlert[] = [];
+      const cohort90d = cohortAttachRates.find((c) => c.daysRange[0] >= 61 && c.daysRange[1] <= 90);
+      const cohort120d = cohortAttachRates.find((c) => c.daysRange[0] >= 91 && c.daysRange[1] <= 120);
+
+      // For negative-margin plans, check if attach rate is recovering
+      planProfitability.filter((p) => p.margin < 0).forEach((plan) => {
+        if (cohort90d && cohort90d.attachRate < cohort90d.target) {
+          exitAlerts.push({
+            planName: plan.planName,
+            cohortLabel: "90-day",
+            attachRate: cohort90d.attachRate,
+            threshold: cohort90d.target,
+            action: `Consider discontinuing — attach rate ${cohort90d.attachRate} below target ${cohort90d.target} at 90 days`,
+          });
+        }
+        if (cohort120d && cohort120d.attachRate < cohort120d.target) {
+          exitAlerts.push({
+            planName: plan.planName,
+            cohortLabel: "120-day",
+            attachRate: cohort120d.attachRate,
+            threshold: cohort120d.target,
+            action: `Review urgently — attach rate ${cohort120d.attachRate} below target ${cohort120d.target} at 120 days`,
+          });
+        }
+      });
 
       return { planProfitability, cohortAttachRates, exitAlerts };
     },

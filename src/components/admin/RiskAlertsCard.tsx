@@ -33,20 +33,10 @@ export function RiskAlertsCard() {
     });
   }
 
-  // 6-month flywheel breakpoint
-  if (!health.flywheelHealthy) {
-    alerts.push({
-      id: "flywheel-warning",
-      severity: "warning",
-      title: "6-month flywheel below breakpoint",
-      detail: `${health.attachRate180d} SKUs/household — flywheel self-funds at ≥ 1.5`,
-      action: "Review cross-sell strategy",
-      href: "/admin/plans",
-    });
-  }
+  // Note: 6-month flywheel alert is shown inline in BusinessHealthCard to avoid duplication
 
-  // Global attach rate still tracked for overall health
-  if (health.attachRateGlobal < 2.0 && health.attachRate90d >= 1.5) {
+  // Global attach rate below target (only when cohorts are healthy)
+  if (health.attachRateGlobal < 2.0 && health.attachRate90d >= 1.5 && health.flywheelHealthy) {
     alerts.push({
       id: "attach-global-warning",
       severity: "warning",

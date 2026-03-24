@@ -331,7 +331,7 @@ function LossLeadersTab() {
                 <div className="flex-1">
                   <p className="text-sm font-medium text-destructive">{alert.planName} — {alert.cohortLabel}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Attach rate: {(alert.attachRate * 100).toFixed(0)}% (threshold: {(alert.threshold * 100).toFixed(0)}%)
+                    Attach rate: {alert.attachRate.toFixed(1)} SKUs/hh (target: {alert.threshold.toFixed(1)})
                   </p>
                   <p className="text-xs text-muted-foreground">{alert.action}</p>
                 </div>

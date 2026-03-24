@@ -343,8 +343,8 @@ function PayoutReviewCard() {
     ? new Date(lastReviewDate.getTime() + 90 * 24 * 60 * 60 * 1000)
     : null;
 
-  const statusColor = status === "healthy" ? "text-green-600 dark:text-green-400" : status === "warning" ? "text-yellow-600 dark:text-yellow-400" : "text-destructive";
-  const dotColor = status === "healthy" ? "bg-green-500" : status === "warning" ? "bg-yellow-500" : "bg-destructive";
+  const statusColor = status === "healthy" ? "text-success" : status === "warning" ? "text-warning" : "text-destructive";
+  const dotColor = status === "healthy" ? "bg-success" : status === "warning" ? "bg-warning" : "bg-destructive";
 
   return (
     <Card
@@ -391,9 +391,8 @@ function MetricGauge({ metricKey }: { metricKey: "grossMargin" | "providerUtiliz
 
   if (metrics.isLoading) return <Skeleton className="h-20 rounded-lg" />;
 
-  const statusColor = metric.status === "healthy" ? "bg-green-500" : metric.status === "warning" ? "bg-yellow-500" : "bg-destructive";
-  const dotColor = metric.status === "healthy" ? "bg-green-500" : metric.status === "warning" ? "bg-yellow-500" : "bg-destructive";
-  const textColor = metric.status === "healthy" ? "text-green-600 dark:text-green-400" : metric.status === "warning" ? "text-yellow-600 dark:text-yellow-400" : "text-destructive";
+  const bgColor = metric.status === "healthy" ? "bg-success" : metric.status === "warning" ? "bg-warning" : "bg-destructive";
+  const textColor = metric.status === "healthy" ? "text-success" : metric.status === "warning" ? "text-warning" : "text-destructive";
 
   return (
     <Card className="p-3">
@@ -403,7 +402,7 @@ function MetricGauge({ metricKey }: { metricKey: "grossMargin" | "providerUtiliz
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
-            <span className={cn("h-2 w-2 rounded-full shrink-0", dotColor)} />
+            <span className={cn("h-2 w-2 rounded-full shrink-0", bgColor)} />
             <p className="text-xs font-medium truncate">{config.label}</p>
           </div>
           <p className={cn("text-lg font-bold", textColor)}>{metric.value}{config.suffix}</p>
@@ -411,7 +410,7 @@ function MetricGauge({ metricKey }: { metricKey: "grossMargin" | "providerUtiliz
           {/* Progress bar */}
           <div className="relative h-1.5 bg-muted rounded-full overflow-hidden mt-1.5">
             <div
-              className={cn("h-full rounded-full", statusColor)}
+              className={cn("h-full rounded-full", bgColor)}
               style={{ width: `${Math.min(metric.value, 100)}%` }}
             />
             <div
