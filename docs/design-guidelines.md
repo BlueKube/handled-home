@@ -380,16 +380,65 @@ Cross-reference `docs/screen-flows.md` for per-screen component usage and `docs/
 
 ---
 
-## Animations
-| Name | Keyframe | Duration | Use |
-|------|----------|----------|-----|
-| Shimmer | gradient sweep | 1.5s infinite | Skeleton loading |
-| Slide Up | translateY(16→0) | 250ms | Bottom sheets, modals |
-| Scale In | scale(0.95→1) | 200ms | Popovers, dialogs |
-| Fade In | translateY(4→0) + opacity | 200ms | Page transitions |
-| Press | scale(0.97/0.98) | 100ms | Buttons, cards |
+## Motion System
 
-All transitions: ease-out. No aggressive or decorative animations.
+### easing curves
+
+| Name | Value | Use |
+|------|-------|-----|
+| **ease-default** | `cubic-bezier(0.25, 0.1, 0.25, 1.0)` | General transitions, color changes |
+| **ease-out-expo** | `cubic-bezier(0.16, 1, 0.3, 1)` | Entry animations — sheets, modals, pages |
+| **ease-in-out** | `cubic-bezier(0.42, 0, 0.58, 1)` | Symmetric motions — toggles, switches |
+| **ease-spring** | `cubic-bezier(0.34, 1.56, 0.64, 1)` | Playful feedback — checkbox check, badge pulse |
+
+### duration scale
+
+| Tier | Duration | Use |
+|------|----------|-----|
+| **Instant** | 100ms | Press feedback, toggle, checkbox, ripple |
+| **Fast** | 150ms–200ms | Fade-in, scale-in, tooltip, color shifts |
+| **Normal** | 250ms | Sheet slide-up, dialog open, page transition |
+| **Gentle** | 350ms | Multi-element stagger, drawer open |
+
+### keyframe animations
+
+| Class | Keyframe | Duration | Easing |
+|-------|----------|----------|--------|
+| `.animate-shimmer` | background-position -200%→200% | 1.5s infinite | ease-in-out |
+| `.animate-slide-up` | translateY(16px→0) + opacity | 250ms | ease-out-expo |
+| `.animate-scale-in` | scale(0.95→1) + opacity | 200ms | ease-out-expo |
+| `.animate-fade-in` | translateY(4px→0) + opacity | 200ms | ease-default |
+| `.press-feedback` | active:scale-[0.98] | 100ms | ease-default |
+
+### entry/exit pairs
+
+| Component | Entry | Exit |
+|-----------|-------|------|
+| **Sheet** | `.animate-slide-up` 250ms | slide-down + fade 200ms |
+| **Dialog** | `.animate-scale-in` 200ms | scale(1→0.95) + fade 150ms |
+| **Toast** | slide-down from top 200ms | fade-out + translateY(-8px) 150ms |
+| **Popover** | `.animate-scale-in` 200ms | fade-out 100ms |
+| **Drawer** | slide-up 350ms (Vaul spring) | drag-dismiss or slide-down 250ms |
+| **Menu** | `.animate-scale-in` 150ms | fade-out 100ms |
+
+### micro-interactions
+
+- **Toggle/Switch**: thumb slides 44px over 100ms `ease-in-out`, track crossfade 150ms
+- **Checkbox**: check icon scales 0→1 over 100ms `ease-spring`, bg fills simultaneously
+- **Progress bar**: width transition 300ms `ease-default`
+- **Pull-to-refresh**: spinner fades in at 60px threshold, rotate 360° over 800ms infinite
+- **Long-press**: haptic at 300ms threshold, scale(1→0.96) during hold
+- **Swipe-to-dismiss**: follows finger with spring-back if <30% threshold
+- **List stagger**: each item delays 30ms, max 5 items (150ms total cap)
+
+### `prefers-reduced-motion` handling
+
+When `prefers-reduced-motion: reduce` is active:
+- Disable all transform animations (translateY, scale) — replace with opacity crossfade at 150ms
+- Remove `.animate-shimmer` infinite loop — show static `bg-muted`
+- Disable `.press-feedback` scale — keep color-only active states
+- Replace sheet slide transitions with instant opacity fade
+- Keep progress bar and spinner — functional motion is acceptable per WCAG 2.1 §2.3.3
 
 ---
 
