@@ -345,16 +345,65 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 
 ---
 
-## Animations
-| Name | Keyframe | Duration | Use |
-|------|----------|----------|-----|
-| Shimmer | gradient sweep | 1.5s infinite | Skeleton loading |
-| Slide Up | translateY(16→0) | 250ms | Bottom sheets, modals |
-| Scale In | scale(0.95→1) | 200ms | Popovers, dialogs |
-| Fade In | translateY(4→0) + opacity | 200ms | Page transitions |
-| Press | scale(0.97/0.98) | 100ms | Buttons, cards |
+## Motion System
 
-All transitions: ease-out. No aggressive or decorative animations.
+### Easing Curves
+
+| Name | Value | Use |
+|------|-------|-----|
+| **ease-default** | `cubic-bezier(0.25, 0.1, 0.25, 1.0)` | General transitions, color changes |
+| **ease-out-expo** | `cubic-bezier(0.16, 1, 0.3, 1)` | Entry animations — sheets, modals, pages |
+| **ease-in-out** | `cubic-bezier(0.42, 0, 0.58, 1)` | Symmetric motions — toggles, switches |
+| **ease-spring** | `cubic-bezier(0.34, 1.56, 0.64, 1)` | Playful feedback — checkbox check, badge pulse |
+
+### Duration Scale
+
+| Tier | Duration | Use |
+|------|----------|-----|
+| **Instant** | 100ms | Press feedback, toggle, checkbox, ripple |
+| **Fast** | 150ms–200ms | Fade-in, scale-in, tooltip appear, color shifts |
+| **Normal** | 250ms | Sheet slide-up, dialog open, page transition |
+| **Gentle** | 350ms | Complex multi-element stagger, drawer open |
+
+### Keyframe Animations
+
+| Name | Keyframe | Duration | Easing | Use |
+|------|----------|----------|--------|-----|
+| `.animate-shimmer` | background-position -200%→200% | 1.5s infinite | ease-in-out | Skeleton loading |
+| `.animate-slide-up` | translateY(16px→0) + opacity 0→1 | 250ms | ease-out-expo | Sheet, modal entry |
+| `.animate-scale-in` | scale(0.95→1) + opacity 0→1 | 200ms | ease-out-expo | Dialog, popover, tooltip entry |
+| `.animate-fade-in` | translateY(4px→0) + opacity 0→1 | 200ms | ease-default | Page mount transitions |
+| `.press-feedback` | active:scale-[0.98] | 100ms | ease-default | Button, card tap feedback |
+
+### Entry/Exit Pairs
+
+| Component | Entry | Exit |
+|-----------|-------|------|
+| **Sheet** | `.animate-slide-up` 250ms from bottom | slide-down translateY(0→16px) + fade 200ms |
+| **Dialog** | `.animate-scale-in` 200ms centered | scale(1→0.95) + fade-out 150ms |
+| **Toast** | slide-down from top + fade-in 200ms | fade-out + translateY(0→-8px) 150ms |
+| **Popover** | `.animate-scale-in` 200ms from trigger | fade-out 100ms |
+| **Drawer** | slide-up from bottom 350ms (Vaul spring) | drag-down dismiss or slide-down 250ms |
+| **Menu/Dropdown** | `.animate-scale-in` 150ms from trigger edge | fade-out 100ms |
+
+### Micro-Interaction Specs
+
+- **Toggle/Switch**: thumb slides 44px over 100ms `ease-in-out`, track color crossfade 150ms
+- **Checkbox**: check icon scales from 0→1 over 100ms `ease-spring`, bg fills simultaneously
+- **Progress bar**: width transition 300ms `ease-default`, uses `transition-all`
+- **Pull-to-refresh**: spinner fades in at 60px pull threshold, rotate 360° over 800ms infinite
+- **Long-press**: haptic at 300ms threshold, scale(1→0.96) during hold
+- **Swipe-to-dismiss**: follows finger with spring-back if <30% threshold, completes at >30%
+- **List item stagger**: each item delays 30ms from previous, max 5 items staggered (150ms total cap)
+
+### Reduced Motion (`prefers-reduced-motion`)
+
+When the user has `prefers-reduced-motion: reduce` enabled:
+- Disable all transform-based animations (translateY, scale) — replace with simple opacity crossfade at 150ms
+- Remove `.animate-shimmer` infinite loop — show static `bg-muted` instead
+- Disable `.press-feedback` scale — keep color-only active states
+- Replace slide-up/slide-down sheet transitions with instant opacity fade
+- Keep progress bar and spinner — functional motion is acceptable per WCAG 2.1 §2.3.3
 
 ---
 
