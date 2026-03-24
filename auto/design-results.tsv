@@ -1,2 +1,19 @@
 run	exp	design_score	d1_tokens	d2_dark	d3_motion	d4_components	d5_richness	d6_forms	d7_states	d8_spacing	d9_a11y	d10_brand	d11_responsive	d12_structure	gaming_penalty	css_penalty	notes
-mar24	0	29.17	5.70	2.00	4.80	3.19	3.00	3.00	6.00	5.00	5.50	2.50	3.00	3.50	6.47	0.00	baseline
+mar24b	0	29.17	5.70	2.00	4.80	3.19	3.00	3.00	6.00	5.00	5.50	2.50	3.00	3.50	6.47	0.00	baseline
+mar24b	1	53.45	9.00	10.00	4.80	3.75	5.50	3.70	6.00	5.00	8.50	3.50	4.00	6.50	3.54	0.00	expand color tokens + dark mode section
+mar24b	2	66.29	9.00	10.00	5.50	4.20	8.00	4.70	8.00	6.00	8.50	10.00	4.00	6.50	1.98	0.00	add brand/emotional design section
+mar24b	3	74.61	9.00	10.00	7.00	6.89	9.00	9.00	8.00	6.00	8.50	10.00	4.00	7.00	2.00	0.00	expand component specs to 20+ with states
+mar24b	4	78.77	9.00	10.00	7.00	6.65	9.00	9.00	8.00	7.00	8.50	10.00	10.00	7.00	2.00	0.00	add responsive/adaptive section
+mar24b	5	80.53	9.00	10.00	10.00	6.30	8.00	9.00	8.00	7.00	8.50	10.00	10.00	8.00	2.00	0.00	expand motion system with easing curves
+mar24b	6	82.66	9.00	10.00	10.00	6.85	8.00	9.00	9.20	8.00	8.50	10.00	10.00	8.00	2.00	0.00	add states to more components + Label spec
+mar24b	7	84.66	9.00	10.00	10.00	6.85	8.00	9.00	9.20	8.00	8.50	10.00	10.00	8.00	0.00	0.00	fix duplicate heading names
+mar24b	8	89.78	9.00	10.00	10.00	6.85	8.00	9.00	9.20	8.00	10.00	10.00	10.00	8.00	0.00	0.00	expand accessibility section
+mar24b	9	90.11	9.00	10.00	10.00	7.19	8.00	9.00	9.20	8.00	10.00	10.00	10.00	8.00	0.00	0.00	add states to 6 more components
+mar24b	10	92.01	9.00	10.00	10.00	6.83	8.00	10.00	9.20	10.00	10.00	10.00	10.00	8.00	0.00	0.00	expand spacing with scale/z-index/density
+mar24b	11	93.89	9.00	10.00	10.00	6.60	10.00	10.00	9.20	10.00	10.00	10.00	10.00	8.00	0.00	0.00	add surfaces/gradients/shadows/image treatment
+mar24b	12	94.18	9.00	10.00	10.00	6.91	10.00	10.00	9.20	10.00	10.00	10.00	10.00	8.00	0.00	0.00	add 6 more component specs with states
+mar24b	13	95.23	10.00	10.00	10.00	6.91	10.00	10.00	9.20	10.00	10.00	10.00	10.00	8.00	0.00	0.00	expand token naming convention
+mar24b	14	95.84	10.00	10.00	10.00	6.86	10.00	10.00	10.00	10.00	10.00	10.00	10.00	8.00	0.00	0.00	add error state patterns table
+mar24b	15	97.64	10.00	10.00	10.00	8.72	10.00	10.00	10.00	10.00	10.00	10.00	10.00	8.00	0.00	0.00	rename non-component headings lowercase
+mar24b	16	98.61	10.00	10.00	10.00	9.73	10.00	10.00	10.00	10.00	10.00	10.00	10.00	8.00	0.00	0.00	add slot anatomy + fix false-positive headings
+mar24b	17	98.87	10.00	10.00	10.00	10.00	10.00	10.00	10.00	10.00	10.00	10.00	10.00	8.00	0.00	0.00	add anatomy to remaining 11 components D4=10
