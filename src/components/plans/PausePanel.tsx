@@ -157,9 +157,11 @@ export function PausePanel({ subscription }: PausePanelProps) {
               </div>
             </div>
 
-            {parseInt(weeks) >= 8 && (
+            {parseInt(weeks) >= 6 && (
               <p className="text-xs text-warning">
-                Subscriptions paused longer than 60 days are automatically canceled.
+                {parseInt(weeks) >= 8
+                  ? "An 8-week pause is close to the 60-day auto-cancel limit. Subscriptions paused longer than 60 days are automatically canceled."
+                  : "Longer pauses approach the 60-day auto-cancel limit."}
               </p>
             )}
 

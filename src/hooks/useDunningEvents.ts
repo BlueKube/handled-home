@@ -7,7 +7,6 @@ export const DUNNING_STEPS = [
   "retry_3",
   "grace_start",
   "grace_end",
-  "suspended",
   "canceled",
 ] as const;
 
@@ -18,8 +17,7 @@ export const DUNNING_TIMELINE: Record<DunningStep, { dayOffset: number; label: s
   retry_2: { dayOffset: 7, label: "Second retry" },
   retry_3: { dayOffset: 10, label: "Third retry" },
   grace_start: { dayOffset: 0, label: "Grace period starts" },
-  grace_end: { dayOffset: 14, label: "Grace period ends" },
-  suspended: { dayOffset: 14, label: "Service suspended" },
+  grace_end: { dayOffset: 14, label: "Grace period ends / Service suspended" },
   canceled: { dayOffset: 30, label: "Auto-canceled" },
 };
 
