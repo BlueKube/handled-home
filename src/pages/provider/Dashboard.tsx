@@ -9,8 +9,10 @@ import { useProviderJobs, ProviderJob } from "@/hooks/useProviderJobs";
 import { useProviderEarnings } from "@/hooks/useProviderEarnings";
 import { useProviderRoutePlan } from "@/hooks/useProviderRoutePlan";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProviderOrg } from "@/hooks/useProviderOrg";
 import { formatCents } from "@/utils/format";
 import { ProviderNotificationBanners } from "@/components/provider/NotificationBanners";
+import { ProviderStatusBanner } from "@/components/provider/ProviderStatusBanner";
 import { MarketHeatBanner } from "@/components/provider/MarketHeatBanner";
 import { ByocBanner } from "@/components/provider/ByocBanner";
 import { EarningsProjectionCard } from "@/components/provider/EarningsProjectionCard";
@@ -28,6 +30,8 @@ import {
   Car,
   Lock,
   Loader2,
+  ShieldOff,
+  Headphones,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -175,6 +179,7 @@ function UpcomingPreview() {
 
 export default function ProviderDashboard() {
   const { profile } = useAuth();
+  const { org } = useProviderOrg();
   const { data: todayJobs, isLoading: jobsLoading, isError: jobsError } = useProviderJobs("today");
   const { eligibleBalance, heldBalance, earnings, isLoading: earningsLoading, isError: earningsError } =
     useProviderEarnings();
@@ -188,6 +193,38 @@ export default function ProviderDashboard() {
     isLocking,
   } = useProviderRoutePlan();
   const navigate = useNavigate();
+
+  const orgStatus = org?.status ?? "ACTIVE";
+
+  // Suspended providers see a full-page notice
+  if (orgStatus === "SUSPENDED") {
+    return (
+      <div className="animate-fade-in p-4 pb-24 flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
+        <div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center">
+          <ShieldOff className="h-8 w-8 text-destructive" />
+        </div>
+        <h1 className="text-h2">Account Suspended</h1>
+        <p className="text-sm text-muted-foreground max-w-xs">
+          Your provider account has been suspended. You cannot receive new job assignments while your account is under review.
+        </p>
+        <Card className="p-4 w-full max-w-sm">
+          <h2 className="text-sm font-semibold mb-2">What happens next?</h2>
+          <ul className="text-xs text-muted-foreground space-y-2">
+            <li>• Your existing scheduled jobs are being reassigned</li>
+            <li>• Any pending earnings will be paid on the next payout cycle</li>
+            <li>• Contact support to discuss reinstatement</li>
+          </ul>
+        </Card>
+        <Button
+          className="mt-2"
+          onClick={() => navigate("/provider/support")}
+        >
+          <Headphones className="h-4 w-4 mr-2" />
+          Contact Support
+        </Button>
+      </div>
+    );
+  }
 
   const todayCount = todayJobs?.length ?? 0;
 
@@ -221,6 +258,9 @@ export default function ProviderDashboard() {
             : "No jobs scheduled for today"}
         </p>
       </div>
+
+      {/* Account status banners */}
+      <ProviderStatusBanner status={orgStatus} />
 
       {/* SLA Notification Banners */}
       <ProviderNotificationBanners />
