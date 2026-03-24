@@ -1,94 +1,12 @@
 # Design Guidelines — Handled Home (Mobile-Native)
 
-> **Last updated:** 2026-03-15 — Corrected color tokens to match index.css. Updated component specs.
-
-## Platform and Responsive Behavior
-
-Mobile-first iOS & Android app via Capacitor. Admin uses desktop sidebar layout — see Admin Layout section below. Reference `docs/app-flow-pages-and-roles.md` for the full route tree.
-
-### device size tiers
-
-| Tier | Viewport | Example | Notes |
-|------|----------|---------|-------|
-| Compact | 320px–375px | iPhone SE | Reduce p-4 to p-3, stack horizontal layouts vertically |
-| Regular | 376px–428px | iPhone 15 (390px) | **Design target** — all specs reference this tier |
-| Max | 429px–480px | iPhone 15 Pro Max (430px) | Extra breathing room, no layout changes needed |
-
-### orientation handling
-
-- Lock customer/provider screens to portrait via Capacitor `Screen.lock({ orientation: 'portrait' })`
-- Admin desktop: landscape-optimized sidebar + content layout, min-width 1024px
-- If a customer rotates to landscape, content reflows naturally — no special breakpoints
-
-### dynamic type and font scaling
-
-- Base font: 16px Inter on regular tier. All typography uses rem units internally
-- Respect iOS Dynamic Type: Capacitor's WebView inherits system font-size preferences
-- Maximum scale: 1.4× (set via `viewport` meta `maximum-scale` to prevent layout breakage)
-- Minimum body text: 13px (`.text-caption`) — never smaller, even at reduced accessibility sizes
-
-### keyboard avoidance
-
-- Capacitor `Keyboard.setResizeMode({ mode: 'native' })` — WebView resizes when keyboard opens
-- Scroll focused input into view: `input.scrollIntoView({ behavior: 'smooth', block: 'center' })` on focus
-- Bottom-docked CTAs (like "Save" buttons) must use `pb-safe` and shift above keyboard
-- Sheet/drawer content scrolls independently — keyboard push doesn't affect overlay position
-
-### capacitor and native integration
-
-- **Safe areas**: `.safe-top` applies `env(safe-area-inset-top)` for notch; `.safe-bottom` for home indicator
-- **Status bar**: light-content on dark backgrounds (navy sidebar), dark-content on light backgrounds
-- **Haptic feedback**: `Haptics.impact({ style: 'light' })` on button press, `medium` on toggle, `heavy` on destructive confirm
-- **Splash screen**: navy `hsl(214 65% 14%)` background with centered logo, auto-hide after app mount
-- **Deep links**: Capacitor App plugin handles `handledapp://` scheme for push notification targets
+## Platform
+Mobile-first iOS & Android app via Capacitor. No desktop breakpoints.
 
 ---
 
-## Brand and Emotional Design
-
-Brand personality: **calm concierge** — confident, kind, predictable. Tagline: "Your home, handled." See `docs/masterplan.md` for full brand positioning.
-
-### personality → design mappings
-
-| Personality Trait | Visual Decision | Implementation |
-|-------------------|----------------|----------------|
-| **Calm** | Slow easing curves, muted palette, minimal motion | `cubic-bezier(0.25, 0.1, 0.25, 1.0)` for transitions; navy `hsl(214 65% 14%)` primary, no saturated reds in default UI |
-| **Competent** | Consistent 12px radius, structured spacing, clear hierarchy | `rounded-xl` on all interactive elements; 8px grid; `.text-h2` for page titles |
-| **Trustworthy** | Navy primary conveys authority; proof-of-work imagery; no flashy gradients | `bg-primary` for CTAs; before/after photo pairs; shadow-sm for subtle depth |
-| **Kind** | Warm success messages, gentle error copy, rounded shapes | `rounded-2xl` cards; "We'll take care of it" not "Error occurred" |
-| **Premium** | Generous whitespace, Inter 300–700 weight range, glass surface treatment | `p-4` card padding; `.glass` utility with backdrop-blur-xl |
-
-### copy tone examples
-
-- **Success toast**: "Service confirmed — your lawn is on the schedule."
-- **Error toast**: "We couldn't save that change. Check your connection and try again."
-- **Empty state (no services)**: "No services yet. Let's get your home set up."
-- **Confirmation dialog**: "Cancel this service? You can re-add it anytime from your plan."
-- **Notification**: "Your pool service is complete. View the proof-of-work photos."
-- **Onboarding**: "Tell us about your home so we can recommend the right plan."
-
-### imagery + illustration direction
-
-- Photography: warm, natural lighting; residential settings; no stock-photo feel
-- Illustration style: outlined Lucide icons at 24px with 1.5px stroke width; accent tint for icon containers using `bg-accent/10` with `rounded-full`
-- Icon sizes: 16px inline, 20px in buttons, 24px standalone, 40px in empty states
-- Spot illustrations for empty states: single-color line art using `text-muted-foreground`
-- No decorative gradients — visual language is flat with subtle shadow depth
-
-### celebration + delight moments
-
-- **Service completion**: success toast with checkmark icon + `.animate-scale-in` at 200ms
-- **Plan activation**: confetti-style milestone card with accent border and `bg-accent/5` tint
-- **Onboarding completion**: congratulations screen with achievement icon at 48px
-- **First service booked**: reward badge pulse animation, scale(1.0→1.05→1.0) over 300ms
-
-### brand anti-patterns
-
-- Never use aggressive language: avoid "URGENT", "ACT NOW", "Don't miss out"
-- Never use red for non-destructive actions — `bg-destructive` is reserved for errors and delete confirmations
-- Do not show raw error codes or stack traces to users
-- Avoid dense data tables in customer-facing screens — use StatCard summaries instead
-- Never auto-play video or sound — the app should feel quiet and controlled
+## Emotional Tone
+Calm concierge — confident, kind, predictable. "Your home is handled."
 
 ---
 
@@ -106,11 +24,11 @@ Line-height ≥ 1.5×
 
 ## Color System (HSL tokens)
 
-All colors use CSS custom properties via `hsl(var(--<name>))` — defined in `src/index.css`. WCAG AA compliance required.
+All colors use CSS custom properties via `hsl(var(--name))` — defined in `src/index.css`. Naming convention: `--{category}-{role}`, e.g. `--card-foreground`, `--sidebar-primary-foreground`, `--destructive-foreground`.
 
-### primitive tokens (raw values)
+### Primitive color tokens
 
-Core palette values. These are raw HSL values — never reference primitives directly in components, use semantic tokens instead.
+Three-tier architecture: **primitive** (raw values below) → **semantic** (purpose aliases like `bg-background`, `text-foreground`) → **component** (scoped overrides like `--sidebar-*`).
 
 | Token | Light | Dark |
 |-------|-------|------|
@@ -139,512 +57,100 @@ Core palette values. These are raw HSL values — never reference primitives dir
 | `--ring` | 200 80% 50% | 200 80% 50% |
 | `--radius` | 0.75rem | 0.75rem |
 
-### semantic tokens (aliases)
+### Component-scoped tokens (sidebar)
 
-Purpose-based aliases that map primitives to roles. Use these in components.
+| Token | Light | Dark |
+|-------|-------|------|
+| `--sidebar-background` | 214 65% 14% | 214 65% 6% |
+| `--sidebar-foreground` | 220 20% 90% | 220 20% 90% |
+| `--sidebar-primary` | 200 80% 50% | 200 80% 50% |
+| `--sidebar-primary-foreground` | 0 0% 100% | 0 0% 100% |
+| `--sidebar-accent` | 214 55% 20% | 214 55% 15% |
+| `--sidebar-accent-foreground` | 220 20% 95% | 220 20% 95% |
+| `--sidebar-border` | 214 50% 22% | 214 50% 15% |
 
-- **Surface default** → `bg-background` — page-level background
-- **Surface raised** → `bg-card` — card, sheet, dialog backgrounds
-- **Surface overlay** → `bg-popover` — popover, dropdown, tooltip backgrounds
-- **Text primary** → `text-foreground` — headings, body text
-- **Text secondary** → `text-muted-foreground` — captions, helper text
-- **Interactive default** → `bg-primary` — primary buttons, active tab bar items
-- **Interactive accent** → `bg-accent` — CTAs, links, focus ring (`--ring`)
-- **Feedback success** → `bg-success` / `text-success` — confirmations
-- **Feedback warning** → `bg-warning` / `text-warning` — advisory alerts
-- **Feedback destructive** → `bg-destructive` / `text-destructive` — errors, delete actions
-
-### scoped token overrides
-
-Specific tokens scoped to individual components:
-
-| Component Token | Light | Dark | Used by |
-|-----------------|-------|------|---------|
-| `--sidebar-background` | 214 65% 14% | 214 65% 6% | Admin sidebar shell |
-| `--sidebar-foreground` | 220 20% 90% | 220 20% 90% | Admin sidebar text |
-| `--sidebar-primary` | 200 80% 50% | 200 80% 50% | Active sidebar item |
-| `--sidebar-accent` | 214 55% 20% | 214 55% 15% | Sidebar hover state |
-| `--sidebar-border` | 214 50% 22% | 214 50% 15% | Sidebar dividers |
-
-### --token naming convention
-
-Naming pattern: `--{category}-{role}-{modifier}`. Examples following this token naming convention:
-- `--background` — base surface color (single-tier shorthand)
-- `--card-foreground` — text color on card surfaces
-- `--sidebar-primary-foreground` — foreground text on active sidebar item
-- `--sidebar-accent-foreground` — text on sidebar hover state
-- `--muted-foreground` — secondary text on muted backgrounds
-- `--destructive-foreground` — text on destructive action surfaces
+WCAG AA compliance required (4.5:1 body text, 3:1 large text 18px+).
 
 ---
 
-## Dark Mode
-
-Dark theme is applied via the `.dark` class on `<html>`. All tokens in the color table above include explicit dark values from `src/index.css`.
-
-### dark elevation model
-
-In dark mode, elevation is communicated through surface luminance rather than shadow — higher surfaces are lighter. Shadow opacity is reduced to 40% of light-mode values since shadows are less visible against dark backgrounds.
-
-| Level | Surface | Light shadow | Dark treatment |
-|-------|---------|-------------|----------------|
-| 0 — Base | `bg-background` | none | `hsl(214 65% 8%)` background |
-| 1 — Raised | `bg-card` | shadow-sm | `hsl(214 55% 12%)` — 4% lighter than base |
-| 2 — Overlay | `bg-popover` | shadow-md | `hsl(214 55% 12%)` — same as card, border distinguishes |
-| 3 — Sidebar | `bg-sidebar-background` | none | `hsl(214 65% 6%)` — darker than base for contrast |
-
-### dark image + illustration guidance
-
-- Apply `brightness(0.85)` filter to photos in dark mode to reduce glare
-- Reduce illustration saturation by 10% — overly vivid colors clash with muted dark surfaces
-- Overlay a `rgba(0,0,0,0.15)` dimming layer on hero images
-- Use `text-foreground` for illustration line strokes (adapts automatically)
-- Placeholder/skeleton shimmer gradient shifts from `hsl(214 55% 12%)` to `hsl(214 55% 16%)`
-
-### .dark class overrides
-
-- **Button (default)**: flips from navy `bg-primary` to cyan `bg-primary` — foreground becomes dark `hsl(214 65% 8%)`
-- **Card**: border becomes visible at `hsl(214 50% 22%)` since shadow is ineffective
-- **Input**: `bg-input` shifts to `hsl(214 50% 22%)`; focus ring remains `--ring` cyan
-- **Badge/StatusBadge**: reduce background opacity to 80% to avoid oversaturation
-- **Toast**: use `bg-card` surface with 1px `border-border` for definition
-- **Tab bar**: glass backdrop-blur remains; opacity shifts to `bg-card/85` for legibility
-- **Skeleton**: shimmer sweeps from `hsl(214 50% 18%)` to `hsl(214 50% 24%)`
-- **Dialog/Sheet**: overlay darkness increases from `rgba(0,0,0,0.5)` to `rgba(0,0,0,0.7)`
-- **Navigation sidebar**: `hsl(214 65% 6%)` — darker than page background for clear boundary
-
-### dark mode testing checklist
-
-- [ ] Verify all text passes WCAG AA (4.5:1 body, 3:1 large text) against dark surfaces
-- [ ] Check card borders are visible — shadow-only differentiation fails in dark mode
-- [ ] Validate toast readability over dark backgrounds
-- [ ] Test skeleton shimmer animation contrast — must be perceptible but not flashy
-- [ ] Audit image brightness — no pure-white glare on dark pages
-
----
-
-## Spacing and Layout
-
-### 8pt spacing scale
-
-8pt base grid. All spacing uses these values:
-
-| Token | px | Tailwind | Use |
-|-------|----|----------|-----|
-| `space-1` | 4px | `p-1` / `gap-1` | Inline icon-to-text gap |
-| `space-2` | 8px | `p-2` / `gap-2` | Tight list item padding |
-| `space-3` | 12px | `p-3` / `gap-3` | Compact card padding, badge gap |
-| `space-4` | 16px | `p-4` / `gap-4` | Default page padding, card padding, section gap |
-| `space-5` | 20px | `p-5` / `gap-5` | Form field vertical spacing |
-| `space-6` | 24px | `p-6` / `gap-6` | Admin page padding, large section gap |
-| `space-8` | 32px | `p-8` / `gap-8` | Empty state container padding |
-| `space-10` | 40px | `p-10` | Hero section vertical padding |
-| `space-12` | 48px | `p-12` | Page-level vertical separation |
-| `space-16` | 64px | `p-16` | Major section breaks |
-
-### 44px touch targets
-
-- Minimum tap target: 44×44px (iOS HIG)
-- Input height: 48px (prevents iOS auto-zoom on focus)
-- Exception: inline text links in body copy do not need 44px targets — underline + color differentiation is sufficient
-- One primary CTA per screen — place above fold or sticky at bottom
-
-### Z-Index Scale
-
-| Level | z-index | Tailwind | Use |
-|-------|---------|----------|-----|
-| Base content | z-index: 0 | `z-0` | Default page content |
-| Sticky headers | z-index: 10 | `z-10` | Sticky section headers, floating action |
-| Dropdown/Popover | z-index: 20 | `z-20` | Select menus, popovers, tooltips |
-| Sheet overlay | z-index: 40 | `z-40` | Bottom sheet, drawer backdrops |
-| Modal overlay | z-index: 50 | `z-50` | Dialog overlays, confirmation modals |
-| Toast | z-index: 60 | `z-[60]` | Toast notifications (always on top) |
-
-### content density modes
-
-| Mode | Card padding | List item gap | Section gap | When |
-|------|-------------|--------------|-------------|------|
-| Compact | p-3 (12px) | gap-2 (8px) | gap-3 (12px) | Dense data: admin tables, provider schedules |
-| Default | p-4 (16px) | gap-3 (12px) | gap-4 (16px) | Standard customer pages |
-| Comfortable | p-6 (24px) | gap-4 (16px) | gap-6 (24px) | Admin dashboard, landing sections |
-
-### page layout templates
-
-- **List page**: `.text-h2` title → filter tabs → ScrollArea list with gap-3 items → `pb-24` bottom clearance
-- **Detail page**: back button + `.text-h2` title → hero card → info sections stacked with gap-4 → sticky bottom CTA
-- **Form page**: back button + `.text-h2` title → form fields with gap-5 vertical → sticky bottom submit
-- **Dashboard**: `.text-h2` greeting → stat cards grid → action cards → activity list
-
-### scroll + overflow behavior
-
-- Main page: native scroll with momentum (`-webkit-overflow-scrolling: touch`)
-- Sticky tab bar: `position: fixed bottom-0 z-40` with `.safe-bottom` padding
-- Pull-to-refresh: enabled on list pages via Capacitor plugin, spinner at 60px threshold
-- Infinite scroll: load more trigger at 200px from bottom via IntersectionObserver
-- Sheet/drawer content: independent scroll within max-height 85vh container, snap to stops
-- Horizontal overflow: snap scroll for card carousels (`snap-x snap-mandatory`), indicator dots below
+## Spacing & Touch
+- 8pt grid system
+- Minimum tap target: 44px (iOS HIG)
+- Input height: 48px (prevents iOS zoom)
+- One primary CTA per screen
+- Safe area insets: `env(safe-area-inset-top/bottom)`
 
 ---
 
 ## Components
 
-Cross-reference `docs/screen-flows.md` for screen-level component usage and `docs/feature-list.md` for feature coverage.
-
 ### Button (`button.tsx`)
-- Sizes: `sm` 36px, `default` h-11 (44px), `lg` 48px, `xl` 52px, `icon` 44×44
+- Default: h-11 (44px), rounded-xl
+- Sizes: `sm` (36px), `lg` (48px), `xl` (52px), `icon` (44×44)
 - Variants: `default`, `accent`, `soft`, `soft-destructive`, `outline`, `secondary`, `ghost`, `link`, `destructive`
-- Use when: primary CTA, form submission, navigation action. Avoid ghost for primary actions.
-
-#### slot anatomy
-Slot anatomy: icon-left (16px) + label + icon-right (16px); icon-only uses `icon` size
-
-#### interaction states
-hover → `opacity-90`; active → `scale-[0.97]` 150ms; focus → `ring-2 ring-ring ring-offset-2`; disabled → `opacity-50 pointer-events-none`; loading → spinner replaces label, disabled state via `loading` prop
+- Active: `scale-[0.97]`, 150ms transition
+- Loading: spinner + disabled state via `loading` prop
 
 ### Card (`card.tsx`)
-- Default: `bg-card` rounded-2xl shadow-sm p-4
-- Variants: `interactive` (hover → shadow-md, active → `scale-[0.98]` press feedback), `glass` (backdrop-blur-xl `bg-card/80`), `elevated` (shadow-lg)
-- Use when: grouping related content. Use `interactive` for tappable list items. Use `glass` for overlays on images.
-
-#### slot anatomy
-Slot anatomy: CardHeader (icon + title + description) → CardContent → CardFooter (actions)
-
-#### interaction states
-hover → shadow-md (interactive only); active → `scale-[0.98]`; focus → `ring-2 ring-ring`; disabled → `opacity-60`
+- Default: rounded-2xl, subtle shadow, p-4
+- Variants: `interactive` (press feedback), `glass` (backdrop-blur), `elevated` (stronger shadow)
 
 ### Input (`input.tsx`)
-- Height: h-12 (48px), rounded-xl, `border-input` 1px, 16px font-size (prevents iOS zoom)
-- Use when: single-line text entry. Use Textarea for multi-line.
+- h-12, rounded-xl, accent ring on focus
+- Background shifts to `--card` on focus
 
-#### slot anatomy
-Slot anatomy: label (above) → prefix icon (left 16px) → input → suffix icon/action (right)
+### StatCard (`StatCard.tsx`)
+- Icon with tinted bg circle (accent/10)
+- Value + label + optional trend indicator
+- `compact` variant for inline rows
 
-#### interaction states
-empty → placeholder in `text-muted-foreground`; focused → `ring-2 ring-ring` + `bg-card`; filled → `text-foreground`; error → `border-destructive ring-destructive`; disabled → `opacity-50 bg-muted`
+### PageSkeleton (`PageSkeleton.tsx`)
+- Shimmer animation (gradient sweep)
+- Variants: `stats`, `list`, `page`
 
-### Textarea (`textarea.tsx`)
-- Min-height: 80px, rounded-xl, same border/focus treatment as Input
-- Slot anatomy: label (above) → textarea content area → character count suffix (optional, trailing)
-- States: empty → placeholder `text-muted-foreground`; focused → `ring-2 ring-ring` + `bg-card`; filled → `text-foreground`; hover → `border-ring`; error → `border-destructive`; disabled → `opacity-50 bg-muted`; loading → not applicable
-- Use when: multi-line text (notes, descriptions, access instructions).
+### StatusBadge (`StatusBadge.tsx`)
+- Pill shape, min-h 28px, dot indicator before label
 
-### Select Dropdown (`select.tsx`)
-- Slot anatomy: trigger (label + trailing chevron icon) → dropdown content panel → option items
-- Height: h-12 (48px), rounded-xl, chevron-down trailing icon 16px
-- States: default → `border-input`; hover → `border-ring`; focused/open → `ring-2 ring-ring`; active → dropdown `.animate-scale-in` 150ms; filled → selected value in `text-foreground`; disabled → `opacity-50`; error → `border-destructive`; loading → spinner replaces chevron
-- Use when: choosing from 4+ predefined options. Use radio for 2–3 options.
+### BottomTabBar
+- Glass bg: `bg-card/90 backdrop-blur-lg`
+- Active: teal dot + icon scale
+- Top shadow for depth
 
-### Checkbox (`checkbox.tsx`)
-- Slot anatomy: checkbox box (leading) → label text (trailing)
-- Size: 20px × 20px, rounded-md (4px radius), `border-input`
-- States: unchecked → `border-input bg-background`; checked → `bg-primary` + check icon in `text-primary-foreground`; hover → `border-ring`; focus → `ring-2 ring-ring`; disabled → `opacity-50`
-- Use when: multi-select options, terms acceptance.
-
-### Switch (`switch.tsx`)
-- Slot anatomy: track (container) → thumb circle (leading/trailing based on state) → label text
-- Track: 44px × 24px, rounded-full; Thumb: 20px circle
-- States: off → `bg-muted`; on → `bg-primary`; hover → `opacity-90`; focus → `ring-2 ring-ring`; disabled → `opacity-50`
-- Use when: binary toggle with immediate effect (notifications on/off). Prefer over checkbox for settings.
-
-### Badge (`badge.tsx`)
-- Slot anatomy: leading dot/icon (optional) → label text content
-- Height: min-h 24px, rounded-full, px-3, text-caption size (13px)
-- Variants: `default` (bg-primary), `secondary` (bg-secondary), `outline` (border only), `destructive` (bg-destructive)
-- States: default → static display; hover → `opacity-90` (if interactive); active → `scale-[0.97]`; focus → `ring-2 ring-ring`; disabled → `opacity-50`
-- Use when: status labels, counts, category tags.
-
-### Dialog (`dialog.tsx`)
-- Overlay: `bg-black/50`, entry `.animate-scale-in` 200ms
-- Content: `bg-card` rounded-2xl p-6 shadow-lg max-w-sm centered
-- Use when: confirmations, destructive action gates. Do not use for forms — use Sheet instead.
-
-#### slot anatomy
-Slot anatomy: DialogHeader (title `.text-h3` + description) → DialogContent → DialogFooter (actions, right-aligned)
-
-#### interaction states
-open → overlay + scale-in; closing → fade-out 150ms; hover (close button) → `opacity-70`; focus → focus trap cycles through content; active → standard button press on footer actions; disabled → footer buttons show `opacity-50`; loading → footer CTA shows spinner
-
-### BottomSheet (`sheet.tsx`)
-- Slides from bottom, entry `.animate-slide-up` 250ms, overlay `bg-black/50`
-- Content: `bg-card` rounded-t-2xl p-4 pb-safe, max-height 85vh, drag-to-dismiss handle (40px × 4px rounded-full `bg-muted` centered)
-- Use when: forms, pickers, detail views that don't warrant a full page.
-
-#### slot anatomy
-Slot anatomy: drag handle (leading, top) → header (title + close) → content area → footer actions (trailing)
-
-#### interaction states
-open → slide-up + overlay; dragging → follows finger; dismissed → slide-down 200ms; hover (handle) → `bg-muted-foreground/40`; focus → focus trap within sheet; active → drag gesture; disabled → handle hidden, no dismiss; loading → content replaced by skeleton
-
-### Drawer (`drawer.tsx`)
-- Slot anatomy: drag handle (leading) → content area → footer actions (trailing)
-- Wraps Vaul for native drag-to-dismiss behavior, same `.animate-slide-up` 250ms entry
-- States: open → slide-up + overlay `bg-black/50`; active/dragging → follows finger position; hover (handle) → `bg-muted-foreground/50`; disabled → not applicable; loading → content area shows skeleton
-- Use when: complex forms or multi-step flows from bottom of screen.
-
-### Tabs (`tabs.tsx`)
-- Slot anatomy: TabsList container → TabsTrigger items (label text) → TabsContent panels
-- Height: 44px, `bg-muted` rounded-xl container, active tab `bg-card` shadow-sm rounded-lg
-- States: default → `text-muted-foreground`; active → `text-foreground bg-card shadow-sm`; hover → `text-foreground`; focus → `ring-2 ring-ring`
-- Use when: switching between 2–4 content panels (e.g., Login/Signup, service categories).
-
-### Avatar (`avatar.tsx`)
-- Slot anatomy: image content (primary) → fallback initials label (when image fails)
-- Sizes: 32px (inline), 40px (list items), 48px (profile), 64px (detail view)
-- Shape: rounded-full, `bg-muted` fallback with initials in `text-muted-foreground`
-- States: loaded → shows image with `object-cover`; loading → `bg-muted` pulse animation; error → fallback initials; hover → `opacity-80` (if interactive); focus → `ring-2 ring-ring`; active → opens profile; disabled → `opacity-50 grayscale`
-- Use when: user/provider profile images, assignee indicators.
-
-### Progress (`progress.tsx`)
-- Slot anatomy: track (full width, `bg-muted`) → fill bar (leading, `bg-primary`) → label (optional, trailing)
-- Height: 8px, rounded-full, track `bg-muted`, fill `bg-primary`
-- Variants: default (primary fill), accent (`bg-accent` fill), small (4px height)
-- States: determinate → width percent; indeterminate → shimmer animation; loading → track only, no fill; error → fill turns `bg-destructive`; hover → not applicable; focus → `ring-2 ring-ring` (if interactive); active → not applicable; disabled → `opacity-40`
-- Use when: upload progress, onboarding completion, step indicators.
-
-### LoadingSkeleton (`skeleton.tsx`)
-- Slot anatomy: placeholder content blocks — each slot mirrors the real content's label and layout position
-- Base: `bg-muted` rounded-xl, `.animate-shimmer` gradient sweep 1.5s infinite
-- Variants: `line` (h-4 rounded), `circle` (rounded-full), `card` (rounded-2xl h-32)
-- States: loading → shimmer animation active; loaded → crossfade to real content 200ms; error → replaced by error state; disabled → static `bg-muted` no animation; hover → not applicable
-- Use when: content is loading. Match skeleton shape to expected content layout.
-
-### Tooltip (`tooltip.tsx`)
-- Slot anatomy: trigger element → tooltip content panel (label text + optional trailing arrow)
-- Background: `bg-popover` rounded-lg p-2 shadow-md, 13px text
-- Entry: `.animate-scale-in` 200ms; delay 300ms on hover
-- States: hover → appear after 300ms delay; focus → appear immediately; active → remains visible; dismissed → fade-out 100ms; disabled → tooltip not shown; loading → not applicable; error → not applicable
-- Use when: supplementary info on icon buttons. Not for essential information.
-
-### EmptyState (`empty-state.tsx`)
-- Layout: centered flex-col, gap-3, p-8
-- Slot anatomy: icon (40px in `text-muted-foreground`) → title (`.text-h3`) → body (`.text-body text-muted-foreground`) → CTA button
-- States: default → full template visible; loading → replaced by PageSkeleton; error → shows retry CTA; hover (CTA) → standard button hover; active (CTA) → `scale-[0.97]`; disabled → `opacity-50` on CTA
-- Use when: lists with no data, first-time screens. Every empty state must have icon + title + body + CTA.
-
-### Popover (`popover.tsx`)
-- Slot anatomy: trigger element → popover content panel (with optional leading icon and trailing close)
-- Content: `bg-popover` rounded-xl shadow-lg p-4, entry `.animate-scale-in` 200ms
-- States: open → scale-in from trigger; closed → fade-out 150ms; hover (trigger) → `opacity-80`; focus → `ring-2 ring-ring` on trigger, focus trap in content; active → click/tap opens; disabled → trigger `opacity-50 pointer-events-none`; loading → content shows skeleton
-- Use when: contextual menus, filter dropdowns. Not for full forms — use Sheet.
-
-### ScrollArea (`scroll-area.tsx`)
-- Slot anatomy: viewport content area → vertical scrollbar (trailing) → horizontal scrollbar (end)
-- Custom scrollbar: 4px wide, rounded-full, `bg-muted` track, `bg-muted-foreground/30` thumb
-- States: idle → scrollbar hidden; hover → scrollbar visible at `opacity-80`; active/scrolling → thumb visible `bg-muted-foreground/50`; disabled → `overflow-hidden`; focus → keyboard scroll enabled
-- Use when: constrained-height content areas (sidebars, long lists in sheets).
-
-### Separator (`separator.tsx`)
-- Slot anatomy: single line element (no content slots — purely decorative)
-- Height: 1px, `bg-border`, full width
-- Variants: horizontal (default), vertical
-- States: default → visible `bg-border`; hover → not applicable; active → not applicable; focus → not applicable; disabled → `opacity-30`
-- Use when: dividing content sections within a card or page.
-
-### Label (`label.tsx`)
-- Font: 14px / 500 weight, `text-foreground`, margin-bottom 4px above input
-- States: default → `text-foreground`; error → `text-destructive`; disabled → `text-muted-foreground opacity-70`; hover → not applicable; focus → cursor moves to associated input
-- Slot anatomy: label text + optional required indicator (`text-destructive` asterisk)
-- Use when: above every form input. Always pair with `htmlFor` for accessibility.
-
-### Slider (`slider.tsx`)
-- Slot anatomy: track → fill (leading portion) → thumb handle → label/tooltip (above thumb)
-- Track: h-2 (8px) rounded-full `bg-muted`; fill `bg-primary`; thumb 20px circle `bg-primary-foreground` with shadow-md
-- States: default → thumb at position; hover → thumb scale(1.1) 100ms; active/dragging → thumb scale(1.2), `ring-4 ring-ring/20`; focus → `ring-2 ring-ring`; disabled → `opacity-50 pointer-events-none`; loading → track only, no thumb
-- Use when: numeric ranges (service frequency, budget slider).
-
-### RadioGroup (`radio-group.tsx`)
-- Slot anatomy: radio circle (leading) → label text content → optional suffix/description
-- Size: 20px circle, `border-2 border-input`, inner dot 10px `bg-primary` when selected
-- States: unselected → empty circle `border-input`; selected → inner dot `bg-primary`; hover → `border-ring`; focus → `ring-2 ring-ring`; active → scale(0.95) 100ms; disabled → `opacity-50`; error → `border-destructive`
-- Use when: single selection from 2–3 visible options. Use Select for 4+.
-
-### Alert (`alert.tsx`)
-- Container: rounded-xl p-4, `border-l-4` left accent border
-- Variants: `default` (border-border), `destructive` (border-destructive bg-destructive/5), `warning` (border-warning bg-warning/5), `success` (border-success bg-success/5)
-- States: default → visible; hover → not applicable; active → not applicable; focus → `ring-2 ring-ring` when focusable; disabled → `opacity-50`; loading → replaced by skeleton; error → n/a
-- Slot anatomy: icon (leading, 20px) → AlertTitle (`.text-h3`) → AlertDescription (`.text-body text-muted-foreground`)
-- Use when: inline informational messages, validation summaries. Not for transient notifications (use Toast).
-
-### Accordion (`accordion.tsx`)
-- Slot anatomy: trigger (label text + trailing ChevronDown icon) → collapsible content area
-- Trigger: h-12 (48px), full width, text left, `ChevronDown` icon right (16px), rotates 180° on open
-- Content: `py-3 px-0`, animate height 250ms `ease-out-expo`
-- States: collapsed → chevron pointing down; expanded → chevron rotated 180°; hover → `bg-muted/50`; focus → `ring-2 ring-ring`; active → press scale not used (too subtle); disabled → `opacity-50 pointer-events-none`; loading → content skeleton
-- Use when: FAQ sections, collapsible detail groups. Use Collapsible for single toggle.
-
-### Collapsible (`collapsible.tsx`)
-- Slot anatomy: trigger element (leading) → collapsible content panel
-- Trigger: any interactive element; content animates height 200ms `ease-default`
-- States: collapsed → content hidden (height: 0); expanded → content visible; hover → trigger highlight; focus → `ring-2 ring-ring` on trigger; active → trigger press; disabled → `opacity-50`; loading → content skeleton
-- Use when: progressive disclosure (show more details). Use Accordion for multiple sections.
-
-### error state patterns
-
-| Error Type | Visual Treatment | User Action |
-|-----------|-----------------|-------------|
-| **Network error** | Toast with `AlertTriangle` icon, `text-destructive`, "Check your connection and try again" | Retry button in toast or inline |
-| **Validation error** | Inline `text-destructive` below field, `border-destructive` on input, `role="alert"` | Fix field and re-submit |
-| **Not found** | EmptyState with `Search` icon, "We couldn't find that" title, back/home CTA | Navigate away |
-| **Timeout** | Toast with clock icon, "This is taking longer than expected" | Auto-retry after 3s or manual retry |
-| **Offline** | Persistent banner at top `bg-warning/10 border-warning`, "You're offline" | Auto-dismiss when connection restores |
-| **Permission denied** | EmptyState with `Lock` icon, "You don't have access" body, contact support CTA | Request access or go back |
+### Toast
+- rounded-2xl, p-4, top-center position
+- Variants: `default`, `destructive`, `success`
 
 ---
 
-## Motion System
+## Animations
+| Name | Keyframe | Duration | Use |
+|------|----------|----------|-----|
+| Shimmer | gradient sweep | 1.5s infinite | Skeleton loading |
+| Slide Up | translateY(16→0) | 250ms | Bottom sheets, modals |
+| Scale In | scale(0.95→1) | 200ms | Popovers, dialogs |
+| Fade In | translateY(4→0) + opacity | 200ms | Page transitions |
+| Press | scale(0.97/0.98) | 100ms | Buttons, cards |
 
-### easing curves (cubic-bezier)
-
-| Name | Value | Use |
-|------|-------|-----|
-| **ease-default** | `cubic-bezier(0.25, 0.1, 0.25, 1.0)` | General transitions, color changes |
-| **ease-out-expo** | `cubic-bezier(0.16, 1, 0.3, 1)` | Entry animations — sheets, modals, pages |
-| **ease-in-out** | `cubic-bezier(0.42, 0, 0.58, 1)` | Symmetric motions — toggles, switches |
-| **ease-spring** | `cubic-bezier(0.34, 1.56, 0.64, 1)` | Playful feedback — checkbox check, badge pulse |
-
-### duration scale (ms)
-
-| Tier | Duration | Use |
-|------|----------|-----|
-| **Instant** | 100ms | Press feedback, toggle, checkbox, ripple |
-| **Fast** | 150ms–200ms | Fade-in, scale-in, tooltip appear, color shifts |
-| **Normal** | 250ms | Sheet slide-up, dialog open, page transition |
-| **Gentle** | 350ms | Complex multi-element stagger, drawer open |
-
-### @keyframe animations
-
-| Name | Keyframe | Duration | Easing | Use |
-|------|----------|----------|--------|-----|
-| `.animate-shimmer` | background-position -200%→200% | 1.5s infinite | ease-in-out | Skeleton loading |
-| `.animate-slide-up` | translateY(16px→0) + opacity 0→1 | 250ms | ease-out-expo | Sheet, modal entry |
-| `.animate-scale-in` | scale(0.95→1) + opacity 0→1 | 200ms | ease-out-expo | Dialog, popover, tooltip entry |
-| `.animate-fade-in` | translateY(4px→0) + opacity 0→1 | 200ms | ease-default | Page mount transitions |
-| `.press-feedback` | active:scale-[0.98] | 100ms | ease-default | Button, card tap feedback |
-
-### entry ↔ exit pairs
-
-| Component | Entry | Exit |
-|-----------|-------|------|
-| **Sheet** | `.animate-slide-up` 250ms from bottom | slide-down translateY(0→16px) + fade 200ms |
-| **Dialog** | `.animate-scale-in` 200ms centered | scale(1→0.95) + fade-out 150ms |
-| **Toast** | slide-down from top + fade-in 200ms | fade-out + translateY(0→-8px) 150ms |
-| **Popover** | `.animate-scale-in` 200ms from trigger | fade-out 100ms |
-| **Drawer** | slide-up from bottom 350ms (Vaul spring) | drag-down dismiss or slide-down 250ms |
-| **Menu/Dropdown** | `.animate-scale-in` 150ms from trigger edge | fade-out 100ms |
-
-### micro-interaction specs
-
-- **Toggle/Switch**: thumb slides 44px over 100ms `ease-in-out`, track color crossfade 150ms
-- **Checkbox**: check icon scales from 0→1 over 100ms `ease-spring`, bg fills simultaneously
-- **Progress bar**: width transition 300ms `ease-default`, uses `transition-all`
-- **Pull-to-refresh**: spinner fades in at 60px pull threshold, rotate 360° over 800ms infinite
-- **Long-press**: haptic at 300ms threshold, scale(1→0.96) during hold
-- **Swipe-to-dismiss**: follows finger with spring-back if <30% threshold, completes at >30%
-- **List item stagger**: each item delays 30ms from previous, max 5 items staggered (150ms total cap)
-
-### prefers-reduced-motion handling
-
-When the user has `prefers-reduced-motion: reduce` enabled:
-- Disable all transform-based animations (translateY, scale) — replace with simple opacity crossfade at 150ms
-- Remove `.animate-shimmer` infinite loop — show static `bg-muted` instead
-- Disable `.press-feedback` scale — keep color-only active states
-- Replace slide-up/slide-down sheet transitions with instant opacity fade
-- Keep progress bar and spinner — functional motion is acceptable per WCAG 2.1 §2.3.3
-
----
-
-## Surfaces and Visual Depth
-
-### gradient definitions (CSS)
-
-Subtle, purposeful gradients only — the brand is "calm concierge," not "tech keynote."
-
-| Name | CSS | Use |
-|------|-----|-----|
-| **Hero shimmer** | `linear-gradient(135deg, hsl(214 65% 14%) 0%, hsl(214 55% 20%) 100%)` | Onboarding hero backgrounds, splash |
-| **Accent highlight** | `linear-gradient(90deg, hsl(200 80% 50%) 0%, hsl(200 80% 60%) 100%)` | Progress bar fills, accent badges |
-| **Skeleton sweep** | `linear-gradient(90deg, transparent 0%, hsl(220 14% 93%) 50%, transparent 100%)` | `.animate-shimmer` overlay |
-| **Surface fade** | `radial-gradient(ellipse at top, hsl(220 20% 97%) 0%, hsl(0 0% 100%) 100%)` | Page background subtle depth |
-
-### shadow + elevation scale
-
-| Level | Token | CSS Value | Use |
-|-------|-------|-----------|-----|
-| **elevation-0** | `shadow-none` | `box-shadow: none` | Flat surfaces, inline elements |
-| **elevation-1** | `shadow-sm` | `box-shadow: 0 1px 2px rgba(0,0,0,0.05)` | Cards at rest, list items |
-| **elevation-2** | `shadow-md` | `box-shadow: 0 4px 6px rgba(0,0,0,0.07)` | Hovered cards, interactive elevated surfaces |
-| **elevation-3** | `shadow-lg` | `box-shadow: 0 10px 15px rgba(0,0,0,0.10)` | Popover, dropdown, tooltip |
-| **elevation-4** | `shadow-xl` | `box-shadow: 0 20px 25px rgba(0,0,0,0.12)` | Dialog, sheet overlay |
-| **elevation-5** | `shadow-2xl` | `box-shadow: 0 25px 50px rgba(0,0,0,0.15)` | Dragged element, floating CTA |
-
-In dark mode, reduce shadow opacity to 40% of light values — use surface luminance for primary elevation cue.
-
-### surface treatments (glass, blur, tint)
-
-- **Glass**: `.glass` utility — `bg-card/80 backdrop-blur-xl border-border/50`. Use for tab bar, floating headers, overlay panels
-- **Frosted**: `backdrop-blur-lg bg-background/70`. Use for status bar overlays on scrolled content
-- **Tinted surface**: `bg-accent/5` or `bg-success/5`. Use for subtle highlight backgrounds on feature cards
-- **Noise texture**: not used — keeps the UI clean. Reserve for marketing materials only
-
-### image treatment rules
-
-- Aspect ratios: hero images 16:9, thumbnail 1:1 (rounded-xl), avatar rounded-full
-- Object fit: `object-cover` for all photos, `object-contain` for logos/icons
-- Placeholder: `bg-muted` with centered Lucide icon in `text-muted-foreground` while loading
-- Overlay for text on images: `linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)` from bottom
-- Border radius on images: match parent container — rounded-2xl in cards, rounded-xl standalone
-- Max image size: constrain to container width, lazy-load with `loading="lazy"`
+All transitions: ease-out. No aggressive or decorative animations.
 
 ---
 
 ## Utilities
 - `.glass` — bg-card/80 backdrop-blur-xl border-border/50
-- `.press-feedback` — active:scale-[0.98] with transition duration-100
+- `.press-feedback` — active:scale-[0.98] with transition
 - `.safe-top` / `.safe-bottom` — env(safe-area-inset)
-- `.text-h1` through `.text-caption` — typography presets (see Typography section)
-- `.animate-fade-in` — translateY(4px→0) + opacity fade 200ms, applied to page containers on mount
-
----
-
-## Admin (Desktop) Layout
-
-Admin pages use a **sidebar + command bar** layout (via `AdminShell`), not the mobile bottom tab bar.
-
-| Pattern | Customer/Provider (Mobile) | Admin (Desktop) |
-|---------|---------------------------|-----------------|
-| Shell | Bottom tab bar (56px) | Sidebar + command bar (h-12) |
-| Container padding | `p-4 pb-24` | `p-6` |
-| Max-width constraints | None (mobile-only) | OK (`max-w-4xl`, `max-w-6xl`) |
-| Responsive grids | None | OK (`lg:grid-cols-*`) |
-| Page heading | `text-h2` | `text-h2` |
-| Entry animation | `animate-fade-in` | `animate-fade-in` |
-| Back navigation | `ChevronLeft` h-5 w-5 + aria-label | `ChevronLeft` h-5 w-5 + aria-label |
-| Touch targets | Min 44px | Standard button sizes |
-
-**Key differences:**
-- No `pb-24` — admin has no bottom tab bar to clear
-- `p-6` padding (not `p-4`) — more spacious desktop layout
-- `max-w-*` constraints are appropriate for desktop readability
-- Responsive grids are used for dashboard-style pages
+- `.text-h1` through `.text-caption` — typography presets
 
 ---
 
 ## Accessibility
+- Semantic headings
+- Visible focus states (ring-2 ring-ring)
+- Proper contrast ratios (WCAG AA)
+- Clear error messaging
+- 16px minimum font for inputs (no iOS zoom)
 
-WCAG AA compliance required. All text must meet 4.5:1 contrast (body) or 3:1 (large text 18px+).
+---
 
-- Semantic headings: one `h1` per page, sequential `h2`→`h3` nesting
-- Visible focus states: `ring-2 ring-ring ring-offset-2` on all interactive elements via `focus-visible`
-- Focus trap: Dialog and Sheet trap focus within overlay; Tab cycles through focusable children; Escape closes
-- Focus restore: when a Dialog/Sheet closes, focus returns to the trigger element that opened it
-- Touch targets: minimum 44×44px per iOS HIG; exception: inline text links in body copy (underline + color differentiation sufficient)
-- 16px minimum font for inputs (prevents iOS auto-zoom on focus)
-- `aria-label` on icon-only buttons (e.g., back `ChevronLeft` buttons, close `X` buttons)
-- `aria-live="polite"` on toast container for screen reader announcements
-- `role="alert"` on inline form error messages for immediate announcement
-- Color-independent information: never convey status by color alone — pair with icon (checkmark for success, `AlertTriangle` for warning) or text label as secondary indicator
-- Screen reader: use `sr-only` class for visually hidden labels; `aria-describedby` links inputs to helper/error text
-- Landmarks: `<main>` for page content, `<nav>` for tab bar, `<aside>` for admin sidebar
-- VoiceOver/TalkBack testing: verify tab order follows visual top-to-bottom flow, all modals announce their title on open
-- Lighthouse accessibility audit: target 95+ score on all customer-facing pages
-
+## Voice
+Calm, competent, kind. Never blame users. Reinforce: "Your home is handled."
