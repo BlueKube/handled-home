@@ -152,8 +152,9 @@ export default function CustomerSupportNew() {
           <Textarea
             value={note}
             onChange={(e) => {
-              setNote(e.target.value.slice(0, 500));
-              if (e.target.value.trim().length >= 10) {
+              const capped = e.target.value.slice(0, 500);
+              setNote(capped);
+              if (capped.trim().length >= 10) {
                 setErrors((prev) => ({ ...prev, description: "" }));
               }
             }}
@@ -218,7 +219,7 @@ export default function CustomerSupportNew() {
 
           <Button
             className="w-full"
-            disabled={!note.trim() || note.trim().length < 10 || createTicket.isPending}
+            disabled={createTicket.isPending}
             onClick={handleSubmit}
           >
             {createTicket.isPending ? "Submitting…" : "Submit"}
