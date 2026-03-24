@@ -155,28 +155,6 @@ For each page you touch, evaluate:
 5. **Density** — Appropriate content density? No voids?
 6. **Proof and feedback** — Does it show progress, earnings, or value?
 
-## Stitch MCP Server — Design-to-Code Workflow
-
-The `stitch` MCP server is configured in `.claude/settings.json`. It connects to Google Stitch to pull AI-generated designs.
-
-### Available MCP Tools
-
-| Tool | Purpose | Parameters |
-|------|---------|------------|
-| `get_screen_code` | Get HTML code for a design screen | `projectId`, `screenId` |
-| `get_screen_image` | Get screenshot as base64 image | `projectId`, `screenId` |
-| `build_site` | Build full site mapping screens to routes | `projectId`, `routes[]` |
-
-### Implementation Workflow
-
-When implementing a screen from Stitch designs:
-
-1. **Pull the design** — Use `get_screen_image` to see the visual design, then `get_screen_code` to get the HTML reference
-2. **Map to existing components** — Translate Stitch HTML into existing shadcn/ui components (`Card`, `Button`, `Badge`, `Tabs`, etc.) and project-specific components
-3. **Follow existing patterns** — Match the file structure and hook patterns already in the codebase (React Query hooks, Supabase integration, etc.)
-4. **Respect the design system** — Use Tailwind classes with CSS variable colors (`bg-primary`, `text-accent`, etc.), not hardcoded values
-5. **Keep mobile-first** — All customer/provider screens target 390×844 viewport with safe area padding
-
 ## Git Workflow
 
 - Develop on the designated feature branch (see task instructions)
