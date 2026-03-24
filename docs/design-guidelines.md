@@ -452,10 +452,21 @@ Admin pages use a **sidebar + command bar** layout (via `AdminShell`), not the m
 ---
 
 ## Accessibility
-- Semantic headings
-- Visible focus states (ring-2 ring-ring)
-- Proper contrast ratios (WCAG AA)
-- Clear error messaging
-- 16px minimum font for inputs (no iOS zoom)
-- Back buttons include `aria-label` for screen readers
+
+WCAG AA compliance required. All text must meet 4.5:1 contrast (body) or 3:1 (large text 18px+).
+
+- Semantic headings: one `h1` per page, sequential `h2`→`h3` nesting
+- Visible focus states: `ring-2 ring-ring ring-offset-2` on all interactive elements via `focus-visible`
+- Focus trap: Dialog and Sheet trap focus within overlay; Tab cycles through focusable children; Escape closes
+- Focus restore: when a Dialog/Sheet closes, focus returns to the trigger element that opened it
+- Touch targets: minimum 44×44px per iOS HIG; exception: inline text links in body copy (underline + color differentiation sufficient)
+- 16px minimum font for inputs (prevents iOS auto-zoom on focus)
+- `aria-label` on icon-only buttons (e.g., back `ChevronLeft` buttons, close `X` buttons)
+- `aria-live="polite"` on toast container for screen reader announcements
+- `role="alert"` on inline form error messages for immediate announcement
+- Color-independent information: never convey status by color alone — pair with icon (checkmark for success, `AlertTriangle` for warning) or text label as secondary indicator
+- Screen reader: use `sr-only` class for visually hidden labels; `aria-describedby` links inputs to helper/error text
+- Landmarks: `<main>` for page content, `<nav>` for tab bar, `<aside>` for admin sidebar
+- VoiceOver/TalkBack testing: verify tab order follows visual top-to-bottom flow, all modals announce their title on open
+- Lighthouse accessibility audit: target 95+ score on all customer-facing pages
 
