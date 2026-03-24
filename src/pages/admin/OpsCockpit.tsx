@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { SparklineChart } from "@/components/SparklineChart";
 import {
   AlertTriangle, Camera, Clock, ShieldAlert,
-  DollarSign, CreditCard, Pause, Gift,
+  DollarSign, CreditCard, Pause, Gift, Calendar,
   Bug, RotateCcw, Timer, UserX,
   Globe, Users, Briefcase, TrendingUp, SlidersHorizontal,
 } from "lucide-react";
@@ -234,6 +234,7 @@ export default function OpsCockpit() {
               value={formatCents(m.addOnRevenue7dCents)}
               href="/admin/ops/billing"
             />
+            <PayoutReviewCard />
           </div>
         </div>
 
@@ -324,5 +325,52 @@ export default function OpsCockpit() {
         <RecentActionsCard />
       </div>
     </div>
+  );
+}
+
+function PayoutReviewCard() {
+  const nav = useNavigate();
+  // TODO: Store last_payout_review_date in admin_settings table
+  const lastReviewDate: Date | null = null; // Mock: no review yet
+  const daysSinceReview = lastReviewDate
+    ? Math.floor((Date.now() - lastReviewDate.getTime()) / (1000 * 60 * 60 * 24))
+    : Infinity;
+  const status = daysSinceReview < 60 ? "healthy" : daysSinceReview < 90 ? "warning" : "overdue";
+  const nextReviewDate = lastReviewDate
+    ? new Date(lastReviewDate.getTime() + 90 * 24 * 60 * 60 * 1000)
+    : null;
+
+  const statusColor = status === "healthy" ? "text-green-600 dark:text-green-400" : status === "warning" ? "text-yellow-600 dark:text-yellow-400" : "text-destructive";
+  const dotColor = status === "healthy" ? "bg-green-500" : status === "warning" ? "bg-yellow-500" : "bg-destructive";
+
+  return (
+    <Card
+      variant="interactive"
+      className={cn("p-3 cursor-pointer hover:shadow-md transition-shadow", status === "overdue" && "border-destructive/40 bg-destructive/5")}
+      onClick={() => nav("/admin/payouts")}
+    >
+      <div className="flex items-start gap-2.5">
+        <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg shrink-0", status === "overdue" ? "bg-destructive/10" : "bg-accent/10")}>
+          <Calendar className={cn("h-4 w-4", status === "overdue" ? "text-destructive" : "text-accent")} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className={cn("h-2 w-2 rounded-full shrink-0", dotColor)} />
+            <p className="text-xs font-medium truncate">Payout Review</p>
+          </div>
+          <p className={cn("text-xs mt-0.5", statusColor)}>
+            {lastReviewDate
+              ? `Last reviewed: ${formatDistanceToNow(lastReviewDate, { addSuffix: true })}`
+              : "Never reviewed"}
+          </p>
+          <p className="text-[10px] text-muted-foreground mt-0.5">
+            {nextReviewDate
+              ? `Next due: ${nextReviewDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+              : "Review recommended"}
+          </p>
+          <p className="text-[10px] text-accent mt-1">Go to Payouts →</p>
+        </div>
+      </div>
+    </Card>
   );
 }
