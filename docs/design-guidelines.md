@@ -221,12 +221,66 @@ In dark mode, elevation is communicated through surface luminance rather than sh
 
 ---
 
-## Spacing & Touch
-- 8pt grid system
-- Minimum tap target: 44px (iOS HIG)
-- Input height: 48px (prevents iOS zoom)
-- One primary CTA per screen
-- Safe area insets: `env(safe-area-inset-top/bottom)`
+## Spacing and Layout
+
+### Spacing Scale
+
+8pt base grid. All spacing uses these values:
+
+| Token | px | Tailwind | Use |
+|-------|----|----------|-----|
+| `space-1` | 4px | `p-1` / `gap-1` | Inline icon-to-text gap |
+| `space-2` | 8px | `p-2` / `gap-2` | Tight list item padding |
+| `space-3` | 12px | `p-3` / `gap-3` | Compact card padding, badge gap |
+| `space-4` | 16px | `p-4` / `gap-4` | Default page padding, card padding, section gap |
+| `space-5` | 20px | `p-5` / `gap-5` | Form field vertical spacing |
+| `space-6` | 24px | `p-6` / `gap-6` | Admin page padding, large section gap |
+| `space-8` | 32px | `p-8` / `gap-8` | Empty state container padding |
+| `space-10` | 40px | `p-10` | Hero section vertical padding |
+| `space-12` | 48px | `p-12` | Page-level vertical separation |
+| `space-16` | 64px | `p-16` | Major section breaks |
+
+### Touch Targets
+
+- Minimum tap target: 44×44px (iOS HIG)
+- Input height: 48px (prevents iOS auto-zoom on focus)
+- Exception: inline text links in body copy do not need 44px targets — underline + color differentiation is sufficient
+- One primary CTA per screen — place above fold or sticky at bottom
+
+### Z-Index Scale
+
+| Level | z-index | Tailwind | Use |
+|-------|---------|----------|-----|
+| Base content | z-index: 0 | `z-0` | Default page content |
+| Sticky headers | z-index: 10 | `z-10` | Sticky section headers, floating action |
+| Dropdown/Popover | z-index: 20 | `z-20` | Select menus, popovers, tooltips |
+| Sheet overlay | z-index: 40 | `z-40` | Bottom sheet, drawer backdrops |
+| Modal overlay | z-index: 50 | `z-50` | Dialog overlays, confirmation modals |
+| Toast | z-index: 60 | `z-[60]` | Toast notifications (always on top) |
+
+### Content Density
+
+| Mode | Card padding | List item gap | Section gap | When |
+|------|-------------|--------------|-------------|------|
+| Compact | p-3 (12px) | gap-2 (8px) | gap-3 (12px) | Dense data: admin tables, provider schedules |
+| Default | p-4 (16px) | gap-3 (12px) | gap-4 (16px) | Standard customer pages |
+| Comfortable | p-6 (24px) | gap-4 (16px) | gap-6 (24px) | Admin dashboard, landing sections |
+
+### Page Layout Templates
+
+- **List page**: `.text-h2` title → filter tabs → ScrollArea list with gap-3 items → `pb-24` bottom clearance
+- **Detail page**: back button + `.text-h2` title → hero card → info sections stacked with gap-4 → sticky bottom CTA
+- **Form page**: back button + `.text-h2` title → form fields with gap-5 vertical → sticky bottom submit
+- **Dashboard**: `.text-h2` greeting → stat cards grid → action cards → activity list
+
+### Scroll and Overflow Behavior
+
+- Main page: native scroll with momentum (`-webkit-overflow-scrolling: touch`)
+- Sticky tab bar: `position: fixed bottom-0 z-40` with `.safe-bottom` padding
+- Pull-to-refresh: enabled on list pages via Capacitor plugin, spinner at 60px threshold
+- Infinite scroll: load more trigger at 200px from bottom via IntersectionObserver
+- Sheet/drawer content: independent scroll within max-height 85vh container, snap to stops
+- Horizontal overflow: snap scroll for card carousels (`snap-x snap-mandatory`), indicator dots below
 
 ---
 
