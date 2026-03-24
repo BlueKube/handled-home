@@ -50,7 +50,7 @@ export function EmptyState({
         </Button>
       )}
       {secondaryLabel && secondaryAction && (
-        <Button variant="ghost" size="sm" onClick={secondaryAction}>
+        <Button variant="ghost" className="min-h-[44px]" onClick={secondaryAction}>
           {secondaryLabel}
         </Button>
       )}
