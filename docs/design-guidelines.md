@@ -91,6 +91,8 @@ Line-height ≥ 1.5×
 
 All colors use CSS custom properties via `hsl(var(--name))` — defined in `src/index.css`. Naming convention: `--{category}-{role}`, e.g. `--card-foreground`, `--sidebar-primary-foreground`, `--destructive-foreground`.
 
+Semantic usage: `bg-background` for page surface, `bg-card` for raised surfaces, `bg-popover` for overlays, `text-foreground` for headings/body, `text-muted-foreground` for captions and helper text, `bg-primary` for default buttons, `bg-accent` for CTAs and `--ring` focus indicator, `bg-destructive` for errors, `bg-success` for confirmations, `bg-warning` for advisory alerts, `border-border` for dividers, `border-input` for form field borders.
+
 ### Primitive color tokens
 
 Three-tier architecture: **primitive** (raw values below) → **semantic** (purpose aliases like `bg-background`, `text-foreground`) → **component** (scoped overrides like `--sidebar-*`).
@@ -448,6 +450,17 @@ Cross-reference `docs/screen-flows.md` for per-screen component usage and `docs/
 - Track h-2 rounded-full `bg-muted`; thumb 20px `bg-primary-foreground` shadow-md
 - States: default → thumb at position; hover → thumb scale(1.1); active → thumb scale(1.2) `ring-4 ring-ring/20`; focus → `ring-2 ring-ring`; disabled → `opacity-50`; loading → track only
 - Use when: numeric ranges (frequency, budget).
+
+### error state patterns
+
+| Error Type | Visual Treatment | User Action |
+|-----------|-----------------|-------------|
+| **Network error** | Toast `AlertTriangle` icon, `text-destructive` | Retry button |
+| **Validation error** | Inline `text-destructive` below field, `border-destructive` | Fix and re-submit |
+| **Not found** | EmptyState with `Search` icon, back/home CTA | Navigate away |
+| **Timeout** | Toast with clock icon | Auto-retry 3s or manual |
+| **Offline** | Persistent banner `bg-warning/10 border-warning` | Auto-dismiss on reconnect |
+| **Permission denied** | EmptyState with `Lock` icon, contact CTA | Request access |
 
 ---
 
