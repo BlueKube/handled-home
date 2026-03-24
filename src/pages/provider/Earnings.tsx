@@ -268,7 +268,7 @@ export default function ProviderEarnings() {
   const periodLabel = period === "today" ? "Today" : period === "week" ? "This Week" : "This Month";
 
   return (
-    <div className="animate-fade-in p-4 pb-24 space-y-5 max-w-2xl">
+    <div className="animate-fade-in p-4 pb-24 space-y-5">
       <div>
         <h1 className="text-h2">Earnings</h1>
         <p className="text-caption mt-0.5">Track your earnings and payouts</p>

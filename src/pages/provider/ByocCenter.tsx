@@ -283,7 +283,7 @@ function InviteLinkCard({
           {inactive ? (
             <XCircle className="h-3 w-3 text-muted-foreground" />
           ) : (
-            <CheckCircle className="h-3 w-3 text-green-500" />
+            <CheckCircle className="h-3 w-3 text-success" />
           )}
         </div>
         <span className="text-xs text-muted-foreground font-mono">{link.token}</span>

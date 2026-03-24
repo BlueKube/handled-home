@@ -30,7 +30,7 @@ export default function ProviderQualityScore() {
 
   if (isLoading || tierLoading) {
     return (
-      <div className="animate-fade-in p-4 pb-24 max-w-2xl space-y-4">
+      <div className="animate-fade-in p-4 pb-24 space-y-4">
         <div className="flex items-center gap-3">
           <Skeleton className="h-11 w-11 rounded-xl" />
           <Skeleton className="h-7 w-40" />
@@ -50,7 +50,7 @@ export default function ProviderQualityScore() {
     : 0;
 
   return (
-    <div className="animate-fade-in p-4 pb-24 max-w-2xl space-y-4">
+    <div className="animate-fade-in p-4 pb-24 space-y-4">
       {/* Header */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => navigate("/provider/performance")} aria-label="Back to score">
