@@ -284,13 +284,13 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 - Overlay: `bg-black/50`, entry `.animate-scale-in` 200ms
 - Content: `bg-card` rounded-2xl p-6 shadow-lg max-w-sm centered
 - Slot anatomy: DialogHeader (title `.text-h3` + description) → DialogContent → DialogFooter (actions, right-aligned)
-- States: open → overlay + scale-in; closing → fade-out 150ms
+- States: open → overlay + scale-in; closing → fade-out 150ms; hover (close button) → `opacity-70`; focus → focus trap cycles through content; active → standard button press on footer actions; disabled → footer buttons show `opacity-50`; loading → footer CTA shows spinner
 - Use when: confirmations, destructive action gates. Do not use for forms — use Sheet instead.
 
 ### BottomSheet (`sheet.tsx`)
 - Slides from bottom, entry `.animate-slide-up` 250ms, overlay `bg-black/50`
 - Content: `bg-card` rounded-t-2xl p-4 pb-safe, max-height 85vh, drag-to-dismiss handle (40px × 4px rounded-full `bg-muted` centered)
-- States: open → slide-up + overlay; dragging → follows finger; dismissed → slide-down 200ms
+- States: open → slide-up + overlay; dragging → follows finger; dismissed → slide-down 200ms; hover (handle) → `bg-muted-foreground/40`; focus → focus trap within sheet; active → drag gesture; disabled → handle hidden, no dismiss; loading → content replaced by skeleton
 - Use when: forms, pickers, detail views that don't warrant a full page.
 
 ### Drawer (`drawer.tsx`)
@@ -306,13 +306,13 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 ### Avatar (`avatar.tsx`)
 - Sizes: 32px (inline), 40px (list items), 48px (profile), 64px (detail view)
 - Shape: rounded-full, `bg-muted` fallback with initials in `text-muted-foreground`
-- States: loaded → shows image with `object-cover`; loading → `bg-muted` pulse; error → fallback initials
+- States: loaded → shows image with `object-cover`; loading → `bg-muted` pulse animation; error → fallback initials; hover → `opacity-80` (if interactive); focus → `ring-2 ring-ring`; active → opens profile; disabled → `opacity-50 grayscale`
 - Use when: user/provider profile images, assignee indicators.
 
 ### Progress (`progress.tsx`)
 - Height: 8px, rounded-full, track `bg-muted`, fill `bg-primary`
 - Variants: default (primary fill), accent (`bg-accent` fill), small (4px height)
-- States: determinate → width percent; indeterminate → shimmer animation
+- States: determinate → width percent; indeterminate → shimmer animation; loading → track only, no fill; error → fill turns `bg-destructive`; hover → not applicable; focus → `ring-2 ring-ring` (if interactive); active → not applicable; disabled → `opacity-40`
 - Use when: upload progress, onboarding completion, step indicators.
 
 ### LoadingSkeleton (`skeleton.tsx`)
@@ -324,7 +324,7 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 ### Tooltip (`tooltip.tsx`)
 - Background: `bg-popover` rounded-lg p-2 shadow-md, 13px text
 - Entry: `.animate-scale-in` 200ms; delay 300ms on hover
-- States: hover-triggered → appear with delay; focus-triggered → immediate; dismissed → fade-out 100ms
+- States: hover → appear after 300ms delay; focus → appear immediately; active → remains visible; dismissed → fade-out 100ms; disabled → tooltip not shown; loading → not applicable; error → not applicable
 - Use when: supplementary info on icon buttons. Not for essential information.
 
 ### EmptyState (`empty-state.tsx`)
@@ -335,7 +335,7 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 
 ### Popover (`popover.tsx`)
 - Content: `bg-popover` rounded-xl shadow-lg p-4, entry `.animate-scale-in` 200ms
-- States: open → scale-in from trigger; closed → fade-out 150ms
+- States: open → scale-in from trigger; closed → fade-out 150ms; hover (trigger) → `opacity-80`; focus → `ring-2 ring-ring` on trigger, focus trap in content; active → click/tap opens; disabled → trigger `opacity-50 pointer-events-none`; loading → content shows skeleton
 - Use when: contextual menus, filter dropdowns. Not for full forms — use Sheet.
 
 ### ScrollArea (`scroll-area.tsx`)
