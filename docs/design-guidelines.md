@@ -473,12 +473,56 @@ When the user has `prefers-reduced-motion: reduce` enabled:
 
 ---
 
+## Surfaces and Visual Depth
+
+### Gradient Definitions
+
+Subtle, purposeful gradients only — the brand is "calm concierge," not "tech keynote."
+
+| Name | CSS | Use |
+|------|-----|-----|
+| **Hero shimmer** | `linear-gradient(135deg, hsl(214 65% 14%) 0%, hsl(214 55% 20%) 100%)` | Onboarding hero backgrounds, splash |
+| **Accent highlight** | `linear-gradient(90deg, hsl(200 80% 50%) 0%, hsl(200 80% 60%) 100%)` | Progress bar fills, accent badges |
+| **Skeleton sweep** | `linear-gradient(90deg, transparent 0%, hsl(220 14% 93%) 50%, transparent 100%)` | `.animate-shimmer` overlay |
+| **Surface fade** | `radial-gradient(ellipse at top, hsl(220 20% 97%) 0%, hsl(0 0% 100%) 100%)` | Page background subtle depth |
+
+### Shadow and Elevation Scale
+
+| Level | Token | CSS Value | Use |
+|-------|-------|-----------|-----|
+| **elevation-0** | `shadow-none` | `box-shadow: none` | Flat surfaces, inline elements |
+| **elevation-1** | `shadow-sm` | `box-shadow: 0 1px 2px rgba(0,0,0,0.05)` | Cards at rest, list items |
+| **elevation-2** | `shadow-md` | `box-shadow: 0 4px 6px rgba(0,0,0,0.07)` | Hovered cards, interactive elevated surfaces |
+| **elevation-3** | `shadow-lg` | `box-shadow: 0 10px 15px rgba(0,0,0,0.10)` | Popover, dropdown, tooltip |
+| **elevation-4** | `shadow-xl` | `box-shadow: 0 20px 25px rgba(0,0,0,0.12)` | Dialog, sheet overlay |
+| **elevation-5** | `shadow-2xl` | `box-shadow: 0 25px 50px rgba(0,0,0,0.15)` | Dragged element, floating CTA |
+
+In dark mode, reduce shadow opacity to 40% of light values — use surface luminance for primary elevation cue.
+
+### Surface Treatments
+
+- **Glass**: `.glass` utility — `bg-card/80 backdrop-blur-xl border-border/50`. Use for tab bar, floating headers, overlay panels
+- **Frosted**: `backdrop-blur-lg bg-background/70`. Use for status bar overlays on scrolled content
+- **Tinted surface**: `bg-accent/5` or `bg-success/5`. Use for subtle highlight backgrounds on feature cards
+- **Noise texture**: not used — keeps the UI clean. Reserve for marketing materials only
+
+### Image Treatment Rules
+
+- Aspect ratios: hero images 16:9, thumbnail 1:1 (rounded-xl), avatar rounded-full
+- Object fit: `object-cover` for all photos, `object-contain` for logos/icons
+- Placeholder: `bg-muted` with centered Lucide icon in `text-muted-foreground` while loading
+- Overlay for text on images: `linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)` from bottom
+- Border radius on images: match parent container — rounded-2xl in cards, rounded-xl standalone
+- Max image size: constrain to container width, lazy-load with `loading="lazy"`
+
+---
+
 ## Utilities
 - `.glass` — bg-card/80 backdrop-blur-xl border-border/50
-- `.press-feedback` — active:scale-[0.98] with transition
+- `.press-feedback` — active:scale-[0.98] with transition duration-100
 - `.safe-top` / `.safe-bottom` — env(safe-area-inset)
-- `.text-h1` through `.text-caption` — typography presets
-- `.animate-fade-in` — translateY(4→0) + opacity fade, applied to all page-level containers on mount
+- `.text-h1` through `.text-caption` — typography presets (see Typography section)
+- `.animate-fade-in` — translateY(4px→0) + opacity fade 200ms, applied to page containers on mount
 
 ---
 
