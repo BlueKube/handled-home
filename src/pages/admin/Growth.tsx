@@ -667,7 +667,8 @@ function ByopAdminList() {
     (r: any) => r.status === "under_review" || r.status === "accepted"
   );
 
-  const handleDecline = useCallback((id: string) => {
+  const handleDecline = useCallback((id: string, providerName: string) => {
+    if (!window.confirm(`Mark "${providerName}" as provider declined? This cannot be undone.`)) return;
     setDecliningId(id);
     declineRecommendation.mutate(id, {
       onSettled: () => setDecliningId(null),
@@ -696,7 +697,7 @@ function ByopAdminList() {
               size="sm"
               variant="outline"
               className="text-xs text-warning border-warning/30 hover:bg-warning/10"
-              onClick={() => handleDecline(rec.id)}
+              onClick={() => handleDecline(rec.id, rec.provider_name)}
               disabled={decliningId === rec.id}
             >
               <UserX className="h-3 w-3 mr-1" />
