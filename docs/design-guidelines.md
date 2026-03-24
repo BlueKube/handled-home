@@ -256,12 +256,12 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 
 ### Textarea (`textarea.tsx`)
 - Min-height: 80px, rounded-xl, same border/focus treatment as Input
-- States: empty → placeholder; focused → `ring-2 ring-ring`; error → `border-destructive`; disabled → `opacity-50`
+- States: empty → placeholder `text-muted-foreground`; focused → `ring-2 ring-ring` + `bg-card`; filled → `text-foreground`; hover → `border-ring`; error → `border-destructive`; disabled → `opacity-50 bg-muted`; loading → not applicable
 - Use when: multi-line text (notes, descriptions, access instructions).
 
 ### Select (`select.tsx`)
 - Height: h-12 (48px), rounded-xl, chevron-down trailing icon 16px
-- States: default → `border-input`; focused/open → `ring-2 ring-ring`; disabled → `opacity-50`; error → `border-destructive`
+- States: default → `border-input`; hover → `border-ring`; focused/open → `ring-2 ring-ring`; active → dropdown `.animate-scale-in` 150ms; filled → selected value in `text-foreground`; disabled → `opacity-50`; error → `border-destructive`; loading → spinner replaces chevron
 - Use when: choosing from 4+ predefined options. Use radio for 2–3 options.
 
 ### Checkbox (`checkbox.tsx`)
@@ -277,6 +277,7 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 ### Badge (`badge.tsx`)
 - Height: min-h 24px, rounded-full, px-3, text-caption size (13px)
 - Variants: `default` (bg-primary), `secondary` (bg-secondary), `outline` (border only), `destructive` (bg-destructive)
+- States: default → static display; hover → `opacity-90` (if interactive); active → `scale-[0.97]`; focus → `ring-2 ring-ring`; disabled → `opacity-50`
 - Use when: status labels, counts, category tags.
 
 ### Dialog (`dialog.tsx`)
@@ -293,7 +294,8 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 - Use when: forms, pickers, detail views that don't warrant a full page.
 
 ### Drawer (`drawer.tsx`)
-- Identical animation to Sheet — wraps Vaul for native drag-to-dismiss behavior
+- Wraps Vaul for native drag-to-dismiss behavior, same `.animate-slide-up` 250ms entry
+- States: open → slide-up + overlay `bg-black/50`; active/dragging → follows finger position; hover (handle) → `bg-muted-foreground/50`; disabled → not applicable; loading → content area shows skeleton
 - Use when: complex forms or multi-step flows from bottom of screen.
 
 ### Tabs (`tabs.tsx`)
@@ -316,6 +318,7 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 ### Skeleton (`skeleton.tsx`)
 - Base: `bg-muted` rounded-xl, `.animate-shimmer` gradient sweep 1.5s infinite
 - Variants: `line` (h-4 rounded), `circle` (rounded-full), `card` (rounded-2xl h-32)
+- States: loading → shimmer animation active; loaded → crossfade to real content 200ms; error → replaced by error state; disabled → static `bg-muted` no animation; hover → not applicable
 - Use when: content is loading. Match skeleton shape to expected content layout.
 
 ### Tooltip (`tooltip.tsx`)
@@ -327,6 +330,7 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 ### EmptyState (`empty-state.tsx`)
 - Layout: centered flex-col, gap-3, p-8
 - Slot anatomy: icon (40px in `text-muted-foreground`) → title (`.text-h3`) → body (`.text-body text-muted-foreground`) → CTA button
+- States: default → full template visible; loading → replaced by PageSkeleton; error → shows retry CTA; hover (CTA) → standard button hover; active (CTA) → `scale-[0.97]`; disabled → `opacity-50` on CTA
 - Use when: lists with no data, first-time screens. Every empty state must have icon + title + body + CTA.
 
 ### Popover (`popover.tsx`)
@@ -336,12 +340,20 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 
 ### ScrollArea (`scroll-area.tsx`)
 - Custom scrollbar: 4px wide, rounded-full, `bg-muted` track, `bg-muted-foreground/30` thumb
+- States: idle → scrollbar hidden; hover → scrollbar visible at `opacity-80`; active/scrolling → thumb visible `bg-muted-foreground/50`; disabled → `overflow-hidden`; focus → keyboard scroll enabled
 - Use when: constrained-height content areas (sidebars, long lists in sheets).
 
 ### Separator (`separator.tsx`)
 - Height: 1px, `bg-border`, full width
 - Variants: horizontal (default), vertical
+- States: default → visible `bg-border`; hover → not applicable; active → not applicable; focus → not applicable; disabled → `opacity-30`
 - Use when: dividing content sections within a card or page.
+
+### Label (`label.tsx`)
+- Font: 14px / 500 weight, `text-foreground`, margin-bottom 4px above input
+- States: default → `text-foreground`; error → `text-destructive`; disabled → `text-muted-foreground opacity-70`; hover → not applicable; focus → cursor moves to associated input
+- Slot anatomy: label text + optional required indicator (`text-destructive` asterisk)
+- Use when: above every form input. Always pair with `htmlFor` for accessibility.
 
 ---
 
