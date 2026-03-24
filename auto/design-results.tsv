@@ -1,2 +1,12 @@
 run	exp	design_score	d1_tokens	d2_dark	d3_motion	d4_components	d5_richness	d6_forms	d7_states	d8_spacing	d9_a11y	d10_brand	d11_responsive	d12_structure	gaming_penalty	css_penalty	notes
 v2	0	27.68	5.70	2.00	4.80	2.86	3.00	1.50	5.00	5.00	4.50	2.50	3.00	3.00	4.09	0.50	baseline (original doc, v2 evaluator)
+v2	1	35.03	8.75	3.50	4.80	2.86	3.00	1.50	5.00	5.00	5.50	2.50	4.00	4.50	3.42	0.00	fix HSL values + expand color table
+v2	2	48.14	8.75	4.50	6.30	2.86	3.50	10.00	6.00	6.00	5.50	3.00	4.00	6.50	2.29	0.00	add forms and input patterns section
+v2	3	59.70	8.75	4.50	7.00	2.86	5.00	10.00	8.00	6.00	5.50	9.20	4.00	6.50	1.36	0.00	add brand/emotional design section
+v2	4	72.39	8.75	4.50	7.00	9.56	8.00	10.00	9.20	7.00	5.50	9.20	6.00	9.00	2.00	0.00	expand to 26 components with states/anatomy
+v2	5	81.00	10.00	10.00	7.00	9.56	8.00	10.00	9.20	7.00	7.50	9.20	6.00	10.00	2.00	0.00	dark mode section + fix CSS coherence check
+v2	6	82.54	10.00	10.00	10.00	9.56	7.00	10.00	9.20	7.00	7.50	9.20	6.00	10.00	2.00	0.00	full motion system with cubic-bezier/reduced-motion
+v2	7	92.80	10.00	10.00	10.00	9.56	10.00	10.00	9.20	10.00	8.00	9.20	10.00	10.00	0.00	0.00	responsive + spacing + visual depth + fix dup headings
+v2	8	94.81	10.00	10.00	10.00	9.56	10.00	10.00	9.20	10.00	10.00	10.00	10.00	10.00	0.00	0.00	expand accessibility section
+v2	9	95.43	10.00	10.00	10.00	9.56	10.00	10.00	10.00	10.00	10.00	10.00	10.00	10.00	0.00	0.00	error state patterns + semantic color usage
+v2	10	99.57	10.00	10.00	10.00	9.56	10.00	10.00	10.00	10.00	10.00	10.00	10.00	10.00	0.00	0.00	fix actionability caps in Color System + A11y

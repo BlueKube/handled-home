@@ -732,7 +732,8 @@ def score_d4_component_specs(sections: list[Section], text: str, ui_components: 
         full = s.full_text.lower()
         has_anatomy = False
         # Primary signal: → chain with 2+ arrows (e.g. "icon → label → badge")
-        arrow_chains = re.findall(r'[a-z][\w\s]*→[a-z][\w\s]*→', full)
+        # Use [^→]+ between arrows to allow parens, digits, punctuation in slot names
+        arrow_chains = re.findall(r'[a-z][^→]+→[^→]+→', full)
         if arrow_chains:
             has_anatomy = True
         # Secondary signal: explicit "slot" or "anatomy" keyword + at least one
