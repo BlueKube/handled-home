@@ -102,9 +102,9 @@ Every batch gets a spec in `docs/working/batch-specs/` before coding starts:
 
 After each commit, run a multi-agent review. This is the quality gate that prevents bugs, drift, and regressions from compounding across batches.
 
-#### Architecture: 5 lanes × 2 tiers = 10 agents
+#### Architecture: 4 parallel lanes + 1 synthesis lane × 2 tiers = 10 agents
 
-Launch all 10 agents **in parallel** using the Agent tool. Each lane gets two agents running simultaneously — a deep-analysis tier and a fast second-opinion tier.
+**Stage 1 — Parallel analysis (8 agents):** Launch Lanes 1–4 in parallel, each with a Sonnet (deep) and Haiku (fast) tier.
 
 | Lane | What it checks | Deep tier | Fast tier |
 |------|----------------|-----------|-----------|
@@ -112,12 +112,23 @@ Launch all 10 agents **in parallel** using the Agent tool. Each lane gets two ag
 | 2. Bug scan (diff only) | Bugs visible in the diff alone — no extra context, no codebase knowledge | Sonnet | Haiku |
 | 3. Historical context | git blame / git log on changed files — did we break something intentional? | Sonnet | Haiku |
 | 4. Prior feedback | Have these files had PR review comments before? Are we repeating past mistakes? | Sonnet | Haiku |
-| 5. Code comment compliance | Do comments match what the code does? Stale comments? Missing comments on complex logic? | Sonnet | Haiku |
+
+**Stage 2 — Synthesis (2 agents):** After Lanes 1–4 return, launch Lane 5 with all findings from the previous stage as input.
+
+| Lane | What it checks | Deep tier | Fast tier |
+|------|----------------|-----------|-----------|
+| 5. Synthesis & cross-check | Cross-validate findings across lanes, resolve contradictions, catch inter-lane gaps, produce the final scored report | Sonnet | Haiku |
+
+Lane 5 is the **only agent that sees other agents' output**. It serves as the communication bridge between lanes. This is critical because:
+- Lane 1 might say "spec item X was implemented" while Lane 2 found a bug in that exact implementation — the synthesis agent connects those dots
+- Lane 3 might say "this pattern was intentional per git history" while Lane 2 flagged it as a bug — the synthesis agent resolves the contradiction
+- If 3 lanes each flag something in the same file, the synthesis agent elevates that file as high-risk
+- Findings that fall between lane boundaries (not quite a bug, not quite a spec gap) get caught here
 
 #### Model assignments
 
-- **Sonnet agents (5):** Deep analysis tier. Each gets the full diff + lane-specific context (e.g., git blame output for lane 3, PR comments for lane 4). Sonnet provides thorough, nuanced analysis.
-- **Haiku agents (5):** Fast second-opinion tier. Each gets the same diff + lane-specific context. Haiku provides a quick sanity check that catches things the Sonnet agent might frame differently or miss.
+- **Sonnet agents (5):** Deep analysis tier. Lanes 1–4 get the diff + lane-specific context. Lane 5 (synthesis) gets all findings from the previous stage plus the diff and batch spec.
+- **Haiku agents (5):** Fast second-opinion tier. Same inputs as their Sonnet counterparts. Haiku provides a quick sanity check that catches things Sonnet might frame differently or miss.
 
 The two-tier approach works because different models catch different things. Sonnet tends to find architectural issues and subtle bugs; Haiku tends to catch obvious oversights and pattern violations that Sonnet sometimes rationalizes away.
 
@@ -133,9 +144,11 @@ Additionally, per lane:
 - **Lane 2:** Diff only, no extra context (forces the agent to find bugs from code alone)
 - **Lane 3:** `git blame` and `git log` output for every changed file
 - **Lane 4:** PR review comments from previous PRs touching the same files (via `gh api`)
-- **Lane 5:** The full content of every changed file (not just the diff), so the agent can check comments against surrounding code
+- **Lane 5 (synthesis):** All findings from Lanes 1–4 (both tiers), the full diff, and the batch spec. The synthesis agent does not re-review the code — it cross-validates, de-duplicates, resolves contradictions, and produces the final scored report.
 
-> **Why Lane 1 checks spec completeness instead of CLAUDE.md compliance:** CLAUDE.md conventions (semantic tokens, touch targets, padding, aria-labels) are already covered by the Bug Scan, Historical Context, and Code Comment lanes — they naturally catch deviations from project patterns. What no other lane catches is *missing work* — requirements that were specified but never implemented. This gap caused an entire cleanup PRD after a previous implementation shipped "complete" with 7 unfinished items. The spec completeness audit closes that gap at the review stage.
+> **Why Lane 1 checks spec completeness instead of CLAUDE.md compliance:** CLAUDE.md conventions (semantic tokens, touch targets, padding, aria-labels) are already covered by the Bug Scan and Historical Context lanes — they naturally catch deviations from project patterns. What no other lane catches is *missing work* — requirements that were specified but never implemented. This gap caused an entire cleanup PRD after a previous implementation shipped "complete" with 7 unfinished items. The spec completeness audit closes that gap at the review stage.
+>
+> **Why Lane 5 is a synthesis lane instead of another parallel check:** Parallel lanes are fast but isolated — they can't see each other's findings, which means contradictions go unresolved, related findings across lanes stay disconnected, and inter-lane gaps slip through. The synthesis lane runs sequentially after Lanes 1–4, reads all their output, and produces a unified, cross-validated report. It's the only point in the review where findings from different perspectives are reconciled.
 
 #### Agent prompts
 
@@ -196,26 +209,71 @@ Agent tool:
     If no issues found, say "No issues found."
 ```
 
-#### Merging findings
+Example agent launch (Lane 5, Sonnet tier — Synthesis):
+```
+Agent tool:
+  model: sonnet
+  description: "Synthesis & cross-check — Sonnet"
+  prompt: |
+    You are a review synthesis agent. You did NOT review the code yourself.
+    Your job is to cross-validate, de-duplicate, and score the findings
+    from 4 independent review lanes.
 
-After all 10 agents return:
-1. Collect all findings across all lanes and tiers
-2. De-duplicate — if both Sonnet and Haiku in the same lane flag the same issue, that's one finding with higher confidence
-3. Score each finding 0–100:
+    LANE 1 FINDINGS (Spec Completeness — Sonnet + Haiku):
+    [paste findings]
+
+    LANE 2 FINDINGS (Bug Scan — Sonnet + Haiku):
+    [paste findings]
+
+    LANE 3 FINDINGS (Historical Context — Sonnet + Haiku):
+    [paste findings]
+
+    LANE 4 FINDINGS (Prior Feedback — Sonnet + Haiku):
+    [paste findings]
+
+    BATCH SPEC:
+    [paste batch spec]
+
+    DIFF:
+    [paste diff]
+
+    Your tasks:
+    1. De-duplicate findings that multiple lanes flagged
+    2. Connect related findings (e.g., "spec says X implemented" + "bug in X")
+    3. Resolve contradictions (e.g., "intentional per history" vs "flagged as bug")
+    4. Flag anything that falls between lane boundaries
+    5. Score each finding 0–100 using the confidence formula
+    6. Categorize as MUST-FIX (75+), SHOULD-FIX (25–74), or DROP (0–24)
+
+    Return the final unified report with scores and categories.
+```
+
+#### Merging findings (handled by Lane 5)
+
+The synthesis lane produces the final report. Its job:
+
+1. **De-duplicate** — if multiple lanes or tiers flagged the same issue, merge into one finding with higher confidence
+2. **Cross-validate** — connect related findings across lanes (e.g., Lane 1 says "spec item implemented" + Lane 2 found a bug in that implementation = elevated priority)
+3. **Resolve contradictions** — if Lane 3 says "this was intentional per history" but Lane 2 flagged it as a bug, make the call and explain the reasoning
+4. **Score each finding 0–100:**
    - **Cross-tier agreement** (both Sonnet and Haiku flagged it): +30 confidence
    - **Cross-lane agreement** (multiple lanes flagged it): +20 per additional lane
    - **Severity of impact** (regression, security, data loss): +20–40
    - **Specificity** (exact file:line with clear explanation): +10
    - **Style-only** (formatting, naming preference): cap at 20
 
-4. Apply thresholds:
-   - **75–100 (MUST-FIX):** Bugs, regressions, security issues, accessibility violations — **fix before proceeding**
+5. **Apply thresholds:**
+   - **75–100 (MUST-FIX):** Bugs, regressions, security issues, missing spec items — **fix before proceeding**
    - **25–74 (SHOULD-FIX):** Inconsistencies, missing polish, non-critical issues — **fix in same batch when feasible**
    - **0–24 (DROP):** Style preferences, minor suggestions — log or ignore
 
 #### Fix loop
 
-Fix findings → re-commit → re-run review → repeat until clean. **Maximum 3 passes.** If issues persist after 3 passes, escalate to the human for a decision rather than looping indefinitely.
+Fix findings → re-commit → **lightweight re-review** → repeat until clean. **Maximum 3 passes.**
+
+**Lightweight re-review (passes 2+):** On fix commits, only run Lanes 1–2 (spec completeness + bug scan) plus the synthesis lane — 6 agents instead of 10. Lanes 3–4 (historical context, prior feedback) add negligible value on a fix diff since the history hasn't meaningfully changed. This cuts re-review time nearly in half without losing quality on the things that matter: "did we actually fix it?" and "did the fix introduce new bugs?"
+
+If issues persist after 3 passes, escalate to the human for a decision rather than looping indefinitely.
 
 ### Step 5: Validate build
 
@@ -500,7 +558,7 @@ Human brings the next PRD. Return to Phase 1.
 [ ] Write batch spec
 [ ] Implement spec (nothing more)
 [ ] Commit
-[ ] 10-agent code review (5 lanes × 2 tiers)
+[ ] 10-agent code review (4 parallel lanes + 1 synthesis lane × 2 tiers)
 [ ] Fix findings until clean
 [ ] Validate build (tsc + build)
 [ ] Validate visually (screenshots)

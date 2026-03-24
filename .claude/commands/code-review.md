@@ -20,8 +20,8 @@ Use a Haiku agent to locate any CLAUDE.md files in the repo root and in director
 ### 3. Summarize changes
 Use a Haiku agent to return a brief summary of the diff.
 
-### 4. Parallel code review (5 lanes × 2 tiers = 10 agents)
-Launch 10 agents in parallel: one Sonnet agent and one Haiku agent per lane. Each lane has a single review focus — agents within the same lane may find overlapping issues (that's intentional redundancy), but agents should not cross into another lane's focus.
+### 4. Stage 1 — Parallel code review (4 lanes × 2 tiers = 8 agents)
+Launch 8 agents in parallel: one Sonnet agent and one Haiku agent per lane. Each lane has a single review focus — agents within the same lane may find overlapping issues (that's intentional redundancy), but agents should not cross into another lane's focus.
 
 The Sonnet agent in each lane does the deep analysis. The Haiku agent in each lane acts as a fast, independent second set of eyes on the same scope. Both return a list of issues with reasons.
 
@@ -31,23 +31,29 @@ a. **Spec completeness audit** — Cross-reference every requirement, acceptance
 b. **Bug scan** — Shallow scan for obvious bugs in the changed code only. No extra context, no git history, no nitpicks — just the diff.
 c. **Historical context** — Read git blame/history of modified code to spot regressions or issues informed by past changes. Do not cross into the bug scan lane; focus on what the history reveals.
 d. **Prior feedback** — Check previous PRs/commits that touched these files for recurring review comments that may apply here.
-e. **Code comment compliance** — Verify changes comply with inline guidance (TODOs, FIXMEs, doc comments) and CLAUDE.md conventions in the modified files.
 
-After all 10 agents return, merge and deduplicate findings across both tiers before proceeding to confidence scoring.
+### 5. Stage 2 — Synthesis & cross-check (1 lane × 2 tiers = 2 agents)
+After all 8 Stage 1 agents return, launch Lane e with all findings as input:
 
-### 5. Confidence scoring
-For each issue, launch a parallel Haiku agent to score confidence (0–100):
+e. **Synthesis & cross-check** — Receives all findings from Lanes a–d (both tiers). Cross-validates findings across lanes, resolves contradictions, connects related issues, catches inter-lane gaps, de-duplicates, scores each finding 0–100, and produces the final categorized report.
 
-- **0**: False positive, doesn't hold up to scrutiny, or pre-existing issue.
-- **25**: Might be real, might be false positive. Stylistic issues not tied to spec requirements.
-- **50**: Verified real issue but minor — a nitpick or rarely hit in practice. (SHOULD-FIX)
-- **75**: Confirmed real issue that will be hit in practice, or a spec requirement that is missing/incomplete. (MUST-FIX)
-- **100**: Definitely real, will happen frequently, or a clearly specified requirement that was not implemented at all. (MUST-FIX)
+This is the only lane that sees other agents' output. It serves as the communication bridge between lanes:
+- Connects related findings (e.g., "spec item implemented" from Lane a + "bug in that implementation" from Lane b)
+- Resolves contradictions (e.g., "intentional per history" from Lane c vs. "flagged as bug" from Lane b)
+- Elevates files flagged by multiple lanes as high-risk
+- Catches issues that fall between lane boundaries
 
-For spec-completeness issues, the agent must cite the specific spec requirement that was not satisfied.
+**Scoring (applied by the synthesis agent):**
+- **Cross-tier agreement** (both Sonnet and Haiku flagged it): +30 confidence
+- **Cross-lane agreement** (multiple lanes flagged it): +20 per additional lane
+- **Severity of impact** (regression, security, data loss, missing spec item): +20–40
+- **Specificity** (exact file:line with clear explanation): +10
+- **Style-only** (formatting, naming preference): cap at 20
+
+For spec-completeness issues, the synthesis agent must cite the specific spec requirement that was not satisfied.
 
 ### 6. Filter and categorize
-Drop issues scoring below 25. Categorize the rest:
+The synthesis agent drops issues scoring below 25 and categorizes the rest:
 - **MUST-FIX** (75+): Must be resolved before batch is done.
 - **SHOULD-FIX** (25–74): Should be resolved in the same batch if straightforward.
 
@@ -70,9 +76,11 @@ Found N issues (X must-fix, Y should-fix):
 Or if clean: "No issues found. All spec items verified, no bugs detected."
 
 ### 8. Recheck loop (phase mode only)
-After fixes are committed for any MUST-FIX or SHOULD-FIX findings, **re-run steps 1–7 automatically** on the new diff. This verifies that:
+After fixes are committed for any MUST-FIX or SHOULD-FIX findings, **re-run a lightweight review automatically** on the new diff. This verifies that:
 - Each original finding was actually resolved (not just claimed fixed)
 - The fix itself didn't introduce new issues
+
+**Lightweight re-review (passes 2+):** Only run Lanes a–b (spec completeness + bug scan) plus Lane e (synthesis) — 6 agents instead of 10. Lanes c–d (historical context, prior feedback) add negligible value on a fix diff since the history hasn't meaningfully changed.
 
 Keep looping until a pass comes back clean (no issues scoring 25+). Cap at **3 passes** to avoid infinite loops — if issues persist after 3 passes, report the remaining findings and stop.
 
