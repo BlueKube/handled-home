@@ -187,7 +187,7 @@ export default function ByocCenter() {
       )}
 
       {/* Customer Referral Cross-Sell */}
-      <Card className="border-border bg-muted/30">
+      <Card className="border-border bg-muted/50">
         <CardContent className="py-4 px-4">
           <div className="flex items-start gap-3">
             <Users className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
@@ -196,6 +196,12 @@ export default function ByocCenter() {
               <p className="text-xs text-muted-foreground">
                 Activated customers get a referral code — more neighbors means denser routes and better earnings for you.
               </p>
+              <button
+                onClick={() => navigate("/provider/referrals")}
+                className="text-xs text-accent underline min-h-[44px] flex items-center"
+              >
+                Learn about customer referrals
+              </button>
             </div>
           </div>
         </CardContent>

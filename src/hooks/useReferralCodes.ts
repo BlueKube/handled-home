@@ -33,11 +33,12 @@ export function useReferralCodes() {
 
   const generateCodeMutation = useMutation({
     mutationFn: async (programId: string) => {
+      if (!user) throw new Error("Not authenticated");
       // Enforce one code per customer — re-check from DB to avoid stale cache
       const { count, error: countError } = await supabase
         .from("referral_codes")
         .select("id", { count: "exact", head: true })
-        .eq("user_id", user!.id);
+        .eq("user_id", user.id);
       if (countError) throw countError;
       if ((count ?? 0) > 0) {
         throw new Error("You already have a referral code. Only one code per account is allowed.");
@@ -45,7 +46,7 @@ export function useReferralCodes() {
       const code = generateCode();
       const { data, error } = await supabase
         .from("referral_codes")
-        .insert({ program_id: programId, user_id: user!.id, code } as any)
+        .insert({ program_id: programId, user_id: user.id, code } as any)
         .select()
         .single();
       if (error) throw error;

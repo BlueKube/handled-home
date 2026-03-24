@@ -129,9 +129,12 @@ export default function ProviderReferrals() {
       {/* BYOC Quick Link */}
       <Card
         className="border-accent/20 bg-accent/5 cursor-pointer hover:shadow-md transition-shadow"
+        role="button"
+        tabIndex={0}
         onClick={() => navigate("/provider/byoc")}
+        onKeyDown={(e) => e.key === "Enter" && navigate("/provider/byoc")}
       >
-        <CardContent className="py-4 px-4 flex items-center gap-3">
+        <CardContent className="py-4 px-4 flex items-center gap-3 min-h-[44px]">
           <UserPlus className="h-5 w-5 text-accent shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold">BYOC Center</p>

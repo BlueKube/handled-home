@@ -29,7 +29,7 @@ export function useByocInviteLinks() {
     enabled: !!orgId,
     queryFn: async () => {
       const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
+      todayStart.setUTCHours(0, 0, 0, 0);
       const { count, error } = await supabase
         .from("byoc_invite_links")
         .select("id", { count: "exact", head: true })
@@ -41,7 +41,7 @@ export function useByocInviteLinks() {
   });
 
   const todayCount = todayLinksQuery.data ?? 0;
-  const canCreateLink = activeCount < 10 && todayCount < 10;
+  const canCreateLink = todayLinksQuery.isSuccess && activeCount < 10 && todayCount < 10;
   const rateLimitReason =
     activeCount >= 10
       ? "You have 10 active links — deactivate an unused link before creating a new one."
@@ -89,11 +89,12 @@ export function useByocInviteLinks() {
 
   const deactivateLink = useMutation({
     mutationFn: async (linkId: string) => {
+      if (!orgId) throw new Error("No org");
       const { error } = await supabase
         .from("byoc_invite_links")
         .update({ is_active: false })
         .eq("id", linkId)
-        .eq("org_id", orgId!);
+        .eq("org_id", orgId);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["byoc-invite-links"] }),
