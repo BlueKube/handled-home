@@ -14,7 +14,7 @@ export default function OpsExceptions() {
   const selected = exceptions?.find((e) => e.id === selectedId) ?? null;
 
   return (
-    <div className="flex h-[calc(100vh-3rem)]">
+    <div className="flex h-[calc(100vh-3rem)] animate-fade-in">
       {/* Queue panel */}
       <div className={`${selectedId ? "w-1/2 border-r" : "w-full"} overflow-y-auto transition-all`}>
         <OpsExceptionQueue
