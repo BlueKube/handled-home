@@ -44,7 +44,12 @@ export default function ByocCenter() {
   // Gate: must be approved provider org
   if (!org || (org.status !== "ACTIVE" && org.status !== "PROBATION")) {
     return (
-      <div className="animate-fade-in p-4 pb-24 text-center mt-12">
+      <div className="animate-fade-in p-4 pb-24">
+        <button onClick={() => navigate("/provider/more")} className="flex items-center gap-1 text-muted-foreground mb-2 hover:text-foreground transition-colors" aria-label="Back to More menu">
+          <ChevronLeft className="h-4 w-4" />
+          <span className="text-sm">More</span>
+        </button>
+        <div className="text-center mt-8">
         <Gift className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
         <h1 className="text-h2 mb-2">BYOC Center</h1>
         <p className="text-caption">
@@ -57,6 +62,7 @@ export default function ByocCenter() {
         >
           Back to Dashboard
         </Button>
+        </div>
       </div>
     );
   }
