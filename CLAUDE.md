@@ -8,7 +8,7 @@ Three user roles: **Customer**, **Provider**, **Admin**.
 
 ## Your Current Mission
 
-You are continuing the Handled Home app overhaul. Complete: customer redesign (12 epics, 36 pages), provider redesign (11 batches, 34 pages), admin redesign (5 batches, ~54 pages), and growth operations (6 batches: BYOP flow, BYOC rewrite, viral loop, growth hubs, admin funnels, abuse prevention). The next phase is remaining **implementation batches** (7–11) and final cleanup.
+You are continuing the Handled Home app overhaul. All major phases are complete: customer redesign (12 epics, 36 pages), provider redesign (11 batches, 34 pages), admin redesign (5 batches, ~54 pages), growth operations (6 batches), and implementation batches (7–11). The app is in **final cleanup and hardening** mode.
 
 ## Workflow (Non-Negotiable)
 
@@ -147,14 +147,20 @@ All 6 growth-focused batches complete.
 - `useByopRecommendation.ts` — BYOP form submission + tracking
 - `useByocFunnelStats` / `useReferralFunnelStats` / `useByopFunnelStats` — Admin funnel metrics (in `useGrowthEvents.ts`)
 
-### Remaining Implementation Batches
-| Batch | Theme | Est. Size |
-|-------|-------|-----------|
-| 7 | Subscription lifecycle correctness (downgrade, cancel, pause, dunning) | Medium |
-| 8 | Operational resilience (provider exit/suspension, zone coverage gaps) | Large |
-| 9 | Conversion funnel polish (invite, BYOC, share landing pages) | Small |
-| 10 | Nielsen heuristic compliance (empty states, loading skeletons, help tooltips) | Large |
-| 11 | Operating model visibility (success metric gauges, risk alerts) | Medium |
+### Implementation Batches (Complete)
+
+| Batch | Theme | Status |
+|-------|-------|--------|
+| 7 | Subscription lifecycle correctness (downgrade, cancel, pause, dunning) | Complete |
+| 8 | Operational resilience (provider exit/suspension, zone coverage gaps) | Complete |
+| 9 | Conversion funnel polish (invite, BYOC, share landing pages) | Complete |
+| 10 | Nielsen heuristic compliance (empty states, loading skeletons, help tooltips) | Complete |
+| 11 | Operating model visibility (success metric gauges, risk alerts) | Complete |
+
+### New hooks & components (Implementation Batches)
+- `useBusinessHealth.ts` — Computes attach rate, household churn, provider churn, zone density from live data
+- `BusinessHealthCard.tsx` — 4 operating-model gauges with green/amber/red threshold indicators on OpsCockpit
+- `RiskAlertsCard.tsx` — Actionable threshold breach alerts (attach rate, churn, zone density) on OpsCockpit
 
 ## Tech Stack
 

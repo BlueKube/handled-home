@@ -392,6 +392,8 @@
 213. Growth health: referrals, provider invites, applications, fraud holds — DONE
 214. KPI definitions page with formulas, time windows, data sources, and caveats — DONE
 215. Daily snapshot rollup via `snapshot-rollup` edge function — DONE
+216. Business Health gauges on Ops Cockpit: attach rate, household churn, provider churn, zone density bands — green/amber/red threshold indicators from operating model — DONE
+217. Risk Alerts card on Ops Cockpit: operating model threshold violations surfaced as actionable alerts with severity (warning/critical) and deep links to resolution pages — DONE
 
 ---
 
