@@ -253,6 +253,15 @@ export default function OnboardingCompliance() {
         Continue
         <ArrowRight className="h-4 w-4 ml-2" />
       </Button>
+      {!fallbackMerged.requiresGlInsurance && !fallbackMerged.requiresLicense && !fallbackMerged.requiresBackgroundCheck && !fallbackMerged.requiresCoiUpload && (
+        <Button
+          variant="ghost"
+          className="w-full text-muted-foreground mt-2"
+          onClick={() => navigate("/provider/onboarding/agreement", { state: { orgId, allowedZoneIds } })}
+        >
+          Skip for now
+        </Button>
+      )}
     </div>
   );
 }
