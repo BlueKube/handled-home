@@ -5,8 +5,48 @@ Mobile-first iOS & Android app via Capacitor. No desktop breakpoints.
 
 ---
 
-## Emotional Tone
-Calm concierge — confident, kind, predictable. "Your home is handled."
+## Brand and Emotional Design
+
+Brand personality: **calm concierge** — confident, kind, predictable. Tagline: "Your home, handled." See `docs/masterplan.md` for full business context.
+
+### personality → design mappings
+
+| Trait | Design Decision | Implementation |
+|-------|----------------|----------------|
+| **Calm** | Slow easing, muted navy palette, minimal motion | `cubic-bezier(0.25, 0.1, 0.25, 1.0)` default easing; `--primary` navy not saturated |
+| **Competent** | Consistent radius, clear hierarchy, structured spacing | `rounded-xl` on inputs/buttons, `rounded-2xl` on cards; 8px grid |
+| **Trustworthy** | Navy primary conveys authority; proof-of-work photos | `bg-primary` for CTAs; before/after image pairs in service detail |
+| **Kind** | Warm success copy, gentle error language, rounded shapes | "We'll take care of it" not "Error occurred"; `rounded-full` badges |
+| **Premium** | Generous whitespace, Inter 300–700, glass surfaces | `p-4` card padding; `.glass` backdrop-blur-xl; Inter font stack |
+
+### copy tone examples
+
+- **Success toast**: "Service confirmed — your lawn is on the schedule."
+- **Error toast**: "We couldn't save that change. Check your connection and try again."
+- **Empty state**: "No services yet. Let's get your home set up."
+- **Confirmation dialog**: "Cancel this service? You can re-add it anytime from your plan."
+- **Notification**: "Your pool service is complete. View the proof-of-work photos."
+
+### imagery direction
+
+- Photography: warm, natural lighting; residential settings; no stock-photo feel
+- Illustration: Lucide icons at 24px with 1.5px stroke width; `bg-accent/10 rounded-full` containers
+- Icon sizes: 16px inline, 20px in buttons, 24px standalone, 40px in empty states
+- Spot illustrations for empty states: single-color line art in `text-muted-foreground`
+
+### celebration moments
+
+- **Service completion**: success toast + checkmark icon, `.animate-scale-in` 200ms
+- **Plan activation**: milestone card with accent border, `bg-accent/5` tint
+- **Onboarding complete**: achievement icon 48px + congratulations copy
+
+### brand anti-patterns
+
+- Never use aggressive language — avoid "URGENT", "ACT NOW", "Don't miss out"
+- Never use `bg-destructive` for non-destructive actions — red is reserved for errors/deletes
+- Do not show raw error codes or stack traces to users
+- Avoid dense data tables in customer screens — use StatCard summaries instead
+- Never auto-play video or sound — the app feels quiet and controlled
 
 ---
 
@@ -206,7 +246,3 @@ All transitions: ease-out. No aggressive or decorative animations.
 - Clear error messaging
 - 16px minimum font for inputs (no iOS zoom)
 
----
-
-## Voice
-Calm, competent, kind. Never blame users. Reinforce: "Your home is handled."
