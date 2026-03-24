@@ -168,11 +168,13 @@ Specific tokens scoped to individual components:
 
 ### Token Naming Convention
 
-Pattern: `--{category}-{role}-{modifier}`. Examples:
-- `--background` — base surface color
+Naming pattern: `--{category}-{role}-{modifier}`. Examples following this token naming convention:
+- `--background` — base surface color (single-tier shorthand)
 - `--card-foreground` — text color on card surfaces
-- `--sidebar-primary` — component-scoped override for sidebar active state
-- `--muted-foreground` — text on muted backgrounds
+- `--sidebar-primary-foreground` — foreground text on active sidebar item
+- `--sidebar-accent-foreground` — text on sidebar hover state
+- `--muted-foreground` — secondary text on muted backgrounds
+- `--destructive-foreground` — text on destructive action surfaces
 
 ---
 
