@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useOpsMetrics } from "@/hooks/useOpsMetrics";
+import { useOperationalMetrics } from "@/hooks/useOperationalMetrics";
 import { useAutopilotHealth } from "@/hooks/useAutopilotHealth";
 import { AutopilotBanner } from "@/components/admin/AutopilotBanner";
 import { ZoneHealthTable } from "@/components/admin/ZoneHealthTable";
@@ -198,6 +199,7 @@ export default function OpsCockpit() {
               emptyLabel="No zones near capacity"
               href="/admin/ops/zones"
             />
+            <MetricGauge metricKey="providerUtilization" />
           </div>
         </div>
 
@@ -235,6 +237,7 @@ export default function OpsCockpit() {
               href="/admin/ops/billing"
             />
             <PayoutReviewCard />
+            <MetricGauge metricKey="grossMargin" />
           </div>
         </div>
 
@@ -369,6 +372,53 @@ function PayoutReviewCard() {
               : "Review recommended"}
           </p>
           <p className="text-[10px] text-accent mt-1">Go to Payouts →</p>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+const METRIC_CONFIG = {
+  grossMargin: { label: "Gross Margin", icon: DollarSign, suffix: "%" },
+  providerUtilization: { label: "Provider Utilization", icon: Users, suffix: "%" },
+} as const;
+
+function MetricGauge({ metricKey }: { metricKey: "grossMargin" | "providerUtilization" }) {
+  const metrics = useOperationalMetrics();
+  const metric = metrics[metricKey];
+  const config = METRIC_CONFIG[metricKey];
+  const Icon = config.icon;
+
+  if (metrics.isLoading) return <Skeleton className="h-20 rounded-lg" />;
+
+  const statusColor = metric.status === "healthy" ? "bg-green-500" : metric.status === "warning" ? "bg-yellow-500" : "bg-destructive";
+  const dotColor = metric.status === "healthy" ? "bg-green-500" : metric.status === "warning" ? "bg-yellow-500" : "bg-destructive";
+  const textColor = metric.status === "healthy" ? "text-green-600 dark:text-green-400" : metric.status === "warning" ? "text-yellow-600 dark:text-yellow-400" : "text-destructive";
+
+  return (
+    <Card className="p-3">
+      <div className="flex items-start gap-2.5">
+        <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg shrink-0", metric.status === "critical" ? "bg-destructive/10" : "bg-accent/10")}>
+          <Icon className={cn("h-4 w-4", metric.status === "critical" ? "text-destructive" : "text-accent")} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className={cn("h-2 w-2 rounded-full shrink-0", dotColor)} />
+            <p className="text-xs font-medium truncate">{config.label}</p>
+          </div>
+          <p className={cn("text-lg font-bold", textColor)}>{metric.value}{config.suffix}</p>
+          <p className="text-[10px] text-muted-foreground">Target: ≥{metric.target}{config.suffix}</p>
+          {/* Progress bar */}
+          <div className="relative h-1.5 bg-muted rounded-full overflow-hidden mt-1.5">
+            <div
+              className={cn("h-full rounded-full", statusColor)}
+              style={{ width: `${Math.min(metric.value, 100)}%` }}
+            />
+            <div
+              className="absolute top-0 h-full w-0.5 bg-foreground/50"
+              style={{ left: `${metric.target}%` }}
+            />
+          </div>
         </div>
       </div>
     </Card>
