@@ -180,41 +180,159 @@ Every form field follows: **label** (above, 14px/500, `htmlFor` required) → **
 
 ## Components
 
+Cross-reference `docs/screen-flows.md` for per-screen component usage and `docs/feature-list.md` for feature coverage.
+
 ### Button (`button.tsx`)
-- Default: h-11 (44px), rounded-xl
-- Sizes: `sm` (36px), `lg` (48px), `xl` (52px), `icon` (44×44)
+- Anatomy: icon-left (16px) → label → icon-right (16px)
+- Sizes: `sm` 36px, `default` h-11 (44px), `lg` 48px, `xl` 52px, `icon` 44×44
 - Variants: `default`, `accent`, `soft`, `soft-destructive`, `outline`, `secondary`, `ghost`, `link`, `destructive`
-- Active: `scale-[0.97]`, 150ms transition
-- Loading: spinner + disabled state via `loading` prop
+- States: hover → `opacity-90`; active → `scale-[0.97]` 150ms; focus → `ring-2 ring-ring ring-offset-2`; disabled → `opacity-50 pointer-events-none`; loading → spinner replaces label
+- Use when: primary CTA, form submission. Avoid `ghost` for primary actions.
 
 ### Card (`card.tsx`)
-- Default: rounded-2xl, subtle shadow, p-4
-- Variants: `interactive` (press feedback), `glass` (backdrop-blur), `elevated` (stronger shadow)
+- Anatomy: CardHeader (icon → title → description) → CardContent → CardFooter (actions)
+- Variants: `default` (`bg-card` rounded-2xl shadow-sm p-4), `interactive` (hover → shadow-md, active → `scale-[0.98]`), `glass` (backdrop-blur-xl `bg-card/80`), `elevated` (shadow-lg)
+- States: hover → shadow-md; active → `scale-[0.98]`; focus → `ring-2 ring-ring`; disabled → `opacity-60`
+- Use when: grouping related content. Use `interactive` for tappable list items.
 
 ### Input (`input.tsx`)
-- h-12, rounded-xl, accent ring on focus
-- Background shifts to `--card` on focus
+- Anatomy: label → prefix icon (16px) → input field → suffix action
+- Height: h-12 (48px), rounded-xl, 16px font (prevents iOS zoom)
+- States: empty → placeholder `text-muted-foreground`; focused → `ring-2 ring-ring` + `bg-card`; filled → `text-foreground`; error → `border-destructive`; disabled → `opacity-50 bg-muted`
+- Use when: single-line text. Use Textarea for multi-line.
 
-### StatCard (`StatCard.tsx`)
-- Icon with tinted bg circle (accent/10)
-- Value + label + optional trend indicator
-- `compact` variant for inline rows
+### Textarea (`textarea.tsx`)
+- Anatomy: label → textarea content → character count (trailing)
+- Min-height 80px, rounded-xl, same focus treatment as Input
+- States: empty → placeholder; focused → `ring-2 ring-ring`; error → `border-destructive`; disabled → `opacity-50`; hover → `border-ring`
+- Use when: multi-line text (notes, descriptions).
 
-### PageSkeleton (`PageSkeleton.tsx`)
-- Shimmer animation (gradient sweep)
-- Variants: `stats`, `list`, `page`
+### Select (`select.tsx`)
+- Anatomy: trigger (label → chevron-down 16px) → dropdown panel → option items
+- Height: h-12 (48px), rounded-xl
+- States: default → `border-input`; focused/open → `ring-2 ring-ring`; filled → selected value; error → `border-destructive`; disabled → `opacity-50`; loading → spinner replaces chevron
+- Use when: 4+ predefined options. Use RadioGroup for 2–3.
 
-### StatusBadge (`StatusBadge.tsx`)
-- Pill shape, min-h 28px, dot indicator before label
+### Checkbox (`checkbox.tsx`)
+- Anatomy: checkbox box (leading) → label text (trailing)
+- Size: 20×20px, rounded-md, `border-input`
+- States: unchecked → `border-input bg-background`; checked → `bg-primary` + check icon; hover → `border-ring`; focus → `ring-2 ring-ring`; disabled → `opacity-50`
+- Use when: multi-select options, terms acceptance.
 
-### BottomTabBar
-- Glass bg: `bg-card/90 backdrop-blur-lg`
-- Active: teal dot + icon scale
-- Top shadow for depth
+### Switch (`switch.tsx`)
+- Anatomy: track container → sliding thumb → label text
+- Track: 44×24px rounded-full; thumb: 20px circle
+- States: off → `bg-muted`; on → `bg-primary`; hover → `opacity-90`; focus → `ring-2 ring-ring`; disabled → `opacity-50`
+- Use when: binary toggle with immediate effect. Prefer over Checkbox for settings.
 
-### Toast
-- rounded-2xl, p-4, top-center position
-- Variants: `default`, `destructive`, `success`
+### Badge (`badge.tsx`)
+- Anatomy: dot indicator (leading) → label text
+- min-h 24px, rounded-full, px-3, 13px text
+- Variants: `default`, `secondary`, `outline`, `destructive`
+- States: default → static; hover → `opacity-90` (if interactive); active → `scale-[0.97]`; focus → `ring-2 ring-ring`; disabled → `opacity-50`
+- Use when: status labels, counts, tags.
+
+### Dialog (`dialog.tsx`)
+- Anatomy: overlay → DialogHeader (title → description) → DialogContent → DialogFooter (cancel → confirm)
+- Overlay `bg-black/50`, content `bg-card` rounded-2xl p-6 shadow-lg max-w-sm
+- States: open → `.animate-scale-in` 200ms; closing → fade-out 150ms; focus → trapped; disabled → footer buttons `opacity-50`; loading → CTA spinner
+- Use when: confirmations, destructive gates. Do not use for forms — use Sheet.
+
+### Sheet (`sheet.tsx`)
+- Anatomy: drag handle (top) → header (title → close) → scrollable content → footer actions
+- Slides from bottom, `.animate-slide-up` 250ms, overlay `bg-black/50`, `bg-card` rounded-t-2xl p-4 pb-safe, max-height 85vh
+- States: open → slide-up; dragging → follows finger; dismissed → slide-down 200ms; focus → trapped; loading → skeleton content
+- Use when: forms, pickers, detail views.
+
+### Drawer (`drawer.tsx`)
+- Anatomy: drag handle (top) → content → footer
+- Wraps Vaul for native drag-to-dismiss, same `.animate-slide-up` 250ms
+- States: open → slide-up + overlay; dragging → follows finger; hover handle → `bg-muted-foreground/50`; disabled → not dismissable; loading → skeleton
+- Use when: complex multi-step flows from bottom.
+
+### Tabs (`tabs.tsx`)
+- Anatomy: TabsList container → TabsTrigger items → TabsContent panels
+- Height: 44px, `bg-muted` rounded-xl, active `bg-card` shadow-sm rounded-lg
+- States: default → `text-muted-foreground`; active → `text-foreground bg-card`; hover → `text-foreground`; focus → `ring-2 ring-ring`; disabled → `opacity-50`
+- Use when: switching 2–4 content panels (Login/Signup, categories).
+
+### Avatar (`avatar.tsx`)
+- Anatomy: image → fallback initials
+- Sizes: 32px inline, 40px list, 48px profile, 64px detail
+- States: loaded → `object-cover`; loading → `bg-muted` pulse; error → fallback initials; hover → `opacity-80`; focus → `ring-2 ring-ring`; disabled → `opacity-50 grayscale`
+- Use when: user/provider images.
+
+### Progress (`progress.tsx`)
+- Anatomy: track (full-width `bg-muted`) → fill bar (leading `bg-primary`) → label (trailing)
+- Height: 8px rounded-full; small variant 4px
+- States: determinate → width %; indeterminate → shimmer; error → `bg-destructive` fill; disabled → `opacity-40`; loading → track only
+- Use when: upload progress, onboarding completion.
+
+### Skeleton (`skeleton.tsx`)
+- `bg-muted` rounded-xl, `.animate-shimmer` 1.5s infinite
+- Variants: `line` (h-4), `circle` (rounded-full), `card` (rounded-2xl h-32)
+- States: loading → shimmer active; loaded → crossfade 200ms; error → replaced by error state; disabled → static `bg-muted`; hover → n/a
+- Use when: content loading. Match shape to expected content.
+
+### Tooltip (`tooltip.tsx`)
+- Anatomy: trigger element → tooltip panel (label → arrow)
+- `bg-popover` rounded-lg p-2 shadow-md, 13px; `.animate-scale-in` 200ms
+- States: hover → appear after 300ms delay; focus → immediate; active → visible; dismissed → fade-out 100ms; disabled → hidden; loading → n/a
+- Use when: supplementary info on icon buttons. Not for essential info.
+
+### EmptyState (`empty-state.tsx`)
+- Anatomy: icon (40px `text-muted-foreground`) → title (`.text-h3`) → body (`.text-body text-muted-foreground`) → CTA button
+- Layout: centered flex-col, gap-3, p-8
+- States: default → full template; loading → PageSkeleton; error → retry CTA; hover CTA → button hover; active CTA → `scale-[0.97]`; disabled → CTA `opacity-50`
+- Use when: lists with no data. Every empty state must have icon + title + body + CTA.
+
+### Popover (`popover.tsx`)
+- Anatomy: trigger → popover content panel (leading icon → items → trailing close)
+- `bg-popover` rounded-xl shadow-lg p-4, `.animate-scale-in` 200ms
+- States: open → scale-in; closed → fade-out 150ms; hover trigger → `opacity-80`; focus → trapped; active → click opens; disabled → trigger `opacity-50`; loading → skeleton
+- Use when: contextual menus, filter dropdowns.
+
+### ScrollArea (`scroll-area.tsx`)
+- Anatomy: viewport → vertical scrollbar (trailing) → horizontal scrollbar
+- Scrollbar: 4px wide rounded-full, `bg-muted` track, `bg-muted-foreground/30` thumb
+- States: idle → scrollbar hidden; hover → visible `opacity-80`; scrolling → thumb `bg-muted-foreground/50`; disabled → `overflow-hidden`; focus → keyboard scroll
+- Use when: constrained-height areas (sidebars, lists in sheets).
+
+### Separator (`separator.tsx`)
+- 1px `bg-border`, full width; vertical variant available
+- States: default → visible; disabled → `opacity-30`; hover/active/focus → n/a
+- Use when: dividing sections within a card.
+
+### Label (`label.tsx`)
+- Anatomy: label text → required indicator (trailing `text-destructive` asterisk)
+- 14px/500 weight, `text-foreground`, margin-bottom 4px
+- States: default → `text-foreground`; error → `text-destructive`; disabled → `opacity-70`; hover → n/a; focus → moves cursor to associated input
+- Use when: above every form field. Always pair with `htmlFor`.
+
+### Accordion (`accordion.tsx`)
+- Anatomy: trigger (label → trailing ChevronDown 16px) → collapsible content
+- Trigger h-12 (48px), ChevronDown rotates 180° on expand, content `py-3` animate-height 250ms
+- States: collapsed → chevron down; expanded → chevron rotated; hover → `bg-muted/50`; focus → `ring-2 ring-ring`; disabled → `opacity-50`; loading → content skeleton
+- Use when: FAQ, collapsible groups. Use Collapsible for single toggle.
+
+### Alert (`alert.tsx`)
+- Anatomy: accent border (leading) → icon (20px) → AlertTitle (`.text-h3`) → AlertDescription
+- rounded-xl p-4, `border-l-4`
+- Variants: `default`, `destructive` (`border-destructive bg-destructive/5`), `warning`, `success`
+- States: default → visible; hover → n/a; focus → `ring-2 ring-ring`; disabled → `opacity-50`; loading → skeleton; error → n/a
+- Use when: inline informational messages. Not for transient notifications (use Toast).
+
+### RadioGroup (`radio-group.tsx`)
+- Anatomy: radio circle (leading) → label text → optional description (trailing)
+- 20px circle, `border-2 border-input`, inner dot 10px `bg-primary`
+- States: unselected → empty; selected → dot `bg-primary`; hover → `border-ring`; focus → `ring-2 ring-ring`; active → `scale-[0.95]`; disabled → `opacity-50`; error → `border-destructive`
+- Use when: single selection from 2–3 options.
+
+### Slider (`slider.tsx`)
+- Anatomy: track → fill (leading) → thumb handle → value label (above)
+- Track h-2 rounded-full `bg-muted`; thumb 20px `bg-primary-foreground` shadow-md
+- States: default → thumb at position; hover → thumb scale(1.1); active → thumb scale(1.2) `ring-4 ring-ring/20`; focus → `ring-2 ring-ring`; disabled → `opacity-50`; loading → track only
+- Use when: numeric ranges (frequency, budget).
 
 ---
 
