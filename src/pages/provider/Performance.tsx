@@ -10,6 +10,7 @@ import { useProviderPerformance } from "@/hooks/useProviderPerformance";
 import { useProviderQualityScore } from "@/hooks/useProviderQualityScore";
 import { useProviderTier } from "@/hooks/useProviderTier";
 import { useProviderOrg } from "@/hooks/useProviderOrg";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   CheckCircle,
   Clock,
@@ -61,9 +62,12 @@ function MetricRing({ value, label, color }: { value: number | null; label: stri
 function SnapshotTrend({ snapshots }: { snapshots: { snapshot_date: string; completed_jobs: number | null }[] }) {
   if (snapshots.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground text-center py-6">
-        No performance history yet. Complete jobs to see trends.
-      </p>
+      <EmptyState
+        compact
+        icon={TrendingUp}
+        title="No performance history"
+        body="Complete jobs to see your daily completion trends here."
+      />
     );
   }
 

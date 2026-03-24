@@ -3,7 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Search, Clock, CloudRain } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Search, Clock, CloudRain, Package } from "lucide-react";
 import { useSkus, FULFILLMENT_MODE_LABELS } from "@/hooks/useSkus";
 import type { ServiceSku } from "@/hooks/useSkus";
 import { SkuDetailView } from "@/components/SkuDetailView";
@@ -28,7 +29,12 @@ export default function ProviderSKUs() {
       {isLoading ? (
         <p className="text-center text-muted-foreground py-8">Loading…</p>
       ) : skus.length === 0 ? (
-        <p className="text-center text-muted-foreground py-8">No services available.</p>
+        <EmptyState
+          compact
+          icon={Package}
+          title="No services available"
+          body={search ? "No services match your search. Try a different term." : "Services will appear here once configured by your admin."}
+        />
       ) : (
         <div className="grid gap-3">
           {skus.map(sku => {

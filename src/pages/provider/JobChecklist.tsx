@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { StatusBadge } from "@/components/StatusBadge";
 import { ReportIssueSheet } from "@/components/provider/ReportIssueSheet";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   ChevronLeft, Check, X, AlertCircle, AlertTriangle, CheckSquare,
   CheckCircle2, Camera, ArrowRight,
@@ -174,13 +175,12 @@ export default function ProviderJobChecklist() {
 
         {/* Empty state */}
         {checklist.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <CheckSquare className="h-10 w-10 text-muted-foreground/50 mb-3" />
-            <p className="text-sm font-semibold text-foreground">No checklist items</p>
-            <p className="text-xs text-muted-foreground mt-1 max-w-[240px]">
-              This job has no checklist requirements. Continue to photos.
-            </p>
-          </div>
+          <EmptyState
+            compact
+            icon={CheckSquare}
+            title="No checklist items"
+            body="This job has no checklist requirements. Continue to photos."
+          />
         )}
 
         {/* Checklist items grouped by SKU */}

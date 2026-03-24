@@ -3,6 +3,7 @@ import { useSupportTickets } from "@/hooks/useSupportTickets";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TicketStatusChip } from "@/components/support/TicketStatusChip";
+import { EmptyState } from "@/components/ui/empty-state";
 import { AlertTriangle, ChevronRight, Inbox, ShieldAlert } from "lucide-react";
 import { format } from "date-fns";
 
@@ -79,10 +80,12 @@ export default function ProviderSupportHome() {
 
       {/* Empty state */}
       {!isLoading && tickets.length === 0 && (
-        <div className="text-center py-10 space-y-2">
-          <ShieldAlert className="h-10 w-10 text-muted-foreground/40 mx-auto" />
-          <p className="text-sm text-muted-foreground">No support tickets — keep up the great work!</p>
-        </div>
+        <EmptyState
+          compact
+          icon={ShieldAlert}
+          title="No support tickets"
+          body="Keep up the great work! Tickets will appear here if any issues arise."
+        />
       )}
     </div>
   );

@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useProviderJobs } from "@/hooks/useProviderJobs";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Clock, ChevronRight, ChevronLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
@@ -44,13 +45,12 @@ export default function ProviderHistory() {
           ))}
         </div>
       ) : Object.keys(grouped).length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Clock className="h-10 w-10 text-muted-foreground/40 mb-3" />
-          <p className="text-sm font-semibold text-foreground">No completed jobs yet</p>
-          <p className="text-xs text-muted-foreground mt-1 max-w-[240px]">
-            Jobs you complete will appear here with their details and status.
-          </p>
-        </div>
+        <EmptyState
+          compact
+          icon={Clock}
+          title="No completed jobs yet"
+          body="Jobs you complete will appear here with their details and status."
+        />
       ) : (
         Object.entries(grouped)
           .sort(([a], [b]) => b.localeCompare(a))
