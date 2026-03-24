@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Copy, Check, Users, Gift, Clock, ChevronRight, ChevronLeft, Target, Star, Trophy } from "lucide-react";
+import { Copy, Check, Users, Gift, Clock, ChevronRight, ChevronLeft, Target, Star, Trophy, AlertTriangle } from "lucide-react";
 import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,7 +23,7 @@ const MILESTONE_LABELS: Record<string, string> = {
 export default function CustomerReferrals() {
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
-  const { codes, generateCode } = useReferralCodes();
+  const { codes, generateCode, isRateLimited, rateLimitMessage } = useReferralCodes();
   const { programs } = useReferralPrograms();
   const referrals = useReferrals("own");
   const rewards = useReferralRewards();
@@ -71,15 +71,21 @@ export default function CustomerReferrals() {
           {activeProgram ? (
             <>
               <p className="text-sm text-muted-foreground">{activeProgram.description || "Invite friends and earn credits when they subscribe."}</p>
+              {isRateLimited && (
+                <div className="flex items-center gap-2 rounded-lg bg-warning/10 border border-warning/30 px-3 py-2">
+                  <AlertTriangle className="h-4 w-4 text-warning shrink-0" />
+                  <p className="text-sm text-warning">{rateLimitMessage}</p>
+                </div>
+              )}
               {myCode ? (
                 <div className="flex items-center gap-2">
                   <code className="flex-1 bg-muted px-3 py-2 rounded-lg text-sm font-mono">{myCode.code}</code>
-                  <Button size="sm" variant="outline" onClick={handleCopyLink} aria-label={copied ? "Copied" : "Copy referral link"}>
+                  <Button size="sm" variant="outline" onClick={handleCopyLink} disabled={isRateLimited} aria-label={copied ? "Copied" : "Copy referral link"}>
                     {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
               ) : (
-                <Button onClick={handleGenerateCode} disabled={generateCode.isPending} size="sm">
+                <Button onClick={handleGenerateCode} disabled={generateCode.isPending || isRateLimited} size="sm">
                   Generate Code
                 </Button>
               )}

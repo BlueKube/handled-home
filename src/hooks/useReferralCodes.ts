@@ -28,7 +28,7 @@ export function useReferralCodes() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("referral_codes")
-        .select("*, referral_programs(name, status)")
+        .select("*, referral_programs(name, status, max_rewards_per_referrer_per_week)")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -36,11 +36,35 @@ export function useReferralCodes() {
     },
   });
 
+  // Velocity cap: check referrals attributed to this user in the past 7 days
+  const velocityCheck = useQuery({
+    queryKey: ["referral-velocity", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { count, error } = await supabase
+        .from("referrals" as any)
+        .select("id", { count: "exact", head: true })
+        .eq("referrer_user_id", user!.id)
+        .gte("created_at", sevenDaysAgo);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
+  const weeklyLimit = codes.data?.[0]?.referral_programs?.max_rewards_per_referrer_per_week ?? 10;
+  const weeklyCount = velocityCheck.data ?? 0;
+  const isRateLimited = weeklyCount >= weeklyLimit;
+  const rateLimitMessage = isRateLimited
+    ? "You've reached your weekly referral limit. Try again next week."
+    : null;
+
   const hasActiveCode = codes.isSuccess && (codes.data ?? []).length > 0;
 
   const generateCodeMutation = useMutation({
     mutationFn: async (programId: string) => {
       if (!user) throw new Error("Not authenticated");
+      if (isRateLimited) throw new Error(rateLimitMessage!);
       // Enforce one code per customer — re-check from DB to avoid stale cache
       const { count, error: countError } = await supabase
         .from("referral_codes")
@@ -61,10 +85,11 @@ export function useReferralCodes() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["referral-codes"] });
+      qc.invalidateQueries({ queryKey: ["referral-velocity"] });
       toast.success("Referral code generated — share it to start earning.");
     },
     onError: (e: any) => toast.error(e.message),
   });
 
-  return { codes, generateCode: generateCodeMutation, hasActiveCode };
+  return { codes, generateCode: generateCodeMutation, hasActiveCode, isRateLimited, rateLimitMessage };
 }
