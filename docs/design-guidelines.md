@@ -560,9 +560,21 @@ Subtle, purposeful gradients — the brand is calm concierge, not tech keynote.
 ---
 
 ## Accessibility
-- Semantic headings
-- Visible focus states (ring-2 ring-ring)
-- Proper contrast ratios (WCAG AA)
-- Clear error messaging
-- 16px minimum font for inputs (no iOS zoom)
+
+WCAG AA compliance required — 4.5:1 contrast for body text, 3:1 for large text (18px+).
+
+- Semantic headings: one `h1` per page, sequential `h2`→`h3` nesting
+- Visible focus: `ring-2 ring-ring ring-offset-2` on all interactive elements via `focus-visible`
+- Focus trap: Dialog and Sheet trap focus within overlay; Tab cycles through focusable children; Escape closes
+- Focus restore: when Dialog/Sheet closes, focus returns to the trigger element
+- Touch targets: minimum 44×44px per iOS HIG; exception: inline text links (underline + color sufficient)
+- 16px minimum font for inputs (prevents iOS auto-zoom on `focus`)
+- `aria-label` on icon-only buttons (back `ChevronLeft`, close `X`)
+- `aria-live="polite"` on toast container for screen reader announcements
+- `role="alert"` on inline form error messages
+- Color-independent info: never convey status by color alone — pair with icon (checkmark, `AlertTriangle`) as secondary indicator
+- `sr-only` for visually hidden labels; `aria-describedby` links inputs to helper/error text
+- Landmarks: `<main>` for page content, `<nav>` for tab bar, `<aside>` for admin sidebar
+- VoiceOver/TalkBack: verify tab order follows visual flow, modals announce title on open
+- Lighthouse a11y audit: target 95+ on all customer-facing pages
 
