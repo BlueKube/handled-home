@@ -1,109 +1,66 @@
-# Implementation Plan: Remaining Implementation Gaps
+# Plan: Provider Experience Auto-Evaluator
 
-**PRD**: `docs/working/prd.md` (PRD-implementation-gaps.md)
-**Branch**: `claude/document-prd-workflow-Mhw6W`
-**Date**: 2026-03-24
+## Goal
 
----
+Build `auto/evaluate-provider.py` — a 7-dimension scoring harness that evaluates provider experience quality in `docs/screen-flows.md` (Flows 17–24, 34–35). Follows the same architecture as `evaluate-design.py`. Expected baseline: ~55–65.
 
-## Summary
+## 7 Scoring Dimensions
 
-This plan closes 5 MISSING and 9 PARTIAL items from the post-PR #40 audit. All changes are frontend-only — no Supabase migrations or edge functions. Mock data is used for metrics that would require new backend queries.
+| Dim | Name | Weight | What It Checks |
+|-----|------|--------|----------------|
+| D1 | Earnings Transparency | 1.3× | Can provider predict next payout in 3 seconds? Modifier explanations, projection cards, held earnings detail, payout status |
+| D2 | Schedule Control | 1.2× | Route lock, queue breadcrumb, map/list toggle, route optimization, stop tracking, availability management |
+| D3 | Fairness Signals | 1.2× | Route density messaging, guaranteed payout framing, no-tip-dependency language, transparent modifiers, minimum earnings signals |
+| D4 | Onboarding Friction | 1.1× | Steps to first job (currently 6), progressive disclosure, resume state, compliance UX, invite code flow |
+| D5 | Retention Hooks | 1.0× | Milestone celebrations, performance feedback, growth path, streaks, capacity meter, quality score, insights |
+| D6 | BYOC Provider Tools | 1.0× | Invite management, link creation, activation tracking, scripts/templates, bonus framing, rate limiting |
+| D7 | Cognitive Walkthroughs | 0.9× | First week journey, checking earnings journey, handling dispute journey — end-to-end path completeness |
 
-**Total scope**: 14 items across 3 phases, ~27 files modified, 3 files created.
+## Anti-Gaming Guards
 
----
+1. **Word-count bell curve** — Provider flows should be 4k–10k words (sweet spot)
+2. **Duplicate screen detection** — Screen headings >80% similar
+3. **Boilerplate detection** — Jaccard >0.8 on 50+ word blocks
+4. **Masterplan coherence** — Cross-reference provider promises in masterplan.md against flow content
+5. **Flow completeness** — All 10 expected flows (17–24, 34, 35) must be present
 
-## Phase 1: UX Polish & Verification Gaps (Batch A)
+## Phase 1: Core Infrastructure + D1–D3 (3 batches)
 
-**Theme**: Quick wins — small, isolated changes with no cross-dependencies. Improves customer/admin UX consistency.
+### Batch 1: File scaffolding, parser, data structures, utilities
+- Shebang, docstring, imports
+- File paths (screen-flows.md, masterplan.md, operating-model.md)
+- Dimension weights dict
+- Data classes: `Issue`, `FlowSection`, `ScoreResult`
+- Parser: extract provider flows (17–24, 34, 35) from screen-flows.md by `# FLOW N:` and `### Screen N.X:` headings
+- Utility functions: `count_words`, `heading_similarity`, `jaccard_similarity`, `count_keyword_matches`, `count_pattern_matches`, `find_screens_matching`
 
-| Batch | Item | Size | Files Modified | Files Created | Dependencies |
-|-------|------|------|----------------|---------------|--------------|
-| 1 | P3-3: Sign Out Confirmation | S | 1 (`MoreMenu.tsx`) | 0 | None |
-| 2 | 2.1: Empty States | S | 2 (`Billing.tsx`, `admin/Dashboard.tsx`) | 0 | None |
-| 3 | 2.5: Status Badges | S | 3 (`StatusBadge.tsx`, `Plans.tsx`, `ByocCenter.tsx`) | 0 | None |
-| 4 | 2.6: Validation | M | 2 (`SupportNew.tsx`, `ProfileForm.tsx`) | 0 | None |
-| 5 | 2.3: Back Buttons | M | 8 (customer + provider pages) | 0 | None |
-| 6 | P3-2: Skip Options | S | 2 (`OnboardingOrg.tsx`, `OnboardingCompliance.tsx`) | 0 | None |
-| 7 | P3-1: Help Tooltips | M | 18 (customer + admin pages) | 0 | None |
+### Batch 2: D1 (Earnings Transparency) + D2 (Schedule Control) scorers
+- D1: 5 sub-checks — payout prediction speed, modifier explanations, projection cards, held earnings detail, payout account status
+- D2: 5 sub-checks — route lock UX, queue breadcrumb, route optimization, availability management, job list views (map/list/tabs)
 
-**Risk areas**: Batch 7 (Help Tooltips) touches 18 files — high surface area but each change is mechanical (add import + single JSX element). Risk is layout overflow from tooltip placement.
+### Batch 3: D3 (Fairness Signals) scorer + evaluate() shell + output
+- D3: 5 sub-checks — guaranteed payout framing, no-tip language, density messaging, transparent modifiers, minimum earnings signals
+- `evaluate()` function (scoring D1–D3 only, other dims return 0.0 placeholder)
+- `print_results()` with YAML header + verbose bar chart + issues
+- CLI entry point (`__main__`)
+- Validate: `python3 auto/evaluate-provider.py -v` runs and produces baseline
 
----
+## Phase 2: D4–D7 + Anti-Gaming (3 batches)
 
-## Phase 2: Backend Rules & Edge Cases (Batch B)
+### Batch 4: D4 (Onboarding Friction) + D5 (Retention Hooks) scorers
+- D4: 5 sub-checks — step count, progressive disclosure, resume/draft state, compliance UX, invite code flow clarity
+- D5: 5 sub-checks — celebration screens, performance/quality score, insights/coaching, growth path signals, capacity/streak gamification
 
-**Theme**: P2 correctness items — billing logic, fraud prevention, BYOP provider decline handling. These affect business rule correctness.
+### Batch 5: D6 (BYOC Tools) + D7 (Cognitive Walkthroughs) scorers
+- D6: 5 sub-checks — invite link creation, activation tracking, invite scripts, bonus framing, rate limiting/compliance
+- D7: 5 sub-checks — first-week path completeness, earnings-check path, dispute-handling path, empty-state coverage, error-state coverage
 
-| Batch | Item | Size | Files Modified | Files Created | Dependencies |
-|-------|------|------|----------------|---------------|--------------|
-| 8 | P2-4: Referral Fraud Prevention | M | 3 (`useReferralCodes.ts`, `useReferralAdmin.ts`, `Referrals.tsx`) | 0 | None |
-| 9 | P2-2: BYOP Provider Decline | M | 4 (`useGrowthEvents.ts`, `Growth.tsx`, `useByopRecommendation.ts`, `RecommendProviderStatus.tsx`) | 1 (`ByopDeclineNotification.tsx`) | None |
-| 10 | P2-1: Operational Exception Handling | L | 3 (`PausePanel.tsx`, `useDunningEvents.ts`, `FixPaymentPanel.tsx`) | 0 | None |
+### Batch 6: Anti-gaming guards + evaluate() completion + final validation
+- All 5 guards implemented
+- `evaluate()` wired to all 7 dimensions + guards
+- Run baseline, confirm score 55–65
+- Fix any calibration issues
 
-**Risk areas**: Batch 10 (Pause/Dunning/Payment) is the largest single batch — modifies billing-adjacent components with timeline visualizations and dunning logic. Careful review needed.
-
----
-
-## Phase 3: Admin Metrics & Monitoring (Batch C)
-
-**Theme**: Admin dashboards — adding monitoring gauges, cohort filtering, and loss leader reporting. All use mock data initially.
-
-| Batch | Item | Size | Files Modified | Files Created | Dependencies |
-|-------|------|------|----------------|---------------|--------------|
-| 11 | P2-6: Payout Review Cadence | S | 1 (`OpsCockpit.tsx`) | 0 | None |
-| 12 | 4.3: Bundle Flywheel Cohort Filtering | M | 3 (`useBusinessHealth.ts`, `BusinessHealthCard.tsx`, `RiskAlertsCard.tsx`) | 0 | None |
-| 13 | 4.4: Success Metrics Gauges | M | 1 (`OpsCockpit.tsx`) | 1 (`useOperationalMetrics.ts`) | Batch 11 (same file) |
-| 14 | P2-5: Loss Leader Review | M | 1 (`Reports.tsx`) | 1 (`useLossLeaderMetrics.ts`) | None |
-
-**Risk areas**: Batches 11 and 13 both modify `OpsCockpit.tsx` — batch 13 depends on batch 11 completing first. Batch 12 modifies the business health calculation which feeds into risk alerts — regression risk on existing alert thresholds.
-
----
-
-## Deferred Items
-
-- Backend queries for mock data (all marked with `// TODO: Replace with Supabase query`)
-- IP/device fingerprinting for referral fraud
-- `ChangePasswordForm.tsx` validation improvements (explicitly out of scope per PRD)
-- React Hook Form / Zod migration (PRD specifies manual validation pattern)
-
----
-
-## Execution Order
-
-```
-Phase 1 (Batches 1–7)  →  Doc Sync  →  Phase 2 (Batches 8–10)  →  Doc Sync  →  Phase 3 (Batches 11–14)  →  Doc Sync  →  Archive
-```
-
-Each batch follows the workflow checklist:
-1. Re-anchor to plan
-2. Write batch spec in `docs/working/batch-specs/`
-3. Implement spec
-4. Commit
-5. 10-agent code review
-6. Fix loop (max 3 passes)
-7. Validate build (`tsc --noEmit` + `npm run build`)
-8. Validate visually (screenshots where applicable)
-9. Push
-
----
-
-## Status Tracker
-
-| Phase | Batch | Item | Status |
-|-------|-------|------|--------|
-| 1 | 1 | P3-3: Sign Out Confirmation | ✅ Complete |
-| 1 | 2 | 2.1: Empty States | ✅ Complete |
-| 1 | 3 | 2.5: Status Badges | ✅ Complete |
-| 1 | 4 | 2.6: Validation | ✅ Complete |
-| 1 | 5 | 2.3: Back Buttons | ✅ Complete |
-| 1 | 6 | P3-2: Skip Options | ✅ Complete |
-| 1 | 7 | P3-1: Help Tooltips | ✅ Complete |
-| 2 | 8 | P2-4: Referral Fraud Prevention | ✅ Complete |
-| 2 | 9 | P2-2: BYOP Provider Decline | ✅ Complete |
-| 2 | 10 | P2-1: Operational Exception Handling | ✅ Complete |
-| 3 | 11 | P2-6: Payout Review Cadence | ✅ Complete |
-| 3 | 12 | 4.3: Bundle Flywheel Cohort Filtering | ✅ Complete |
-| 3 | 13 | 4.4: Success Metrics Gauges | ✅ Complete |
-| 3 | 14 | P2-5: Loss Leader Review | ✅ Complete |
+## Phase 3: Documentation Sync
+- Update feature-list.md with new evaluator
+- No other docs affected (this is tooling, not product)
