@@ -221,123 +221,210 @@ After completing a phase (group of related batches), sync all project documentat
 
 ### The Six North Star Documents
 
-Every project should maintain six core documents in a `docs/` folder. These are **living documents** — they evolve as features are built — but they serve as the North Star that prevents drift across phases, sessions, and contributors.
+Every product needs a small set of living documents that define what the product is, how it works, how it makes money, and how it's built. These six documents serve that purpose. They are the **institutional memory** of the project — the shared context that keeps every session, every contributor, and every AI agent aligned with the same reality.
 
-These are not throwaway specs. They are the institutional memory of the project. When a new session starts, Claude reads these to understand the full context. When a human onboards, they read these to get up to speed. **If these docs are stale, every subsequent decision is made on bad information.**
+These are not throwaway specs. They are not "nice to have." They are the difference between an AI that builds the right thing and an AI that builds something plausible but wrong. When a new session starts, Claude reads these to understand the full context. When a human onboards, they read these to get up to speed. **If these docs are stale, every subsequent decision is made on bad information.**
 
-#### 1. `docs/masterplan.md` — Vision & Strategy
+They are also **living documents** — they evolve as the product evolves. A feature ships and the feature list gets updated. A pricing model changes and the operating model gets revised. A new screen is added and the screen flows grow. The documents are never "done" because the product is never done.
 
-**What it contains:** Business model, product vision, target users, competitive positioning, growth strategy, and long-term roadmap. This is the "why" behind everything.
+---
 
-**What it answers:**
-- What are we building and for whom?
-- What's the business model?
-- What are the growth levers?
-- What's the product vision at 1 year, 3 years?
+#### 1. `docs/masterplan.md` — Business Plan, Vision & Value Proposition
 
-**When to update:** When new features change the product strategy, when growth assumptions are validated or invalidated, when the business model evolves.
+**Scope:** This is the foundational "why" document. It defines the problem being solved, who it's being solved for, and why this solution wins.
 
-**What NOT to change:** The core vision and mission should be stable. If you're rewriting the vision every phase, something is wrong upstream.
+**What it contains:**
+- **Problem statement** — What pain exists in the market? Who feels it?
+- **Value proposition** — What does this product offer that alternatives don't? Why would someone choose it?
+- **Target users** — Who are the primary personas? What are their goals, frustrations, and decision criteria?
+- **Business model** — How does the product generate revenue? What's the core transaction?
+- **Competitive positioning** — What exists today? Where does this product sit in the landscape?
+- **Growth strategy** — What are the primary acquisition channels? What creates organic growth? What are the flywheels?
+- **Long-term vision** — Where is this headed at 1 year, 3 years, at scale?
 
-#### 2. `docs/operating-model.md` — Unit Economics & Thresholds
+**What it answers for Claude:**
+- What problem does this code solve?
+- Who are we building for, and what do they care about?
+- When two implementation paths are equally valid, which one aligns better with the business model?
+- What language and tone should the product use?
 
-**What it contains:** Pricing mechanics, margin structure, cost drivers, success metric thresholds, risk triggers, and operational rules. The quantitative backbone of the business.
+**When to update:** When the target market shifts, when the value proposition is refined based on user feedback, when new growth channels are validated, when competitive dynamics change.
 
-**What it answers:**
-- What does healthy look like in numbers?
-- What thresholds trigger action? (e.g., churn > 2%, attach rate < 1.5)
-- How does money flow through the system?
-- What are the margin levers?
+**What NOT to change casually:** The core vision and mission should be stable across many phases. If you're rewriting the vision every sprint, the problem is upstream of the document.
 
-**When to update:** When pricing changes, when new metrics are surfaced in the product, when threshold values are tuned based on real data.
+**Benefit:** Without this document, Claude builds features in a vacuum. With it, Claude understands the business context behind every screen, every flow, every metric — and makes better trade-off decisions as a result.
 
-**Why it matters for code:** Every dashboard gauge, risk alert, and business health indicator should trace back to a specific number in this document. If the code shows a threshold that isn't in the operating model, either the code or the doc is wrong.
+---
 
-#### 3. `docs/screen-flows.md` — Screen Layouts & Component Specs
+#### 2. `docs/operating-model.md` — Revenue Model, Unit Economics & Operational Thresholds
 
-**What it contains:** Every screen in the app — its layout, header structure, key components, navigation behavior, and user flow. The visual source of truth.
+**Scope:** This is the quantitative backbone of the business. Where the masterplan says "we make money by X," the operating model says "here's exactly how the math works."
 
-**What it answers:**
-- What does each screen look like?
-- What components does it use?
-- Where does the back button go?
-- What's the empty state?
+**What it contains:**
+- **Revenue model** — How money flows in. Subscription tiers, transaction fees, usage-based pricing, add-on revenue, or whatever the model is. Specific numbers, not hand-waving.
+- **Cost structure** — What are the major cost drivers? Cost per user, cost per transaction, infrastructure costs, fulfillment costs, support costs.
+- **Unit economics** — Revenue per unit minus cost per unit. What does profitable look like at the individual customer/transaction level?
+- **Margin structure** — Gross margins, contribution margins, and what levers move them. Where does margin expand at scale?
+- **Success metric thresholds** — The specific numbers that define healthy vs. unhealthy. Churn rate targets, retention benchmarks, conversion rate floors, engagement thresholds. These are the numbers that dashboards and alerts should be built against.
+- **Risk triggers** — What conditions require intervention? What metric breaches trigger a review, a pause, or a rollback?
+- **Operational rules** — Payment retry logic, dunning cascades, suspension policies, escalation procedures. The "if X then Y" rules that govern how the system behaves under stress.
 
-**When to update:** When screens are added, renamed, or restructured. When navigation patterns change. When new shared components are introduced.
+**What it answers for Claude:**
+- What thresholds should a health dashboard use for green/yellow/red indicators?
+- When building a risk alert, what number constitutes "at risk"?
+- When implementing billing logic, what are the retry windows and grace periods?
+- When building admin tools, what metrics do operators need to see?
 
-**Size warning:** This file grows large (50KB+). That's fine — it's the single source of truth for UI. Don't split it unless it becomes genuinely unmanageable.
+**When to update:** When pricing changes, when new metrics are added to dashboards, when threshold values are tuned based on real-world data, when the cost structure shifts.
+
+**Benefit:** This document is the bridge between business strategy and code. Every gauge, alert, threshold, and financial calculation in the product should trace back to a specific number in this document. Without it, developers invent thresholds or hardcode assumptions that may not match the business reality.
+
+---
+
+#### 3. `docs/screen-flows.md` — Application Structure & Screen Specifications
+
+**Scope:** This is the visual source of truth. It describes every screen in the application — what it contains, how it's laid out, what components it uses, and how users navigate between screens.
+
+**What it contains:**
+- **Screen inventory** — Every screen/page in the application, organized by user role or functional area
+- **Layout specifications** — Header structure, content sections, footer/action bars, spacing, and hierarchy for each screen
+- **Component usage** — Which shared components (cards, lists, forms, modals, drawers) each screen uses and how
+- **Navigation behavior** — Where the back button goes, what tapping an item opens, how drill-downs work
+- **Empty states** — What each screen shows when there's no data (icon, message, call to action)
+- **Loading states** — Skeleton patterns and loading indicators per screen
+- **User flows** — Multi-screen sequences (onboarding, checkout, setup wizards) described step by step
+
+**What it answers for Claude:**
+- When building a new screen, what pattern should it follow?
+- When modifying an existing screen, what's the intended layout?
+- What does the empty state look like for this view?
+- How does this screen connect to the screens before and after it?
+
+**When to update:** When screens are added, renamed, removed, or restructured. When navigation patterns change. When new shared components are introduced that affect multiple screens.
+
+**Size note:** This file will grow large as the product grows. That's expected — it's the single place to understand the full UI. Don't split it prematurely; a large, searchable file is better than scattered fragments.
+
+**Benefit:** Without this document, every new screen is a guess. With it, Claude can build screens that are consistent with the rest of the application — same patterns, same components, same navigation conventions — without having to reverse-engineer the intent from existing code.
+
+---
 
 #### 4. `docs/app-flow-pages-and-roles.md` — Routes, Pages & Access Control
 
-**What it contains:** The complete route tree, page inventory, role gates (which users can access what), and primary user journeys described as step-by-step flows.
+**Scope:** This is the structural map of the application. It defines every URL, which page it renders, who can access it, and how users move through the product.
 
-**What it answers:**
-- What URL maps to what page?
-- Which role can access which routes?
-- What are the key user journeys (onboarding, purchasing, provider workflow)?
-- How many pages does each role have?
+**What it contains:**
+- **Route tree** — Every URL path in the application, organized hierarchically
+- **Page inventory** — A count and list of all pages, broken down by user role or section
+- **Role gates** — Which user roles can access which routes (authentication and authorization rules)
+- **User journeys** — The primary paths users take through the product, described as numbered steps with specific route paths (e.g., "1. User lands on `/dashboard`, 2. Taps a job card to open `/jobs/:id`")
+- **Navigation hierarchy** — Parent/child relationships between pages, breadcrumb structures, tab groups
 
-**When to update:** When routes are added or renamed, when role gates change, when user journeys are modified. **Route drift is one of the most common doc-staleness problems** — a route gets renamed in code but the doc still shows the old path.
+**What it answers for Claude:**
+- Where should a new page live in the route tree?
+- What role gate should protect this route?
+- When linking from page A to page B, what's the correct path?
+- How many pages does each user role have access to?
 
-#### 5. `docs/feature-list.md` — Feature Inventory & Status
+**When to update:** When routes are added, renamed, or removed. When role gates change. When user journeys are modified. **Route drift is one of the most common doc-staleness problems** — a route gets renamed in code but the doc still shows the old path. This causes broken links in documentation and incorrect navigation assumptions.
 
-**What it contains:** Every feature in the product, numbered, with a status label (DONE, IN PROGRESS, PLANNED, DEFERRED) and tagged by strategic category.
+**Benefit:** This document prevents Claude from creating orphan pages, using wrong route paths, or building navigation that doesn't match the actual application structure. It's also the fastest way to understand the scope and shape of the product — "143 pages across 3 roles" tells you immediately what you're working with.
 
-**What it answers:**
-- What features exist?
-- What's their current status?
-- How do features map to business strategy?
-- What's the total feature count?
+---
 
-**When to update:** After every batch — mark newly shipped features as DONE, add any new features that were discovered during implementation. This is the simplest doc to keep current and the easiest to let slip.
+#### 5. `docs/feature-list.md` — Feature Inventory & Delivery Status
 
-#### 6. `docs/design-guidelines.md` — Design System & Tokens
+**Scope:** This is the product's capability ledger. Every feature the product has (or will have), numbered, categorized, and status-tracked.
 
-**What it contains:** Color tokens, typography scale, spacing system, component specs (buttons, cards, inputs, badges), icon system, animation patterns, and platform-specific rules.
+**What it contains:**
+- **Numbered feature list** — Every feature, from #1 to #N, with a short description
+- **Status labels** — Each feature marked as DONE, IN PROGRESS, PLANNED, or DEFERRED
+- **Strategic tags** — Features tagged by business category (e.g., "growth-driver", "retention", "trust-builder", "margin-lever") to show how features connect to business goals
+- **Grouping by area** — Features organized into logical sections (billing, onboarding, analytics, etc.)
 
-**What it answers:**
-- What are the design tokens (colors, fonts, spacing)?
-- What do standard components look like?
-- What are the accessibility requirements?
-- What patterns are used for mobile vs. desktop?
+**What it answers for Claude:**
+- Has this feature already been built?
+- What's the total feature count and how much is complete?
+- Which features support which business goals?
+- What's still planned vs. what's been deferred and why?
 
-**When to update:** When new design patterns are introduced (e.g., gauge indicators, risk alert cards), when token values change, when new component variants are added to the UI library.
+**When to update:** After every batch — mark newly shipped features as DONE, add any new features that were discovered during implementation, update status labels for anything that moved. This is the simplest doc to keep current and the easiest to let slip.
 
-### How these docs work together
+**Benefit:** This document is the definitive answer to "what does this product do?" It prevents duplicate work (building something that already exists), keeps the team honest about delivery status, and connects every feature back to a business reason. When a stakeholder asks "do we have X?", the answer is in this file.
+
+---
+
+#### 6. `docs/design-guidelines.md` — Design System, Patterns & Standards
+
+**Scope:** This is the visual and interaction rulebook. It defines how the product looks and feels at the component level, ensuring consistency across every screen regardless of who or what builds it.
+
+**What it contains:**
+- **Color system** — Named color tokens (primary, accent, success, warning, destructive, muted), their values, and usage rules. How colors are applied in light mode and dark mode.
+- **Typography scale** — Font families, size scale (headings, body, captions), weight usage, and line height conventions
+- **Spacing system** — Padding and margin conventions, page-level spacing, card spacing, section gaps
+- **Component specifications** — Standard dimensions and styles for buttons (heights, border radius, variants), inputs, cards, badges, modals, drawers, and other shared components
+- **Icon system** — Which icon library is used, standard sizes, and usage conventions
+- **Animation patterns** — Entry animations, transitions, loading patterns
+- **Platform-specific rules** — Mobile vs. desktop conventions, safe area handling, touch target minimums, responsive breakpoints
+- **Accessibility standards** — Minimum touch target sizes, ARIA label requirements, keyboard navigation patterns, color contrast rules
+
+**What it answers for Claude:**
+- What color token should this element use?
+- How tall should a button be?
+- What border radius do cards use?
+- What's the minimum touch target size?
+- How should this component animate in?
+
+**When to update:** When new design patterns are introduced (new component types, new indicator styles), when token values change, when new component variants are added, when platform conventions evolve.
+
+**Benefit:** This document is the difference between a product that feels cohesive and one that feels stitched together. Every screen Claude builds will use the right colors, the right spacing, the right component styles — not because Claude memorized the CSS, but because the rules are written down in one place.
+
+---
+
+### How the six documents work together
 
 ```
-masterplan.md          → WHY we're building (vision, strategy)
-operating-model.md     → HOW the business works (economics, thresholds)
-screen-flows.md        → WHAT each screen looks like (layouts, components)
-app-flow-pages-and-roles.md → WHERE users go (routes, journeys, access)
-feature-list.md        → WHAT exists and its status (inventory)
-design-guidelines.md   → HOW it looks and feels (design system)
+masterplan.md            → WHY we're building    (vision, value prop, business model)
+operating-model.md       → HOW the business runs (revenue, costs, thresholds, rules)
+screen-flows.md          → WHAT each screen is   (layouts, components, states)
+app-flow-pages-roles.md  → WHERE users go        (routes, journeys, access control)
+feature-list.md          → WHAT exists today      (inventory, status, progress)
+design-guidelines.md     → HOW it looks and feels (design system, patterns, standards)
 ```
 
-Claude reads all six at the start of a session. Together they provide full context without needing to read every source file. When they're current, Claude can make informed decisions about where to put new code, what patterns to follow, and what the business expects. When they're stale, Claude makes decisions based on outdated assumptions.
+Together, these six documents form a complete context layer:
+- The **masterplan** tells you what to build and why
+- The **operating model** tells you what the numbers should be
+- The **screen flows** tell you what each screen should contain
+- The **app flow** tells you how screens connect and who can access them
+- The **feature list** tells you what's done and what's left
+- The **design guidelines** tell you how everything should look
+
+Claude reads all six at the start of a session. Together they provide full product context without needing to read every source file. When they're current, Claude makes informed decisions about where to put new code, what patterns to follow, and what the business expects. When they're stale, Claude makes decisions based on outdated assumptions — and stale assumptions compound silently across batches until the product drifts far from intent.
 
 ### Living document rules
 
-1. **These docs are never "finished"** — they grow and evolve with the product
-2. **Update after every phase, not every batch** — batch-level updates create too much churn; phase-level keeps them current without constant maintenance
-3. **Additions are easy, deletions are careful** — adding a new feature to the list is straightforward; removing or changing strategy sections should be deliberate
-4. **The code is the truth, the docs are the map** — if the code and docs disagree, investigate which one is wrong before changing either
-5. **New projects start with 2, grow to 6** — begin with `masterplan.md` and `design-guidelines.md`; add the others as the project reaches the point where they're needed
+1. **These docs are never "finished"** — they grow and evolve with the product. A feature list with 50 items today may have 200 in a year. That's success, not bloat.
+2. **Update after every phase, not every batch** — batch-level updates create too much churn and interrupt flow. Phase-level syncs keep them current without constant maintenance overhead.
+3. **Additions are easy, deletions are careful** — adding a new feature to the list or a new screen to the flows is routine. Removing or rewriting strategy sections, economic thresholds, or design tokens should be deliberate and discussed.
+4. **The code is the truth, the docs are the map** — if the code and docs disagree, investigate which one is wrong before changing either. Sometimes the code drifted; sometimes the doc was aspirational. Both happen.
+5. **New projects start with 2, grow to 6** — begin with `masterplan.md` (what are we building?) and `design-guidelines.md` (how should it look?). Add the others as the product reaches the complexity where they're needed. A 3-page app doesn't need a route tree doc; a 50-page app does.
+6. **Consistency across docs matters** — if the masterplan says the product has 3 user roles, the app-flow doc should show 3 role sections, the feature list should tag features by those roles, and the screen flows should organize screens by those roles. Cross-document consistency is what makes the system trustworthy.
 
 ### What to check during sync
 
-- **Completion status** — Are roadmap/batch tables current?
-- **Page names and routes** — Did any names drift from what's documented?
-- **New hooks/components** — Are newly created files listed?
-- **Feature status labels** — Are features marked DONE that were just shipped?
-- **Strategy sections** — Do they describe features as they were actually built?
-- **Design patterns** — Were new patterns introduced that should be documented?
-- **Threshold values** — Do dashboard gauges match operating-model.md thresholds?
-- **Route paths** — Do user journey descriptions use the actual route paths from the code?
+- **Completion status** — Are roadmap/batch tables in the masterplan and feature list current?
+- **Page names and routes** — Did any page names or URL paths drift from what's documented in the app flow?
+- **New components and modules** — Are newly created files, hooks, or components referenced where appropriate?
+- **Feature status labels** — Are features marked DONE that were just shipped? Are any still marked PLANNED that have been built?
+- **Strategy alignment** — Do strategy sections in the masterplan still describe features as they were actually built, or has the implementation diverged?
+- **Design patterns** — Were new patterns introduced that should be added to the design guidelines?
+- **Economic thresholds** — Do metrics, gauges, and alerts in the code match the thresholds defined in the operating model?
+- **User journeys** — Do journey descriptions use the actual route paths from the code, not outdated paths from an earlier version?
+- **Cross-document consistency** — Does a role/feature/page mentioned in one doc appear correctly in all the others?
 
 ### How to sync
 
-Use subagents to parallelize the review across multiple documents. For each doc, the agent reports what's stale and what it should say. Then make the edits, commit, and push.
+Use subagents to parallelize the review across multiple documents. For each doc, the agent reads the current file, compares it against the code changes from the completed phase, and reports what's stale and what it should say. Then make the edits, commit, and push.
 
 ---
 
