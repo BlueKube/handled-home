@@ -259,7 +259,7 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 - States: empty → placeholder `text-muted-foreground`; focused → `ring-2 ring-ring` + `bg-card`; filled → `text-foreground`; hover → `border-ring`; error → `border-destructive`; disabled → `opacity-50 bg-muted`; loading → not applicable
 - Use when: multi-line text (notes, descriptions, access instructions).
 
-### Select (`select.tsx`)
+### Select Dropdown (`select.tsx`)
 - Height: h-12 (48px), rounded-xl, chevron-down trailing icon 16px
 - States: default → `border-input`; hover → `border-ring`; focused/open → `ring-2 ring-ring`; active → dropdown `.animate-scale-in` 150ms; filled → selected value in `text-foreground`; disabled → `opacity-50`; error → `border-destructive`; loading → spinner replaces chevron
 - Use when: choosing from 4+ predefined options. Use radio for 2–3 options.
@@ -287,7 +287,7 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 - States: open → overlay + scale-in; closing → fade-out 150ms
 - Use when: confirmations, destructive action gates. Do not use for forms — use Sheet instead.
 
-### Sheet (`sheet.tsx`)
+### BottomSheet (`sheet.tsx`)
 - Slides from bottom, entry `.animate-slide-up` 250ms, overlay `bg-black/50`
 - Content: `bg-card` rounded-t-2xl p-4 pb-safe, max-height 85vh, drag-to-dismiss handle (40px × 4px rounded-full `bg-muted` centered)
 - States: open → slide-up + overlay; dragging → follows finger; dismissed → slide-down 200ms
@@ -315,7 +315,7 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 - States: determinate → width percent; indeterminate → shimmer animation
 - Use when: upload progress, onboarding completion, step indicators.
 
-### Skeleton (`skeleton.tsx`)
+### LoadingSkeleton (`skeleton.tsx`)
 - Base: `bg-muted` rounded-xl, `.animate-shimmer` gradient sweep 1.5s infinite
 - Variants: `line` (h-4 rounded), `circle` (rounded-full), `card` (rounded-2xl h-32)
 - States: loading → shimmer animation active; loaded → crossfade to real content 200ms; error → replaced by error state; disabled → static `bg-muted` no animation; hover → not applicable
