@@ -82,6 +82,62 @@ WCAG AA compliance required (4.5:1 body text, 3:1 large text 18px+).
 
 ---
 
+## Forms and Input Patterns
+
+### Field states
+
+| State | Border | Background | Label | Helper text |
+|-------|--------|-----------|-------|-------------|
+| **Empty** | `border-input` 1px | `bg-background` | `text-foreground` 14px/500 | `text-muted-foreground` 13px |
+| **Focused** | `ring-2 ring-ring` | `bg-card` | `text-foreground` | helper visible |
+| **Filled** | `border-input` 1px | `bg-background` | `text-foreground` | hidden unless error |
+| **Error** | `border-destructive` | `bg-background` | `text-destructive` | error message in `text-destructive`, `role="alert"` |
+| **Disabled** | `border-input opacity-50` | `bg-muted` | `text-muted-foreground` | `opacity-50` |
+| **Read-only** | `border-transparent` | `bg-muted` | `text-muted-foreground` | none |
+
+### Field anatomy
+
+Every form field follows: **label** (above, 14px/500, `htmlFor` required) → **input** (h-12 48px, rounded-xl, 16px font to prevent iOS zoom) → **helper text** (below, 13px `text-muted-foreground`) → **error message** (replaces helper, `text-destructive`).
+
+### Validation patterns
+
+- **Inline validation**: validate on blur for text fields; show error immediately below field with `border-destructive` ring
+- **On-submit validation**: scroll to first invalid field, focus it, show all errors simultaneously
+- **Required indicator**: red asterisk after label text — `text-destructive` `*`
+- **Helper text**: always visible in `text-muted-foreground` (e.g. "Min 8 characters"); replaced by error message on validation failure
+- **Constraint patterns**: use React Hook Form + Zod schemas; errors come from Zod, displayed via `FormMessage`
+
+### Form element types
+
+| Element | Component | Height | Notes |
+|---------|-----------|--------|-------|
+| Text input | `input.tsx` | 48px | `rounded-xl`, prefix/suffix icon slots |
+| Textarea | `textarea.tsx` | 80px min | auto-grows; same border treatment |
+| Select | `select.tsx` | 48px | chevron-down trailing; dropdown via `popover.tsx` |
+| Checkbox | `checkbox.tsx` | 20×20px | `rounded-md`, check icon on select |
+| Radio | `radio-group.tsx` | 20px circle | dot indicator, border-2 |
+| Toggle/Switch | `switch.tsx` | 24×44px track, 20px thumb | immediate effect, no form submit needed |
+| OTP input | `input-otp.tsx` | 48px per cell | 6-digit, auto-advance between cells |
+| Slider | `slider.tsx` | 8px track, 20px thumb | numeric range, `bg-primary` fill |
+| Date | native date picker | 48px | Capacitor-delegated to OS picker |
+| Search | `input.tsx` + `Search` icon | 48px | prefix Search icon 16px, clear button suffix |
+
+### Form layout rules
+
+- Field gap: `gap-5` (20px) vertical between fields in a form stack
+- Label position: always above input, margin-bottom 4px
+- Form group sections: `gap-6` (24px) between fieldsets; optional `text-h3` group heading
+- Submit button: full-width, `xl` size (52px), sticky at bottom with `pb-safe` on mobile
+
+### Multi-step forms
+
+- Step progress: `Progress` bar at top showing completion percentage
+- Step transitions: `.animate-fade-in` between steps (200ms ease-out)
+- Back navigation: `ChevronLeft` in header; step data persisted in React state
+- Onboarding flow uses 3–5 steps: property details → coverage map → plan recommendation → confirmation
+
+---
+
 ## Components
 
 ### Button (`button.tsx`)
