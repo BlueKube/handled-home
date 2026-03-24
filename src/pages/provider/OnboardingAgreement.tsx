@@ -72,7 +72,7 @@ export default function OnboardingAgreement() {
 
   if (!applicationId) {
     return (
-      <div className="p-4 max-w-lg mx-auto">
+      <div className="p-4">
         <p className="text-muted-foreground text-sm">
           No application found. Please{" "}
           <button
