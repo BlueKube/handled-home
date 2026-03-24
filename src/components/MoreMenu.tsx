@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useAuth, AppRole } from "@/contexts/AuthContext";
 import {
   MapPin, Wallet, Users, HelpCircle, Settings,
@@ -137,13 +139,21 @@ export default function MoreMenuPage() {
   const sections = sectionsByRole[effectiveRole] ?? customerSections;
   const { theme, setTheme } = useTheme();
 
+  const [signingOut, setSigningOut] = useState(false);
+
   const handleSignOut = async () => {
-    await signOut();
-    navigate("/auth");
+    setSigningOut(true);
+    try {
+      await signOut();
+      navigate("/auth");
+    } catch {
+      toast.error("Sign out failed. Please try again.");
+      setSigningOut(false);
+    }
   };
 
   return (
-    <div className="px-4 py-6 pb-24 max-w-lg mx-auto animate-fade-in space-y-5">
+    <div className="px-4 py-6 pb-24 mx-auto animate-fade-in space-y-5">
       <h1 className="text-h2">More</h1>
 
       {roles.length > 1 && (
@@ -201,7 +211,7 @@ export default function MoreMenuPage() {
               <button
                 className="flex items-center gap-3 w-full px-4 py-3.5 rounded-xl text-left text-destructive hover:bg-destructive/5 active:bg-destructive/10 transition-colors"
               >
-                <LogOut className="h-5 w-5" />
+                <LogOut className="h-5 w-5 flex-shrink-0" />
                 <span className="font-medium">Sign Out</span>
               </button>
             </AlertDialogTrigger>
@@ -218,9 +228,10 @@ export default function MoreMenuPage() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleSignOut}
+              disabled={signingOut}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Sign Out
+              {signingOut ? "Signing out…" : "Sign Out"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
