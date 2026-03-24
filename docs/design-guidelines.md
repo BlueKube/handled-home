@@ -409,6 +409,34 @@ Cross-reference `docs/screen-flows.md` for screen-level component usage and `doc
 - Slot anatomy: label text + optional required indicator (`text-destructive` asterisk)
 - Use when: above every form input. Always pair with `htmlFor` for accessibility.
 
+### Slider (`slider.tsx`)
+- Track: h-2 (8px) rounded-full `bg-muted`; fill `bg-primary`; thumb 20px circle `bg-primary-foreground` with shadow-md
+- States: default → thumb at position; hover → thumb scale(1.1) 100ms; active/dragging → thumb scale(1.2), `ring-4 ring-ring/20`; focus → `ring-2 ring-ring`; disabled → `opacity-50 pointer-events-none`; loading → track only, no thumb
+- Use when: numeric ranges (service frequency, budget slider).
+
+### RadioGroup (`radio-group.tsx`)
+- Size: 20px circle, `border-2 border-input`, inner dot 10px `bg-primary` when selected
+- States: unselected → empty circle `border-input`; selected → inner dot `bg-primary`; hover → `border-ring`; focus → `ring-2 ring-ring`; active → scale(0.95) 100ms; disabled → `opacity-50`; error → `border-destructive`
+- Use when: single selection from 2–3 visible options. Use Select for 4+.
+
+### Alert (`alert.tsx`)
+- Container: rounded-xl p-4, `border-l-4` left accent border
+- Variants: `default` (border-border), `destructive` (border-destructive bg-destructive/5), `warning` (border-warning bg-warning/5), `success` (border-success bg-success/5)
+- States: default → visible; hover → not applicable; active → not applicable; focus → `ring-2 ring-ring` when focusable; disabled → `opacity-50`; loading → replaced by skeleton; error → n/a
+- Slot anatomy: icon (leading, 20px) → AlertTitle (`.text-h3`) → AlertDescription (`.text-body text-muted-foreground`)
+- Use when: inline informational messages, validation summaries. Not for transient notifications (use Toast).
+
+### Accordion (`accordion.tsx`)
+- Trigger: h-12 (48px), full width, text left, `ChevronDown` icon right (16px), rotates 180° on open
+- Content: `py-3 px-0`, animate height 250ms `ease-out-expo`
+- States: collapsed → chevron pointing down; expanded → chevron rotated 180°; hover → `bg-muted/50`; focus → `ring-2 ring-ring`; active → press scale not used (too subtle); disabled → `opacity-50 pointer-events-none`; loading → content skeleton
+- Use when: FAQ sections, collapsible detail groups. Use Collapsible for single toggle.
+
+### Collapsible (`collapsible.tsx`)
+- Trigger: any interactive element; content animates height 200ms `ease-default`
+- States: collapsed → content hidden (height: 0); expanded → content visible; hover → trigger highlight; focus → `ring-2 ring-ring` on trigger; active → trigger press; disabled → `opacity-50`; loading → content skeleton
+- Use when: progressive disclosure (show more details). Use Accordion for multiple sections.
+
 ---
 
 ## Motion System
