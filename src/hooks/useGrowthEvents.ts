@@ -238,6 +238,7 @@ export function useByopFunnelStats(dateRange?: { start: string; end: string }) {
         underReview: rows.filter((r: any) => r.status === "under_review").length,
         accepted: rows.filter((r: any) => r.status === "accepted").length,
         notAFit: rows.filter((r: any) => r.status === "not_a_fit").length,
+        providerUnavailable: rows.filter((r: any) => r.status === "provider_unavailable").length,
       };
     },
   });

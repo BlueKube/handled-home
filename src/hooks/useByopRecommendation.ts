@@ -26,19 +26,23 @@ export interface ByopSubmitPayload {
   note?: string;
 }
 
-export function useByopRecommendations() {
+export function useByopRecommendations(options?: { admin?: boolean }) {
   const { user } = useAuth();
   const qc = useQueryClient();
+  const isAdmin = options?.admin ?? false;
 
   const recommendations = useQuery({
-    queryKey: ["byop-recommendations", user?.id],
+    queryKey: isAdmin ? ["byop-recommendations", "admin"] : ["byop-recommendations", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("byop_recommendations")
         .select("*")
-        .eq("customer_id", user!.id)
         .order("created_at", { ascending: false });
+      if (!isAdmin) {
+        query = query.eq("customer_id", user!.id);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data as ByopRecommendation[];
     },
@@ -72,9 +76,25 @@ export function useByopRecommendations() {
     },
   });
 
+  const declineRecommendation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("byop_recommendations")
+        .update({ status: "provider_unavailable", reviewed_at: new Date().toISOString() } as any)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["byop-recommendations"] });
+      qc.invalidateQueries({ queryKey: ["byop-funnel-stats"] });
+      toast.success("Recommendation marked as provider declined");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   const totalCredits = (recommendations.data ?? [])
     .filter((r) => r.status === "accepted")
     .length * 3000; // $30 per accepted recommendation, in cents
 
-  return { recommendations, submit, totalCredits };
+  return { recommendations, submit, declineRecommendation, totalCredits };
 }

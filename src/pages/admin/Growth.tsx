@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
-import { Activity, Shield, TrendingUp, AlertTriangle, Lock, RefreshCw, ChevronRight, Sliders, BarChart3, Inbox, Settings2, Rocket, UserPlus, Users, GitBranch } from "lucide-react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { Activity, Shield, TrendingUp, AlertTriangle, Lock, RefreshCw, ChevronRight, Sliders, BarChart3, Inbox, Settings2, Rocket, UserPlus, Users, GitBranch, UserX } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import { useMarketHealth, type HealthSnapshot } from "@/hooks/useMarketHealth";
 import { useAutopilotActions } from "@/hooks/useAutopilotActions";
 import { useGrowthSurfaceConfig } from "@/hooks/useGrowthSurfaceConfig";
 import { useGrowthEventStats, useByocFunnelStats, useReferralFunnelStats, useByopFunnelStats } from "@/hooks/useGrowthEvents";
+import { useByopRecommendations } from "@/hooks/useByopRecommendation";
 import { useZoneStateRecommendations } from "@/hooks/useZoneStateRecommendations";
 import { ZoneCategoryDetailPanel } from "@/components/admin/ZoneCategoryDetailPanel";
 import { RecommendationsInbox } from "@/components/admin/RecommendationsInbox";
@@ -532,7 +533,7 @@ function FunnelsTab() {
 
   const byocData = byoc.data ?? { invitesSent: 0, landingViews: 0, signups: 0, activated: 0 };
   const refData = referral.data ?? { codesShared: 0, landingViews: 0, signups: 0, subscribed: 0, firstVisit: 0 };
-  const byopData = byop.data ?? { submitted: 0, underReview: 0, accepted: 0, notAFit: 0 };
+  const byopData = byop.data ?? { submitted: 0, underReview: 0, accepted: 0, notAFit: 0, providerUnavailable: 0 };
 
   // K-factor: activations per invite sent
   const byocKFactor = byocData.invitesSent > 0 ? (byocData.activated / byocData.invitesSent) : 0;
@@ -616,9 +617,14 @@ function FunnelsTab() {
             { label: "Under Review", count: byopData.underReview },
             { label: "Accepted", count: byopData.accepted },
           ]} />
-          {byopData.notAFit > 0 && (
-            <p className="text-xs text-muted-foreground mt-2">{byopData.notAFit} marked as not a fit</p>
-          )}
+          <div className="flex flex-wrap gap-3 mt-2">
+            {byopData.notAFit > 0 && (
+              <p className="text-xs text-muted-foreground">{byopData.notAFit} marked as not a fit</p>
+            )}
+            {byopData.providerUnavailable > 0 && (
+              <p className="text-xs text-warning">{byopData.providerUnavailable} provider declined</p>
+            )}
+          </div>
         </CardContent>
       </Card>
 
@@ -646,7 +652,60 @@ function FunnelsTab() {
           </div>
         </CardContent>
       </Card>
+
+      {/* BYOP Admin Actions */}
+      <ByopAdminList />
     </div>
+  );
+}
+
+function ByopAdminList() {
+  const { recommendations, declineRecommendation } = useByopRecommendations({ admin: true });
+  const [decliningId, setDecliningId] = useState<string | null>(null);
+
+  const actionable = (recommendations.data ?? []).filter(
+    (r: any) => r.status === "under_review" || r.status === "accepted"
+  );
+
+  const handleDecline = useCallback((id: string) => {
+    setDecliningId(id);
+    declineRecommendation.mutate(id, {
+      onSettled: () => setDecliningId(null),
+    });
+  }, [declineRecommendation]);
+
+  if (actionable.length === 0) return null;
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base flex items-center gap-2">
+          <UserX className="h-4 w-4" />
+          BYOP Recommendations — Provider Actions
+        </CardTitle>
+        <p className="text-xs text-muted-foreground">Mark recommendations as provider declined when the provider is unavailable</p>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {actionable.map((rec: any) => (
+          <div key={rec.id} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+            <div>
+              <p className="text-sm font-medium">{rec.provider_name}</p>
+              <p className="text-xs text-muted-foreground capitalize">{rec.category?.replace(/_/g, " ")} · {rec.status.replace(/_/g, " ")}</p>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs text-warning border-warning/30 hover:bg-warning/10"
+              onClick={() => handleDecline(rec.id)}
+              disabled={decliningId === rec.id}
+            >
+              <UserX className="h-3 w-3 mr-1" />
+              Provider Declined
+            </Button>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
   );
 }
 

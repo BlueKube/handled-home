@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
+import { ByopDeclineNotification } from "@/components/customer/ByopDeclineNotification";
 import { useByopRecommendations, ByopStatus } from "@/hooks/useByopRecommendation";
 import { getCategoryLabel } from "@/lib/serviceCategories";
 import { formatCents } from "@/utils/format";
@@ -117,27 +118,11 @@ export default function RecommendProviderStatus() {
                     )}
 
                     {rec.status === "provider_unavailable" && (
-                      <div className="pt-2 space-y-3">
-                        <div className="flex items-start gap-2 rounded-lg bg-warning/10 border border-warning/20 p-3">
-                          <UserX className="h-4 w-4 text-warning shrink-0 mt-0.5" />
-                          <div>
-                            <p className="text-sm font-medium">
-                              {rec.provider_name} is no longer available
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              We're assigning a qualified replacement provider from our network.
-                              Your service will continue uninterrupted, and your current pricing
-                              is preserved for the next billing cycle.
-                            </p>
-                          </div>
-                        </div>
-                        <Button
-                          variant="outline"
-                          className="min-h-[44px]"
-                          onClick={() => navigate("/customer/routine")}
-                        >
-                          View My Routine
-                        </Button>
+                      <div className="pt-2">
+                        <ByopDeclineNotification
+                          providerName={rec.provider_name}
+                          recommendationId={rec.id}
+                        />
                       </div>
                     )}
                   </CardContent>
