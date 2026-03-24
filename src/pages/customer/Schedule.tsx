@@ -30,6 +30,7 @@ import {
   Timer,
 } from "lucide-react";
 import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
+import { HelpTip } from "@/components/ui/help-tip";
 
 function formatVisitDate(dateStr: string): string {
   const date = parseISO(dateStr);
@@ -347,7 +348,7 @@ export default function Schedule() {
   return (
     <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4 animate-fade-in">
       {/* Header */}
-      <h1 className="text-h2">Schedule</h1>
+      <h1 className="text-h2">Schedule <HelpTip text="Your schedule shows upcoming and past visits. Tap any visit for details, photos, and checklists." /></h1>
 
       {/* Mini Calendar */}
       <MiniCalendar serviceDates={serviceDates} onSelectDate={handleCalendarSelect} />

@@ -6,10 +6,11 @@ import { useInviteScripts } from "@/hooks/useInviteScripts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/StatusBadge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Copy, Link2, Users, Gift, ChevronDown, CheckCircle, XCircle, AlertTriangle, Info, ChevronRight } from "lucide-react";
+import { Plus, Copy, Link2, Users, Gift, ChevronDown, ChevronLeft, AlertTriangle, Info } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -43,7 +44,12 @@ export default function ByocCenter() {
   // Gate: must be approved provider org
   if (!org || (org.status !== "ACTIVE" && org.status !== "PROBATION")) {
     return (
-      <div className="animate-fade-in p-4 pb-24 text-center mt-12">
+      <div className="animate-fade-in p-4 pb-24">
+        <button onClick={() => navigate("/provider/more")} className="flex items-center gap-1 text-muted-foreground mb-2 hover:text-foreground transition-colors" aria-label="Back to More menu">
+          <ChevronLeft className="h-4 w-4" />
+          <span className="text-sm">More</span>
+        </button>
+        <div className="text-center mt-8">
         <Gift className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
         <h1 className="text-h2 mb-2">BYOC Center</h1>
         <p className="text-caption">
@@ -56,6 +62,7 @@ export default function ByocCenter() {
         >
           Back to Dashboard
         </Button>
+        </div>
       </div>
     );
   }
@@ -70,6 +77,10 @@ export default function ByocCenter() {
 
   return (
     <div className="animate-fade-in p-4 pb-24 space-y-4">
+      <button onClick={() => navigate("/provider/more")} className="flex items-center gap-1 text-muted-foreground mb-2 hover:text-foreground transition-colors" aria-label="Back to More menu">
+        <ChevronLeft className="h-4 w-4" />
+        <span className="text-sm">More</span>
+      </button>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-h2">BYOC Center</h1>
@@ -277,14 +288,10 @@ function InviteLinkCard({
     <div className={`border rounded-lg p-3 space-y-2 ${inactive ? "opacity-60" : ""}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Badge variant={inactive ? "secondary" : "default"} className="text-xs">
+          <Badge variant={inactive ? "secondary" : "default"} className="text-xs capitalize">
             {link.category_key.replace(/_/g, " ")}
           </Badge>
-          {inactive ? (
-            <XCircle className="h-3 w-3 text-muted-foreground" />
-          ) : (
-            <CheckCircle className="h-3 w-3 text-success" />
-          )}
+          <StatusBadge status={inactive ? "inactive" : "active"} />
         </div>
         <span className="text-xs text-muted-foreground font-mono">{link.token}</span>
       </div>

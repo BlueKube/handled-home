@@ -7,7 +7,8 @@ import { PreviewAsCard } from "@/components/settings/PreviewAsCard";
 import { NotificationPreferences } from "@/components/settings/NotificationPreferences";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LogOut, Mail } from "lucide-react";
+import { LogOut, Mail, ChevronLeft } from "lucide-react";
+import { HelpTip } from "@/components/ui/help-tip";
 
 export default function CustomerSettings() {
   const { user, profile, signOut } = useAuth();
@@ -26,8 +27,12 @@ export default function CustomerSettings() {
   };
 
   return (
-    <div className="px-4 py-6 pb-24 space-y-6 max-w-lg mx-auto animate-fade-in">
-      <h1 className="text-h2">Account Settings</h1>
+    <div className="px-4 py-6 pb-24 space-y-6 animate-fade-in">
+      <button onClick={() => navigate("/customer/more")} className="flex items-center gap-1 text-muted-foreground mb-2 hover:text-foreground transition-colors" aria-label="Back to More menu">
+        <ChevronLeft className="h-4 w-4" />
+        <span className="text-sm">More</span>
+      </button>
+      <h1 className="text-h2">Account Settings <HelpTip text="Update your profile, notification preferences, and security settings here." /></h1>
 
       {/* Avatar + email */}
       <div className="flex items-center gap-4">

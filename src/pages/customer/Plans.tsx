@@ -1,4 +1,5 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { ChevronLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlans } from "@/hooks/usePlans";
@@ -9,6 +10,7 @@ import { BundleSavingsCard } from "@/components/plans/BundleSavingsCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
+import { HelpTip } from "@/components/ui/help-tip";
 
 /**
  * Fallback tier highlights (used when plan_handles has no DB rows yet).
@@ -101,9 +103,13 @@ export default function CustomerPlans() {
   };
 
   return (
-    <div className="p-4 pb-24 space-y-6 animate-fade-in max-w-lg mx-auto">
+    <div className="p-4 pb-24 space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-h2">Pick your membership</h1>
+        <button onClick={() => navigate("/customer/more")} className="flex items-center gap-1 text-muted-foreground mb-2 hover:text-foreground transition-colors" aria-label="Back to More menu">
+          <ChevronLeft className="h-4 w-4" />
+          <span className="text-sm">More</span>
+        </button>
+        <h1 className="text-h2">Pick your membership <HelpTip text="Plans set how many handles you get each cycle. Higher tiers include more services and priority scheduling." /></h1>
         <p className="text-muted-foreground mt-1">
           One simple plan — we handle the rest.
         </p>

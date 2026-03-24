@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Users, DollarSign, MapPin, TrendingUp, Gauge, Briefcase,
   AlertTriangle, ChevronRight, Building2, CreditCard,
-  ShieldAlert, Clock, Sparkles, CheckCircle, Package,
+  ShieldAlert, Clock, Sparkles, CheckCircle, Package, BarChart3,
 } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { SparklineChart } from "@/components/SparklineChart";
@@ -13,6 +13,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
+import { HelpTip } from "@/components/ui/help-tip";
 
 function formatCents(cents: number) {
   return "$" + (cents / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -63,7 +65,7 @@ export default function AdminDashboard() {
   return (
     <div className="p-6 space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-h2">Admin Console</h1>
+        <h1 className="text-h2">Admin Console <HelpTip text="Admin dashboard shows key metrics across all zones. Data updates in real-time as customers and providers interact." /></h1>
         <p className="text-sm text-muted-foreground">Operations overview</p>
       </div>
 
@@ -72,6 +74,14 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
         </div>
+      ) : counts && !counts.customers && !counts.activeProviders && !counts.activeSubs ? (
+        <EmptyState
+          icon={BarChart3}
+          title="No data yet"
+          body="Metrics will populate as customers and providers onboard."
+          ctaLabel="View Providers"
+          ctaAction={() => nav("/admin/providers")}
+        />
       ) : (
         <>
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">

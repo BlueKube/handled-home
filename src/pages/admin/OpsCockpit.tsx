@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useOpsMetrics } from "@/hooks/useOpsMetrics";
+import { useOperationalMetrics } from "@/hooks/useOperationalMetrics";
 import { useAutopilotHealth } from "@/hooks/useAutopilotHealth";
 import { AutopilotBanner } from "@/components/admin/AutopilotBanner";
 import { ZoneHealthTable } from "@/components/admin/ZoneHealthTable";
@@ -13,12 +14,13 @@ import { Badge } from "@/components/ui/badge";
 import { SparklineChart } from "@/components/SparklineChart";
 import {
   AlertTriangle, Camera, Clock, ShieldAlert,
-  DollarSign, CreditCard, Pause, Gift,
+  DollarSign, CreditCard, Pause, Gift, Calendar,
   Bug, RotateCcw, Timer, UserX,
   Globe, Users, Briefcase, TrendingUp, SlidersHorizontal,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
+import { HelpTip } from "@/components/ui/help-tip";
 
 function formatCents(cents: number) {
   return "$" + (cents / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -148,7 +150,7 @@ export default function OpsCockpit() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-h2 mb-0.5">Ops Cockpit</h1>
+          <h1 className="text-h2 mb-0.5">Ops Cockpit <HelpTip text="The Ops Cockpit surfaces the metrics that need attention right now. Red = act today, yellow = watch this week." /></h1>
           <p className="text-caption">{updatedLabel}</p>
         </div>
         <div className="flex items-center gap-2">
@@ -197,6 +199,7 @@ export default function OpsCockpit() {
               emptyLabel="No zones near capacity"
               href="/admin/ops/zones"
             />
+            <MetricGauge metricKey="providerUtilization" />
           </div>
         </div>
 
@@ -233,6 +236,8 @@ export default function OpsCockpit() {
               value={formatCents(m.addOnRevenue7dCents)}
               href="/admin/ops/billing"
             />
+            <PayoutReviewCard />
+            <MetricGauge metricKey="grossMargin" />
           </div>
         </div>
 
@@ -323,5 +328,98 @@ export default function OpsCockpit() {
         <RecentActionsCard />
       </div>
     </div>
+  );
+}
+
+function PayoutReviewCard() {
+  const nav = useNavigate();
+  // TODO: Store last_payout_review_date in admin_settings table
+  const lastReviewDate: Date | null = null; // Mock: no review yet
+  const daysSinceReview = lastReviewDate
+    ? Math.floor((Date.now() - lastReviewDate.getTime()) / (1000 * 60 * 60 * 24))
+    : Infinity;
+  const status = daysSinceReview < 60 ? "healthy" : daysSinceReview < 90 ? "warning" : "overdue";
+  const nextReviewDate = lastReviewDate
+    ? new Date(lastReviewDate.getTime() + 90 * 24 * 60 * 60 * 1000)
+    : null;
+
+  const statusColor = status === "healthy" ? "text-success" : status === "warning" ? "text-warning" : "text-destructive";
+  const dotColor = status === "healthy" ? "bg-success" : status === "warning" ? "bg-warning" : "bg-destructive";
+
+  return (
+    <Card
+      variant="interactive"
+      className={cn("p-3 cursor-pointer hover:shadow-md transition-shadow", status === "overdue" && "border-destructive/40 bg-destructive/5")}
+      onClick={() => nav("/admin/payouts")}
+    >
+      <div className="flex items-start gap-2.5">
+        <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg shrink-0", status === "overdue" ? "bg-destructive/10" : "bg-accent/10")}>
+          <Calendar className={cn("h-4 w-4", status === "overdue" ? "text-destructive" : "text-accent")} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className={cn("h-2 w-2 rounded-full shrink-0", dotColor)} />
+            <p className="text-xs font-medium truncate">Payout Review</p>
+          </div>
+          <p className={cn("text-xs mt-0.5", statusColor)}>
+            {lastReviewDate
+              ? `Last reviewed: ${formatDistanceToNow(lastReviewDate, { addSuffix: true })}`
+              : "Never reviewed"}
+          </p>
+          <p className="text-[10px] text-muted-foreground mt-0.5">
+            {nextReviewDate
+              ? `Next due: ${nextReviewDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+              : "Review recommended"}
+          </p>
+          <p className="text-[10px] text-accent mt-1">Go to Payouts →</p>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+const METRIC_CONFIG = {
+  grossMargin: { label: "Gross Margin", icon: DollarSign, suffix: "%" },
+  providerUtilization: { label: "Provider Utilization", icon: Users, suffix: "%" },
+} as const;
+
+function MetricGauge({ metricKey }: { metricKey: "grossMargin" | "providerUtilization" }) {
+  const metrics = useOperationalMetrics();
+  const metric = metrics[metricKey];
+  const config = METRIC_CONFIG[metricKey];
+  const Icon = config.icon;
+
+  if (metrics.isLoading) return <Skeleton className="h-20 rounded-lg" />;
+
+  const bgColor = metric.status === "healthy" ? "bg-success" : metric.status === "warning" ? "bg-warning" : "bg-destructive";
+  const textColor = metric.status === "healthy" ? "text-success" : metric.status === "warning" ? "text-warning" : "text-destructive";
+
+  return (
+    <Card className="p-3">
+      <div className="flex items-start gap-2.5">
+        <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg shrink-0", metric.status === "critical" ? "bg-destructive/10" : "bg-accent/10")}>
+          <Icon className={cn("h-4 w-4", metric.status === "critical" ? "text-destructive" : "text-accent")} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className={cn("h-2 w-2 rounded-full shrink-0", bgColor)} />
+            <p className="text-xs font-medium truncate">{config.label}</p>
+          </div>
+          <p className={cn("text-lg font-bold", textColor)}>{metric.value}{config.suffix}</p>
+          <p className="text-[10px] text-muted-foreground">Target: ≥{metric.target}{config.suffix}</p>
+          {/* Progress bar */}
+          <div className="relative h-1.5 bg-muted rounded-full overflow-hidden mt-1.5">
+            <div
+              className={cn("h-full rounded-full", bgColor)}
+              style={{ width: `${Math.min(metric.value, 100)}%` }}
+            />
+            <div
+              className="absolute top-0 h-full w-0.5 bg-foreground/50"
+              style={{ left: `${metric.target}%` }}
+            />
+          </div>
+        </div>
+      </div>
+    </Card>
   );
 }

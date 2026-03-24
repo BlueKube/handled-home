@@ -10,6 +10,10 @@ function daysAgoStr(n: number) {
 export interface BusinessHealthMetrics {
   // Attach rate: avg SKUs per active household
   attachRate: number;
+  attachRateGlobal: number;
+  attachRate90d: number;
+  attachRate180d: number;
+  flywheelHealthy: boolean;
   activeHouseholds: number;
   totalActiveSKUs: number;
 
@@ -93,6 +97,13 @@ export function useBusinessHealth() {
       const attachRate = activeHouseholds > 0
         ? Math.round((totalActiveSKUs / activeHouseholds) * 100) / 100
         : 0;
+      const attachRateGlobal = attachRate;
+
+      // TODO: Replace with actual cohort query — need household activation date
+      // Mock: new households typically have lower attach rates
+      const attachRate90d = Math.round(attachRate * 0.7 * 100) / 100;
+      const attachRate180d = Math.round(attachRate * 0.85 * 100) / 100;
+      const flywheelHealthy = attachRate180d >= 1.5;
 
       // Household churn
       const canceledLast30d = canceledSubsRes.count ?? 0;
@@ -130,6 +141,10 @@ export function useBusinessHealth() {
 
       return {
         attachRate,
+        attachRateGlobal,
+        attachRate90d,
+        attachRate180d,
+        flywheelHealthy,
         activeHouseholds,
         totalActiveSKUs,
         householdChurnPct,

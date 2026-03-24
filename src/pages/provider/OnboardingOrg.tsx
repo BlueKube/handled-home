@@ -160,6 +160,14 @@ export default function OnboardingOrg() {
         Continue
         <ArrowRight className="h-4 w-4 ml-2" />
       </Button>
+      <Button
+        variant="ghost"
+        className="w-full text-muted-foreground mt-2"
+        disabled={!name.trim() || !accountable || !effectiveOrgId}
+        onClick={() => navigate("/provider/onboarding/coverage", { state: { orgId: effectiveOrgId, allowedZoneIds } })}
+      >
+        Skip for now
+      </Button>
     </div>
   );
 }

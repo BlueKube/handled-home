@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useAuth, AppRole } from "@/contexts/AuthContext";
 import {
   MapPin, Wallet, Users, HelpCircle, Settings,
@@ -11,6 +13,17 @@ import { useTheme } from "next-themes";
 import { Switch } from "@/components/ui/switch";
 import { RoleSwitcher } from "@/components/settings/RoleSwitcher";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface MenuItem {
   label: string;
@@ -126,13 +139,21 @@ export default function MoreMenuPage() {
   const sections = sectionsByRole[effectiveRole] ?? customerSections;
   const { theme, setTheme } = useTheme();
 
+  const [signingOut, setSigningOut] = useState(false);
+
   const handleSignOut = async () => {
-    await signOut();
-    navigate("/auth");
+    setSigningOut(true);
+    try {
+      await signOut();
+      navigate("/auth");
+    } catch {
+      toast.error("Sign out failed. Please try again.");
+      setSigningOut(false);
+    }
   };
 
   return (
-    <div className="px-4 py-6 pb-24 max-w-lg mx-auto animate-fade-in space-y-5">
+    <div className="px-4 py-6 pb-24 mx-auto animate-fade-in space-y-5">
       <h1 className="text-h2">More</h1>
 
       {roles.length > 1 && (
@@ -183,17 +204,38 @@ export default function MoreMenuPage() {
         </Card>
       </div>
 
-      <Card className="border-destructive/20">
-        <CardContent className="p-0">
-          <button
-            onClick={handleSignOut}
-            className="flex items-center gap-3 w-full px-4 py-3.5 rounded-xl text-left text-destructive hover:bg-destructive/5 active:bg-destructive/10 transition-colors"
-          >
-            <LogOut className="h-5 w-5" />
-            <span className="font-medium">Sign Out</span>
-          </button>
-        </CardContent>
-      </Card>
+      <AlertDialog>
+        <Card className="border-destructive/20">
+          <CardContent className="p-0">
+            <AlertDialogTrigger asChild>
+              <button
+                className="flex items-center gap-3 w-full px-4 py-3.5 rounded-xl text-left text-destructive hover:bg-destructive/5 active:bg-destructive/10 transition-colors"
+              >
+                <LogOut className="h-5 w-5 flex-shrink-0" />
+                <span className="font-medium">Sign Out</span>
+              </button>
+            </AlertDialogTrigger>
+          </CardContent>
+        </Card>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sign out?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You'll need to sign in again to access your account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleSignOut}
+              disabled={signingOut}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {signingOut ? "Signing out…" : "Sign Out"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

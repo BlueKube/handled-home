@@ -21,6 +21,7 @@ import { ReceiptSuggestions } from "@/components/customer/ReceiptSuggestions";
 import { QuickFeedbackCard } from "@/components/customer/QuickFeedbackCard";
 import { PrivateReviewCard } from "@/components/customer/PrivateReviewCard";
 import { ArrowLeft, Clock, CheckCircle2, XCircle, AlertTriangle, Share2, ArrowUpCircle, Lightbulb, Users, Copy } from "lucide-react";
+import { HelpTip } from "@/components/ui/help-tip";
 import { format } from "date-fns";
 
 export default function CustomerVisitDetail() {
@@ -129,7 +130,7 @@ export default function CustomerVisitDetail() {
         <div className="flex items-center gap-2">
           <StatusBadge status={jobStatusForBadge} />
         </div>
-        <h1 className="text-h2">{skuSummary}</h1>
+        <h1 className="text-h2">{skuSummary} <HelpTip text="This is your visit receipt — it includes photos, checklists, and provider notes for this service." /></h1>
         <p className="text-sm text-muted-foreground">{visitDate}</p>
       </div>
 

@@ -21,6 +21,7 @@ export default function CustomerSupportNew() {
   const [note, setNote] = useState("");
   const [createdTicketId, setCreatedTicketId] = useState<string | null>(null);
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const createTicket = useCreateTicket();
@@ -49,7 +50,15 @@ export default function CustomerSupportNew() {
   };
 
   const handleSubmit = async () => {
-    if (!category || !note.trim()) return;
+    if (!category) return;
+    const newErrors: Record<string, string> = {};
+    if (note.trim().length < 10) {
+      newErrors.description = "Description must be at least 10 characters";
+    }
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
 
     try {
       const ticket = await createTicket.mutateAsync({
@@ -142,14 +151,24 @@ export default function CustomerSupportNew() {
 
           <Textarea
             value={note}
-            onChange={(e) => setNote(e.target.value.slice(0, 500))}
+            onChange={(e) => {
+              const capped = e.target.value.slice(0, 500);
+              setNote(capped);
+              if (capped.trim().length >= 10) {
+                setErrors((prev) => ({ ...prev, description: "" }));
+              }
+            }}
             placeholder="Describe what happened…"
             rows={4}
             autoFocus
+            aria-describedby={errors.description ? "description-error" : undefined}
           />
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">{note.length}/500</span>
           </div>
+          {errors.description && (
+            <p id="description-error" className="text-sm text-destructive mt-1" role="alert">{errors.description}</p>
+          )}
 
           {/* P3: Photo upload */}
           <div className="space-y-2">
@@ -200,7 +219,7 @@ export default function CustomerSupportNew() {
 
           <Button
             className="w-full"
-            disabled={!note.trim() || createTicket.isPending}
+            disabled={createTicket.isPending}
             onClick={handleSubmit}
           >
             {createTicket.isPending ? "Submitting…" : "Submit"}

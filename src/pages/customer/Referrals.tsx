@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Copy, Check, Users, Gift, Clock, ChevronRight, Target, Star, Trophy } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Copy, Check, Users, Gift, Clock, ChevronRight, ChevronLeft, Target, Star, Trophy, AlertTriangle } from "lucide-react";
 import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +11,7 @@ import { useReferrals } from "@/hooks/useReferrals";
 import { useReferralRewards } from "@/hooks/useReferralRewards";
 import { useReferralPrograms } from "@/hooks/useReferralPrograms";
 import { Skeleton } from "@/components/ui/skeleton";
+import { HelpTip } from "@/components/ui/help-tip";
 
 const MILESTONE_LABELS: Record<string, string> = {
   installed: "Signed up",
@@ -19,8 +21,9 @@ const MILESTONE_LABELS: Record<string, string> = {
 };
 
 export default function CustomerReferrals() {
+  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
-  const { codes, generateCode } = useReferralCodes();
+  const { codes, generateCode, isRateLimited, rateLimitMessage } = useReferralCodes();
   const { programs } = useReferralPrograms();
   const referrals = useReferrals("own");
   const rewards = useReferralRewards();
@@ -50,8 +53,12 @@ export default function CustomerReferrals() {
   }
 
   return (
-    <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-6 animate-fade-in">
-      <h1 className="text-h2">Referrals</h1>
+    <div className="px-4 py-6 pb-24 space-y-6 animate-fade-in">
+      <button onClick={() => navigate("/customer/more")} className="flex items-center gap-1 text-muted-foreground mb-2 hover:text-foreground transition-colors" aria-label="Back to More menu">
+        <ChevronLeft className="h-4 w-4" />
+        <span className="text-sm">More</span>
+      </button>
+      <h1 className="text-h2">Referrals <HelpTip text="Share your code with neighbors. When they subscribe, you both earn a $30 credit toward your next cycle." /></h1>
 
       {/* Share Section */}
       <Card>
@@ -64,6 +71,12 @@ export default function CustomerReferrals() {
           {activeProgram ? (
             <>
               <p className="text-sm text-muted-foreground">{activeProgram.description || "Invite friends and earn credits when they subscribe."}</p>
+              {isRateLimited && (
+                <div className="flex items-center gap-2 rounded-lg bg-warning/10 border border-warning/30 px-3 py-2">
+                  <AlertTriangle className="h-4 w-4 text-warning shrink-0" />
+                  <p className="text-sm text-warning">{rateLimitMessage}</p>
+                </div>
+              )}
               {myCode ? (
                 <div className="flex items-center gap-2">
                   <code className="flex-1 bg-muted px-3 py-2 rounded-lg text-sm font-mono">{myCode.code}</code>
@@ -72,7 +85,7 @@ export default function CustomerReferrals() {
                   </Button>
                 </div>
               ) : (
-                <Button onClick={handleGenerateCode} disabled={generateCode.isPending} size="sm">
+                <Button onClick={handleGenerateCode} disabled={generateCode.isPending || isRateLimited} size="sm">
                   Generate Code
                 </Button>
               )}
@@ -193,7 +206,7 @@ export default function CustomerReferrals() {
             body="Share your code with friends and earn rewards when they subscribe."
             ctaLabel={myCode ? "Copy your referral link" : "Generate referral code"}
             ctaAction={myCode ? handleCopyLink : handleGenerateCode}
-            ctaDisabled={!myCode && generateCode.isPending}
+            ctaDisabled={(!myCode && generateCode.isPending) || (!myCode && isRateLimited)}
           />
         )}
       </div>

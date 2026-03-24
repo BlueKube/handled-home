@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, MapPin, AlertTriangle, CheckCircle2, X, Bell, ChevronRight, Map, Ruler, Info } from "lucide-react";
+import { Loader2, MapPin, AlertTriangle, CheckCircle2, X, Bell, ChevronRight, ChevronLeft, Map, Ruler, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Dialog,
@@ -21,6 +21,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { HelpTip } from "@/components/ui/help-tip";
 
 interface FieldErrors {
   street_address?: string;
@@ -212,7 +213,11 @@ export default function CustomerProperty() {
     <div className="animate-fade-in pb-24">
       {/* Header */}
       <div className="px-4 pt-2 pb-4">
-        <h1 className="text-h2 text-foreground">Your Home</h1>
+        <button onClick={() => navigate("/customer/more")} className="flex items-center gap-1 text-muted-foreground mb-2 hover:text-foreground transition-colors" aria-label="Back to More menu">
+          <ChevronLeft className="h-4 w-4" />
+          <span className="text-sm">More</span>
+        </button>
+        <h1 className="text-h2 text-foreground">Your Home <HelpTip text="Your property details help providers prepare for visits — accurate info means better service." /></h1>
         <p className="text-caption mt-1">A few details so we can serve you smoothly.</p>
       </div>
 

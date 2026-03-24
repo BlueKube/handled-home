@@ -3,11 +3,14 @@ import { useAdminSubscriptions } from "@/hooks/useAdminSubscriptions";
 import { useAdminBilling } from "@/hooks/useAdminBilling";
 import { useOpsMetrics } from "@/hooks/useOpsMetrics";
 import { useZones } from "@/hooks/useZones";
+import { useLossLeaderMetrics } from "@/hooks/useLossLeaderMetrics";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { DollarSign, TrendingDown, TrendingUp, Users } from "lucide-react";
+import { DollarSign, TrendingDown, TrendingUp, Users, AlertTriangle } from "lucide-react";
+import { HelpTip } from "@/components/ui/help-tip";
 
 function fmt(cents: number) {
   return `$${(cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
@@ -88,7 +91,7 @@ export default function AdminReports() {
   return (
     <div className="p-6 space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-h2">Reporting & Analytics</h1>
+        <h1 className="text-h2">Reporting & Analytics <HelpTip text="Reports provide historical views of revenue, subscriptions, operations, and zone performance." /></h1>
         <p className="text-caption">Revenue, retention, and operational performance</p>
       </div>
 
@@ -134,6 +137,7 @@ export default function AdminReports() {
           <TabsTrigger value="subs">Subscriptions</TabsTrigger>
           <TabsTrigger value="ops">Operations</TabsTrigger>
           <TabsTrigger value="zones">By Zone</TabsTrigger>
+          <TabsTrigger value="loss-leaders">Loss Leaders</TabsTrigger>
         </TabsList>
 
         <TabsContent value="revenue">
@@ -232,7 +236,111 @@ export default function AdminReports() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="loss-leaders">
+          <LossLeadersTab />
+        </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function LossLeadersTab() {
+  const { data, isLoading } = useLossLeaderMetrics();
+
+  if (isLoading) return <div className="space-y-4 mt-4"><Skeleton className="h-48" /><Skeleton className="h-32" /><Skeleton className="h-24" /></div>;
+  if (!data) return null;
+
+  return (
+    <div className="space-y-4 mt-4">
+      {/* Per-plan profitability */}
+      <Card>
+        <CardHeader><CardTitle>Per-Plan Profitability</CardTitle></CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b text-muted-foreground text-xs">
+                  <th className="text-left py-2 font-medium">Plan</th>
+                  <th className="text-left py-2 font-medium">Tier</th>
+                  <th className="text-right py-2 font-medium">Subs</th>
+                  <th className="text-right py-2 font-medium">Revenue</th>
+                  <th className="text-right py-2 font-medium">Est. Cost</th>
+                  <th className="text-right py-2 font-medium">Margin</th>
+                  <th className="text-right py-2 font-medium">Margin %</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.planProfitability.map((p) => (
+                  <tr key={p.planId} className={`border-b last:border-0 ${p.margin < 0 ? "bg-destructive/5" : ""}`}>
+                    <td className={`py-2 font-medium ${p.margin < 0 ? "text-destructive" : ""}`}>{p.planName}</td>
+                    <td className="py-2 capitalize text-muted-foreground">{p.tier}</td>
+                    <td className="py-2 text-right">{p.subscriberCount}</td>
+                    <td className="py-2 text-right">${(p.revenue / 100).toFixed(2)}</td>
+                    <td className="py-2 text-right">${(p.estimatedCost / 100).toFixed(2)}</td>
+                    <td className={`py-2 text-right font-medium ${p.margin < 0 ? "text-destructive" : "text-success"}`}>
+                      ${(p.margin / 100).toFixed(2)}
+                    </td>
+                    <td className={`py-2 text-right ${p.marginPercent < 0 ? "text-destructive" : ""}`}>
+                      {p.marginPercent.toFixed(1)}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Cohort attach rates */}
+      <Card>
+        <CardHeader><CardTitle>Cohort Attach Rates</CardTitle></CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {data.cohortAttachRates.map((c) => {
+              const belowTarget = c.attachRate < c.target;
+              return (
+                <div
+                  key={c.cohortLabel}
+                  className={`rounded-xl border p-3 ${belowTarget ? "border-warning/30 bg-warning/5" : "border-border"}`}
+                >
+                  <p className="text-xs font-medium text-muted-foreground">{c.cohortLabel}</p>
+                  <p className={`text-xl font-bold mt-1 ${belowTarget ? "text-warning" : "text-foreground"}`}>
+                    {c.attachRate.toFixed(1)}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">Target: {c.target.toFixed(1)} · {c.householdCount} hh</p>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Exit criteria alerts */}
+      {data.exitAlerts.length > 0 && (
+        <Card className="border-destructive/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-destructive" />
+              Exit Criteria Alerts
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {data.exitAlerts.map((alert, i) => (
+              <div key={i} className="flex items-start gap-3 rounded-lg bg-destructive/5 border border-destructive/20 p-3">
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-destructive">{alert.planName} — {alert.cohortLabel}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Attach rate: {alert.attachRate.toFixed(1)} SKUs/hh (target: {alert.threshold.toFixed(1)})
+                  </p>
+                  <p className="text-xs text-muted-foreground">{alert.action}</p>
+                </div>
+                <Badge variant="outline" className="text-destructive border-destructive/30 shrink-0">Action Required</Badge>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

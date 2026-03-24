@@ -16,6 +16,7 @@ import {
   Camera,
 } from "lucide-react";
 import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
+import { HelpTip } from "@/components/ui/help-tip";
 import { format, differenceInMonths, parseISO } from "date-fns";
 
 function StatPill({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string | number }) {
@@ -112,12 +113,15 @@ export default function Activity() {
           <div className="flex items-center gap-3">
             <TrendingUp className="h-5 w-5 text-accent shrink-0" />
             <div>
-              <p className="text-sm font-semibold">
-                Your home has received {stats.totalServices} professional service{stats.totalServices !== 1 ? "s" : ""}
-                {subscription?.created_at && (
-                  <> since {format(new Date(subscription.created_at), "MMMM yyyy")}</>
-                )}
-              </p>
+              <div className="flex items-center gap-1">
+                <p className="text-sm font-semibold">
+                  Your home has received {stats.totalServices} professional service{stats.totalServices !== 1 ? "s" : ""}
+                  {subscription?.created_at && (
+                    <> since {format(new Date(subscription.created_at), "MMMM yyyy")}</>
+                  )}
+                </p>
+                <HelpTip text="Every visit includes a photo receipt and checklist verification — this is the cumulative value your membership has delivered." />
+              </div>
               <Badge variant="outline" className="mt-1.5 text-[10px] border-primary/20 text-primary bg-primary/5">
                 Insured providers · Proof on every visit
               </Badge>

@@ -2,6 +2,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+export const FRAUD_FLAG_CATEGORIES = [
+  "velocity_cap",
+  "suspicious_ip",
+  "same_household",
+  "self_referral",
+  "rapid_redemption",
+] as const;
+
+export type FraudFlagCategory = typeof FRAUD_FLAG_CATEGORIES[number];
+
 export function useReferralAdmin() {
   const qc = useQueryClient();
 
@@ -82,10 +92,10 @@ export function useReferralAdmin() {
   });
 
   const reviewFlag = useMutation({
-    mutationFn: async ({ flagId, action, note }: { flagId: string; action: "reviewed" | "dismissed"; note?: string }) => {
+    mutationFn: async ({ flagId, action, note, category }: { flagId: string; action: "reviewed" | "dismissed"; note?: string; category?: FraudFlagCategory }) => {
       const { error } = await supabase
         .from("referral_risk_flags")
-        .update({ status: action, reviewed_by_admin_user_id: (await supabase.auth.getUser()).data.user?.id, reviewed_at: new Date().toISOString(), review_note: note } as any)
+        .update({ status: action, reviewed_by_admin_user_id: (await supabase.auth.getUser()).data.user?.id, reviewed_at: new Date().toISOString(), review_note: note, ...(category ? { flag_type: category } : {}) } as any)
         .eq("id", flagId);
       if (error) throw error;
     },

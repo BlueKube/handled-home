@@ -167,6 +167,29 @@ export function BusinessHealthCard() {
         </div>
       </div>
 
+      {/* Cohort attach rates */}
+      <div className="space-y-2 pt-2 border-t border-border">
+        <p className="text-xs font-medium text-muted-foreground">Cohort Attach Rates</p>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <p className="text-sm font-bold">{health.attachRate90d} SKUs/hh</p>
+            <p className="text-[10px] text-muted-foreground">90-day cohort · target ≥ 1.5</p>
+          </div>
+          <div>
+            <p className="text-sm font-bold">{health.attachRate180d} SKUs/hh</p>
+            <p className="text-[10px] text-muted-foreground">6-month cohort · target ≥ 1.5</p>
+          </div>
+        </div>
+        {!health.flywheelHealthy && (
+          <div className="flex items-start gap-2 rounded-lg bg-warning/10 border border-warning/20 p-2">
+            <Activity className="h-3.5 w-3.5 text-warning shrink-0 mt-0.5" />
+            <p className="text-xs text-warning">
+              Flywheel alert: 6-month attach rate below 1.5 — cross-sell is not self-funding.
+            </p>
+          </div>
+        )}
+      </div>
+
       {/* Supplementary details */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-border text-xs text-muted-foreground">
         <div>

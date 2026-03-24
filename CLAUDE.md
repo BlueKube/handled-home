@@ -6,161 +6,97 @@ Handled Home is a **managed home-maintenance platform** — "Your home, handled.
 
 Three user roles: **Customer**, **Provider**, **Admin**.
 
-## Your Current Mission
-
-You are continuing the Handled Home app overhaul. All major phases are complete: customer redesign (12 epics, 36 pages), provider redesign (11 batches, 34 pages), admin redesign (5 batches, ~54 pages), growth operations (6 batches), and implementation batches (7–11). The app is in **final cleanup and hardening** mode.
-
 ## Workflow (Non-Negotiable)
 
-Follow this exact sequence for every batch. Do not skip steps.
+**Every implementation task — whether a new feature, redesign, bug fix batch, or system overhaul — follows the PRD-to-Production workflow.**
 
-1. **Re-anchor to the roadmap** — State which provider pages/areas this batch covers and what remains.
-2. **Write a spec before coding** — Every batch needs a markdown spec with: title, why it matters, scope, non-goals, exact file targets, acceptance criteria, regression risks, visual validation checklist.
-3. **Keep batches small** — 1 theme across 1-3 screens. Don't mix unrelated fixes.
-4. **Implement only the spec** — If you find something out of scope, defer it.
-5. **Run code review after every commit/phase** — After committing, run `/code-review` to review the diff against main. This launches 10 agents in parallel across 5 review lanes:
-   - CLAUDE.md compliance
-   - Bug scan (diff only, no extra context)
-   - Historical context (git blame / history)
-   - Prior PR feedback on the same files
-   - Code comment compliance
-   Each lane gets one Sonnet agent (deep analysis) and one Haiku agent (fast second opinion). Findings from both tiers are merged and then scored for confidence. See `.claude/commands/code-review.md` for details.
-6. **Fix findings until clear** — MUST-FIX (75+) and SHOULD-FIX (25–74) must be resolved. After committing fixes, the review automatically re-runs to verify fixes are real and didn't introduce new issues. This loops until clean (max 3 passes).
-7. **Validate build** — Run `npx tsc --noEmit` and `npm run build` before considering a batch done.
-8. **Reconcile** — After each batch, update which pages are done and what's next.
-9. **Sync documentation after each phase** — After completing a phase (group of related batches), review all key docs for stale info: page names, navigation specs, design patterns, product strategy sections. See `docs/skills/redesign-workflow-guide.md` step 9.
+Read and follow `docs/skills/prd-to-production-workflow.md` before starting any work. Do not skip steps.
 
-## Slash Commands
+### Quick reference (full details in the workflow doc)
 
-- `/kickoff` — Start a new batch or phase. Reads the roadmap, identifies what's next, writes the spec, and asks for approval before coding.
-- `/code-review` — Review changes for bugs and CLAUDE.md compliance. Runs 10 agents (5 lanes × 2 tiers: Sonnet + Haiku) with confidence scoring. Two modes: phase mode (no args, reviews branch diff vs main) or PR mode (`/code-review 123`).
+1. **PRD → Plan** — Decompose the PRD into phases and batches. Write `docs/working/plan.md`. Get human approval.
+2. **Batch execution** — For each batch: re-anchor → write spec in `docs/working/batch-specs/` → implement → commit → 10-agent code review → fix loop → validate build → validate visually → push.
+3. **Doc sync** — After each phase, sync the six north star documents (see below).
+4. **Phase transition** — Mark phase complete in plan, restate what's next.
+5. **Completion** — Final recap, archive `docs/working/` to `docs/archive/`.
 
-## Workflow & UX Reference Docs
+### Slash commands
 
-Read these before starting any batch:
-- `docs/skills/redesign-workflow-guide.md` — Batch execution workflow (MUST follow)
-- `docs/skills/mobile-ui-ux-guide.md` — Mobile UX design principles and review framework
+- `/code-review` — 10-agent review (4 parallel lanes + 1 synthesis lane × 2 tiers). Phase mode (no args) or PR mode (`/code-review 123`).
 
-## Key Reference Docs
+### Mandatory Code Review — Non-Negotiable
 
-These are already in the repo under `docs/`. Read all of these before starting work:
-- `docs/screen-flows.md` — The source of truth for all screen layouts, flows, and component specs (~68KB)
-- `docs/design-guidelines.md` — Design tokens, spacing, color, typography, component specs
-- `docs/masterplan.md` — Business model, vision, product strategy (~35KB)
-- `docs/operating-model.md` — Unit economics, pricing mechanics, margin levers, provider payouts (~17KB)
-- `docs/app-flow-pages-and-roles.md` — Complete route tree (143 pages) with role gates and primary user journeys
-- `docs/feature-list.md` — Full feature inventory by area
+**After committing every batch, you MUST run the 10-agent code review before moving to the next batch.** No exceptions — even if the user says "keep going," "don't stop," or "finish everything." The review is part of the definition of done for a batch, not a separate optional step.
 
-## What's Already Complete
+**If you catch yourself starting Batch N+1 without having reviewed Batch N, STOP immediately and run the review first.**
 
-### Customer Redesign (PR #29 — merged)
-All 12 customer epics complete. 36 customer pages polished.
+A batch is not complete until: `implement → commit → code review → fix loop → validate build → push`. Skipping the review and pushing is a workflow violation.
 
-### Provider Batch 1: Dashboard & Earnings Clarity (PR #30 — merged)
-- New `DailyRecapCard.tsx` component on Dashboard
-- Modifier explanation labels on Earnings
-- Expandable hold detail on Earnings
-- `useProviderEarnings.ts` extended with `ProviderEarning`/`HeldEarning` types, `heldEarnings` array
-- `useProviderJobs.ts` with `"today_all"` filter
-- New `src/utils/format.ts` shared `formatCents` utility
+#### Code review procedure (inline reference)
 
-### Provider Batch 2: Job Flow & Navigation Polish (PR #31 — merged)
-- Sticky action bar on `JobDetail.tsx` (fixed bottom-16, pb-48)
-- Queue position breadcrumb ("Stop X of Y") with prev/next navigation
-- Enhanced completion celebration on `JobComplete.tsx` with route progress bar
-- New `RouteProgressCard.tsx` on Dashboard
-- Review fixes: tap targets, aria-live, progress bar min-width, earnings column fix, loading skeleton
+The full `/code-review` skill is defined in `docs/skills/prd-to-production-workflow.md`. This inline summary exists so the procedure is never lost to context compression.
 
-## Provider Redesign (Complete)
+**Stage 1 — 4 parallel lanes × 2 tiers = 8 agents (launched simultaneously):**
 
-All 34 provider pages and key provider components have been polished across 11 batches:
+| Lane | Focus | What to check |
+|------|-------|---------------|
+| **a. Spec completeness** | Cross-reference every requirement, acceptance criterion, and edge case in the batch spec (`docs/working/batch-specs/`) against the diff. Flag anything specified but not implemented, partially implemented, or implemented differently. **Most important lane.** |
+| **b. Bug scan** | Shallow scan for obvious bugs in changed code only. No extra context, no history, no nitpicks — just the diff. |
+| **c. Historical context** | Read git blame/history of modified files. Spot regressions or issues informed by past changes. Do not duplicate Lane b. |
+| **d. Prior feedback** | Check previous fix commits on these files for recurring review comments that may apply here. |
 
-| Batch | Scope | Status |
-|-------|-------|--------|
-| 1 | Dashboard, Earnings | Complete (PR #30) |
-| 2 | JobDetail, JobComplete, Jobs | Complete (PR #31) |
-| 3 | JobChecklist, JobPhotos | Complete |
-| 4 | Payouts, PayoutHistory, History | Complete |
-| 5 | Performance, QualityScore, Insights, InsightsHistory | Complete |
-| 6 | Availability, Coverage, WorkSetup | Complete |
-| 7 | Organization, Settings, SKUs | Complete |
-| 8 | Support, SupportTicketDetail, Referrals | Complete |
-| 9 | ByocCenter, ByocCreateLink, InviteCustomers | Complete |
-| 10 | Onboarding (7 pages), Apply, Performance | Complete |
-| 11 | Component Cleanup (VisitJobCard, NotificationBanners, WeekDueQueue) | Complete |
+Each lane runs one Sonnet agent (deep analysis) and one Haiku agent (fast second set of eyes). Both tiers in the same lane may find overlapping issues — that's intentional redundancy. Agents must not cross into another lane's focus.
 
-### Consistency standards applied across all pages
-- `animate-fade-in` on main containers
-- `p-4 pb-24` padding (pb-24 for bottom tab bar clearance)
-- `text-h2` for page titles, `text-caption` for subtitles
-- `ChevronLeft` back navigation with aria-labels
-- 44px minimum touch targets
-- Semantic color tokens only (no hardcoded colors)
-- No `max-w-lg` or `max-w-2xl` constraints (mobile-only app)
-- Shared `formatCents` from `@/utils/format`
+**Stage 2 — 1 synthesis lane × 2 tiers = 2 agents (after all Stage 1 agents complete):**
 
-### Deferred Items
-- L4: Extract shared `RouteProgressBar` component (JobComplete + RouteProgressCard — different semantics, low priority)
-- L10: Add focus ring to Proof Required buttons in JobDetail
-- L11: Confirm `replace: true` behavior on breadcrumb navigation
+| Lane | Focus |
+|------|-------|
+| **e. Synthesis & cross-check** | Receives all findings from Lanes a–d (both tiers). De-duplicates, resolves contradictions, connects related issues, catches inter-lane gaps, and scores each finding 0–100. |
 
-## Admin Redesign (Complete)
+**Scoring rules (applied by synthesis agent):**
+- Cross-tier agreement (both Sonnet and Haiku flagged it): **+30**
+- Cross-lane agreement (multiple lanes flagged it): **+20 per additional lane**
+- Severity (regression, security, data loss, missing spec item): **+20–40**
+- Specificity (exact file:line with clear explanation): **+10**
+- Style-only (formatting, naming preference): **cap at 20**
 
-All ~54 admin pages polished across 5 batches:
+**Categorization:**
+- **MUST-FIX (75+):** Resolve before batch is done.
+- **SHOULD-FIX (25–74):** Resolve in the same batch if straightforward.
+- **Drop below 25.**
 
-| Batch | Scope | Pages |
-|-------|-------|-------|
-| 1 | Cockpit & Core Ops | OpsCockpit, OpsJobs, OpsServiceDays, OpsSupport, OpsBilling, OpsGrowth, OpsDefinitions, OpsZones, OpsZoneDetail, DispatcherQueues, Jobs |
-| 2 | Execution | JobDetail, Scheduling, PlannerDashboard, SchedulingPolicy, SchedulingExceptions, WindowTemplates, ServiceDays, Exceptions, ExceptionAnalytics, AssignmentDashboard, AssignmentConfig |
-| 3 | People & Markets | Billing, Dashboard, CustomerLedger, ProviderLedger, ProviderDetail, Providers, Feedback |
-| 4 | Catalog, Money & Control | SKUs, Plans, Bundles, Payouts, ControlConfig, Audit, LevelAnalytics, NotificationHealth, CronHealth |
-| 5 | Growth, Support & Governance | ApplicationDetail, Applications, SupportTicketDetail, ControlChangeLog, ControlChangeRequests, ControlPayouts, ControlPricing, Playbooks, Reports, TestToggles, ZoneBuilder, Growth, Incentives, Settings, Subscriptions, Zones |
+**Fix loop:**
+After fixing MUST-FIX and SHOULD-FIX findings, run a **lightweight re-review** (Lanes a + b + e only = 6 agents) to verify fixes. Cap at **3 passes** to avoid infinite loops.
 
-### Admin consistency standards (differs from provider — desktop sidebar layout)
-- `animate-fade-in` on main containers
-- `p-6` padding (no pb-24 — admin uses sidebar, not bottom tab bar)
-- `text-h2` for page titles
-- `ChevronLeft` back navigation with aria-labels on detail pages
-- Semantic color tokens only
-- `max-w-*` constraints OK for admin (desktop layout)
-- Responsive grids (`lg:grid-cols-*`) OK for admin
+**False positives to skip:**
+- Pre-existing issues not introduced by this diff
+- Things a linter/typechecker/compiler would catch
+- General code quality opinions not tied to spec or conventions
+- Issues on lines the user did not modify
 
-### Skipped
-- `OpsExceptions.tsx` — split-panel layout (`flex h-[calc(100vh-3rem)]`), no standard header pattern
-- `Capacity.tsx` — redirect only, no page content
-- `Support.tsx` — re-export of SupportDashboard
+### Working folder structure
 
-## Growth Batches (Viral Loop & Growth Operations)
+```
+docs/working/
+├── prd.md              # The current PRD (copied here at start)
+├── plan.md             # The phased implementation plan
+└── batch-specs/        # Individual batch specs (one per batch)
+```
 
-All 6 growth-focused batches complete.
+## Six North Star Documents
 
-| Batch | Scope | Status |
-|-------|-------|--------|
-| 1 | BYOP Flow 2B — 3 new customer pages (ByopSearch, ByopConfirm, ByopThankYou) + useByopRecommendation hook + routes | Complete |
-| 2 | BYOC Onboarding Wizard rewrite — simplified to 2-step flow | Complete |
-| 3 | Viral Loop Wiring — referral cards on JobComplete + customer Receipt | Complete |
-| 4 | Provider Growth Hub — ByocCenter ↔ Referrals cross-navigation cards | Complete |
-| 5 | Admin Growth Console — Funnels tab (BYOC, Referral, BYOP, K-factor) + 3 new hooks | Complete |
-| 6 | Abuse Prevention — BYOC rate limits (10/day, 10 active), referral one-code-per-customer, crypto.getRandomValues | Complete |
+These are the living documents that define the product. Claude reads them at the start of work to understand full context. They are updated after each phase — never allowed to go stale.
 
-### New hooks (Growth)
-- `useByopRecommendation.ts` — BYOP form submission + tracking
-- `useByocFunnelStats` / `useReferralFunnelStats` / `useByopFunnelStats` — Admin funnel metrics (in `useGrowthEvents.ts`)
+| Document | Purpose |
+|----------|---------|
+| `docs/masterplan.md` | Business plan, vision, value proposition, growth strategy |
+| `docs/operating-model.md` | Revenue model, unit economics, thresholds, operational rules |
+| `docs/screen-flows.md` | Screen layouts, components, navigation, empty/loading states |
+| `docs/app-flow-pages-and-roles.md` | Route tree, page inventory, role gates, user journeys |
+| `docs/feature-list.md` | Feature inventory, delivery status, strategic tags |
+| `docs/design-guidelines.md` | Design tokens, spacing, typography, component specs, accessibility |
 
-### Implementation Batches (Complete)
-
-| Batch | Theme | Status |
-|-------|-------|--------|
-| 7 | Subscription lifecycle correctness (downgrade, cancel, pause, dunning) | Complete |
-| 8 | Operational resilience (provider exit/suspension, zone coverage gaps) | Complete |
-| 9 | Conversion funnel polish (invite, BYOC, share landing pages) | Complete |
-| 10 | Nielsen heuristic compliance (empty states, loading skeletons, help tooltips) | Complete |
-| 11 | Operating model visibility (success metric gauges, risk alerts) | Complete |
-
-### New hooks & components (Implementation Batches)
-- `useBusinessHealth.ts` — Computes attach rate, household churn, provider churn, zone density from live data
-- `BusinessHealthCard.tsx` — 4 operating-model gauges with green/amber/red threshold indicators on OpsCockpit
-- `RiskAlertsCard.tsx` — Actionable threshold breach alerts (attach rate, churn, zone density) on OpsCockpit
+See the "Phase 3: Documentation Sync" section of the workflow doc for what to check and how to sync.
 
 ## Tech Stack
 
@@ -188,11 +124,11 @@ src/
 │   ├── settings/    # Settings components
 │   └── support/     # Support/help components
 ├── pages/
-│   ├── customer/    # 38 customer pages (incl. 2 BYOP pages)
-│   ├── provider/    # 42 provider pages
-│   ├── admin/       # 59 admin pages
+│   ├── customer/    # Customer pages
+│   ├── provider/    # Provider pages
+│   ├── admin/       # Admin pages
 │   └── shared/      # Shared pages
-├── hooks/           # 60+ custom React hooks
+├── hooks/           # Custom React hooks
 ├── contexts/        # AuthContext
 ├── lib/             # Utilities (utils, h3, billing, etc.)
 ├── constants/       # Config constants
@@ -227,6 +163,27 @@ Button variants: `default` (navy), `accent` (cyan), `outline`, `ghost`, `destruc
 
 All colors use CSS custom properties via `hsl(var(--<name>))` — defined in `src/index.css`.
 
+### Consistency standards
+
+**Customer/Provider pages (mobile):**
+- `animate-fade-in` on main containers
+- `p-4 pb-24` padding (pb-24 for bottom tab bar clearance)
+- `text-h2` for page titles, `text-caption` for subtitles
+- `ChevronLeft` back navigation with aria-labels
+- 44px minimum touch targets
+- Semantic color tokens only (no hardcoded colors)
+- No `max-w-lg` or `max-w-2xl` constraints (mobile-only app)
+- Shared `formatCents` from `@/utils/format`
+
+**Admin pages (desktop sidebar layout):**
+- `animate-fade-in` on main containers
+- `p-6` padding (no pb-24 — admin uses sidebar, not bottom tab bar)
+- `text-h2` for page titles
+- `ChevronLeft` back navigation with aria-labels on detail pages
+- Semantic color tokens only
+- `max-w-*` constraints OK for admin (desktop layout)
+- Responsive grids (`lg:grid-cols-*`) OK for admin
+
 ## UX Principles
 
 - The product should feel like a **managed home operating system**, not a marketplace
@@ -241,40 +198,19 @@ All colors use CSS custom properties via `hsl(var(--<name>))` — defined in `sr
 ## Screen Review Dimensions
 
 For each page you touch, evaluate:
-1. **Clarity** — Can the provider understand the screen's purpose in 3 seconds?
+1. **Clarity** — Can the user understand the screen's purpose in 3 seconds?
 2. **Hierarchy** — Are the most important facts above the fold?
 3. **Motion toward action** — Is the next step obvious?
 4. **Trust** — Does it feel finished and premium?
 5. **Density** — Appropriate content density? No voids?
 6. **Proof and feedback** — Does it show progress, earnings, or value?
 
-## Stitch MCP Server — Design-to-Code Workflow
-
-The `stitch` MCP server is configured in `.claude/settings.json`. It connects to Google Stitch to pull AI-generated designs.
-
-### Available MCP Tools
-
-| Tool | Purpose | Parameters |
-|------|---------|------------|
-| `get_screen_code` | Get HTML code for a design screen | `projectId`, `screenId` |
-| `get_screen_image` | Get screenshot as base64 image | `projectId`, `screenId` |
-| `build_site` | Build full site mapping screens to routes | `projectId`, `routes[]` |
-
-### Implementation Workflow
-
-When implementing a screen from Stitch designs:
-
-1. **Pull the design** — Use `get_screen_image` to see the visual design, then `get_screen_code` to get the HTML reference
-2. **Map to existing components** — Translate Stitch HTML into existing shadcn/ui components (`Card`, `Button`, `Badge`, `Tabs`, etc.) and project-specific components
-3. **Follow existing patterns** — Match the file structure and hook patterns already in the codebase (React Query hooks, Supabase integration, etc.)
-4. **Respect the design system** — Use Tailwind classes with CSS variable colors (`bg-primary`, `text-accent`, etc.), not hardcoded values
-5. **Keep mobile-first** — All customer/provider screens target 390×844 viewport with safe area padding
-
 ## Git Workflow
 
 - Develop on the designated feature branch (see task instructions)
 - Commit message format: `feat(<scope>): Batch N — {Description}`
 - Review fix commits: `fix(<scope>): resolve Batch N review findings`
+- Doc sync commits: `docs: sync documentation after phase N`
 - Push to feature branch after each batch; PR into `main` when phase is complete
 
 ## Test Credentials
@@ -303,54 +239,22 @@ After each batch, visually verify your changes using Playwright screenshots. The
 # Start dev server first
 npm run dev &
 
-# Take a screenshot of a specific provider page (example: Dashboard)
+# Take a screenshot of a specific page (example: provider Dashboard)
 npx playwright test e2e/screenshot-catalog.spec.ts -g "provider-dashboard" \
   --project=chromium
 ```
 
 Screenshots are saved to `e2e/milestones/`. Open them to verify your changes rendered correctly.
 
-### Full provider screenshot catalog
+### Full screenshot catalog
 
 ```bash
-# Capture all provider screens at once
+# Capture all screens for a role at once
 npx playwright test e2e/screenshot-catalog.spec.ts -g "Provider Screens" \
   --project=chromium
 ```
 
-### Write a quick one-off validation script
-
-For pages not in the catalog, or to test specific states:
-
-```typescript
-// e2e/validate-batch.spec.ts (temporary, don't commit)
-import { test, expect } from "@playwright/test";
-import path from "path";
-
-test.use({
-  storageState: path.join(__dirname, ".auth", "provider.json"),
-});
-
-test("validate batch changes", async ({ page }) => {
-  await page.addInitScript(() => {
-    localStorage.setItem("handled_active_role", "provider");
-  });
-
-  // Navigate to the page you changed
-  await page.goto("/provider/jobs");
-  await page.waitForTimeout(2000);
-  await page.screenshot({ path: "test-results/provider-jobs.png", fullPage: true });
-
-  // Test dark mode too
-  await page.emulateMedia({ colorScheme: "dark" });
-  await page.waitForTimeout(500);
-  await page.screenshot({ path: "test-results/provider-jobs-dark.png", fullPage: true });
-});
-```
-
 ### Environment variables for auth
-
-The e2e auth setup reads credentials from environment variables:
 
 ```bash
 export BASE_URL=http://localhost:5173
@@ -380,10 +284,6 @@ npx playwright test e2e/auth.setup.ts --project=auth-setup
 ### Mobile viewport
 
 Playwright is configured for iPhone-like viewport (390×844). All screenshots should match the mobile-first design target.
-
-## PR Review Workflow
-
-When responding to PR review feedback: `./scripts/fetch-pr-review.sh <PR_NUMBER>` to see all comments, then fix, commit, and push.
 
 ## Conventions
 
