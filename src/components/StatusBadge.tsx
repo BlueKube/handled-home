@@ -20,7 +20,7 @@ const statusStyles: Record<string, { label: string; className: string; dotColor:
   refunded: { label: "Refunded", className: "border border-border bg-transparent", dotColor: "bg-muted-foreground" },
   pending: { label: "Pending", className: "bg-warning text-warning-foreground", dotColor: "bg-warning-foreground/70" },
   active: { label: "Active", className: "bg-success text-success-foreground", dotColor: "bg-success-foreground/70" },
-  inactive: { label: "Inactive", className: "bg-secondary text-secondary-foreground", dotColor: "bg-muted-foreground" },
+  inactive: { label: "Inactive", className: "bg-secondary text-secondary-foreground", dotColor: "bg-secondary-foreground/50" },
   probation: { label: "Probation", className: "bg-destructive text-destructive-foreground", dotColor: "bg-destructive-foreground/70" },
   suspended: { label: "Suspended", className: "bg-destructive text-destructive-foreground", dotColor: "bg-destructive-foreground/70" },
   scheduled: { label: "Scheduled", className: "bg-primary text-primary-foreground", dotColor: "bg-primary-foreground/70" },

@@ -10,7 +10,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Copy, Link2, Users, Gift, ChevronDown, CheckCircle, XCircle, AlertTriangle, Info, ChevronRight } from "lucide-react";
+import { Plus, Copy, Link2, Users, Gift, ChevronDown, AlertTriangle, Info } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 

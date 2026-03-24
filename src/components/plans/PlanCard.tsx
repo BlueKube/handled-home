@@ -62,6 +62,7 @@ export function PlanCard({
             <Badge variant="outline" className={`text-xs font-semibold ${TIER_ACCENT[tierKey]}`}>
               {plan.name}
             </Badge>
+            {/* Ribbon = marketing hook, StatusBadge = machine-readable status */}
             {isRecommended && <StatusBadge status="recommended" />}
           </div>
         </div>
