@@ -91,7 +91,14 @@ Line-height ≥ 1.5×
 
 All colors use CSS custom properties via `hsl(var(--name))` — defined in `src/index.css`. Naming convention: `--{category}-{role}`, e.g. `--card-foreground`, `--sidebar-primary-foreground`, `--destructive-foreground`.
 
-Semantic usage: `bg-background` for page surface, `bg-card` for raised surfaces, `bg-popover` for overlays, `text-foreground` for headings/body, `text-muted-foreground` for captions and helper text, `bg-primary` for default buttons, `bg-accent` for CTAs and `--ring` focus indicator, `bg-destructive` for errors, `bg-success` for confirmations, `bg-warning` for advisory alerts, `border-border` for dividers, `border-input` for form field borders.
+Semantic mapping (Tailwind class → purpose):
+- `bg-background` — page surface; `bg-card` — raised cards/sheets; `bg-popover` — dropdown/tooltip overlays
+- `text-foreground` — headings + body; `text-muted-foreground` — captions, helper text at 13px
+- `bg-primary` — default buttons; `bg-accent` — CTAs, focus ring via `--ring`
+- `bg-destructive` — errors, delete actions; `bg-success` — confirmations; `bg-warning` — advisory alerts
+- `border-border` — dividers at 1px; `border-input` — form field borders at 1px
+- `rounded-xl` (12px) — inputs, buttons; `rounded-2xl` (16px) — cards; `rounded-full` — avatars, badges
+- `--radius` base value: 0.75rem (12px); all radii scale from this base
 
 ### Primitive color tokens
 
@@ -590,4 +597,6 @@ WCAG AA compliance required — 4.5:1 contrast for body text, 3:1 for large text
 - Landmarks: `<main>` for page content, `<nav>` for tab bar, `<aside>` for admin sidebar
 - VoiceOver/TalkBack: verify tab order follows visual flow, modals announce title on open
 - Lighthouse a11y audit: target 95+ on all customer-facing pages
+- Tab order: follows visual top-to-bottom flow; skip-nav link at `z-[100]` for keyboard users
+- Reduced motion: respect `prefers-reduced-motion` — see Motion System section for details
 
