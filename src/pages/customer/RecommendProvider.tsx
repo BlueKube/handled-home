@@ -136,7 +136,7 @@ export default function RecommendProvider() {
           <ChevronLeft className="h-5 w-5" />
           <span className="text-sm">More</span>
         </button>
-        <h1 className="text-h2">Recommend a Provider</h1>
+        <h1 className="text-h2">Recommend a Provider <HelpTip text="Know a great service provider? Recommend them to our network and earn a $30 credit if they're accepted." /></h1>
         <p className="text-caption text-muted-foreground mt-1">
           Tell us about a provider you already trust — we'll reach out to see if they'd be a good fit for the Handled Home network.
         </p>

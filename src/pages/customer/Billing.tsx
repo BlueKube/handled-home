@@ -50,7 +50,7 @@ export default function CustomerBillingPage() {
         <ChevronLeft className="h-4 w-4" />
         <span className="text-sm">More</span>
       </button>
-      <h1 className="text-h2">Billing</h1>
+      <h1 className="text-h2">Billing <HelpTip text="Your billing cycle renews automatically. You can pause, change plans, or cancel anytime from this page." /></h1>
 
       {/* Current Plan */}
       <Card>

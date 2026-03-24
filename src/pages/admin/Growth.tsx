@@ -51,7 +51,7 @@ export default function AdminGrowth() {
     <div className="p-6 space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-h2">Growth Console</h1>
+          <h1 className="text-h2">Growth Console <HelpTip text="Growth Console tracks viral loop performance — BYOC activations, referral conversions, and BYOP recommendations." /></h1>
           <p className="text-sm text-muted-foreground">Market health, state machine, and autopilot controls</p>
         </div>
       </div>

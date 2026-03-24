@@ -89,7 +89,7 @@ export default function AdminReports() {
   return (
     <div className="p-6 space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-h2">Reporting & Analytics</h1>
+        <h1 className="text-h2">Reporting & Analytics <HelpTip text="Reports provide historical views of revenue, subscriptions, operations, and zone performance." /></h1>
         <p className="text-caption">Revenue, retention, and operational performance</p>
       </div>
 

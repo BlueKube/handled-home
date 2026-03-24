@@ -65,7 +65,7 @@ export default function AdminDashboard() {
   return (
     <div className="p-6 space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-h2">Admin Console</h1>
+        <h1 className="text-h2">Admin Console <HelpTip text="Admin dashboard shows key metrics across all zones. Data updates in real-time as customers and providers interact." /></h1>
         <p className="text-sm text-muted-foreground">Operations overview</p>
       </div>
 

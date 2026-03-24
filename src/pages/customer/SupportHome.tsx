@@ -26,7 +26,7 @@ export default function CustomerSupportHome() {
         <span className="text-sm">More</span>
       </button>
       <div className="space-y-1">
-        <h1 className="text-h2">Support</h1>
+        <h1 className="text-h2">Support <HelpTip text="Submit a ticket and we'll respond within 24 hours. For urgent issues, call the number below." /></h1>
         <p className="text-caption">Get help or resolve an issue</p>
       </div>
 

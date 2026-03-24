@@ -130,7 +130,7 @@ export default function CustomerVisitDetail() {
         <div className="flex items-center gap-2">
           <StatusBadge status={jobStatusForBadge} />
         </div>
-        <h1 className="text-h2">{skuSummary}</h1>
+        <h1 className="text-h2">{skuSummary} <HelpTip text="This is your visit receipt — it includes photos, checklists, and provider notes for this service." /></h1>
         <p className="text-sm text-muted-foreground">{visitDate}</p>
       </div>
 

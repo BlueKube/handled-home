@@ -58,7 +58,7 @@ export default function CustomerReferrals() {
         <ChevronLeft className="h-4 w-4" />
         <span className="text-sm">More</span>
       </button>
-      <h1 className="text-h2">Referrals</h1>
+      <h1 className="text-h2">Referrals <HelpTip text="Share your code with neighbors. When they subscribe, you both earn a $30 credit toward your next cycle." /></h1>
 
       {/* Share Section */}
       <Card>

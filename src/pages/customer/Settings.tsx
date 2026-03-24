@@ -32,7 +32,7 @@ export default function CustomerSettings() {
         <ChevronLeft className="h-4 w-4" />
         <span className="text-sm">More</span>
       </button>
-      <h1 className="text-h2">Account Settings</h1>
+      <h1 className="text-h2">Account Settings <HelpTip text="Update your profile, notification preferences, and security settings here." /></h1>
 
       {/* Avatar + email */}
       <div className="flex items-center gap-4">

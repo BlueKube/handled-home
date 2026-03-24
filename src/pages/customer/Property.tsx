@@ -217,7 +217,7 @@ export default function CustomerProperty() {
           <ChevronLeft className="h-4 w-4" />
           <span className="text-sm">More</span>
         </button>
-        <h1 className="text-h2 text-foreground">Your Home</h1>
+        <h1 className="text-h2 text-foreground">Your Home <HelpTip text="Your property details help providers prepare for visits — accurate info means better service." /></h1>
         <p className="text-caption mt-1">A few details so we can serve you smoothly.</p>
       </div>
 

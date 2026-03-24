@@ -149,7 +149,7 @@ export default function OpsCockpit() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-h2 mb-0.5">Ops Cockpit</h1>
+          <h1 className="text-h2 mb-0.5">Ops Cockpit <HelpTip text="The Ops Cockpit surfaces the metrics that need attention right now. Red = act today, yellow = watch this week." /></h1>
           <p className="text-caption">{updatedLabel}</p>
         </div>
         <div className="flex items-center gap-2">
