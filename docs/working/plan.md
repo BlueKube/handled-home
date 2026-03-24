@@ -98,8 +98,8 @@ Each batch follows the workflow checklist:
 | 1 | 3 | 2.5: Status Badges | ✅ Complete |
 | 1 | 4 | 2.6: Validation | ✅ Complete |
 | 1 | 5 | 2.3: Back Buttons | ✅ Complete |
-| 1 | 6 | P3-2: Skip Options | ⬜ Not Started |
-| 1 | 7 | P3-1: Help Tooltips | ⬜ Not Started |
+| 1 | 6 | P3-2: Skip Options | ✅ Complete |
+| 1 | 7 | P3-1: Help Tooltips | ✅ Complete |
 | 2 | 8 | P2-4: Referral Fraud Prevention | ⬜ Not Started |
 | 2 | 9 | P2-2: BYOP Provider Decline | ⬜ Not Started |
 | 2 | 10 | P2-1: Operational Exception Handling | ⬜ Not Started |
