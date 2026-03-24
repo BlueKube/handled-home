@@ -20,7 +20,7 @@ export function StatCard({ icon: Icon, label, value, trend, compact = false, cla
   if (compact) {
     return (
       <div className={cn("flex items-center gap-3 py-2", className)}>
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent/10 shrink-0">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/10 shrink-0">
           <Icon className="h-4 w-4 text-accent" />
         </div>
         <div className="flex-1 min-w-0">
@@ -43,7 +43,7 @@ export function StatCard({ icon: Icon, label, value, trend, compact = false, cla
   return (
     <Card variant="interactive" className={cn("p-4", className)}>
       <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 shrink-0">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10 shrink-0">
           <Icon className="h-5 w-5 text-accent" />
         </div>
         <div className="flex-1 min-w-0">
