@@ -298,7 +298,7 @@
 | 2 | 8: Composite Components | ✅ | Pushed. Clean review — 0 findings. |
 | 3 | 9: Dark Elevation & Borders | ✅ | Pushed. 1 MUST-FIX resolved (layer specificity). |
 | 3 | 10: Dark Overlay & Images | ✅ | Pushed. Clean review — 0 findings. |
-| 3 | 11: Dark Component Sweep | ⬜ | |
+| 3 | 11: Dark Component Sweep | ✅ | Pushed. Clean review — 0 findings. |
 | 4 | 12: Focus Trap & Restore | ⬜ | |
 | 4 | 13: ARIA & Screen Reader | ⬜ | |
 | 4 | 14: Color-Independent Status | ⬜ | |
