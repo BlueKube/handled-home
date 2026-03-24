@@ -278,7 +278,7 @@ export default function CustomerRoutine() {
 
       {/* Bottom CTA */}
       {(items.length > 0 || !hasSub) && (
-        <div className="fixed bottom-16 left-0 right-0 z-40 p-4 bg-card/95 backdrop-blur border-t border-border max-w-lg mx-auto">
+        <div className="fixed bottom-16 left-0 right-0 z-40 p-4 bg-card/95 backdrop-blur border-t border-border">
           {hasSub ? (
             <>
               <Button
