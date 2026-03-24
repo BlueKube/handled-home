@@ -1,7 +1,32 @@
 # Design Guidelines — Handled Home (Mobile-Native)
 
-## Platform
-Mobile-first iOS & Android app via Capacitor. No desktop breakpoints.
+## Platform and Responsive Behavior
+
+Mobile-first iOS & Android app via Capacitor. Admin uses desktop sidebar layout. See `docs/app-flow-pages-and-roles.md` for routes.
+
+### device tiers
+
+| Tier | Width | Example | Adjustments |
+|------|-------|---------|-------------|
+| Compact | 320–375px | iPhone SE | Reduce `p-4` to `p-3`, stack horizontal layouts |
+| Regular | 376–428px | iPhone 15 (390px) | **Design target** — all specs reference this tier |
+| Max | 429–480px | iPhone 15 Pro Max | Extra breathing room, no changes needed |
+
+### orientation and keyboard
+
+- Lock customer/provider to portrait via Capacitor `Screen.lock({ orientation: 'portrait' })`
+- Admin: landscape sidebar + content, min-width 1024px
+- Keyboard avoidance: Capacitor `Keyboard.setResizeMode({ mode: 'native' })`; scroll focused input into view with `scrollIntoView({ behavior: 'smooth', block: 'center' })`
+- Bottom-docked CTAs shift above keyboard; use `pb-safe`
+
+### native integration (Capacitor)
+
+- Safe areas: `.safe-top` → `env(safe-area-inset-top)` for notch; `.safe-bottom` for home indicator
+- Status bar: light-content on dark backgrounds, dark-content on light
+- Haptic feedback: `Haptics.impact({ style: 'light' })` on press, `medium` on toggle
+- Splash screen: navy `--primary` background, auto-hide after mount
+- Dynamic type: base 16px, respect iOS font scaling, maximum-scale 1.4×
+- Font scaling: all typography uses rem internally; 13px (`.text-caption`) is absolute minimum
 
 ---
 
@@ -157,12 +182,58 @@ In dark mode, elevation uses surface luminance (lighter = higher) rather than sh
 
 ---
 
-## Spacing & Touch
-- 8pt grid system
-- Minimum tap target: 44px (iOS HIG)
+## Spacing and Layout
+
+### spacing scale (8pt grid)
+
+| Token | px | Tailwind | Use |
+|-------|----|----------|-----|
+| `space-1` | 4px | `p-1` / `gap-1` | Icon-to-text gap |
+| `space-2` | 8px | `p-2` / `gap-2` | Tight list padding |
+| `space-3` | 12px | `p-3` / `gap-3` | Compact card padding |
+| `space-4` | 16px | `p-4` / `gap-4` | Default page/card padding |
+| `space-5` | 20px | `p-5` / `gap-5` | Form field vertical gap |
+| `space-6` | 24px | `p-6` / `gap-6` | Admin padding, section gap |
+| `space-8` | 32px | `p-8` / `gap-8` | Empty state padding |
+| `space-10` | 40px | `p-10` | Hero vertical padding |
+| `space-12` | 48px | `p-12` | Page-level separation |
+| `space-16` | 64px | `p-16` | Major section breaks |
+
+### touch targets and density
+
+- Minimum tap target: 44×44px (iOS HIG); exception: inline text links (underline + color sufficient)
 - Input height: 48px (prevents iOS zoom)
-- One primary CTA per screen
-- Safe area insets: `env(safe-area-inset-top/bottom)`
+- One primary CTA per screen — above fold or sticky bottom with `pb-safe`
+- Compact density: p-3 / gap-2 (admin tables, schedules)
+- Default density: p-4 / gap-3 (customer pages)
+- Comfortable density: p-6 / gap-4 (admin dashboard)
+
+### z-index scale
+
+| Level | z-index | Tailwind | Use |
+|-------|---------|----------|-----|
+| Base | 0 | `z-0` | Page content |
+| Sticky | 10 | `z-10` | Sticky headers, floating action |
+| Dropdown | 20 | `z-20` | Select, popover, tooltip |
+| Sheet | 40 | `z-40` | Bottom sheet, drawer |
+| Modal | 50 | `z-50` | Dialog overlays |
+| Toast | 60 | `z-[60]` | Toast (always on top) |
+
+### page templates
+
+- **List page**: `.text-h2` title → filter tabs → ScrollArea list gap-3 → `pb-24`
+- **Detail page**: back button + `.text-h2` → hero card → info sections gap-4 → sticky CTA
+- **Form page**: back + `.text-h2` → fields gap-5 → sticky submit
+- **Dashboard**: `.text-h2` greeting → stat cards → action cards → activity list
+
+### scroll behavior
+
+- Main page: native momentum scroll (`-webkit-overflow-scrolling: touch`)
+- Tab bar: `position: fixed bottom-0 z-40` + `.safe-bottom`
+- Pull-to-refresh: Capacitor plugin, spinner at 60px threshold
+- Infinite scroll: IntersectionObserver at 200px from bottom
+- Sheet content: independent scroll within 85vh, snap-to-stops
+- Horizontal overflow: `snap-x snap-mandatory` for card carousels
 
 ---
 
@@ -251,7 +322,7 @@ Cross-reference `docs/screen-flows.md` for per-screen component usage and `docs/
 - States: empty → placeholder; focused → `ring-2 ring-ring`; error → `border-destructive`; disabled → `opacity-50`; hover → `border-ring`
 - Use when: multi-line text (notes, descriptions).
 
-### Select (`select.tsx`)
+### Select Dropdown (`select.tsx`)
 - Anatomy: trigger (label → chevron-down 16px) → dropdown panel → option items
 - Height: h-12 (48px), rounded-xl
 - States: default → `border-input`; focused/open → `ring-2 ring-ring`; filled → selected value; error → `border-destructive`; disabled → `opacity-50`; loading → spinner replaces chevron
@@ -282,7 +353,7 @@ Cross-reference `docs/screen-flows.md` for per-screen component usage and `docs/
 - States: open → `.animate-scale-in` 200ms; closing → fade-out 150ms; focus → trapped; disabled → footer buttons `opacity-50`; loading → CTA spinner
 - Use when: confirmations, destructive gates. Do not use for forms — use Sheet.
 
-### Sheet (`sheet.tsx`)
+### BottomSheet (`sheet.tsx`)
 - Anatomy: drag handle (top) → header (title → close) → scrollable content → footer actions
 - Slides from bottom, `.animate-slide-up` 250ms, overlay `bg-black/50`, `bg-card` rounded-t-2xl p-4 pb-safe, max-height 85vh
 - States: open → slide-up; dragging → follows finger; dismissed → slide-down 200ms; focus → trapped; loading → skeleton content
@@ -312,7 +383,7 @@ Cross-reference `docs/screen-flows.md` for per-screen component usage and `docs/
 - States: determinate → width %; indeterminate → shimmer; error → `bg-destructive` fill; disabled → `opacity-40`; loading → track only
 - Use when: upload progress, onboarding completion.
 
-### Skeleton (`skeleton.tsx`)
+### LoadingSkeleton (`skeleton.tsx`)
 - `bg-muted` rounded-xl, `.animate-shimmer` 1.5s infinite
 - Variants: `line` (h-4), `circle` (rounded-full), `card` (rounded-2xl h-32)
 - States: loading → shimmer active; loaded → crossfade 200ms; error → replaced by error state; disabled → static `bg-muted`; hover → n/a
@@ -447,6 +518,44 @@ When `prefers-reduced-motion: reduce` is active:
 - `.press-feedback` — active:scale-[0.98] with transition
 - `.safe-top` / `.safe-bottom` — env(safe-area-inset)
 - `.text-h1` through `.text-caption` — typography presets
+
+---
+
+## Surfaces and Visual Depth
+
+### shadow elevation scale
+
+| Level | Token | CSS | Use |
+|-------|-------|-----|-----|
+| 0 | `shadow-none` | `box-shadow: none` | Flat inline elements |
+| 1 | `shadow-sm` | `box-shadow: 0 1px 2px rgba(0,0,0,0.05)` | Cards at rest, list items |
+| 2 | `shadow-md` | `box-shadow: 0 4px 6px rgba(0,0,0,0.07)` | Hovered cards, elevated surfaces |
+| 3 | `shadow-lg` | `box-shadow: 0 10px 15px rgba(0,0,0,0.10)` | Popover, dropdown, tooltip |
+| 4 | `shadow-xl` | `box-shadow: 0 20px 25px rgba(0,0,0,0.12)` | Dialog, sheet overlay |
+| 5 | `shadow-2xl` | `box-shadow: 0 25px 50px rgba(0,0,0,0.15)` | Dragged elements, floating CTA |
+
+### gradient patterns
+
+Subtle, purposeful gradients — the brand is calm concierge, not tech keynote.
+
+- **Hero accent**: `linear-gradient(135deg, hsl(214 65% 14%) 0%, hsl(214 50% 22%) 100%)` — onboarding hero bg
+- **Skeleton sweep**: `linear-gradient(90deg, transparent 0%, hsl(220 14% 93%) 50%, transparent 100%)` — `.animate-shimmer` overlay
+- **Image overlay**: `linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)` — text legibility on photos
+- **Surface fade**: `radial-gradient(ellipse at top, hsl(220 20% 97%) 0%, hsl(0 0% 100%) 100%)` — subtle page depth
+
+### surface treatments
+
+- **Glass**: `.glass` — `bg-card/80 backdrop-blur-xl border-border/50`. Tab bar, floating headers
+- **Frosted**: `backdrop-blur-lg bg-background/70`. Status bar overlays on scrolled content
+- **Tinted surface**: `bg-accent/5` or `bg-success/5`. Highlight backgrounds on feature cards
+- **Noise texture**: not used — keeps UI clean per brand guidelines
+
+### image treatment rules
+
+- Aspect ratios: hero 16:9, thumbnail 1:1 rounded-xl, avatar rounded-full
+- Object fit: `object-cover` for photos, `object-contain` for logos
+- Placeholder: `bg-muted` + centered icon `text-muted-foreground` while loading
+- Border radius on images: match parent container — rounded-2xl in cards, rounded-xl standalone
 
 ---
 
