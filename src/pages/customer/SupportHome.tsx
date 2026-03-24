@@ -4,7 +4,7 @@ import { useCustomerJobs } from "@/hooks/useCustomerJobs";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TicketStatusChip } from "@/components/support/TicketStatusChip";
-import { MessageCirclePlus, ChevronRight, Inbox, Clock } from "lucide-react";
+import { MessageCirclePlus, ChevronRight, ChevronLeft, Inbox, Clock } from "lucide-react";
 import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
 import { format } from "date-fns";
 
@@ -19,8 +19,12 @@ export default function CustomerSupportHome() {
     .slice(0, 3);
 
   return (
-    <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-6 animate-fade-in">
+    <div className="px-4 py-6 pb-24 space-y-6 animate-fade-in">
       <div className="space-y-1">
+        <button onClick={() => navigate("/customer/more")} className="flex items-center gap-1 text-muted-foreground mb-2 hover:text-foreground transition-colors" aria-label="Back to More menu">
+          <ChevronLeft className="h-4 w-4" />
+          <span className="text-sm">More</span>
+        </button>
         <h1 className="text-h2">Support</h1>
         <p className="text-caption">Get help or resolve an issue</p>
       </div>

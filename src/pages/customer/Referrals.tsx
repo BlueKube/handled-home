@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Copy, Check, Users, Gift, Clock, ChevronRight, Target, Star, Trophy } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Copy, Check, Users, Gift, Clock, ChevronRight, ChevronLeft, Target, Star, Trophy } from "lucide-react";
 import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +20,7 @@ const MILESTONE_LABELS: Record<string, string> = {
 };
 
 export default function CustomerReferrals() {
+  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const { codes, generateCode } = useReferralCodes();
   const { programs } = useReferralPrograms();
@@ -50,7 +52,11 @@ export default function CustomerReferrals() {
   }
 
   return (
-    <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-6 animate-fade-in">
+    <div className="px-4 py-6 pb-24 space-y-6 animate-fade-in">
+      <button onClick={() => navigate("/customer/more")} className="flex items-center gap-1 text-muted-foreground mb-2 hover:text-foreground transition-colors" aria-label="Back to More menu">
+        <ChevronLeft className="h-4 w-4" />
+        <span className="text-sm">More</span>
+      </button>
       <h1 className="text-h2">Referrals</h1>
 
       {/* Share Section */}

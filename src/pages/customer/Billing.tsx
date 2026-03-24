@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, Clock, Receipt, ChevronRight, AlertTriangle, Gift } from "lucide-react";
+import { CreditCard, Clock, Receipt, ChevronRight, AlertTriangle, Gift, ChevronLeft } from "lucide-react";
 import { PageSkeleton } from "@/components/PageSkeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 
@@ -24,6 +24,10 @@ export default function CustomerBillingPage() {
   if (!subscription) {
     return (
       <div className="px-4 py-6 space-y-4 animate-fade-in pb-24">
+        <button onClick={() => navigate("/customer/more")} className="flex items-center gap-1 text-muted-foreground mb-2 hover:text-foreground transition-colors" aria-label="Back to More menu">
+          <ChevronLeft className="h-4 w-4" />
+          <span className="text-sm">More</span>
+        </button>
         <h1 className="text-h2">Billing</h1>
         <EmptyState
           icon={CreditCard}
@@ -41,6 +45,10 @@ export default function CustomerBillingPage() {
 
   return (
     <div className="px-4 py-6 space-y-4 animate-fade-in pb-24">
+      <button onClick={() => navigate("/customer/more")} className="flex items-center gap-1 text-muted-foreground mb-2 hover:text-foreground transition-colors" aria-label="Back to More menu">
+        <ChevronLeft className="h-4 w-4" />
+        <span className="text-sm">More</span>
+      </button>
       <h1 className="text-h2">Billing</h1>
 
       {/* Current Plan */}

@@ -10,7 +10,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Copy, Link2, Users, Gift, ChevronDown, AlertTriangle, Info } from "lucide-react";
+import { Plus, Copy, Link2, Users, Gift, ChevronDown, ChevronLeft, AlertTriangle, Info } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -71,6 +71,10 @@ export default function ByocCenter() {
 
   return (
     <div className="animate-fade-in p-4 pb-24 space-y-4">
+      <button onClick={() => navigate("/provider/more")} className="flex items-center gap-1 text-muted-foreground mb-2 hover:text-foreground transition-colors" aria-label="Back to More menu">
+        <ChevronLeft className="h-4 w-4" />
+        <span className="text-sm">More</span>
+      </button>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-h2">BYOC Center</h1>

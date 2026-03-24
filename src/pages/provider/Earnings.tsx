@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,6 +22,7 @@ import {
   Target,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
   Info,
   CalendarClock,
 } from "lucide-react";
@@ -250,6 +252,7 @@ function PayoutsList() {
 }
 
 export default function ProviderEarnings() {
+  const navigate = useNavigate();
   const [mainTab, setMainTab] = useState("earnings");
   const [period, setPeriod] = useState<EarningsPeriod>("month");
   const [holdExpanded, setHoldExpanded] = useState(false);
@@ -269,6 +272,10 @@ export default function ProviderEarnings() {
 
   return (
     <div className="animate-fade-in p-4 pb-24 space-y-5">
+      <button onClick={() => navigate("/provider/more")} className="flex items-center gap-1 text-muted-foreground mb-2 hover:text-foreground transition-colors" aria-label="Back to More menu">
+        <ChevronLeft className="h-4 w-4" />
+        <span className="text-sm">More</span>
+      </button>
       <div>
         <h1 className="text-h2">Earnings</h1>
         <p className="text-caption mt-0.5">Track your earnings and payouts</p>
