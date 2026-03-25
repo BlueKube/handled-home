@@ -12,6 +12,7 @@ import {
   ShieldCheck, TrendingUp, TrendingDown, Minus, Star, Camera, Clock,
   AlertTriangle, Award, GraduationCap, CheckCircle2, Lock, ChevronLeft,
 } from "lucide-react";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
@@ -25,8 +26,16 @@ const BAND_CONFIG: Record<string, { color: string; bg: string; label: string }> 
 export default function ProviderQualityScore() {
   const navigate = useNavigate();
   const { org } = useProviderOrg();
-  const { score, rollups, scoreEvents, isLoading } = useProviderQualityScore(org?.id);
+  const { score, rollups, scoreEvents, isLoading, isError, refetch } = useProviderQualityScore(org?.id);
   const { currentTier, tierConfig, tierEntry, tierHistory, pendingGates, completedGates, isLoading: tierLoading } = useProviderTier(org?.id);
+
+  if (isError) {
+    return (
+      <div className="animate-fade-in p-4 pb-24">
+        <QueryErrorCard message="Failed to load quality score." onRetry={() => refetch()} />
+      </div>
+    );
+  }
 
   if (isLoading || tierLoading) {
     return (

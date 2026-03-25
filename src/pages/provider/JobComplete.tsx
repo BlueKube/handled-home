@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { ChevronLeft, CheckCircle2, Camera, AlertTriangle, Send, PartyPopper, DollarSign, ChevronRight, Trophy } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { toast as sonnerToast } from "sonner";
@@ -83,7 +84,7 @@ function RouteProgress({ currentJobId }: { currentJobId: string }) {
 export default function ProviderJobComplete() {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
-  const { data, isLoading } = useJobDetail(jobId);
+  const { data, isLoading, isError, refetch } = useJobDetail(jobId);
   const actions = useJobActions(jobId);
   const [summary, setSummary] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -93,6 +94,14 @@ export default function ProviderJobComplete() {
 
   // Track which SKUs have completed their level feedback
   const [completedLevelSkus, setCompletedLevelSkus] = useState<Set<string>>(new Set());
+
+  if (isError) {
+    return (
+      <div className="animate-fade-in p-4 pb-24">
+        <QueryErrorCard message="Failed to load job details." onRetry={() => refetch()} />
+      </div>
+    );
+  }
 
   if (isLoading || !data) {
     return (
