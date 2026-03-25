@@ -171,7 +171,7 @@ def parse_provider_flows(text: str) -> list[FlowSection]:
                 number=s_number,
                 title=s_title,
                 body=screen_body,
-                line_start=start_line + 1 + s_start,  # 1-indexed line of screen heading
+                line_start=start_line + 1 + s_start + 1,  # 1-indexed line of screen heading
             ))
 
         # Body = text before first screen
