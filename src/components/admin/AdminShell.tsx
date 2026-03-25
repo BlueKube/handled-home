@@ -251,10 +251,11 @@ export function AdminShell() {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
+        <a href="#main-content" className="skip-nav">Skip to main content</a>
         <AdminSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           <AdminCommandBar />
-          <main className="flex-1 overflow-auto">
+          <main id="main-content" className="flex-1 overflow-auto">
             <Outlet />
           </main>
         </div>

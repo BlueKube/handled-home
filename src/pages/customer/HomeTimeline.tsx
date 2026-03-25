@@ -62,7 +62,7 @@ export default function HomeTimeline() {
 
   if (isLoading) {
     return (
-      <div className="p-4 space-y-4 max-w-lg mx-auto">
+      <div className="p-4 space-y-4">
         <Skeleton className="h-8 w-48" />
         <div className="grid grid-cols-3 gap-3">
           {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
@@ -73,7 +73,7 @@ export default function HomeTimeline() {
   }
 
   return (
-    <div className="p-4 pb-24 space-y-6 max-w-lg mx-auto animate-fade-in">
+    <div className="p-4 pb-24 space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="p-2 rounded-lg hover:bg-secondary">

@@ -35,8 +35,8 @@ export function EmptyState({
       <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center">
         <Icon className="h-6 w-6 text-accent" />
       </div>
-      <p className="text-sm font-semibold text-foreground">{title}</p>
-      <p className="text-xs text-muted-foreground text-center max-w-[280px]">
+      <p className="text-h3 text-foreground">{title}</p>
+      <p className="text-body text-muted-foreground text-center max-w-[280px]">
         {body}
       </p>
       {ctaLabel && ctaAction && (

@@ -23,13 +23,28 @@ D12. Doc Structure & Navigability     (0.7×) — heading hierarchy, tables, cro
 
 ## Anti-Gaming Guards
 
-1. Word-count bell curve (3k–8k sweet spot)
+1. Word-count bell curve (3k–8k sweet spot, floor at 1.5k with gentle ramp)
 2. Specificity requirement (actual values: px, ms, HSL, cubic-bezier)
 3. Duplicate heading detection (Levenshtein >80%)
-4. CSS coherence check (HSL values vs index.css)
+4. CSS coherence check (HSL token values vs index.css + gradient/shadow HSL validation)
 5. Boilerplate detection (Jaccard >0.8 on 50+ word paragraphs)
 6. Actionability ratio (sections <20% actionable lines capped at 50%)
 7. Component cross-reference (screen-flows.md coverage, informational)
+
+## v2 Changes (2026-03-24)
+
+- D4: Component detection scoped to ## Components parent section + .tsx filename
+  match. PascalCase-only fallback removed — eliminates false positives from
+  non-component headings like "Spacing Scale" or "Dark Elevation Model".
+- D4: Anatomy sub-check uses → chain patterns and "slot"/"anatomy" + structural
+  terms instead of counting common English words (content, label, end, start).
+- D5/Guard 4: Gradient and shadow hsl() values cross-checked against index.css
+  known token values. Invented hsl() calls penalised 0.25 each (cap 2.0).
+- Guard 1: Word-count floor lowered from 2,000 to 1,500 with gentler ramp curve.
+  1,500–2,000 is a soft warning zone (0.5 penalty) instead of hard cliff.
+- D12: "Consistent component template" sub-check now measures information
+  consistency (do ≥60% of component specs include states, variants, usage?)
+  rather than requiring H4 sub-heading nesting patterns.
 
 Output (grep-friendly):
   design_score:        42.50
@@ -606,26 +621,61 @@ def score_d3_animation_motion(sections: list[Section], text: str) -> tuple[float
 # States we expect documented per component
 COMPONENT_STATES = ["hover", "active", "focus", "disabled", "loading", "error", "pressed", "selected"]
 
+def _find_components_parent(sections: list[Section]) -> Optional[Section]:
+    """Find the H2 'Components' section that scopes component detection."""
+    for s in sections:
+        if s.level == 2 and re.search(r'\bcomponents?\b', s.title, re.IGNORECASE):
+            return s
+    return None
+
+
+def _is_component_heading(title: str, ui_components: list[str]) -> bool:
+    """Determine if a heading names a real UI component.
+
+    Two-pass strategy:
+      1. Match against actual src/components/ui/*.tsx file names (high confidence).
+      2. Match headings containing '.tsx' (explicit file reference).
+    PascalCase alone is NOT sufficient — that was too greedy and matched
+    non-component headings like 'Spacing Scale' or 'Dark Elevation Model'.
+    """
+    title_lower = title.lower().replace(" ", "").replace("-", "")
+
+    # Pass 1: match against real component file stems
+    for comp in ui_components:
+        comp_norm = comp.replace("-", "")
+        if comp_norm in title_lower:
+            return True
+
+    # Pass 2: explicit .tsx reference in heading (e.g. "Button (`button.tsx`)")
+    if ".tsx" in title.lower():
+        return True
+
+    return False
+
+
 def score_d4_component_specs(sections: list[Section], text: str, ui_components: list[str]) -> tuple[float, list[Issue]]:
     """D4: Component Spec Coverage — count, states, variants, anatomy, usage."""
     issues = []
     points = 0.0
 
-    # Find component sections (H3 or H4 headings that look like component names)
+    # Find component sections — scoped to the ## Components parent when it exists.
+    # This prevents non-component H3s (e.g. "Spacing Scale", "Easing Curves") from
+    # being counted as components and diluting coverage ratios.
     all_secs = get_all_sections(sections)
+    components_parent = _find_components_parent(sections)
+
     component_sections = []
-    for s in all_secs:
-        if s.level >= 3:
-            title_lower = s.title.lower()
-            # Match component-like headings (capitalized names, or names matching ui files)
-            is_component = any(comp in title_lower.replace(" ", "").replace("-", "")
-                             for comp in [c.replace("-", "") for c in ui_components])
-            # Also match common patterns like "Button (`button.tsx`)" or "### Card"
-            is_component = is_component or bool(re.search(r'\.tsx|component', s.title, re.IGNORECASE))
-            # Also match PascalCase or known component names
-            is_component = is_component or bool(re.match(r'^[A-Z][a-z]+(?:[A-Z][a-z]+)*', s.title.split('(')[0].split('`')[0].strip()))
-            if is_component:
-                component_sections.append(s)
+
+    if components_parent:
+        # Only search within the Components section tree
+        candidates = get_all_sections([components_parent])
+    else:
+        # Fallback: search all H3+ headings (backward-compat)
+        candidates = [s for s in all_secs if s.level >= 3]
+
+    for s in candidates:
+        if s.level >= 3 and _is_component_heading(s.title, ui_components):
+            component_sections.append(s)
 
     comp_count = len(component_sections)
 
@@ -673,12 +723,29 @@ def score_d4_component_specs(sections: list[Section], text: str, ui_components: 
         pass  # already flagged above
 
     # Sub-check 4: Slot/anatomy documentation (0-2 points)
-    anatomy_kws = ["slot", "anatomy", "leading", "trailing", "prefix", "suffix",
-                   "icon-left", "icon-right", "start", "end", "content", "label"]
+    # Improved: look for structured anatomy descriptions (→ chains like
+    # "icon → label → badge", or explicit "anatomy"/"slot" keywords paired
+    # with a structural pattern) rather than counting common English words
+    # like "content", "label", "end" that produce false positives.
     comps_with_anatomy = 0
     for s in component_sections:
         full = s.full_text.lower()
-        if count_keyword_matches(full, anatomy_kws) >= 2:
+        has_anatomy = False
+        # Primary signal: → chain with 2+ arrows (e.g. "icon → label → badge")
+        # Use [^→]+ between arrows to allow parens, digits, punctuation in slot names
+        arrow_chains = re.findall(r'[a-z][^→]+→[^→]+→', full)
+        if arrow_chains:
+            has_anatomy = True
+        # Secondary signal: explicit "slot" or "anatomy" keyword + at least one
+        # structural term (leading/trailing/prefix/suffix/icon-left/icon-right)
+        if not has_anatomy:
+            has_slot_keyword = bool(re.search(r'\bslot\b|\banatomy\b', full))
+            structural_terms = ["leading", "trailing", "prefix", "suffix",
+                                "icon-left", "icon-right"]
+            has_structural = any(t in full for t in structural_terms)
+            if has_slot_keyword and has_structural:
+                has_anatomy = True
+        if has_anatomy:
             comps_with_anatomy += 1
 
     if comp_count > 0:
@@ -1264,30 +1331,61 @@ def score_d12_doc_structure(sections: list[Section], text: str) -> tuple[float, 
     if h3_count < 8:
         issues.append(Issue("D12_structure", f"Only {h3_count} H3 headings (need 15+)", 1))
 
-    # Sub-check 2: Consistent component template (0-2 points)
-    # Check if component sections follow a similar sub-heading pattern
+    # Sub-check 2: Consistent component information pattern (0-2 points)
+    # Rather than requiring specific H4 sub-headings, check whether component
+    # sections consistently provide the same categories of information:
+    # states, variants/sizes, and usage guidance.  This rewards documents
+    # that use a repeatable template regardless of formatting style (bullet
+    # lists, tables, H4s, etc.).
     all_secs = get_all_sections(sections)
-    comp_secs = [s for s in all_secs if s.level >= 3 and s.subsections]
+    ui_components = get_ui_component_names()
+    components_parent = _find_components_parent(sections)
+
+    if components_parent:
+        comp_candidates = get_all_sections([components_parent])
+    else:
+        comp_candidates = [s for s in all_secs if s.level >= 3]
+
+    comp_secs = [s for s in comp_candidates
+                 if s.level >= 3 and _is_component_heading(s.title, ui_components)]
+
     if len(comp_secs) >= 5:
-        # Check if they have similar sub-heading structures
-        sub_patterns = []
+        # Count how many include each information category
+        INFO_CATEGORIES = {
+            "states": COMPONENT_STATES,  # hover, active, focus, disabled, ...
+            "variants": ["variant", "size", "sm", "lg", "xl", "compact", "outline", "ghost"],
+            "usage": ["when to use", "do not use", "don't use", "use when", "avoid",
+                      "best for", "not for", "instead use", "prefer"],
+        }
+        category_counts = {cat: 0 for cat in INFO_CATEGORIES}
         for cs in comp_secs:
-            sub_titles = tuple(sorted(sub.title.lower() for sub in cs.subsections))
-            sub_patterns.append(sub_titles)
-        # Count how many share at least one sub-heading name
-        common_count = 0
-        if sub_patterns:
-            all_sub_names = [name for pat in sub_patterns for name in pat]
-            name_counts = Counter(all_sub_names)
-            repeated = sum(1 for c in name_counts.values() if c >= 3)
-            if repeated >= 2:
-                points += 2.0
-            elif repeated >= 1:
-                points += 1.0
+            full = cs.full_text.lower()
+            for cat, kws in INFO_CATEGORIES.items():
+                if cat == "states":
+                    if sum(1 for st in kws if st in full) >= 3:
+                        category_counts[cat] += 1
+                elif cat == "usage":
+                    if any(kw in full for kw in kws):
+                        category_counts[cat] += 1
+                else:
+                    if any(kw in full for kw in kws):
+                        category_counts[cat] += 1
+
+        # Award points based on how many categories are consistently present
+        # (appearing in ≥60% of component sections)
+        threshold = len(comp_secs) * 0.6
+        consistent_cats = sum(1 for c in category_counts.values() if c >= threshold)
+
+        if consistent_cats >= 3:
+            points += 2.0
+        elif consistent_cats >= 2:
+            points += 1.5
+        elif consistent_cats >= 1:
+            points += 1.0
     elif len(comp_secs) >= 2:
         points += 0.5
     else:
-        issues.append(Issue("D12_structure", "Fewer than 5 components with consistent sub-heading template", 1))
+        issues.append(Issue("D12_structure", "Fewer than 5 component specs for consistency analysis", 1))
 
     # Sub-check 3: Cross-references to other docs (0-2 points)
     cross_refs = count_pattern_matches(text,
@@ -1332,11 +1430,18 @@ def calculate_gaming_penalty(sections: list[Section], text: str) -> tuple[float,
     penalty = 0.0
 
     # ─── Guard 1: Word-count bell curve ───
+    # Lowered floor from 2000→1500 with gentler ramp.  A concise 1500-word
+    # doc that covers every dimension shouldn't be penalised as hard as one
+    # that's genuinely too sparse (<800 words).
     wc = count_words(text)
-    if wc < 2000:
-        p = (2000 - wc) / 500 * 2.0  # Up to 8 points penalty for very short
-        penalty += min(p, 8.0)
-        issues.append(Issue("GAMING_wordcount", f"Word count {wc} below 2,000 minimum", 2))
+    if wc < 1500:
+        p = (1500 - wc) / 500 * 1.5  # Gentler: max ~4.5 for very short
+        penalty += min(p, 5.0)
+        issues.append(Issue("GAMING_wordcount", f"Word count {wc} below 1,500 minimum", 2))
+    elif wc < 2000:
+        # Soft warning zone — minor penalty
+        penalty += 0.5
+        issues.append(Issue("GAMING_wordcount", f"Word count {wc} is in 1,500–2,000 warning zone", 1))
     elif wc > 12000:
         p = (wc - 12000) / 2000 * 3.0  # Escalating penalty for bloat
         penalty += min(p, 10.0)
@@ -1405,12 +1510,19 @@ def calculate_gaming_penalty(sections: list[Section], text: str) -> tuple[float,
 
 
 def calculate_css_penalty(text: str, css_tokens: CSSTokens) -> tuple[float, list[Issue]]:
-    """Guard 4: CSS coherence check. HSL values in doc vs index.css."""
+    """Guard 4: CSS coherence check. HSL values in doc vs index.css.
+
+    Also validates gradient and shadow HSL values — any hsl() call in the
+    design guidelines whose H/S/L components don't correspond to a known
+    token value in index.css is flagged (informational, lighter penalty).
+    """
     issues = []
     penalty = 0.0
 
     if not css_tokens.light:
         return 0.0, []
+
+    # ── Token HSL coherence (strict — 0.5 per mismatch) ────────────────────
 
     # Find HSL value claims in the design guidelines
     # Pattern: token name followed by HSL-like values
@@ -1422,32 +1534,60 @@ def calculate_css_penalty(text: str, css_tokens: CSSTokens) -> tuple[float, list
 
     for token_name, h, s, l in hsl_claims:
         claimed = f"{h} {s}% {l}%"
-        # Check against light mode
-        if token_name in css_tokens.light:
-            actual = css_tokens.light[token_name].strip()
-            # Normalize whitespace
-            actual_norm = re.sub(r'\s+', ' ', actual)
-            claimed_norm = re.sub(r'\s+', ' ', claimed)
-            if actual_norm != claimed_norm:
-                penalty += 0.5
-                issues.append(Issue("CSS_coherence",
-                    f"--{token_name}: doc says '{claimed}' but index.css has '{actual}'", 2))
+        claimed_norm = re.sub(r'\s+', ' ', claimed)
 
-    # Also check dark mode claims
-    dark_claims = re.findall(
-        r'(?:dark|\.dark)[^|]*--([a-z-]+)[`\s|:]+\s*(\d+)\s+(\d+)%\s+(\d+)%',
-        text, re.IGNORECASE
-    )
-    for token_name, h, s, l in dark_claims:
-        claimed = f"{h} {s}% {l}%"
+        # Check against BOTH light and dark mode — the token might appear in
+        # a dark-mode section with its dark value, or in a light-mode table
+        # with its light value.  Only flag if the claimed value doesn't match
+        # either mode.
+        matches_light = False
+        matches_dark = False
+
+        if token_name in css_tokens.light:
+            actual_light = re.sub(r'\s+', ' ', css_tokens.light[token_name].strip())
+            if actual_light == claimed_norm:
+                matches_light = True
+
         if token_name in css_tokens.dark:
-            actual = css_tokens.dark[token_name].strip()
-            actual_norm = re.sub(r'\s+', ' ', actual)
-            claimed_norm = re.sub(r'\s+', ' ', claimed)
-            if actual_norm != claimed_norm:
-                penalty += 0.5
+            actual_dark = re.sub(r'\s+', ' ', css_tokens.dark[token_name].strip())
+            if actual_dark == claimed_norm:
+                matches_dark = True
+
+        if not matches_light and not matches_dark and (
+            token_name in css_tokens.light or token_name in css_tokens.dark
+        ):
+            # Genuine mismatch — value doesn't match either mode
+            expected = css_tokens.light.get(token_name, css_tokens.dark.get(token_name, "?"))
+            penalty += 0.5
+            issues.append(Issue("CSS_coherence",
+                f"--{token_name}: doc says '{claimed}' but index.css has light='{css_tokens.light.get(token_name, 'N/A')}' dark='{css_tokens.dark.get(token_name, 'N/A')}'", 2))
+
+    # ── Gradient / shadow HSL coherence (softer — 0.25 per invented value) ─
+    # Collect all known HSL value strings from index.css (both modes)
+    known_hsl = set()
+    for v in css_tokens.light.values():
+        v_norm = re.sub(r'\s+', ' ', v.strip())
+        if re.match(r'\d+\s+\d+%\s+\d+%', v_norm):
+            known_hsl.add(v_norm)
+    for v in css_tokens.dark.values():
+        v_norm = re.sub(r'\s+', ' ', v.strip())
+        if re.match(r'\d+\s+\d+%\s+\d+%', v_norm):
+            known_hsl.add(v_norm)
+
+    # Find hsl() calls in gradients / standalone specs (NOT in token tables,
+    # which are already covered above).  Pattern: hsl(H S% L%)
+    hsl_calls = re.findall(r'hsl\(\s*(\d+)\s+(\d+)%\s+(\d+)%\s*\)', text)
+    invented_count = 0
+    for h, s, l in hsl_calls:
+        val = f"{h} {s}% {l}%"
+        if val not in known_hsl:
+            invented_count += 1
+            if invented_count <= 5:  # limit noise
                 issues.append(Issue("CSS_coherence",
-                    f"--{token_name} (dark): doc says '{claimed}' but index.css has '{actual}'", 2))
+                    f"hsl({val}) in doc does not match any index.css token value (invented?)", 1))
+
+    if invented_count > 0:
+        penalty += min(invented_count * 0.25, 2.0)  # cap at 2.0
 
     return penalty, issues
 

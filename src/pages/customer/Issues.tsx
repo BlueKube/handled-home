@@ -31,7 +31,7 @@ export default function CustomerIssues() {
 
   if (isLoading) {
     return (
-      <div className="px-4 py-6 pb-24 max-w-lg mx-auto">
+      <div className="p-4 pb-24">
         <h1 className="text-h2 mb-4">My Issues</h1>
         <div className="space-y-3">
           {[1, 2].map((i) => (
@@ -43,7 +43,7 @@ export default function CustomerIssues() {
   }
 
   return (
-    <div className="px-4 py-6 pb-24 max-w-lg mx-auto animate-fade-in">
+    <div className="p-4 pb-24 animate-fade-in">
       <h1 className="text-h2 mb-4">My Issues</h1>
 
       {(!issues || issues.length === 0) ? (

@@ -23,7 +23,7 @@ export default function CustomerSubscription() {
 
   if (!subscription) {
     return (
-      <div className="p-4 pb-24 space-y-6 animate-fade-in max-w-lg mx-auto">
+      <div className="p-4 pb-24 space-y-6 animate-fade-in">
         <h1 className="text-h2">Subscription <HelpTip text="Your subscription controls your plan tier, billing cycle, and service schedule. Changes take effect at the start of your next cycle." /></h1>
         <CustomerEmptyState
           icon={Shield}
@@ -39,7 +39,7 @@ export default function CustomerSubscription() {
   const isPaused = subscription.paused_at != null;
 
   return (
-    <div className="p-4 pb-24 space-y-6 animate-fade-in max-w-lg mx-auto">
+    <div className="p-4 pb-24 space-y-6 animate-fade-in">
       <h1 className="text-h2">Subscription <HelpTip text="Your subscription controls your plan tier, billing cycle, and service schedule. Changes take effect at the start of your next cycle." /></h1>
 
       {subscription.status === "past_due" && (

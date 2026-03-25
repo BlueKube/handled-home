@@ -314,7 +314,7 @@ export default function ProviderJobPhotos() {
 
       {/* Sticky Action Bar */}
       {showStickyBar && (
-        <div className="fixed bottom-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border px-4 py-3 pb-safe space-y-2 max-w-2xl mx-auto">
+        <div className="fixed bottom-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border px-4 py-3 pb-safe space-y-2">
           <Button
             className="w-full"
             size="lg"

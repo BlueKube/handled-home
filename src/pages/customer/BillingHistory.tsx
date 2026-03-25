@@ -26,7 +26,7 @@ export default function CustomerBillingHistory() {
   if (isLoading) return <PageSkeleton />;
 
   return (
-    <div className="px-4 py-6 space-y-4 animate-fade-in pb-24 max-w-lg mx-auto">
+    <div className="p-4 space-y-4 animate-fade-in pb-24">
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" onClick={() => navigate("/customer/billing")}>
           <ChevronLeft className="h-5 w-5" />

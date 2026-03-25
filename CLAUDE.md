@@ -15,10 +15,10 @@ Read and follow `docs/skills/prd-to-production-workflow.md` before starting any 
 ### Quick reference (full details in the workflow doc)
 
 1. **PRD → Plan** — Decompose the PRD into phases and batches. Write `docs/working/plan.md`. Get human approval.
-2. **Batch execution** — For each batch: re-anchor → write spec in `docs/working/batch-specs/` → implement → commit → 10-agent code review → fix loop → validate build → validate visually → push.
+2. **Batch execution** — For each batch: re-anchor → write spec in `docs/working/batch-specs/` → implement → commit & push → code review (via sub-agents) → fix loop → validate build → push.
 3. **Doc sync** — After each phase, sync the six north star documents (see below).
-4. **Phase transition** — Mark phase complete in plan, restate what's next.
-5. **Completion** — Final recap, archive `docs/working/` to `docs/archive/`.
+4. **Phase transition** — Consolidation check (duplicated patterns, dead code, overgrown files) → fresh session → restate what's next.
+5. **Completion** — Final recap, archive `docs/working/` to `docs/archive/[prd-name]-[YYYY-MM-DD]/`, clean working folder, pick up next PRD from `docs/upcoming/`.
 
 ### Slash commands
 
@@ -79,9 +79,52 @@ After fixing MUST-FIX and SHOULD-FIX findings, run a **lightweight re-review** (
 ```
 docs/working/
 ├── prd.md              # The current PRD (copied here at start)
-├── plan.md             # The phased implementation plan
+├── plan.md             # The phased implementation plan (includes Session Handoff + Progress Table)
 └── batch-specs/        # Individual batch specs (one per batch)
+
+docs/upcoming/          # PRD queue for scheduled automation (numbered: 001-xxx.md, 002-xxx.md)
 ```
+
+### Scheduled Task / Multi-Session Automation
+
+This workflow supports autonomous execution via Claude Code Scheduled Tasks. Each session picks up where the last one left off using `plan.md` as the durable state machine.
+
+**Key rules for scheduled sessions:**
+1. **Read Session Handoff first** — the top section of `plan.md` tells you exactly where to resume
+2. **Cap at 3–4 batches per session** to stay within context limits
+3. **Update Session Handoff before exiting** — every session must write its exit state
+4. **PRD queue** — when a plan completes, check `docs/upcoming/` for the next PRD (lowest number), archive the old working folder, and start the new plan
+5. **Review intensity** — use batch tags (`review: full` / `review: light` / `review: verify`) to scale review effort appropriately
+6. **Combinable batches** — consecutive batches with identical mechanical patterns can be merged into one implementation + one review
+
+See `docs/skills/prd-to-production-workflow.md` → "Scheduled Task Automation" for full details.
+
+### Session Resilience
+
+Sessions can stop unexpectedly (context limits, rate limits, timeouts). The workflow is designed so any session can resume from where the last left off.
+
+1. **Push after every commit** — don't accumulate unpushed work. If a session dies with unpushed changes, they may be unrecoverable.
+2. **Start a fresh session at every phase boundary** — phase transitions are natural seams. Don't carry stale context from Phase N into Phase N+1.
+3. **Use `🟡` for partial batches** — if a session stops mid-batch, mark it `🟡 4/7 files done, pushed` in the progress table so the next session knows exactly where to continue.
+4. **Never block on human input during autonomous execution** — if something is ambiguous, make the best judgment call, commit with a note, and flag it for human review in `plan.md`.
+5. **All review lanes run as sub-agents** — review findings stay in sub-agent context, only the final scored report enters the main context. This keeps batches to ~8-10K tokens in the main window.
+
+### Progress tracker status key
+
+| Symbol | Meaning |
+|--------|---------|
+| `✅` | Complete and pushed |
+| `🟡` | In progress — partial work pushed (note what's done) |
+| `⬜` | Not started |
+| `❌` | Blocked (note reason in table) |
+
+### Review intensity by batch type
+
+| Tag | Agents | When to use |
+|-----|--------|-------------|
+| `review: full` | 10 (default) | New features, component changes, logic changes |
+| `review: light` | 6 (Lanes a+b+e) | Mechanical sweeps, CSS-only, find-replace |
+| `review: verify` | 0 (build only) | Verification batches, doc sync, no code changes |
 
 ## Six North Star Documents
 

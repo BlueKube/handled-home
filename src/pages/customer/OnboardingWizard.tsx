@@ -135,7 +135,7 @@ export default function OnboardingWizard() {
 
   if (isLoading || propLoading) {
     return (
-      <div className="p-4 space-y-4 max-w-lg mx-auto animate-fade-in">
+      <div className="p-4 space-y-4 animate-fade-in">
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-64 w-full" />
@@ -146,7 +146,7 @@ export default function OnboardingWizard() {
   // D1-F2: Show verifying state after checkout redirect
   if (checkoutSuccess && (!subscription || !["active", "trialing"].includes(subscription.status ?? ""))) {
     return (
-      <div className="max-w-lg mx-auto p-4 space-y-6 text-center animate-fade-in">
+      <div className="p-4 space-y-6 text-center animate-fade-in">
         <Loader2 className="h-10 w-10 animate-spin text-accent mx-auto" />
         <h1 className="text-h2">Verifying your subscription…</h1>
         <p className="text-muted-foreground text-sm">This usually takes just a few seconds.</p>
@@ -322,7 +322,7 @@ function PropertyStep({ onComplete }: { onComplete: () => Promise<void> }) {
   const isValid = Object.keys(validateProperty(form)).length === 0;
 
   return (
-    <div className="max-w-lg mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="text-center">
         <Home className="h-10 w-10 text-accent mx-auto mb-3" />
         <h1 className="text-h2">Tell us about your home</h1>
@@ -434,7 +434,7 @@ function ZoneCheckStep({ onComplete, onWaitlist }: { onComplete: () => Promise<v
   };
 
   return (
-    <div className="max-w-lg mx-auto space-y-6 text-center">
+    <div className="space-y-6 text-center">
       <MapPin className="h-10 w-10 text-accent mx-auto" />
       <h1 className="text-h2">Checking your area</h1>
       <p className="text-muted-foreground text-sm">Zip code: <span className="font-mono font-semibold">{zipCode}</span></p>
@@ -542,7 +542,7 @@ function PlanStep({ onSelectPlan }: { onSelectPlan: (planId: string) => Promise<
   };
 
   return (
-    <div className="max-w-lg mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="text-center">
         <Shield className="h-10 w-10 text-accent mx-auto mb-3" />
         <h1 className="text-h2">Pick your membership</h1>
@@ -655,7 +655,7 @@ function SubscribeStep({ planId, onComplete }: { planId: string | null; onComple
   };
 
   if (isLoading) {
-    return <div className="max-w-lg mx-auto space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-48 w-full" /></div>;
+    return <div className="space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-48 w-full" /></div>;
   }
 
   if (!plan) {
@@ -663,7 +663,7 @@ function SubscribeStep({ planId, onComplete }: { planId: string | null; onComple
   }
 
   return (
-    <div className="max-w-lg mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="text-center">
         <Sparkles className="h-10 w-10 text-accent mx-auto mb-3" />
         <h1 className="text-h2">Confirm your membership</h1>
@@ -747,7 +747,7 @@ function ServiceDayStep({ onComplete }: { onComplete: () => Promise<void> }) {
 
   if (assignLoading || createOrRefreshOffer.isPending) {
     return (
-      <div className="max-w-lg mx-auto space-y-4 text-center py-8">
+      <div className="space-y-4 text-center py-8">
         <Loader2 className="h-8 w-8 animate-spin text-accent mx-auto" />
         <p className="text-sm text-muted-foreground">Finding the best route day for your area…</p>
       </div>
@@ -755,7 +755,7 @@ function ServiceDayStep({ onComplete }: { onComplete: () => Promise<void> }) {
   }
 
   return (
-    <div className="max-w-lg mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="text-center">
         <CalendarCheck className="h-10 w-10 text-accent mx-auto mb-3" />
         <h1 className="text-h2">Your Service Day</h1>
@@ -831,7 +831,7 @@ function RoutineStep({ onComplete }: { onComplete: () => Promise<void> }) {
   };
 
   return (
-    <div className="max-w-lg mx-auto space-y-6 text-center">
+    <div className="space-y-6 text-center">
       <Sparkles className="h-10 w-10 text-accent mx-auto" />
       <h1 className="text-h2">Build your routine</h1>
       <p className="text-muted-foreground text-sm">
@@ -950,7 +950,7 @@ function HomeSetupStep({ onComplete }: { onComplete: () => Promise<void> }) {
 
   if (phase === "coverage") {
     return (
-      <div className="max-w-lg mx-auto space-y-5">
+      <div className="space-y-5">
         <div className="text-center">
           <Sparkles className="h-10 w-10 text-accent mx-auto mb-3" />
           <h1 className="text-h2">Make recommendations smarter</h1>
@@ -1005,7 +1005,7 @@ function HomeSetupStep({ onComplete }: { onComplete: () => Promise<void> }) {
   const filledCount = Object.values(sizingForm).filter(Boolean).length;
 
   return (
-    <div className="max-w-lg mx-auto space-y-5">
+    <div className="space-y-5">
       <div className="text-center">
         <Home className="h-10 w-10 text-accent mx-auto mb-3" />
         <h1 className="text-h2">Home size (quick estimate)</h1>
@@ -1066,7 +1066,7 @@ function CompleteStep() {
   const navigate = useNavigate();
 
   return (
-    <div className="max-w-lg mx-auto space-y-6 text-center animate-fade-in">
+    <div className="space-y-6 text-center animate-fade-in">
       <CheckCircle className="h-16 w-16 text-accent mx-auto" />
       <h1 className="text-h2">You're all set!</h1>
       <p className="text-muted-foreground">

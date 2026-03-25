@@ -24,7 +24,7 @@ export default function CustomerBillingPage() {
 
   if (!subscription) {
     return (
-      <div className="px-4 py-6 space-y-4 animate-fade-in pb-24">
+      <div className="p-4 space-y-4 animate-fade-in pb-24">
         <button onClick={() => navigate("/customer/more")} className="flex items-center gap-1 text-muted-foreground mb-2 hover:text-foreground transition-colors" aria-label="Back to More menu">
           <ChevronLeft className="h-4 w-4" />
           <span className="text-sm">More</span>
@@ -45,7 +45,7 @@ export default function CustomerBillingPage() {
   const statusLabel = hasFailedPayment ? "Action needed" : latestInvoice?.status === "PAID" ? "Paid" : latestInvoice?.status ?? "No invoices";
 
   return (
-    <div className="px-4 py-6 space-y-4 animate-fade-in pb-24">
+    <div className="p-4 space-y-4 animate-fade-in pb-24">
       <button onClick={() => navigate("/customer/more")} className="flex items-center gap-1 text-muted-foreground mb-2 hover:text-foreground transition-colors" aria-label="Back to More menu">
         <ChevronLeft className="h-4 w-4" />
         <span className="text-sm">More</span>

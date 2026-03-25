@@ -12,7 +12,7 @@ export default function CustomerPhotoTimeline() {
   const { data: photos, isLoading } = usePropertyPhotoTimeline(property?.id);
 
   return (
-    <div className="p-4 pb-24 space-y-4 animate-fade-in max-w-lg mx-auto">
+    <div className="p-4 pb-24 space-y-4 animate-fade-in">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-5 w-5" />

@@ -651,4 +651,18 @@
 
 ---
 
-*Total features: 375 | Last updated: 2026-03-24 | Value-prop tags added per section*
+## Design System Conformance & Accessibility `trust-builder`
+
+367. Motion system: CSS custom property easing curves (--ease-default, --ease-out-expo, --ease-in-out, --ease-spring) with prefers-reduced-motion support — DONE
+368. Skip-nav links on all layouts (customer/provider AppLayout, admin AdminShell) targeting #main-content — DONE
+369. Semantic landmarks: `<main>`, `<nav>`, `<aside>`, `<header>` on all layouts — DONE
+370. Focus-visible rings on all interactive components (buttons, cards, inputs, tabs, badges) — DONE
+371. Dark mode elevation model: increased shadow opacity, visible card borders, overlay opacity adjustment (bg-black/70) — DONE
+372. Component conformance: all 30+ UI components aligned to design guidelines (sizing, radius, spacing, typography) — DONE
+373. Page template conformance: all customer/provider pages use p-4 pb-24, animate-fade-in, text-h2 titles, semantic tokens — DONE
+374. Form validation accessibility: FormMessage uses conditional role="alert" for screen reader announcements — DONE
+375. Alert component: border-l-4 accent bar, warning + success variants added — DONE
+
+---
+
+*Total features: 384 | Last updated: 2026-03-24 | Value-prop tags added per section*

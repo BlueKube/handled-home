@@ -13,7 +13,7 @@ export default function CustomerHistory() {
 
   if (isLoading) {
     return (
-      <div className="px-4 py-6 pb-24 max-w-lg mx-auto">
+      <div className="p-4 pb-24">
         <h1 className="text-h2 mb-4">Visits</h1>
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
@@ -25,7 +25,7 @@ export default function CustomerHistory() {
   }
 
   return (
-    <div className="px-4 py-6 pb-24 max-w-lg mx-auto animate-fade-in">
+    <div className="p-4 pb-24 animate-fade-in">
       <h1 className="text-h2 mb-4">Visits</h1>
 
       {(!jobs || jobs.length === 0) ? (

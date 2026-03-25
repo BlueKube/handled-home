@@ -8,7 +8,7 @@ const cardVariants = cva(
     variants: {
       variant: {
         default: "shadow-[0_1px_3px_rgba(0,0,0,0.06)]",
-        interactive: "shadow-[0_1px_3px_rgba(0,0,0,0.06)] active:scale-[0.98] active:shadow-sm cursor-pointer",
+        interactive: "shadow-[0_1px_3px_rgba(0,0,0,0.06)] active:scale-[0.98] active:shadow-sm cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
         glass: "bg-card/80 backdrop-blur-xl border-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06)]",
         elevated: "shadow-md",
       },

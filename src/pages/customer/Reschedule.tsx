@@ -159,7 +159,7 @@ export default function CustomerReschedule() {
   // --- Loading states ---
   if (metaLoading || holdLoading) {
     return (
-      <div className="px-4 py-6 max-w-lg mx-auto space-y-4">
+      <div className="p-4 space-y-4">
         <Skeleton className="h-6 w-40" />
         <Skeleton className="h-24 rounded-xl" />
         <Skeleton className="h-24 rounded-xl" />
@@ -169,7 +169,7 @@ export default function CustomerReschedule() {
 
   if (!visitMeta) {
     return (
-      <div className="px-4 py-6 max-w-lg mx-auto text-center space-y-3">
+      <div className="p-4 text-center space-y-3">
         <p className="text-sm text-muted-foreground">Visit not found.</p>
         <Button variant="link" onClick={() => navigate("/customer/upcoming")}>
           ← Back to upcoming
@@ -181,7 +181,7 @@ export default function CustomerReschedule() {
   // --- Done state ---
   if (step === "done") {
     return (
-      <div className="px-4 py-6 max-w-lg mx-auto space-y-5 text-center">
+      <div className="p-4 space-y-5 text-center">
         <CheckCircle2 className="h-14 w-14 text-success mx-auto" />
         <h1 className="text-h2">Visit Rescheduled</h1>
         <p className="text-sm text-muted-foreground">
@@ -193,7 +193,7 @@ export default function CustomerReschedule() {
   }
 
   return (
-    <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-5 animate-fade-in">
+    <div className="p-4 pb-24 space-y-5 animate-fade-in">
       {/* Header */}
       <Button
         variant="ghost"

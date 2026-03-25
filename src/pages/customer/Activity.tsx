@@ -83,7 +83,7 @@ export default function Activity() {
 
   if (isLoading) {
     return (
-      <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4">
+      <div className="p-4 pb-24 space-y-4 animate-fade-in">
         <h1 className="text-h2">Activity</h1>
         <div className="grid grid-cols-3 gap-3">
           {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
@@ -94,7 +94,7 @@ export default function Activity() {
   }
 
   return (
-    <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-6 animate-fade-in">
+    <div className="p-4 pb-24 space-y-6 animate-fade-in">
       {/* Header */}
       <h1 className="text-h2">Activity</h1>
 

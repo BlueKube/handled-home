@@ -143,7 +143,7 @@ export default function CustomerRoutine() {
   // H3: Service day gate only when subscribed
   if (!isLoading && hasSub && assignment?.status !== "confirmed") {
     return (
-      <div className="px-4 py-6 pb-24 max-w-lg mx-auto text-center space-y-4 animate-fade-in">
+      <div className="p-4 pb-24 text-center space-y-4 animate-fade-in">
         <h2 className="text-h2">Confirm your Service Day</h2>
         <p className="text-caption">Lock in your weekly service day before building your routine.</p>
         <Button onClick={() => navigate("/customer/service-day")}>Set Service Day</Button>
@@ -153,7 +153,7 @@ export default function CustomerRoutine() {
 
   if (isLoading) {
     return (
-      <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-4">
+      <div className="p-4 pb-24 space-y-4 animate-fade-in">
         <Skeleton className="h-16 w-full" />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-32 w-full" />
@@ -167,7 +167,7 @@ export default function CustomerRoutine() {
   const planName = "Your Plan";
 
   return (
-    <div className="pb-24 animate-fade-in max-w-lg mx-auto">
+    <div className="pb-24 animate-fade-in">
       {hasSub && (
         <TruthBanner
           planName={planName}
@@ -278,7 +278,7 @@ export default function CustomerRoutine() {
 
       {/* Bottom CTA */}
       {(items.length > 0 || !hasSub) && (
-        <div className="fixed bottom-16 left-0 right-0 z-40 p-4 bg-card/95 backdrop-blur border-t border-border max-w-lg mx-auto">
+        <div className="fixed bottom-16 left-0 right-0 z-40 p-4 bg-card/95 backdrop-blur border-t border-border">
           {hasSub ? (
             <>
               <Button
