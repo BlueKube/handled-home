@@ -87,12 +87,19 @@ export default function ShareLanding() {
   const [heroUrl, setHeroUrl] = useState<string | null>(null);
   useEffect(() => {
     if (!data?.hero_photo_path) return;
+    let active = true;
     supabase.storage
       .from("job-photos")
       .createSignedUrl(data.hero_photo_path, 3600)
-      .then(({ data: urlData }) => {
-        if (urlData?.signedUrl) setHeroUrl(urlData.signedUrl);
+      .then(({ data: urlData, error }) => {
+        if (!active) return;
+        if (error || !urlData?.signedUrl) {
+          console.warn("Failed to load hero photo:", error?.message ?? "no signed URL");
+          return;
+        }
+        setHeroUrl(urlData.signedUrl);
       });
+    return () => { active = false; };
   }, [data?.hero_photo_path]);
 
   return (

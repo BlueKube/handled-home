@@ -227,7 +227,9 @@ export default function OnboardingWizard() {
               await completeStep("plan", { selected_plan_id: planId });
             }}
             onSkip={async () => {
-              await completeStep("plan");
+              try { await completeStep("plan"); } catch {
+                toast.error("Couldn't save progress — try again.");
+              }
             }}
           />
         )}
@@ -245,7 +247,9 @@ export default function OnboardingWizard() {
               await completeStep("subscribe");
             }}
             onSkip={async () => {
-              await completeStep("subscribe");
+              try { await completeStep("subscribe"); } catch {
+                toast.error("Couldn't save progress — try again.");
+              }
             }}
           />
         )}
@@ -614,7 +618,7 @@ function PlanStep({ onSelectPlan, onSkip }: { onSelectPlan: (planId: string) => 
         </div>
       )}
 
-      <Button variant="ghost" size="sm" className="w-full text-sm" onClick={onSkip} disabled={!!selecting}>
+      <Button variant="ghost" className="w-full text-sm min-h-[44px]" onClick={onSkip} disabled={!!selecting}>
         Skip for now — browse plans later from your dashboard
       </Button>
     </div>
@@ -695,7 +699,7 @@ function SubscribeStep({ planId, onComplete, onSkip }: { planId: string | null; 
       <Button className="w-full h-12 text-base font-semibold rounded-xl" onClick={handleCheckout} disabled={loading}>
         {loading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Processing…</> : "Subscribe Now"}
       </Button>
-      <Button variant="ghost" size="sm" className="w-full text-sm" onClick={onSkip} disabled={loading}>
+      <Button variant="ghost" className="w-full text-sm min-h-[44px]" onClick={onSkip} disabled={loading}>
         Skip for now — subscribe when you're ready
       </Button>
     </div>
