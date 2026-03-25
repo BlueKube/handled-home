@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, Clock, Receipt, ChevronRight, AlertTriangle, Gift, ChevronLeft } from "lucide-react";
 import { PageSkeleton } from "@/components/PageSkeleton";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HelpTip } from "@/components/ui/help-tip";
 
@@ -17,10 +18,23 @@ function formatCents(cents: number) {
 export default function CustomerBillingPage() {
   const navigate = useNavigate();
   const { data: subscription, isLoading: subLoading } = useCustomerSubscription();
-  const { defaultMethod, availableCredits, latestInvoice, hasFailedPayment, isLoading } = useCustomerBilling();
+  const { defaultMethod, availableCredits, latestInvoice, hasFailedPayment, isLoading, isError, refetch } = useCustomerBilling();
   const { data: currentPlan } = usePlanDetail(subscription?.plan_id ?? null);
 
   if (isLoading || subLoading) return <PageSkeleton />;
+
+  if (isError) {
+    return (
+      <div className="animate-fade-in p-4 pb-24">
+        <button onClick={() => navigate("/customer/more")} className="flex items-center gap-1 text-muted-foreground mb-2 hover:text-foreground transition-colors" aria-label="Back to More menu">
+          <ChevronLeft className="h-4 w-4" />
+          <span className="text-sm">More</span>
+        </button>
+        <h1 className="text-h2 mb-4">Billing</h1>
+        <QueryErrorCard message="Failed to load billing information." onRetry={() => refetch()} />
+      </div>
+    );
+  }
 
   if (!subscription) {
     return (

@@ -20,6 +20,7 @@ import { ReceiptSuggestions } from "@/components/customer/ReceiptSuggestions";
 
 import { QuickFeedbackCard } from "@/components/customer/QuickFeedbackCard";
 import { PrivateReviewCard } from "@/components/customer/PrivateReviewCard";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { ArrowLeft, Clock, CheckCircle2, XCircle, AlertTriangle, Share2, ArrowUpCircle, Lightbulb, Users, Copy } from "lucide-react";
 import { HelpTip } from "@/components/ui/help-tip";
 import { format } from "date-fns";
@@ -27,7 +28,7 @@ import { format } from "date-fns";
 export default function CustomerVisitDetail() {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
-  const { data, isLoading } = useCustomerVisitDetail(jobId);
+  const { data, isLoading, isError, refetch } = useCustomerVisitDetail(jobId);
   const { feedback, submitFeedback } = useQuickFeedback(jobId);
   const { review, submitReview } = usePrivateReview(jobId);
   const [issueSheetOpen, setIssueSheetOpen] = useState(false);
@@ -87,6 +88,18 @@ export default function CustomerVisitDetail() {
             <div key={i} className="h-24 bg-muted/50 rounded-lg animate-pulse" />
           ))}
         </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="animate-fade-in p-4 pb-24">
+        <Button variant="ghost" size="sm" className="gap-1 -ml-2 mb-4" onClick={() => navigate("/customer/visits")}>
+          <ArrowLeft className="h-4 w-4" />
+          Visits
+        </Button>
+        <QueryErrorCard message="Failed to load visit details." onRetry={() => refetch()} />
       </div>
     );
   }

@@ -8,6 +8,7 @@ import { PlanCard } from "@/components/plans/PlanCard";
 import { HandlesExplainer } from "@/components/plans/HandlesExplainer";
 import { BundleSavingsCard } from "@/components/plans/BundleSavingsCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 import { HelpTip } from "@/components/ui/help-tip";
@@ -90,7 +91,7 @@ export default function CustomerPlans() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isGated = searchParams.get("gated") === "1";
-  const { data: plans, isLoading } = usePlans("active");
+  const { data: plans, isLoading, isError, refetch } = usePlans("active");
   const { property } = useProperty();
   const { data: customerZoneId } = useZoneByZip(property?.zip_code ?? "");
   const { data: allAvail } = useAllPlanZoneAvailability();
@@ -101,6 +102,19 @@ export default function CustomerPlans() {
     const row = allAvail.find((a) => a.plan_id === planId && a.zone_id === customerZoneId);
     return row?.is_enabled ?? false;
   };
+
+  if (isError) {
+    return (
+      <div className="animate-fade-in p-4 pb-24">
+        <button onClick={() => navigate("/customer/more")} className="flex items-center gap-1 text-muted-foreground mb-2 hover:text-foreground transition-colors" aria-label="Back to More menu">
+          <ChevronLeft className="h-4 w-4" />
+          <span className="text-sm">More</span>
+        </button>
+        <h1 className="text-h2 mb-4">Pick your membership</h1>
+        <QueryErrorCard message="Failed to load plans." onRetry={() => refetch()} />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 pb-24 space-y-6 animate-fade-in">

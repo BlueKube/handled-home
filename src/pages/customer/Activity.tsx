@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import {
   CheckCircle,
   Shield,
@@ -31,7 +32,7 @@ function StatPill({ icon: Icon, label, value }: { icon: React.ElementType; label
 
 export default function Activity() {
   const navigate = useNavigate();
-  const { data: completedJobs, isLoading } = useCustomerJobs("completed", { includePhotos: true });
+  const { data: completedJobs, isLoading, isError, refetch } = useCustomerJobs("completed", { includePhotos: true });
   const { data: subscription } = useCustomerSubscription();
 
   const stats = useMemo(() => {
@@ -89,6 +90,15 @@ export default function Activity() {
           {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
         </div>
         <Skeleton className="h-48 w-full" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="animate-fade-in p-4 pb-24">
+        <h1 className="text-h2 mb-4">Activity</h1>
+        <QueryErrorCard message="Failed to load activity history." onRetry={() => refetch()} />
       </div>
     );
   }
