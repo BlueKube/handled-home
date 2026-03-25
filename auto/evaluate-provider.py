@@ -744,6 +744,190 @@ def score_d5_retention_hooks(flows: list[FlowSection], all_text: str) -> tuple[f
     return min(points, 10.0), issues
 
 
+# ─── Dimension 6: BYOC Provider Tools (1.0×) ──────────────────────────────
+
+INVITE_LINK_CREATION_KEYWORDS = [
+    "create invite link", "create link", "new link",
+    "generate", "category", "zone", "cadence",
+]
+
+ACTIVATION_TRACKING_KEYWORDS = [
+    "activations", "activation count", "active links",
+    "stats grid", "recent events", "event list",
+]
+
+INVITE_SCRIPTS_KEYWORDS = [
+    "invite scripts", "message templates", "pre-written",
+    "copy button", "tone badge", "share",
+]
+
+BONUS_FRAMING_KEYWORDS = [
+    "byoc bonus", "incentive", "earn bonus",
+    "bonus income", "guaranteed route pay",
+    "payout amounts", "incentive programs",
+]
+
+RATE_LIMITING_KEYWORDS = [
+    "rate limit", "daily limit", "max links",
+    "max 10", "deactivate", "compliance reminder",
+    "do not promise", "transition credits",
+]
+
+
+def score_d6_byoc_tools(flows: list[FlowSection], all_text: str) -> tuple[float, list[Issue]]:
+    """D6: BYOC Provider Tools — invite management, activation, scripts, bonuses."""
+    issues: list[Issue] = []
+    points = 0.0
+
+    # Sub-check 1: Invite link creation (0-2 points)
+    link_matches = count_keyword_matches(all_text, INVITE_LINK_CREATION_KEYWORDS)
+    link_screens = find_screens_matching(flows, ["create link", "invite link", "new link"])
+    if link_matches >= 4 and len(link_screens) >= 1:
+        points += 2.0
+    elif link_matches >= 2:
+        points += 1.5
+    elif link_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D6_byoc", "No invite link creation flow found", 2))
+
+    # Sub-check 2: Activation tracking (0-2 points)
+    act_matches = count_keyword_matches(all_text, ACTIVATION_TRACKING_KEYWORDS)
+    if act_matches >= 4:
+        points += 2.0
+    elif act_matches >= 2:
+        points += 1.5
+    elif act_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D6_byoc", "No activation tracking found", 2))
+
+    # Sub-check 3: Invite scripts (0-2 points)
+    script_matches = count_keyword_matches(all_text, INVITE_SCRIPTS_KEYWORDS)
+    if script_matches >= 3:
+        points += 2.0
+    elif script_matches >= 2:
+        points += 1.5
+    elif script_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D6_byoc", "No invite scripts or message templates found", 2))
+
+    # Sub-check 4: Bonus framing (0-2 points)
+    bonus_matches = count_keyword_matches(all_text, BONUS_FRAMING_KEYWORDS)
+    if bonus_matches >= 3:
+        points += 2.0
+    elif bonus_matches >= 2:
+        points += 1.5
+    elif bonus_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D6_byoc", "No BYOC bonus framing found", 2))
+
+    # Sub-check 5: Rate limiting / compliance (0-2 points)
+    rate_matches = count_keyword_matches(all_text, RATE_LIMITING_KEYWORDS)
+    if rate_matches >= 4:
+        points += 2.0
+    elif rate_matches >= 2:
+        points += 1.5
+    elif rate_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D6_byoc", "No rate limiting or compliance controls found", 2))
+
+    return min(points, 10.0), issues
+
+
+# ─── Dimension 7: Cognitive Walkthroughs (0.9×) ───────────────────────────
+
+def score_d7_cognitive_walkthroughs(flows: list[FlowSection], all_text: str) -> tuple[float, list[Issue]]:
+    """D7: Cognitive Walkthroughs — end-to-end path completeness for key journeys."""
+    issues: list[Issue] = []
+    points = 0.0
+
+    # Sub-check 1: First-week path completeness (0-2 points)
+    # onboarding → dashboard → first job → job complete → earnings
+    first_week_keywords = [
+        "onboarding", "dashboard", "first job", "job complete",
+        "earnings", "start route", "checklist",
+    ]
+    fw_matches = count_keyword_matches(all_text, first_week_keywords)
+    if fw_matches >= 5:
+        points += 2.0
+    elif fw_matches >= 3:
+        points += 1.5
+    elif fw_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D7_walkthroughs", "First-week journey path incomplete", 3))
+
+    # Sub-check 2: Earnings-check path (0-2 points)
+    # dashboard → earnings tab → period selector → modifier detail → payout status
+    earnings_path_keywords = [
+        "earnings", "period selector", "modifier",
+        "payout", "breakdown", "held earnings",
+    ]
+    ep_matches = count_keyword_matches(all_text, earnings_path_keywords)
+    if ep_matches >= 5:
+        points += 2.0
+    elif ep_matches >= 3:
+        points += 1.5
+    elif ep_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D7_walkthroughs", "Earnings-check journey path incomplete", 2))
+
+    # Sub-check 3: Dispute-handling path (0-2 points)
+    # report issue → contact support → resolution
+    dispute_keywords = [
+        "report issue", "contact support", "dispute",
+        "action sheet", "help", "resolve",
+    ]
+    disp_matches = count_keyword_matches(all_text, dispute_keywords)
+    if disp_matches >= 3:
+        points += 2.0
+    elif disp_matches >= 2:
+        points += 1.5
+    elif disp_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D7_walkthroughs", "Dispute-handling journey path missing or incomplete", 2))
+
+    # Sub-check 4: Empty-state coverage (0-2 points)
+    # Count flows with at least one empty state
+    empty_state_count = count_pattern_matches(all_text, r'empty\s+state|empty\s*\(|empty:')
+    total_flows = len(flows)
+    if total_flows > 0:
+        coverage = empty_state_count / max(total_flows, 1)
+        if coverage >= 2.0:  # avg 2+ empty states per flow
+            points += 2.0
+        elif coverage >= 1.0:
+            points += 1.5
+        elif coverage >= 0.5:
+            points += 1.0
+        else:
+            issues.append(Issue("D7_walkthroughs", f"Low empty-state coverage: {empty_state_count} across {total_flows} flows", 2))
+    else:
+        issues.append(Issue("D7_walkthroughs", "No flows found for empty-state analysis", 3))
+
+    # Sub-check 5: Error-state coverage (0-2 points)
+    error_state_count = count_pattern_matches(all_text, r'error\s+state|error:|couldn\'t\s+be\s+loaded|check\s+your\s+connection')
+    if total_flows > 0:
+        err_coverage = error_state_count / max(total_flows, 1)
+        if err_coverage >= 2.0:
+            points += 2.0
+        elif err_coverage >= 1.0:
+            points += 1.5
+        elif err_coverage >= 0.5:
+            points += 1.0
+        else:
+            issues.append(Issue("D7_walkthroughs", f"Low error-state coverage: {error_state_count} across {total_flows} flows", 2))
+    else:
+        issues.append(Issue("D7_walkthroughs", "No flows found for error-state analysis", 3))
+
+    return min(points, 10.0), issues
+
+
 # ─── Evaluate ───────────────────────────────────────────────────────────────
 
 def evaluate(path: Optional[str] = None, verbose: bool = False) -> ScoreResult:
@@ -780,9 +964,12 @@ def evaluate(path: Optional[str] = None, verbose: bool = False) -> ScoreResult:
     d5, issues = score_d5_retention_hooks(flows, all_text)
     all_issues.extend(issues)
 
-    # ─── D6-D7 Placeholders (implemented in Batch 5) ───
-    d6 = 0.0
-    d7 = 0.0
+    # ─── D6-D7 Scoring ───
+    d6, issues = score_d6_byoc_tools(flows, all_text)
+    all_issues.extend(issues)
+
+    d7, issues = score_d7_cognitive_walkthroughs(flows, all_text)
+    all_issues.extend(issues)
 
     # ─── Anti-Gaming Placeholder (implemented in Batch 6) ───
     gaming_penalty = 0.0
