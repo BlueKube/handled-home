@@ -848,8 +848,8 @@ def score_d7_cognitive_walkthroughs(flows: list[FlowSection], all_text: str) -> 
     # Sub-check 1: First-week path completeness (0-2 points)
     # onboarding → dashboard → first job → job complete → earnings
     first_week_keywords = [
-        "onboarding", "dashboard", "first job", "job complete",
-        "earnings", "start route", "checklist",
+        "provider onboarding", "provider dashboard", "first job",
+        "job complete", "start route", "start next job", "checklist",
     ]
     fw_matches = count_keyword_matches(all_text, first_week_keywords)
     if fw_matches >= 5:
@@ -864,8 +864,8 @@ def score_d7_cognitive_walkthroughs(flows: list[FlowSection], all_text: str) -> 
     # Sub-check 2: Earnings-check path (0-2 points)
     # dashboard → earnings tab → period selector → modifier detail → payout status
     earnings_path_keywords = [
-        "earnings", "period selector", "modifier",
-        "payout", "breakdown", "held earnings",
+        "earnings dashboard", "period selector", "modifier explanation",
+        "payout account", "earnings breakdown", "held earnings",
     ]
     ep_matches = count_keyword_matches(all_text, earnings_path_keywords)
     if ep_matches >= 5:
@@ -881,7 +881,7 @@ def score_d7_cognitive_walkthroughs(flows: list[FlowSection], all_text: str) -> 
     # report issue → contact support → resolution
     dispute_keywords = [
         "report issue", "contact support", "dispute",
-        "action sheet", "help", "resolve",
+        "action sheet", "help resolve", "issue reported",
     ]
     disp_matches = count_keyword_matches(all_text, dispute_keywords)
     if disp_matches >= 3:
@@ -894,36 +894,36 @@ def score_d7_cognitive_walkthroughs(flows: list[FlowSection], all_text: str) -> 
         issues.append(Issue("D7_walkthroughs", "Dispute-handling journey path missing or incomplete", 2))
 
     # Sub-check 4: Empty-state coverage (0-2 points)
-    # Count flows with at least one empty state
-    empty_state_count = count_pattern_matches(all_text, r'empty\s+state|empty\s*\(|empty:')
+    # Count distinct flows that have at least one empty state
     total_flows = len(flows)
+    empty_re = r'empty[\s\-_]+state|empty\s*\(|empty:'
+    flows_with_empty = sum(1 for f in flows if count_pattern_matches(f.full_text, empty_re) > 0)
     if total_flows > 0:
-        coverage = empty_state_count / max(total_flows, 1)
-        if coverage >= 2.0:  # avg 2+ empty states per flow
+        coverage = flows_with_empty / total_flows
+        if coverage >= 0.8:
             points += 2.0
-        elif coverage >= 1.0:
+        elif coverage >= 0.6:
             points += 1.5
-        elif coverage >= 0.5:
+        elif coverage >= 0.3:
             points += 1.0
         else:
-            issues.append(Issue("D7_walkthroughs", f"Low empty-state coverage: {empty_state_count} across {total_flows} flows", 2))
+            issues.append(Issue("D7_walkthroughs", f"Low empty-state coverage: {flows_with_empty}/{total_flows} flows", 2))
     else:
-        issues.append(Issue("D7_walkthroughs", "No flows found for empty-state analysis", 3))
+        issues.append(Issue("D7_walkthroughs", "No flows found for state coverage analysis", 3))
 
     # Sub-check 5: Error-state coverage (0-2 points)
-    error_state_count = count_pattern_matches(all_text, r'error\s+state|error:|couldn\'t\s+be\s+loaded|check\s+your\s+connection')
+    error_re = r'error[\s\-_]+state|error:|couldn\'t\s+be\s+loaded|check\s+your\s+connection'
+    flows_with_error = sum(1 for f in flows if count_pattern_matches(f.full_text, error_re) > 0)
     if total_flows > 0:
-        err_coverage = error_state_count / max(total_flows, 1)
-        if err_coverage >= 2.0:
+        err_coverage = flows_with_error / total_flows
+        if err_coverage >= 0.8:
             points += 2.0
-        elif err_coverage >= 1.0:
+        elif err_coverage >= 0.6:
             points += 1.5
-        elif err_coverage >= 0.5:
+        elif err_coverage >= 0.3:
             points += 1.0
         else:
-            issues.append(Issue("D7_walkthroughs", f"Low error-state coverage: {error_state_count} across {total_flows} flows", 2))
-    else:
-        issues.append(Issue("D7_walkthroughs", "No flows found for error-state analysis", 3))
+            issues.append(Issue("D7_walkthroughs", f"Low error-state coverage: {flows_with_error}/{total_flows} flows", 2))
 
     return min(points, 10.0), issues
 
