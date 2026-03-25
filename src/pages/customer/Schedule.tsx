@@ -111,7 +111,11 @@ function VisitCard({ visit }: { visit: UpcomingVisit }) {
 
   return (
     <Card
-      className={`p-4 space-y-3 transition-colors ${isActive ? "border-accent/40 bg-accent/5" : ""} ${isException ? "border-destructive/30 bg-destructive/5" : ""} ${isOverdue ? "border-warning/40 bg-warning/5" : ""}`}
+      className={`p-4 space-y-3 transition-colors cursor-pointer hover:bg-secondary/50 active:bg-secondary/70 ${isActive ? "border-accent/40 bg-accent/5" : ""} ${isException ? "border-destructive/30 bg-destructive/5" : ""} ${isOverdue ? "border-warning/40 bg-warning/5" : ""}`}
+      onClick={() => navigate(`/customer/visits/${visit.id}`)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") navigate(`/customer/visits/${visit.id}`); }}
     >
       <div className="flex items-start justify-between">
         <div className="space-y-0.5">
@@ -359,6 +363,7 @@ export default function Schedule() {
         serviceNames={serviceNames}
         handlesUsed={planHandles ? planHandles.handles_per_cycle - (handleBalance ?? 0) : undefined}
         handlesTotal={planHandles?.handles_per_cycle}
+        rollover={planHandles && handleBalance != null ? Math.max(0, handleBalance - planHandles.handles_per_cycle) : undefined}
       />
 
       {/* Service Day info */}
