@@ -1416,7 +1416,7 @@ Each menu item: icon + label + ChevronRight, tappable
 1. **Header** (centered, mt-8)
    - Shield icon (accent, 48×48)
    - H2: "Join the Handled Home Network"
-   - Caption: "You're applying to join a curated network of trusted service providers."
+   - Caption: "Join a curated network — get recurring work, reduce admin, and grow your business with Handled Home."
 
 2. **Invite Code Card**
    - CardTitle: "Enter Your Invite Code"
@@ -1560,7 +1560,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Route**: `/provider`
 **Who**: Active provider
-**Purpose**: Daily operations hub — today's jobs, earnings, route status
+**Purpose**: Daily operations hub — today's jobs, earnings, route status. Designed to fill their schedule and reduce admin overhead.
 
 ### Screen 18.1: Provider Dashboard (Primary Tab — Home)
 
@@ -1802,7 +1802,7 @@ Each menu item: icon + label + ChevronRight, tappable
 
 4. **Monthly Projection Card** (conditional, primary tint)
    - Target icon + "At current pace: $X,XXX" + "X scheduled jobs remaining · avg $XX/job"
-   - Framing: guaranteed, predictable payout per job — no tip dependency, no surprise adjustments
+   - Framing: guaranteed minimum earnings per job, predictable payout — no tip dependency, no surprise adjustments
 
 5. **Payout Account Status Card**
    - CheckCircle (green): "Payout account ready" + "Earnings will be deposited on schedule"
@@ -1843,7 +1843,7 @@ Each menu item: icon + label + ChevronRight, tappable
 ### Screen 22.2: Insights
 
 **Route**: `/provider/insights`
-**Purpose**: Business insights and growth recommendations
+**Purpose**: Business insights and growth recommendations to help providers grow their business
 
 **Empty State**: Lightbulb icon + "Your insights will appear here once we have enough job data to spot trends. Continue completing jobs."
 **Error State**: "Insights couldn't be generated right now — check back after your next completed job."
@@ -2441,7 +2441,7 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 **Content**:
 - Headline: "You're at X% capacity" (or "nearly at full capacity" if ≥80%)
 - Subtext: "X jobs/week · avg finish Xh" or "est. $X/mo"
-- Growth CTA (accent, 12px): "Fill your schedule to earn $X more/mo" (if <90% capacity)
+- Growth CTA (accent, 12px): "Fill your schedule to earn $X more/mo" (if <90% capacity) — reinforces the core promise to fill their schedule with recurring work
 
 **Empty State**: Target icon + "Your earnings projection will appear once you have enough job history."
 **Error State**: "Earnings projection temporarily unavailable — your earnings are unaffected."
@@ -2456,8 +2456,8 @@ Admin uses a fixed left sidebar (AdminShell) with grouped navigation sections in
 - 2-column grid:
   - "At 60% capacity" + weekly estimate (foreground, bold)
   - "Full schedule" + weekly estimate (accent, bold)
-- Footer: Zap icon + "Dense routes mean less driving, more earning"
-- The density message reinforces the provider economics flywheel: more density → denser routes → more stops/day → better earnings/hour → better retention
+- Footer: Zap icon + "Dense routes mean less time on the road, more earning"
+- The density message reinforces the provider economics flywheel: more density → denser routes → less time on the road → more stops/day → better earnings/hour → better retention
 
 **Key constraint**: Never show customer pricing or subscription spread. Show payout amounts only. See `operating-model.md` → Provider Payout Logic for the full economics model.
 
