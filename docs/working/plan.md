@@ -8,7 +8,7 @@
 **Context:** Full audit of screen-flows.md vs codebase found 116 gaps (23 HIGH, ~50 MED, ~25 LOW). This plan closes them in 6 phases across 18 batches.
 
 ## Execution Mode
-**Speed mode** — 4-agent review (Lanes 1+2, Sonnet only). Max 2 fix passes.
+**Quality mode** — Full 10-agent review (4 parallel lanes + 1 synthesis × 2 tiers = 10 agents). 3 fix passes max.
 
 ---
 
@@ -18,9 +18,9 @@ Fixes that unblock user flows or repair broken functionality on customer pages.
 
 | Batch | Scope | Size | Review | Combinable |
 |-------|-------|------|--------|------------|
-| 1 | F4 Share Landing hero photo + F5 Onboarding error swallowing + skip options | Medium | light | No |
-| 2 | F7 Dashboard rollover badge + F8 Plan Detail fixed CTA + F9 Routine Review cost breakdown | Medium | light | No |
-| 3 | F11 Schedule tappable visit cards + F11 rollover line + F13 Billing stub/default fixes | Medium | light | No |
+| 1 | F4 Share Landing hero photo + F5 Onboarding error swallowing + skip options | Medium | full | No |
+| 2 | F7 Dashboard rollover badge + F8 Plan Detail fixed CTA + F9 Routine Review cost breakdown | Medium | full | No |
+| 3 | F11 Schedule tappable visit cards + F11 rollover line + F13 Billing stub/default fixes | Medium | full | No |
 
 ---
 
@@ -30,10 +30,10 @@ Fixes that unblock provider flows or repair broken functionality.
 
 | Batch | Scope | Size | Review | Combinable |
 |-------|-------|------|--------|------------|
-| 4 | F17 Onboarding visual progress bar (all 6 steps) | Medium | light | No |
+| 4 | F17 Onboarding visual progress bar (all 6 steps) | Medium | full | No |
 | 5 | F17 Coverage zone map (onboarding) + F23 Coverage zone map (settings) — shared MapboxZoneSelector component | Large | full | No |
-| 6 | F19 Job List "Start Next Job" CTA + F19 Job Complete earnings breakdown + F19 notes limit 500 | Medium | light | No |
-| 7 | F21 Earnings "Set Up Payout Account" button + F24 Support ticket creation + F24 Support Detail duplicate card bug | Medium | light | No |
+| 6 | F19 Job List "Start Next Job" CTA + F19 Job Complete earnings breakdown + F19 notes limit 500 | Medium | full | No |
+| 7 | F21 Earnings "Set Up Payout Account" button + F24 Support ticket creation + F24 Support Detail duplicate card bug | Medium | full | No |
 
 ---
 
@@ -41,8 +41,8 @@ Fixes that unblock provider flows or repair broken functionality.
 
 | Batch | Scope | Size | Review | Combinable |
 |-------|-------|------|--------|------------|
-| 8 | F26 Provider Detail earnings section + F29 billing route + F29 payout schedule | Medium | light | No |
-| 9 | F30 Support assignment/bulk actions + F30 Ticket Detail attachments + F31 Bundle Savings CTA/dismiss/states | Medium | light | No |
+| 8 | F26 Provider Detail earnings section + F29 billing route + F29 payout schedule | Medium | full | No |
+| 9 | F30 Support assignment/bulk actions + F30 Ticket Detail attachments + F31 Bundle Savings CTA/dismiss/states | Medium | full | No |
 
 ---
 
@@ -52,11 +52,11 @@ Mechanical pattern: add spec-compliant error/empty states across all flows. Thes
 
 | Batch | Scope | Size | Review | Combinable |
 |-------|-------|------|--------|------------|
-| 10 | Error/empty states for F1-F6 (Auth, BYOC, Referral, Onboarding flows) | Medium | light | Yes (10-11) |
-| 11 | Error/empty states for F7-F11 (Dashboard, Plans, Routine, Schedule, Activity) | Medium | light | Yes (10-11) |
-| 12 | Error/empty states for F12-F16 (Property, Billing, Support, Referrals, Settings) | Medium | light | Yes (12-13) |
-| 13 | Error/empty states for F17-F24 (all provider flows) | Medium | light | Yes (12-13) |
-| 14 | Error/empty states for F25-F37 (admin flows + feature components) | Medium | light | No |
+| 10 | Error/empty states for F1-F6 (Auth, BYOC, Referral, Onboarding flows) | Medium | full | Yes (10-11) |
+| 11 | Error/empty states for F7-F11 (Dashboard, Plans, Routine, Schedule, Activity) | Medium | full | Yes (10-11) |
+| 12 | Error/empty states for F12-F16 (Property, Billing, Support, Referrals, Settings) | Medium | full | Yes (12-13) |
+| 13 | Error/empty states for F17-F24 (all provider flows) | Medium | full | Yes (12-13) |
+| 14 | Error/empty states for F25-F37 (admin flows + feature components) | Medium | full | No |
 
 ---
 
@@ -66,9 +66,9 @@ Mechanical pattern: align copy, icons, button variants, and minor UI elements to
 
 | Batch | Scope | Size | Review | Combinable |
 |-------|-------|------|--------|------------|
-| 15 | Copy fixes for customer flows (F1-F16): titles, empty state text, toast messages, explainer text | Medium | light | Yes (15-16) |
-| 16 | Copy fixes for provider flows (F17-F24): titles, captions, toast messages, back button labels | Medium | light | Yes (15-16) |
-| 17 | Copy fixes for admin flows (F25-F37) + icon/variant fixes across all flows | Medium | light | No |
+| 15 | Copy fixes for customer flows (F1-F16): titles, empty state text, toast messages, explainer text | Medium | full | Yes (15-16) |
+| 16 | Copy fixes for provider flows (F17-F24): titles, captions, toast messages, back button labels | Medium | full | Yes (15-16) |
+| 17 | Copy fixes for admin flows (F25-F37) + icon/variant fixes across all flows | Medium | full | No |
 
 ---
 
@@ -82,9 +82,9 @@ Mechanical pattern: align copy, icons, button variants, and minor UI elements to
 
 ## Risk Areas
 
-1. **F17/F23 Mapbox zone map (Batch 5)** — Largest single batch. Requires creating a reusable `MapboxZoneSelector` component. If Mapbox GL is not configured or API key is missing, this batch may need to be deferred.
-2. **F13 Stripe Elements (Batch 3)** — The Stripe card collection stub may require backend `create-setup-intent` edge function changes. If backend is not ready, we'll add a clear "Coming soon" state instead of a toast.
-3. **F9 Routine Review cost breakdown (Batch 2)** — Requires pricing data access. May need to query plan/SKU pricing to show line items.
+1. **F17/F23 Mapbox zone map (Batch 5)** — DEFERRED to human. Requires Mapbox API key. Will build placeholder UI that says "Map requires configuration" with a zone list fallback. See `docs/working/deferred-items-for-human.md`.
+2. **F13 Stripe Elements (Batch 3)** — DEFERRED to human. Requires Stripe key + backend edge function. Will build the UI shell with a clear disabled state. See `docs/working/deferred-items-for-human.md`.
+3. **F9 Routine Review cost breakdown (Batch 2)** — Will use market research pricing data from `docs/archive/legacy-docs/deep-research-report.md` as fallback/reference pricing where actual plan pricing is unavailable.
 
 ## Deferred Items
 

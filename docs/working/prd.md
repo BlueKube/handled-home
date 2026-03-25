@@ -1,7 +1,7 @@
 # PRD: Screen-Flows Implementation Gap Closure
 
 ## Execution Mode
-**Speed mode** — Reduced 4-agent review (Lanes 1 + 2 only, Sonnet tier only, no synthesis). These are conformance fixes aligning existing code with existing specs. Max 2 fix passes then move on.
+**Quality mode** — Full 10-agent review system, full documentation sync. Production-ready.
 
 ## Problem Statement
 
