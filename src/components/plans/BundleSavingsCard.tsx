@@ -90,7 +90,7 @@ export function BundleSavingsCard({ planPriceCents, planDisplayPrice, tierKey, l
     <Card className="p-4 bg-accent/5 border-accent/20 relative">
       <button
         onClick={handleDismiss}
-        className="absolute top-2 right-2 h-7 w-7 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+        className="absolute top-1 right-1 h-11 w-11 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
         aria-label="Dismiss savings card"
       >
         <X className="h-3.5 w-3.5 text-muted-foreground" />
