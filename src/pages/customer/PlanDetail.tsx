@@ -47,7 +47,7 @@ export default function CustomerPlanDetail() {
     <div className="p-4 pb-24 space-y-6 animate-fade-in">
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground min-h-[44px]"
+        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground min-h-[44px] min-w-[44px]"
         aria-label="Back to Plans"
       >
         <ChevronLeft className="h-4 w-4" /> Plans
@@ -158,7 +158,7 @@ export default function CustomerPlanDetail() {
       </Card>
 
       {/* Fixed bottom CTA bar */}
-      <div className="fixed bottom-16 left-0 right-0 z-40 p-4 bg-card/95 backdrop-blur border-t border-border">
+      <div className="fixed bottom-16 left-0 right-0 z-40 p-4 bg-card/95 backdrop-blur border-t border-border space-y-2">
         <Button
           variant="accent"
           size="xl"
@@ -166,6 +166,13 @@ export default function CustomerPlanDetail() {
           onClick={() => navigate(`/customer/subscribe?plan=${plan.id}`)}
         >
           Subscribe to This Plan
+        </Button>
+        <Button
+          variant="outline"
+          className="w-full min-h-[44px]"
+          onClick={() => navigate(`/customer/routine?plan=${plan.id}`)}
+        >
+          Build Routine
         </Button>
       </div>
     </div>

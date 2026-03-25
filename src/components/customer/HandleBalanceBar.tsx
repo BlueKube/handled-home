@@ -26,7 +26,7 @@ export function HandleBalanceBar({ balance, perCycle, rollover, className = "" }
             {balance} remaining
           </span>
           {rolloverCount > 0 && (
-            <Badge variant="outline" className="text-accent border-accent/30 text-[10px] px-1.5 py-0">
+            <Badge className="bg-accent text-accent-foreground border-transparent text-[10px] px-1.5 py-0">
               +{rolloverCount} rolled over
             </Badge>
           )}
