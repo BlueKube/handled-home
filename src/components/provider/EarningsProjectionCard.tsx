@@ -62,7 +62,7 @@ export function EarningsProjectionCard({
 
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Zap className="h-3 w-3 text-accent" />
-          <span>Dense routes mean less driving, more earning</span>
+          <span>Dense routes mean less time on the road, more earning</span>
         </div>
       </Card>
     );

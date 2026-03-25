@@ -45,7 +45,7 @@ export default function ProviderOnboarding() {
       <div className="text-center mb-8 mt-8">
         <Shield className="h-12 w-12 text-accent mx-auto mb-4" />
         <h1 className="text-h2 mb-2">Join the Handled Home Network</h1>
-        <p className="text-caption">You're applying to join a curated network of trusted service providers.</p>
+        <p className="text-caption">Join a curated network — get recurring work, reduce admin, and grow your business with Handled Home.</p>
       </div>
 
       <Card>

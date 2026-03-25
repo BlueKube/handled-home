@@ -382,6 +382,9 @@ export default function ProviderEarnings() {
                 {projectionDetail.remainingJobs} scheduled job{projectionDetail.remainingJobs !== 1 ? "s" : ""} remaining
                 · avg {formatCents(projectionDetail.avgPerJob)}/job
               </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Guaranteed minimum earnings per job — no tip dependency
+              </p>
             </div>
           </div>
         </Card>
