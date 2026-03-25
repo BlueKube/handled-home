@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useAdminBilling } from "@/hooks/useAdminBilling";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -105,7 +106,7 @@ export default function AdminBillingPage() {
       <div className="grid grid-cols-2 gap-3">
         <Card
           className="p-3 cursor-pointer hover:shadow-sm transition-shadow"
-          onClick={() => nav("/admin/billing/customers")}
+          onClick={() => toast.info("Search for a customer by name or email to view their ledger")}
         >
           <div className="flex items-center gap-2.5">
             <Receipt className="h-4 w-4 text-accent" />
