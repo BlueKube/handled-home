@@ -4,7 +4,7 @@
 
 **Last updated:** 2026-03-25
 **Status:** Phase 1 in progress
-**Next action:** Begin Phase 4, Batches 10-14 (error/empty states — mechanical sweep, combinable)
+**Next action:** Begin Phase 5, Batches 15-17 (copy/UI alignment — mechanical sweep, combinable)
 **Context:** Full audit of screen-flows.md vs codebase found 116 gaps (23 HIGH, ~50 MED, ~25 LOW). This plan closes them in 6 phases across 18 batches.
 
 ## Execution Mode
@@ -107,11 +107,11 @@ Mechanical pattern: align copy, icons, button variants, and minor UI elements to
 | 7 | P2 | Earnings payout button + Provider support ticket creation + duplicate card bug | ✅ |
 | 8 | P3 | Admin Provider Detail earnings + Billing route + Payout schedule | ✅ |
 | 9 | P3 | Admin Support assignment + Attachments + Bundle Savings | ✅ |
-| 10 | P4 | Error/empty states: F1-F6 | ⬜ |
-| 11 | P4 | Error/empty states: F7-F11 | ⬜ |
-| 12 | P4 | Error/empty states: F12-F16 | ⬜ |
-| 13 | P4 | Error/empty states: F17-F24 | ⬜ |
-| 14 | P4 | Error/empty states: F25-F37 | ⬜ |
+| 10 | P4 | Error/empty states: F1-F6 | ✅ |
+| 11 | P4 | Error/empty states: F7-F11 | ✅ |
+| 12 | P4 | Error/empty states: F12-F16 | ✅ |
+| 13 | P4 | Error/empty states: F17-F24 | ✅ |
+| 14 | P4 | Error/empty states: F25-F37 | ✅ |
 | 15 | P5 | Copy fixes: customer flows | ⬜ |
 | 16 | P5 | Copy fixes: provider flows | ⬜ |
 | 17 | P5 | Copy fixes: admin flows + icon/variant sweep | ⬜ |
