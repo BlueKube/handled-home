@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCreateTicket } from "@/hooks/useCreateTicket";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProviderOrg } from "@/hooks/useProviderOrg";
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,11 +23,48 @@ type Step = "category" | "details" | "submitted";
 
 export default function ProviderSupportNew() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { org } = useProviderOrg();
+  const queryClient = useQueryClient();
   const [step, setStep] = useState<Step>("category");
   const [category, setCategory] = useState<(typeof PROVIDER_CATEGORIES)[number] | null>(null);
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
-  const createTicket = useCreateTicket();
+
+  const createTicket = useMutation({
+    mutationFn: async (input: { category: string; description: string; severity: string }) => {
+      if (!user) throw new Error("Not authenticated");
+
+      const { data: ticket, error: insertError } = await supabase
+        .from("support_tickets")
+        .insert({
+          customer_id: user.id,
+          ticket_type: "provider_request" as any,
+          category: input.category,
+          customer_note: input.description,
+          severity: input.severity as any,
+          provider_org_id: org?.id ?? null,
+        })
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      // Log creation event with provider role
+      await supabase.from("support_ticket_events").insert({
+        ticket_id: ticket.id,
+        event_type: "ticket_created" as any,
+        actor_user_id: user.id,
+        actor_role: "provider",
+        metadata: { ticket_type: "provider_request", category: input.category },
+      });
+
+      return ticket;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["support-tickets"] });
+    },
+  });
 
   const handleCategorySelect = (cat: (typeof PROVIDER_CATEGORIES)[number]) => {
     setCategory(cat);
@@ -40,9 +80,8 @@ export default function ProviderSupportNew() {
     setError("");
     try {
       await createTicket.mutateAsync({
-        ticket_type: "provider_request",
         category: category.key,
-        customer_note: description.trim(),
+        description: description.trim(),
         severity: category.severity,
       });
       setStep("submitted");

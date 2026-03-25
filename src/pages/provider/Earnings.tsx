@@ -411,7 +411,7 @@ export default function ProviderEarnings() {
           </div>
           {!isAccountReady && (
             <Button variant="accent" size="sm" onClick={() => navigate("/provider/settings")}>
-              Set Up
+              Set Up Payout
             </Button>
           )}
         </div>
