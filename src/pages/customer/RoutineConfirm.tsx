@@ -12,7 +12,7 @@ import { RoutineSuccessScreen } from "@/components/routine/RoutineSuccessScreen"
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ArrowLeft, Lock, CalendarDays, Loader2, AlertTriangle } from "lucide-react";
+import { ChevronLeft, Lock, CalendarDays, Loader2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { getCategoryLabel } from "@/lib/serviceCategories";
 import { emitStateAnalyticsEvent } from "@/lib/analyticsEvents";
@@ -116,7 +116,7 @@ export default function RoutineConfirm() {
     <div className="pb-24 animate-fade-in">
       <div className="p-4 space-y-6">
         <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" /> Back
+          <ChevronLeft className="h-4 w-4" /> Back
         </button>
 
         <div className="text-center space-y-2">

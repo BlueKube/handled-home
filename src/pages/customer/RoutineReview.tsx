@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, ArrowRight, CheckCircle2, AlertTriangle, Info } from "lucide-react";
+import { ChevronLeft, ArrowRight, CheckCircle2, AlertTriangle, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -98,7 +98,7 @@ export default function RoutineReview() {
     <div className="pb-24 animate-fade-in">
       <div className="p-4 space-y-5">
         <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" /> Back
+          <ChevronLeft className="h-4 w-4" /> Back
         </button>
 
         <div>

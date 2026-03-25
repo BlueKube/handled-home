@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TicketStatusChip } from "@/components/support/TicketStatusChip";
 import { QueryErrorCard } from "@/components/QueryErrorCard";
-import { ArrowLeft, ChevronRight, Inbox } from "lucide-react";
+import { ChevronLeft, ChevronRight, Inbox } from "lucide-react";
 import { format } from "date-fns";
 
 type Filter = "all" | "open" | "resolved";
@@ -30,7 +30,7 @@ export default function CustomerSupportTickets() {
   return (
     <div className="p-4 pb-24 space-y-4 animate-fade-in">
       <Button variant="ghost" size="sm" className="gap-1 -ml-2" onClick={() => navigate("/customer/support")}>
-        <ArrowLeft className="h-4 w-4" />
+        <ChevronLeft className="h-4 w-4" />
         Support
       </Button>
 

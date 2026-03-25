@@ -20,7 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
-  ArrowLeft,
+  ChevronLeft,
   CalendarDays,
   CheckCircle2,
   Clock,
@@ -201,7 +201,7 @@ export default function CustomerReschedule() {
         className="gap-1 -ml-2"
         onClick={() => navigate("/customer/upcoming")}
       >
-        <ArrowLeft className="h-4 w-4" />
+        <ChevronLeft className="h-4 w-4" />
         Upcoming
       </Button>
 

@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { SupportCategoryTile, getAllCategories, type SupportCategory } from "@/components/support/SupportCategoryTile";
-import { ArrowLeft, CheckCircle2, Camera, X } from "lucide-react";
+import { ChevronLeft, CheckCircle2, Camera, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 type Step = "category" | "details" | "submitted";
@@ -106,7 +106,7 @@ export default function CustomerSupportNew() {
             else navigate("/customer/support");
           }}
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ChevronLeft className="h-4 w-4" />
           {step === "details" ? "Back" : "Support"}
         </Button>
       </div>

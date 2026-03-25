@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { AppointmentWindowPicker } from "@/components/customer/AppointmentWindowPicker";
 import {
   useAppointmentWindows,
@@ -132,7 +132,7 @@ export default function AppointmentPicker() {
         className="gap-1 -ml-2"
         onClick={() => navigate("/customer/upcoming")}
       >
-        <ArrowLeft className="h-4 w-4" />
+        <ChevronLeft className="h-4 w-4" />
         Upcoming
       </Button>
 

@@ -26,7 +26,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import {
-  ArrowLeft,
+  ChevronLeft,
   ArrowRight,
   Check,
   CheckCircle,
@@ -180,7 +180,7 @@ export default function OnboardingWizard() {
         <div className="flex items-center justify-between mb-2">
           {canGoBack ? (
             <button onClick={handleBack} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-              <ArrowLeft className="h-4 w-4" /> Back
+              <ChevronLeft className="h-4 w-4" /> Back
             </button>
           ) : (
             <span />

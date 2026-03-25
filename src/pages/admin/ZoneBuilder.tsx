@@ -26,7 +26,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  ArrowLeft, ArrowRight, ChevronLeft, Loader2, MapPin, Users, Gauge,
+  ArrowRight, ChevronLeft, Loader2, MapPin, Users, Gauge,
   AlertTriangle, BarChart3, Check, Pencil, Merge,
 } from "lucide-react";
 import { useRef } from "react";
@@ -399,7 +399,7 @@ export default function ZoneBuilder() {
             <Slider value={[config.max_spread_minutes]} onValueChange={([v]) => setConfig((c) => ({ ...c, max_spread_minutes: v }))} min={8} max={25} step={1} />
           </div>
           <div className="flex justify-between">
-            <Button variant="ghost" onClick={() => setStep("region")}><ArrowLeft className="h-4 w-4 mr-1" /> Back</Button>
+            <Button variant="ghost" onClick={() => setStep("region")}><ChevronLeft className="h-4 w-4 mr-1" /> Back</Button>
             <Button onClick={handleGenerate} disabled={generating}>
               {generating ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Generating…</> : "Generate Zones"}
             </Button>
@@ -424,7 +424,7 @@ export default function ZoneBuilder() {
           </div>
           <div className="flex justify-between">
             <Button variant="ghost" onClick={() => { setRunId(null); setStep("settings"); }}>
-              <ArrowLeft className="h-4 w-4 mr-1" /> Back to Settings
+              <ChevronLeft className="h-4 w-4 mr-1" /> Back to Settings
             </Button>
             <Button onClick={() => setStep("edit")}>
               Edit Zones <ArrowRight className="h-4 w-4 ml-1" />
@@ -485,7 +485,7 @@ export default function ZoneBuilder() {
 
           <div className="flex justify-between">
             <Button variant="ghost" onClick={() => { setMergeMode(false); setMergeSelection([]); setStep("preview"); }}>
-              <ArrowLeft className="h-4 w-4 mr-1" /> Back to Preview
+              <ChevronLeft className="h-4 w-4 mr-1" /> Back to Preview
             </Button>
             <Button onClick={() => setStep("commit")}>
               Review & Commit <ArrowRight className="h-4 w-4 ml-1" />
@@ -547,7 +547,7 @@ export default function ZoneBuilder() {
 
           <div className="flex justify-between">
             <Button variant="ghost" onClick={() => setStep("edit")}>
-              <ArrowLeft className="h-4 w-4 mr-1" /> Back to Edit
+              <ChevronLeft className="h-4 w-4 mr-1" /> Back to Edit
             </Button>
             <Button onClick={() => setConfirmCommit(true)} disabled={committing}>
               {committing ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Committing…</> : (

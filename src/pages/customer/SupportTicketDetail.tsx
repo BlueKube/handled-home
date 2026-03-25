@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { TicketStatusChip } from "@/components/support/TicketStatusChip";
 import { ResolutionOfferCard } from "@/components/support/ResolutionOfferCard";
-import { ArrowLeft, Clock, MessageSquarePlus } from "lucide-react";
+import { ChevronLeft, Clock, MessageSquarePlus } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
 
@@ -81,7 +81,7 @@ export default function CustomerSupportTicketDetail() {
   return (
     <div className="p-4 pb-24 space-y-4 animate-fade-in">
       <Button variant="ghost" size="sm" className="gap-1 -ml-2" onClick={() => navigate("/customer/support/tickets")}>
-        <ArrowLeft className="h-4 w-4" />
+        <ChevronLeft className="h-4 w-4" />
         Tickets
       </Button>
 
