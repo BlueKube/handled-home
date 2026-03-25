@@ -4,7 +4,7 @@
 
 **Last updated:** 2026-03-25
 **Status:** Phase 1 in progress
-**Next action:** Begin Phase 3, Batch 8 (Admin Provider Detail earnings + Billing route + Payout schedule)
+**Next action:** Begin Phase 4, Batches 10-14 (error/empty states — mechanical sweep, combinable)
 **Context:** Full audit of screen-flows.md vs codebase found 116 gaps (23 HIGH, ~50 MED, ~25 LOW). This plan closes them in 6 phases across 18 batches.
 
 ## Execution Mode
@@ -106,7 +106,7 @@ Mechanical pattern: align copy, icons, button variants, and minor UI elements to
 | 6 | P2 | Job List CTA + Job Complete earnings breakdown | ✅ |
 | 7 | P2 | Earnings payout button + Provider support ticket creation + duplicate card bug | ✅ |
 | 8 | P3 | Admin Provider Detail earnings + Billing route + Payout schedule | ✅ |
-| 9 | P3 | Admin Support assignment + Attachments + Bundle Savings | ⬜ |
+| 9 | P3 | Admin Support assignment + Attachments + Bundle Savings | ✅ |
 | 10 | P4 | Error/empty states: F1-F6 | ⬜ |
 | 11 | P4 | Error/empty states: F7-F11 | ⬜ |
 | 12 | P4 | Error/empty states: F12-F16 | ⬜ |
