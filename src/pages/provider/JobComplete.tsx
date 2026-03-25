@@ -146,10 +146,12 @@ export default function ProviderJobComplete() {
         if (earning?.total_cents) {
           const amount = (earning.total_cents / 100).toFixed(2);
           setEarnedCents(earning.total_cents);
-          setEarningBreakdown({
-            base: earning.base_amount_cents ?? earning.total_cents,
-            modifiers: earning.modifier_cents ?? 0,
-          });
+          if (earning.base_amount_cents != null) {
+            setEarningBreakdown({
+              base: earning.base_amount_cents,
+              modifiers: earning.modifier_cents ?? 0,
+            });
+          }
           sonnerToast.success(`+$${amount} earned`);
         }
       } catch {
@@ -174,16 +176,25 @@ export default function ProviderJobComplete() {
           <h1 className="text-h2 mb-2">Job Submitted!</h1>
           {earnedCents ? (
             <div className="mb-3">
-              <div className="flex items-center justify-center gap-2 mb-1">
-                <DollarSign className="h-5 w-5 text-success" />
-                <span className="text-lg font-bold text-success">
-                  +{formatCents(earnedCents)} earned
-                </span>
-              </div>
-              {earningBreakdown && earningBreakdown.modifiers > 0 && (
-                <div className="flex justify-center gap-4 text-xs text-muted-foreground">
-                  <span>Base: {formatCents(earningBreakdown.base)}</span>
-                  <span>Modifiers: +{formatCents(earningBreakdown.modifiers)}</span>
+              {earningBreakdown ? (
+                <div className="space-y-1 mb-1">
+                  <div className="flex justify-center gap-4 text-sm text-muted-foreground">
+                    <span>Base: {formatCents(earningBreakdown.base)}</span>
+                    <span>Modifiers: {earningBreakdown.modifiers >= 0 ? "+" : ""}{formatCents(earningBreakdown.modifiers)}</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-2">
+                    <DollarSign className="h-5 w-5 text-success" />
+                    <span className="text-lg font-bold text-success">
+                      Total: {formatCents(earnedCents)}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <DollarSign className="h-5 w-5 text-success" />
+                  <span className="text-lg font-bold text-success">
+                    +{formatCents(earnedCents)} earned
+                  </span>
                 </div>
               )}
             </div>
