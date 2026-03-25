@@ -104,6 +104,8 @@ export function useProperty() {
   return {
     property: query.data as Property | null | undefined,
     isLoading: query.isLoading,
+    isError: query.isError,
+    refetch: query.refetch,
     save: mutation.mutateAsync,
     isSaving: mutation.isPending,
   };
