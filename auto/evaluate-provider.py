@@ -171,7 +171,7 @@ def parse_provider_flows(text: str) -> list[FlowSection]:
                 number=s_number,
                 title=s_title,
                 body=screen_body,
-                line_start=start_line + 1 + s_start + 1,
+                line_start=start_line + 1 + s_start,  # 1-indexed line of screen heading
             ))
 
         # Body = text before first screen
@@ -186,7 +186,7 @@ def parse_provider_flows(text: str) -> list[FlowSection]:
             body=body,
             full_text=full_text,
             screens=screens,
-            line_start=start_line + 1,
+            line_start=start_line + 1,  # 1-indexed line of flow heading
         ))
 
     return flows
@@ -206,7 +206,7 @@ def count_words(text: str) -> int:
     """Count words in text, excluding markdown syntax artifacts."""
     cleaned = re.sub(r'```[\s\S]*?```', '', text)
     cleaned = re.sub(r'\|[-:]+\|', '', cleaned)
-    cleaned = re.sub(r'[#*`|>_\[\]]', ' ', cleaned)
+    cleaned = re.sub(r'[#*\`|>_\[\]]', ' ', cleaned)
     return len(cleaned.split())
 
 
@@ -217,8 +217,12 @@ def heading_similarity(a: str, b: str) -> float:
 
 def jaccard_similarity(a: str, b: str) -> float:
     """Word-level Jaccard similarity between two strings."""
+    if not a or not b:
+        return 0.0
     words_a = set(a.lower().split())
     words_b = set(b.lower().split())
+    if not words_a and not words_b:
+        return 1.0
     if not words_a or not words_b:
         return 0.0
     return len(words_a & words_b) / len(words_a | words_b)
