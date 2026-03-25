@@ -15,10 +15,10 @@ Read and follow `docs/skills/prd-to-production-workflow.md` before starting any 
 ### Quick reference (full details in the workflow doc)
 
 1. **PRD → Plan** — Decompose the PRD into phases and batches. Write `docs/working/plan.md`. Get human approval.
-2. **Batch execution** — For each batch: re-anchor → write spec in `docs/working/batch-specs/` → implement → commit → 10-agent code review → fix loop → validate build → validate visually → push.
+2. **Batch execution** — For each batch: re-anchor → write spec in `docs/working/batch-specs/` → implement → commit & push → code review (via sub-agents) → fix loop → validate build → push.
 3. **Doc sync** — After each phase, sync the six north star documents (see below).
-4. **Phase transition** — Mark phase complete in plan, restate what's next.
-5. **Completion** — Final recap, archive `docs/working/` to `docs/archive/`.
+4. **Phase transition** — Consolidation check (duplicated patterns, dead code, overgrown files) → fresh session → restate what's next.
+5. **Completion** — Final recap, archive `docs/working/` to `docs/archive/[prd-name]-[YYYY-MM-DD]/`, clean working folder, pick up next PRD from `docs/upcoming/`.
 
 ### Slash commands
 

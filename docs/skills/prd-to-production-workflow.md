@@ -20,6 +20,13 @@ This workflow turns a Product Requirements Document (PRD) into shipped code thro
 2. Write a PRD covering: problem statement, goals, scope, user stories, success criteria, constraints, and rough priority ordering.
 3. The PRD does not need to be perfect. It needs to be specific enough that Claude can decompose it into phases.
 
+### Execution mode
+
+Each PRD should declare its execution mode:
+
+- **Quality mode** (default) — Full 10-agent review system, full documentation sync. Production-ready.
+- **Speed mode** — Reduced 4-agent review (Lanes 1 + 2 only, Sonnet tier only, no synthesis). Used for prototypes, validation builds, and low-risk changes. Max 2 fix passes then move on.
+
 ---
 
 ## Phase 1: PRD → Plan
@@ -540,8 +547,18 @@ Use subagents to parallelize the review across multiple documents. For each doc,
 After a phase is complete and docs are synced:
 
 1. **Reconcile** — Update `docs/working/plan.md` to mark the phase complete
-2. **Restate the plan** — Summarize what's done and what's next
-3. **Start the next phase** — Return to Phase 2, Step 1
+2. **Consolidation check** — Before starting the next phase, scan for cleanup opportunities created by the batches just completed:
+   - **Duplicated patterns** — Did multiple batches introduce similar components, hooks, or utilities that should be consolidated into one shared abstraction?
+   - **Dead code** — Did any batch supersede or replace earlier work, leaving unused code behind?
+   - **Overgrown files** — Did any file grow significantly across batches and now needs to be split?
+   - **Deferred items** — Review the deferred list accumulated during the phase. Are any quick cleanup tasks (< 15 min) worth folding in now before they compound?
+
+   If cleanup is needed, create a lightweight cleanup batch (no new features — only consolidation, deletion, and extraction). This batch follows the same spec → implement → review → push cycle but uses a lightweight review (Lanes a + b + e only = 6 agents) since it's refactoring, not new logic. Commit as: `refactor(<scope>): consolidate after phase N`.
+
+   If the codebase is clean, skip this and note "No consolidation needed" in the plan.
+3. **Start a fresh session** — Phase transitions are natural context seams. Start a new session before beginning the next phase. The re-anchor step makes this cheap (~2-5K tokens to read plan.md).
+4. **Restate the plan** — Summarize what's done and what's next
+5. **Start the next phase** — Return to Phase 2, Step 1
 
 ---
 
@@ -552,15 +569,19 @@ When all phases in the plan are done:
 1. **Final recap** — Review the entire plan against what was actually built
 2. **Recommendations** — Surface any deferred items, tech debt, or follow-up work
 3. **Final doc sync** — One last pass across all docs
-4. **Archive** — Move the working folder contents to an archive:
+4. **Archive** — Move the working folder contents to a uniquely-named archive folder:
    ```
    docs/archive/
-   └── [feature-name]-[date]/
+   └── [kebab-case-prd-name]-[YYYY-MM-DD]/
        ├── prd.md
        ├── plan.md
        └── batch-specs/
    ```
-5. **Clean the working folder** — `docs/working/` is now empty and ready for the next PRD
+   The folder name combines the PRD's short name (kebab-case) with the completion date. Examples:
+   - `docs/archive/design-guidelines-conformance-2026-03-25/`
+   - `docs/archive/push-notifications-2026-04-02/`
+   - `docs/archive/provider-scheduling-2026-04-10/`
+5. **Clean the working folder** — `docs/working/` should now be empty and ready for the next PRD. Remove `prd.md`, `plan.md`, and all files in `batch-specs/`.
 
 ---
 
@@ -569,6 +590,18 @@ When all phases in the plan are done:
 Human brings the next PRD. Return to Phase 1.
 
 **For automated scheduled execution**, Claude Code can pick up the next PRD from a queue folder. See "Scheduled Task Automation" below.
+
+---
+
+## Phase 7: Autoresearch (Optional, Between Rounds)
+
+After a round of PRDs is complete, optionally run an analysis pass to find the next highest-impact work.
+
+**Method:** Systematically evaluate the product against quality rubrics — UX friction scoring, performance audits, design guidelines conformance checks, accessibility audits, or business model gap analysis.
+
+**Output:** New PRD files added to `docs/upcoming/`, numbered and ready for the scheduled task loop to pick up.
+
+This phase feeds the continuous improvement loop: build → measure → analyze → generate PRDs → build again.
 
 ---
 
@@ -685,14 +718,14 @@ If a session fails mid-batch (context limit, network error, build failure):
 [ ] Re-anchor to plan (read Session Handoff section first)
 [ ] Write batch spec
 [ ] Implement spec (nothing more)
-[ ] Commit
-[ ] Code review (full/light/verify — see batch tag in plan)
-[ ] Fix findings until clean
+[ ] Commit and push
+[ ] Code review via sub-agents (full/light/verify — see batch tag in plan)
+[ ] Fix findings until clean (max 3 passes)
 [ ] Validate build (tsc + build)
-[ ] Validate visually (screenshots, when applicable)
-[ ] Push
+[ ] Validate visually (screenshots, if UI work)
+[ ] Push fixes
 [ ] Update Session Handoff in plan.md
-[ ] (If last batch in phase) Sync docs
+[ ] (If last batch in phase) Consolidation check → fresh session → sync docs
 ```
 
 ## Quick Reference: Review Scoring
@@ -706,17 +739,52 @@ If a session fails mid-batch (context limit, network error, build failure):
 ## Quick Reference: Commit Messages
 
 ```
-feat(<scope>): Batch N — Description       # New features
-fix(<scope>): resolve Batch N review findings  # Review fixes
-docs: sync documentation after phase N      # Doc sync
+feat(<scope>): Batch N — Description                # New features
+fix(<scope>): resolve Batch N review findings       # Review fixes
+refactor(<scope>): consolidate after phase N        # Phase-transition cleanup
+docs: sync documentation after phase N              # Doc sync
+```
+
+## Quick Reference: Directory Structure
+
+```
+docs/
+  masterplan.md
+  operating-model.md
+  screen-flows.md
+  design-guidelines.md
+  app-flow-pages-and-roles.md
+  feature-list.md
+  skills/
+    prd-to-production-workflow.md    # This file
+  upcoming/                          # PRDs queued for future work (numbered: 001-xxx.md)
+  working/                           # Active PRD, plan, and batch specs
+  archive/                           # Completed PRDs with specs and plans
+```
+
+## Quick Reference: PRD Lifecycle
+
+```
+docs/upcoming/001-feature.md          # 1. PRD starts in queue
+        ↓
+docs/working/prd.md                   # 2. Moved to working when active
+docs/working/plan.md                  # 3. Plan created, batches executed
+docs/working/batch-specs/             # 4. Specs written per batch
+        ↓
+docs/archive/feature-2026-03-25/      # 5. Archived on completion
+  ├── prd.md
+  ├── plan.md
+  └── batch-specs/
+docs/working/                         # 6. Working folder cleaned, ready for next PRD
 ```
 
 ## Adapting to Other Projects
 
 This workflow is project-agnostic. To use it on a new project:
 
-1. **Create your core docs** — You don't need all 7 docs from day one. Start with `CLAUDE.md` (project instructions) and `docs/masterplan.md` (what you're building and why). Add others as the project grows.
+1. **Create your core docs** — Start with `CLAUDE.md` (project instructions) and `docs/masterplan.md` (what you're building and why). Add others as the project grows.
 2. **Adjust review lanes** — The 5 review lanes work for most projects. Lane 1 (spec completeness) is the most important — it prevents incomplete work from shipping as "done." If your project has specific concerns (security, performance, i18n), swap a lane or add one.
 3. **Adjust batch size** — For greenfield projects, batches can be larger. For mature codebases, keep them smaller.
 4. **Skip visual validation** if you're building a CLI, API, or backend system. Replace with integration test validation.
-5. **The working folder structure is the constant** — PRD + Plan + Batch Specs, always in one place, always referenced.
+5. **Speed mode for early stages** — When the product is pre-PMF, default to speed mode. Switch to quality mode when the product is being used by real users.
+6. **The working folder structure is the constant** — PRD + Plan + Batch Specs, always in one place, always referenced.
