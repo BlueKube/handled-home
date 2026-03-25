@@ -214,13 +214,6 @@ export default function ProviderSupportTicketDetail() {
           )}
         </Card>
       )}
-      {ticket.resolution_summary && (
-        <Card className="p-4 bg-success/5 border-success/20">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-success mb-1">Resolution</h3>
-          <p className="text-sm">{ticket.resolution_summary}</p>
-        </Card>
-      )}
-
       {/* Provider actions */}
       {!isResolved && (
         <section className="space-y-3">

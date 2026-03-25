@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -398,7 +399,7 @@ export default function ProviderEarnings() {
           ) : (
             <PauseCircle className="h-5 w-5 text-warning shrink-0" />
           )}
-          <div>
+          <div className="flex-1">
             <p className="text-sm font-medium">
               {isAccountReady ? "Payout account ready" : "Payout account not set up"}
             </p>
@@ -408,6 +409,11 @@ export default function ProviderEarnings() {
                 : "Set up your payout account to receive earnings"}
             </p>
           </div>
+          {!isAccountReady && (
+            <Button variant="accent" size="sm" onClick={() => navigate("/provider/settings")}>
+              Set Up
+            </Button>
+          )}
         </div>
       </Card>
 

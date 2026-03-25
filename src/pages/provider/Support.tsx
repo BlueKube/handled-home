@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { TicketStatusChip } from "@/components/support/TicketStatusChip";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
-import { AlertTriangle, ChevronRight, Inbox, ShieldAlert } from "lucide-react";
+import { AlertTriangle, ChevronRight, Inbox, ShieldAlert, Plus } from "lucide-react";
 import { format } from "date-fns";
 
 export default function ProviderSupportHome() {
@@ -17,9 +17,15 @@ export default function ProviderSupportHome() {
 
   return (
     <div className="animate-fade-in p-4 pb-24 space-y-5">
-      <div>
-        <h1 className="text-h2">Support</h1>
-        <p className="text-caption mt-0.5">Claims and disputes involving your jobs</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-h2">Support</h1>
+          <p className="text-caption mt-0.5">Claims and disputes involving your jobs</p>
+        </div>
+        <Button size="sm" onClick={() => navigate("/provider/support/new")}>
+          <Plus className="h-4 w-4 mr-1" />
+          New Ticket
+        </Button>
       </div>
 
       {/* Loading skeleton */}

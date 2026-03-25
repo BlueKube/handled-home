@@ -103,7 +103,7 @@ Mechanical pattern: align copy, icons, button variants, and minor UI elements to
 | 3 | P1 | Schedule tappable cards + ThisCycleSummary rollover line | ✅ |
 | 4 | P2 | Provider Onboarding progress bar | ✅ |
 | 5 | P2 | Coverage zone Mapbox map (onboarding + settings) | ✅ |
-| 6 | P2 | Job List CTA + Job Complete earnings breakdown | ⬜ |
+| 6 | P2 | Job List CTA + Job Complete earnings breakdown | ✅ |
 | 7 | P2 | Earnings payout button + Provider support ticket creation + duplicate card bug | ⬜ |
 | 8 | P3 | Admin Provider Detail earnings + Billing route + Payout schedule | ⬜ |
 | 9 | P3 | Admin Support assignment + Attachments + Bundle Savings | ⬜ |
