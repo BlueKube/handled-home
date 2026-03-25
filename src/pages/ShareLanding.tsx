@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, ImageIcon, Loader2, ArrowRight, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import handledLogo from "@/assets/handled-home-logo.png";
 
 export default function ShareLanding() {
@@ -83,14 +83,28 @@ export default function ShareLanding() {
   const completedDate = data.completed_at ? format(new Date(data.completed_at), "MMMM d, yyyy") : null;
   const bullets: string[] = data.checklist_bullets ?? [];
 
+  // Resolve hero photo signed URL from storage path
+  const [heroUrl, setHeroUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!data?.hero_photo_path) return;
+    supabase.storage
+      .from("job-photos")
+      .createSignedUrl(data.hero_photo_path, 3600)
+      .then(({ data: urlData }) => {
+        if (urlData?.signedUrl) setHeroUrl(urlData.signedUrl);
+      });
+  }, [data?.hero_photo_path]);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero photo area */}
       <div className="relative w-full aspect-[4/3] bg-muted flex items-center justify-center">
-        {data.hero_photo_path ? (
-          <div className="w-full h-full bg-gradient-to-b from-muted to-muted/80 flex items-center justify-center">
-            <ImageIcon className="h-16 w-16 text-muted-foreground/30" />
-          </div>
+        {heroUrl ? (
+          <img
+            src={heroUrl}
+            alt={`${categoryLabel} service photo`}
+            className="w-full h-full object-cover"
+          />
         ) : (
           <div className="w-full h-full bg-gradient-to-b from-secondary to-muted flex items-center justify-center">
             <ImageIcon className="h-16 w-16 text-muted-foreground/30" />
