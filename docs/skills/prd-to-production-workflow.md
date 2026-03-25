@@ -33,7 +33,11 @@ This workflow turns a Product Requirements Document (PRD) into shipped code thro
    - Phase list with batch breakdown
    - Dependency order (what must come first)
    - Estimated size per batch (Small / Medium / Large)
+   - Review intensity tag per batch (`review: full` / `review: light` / `review: verify`)
+   - Whether consecutive batches are combinable (same mechanical pattern)
    - Risk areas and deferred items
+   - A **Session Handoff** section at the top (updated by every session before exit)
+   - A **Progress Table** with batch status (`⬜` / `✅`) — this is the durable state machine that enables multi-session execution
 5. **Create the working folder:**
    ```
    docs/working/
@@ -556,24 +560,125 @@ When all phases in the plan are done:
 
 ---
 
-## Phase 6: Next Feature
+## Phase 6: Next Feature (Manual or Scheduled)
 
 Human brings the next PRD. Return to Phase 1.
+
+**For automated scheduled execution**, Claude Code can pick up the next PRD from a queue folder. See "Scheduled Task Automation" below.
+
+---
+
+## Scheduled Task Automation
+
+This workflow is designed to run autonomously via Claude Code Scheduled Tasks, executing batches continuously across sessions — potentially overnight or over multiple days.
+
+### How it works
+
+A scheduled task runs on a cron schedule (e.g., hourly). Each session:
+1. Reads `docs/working/plan.md` to find the current state
+2. Continues from the first incomplete (`⬜`) batch
+3. Completes up to N batches (configurable)
+4. Updates `plan.md` before exiting so the next session can resume
+
+### Session handoff protocol
+
+Every session MUST update the `## Session Handoff` section of `plan.md` before exiting:
+
+```markdown
+## Session Handoff
+- **Last completed:** Batch N
+- **Next up:** Batch N+1 — [title] (or "None — plan complete")
+- **Blockers:** None (or describe)
+- **PRD queue:** N files remaining in docs/upcoming/
+```
+
+A new session reads this section first (just the first ~10 lines) to know exactly where to resume, without needing to parse the full plan.
+
+### PRD queue (`docs/upcoming/`)
+
+For multi-PRD automation, place numbered PRD files in a queue folder:
+
+```
+docs/upcoming/
+├── 001-push-notifications.md
+├── 002-provider-scheduling.md
+└── 003-analytics-dashboard.md
+```
+
+When a plan completes (all batches `✅`):
+1. Archive `docs/working/` to `docs/archive/[feature-name]-[date]/`
+2. Move the lowest-numbered PRD from `docs/upcoming/` to `docs/working/prd.md`
+3. Decompose it into a new `plan.md`
+4. Begin batch execution
+
+### Scheduled task prompt template
+
+```
+Read docs/working/plan.md. Check the Session Handoff section first.
+
+If all batches are ✅:
+  - Check docs/upcoming/ for the next PRD (lowest number)
+  - If found: archive docs/working/, move PRD to docs/working/prd.md,
+    decompose into plan.md, begin batch execution
+  - If empty: exit — nothing to do
+
+If batches remain ⬜:
+  - Continue from the first incomplete batch
+  - Complete up to 4 batches this session
+  - Follow the full workflow: spec → implement → commit → review → fix → push
+
+Before exiting: update the Session Handoff section of plan.md.
+```
+
+### Batch cap per session
+
+Cap at **3–4 batches per session** to stay within context limits. This is a guideline, not a hard rule — small batches (verification-only, mechanical sweeps) can be grouped, while complex batches may take a full session each.
+
+### Review intensity by batch type
+
+Not all batches need the full 10-agent review. Tag batches in the plan:
+
+| Tag | Review level | When to use |
+|-----|-------------|-------------|
+| `review: full` | 10 agents (4 lanes × 2 tiers + synthesis × 2 tiers) | Default. New features, component changes, logic changes |
+| `review: light` | 6 agents (Lanes a + b + synthesis only) | Mechanical sweeps (find-replace across many files), CSS-only changes |
+| `review: verify` | Build validation only (`tsc --noEmit` + `npm run build`) | Verification-only batches (no code changes), doc sync |
+
+This saves significant tokens on repetitive work. The full 10-agent review adds the most value on batches with novel code changes where spec completeness, historical context, and prior feedback are meaningful.
+
+### Combined batches
+
+When consecutive batches follow an identical pattern (e.g., "remove max-w-lg from all customer pages" across Batches 16-18), they can be combined into a single implementation + single review cycle. The plan should note this possibility:
+
+```markdown
+### Batches 16-18: Customer Pages Sweep (combinable)
+**Pattern:** Same mechanical fix across all customer page files
+**Can combine:** Yes — single find-replace + single review
+```
+
+### Failure recovery
+
+If a session fails mid-batch (context limit, network error, build failure):
+- The Session Handoff section tells the next session exactly where things stopped
+- Git commits provide incremental checkpoints
+- Uncommitted work is lost, but batch specs make reimplementation straightforward
+- The next session reads the handoff, sees the incomplete batch, and picks up from the spec
 
 ---
 
 ## Quick Reference: Batch Checklist
 
 ```
-[ ] Re-anchor to plan
+[ ] Re-anchor to plan (read Session Handoff section first)
 [ ] Write batch spec
 [ ] Implement spec (nothing more)
 [ ] Commit
-[ ] 10-agent code review (4 parallel lanes + 1 synthesis lane × 2 tiers)
+[ ] Code review (full/light/verify — see batch tag in plan)
 [ ] Fix findings until clean
 [ ] Validate build (tsc + build)
-[ ] Validate visually (screenshots)
+[ ] Validate visually (screenshots, when applicable)
 [ ] Push
+[ ] Update Session Handoff in plan.md
 [ ] (If last batch in phase) Sync docs
 ```
 

@@ -79,9 +79,33 @@ After fixing MUST-FIX and SHOULD-FIX findings, run a **lightweight re-review** (
 ```
 docs/working/
 ├── prd.md              # The current PRD (copied here at start)
-├── plan.md             # The phased implementation plan
+├── plan.md             # The phased implementation plan (includes Session Handoff + Progress Table)
 └── batch-specs/        # Individual batch specs (one per batch)
+
+docs/upcoming/          # PRD queue for scheduled automation (numbered: 001-xxx.md, 002-xxx.md)
 ```
+
+### Scheduled Task / Multi-Session Automation
+
+This workflow supports autonomous execution via Claude Code Scheduled Tasks. Each session picks up where the last one left off using `plan.md` as the durable state machine.
+
+**Key rules for scheduled sessions:**
+1. **Read Session Handoff first** — the top section of `plan.md` tells you exactly where to resume
+2. **Cap at 3–4 batches per session** to stay within context limits
+3. **Update Session Handoff before exiting** — every session must write its exit state
+4. **PRD queue** — when a plan completes, check `docs/upcoming/` for the next PRD (lowest number), archive the old working folder, and start the new plan
+5. **Review intensity** — use batch tags (`review: full` / `review: light` / `review: verify`) to scale review effort appropriately
+6. **Combinable batches** — consecutive batches with identical mechanical patterns can be merged into one implementation + one review
+
+See `docs/skills/prd-to-production-workflow.md` → "Scheduled Task Automation" for full details.
+
+### Review intensity by batch type
+
+| Tag | Agents | When to use |
+|-----|--------|-------------|
+| `review: full` | 10 (default) | New features, component changes, logic changes |
+| `review: light` | 6 (Lanes a+b+e) | Mechanical sweeps, CSS-only, find-replace |
+| `review: verify` | 0 (build only) | Verification batches, doc sync, no code changes |
 
 ## Six North Star Documents
 
