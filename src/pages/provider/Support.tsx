@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { TicketStatusChip } from "@/components/support/TicketStatusChip";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { AlertTriangle, ChevronRight, Inbox, ShieldAlert, Plus } from "lucide-react";
 import { format } from "date-fns";
 
 export default function ProviderSupportHome() {
   const navigate = useNavigate();
-  const { data: tickets = [], isLoading } = useSupportTickets();
+  const { data: tickets = [], isLoading, isError, refetch } = useSupportTickets();
 
   const needsInput = tickets.filter((t) => t.status === "awaiting_provider");
   const activeTickets = tickets.filter((t) => !["resolved", "closed"].includes(t.status) && t.status !== "awaiting_provider");
@@ -28,8 +29,13 @@ export default function ProviderSupportHome() {
         </Button>
       </div>
 
+      {/* Error state */}
+      {isError && (
+        <QueryErrorCard message="Failed to load support tickets." onRetry={() => refetch()} />
+      )}
+
       {/* Loading skeleton */}
-      {isLoading && (
+      {!isError && isLoading && (
         <div className="space-y-3">
           {[1, 2].map((i) => (
             <Skeleton key={i} className="h-20 w-full rounded-2xl" />

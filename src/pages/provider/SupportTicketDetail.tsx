@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TicketStatusChip } from "@/components/support/TicketStatusChip";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { ChevronLeft, CheckCircle2, Clock, FileText, Send, Camera, X } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
@@ -24,7 +25,7 @@ const REVIEW_REASONS = [
 export default function ProviderSupportTicketDetail() {
   const { ticketId } = useParams<{ ticketId: string }>();
   const navigate = useNavigate();
-  const { ticket, events, isLoading } = useSupportTicketDetail(ticketId);
+  const { ticket, events, isLoading, error } = useSupportTicketDetail(ticketId);
   const actions = useTicketActions(ticketId ?? "");
 
   const [statement, setStatement] = useState("");
@@ -34,6 +35,14 @@ export default function ProviderSupportTicketDetail() {
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  if (error) {
+    return (
+      <div className="animate-fade-in p-4 pb-24">
+        <QueryErrorCard message="Failed to load support ticket." />
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
