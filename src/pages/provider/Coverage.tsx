@@ -297,7 +297,7 @@ function CoverageZones() {
     enabled: editing,
   });
 
-  const selectedZoneIds = coverage.map((c: any) => c.zone_id);
+  const selectedZoneIds = coverage.map((c: any) => c.zone_id).filter(Boolean);
 
   const toggleZone = async (zoneId: string) => {
     try {

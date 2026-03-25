@@ -51,12 +51,12 @@ export default function MapboxZoneSelector({
               className={`press-feedback cursor-pointer ${selected ? "ring-2 ring-accent" : ""} ${disabled ? "opacity-60 pointer-events-none" : ""}`}
               onClick={() => onToggleZone(zone.id)}
               role="button"
-              tabIndex={0}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggleZone(zone.id); } }}
+              tabIndex={disabled ? -1 : 0}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); onToggleZone(zone.id); } }}
               aria-label={`${selected ? "Deselect" : "Select"} ${zone.name}`}
             >
               <CardContent className="py-4 flex items-center gap-3">
-                <Checkbox checked={selected} className="pointer-events-none" />
+                <Checkbox checked={selected} onCheckedChange={() => {}} className="pointer-events-none" />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
