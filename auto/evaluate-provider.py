@@ -550,6 +550,200 @@ def score_d3_fairness_signals(flows: list[FlowSection], all_text: str) -> tuple[
     return min(points, 10.0), issues
 
 
+# ─── Dimension 4: Onboarding Friction (1.1×) ───────────────────────────────
+
+STEP_COUNT_KEYWORDS = [
+    "step 1", "step 2", "step 3", "step 4", "step 5", "step 6",
+    "progress bar", "progress indicator", "of 6",
+]
+
+PROGRESSIVE_DISCLOSURE_KEYWORDS = [
+    "skip for now", "complete later", "skip option",
+    "skip", "optional", "ghost",
+]
+
+RESUME_STATE_KEYWORDS = [
+    "resume", "draft", "continue your application",
+    "continue application", "next incomplete step",
+    "your data is saved",
+]
+
+COMPLIANCE_UX_KEYWORDS = [
+    "compliance", "insurance", "tax document", "w-9",
+    "upload", "file upload", "accepted formats",
+    "compliance documents", "compliance status",
+]
+
+INVITE_CODE_KEYWORDS = [
+    "invite code", "verify code", "code entry",
+    "handled-", "invalid", "error text", "validation",
+    "format status", "code format",
+]
+
+
+def score_d4_onboarding_friction(flows: list[FlowSection], all_text: str) -> tuple[float, list[Issue]]:
+    """D4: Onboarding Friction — steps to first job, progressive disclosure, resume state."""
+    issues: list[Issue] = []
+    points = 0.0
+
+    # Sub-check 1: Step count (0-2 points)
+    # How many steps to first job? 6 steps specified, each should be documented
+    step_matches = count_keyword_matches(all_text, STEP_COUNT_KEYWORDS)
+    has_progress = bool(count_pattern_matches(all_text, r'step\s+\d+\s+of\s+\d+|progress\s+bar'))
+    if step_matches >= 5 and has_progress:
+        points += 2.0
+    elif step_matches >= 3:
+        points += 1.5
+    elif step_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D4_onboarding", "No step count or progress indicators found", 2))
+
+    # Sub-check 2: Progressive disclosure (0-2 points)
+    skip_matches = count_keyword_matches(all_text, PROGRESSIVE_DISCLOSURE_KEYWORDS)
+    skip_screens = find_screens_matching(flows, ["skip for now", "complete later"])
+    if skip_matches >= 4 and len(skip_screens) >= 2:
+        points += 2.0
+    elif skip_matches >= 2:
+        points += 1.5
+    elif skip_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D4_onboarding", "No progressive disclosure (skip/complete later) found", 2))
+
+    # Sub-check 3: Resume/draft state (0-2 points)
+    resume_matches = count_keyword_matches(all_text, RESUME_STATE_KEYWORDS)
+    has_resume = bool(count_pattern_matches(all_text, r'continue\s+your\s+application|draft|resume'))
+    if resume_matches >= 3 and has_resume:
+        points += 2.0
+    elif resume_matches >= 2:
+        points += 1.5
+    elif resume_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D4_onboarding", "No resume/draft state for incomplete onboarding", 2))
+
+    # Sub-check 4: Compliance UX (0-2 points)
+    comp_matches = count_keyword_matches(all_text, COMPLIANCE_UX_KEYWORDS)
+    if comp_matches >= 5:
+        points += 2.0
+    elif comp_matches >= 3:
+        points += 1.5
+    elif comp_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D4_onboarding", "No compliance document UX found", 2))
+
+    # Sub-check 5: Invite code flow (0-2 points)
+    invite_matches = count_keyword_matches(all_text, INVITE_CODE_KEYWORDS)
+    has_validation = bool(count_pattern_matches(all_text, r'invite\s+code|verify\s+code|code\s+format'))
+    if invite_matches >= 4 and has_validation:
+        points += 2.0
+    elif invite_matches >= 2:
+        points += 1.5
+    elif invite_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D4_onboarding", "No invite code flow found", 2))
+
+    return min(points, 10.0), issues
+
+
+# ─── Dimension 5: Retention Hooks (1.0×) ───────────────────────────────────
+
+CELEBRATION_KEYWORDS = [
+    "celebration", "job complete", "party popper", "partypopper",
+    "trophy", "great work", "all stops finished",
+]
+
+PERFORMANCE_KEYWORDS = [
+    "quality score", "quality rating", "performance",
+    "feedback", "rating breakdown", "first three completed",
+]
+
+INSIGHTS_KEYWORDS = [
+    "insights", "coaching", "recommendations",
+    "growth recommendations", "trends", "lightbulb",
+]
+
+GROWTH_PATH_KEYWORDS = [
+    "capacity", "fill your schedule", "earn more",
+    "growth cta", "at current pace", "earnings potential",
+]
+
+GAMIFICATION_KEYWORDS = [
+    "route progress", "streak", "milestone",
+    "stops complete", "progress bar", "capacity meter",
+    "segmented progress",
+]
+
+
+def score_d5_retention_hooks(flows: list[FlowSection], all_text: str) -> tuple[float, list[Issue]]:
+    """D5: Retention Hooks — celebrations, performance, insights, growth, gamification."""
+    issues: list[Issue] = []
+    points = 0.0
+
+    # Sub-check 1: Celebration screens (0-2 points)
+    celeb_matches = count_keyword_matches(all_text, CELEBRATION_KEYWORDS)
+    celeb_screens = find_screens_matching(flows, ["complete", "celebration", "trophy"])
+    if celeb_matches >= 4 and len(celeb_screens) >= 1:
+        points += 2.0
+    elif celeb_matches >= 2:
+        points += 1.5
+    elif celeb_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D5_retention", "No celebration/completion screens found", 2))
+
+    # Sub-check 2: Performance/quality score (0-2 points)
+    perf_matches = count_keyword_matches(all_text, PERFORMANCE_KEYWORDS)
+    perf_screens = find_screens_matching(flows, ["quality", "performance"])
+    if perf_matches >= 3 and len(perf_screens) >= 1:
+        points += 2.0
+    elif perf_matches >= 2:
+        points += 1.5
+    elif perf_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D5_retention", "No performance/quality score screens found", 2))
+
+    # Sub-check 3: Insights/coaching (0-2 points)
+    insight_matches = count_keyword_matches(all_text, INSIGHTS_KEYWORDS)
+    insight_screens = find_screens_matching(flows, ["insights", "coaching"])
+    if insight_matches >= 3 and len(insight_screens) >= 1:
+        points += 2.0
+    elif insight_matches >= 2:
+        points += 1.5
+    elif insight_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D5_retention", "No insights or coaching features found", 2))
+
+    # Sub-check 4: Growth path signals (0-2 points)
+    growth_matches = count_keyword_matches(all_text, GROWTH_PATH_KEYWORDS)
+    if growth_matches >= 4:
+        points += 2.0
+    elif growth_matches >= 2:
+        points += 1.5
+    elif growth_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D5_retention", "No growth path signals found", 2))
+
+    # Sub-check 5: Capacity/streak gamification (0-2 points)
+    gam_matches = count_keyword_matches(all_text, GAMIFICATION_KEYWORDS)
+    if gam_matches >= 4:
+        points += 2.0
+    elif gam_matches >= 2:
+        points += 1.5
+    elif gam_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D5_retention", "No gamification elements (streaks, progress, milestones) found", 2))
+
+    return min(points, 10.0), issues
+
+
 # ─── Evaluate ───────────────────────────────────────────────────────────────
 
 def evaluate(path: Optional[str] = None, verbose: bool = False) -> ScoreResult:
@@ -579,9 +773,14 @@ def evaluate(path: Optional[str] = None, verbose: bool = False) -> ScoreResult:
     d3, issues = score_d3_fairness_signals(flows, all_text)
     all_issues.extend(issues)
 
-    # ─── D4-D7 Placeholders (implemented in Batches 4-5) ───
-    d4 = 0.0
-    d5 = 0.0
+    # ─── D4-D5 Scoring ───
+    d4, issues = score_d4_onboarding_friction(flows, all_text)
+    all_issues.extend(issues)
+
+    d5, issues = score_d5_retention_hooks(flows, all_text)
+    all_issues.extend(issues)
+
+    # ─── D6-D7 Placeholders (implemented in Batch 5) ───
     d6 = 0.0
     d7 = 0.0
 
