@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Bootstrap a New App with the PRD-to-Production Workflow</title>
+<style>
+body { font-family: 'Inter', Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; color: #1a1a1a; line-height: 1.6; }
+h1 { font-size: 28px; margin-bottom: 8px; }
+h2 { font-size: 22px; margin-top: 40px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; }
+h3 { font-size: 18px; margin-top: 28px; }
+p { margin: 12px 0; }
+code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 14px; }
+pre { background: #f3f4f6; padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 13px; line-height: 1.5; }
+table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+th, td { border: 1px solid #d1d5db; padding: 10px 14px; text-align: left; font-size: 14px; }
+th { background: #f9fafb; font-weight: 600; }
+blockquote { border-left: 4px solid #6b7280; margin: 16px 0; padding: 12px 20px; background: #f9fafb; color: #374151; }
+ul, ol { margin: 12px 0; padding-left: 24px; }
+li { margin: 6px 0; }
+.subtitle { color: #6b7280; font-size: 16px; margin-top: 0; }
+.step-label { display: inline-block; background: #1e3a5f; color: white; padding: 2px 10px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-right: 8px; }
+.note { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 12px 16px; margin: 16px 0; }
+.diagram { background: #f3f4f6; padding: 20px; border-radius: 8px; font-family: monospace; font-size: 13px; white-space: pre; line-height: 1.6; }
+hr { border: none; border-top: 1px solid #e5e7eb; margin: 32px 0; }
+</style>
+</head>
+<body>
+
+<h1>Bootstrap a New App with the PRD-to-Production Workflow</h1>
+<p class="subtitle">From a single masterplan to a fully instrumented repo — ready for autonomous batch execution.</p>
+
+<hr>
+
+<h2>Overview</h2>
+
+<p>This guide walks you through setting up a new application from scratch using the PRD-to-Production workflow. You start with one document (the masterplan), and each subsequent document is derived from the ones before it — creating a domino chain where AI generates 90% of the scaffolding and humans review and tune.</p>
+
+<p><strong>End state:</strong> A repo with 6 north star documents, a working folder structure, the portable workflow skill, and a first PRD queued — ready to start shipping batches.</p>
+
+<h2>The Domino Chain</h2>
+
+<div class="diagram">masterplan.md (human writes this)
+    |
+    v
+CLAUDE.md + project scaffold
+    |
+    v
+design-guidelines.md (derived from masterplan)
+    |
+    v
+app-flow-pages-and-roles.md (derived from masterplan)
+    |
+    v
+screen-flows.md (derived from app-flow + design guidelines)
+    |
+    v
+feature-list.md (extracted from masterplan + screen-flows)
+    |
+    v
+operating-model.md (derived from masterplan)
+    |
+    v
+prd-to-production-workflow.md (copied — this is portable)
+    |
+    v
+First PRD --> docs/upcoming/001-xxx.md
+    |
+    v
+Ready to run.</div>
+
+<h2>The Dependency Graph</h2>
+
+<div class="diagram">                    masterplan.md (human)
+                         |
+              +----------+----------+
+              v          v          v
+         CLAUDE.md   operating-   app-flow-
+              |      model.md    pages-roles.md
+              v                      |
+        design-                      |
+      guidelines.md                  |
+              |          +-----------+
+              v          v
+          screen-flows.md
+              |
+              v
+         feature-list.md</div>
+
+<hr>
+
+<h2>Step 0: Write the Masterplan</h2>
+
+<p><span class="step-label">HUMAN</span> This is the one document AI cannot write for you.</p>
+
+<p><strong>File:</strong> <code>docs/masterplan.md</code></p>
+
+<p>Your masterplan needs to cover:</p>
+
+<ul>
+<li><strong>Problem statement</strong> — What pain exists? Who feels it?</li>
+<li><strong>Target users</strong> — Who are the primary personas?</li>
+<li><strong>Value proposition</strong> — Why would someone choose this over alternatives?</li>
+<li><strong>User roles</strong> — What distinct roles exist in the system?</li>
+<li><strong>Business model</strong> — How does money flow in?</li>
+<li><strong>Core features</strong> — Even a rough list is fine</li>
+<li><strong>Tech stack preferences</strong> — Framework, styling, database, hosting</li>
+<li><strong>Growth strategy</strong> — Acquisition channels, flywheels</li>
+</ul>
+
+<div class="note">
+<strong>Quality bar:</strong> It doesn't need to be polished. It needs to be specific enough that AI can decompose it into phases and derive the other documents from it.
+</div>
+
+<hr>
+
+<h2>Step 1: Scaffold the Repo</h2>
+
+<p><span class="step-label">HUMAN</span> Run a few CLI commands to create the project.</p>
+
+<pre>mkdir my-app && cd my-app
+git init
+npm create vite@latest . -- --template react-ts
+# Install your stack (tailwind, shadcn, supabase, etc.)</pre>
+
+<p>Create the document folder structure:</p>
+
+<pre>docs/
+  masterplan.md          &larr; your document from Step 0
+  skills/
+  upcoming/
+  working/
+    batch-specs/
+  archive/</pre>
+
+<hr>
+
+<h2>Step 2: AI Generates <code>CLAUDE.md</code></h2>
+
+<p><span class="step-label">AI</span> The project instruction file — Claude's operating manual for this repo.</p>
+
+<p><strong>Prompt to Claude:</strong></p>
+
+<blockquote>
+Read <code>docs/masterplan.md</code>. Generate a <code>CLAUDE.md</code> project guide covering: project overview, tech stack, project structure (anticipated), design system tokens (derive from the product's personality — premium? playful? clinical?), UX principles, git workflow, conventions, and commands.
+</blockquote>
+
+<p><strong>Why AI can do this:</strong> The masterplan describes the product, users, and tone. That's enough to derive sensible defaults for design tokens, folder structure, and conventions. You'll tune it later — but the first draft is 80% right.</p>
+
+<p><strong>What the human does:</strong> Review for ~10 minutes. Adjust colors, fonts, or conventions to taste.</p>
+
+<hr>
+
+<h2>Step 3: AI Generates <code>docs/design-guidelines.md</code></h2>
+
+<p><span class="step-label">AI</span> The full design system — how the product looks and feels.</p>
+
+<p><strong>Prompt to Claude:</strong></p>
+
+<blockquote>
+Read <code>docs/masterplan.md</code> and <code>CLAUDE.md</code>. Generate <code>docs/design-guidelines.md</code> — the full design system. Derive: color palette (from the product's personality and target audience), typography scale, spacing system, component specs (buttons, inputs, cards, badges), icon system, animation patterns, mobile/desktop rules, accessibility standards. Reference the tech stack in CLAUDE.md for implementation details (e.g., Tailwind classes, CSS custom properties).
+</blockquote>
+
+<p><strong>Why this works:</strong> A "managed home services platform for homeowners" implies trustworthy (navy/blue), clean (white space), premium but approachable. A "gaming social network for teens" would produce completely different tokens. The masterplan's <em>who</em> and <em>what</em> drive the <em>how it looks</em>.</p>
+
+<hr>
+
+<h2>Step 4: AI Generates <code>docs/app-flow-pages-and-roles.md</code></h2>
+
+<p><span class="step-label">AI</span> The structural map — every route, page, and access gate.</p>
+
+<p><strong>Prompt to Claude:</strong></p>
+
+<blockquote>
+Read <code>docs/masterplan.md</code>. Generate <code>docs/app-flow-pages-and-roles.md</code>. Extract every user role. For each role, define: their route tree (every page they'd need), role gates, and primary user journeys (numbered steps with route paths). Include auth pages, onboarding, settings, and error pages.
+</blockquote>
+
+<p><strong>Why this works:</strong> The masterplan lists roles and features. Roles + features = pages. Pages + roles = route tree + access control. This is mechanical derivation.</p>
+
+<hr>
+
+<h2>Step 5: AI Generates <code>docs/screen-flows.md</code></h2>
+
+<p><span class="step-label">AI</span> What every screen contains — layouts, components, states.</p>
+
+<p><strong>Prompt to Claude:</strong></p>
+
+<blockquote>
+Read <code>docs/masterplan.md</code>, <code>docs/app-flow-pages-and-roles.md</code>, and <code>docs/design-guidelines.md</code>. Generate <code>docs/screen-flows.md</code>. For every page in the app-flow doc, describe: layout (header, content sections, action bars), which components it uses, navigation behavior, empty state, loading state. Group by role. Use the component specs from design-guidelines.md.
+</blockquote>
+
+<p><strong>Why this comes after app-flow:</strong> You need the page inventory before you can describe each page. And you need design guidelines to know <em>what components exist</em> to reference.</p>
+
+<hr>
+
+<h2>Step 6: AI Generates <code>docs/feature-list.md</code></h2>
+
+<p><span class="step-label">AI</span> The capability ledger — every feature, numbered and tagged.</p>
+
+<p><strong>Prompt to Claude:</strong></p>
+
+<blockquote>
+Read <code>docs/masterplan.md</code> and <code>docs/screen-flows.md</code>. Generate <code>docs/feature-list.md</code>. Extract every feature (numbered), mark all as PLANNED, tag each with a strategic category (growth-driver, retention, trust-builder, margin-lever, table-stakes). Group by functional area.
+</blockquote>
+
+<p><strong>Why this is late in the chain:</strong> Screen-flows often surface features the masterplan implied but didn't explicitly list (e.g., "the settings page needs notification preferences" — that's a feature). Doing this after screen-flows gives a more complete inventory.</p>
+
+<hr>
+
+<h2>Step 7: AI Generates <code>docs/operating-model.md</code></h2>
+
+<p><span class="step-label">AI</span> The business math — revenue, costs, thresholds, rules.</p>
+
+<p><strong>Prompt to Claude:</strong></p>
+
+<blockquote>
+Read <code>docs/masterplan.md</code>. Generate <code>docs/operating-model.md</code>. Define: revenue model (specific pricing if stated, placeholder ranges if not), cost structure, unit economics framework, margin targets, success metric thresholds (churn, retention, conversion — use industry benchmarks for the vertical if specifics aren't in the masterplan), risk triggers, and operational rules (payment retry, dunning, suspension policies).
+</blockquote>
+
+<p><strong>Why AI can do this:</strong> Industry benchmarks exist for most verticals. A home services subscription platform has known churn ranges (5-8% monthly), known conversion benchmarks, known margin structures. AI fills in reasonable defaults; the human tunes the numbers.</p>
+
+<hr>
+
+<h2>Step 8: Copy the Workflow Doc</h2>
+
+<p><span class="step-label">HUMAN</span> One file copy — this document is portable across projects.</p>
+
+<pre>cp reference/prd-to-production-workflow.md docs/skills/prd-to-production-workflow.md</pre>
+
+<p>Adapt the review lane descriptions if your project has unique concerns (security-heavy, i18n, etc.), but the structure is project-agnostic.</p>
+
+<hr>
+
+<h2>Step 9: Write the First PRD</h2>
+
+<p><span class="step-label">HUMAN or AI</span> Your first implementation target.</p>
+
+<pre>docs/upcoming/001-core-scaffold-and-auth.md</pre>
+
+<p>The first PRD is typically: project scaffold, auth flow, role routing, and the shell pages for each role. The human can write this, or ask AI to draft it from the masterplan's priority ordering.</p>
+
+<hr>
+
+<h2>Step 10: Start the Loop</h2>
+
+<pre>cp docs/upcoming/001-core-scaffold-and-auth.md docs/working/prd.md</pre>
+
+<p>You're now in <strong>Phase 1</strong> of the PRD-to-Production workflow: PRD &rarr; Plan &rarr; Batches &rarr; Ship.</p>
+
+<p>From here, the workflow runs on its own — either manually, via Claude Code Scheduled Tasks, or via the Agent SDK on a VPS.</p>
+
+<hr>
+
+<h2>Summary: What the Human Actually Does</h2>
+
+<table>
+<tr>
+<th>Step</th>
+<th>Who</th>
+<th>Human Effort</th>
+</tr>
+<tr>
+<td>0. Masterplan</td>
+<td>Human</td>
+<td><strong>Write it</strong> (the real work)</td>
+</tr>
+<tr>
+<td>1. Scaffold</td>
+<td>Human</td>
+<td>Run 3-4 CLI commands</td>
+</tr>
+<tr>
+<td>2. CLAUDE.md</td>
+<td>AI &rarr; Human</td>
+<td>Review and tune (~10 min)</td>
+</tr>
+<tr>
+<td>3. Design guidelines</td>
+<td>AI &rarr; Human</td>
+<td>Review and tune (~10 min)</td>
+</tr>
+<tr>
+<td>4. App flow &amp; roles</td>
+<td>AI &rarr; Human</td>
+<td>Review and tune (~10 min)</td>
+</tr>
+<tr>
+<td>5. Screen flows</td>
+<td>AI &rarr; Human</td>
+<td>Review and tune (~10 min)</td>
+</tr>
+<tr>
+<td>6. Feature list</td>
+<td>AI &rarr; Human</td>
+<td>Review and tune (~10 min)</td>
+</tr>
+<tr>
+<td>7. Operating model</td>
+<td>AI &rarr; Human</td>
+<td>Review and tune (~10 min)</td>
+</tr>
+<tr>
+<td>8. Workflow doc</td>
+<td>Human</td>
+<td>Copy one file</td>
+</tr>
+<tr>
+<td>9. First PRD</td>
+<td>Human or AI</td>
+<td>Write or review the draft</td>
+</tr>
+<tr>
+<td>10. Start</td>
+<td>Human</td>
+<td>One copy command, then the loop runs</td>
+</tr>
+</table>
+
+<p><strong>Total human effort:</strong> Writing the masterplan + ~1 hour reviewing 6 AI-generated docs + writing the first PRD. Everything else is derived.</p>
+
+<hr>
+
+<h2>Final Repo Structure</h2>
+
+<pre>my-app/
+  CLAUDE.md
+  docs/
+    masterplan.md
+    operating-model.md
+    screen-flows.md
+    design-guidelines.md
+    app-flow-pages-and-roles.md
+    feature-list.md
+    skills/
+      prd-to-production-workflow.md
+    upcoming/
+      001-core-scaffold-and-auth.md
+    working/
+      batch-specs/
+    archive/
+  src/
+    ... (scaffolded by Vite + your stack)</pre>
+
+<hr>
+
+<p style="color: #6b7280; font-size: 13px; text-align: center; margin-top: 40px;">PRD-to-Production Workflow &mdash; Bootstrap Guide</p>
+
+</body>
+</html>
