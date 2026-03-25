@@ -559,7 +559,7 @@ STEP_COUNT_KEYWORDS = [
 
 PROGRESSIVE_DISCLOSURE_KEYWORDS = [
     "skip for now", "complete later", "skip option",
-    "skip", "optional", "ghost",
+    "skip —", "skip for", "progressive disclosure",
 ]
 
 RESUME_STATE_KEYWORDS = [
@@ -576,8 +576,8 @@ COMPLIANCE_UX_KEYWORDS = [
 
 INVITE_CODE_KEYWORDS = [
     "invite code", "verify code", "code entry",
-    "handled-", "invalid", "error text", "validation",
-    "format status", "code format",
+    "handled-", "code format", "format status",
+    "enter your invite code",
 ]
 
 
@@ -657,8 +657,8 @@ CELEBRATION_KEYWORDS = [
 ]
 
 PERFORMANCE_KEYWORDS = [
-    "quality score", "quality rating", "performance",
-    "feedback", "rating breakdown", "first three completed",
+    "quality score", "quality rating", "performance metrics",
+    "feedback summary", "rating breakdown", "first three completed",
 ]
 
 INSIGHTS_KEYWORDS = [
@@ -685,7 +685,7 @@ def score_d5_retention_hooks(flows: list[FlowSection], all_text: str) -> tuple[f
 
     # Sub-check 1: Celebration screens (0-2 points)
     celeb_matches = count_keyword_matches(all_text, CELEBRATION_KEYWORDS)
-    celeb_screens = find_screens_matching(flows, ["complete", "celebration", "trophy"])
+    celeb_screens = find_screens_matching(flows, ["job complete", "celebration", "trophy"])
     if celeb_matches >= 4 and len(celeb_screens) >= 1:
         points += 2.0
     elif celeb_matches >= 2:
