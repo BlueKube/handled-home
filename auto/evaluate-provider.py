@@ -248,3 +248,213 @@ def find_screens_matching(flows: list[FlowSection], keywords: list[str]) -> list
             if any(kw.lower() in combined for kw in keywords):
                 results.append(screen)
     return results
+
+
+# ─── Dimension 1: Earnings Transparency (1.3×) ─────────────────────────────
+
+# Keywords for earnings-related sub-checks
+PAYOUT_PREDICTION_KEYWORDS = [
+    "projection", "projected", "at current pace", "est.", "estimated",
+    "per job", "avg", "this week", "today", "period",
+    "stats grid", "period selector",
+]
+
+MODIFIER_KEYWORDS = [
+    "modifier", "quality tier", "rush", "high-demand", "bonus",
+    "adjustment", "base", "net", "breakdown", "expandable",
+    "human-readable", "reason", "label",
+]
+
+PROJECTION_KEYWORDS = [
+    "capacity", "earnings projection", "estimated monthly",
+    "growth cta", "fill your schedule", "at current pace",
+    "earning potential", "zone", "dense routes",
+]
+
+HELD_EARNINGS_KEYWORDS = [
+    "held", "hold", "on hold", "hold reason", "release",
+    "review period", "under review", "payout account setup",
+    "estimated release", "how it works",
+]
+
+PAYOUT_STATUS_KEYWORDS = [
+    "payout account", "ready", "not set up", "set up payout",
+    "deposited", "on schedule", "checkcircle", "pausecircle",
+]
+
+
+def score_d1_earnings_transparency(flows: list[FlowSection], text: str) -> tuple[float, list[Issue]]:
+    """D1: Earnings Transparency — can provider predict next payout in 3 seconds?"""
+    issues: list[Issue] = []
+    points = 0.0  # max 10 (5 sub-checks × 2 points each)
+
+    # Combine all provider flow text for keyword searching
+    all_text = "\n".join(f.full_text for f in flows)
+
+    # Sub-check 1: Payout prediction speed (0-2 points)
+    # Can provider see next payout at a glance? Stats grid, period selector, projection
+    pred_matches = count_keyword_matches(all_text, PAYOUT_PREDICTION_KEYWORDS)
+    if pred_matches >= 6:
+        points += 2.0
+    elif pred_matches >= 3:
+        points += 1.0
+    elif pred_matches >= 1:
+        points += 0.5
+    else:
+        issues.append(Issue("D1_earnings", "No payout prediction elements found (stats grid, projection, period selector)", 3))
+
+    # Sub-check 2: Modifier explanations (0-2 points)
+    # Human-readable labels on modifiers with reasons
+    mod_matches = count_keyword_matches(all_text, MODIFIER_KEYWORDS)
+    has_modifier_labels = bool(count_pattern_matches(all_text, r'modifier\s+explanation|human-readable\s+reason|quality\s+tier\s+bonus|rush.*bonus|adjustment'))
+    if mod_matches >= 6 and has_modifier_labels:
+        points += 2.0
+    elif mod_matches >= 4:
+        points += 1.5
+    elif mod_matches >= 2:
+        points += 1.0
+    elif mod_matches >= 1:
+        points += 0.5
+    else:
+        issues.append(Issue("D1_earnings", "No modifier explanation labels found", 2))
+
+    # Sub-check 3: Projection cards (0-2 points)
+    # Capacity %, estimated monthly earnings, growth CTA
+    proj_matches = count_keyword_matches(all_text, PROJECTION_KEYWORDS)
+    proj_screens = find_screens_matching(flows, ["projection", "capacity", "earnings potential"])
+    if proj_matches >= 5 and len(proj_screens) >= 1:
+        points += 2.0
+    elif proj_matches >= 3:
+        points += 1.5
+    elif proj_matches >= 1:
+        points += 0.5
+    else:
+        issues.append(Issue("D1_earnings", "No earnings projection cards found", 2))
+
+    # Sub-check 4: Held earnings detail (0-2 points)
+    # Expandable section with hold reasons, estimated release
+    held_matches = count_keyword_matches(all_text, HELD_EARNINGS_KEYWORDS)
+    has_hold_reasons = bool(count_pattern_matches(all_text, r'hold\s+reason|new\s+provider\s+review|under\s+review|payout\s+account\s+setup'))
+    if held_matches >= 5 and has_hold_reasons:
+        points += 2.0
+    elif held_matches >= 3:
+        points += 1.5
+    elif held_matches >= 1:
+        points += 0.5
+    else:
+        issues.append(Issue("D1_earnings", "No held earnings detail or hold reasons found", 2))
+
+    # Sub-check 5: Payout account status (0-2 points)
+    # Ready/not-set-up states, setup CTA
+    payout_matches = count_keyword_matches(all_text, PAYOUT_STATUS_KEYWORDS)
+    has_dual_states = bool(count_pattern_matches(all_text, r'payout\s+account\s+ready|payout\s+account\s+not\s+set'))
+    if payout_matches >= 4 and has_dual_states:
+        points += 2.0
+    elif payout_matches >= 2:
+        points += 1.0
+    elif payout_matches >= 1:
+        points += 0.5
+    else:
+        issues.append(Issue("D1_earnings", "No payout account status section found", 2))
+
+    return min(points, 10.0), issues
+
+
+# ─── Dimension 2: Schedule Control (1.2×) ──────────────────────────────────
+
+ROUTE_LOCK_KEYWORDS = [
+    "route lock", "lock your route", "start route", "route locked",
+    "lock icon", "stops", "projected earnings", "begin your day",
+]
+
+QUEUE_BREADCRUMB_KEYWORDS = [
+    "stop x of y", "breadcrumb", "prev", "next", "navigation arrows",
+    "chevronleft", "chevronright", "queue",
+]
+
+ROUTE_OPTIMIZATION_KEYWORDS = [
+    "optimize route", "route optimization", "reorder",
+    "shortest drive", "drive time", "optimize",
+]
+
+AVAILABILITY_KEYWORDS = [
+    "availability", "coverage", "zone", "capacity",
+    "zone selection", "sku capabilities", "schedule",
+]
+
+JOB_LIST_KEYWORDS = [
+    "map/list", "view toggle", "segmented control",
+    "today", "this week", "all", "tabs",
+    "job cards", "rank", "status badge",
+]
+
+
+def score_d2_schedule_control(flows: list[FlowSection], text: str) -> tuple[float, list[Issue]]:
+    """D2: Schedule Control — route lock, queue, optimization, availability, job views."""
+    issues: list[Issue] = []
+    points = 0.0  # max 10 (5 sub-checks × 2 points each)
+
+    all_text = "\n".join(f.full_text for f in flows)
+
+    # Sub-check 1: Route lock UX (0-2 points)
+    lock_matches = count_keyword_matches(all_text, ROUTE_LOCK_KEYWORDS)
+    has_lock_states = bool(count_pattern_matches(all_text, r'not\s+locked|route\s+locked'))
+    if lock_matches >= 4 and has_lock_states:
+        points += 2.0
+    elif lock_matches >= 2:
+        points += 1.0
+    elif lock_matches >= 1:
+        points += 0.5
+    else:
+        issues.append(Issue("D2_schedule", "No route lock UX found", 2))
+
+    # Sub-check 2: Queue breadcrumb (0-2 points)
+    bread_matches = count_keyword_matches(all_text, QUEUE_BREADCRUMB_KEYWORDS)
+    has_breadcrumb = bool(count_pattern_matches(all_text, r'stop\s+\w+\s+of\s+\w+|queue\s+breadcrumb'))
+    if bread_matches >= 4 and has_breadcrumb:
+        points += 2.0
+    elif bread_matches >= 2:
+        points += 1.0
+    elif bread_matches >= 1:
+        points += 0.5
+    else:
+        issues.append(Issue("D2_schedule", "No queue breadcrumb (Stop X of Y) found", 2))
+
+    # Sub-check 3: Route optimization (0-2 points)
+    opt_matches = count_keyword_matches(all_text, ROUTE_OPTIMIZATION_KEYWORDS)
+    has_optimize_button = bool(count_pattern_matches(all_text, r'optimize\s+route|shortest\s+drive'))
+    if opt_matches >= 3 and has_optimize_button:
+        points += 2.0
+    elif opt_matches >= 2:
+        points += 1.5
+    elif opt_matches >= 1:
+        points += 0.5
+    else:
+        issues.append(Issue("D2_schedule", "No route optimization controls found", 2))
+
+    # Sub-check 4: Availability management (0-2 points)
+    avail_matches = count_keyword_matches(all_text, AVAILABILITY_KEYWORDS)
+    avail_screens = find_screens_matching(flows, ["coverage", "availability", "capacity"])
+    if avail_matches >= 3 and len(avail_screens) >= 1:
+        points += 2.0
+    elif avail_matches >= 2:
+        points += 1.0
+    elif avail_matches >= 1:
+        points += 0.5
+    else:
+        issues.append(Issue("D2_schedule", "No availability/coverage management found", 2))
+
+    # Sub-check 5: Job list views (0-2 points)
+    view_matches = count_keyword_matches(all_text, JOB_LIST_KEYWORDS)
+    has_toggle = bool(count_pattern_matches(all_text, r'map/list|view\s+toggle|segmented\s+control'))
+    has_tabs = bool(count_pattern_matches(all_text, r'today\s*\|\s*this\s*week|tabs'))
+    if view_matches >= 5 and has_toggle and has_tabs:
+        points += 2.0
+    elif view_matches >= 3:
+        points += 1.5
+    elif view_matches >= 1:
+        points += 0.5
+    else:
+        issues.append(Issue("D2_schedule", "No job list view controls (map/list, tabs) found", 2))
+
+    return min(points, 10.0), issues
