@@ -3,8 +3,8 @@
 ## Session Handoff
 
 **Last updated:** 2026-03-25
-**Status:** Phase 1, starting Batch 2
-**Next action:** Write batch-spec for Batch 2, then implement D1 + D2 scorers
+**Status:** Phase 1, starting Batch 3
+**Next action:** Write batch-spec for Batch 3, implement D3 + evaluate() + print_results() + CLI
 **Branch:** `claude/implement-plan-workflow-qVflr`
 
 ## Progress Table
@@ -12,7 +12,7 @@
 | Batch | Phase | Description | Size | Review | Status |
 |-------|-------|-------------|------|--------|--------|
 | 1 | Phase 1 | File scaffolding, parser, data structures, utilities | Medium | `review: full` | ✅ |
-| 2 | Phase 1 | D1 (Earnings Transparency) + D2 (Schedule Control) | Medium | `review: full` | ⬜ |
+| 2 | Phase 1 | D1 (Earnings Transparency) + D2 (Schedule Control) | Medium | `review: full` | ✅ |
 | 3 | Phase 1 | D3 (Fairness Signals) + evaluate() shell + output | Medium | `review: full` | ⬜ |
 | 4 | Phase 2 | D4 (Onboarding Friction) + D5 (Retention Hooks) | Medium | `review: full` | ⬜ |
 | 5 | Phase 2 | D6 (BYOC Tools) + D7 (Cognitive Walkthroughs) | Medium | `review: full` | ⬜ |

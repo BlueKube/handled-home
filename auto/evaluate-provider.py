@@ -455,3 +455,230 @@ def score_d2_schedule_control(flows: list[FlowSection], all_text: str) -> tuple[
         issues.append(Issue("D2_schedule", "No job list view controls (map/list, tabs) found", 2))
 
     return min(points, 10.0), issues
+
+
+# ─── Dimension 3: Fairness Signals (1.2×) ──────────────────────────────────
+
+GUARANTEED_PAYOUT_KEYWORDS = [
+    "guaranteed", "predictable", "per-job", "set by sku",
+    "guaranteed payout", "payout per job", "no surprise",
+]
+
+NO_TIP_KEYWORDS = [
+    "no-tip", "no tip", "tip dependency", "tip-dependency",
+    "no surprise adjustments", "never see customer pricing",
+]
+
+DENSITY_KEYWORDS = [
+    "route density", "dense routes", "denser routes",
+    "less driving", "more earning", "density",
+    "more stops", "better earnings", "flywheel",
+]
+
+TRANSPARENT_MODIFIER_KEYWORDS = [
+    "modifier breakdown", "quality tier", "rush bonus",
+    "adjustment reason", "transparent modifier", "base pay",
+    "modifier explanation", "human-readable reason",
+]
+
+MINIMUM_EARNINGS_KEYWORDS = [
+    "minimum", "floor", "guaranteed minimum", "base pay",
+    "minimum earnings", "guaranteed route pay",
+]
+
+
+def score_d3_fairness_signals(flows: list[FlowSection], all_text: str) -> tuple[float, list[Issue]]:
+    """D3: Fairness Signals — guaranteed payout, no-tip, density, transparent modifiers."""
+    issues: list[Issue] = []
+    points = 0.0  # max 10 (5 sub-checks × 2 points each)
+
+    # Sub-check 1: Guaranteed payout framing (0-2 points)
+    guar_matches = count_keyword_matches(all_text, GUARANTEED_PAYOUT_KEYWORDS)
+    if guar_matches >= 4:
+        points += 2.0
+    elif guar_matches >= 2:
+        points += 1.5
+    elif guar_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D3_fairness", "No guaranteed payout framing found", 3))
+
+    # Sub-check 2: No-tip language (0-2 points)
+    tip_matches = count_keyword_matches(all_text, NO_TIP_KEYWORDS)
+    if tip_matches >= 3:
+        points += 2.0
+    elif tip_matches >= 2:
+        points += 1.5
+    elif tip_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D3_fairness", "No tip-independence language found", 2))
+
+    # Sub-check 3: Density messaging (0-2 points)
+    density_matches = count_keyword_matches(all_text, DENSITY_KEYWORDS)
+    if density_matches >= 4:
+        points += 2.0
+    elif density_matches >= 2:
+        points += 1.5
+    elif density_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D3_fairness", "No route density messaging found", 2))
+
+    # Sub-check 4: Transparent modifiers (0-2 points)
+    mod_matches = count_keyword_matches(all_text, TRANSPARENT_MODIFIER_KEYWORDS)
+    if mod_matches >= 4:
+        points += 2.0
+    elif mod_matches >= 2:
+        points += 1.5
+    elif mod_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D3_fairness", "No transparent modifier breakdown found", 2))
+
+    # Sub-check 5: Minimum earnings signals (0-2 points)
+    min_matches = count_keyword_matches(all_text, MINIMUM_EARNINGS_KEYWORDS)
+    if min_matches >= 3:
+        points += 2.0
+    elif min_matches >= 2:
+        points += 1.5
+    elif min_matches >= 1:
+        points += 1.0
+    else:
+        issues.append(Issue("D3_fairness", "No minimum earnings signals found", 2))
+
+    return min(points, 10.0), issues
+
+
+# ─── Evaluate ───────────────────────────────────────────────────────────────
+
+def evaluate(path: Optional[str] = None, verbose: bool = False) -> ScoreResult:
+    """Run 7-dimension provider experience evaluation."""
+    filepath = Path(path) if path else SCREEN_FLOWS_PATH
+    if not filepath.exists():
+        print(f"ERROR: {filepath} not found", file=sys.stderr)
+        sys.exit(1)
+
+    text = filepath.read_text(encoding="utf-8")
+    flows = parse_provider_flows(text)
+
+    if not flows:
+        print("ERROR: No provider flows found in document", file=sys.stderr)
+        sys.exit(1)
+
+    all_text = "\n".join(f.full_text for f in flows)
+    all_issues: list[Issue] = []
+
+    # ─── D1-D3 Scoring ───
+    d1, issues = score_d1_earnings_transparency(flows, all_text)
+    all_issues.extend(issues)
+
+    d2, issues = score_d2_schedule_control(flows, all_text)
+    all_issues.extend(issues)
+
+    d3, issues = score_d3_fairness_signals(flows, all_text)
+    all_issues.extend(issues)
+
+    # ─── D4-D7 Placeholders (implemented in Batches 4-5) ───
+    d4 = 0.0
+    d5 = 0.0
+    d6 = 0.0
+    d7 = 0.0
+
+    # ─── Anti-Gaming Placeholder (implemented in Batch 6) ───
+    gaming_penalty = 0.0
+
+    # ─── Composite Score ───
+    scores = {
+        "d1_earnings": d1, "d2_schedule": d2, "d3_fairness": d3,
+        "d4_onboarding": d4, "d5_retention": d5, "d6_byoc": d6,
+        "d7_walkthroughs": d7,
+    }
+
+    weighted_sum = sum(scores[k] * DIMENSION_WEIGHTS[k] for k in scores)
+    total_weight = sum(DIMENSION_WEIGHTS.values())
+    weighted_avg = weighted_sum / total_weight  # 0-10
+
+    composite = weighted_avg * 10.0 - gaming_penalty
+    composite = max(min(composite, 100.0), 0.0)
+
+    return ScoreResult(
+        provider_score=round(composite, 2),
+        max_possible=100.0,
+        d1_earnings=round(d1, 2),
+        d2_schedule=round(d2, 2),
+        d3_fairness=round(d3, 2),
+        d4_onboarding=round(d4, 2),
+        d5_retention=round(d5, 2),
+        d6_byoc=round(d6, 2),
+        d7_walkthroughs=round(d7, 2),
+        gaming_penalty=round(gaming_penalty, 2),
+        word_count=count_words(all_text),
+        issues_found=len(all_issues),
+        issues=all_issues,
+    )
+
+
+# ─── Output ──────────────────────────────────────────────────────────────────
+
+def print_results(result: ScoreResult, verbose: bool = False):
+    """Print results in grep-friendly format."""
+    print("---")
+    print(f"provider_score:      {result.provider_score:.2f}")
+    print(f"max_possible:        {result.max_possible:.2f}")
+    print(f"d1_earnings:         {result.d1_earnings:.2f}")
+    print(f"d2_schedule:         {result.d2_schedule:.2f}")
+    print(f"d3_fairness:         {result.d3_fairness:.2f}")
+    print(f"d4_onboarding:       {result.d4_onboarding:.2f}")
+    print(f"d5_retention:        {result.d5_retention:.2f}")
+    print(f"d6_byoc:             {result.d6_byoc:.2f}")
+    print(f"d7_walkthroughs:     {result.d7_walkthroughs:.2f}")
+    print(f"gaming_penalty:      {result.gaming_penalty:.2f}")
+    print(f"word_count:          {result.word_count}")
+    print(f"issues_found:        {result.issues_found}")
+    print("---")
+
+    if verbose:
+        print(f"\n## Score Breakdown")
+        dimensions = [
+            ("D1  Earnings", result.d1_earnings, 1.3),
+            ("D2  Schedule", result.d2_schedule, 1.2),
+            ("D3  Fairness", result.d3_fairness, 1.2),
+            ("D4  Onboarding", result.d4_onboarding, 1.1),
+            ("D5  Retention", result.d5_retention, 1.0),
+            ("D6  BYOC", result.d6_byoc, 1.0),
+            ("D7  Walkthroughs", result.d7_walkthroughs, 0.9),
+        ]
+        for name, score, weight in dimensions:
+            filled = int(score)
+            bar = "█" * filled + "░" * (10 - filled)
+            print(f"  {name:18s} {bar} {score:.1f}/10  (×{weight})")
+
+        if result.gaming_penalty > 0:
+            print(f"\n  Gaming penalty:    -{result.gaming_penalty:.1f}")
+
+        print(f"\n  Word count:        {result.word_count}")
+
+        if result.issues:
+            by_dim = Counter(i.dimension for i in result.issues)
+            print(f"\n## Issues by Dimension")
+            for dim, count in sorted(by_dim.items(), key=lambda x: -x[1]):
+                print(f"  {dim:25s} {count:3d}")
+
+            notable = [i for i in result.issues if i.severity >= 2]
+            if notable:
+                print(f"\n## Notable Issues (severity 2+) — {len(notable)} total")
+                for issue in notable[:30]:
+                    print(f"  [{issue.dimension}] {issue.message}")
+
+
+if __name__ == "__main__":
+    verbose = "--verbose" in sys.argv or "-v" in sys.argv
+    path = None
+    for arg in sys.argv[1:]:
+        if not arg.startswith("-"):
+            path = arg
+            break
+
+    result = evaluate(path, verbose=verbose)
+    print_results(result, verbose=verbose)
