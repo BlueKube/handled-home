@@ -14,7 +14,7 @@ import { TodayLoadout, DayPlanSummary } from "@/components/provider/DayPlanCompo
 import { VisitJobCard } from "@/components/provider/VisitJobCard";
 import { WeekDueQueue } from "@/components/provider/WeekDueQueue";
 import { EmptyState } from "@/components/ui/empty-state";
-import { MapPin, Clock, ChevronRight, ArrowUp, ArrowDown, Route, Loader2, Lock, Map as MapIcon, List, ShieldCheck, Timer, CalendarClock } from "lucide-react";
+import { MapPin, Clock, ChevronRight, ArrowUp, ArrowDown, Route, Loader2, Lock, Map as MapIcon, List, ShieldCheck, Timer, CalendarClock, Play } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format, differenceInDays, parseISO } from "date-fns";
@@ -368,6 +368,28 @@ function WeekView() {
   );
 }
 
+function StartNextJobCTA() {
+  const { data: jobs } = useProviderJobs("today");
+  const navigate = useNavigate();
+
+  if (!jobs || jobs.length === 0) return null;
+
+  const nextJob = jobs.find((j) => !["COMPLETED", "CANCELED"].includes(j.status));
+  if (!nextJob) return null;
+
+  return (
+    <Button
+      variant="accent"
+      size="lg"
+      className="w-full"
+      onClick={() => navigate(`/provider/jobs/${nextJob.id}`)}
+    >
+      <Play className="h-4 w-4 mr-2" />
+      Start Next Job
+    </Button>
+  );
+}
+
 export default function ProviderJobs() {
   const [tab, setTab] = useState("today");
 
@@ -384,6 +406,7 @@ export default function ProviderJobs() {
         <TabsContent value="today" className="mt-4 space-y-3">
           <TodayLoadout />
           <DayPlanSummary />
+          <StartNextJobCTA />
           <TodayJobList />
         </TabsContent>
         <TabsContent value="week" className="mt-4">

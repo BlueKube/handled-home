@@ -89,6 +89,7 @@ export default function ProviderJobComplete() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [earnedCents, setEarnedCents] = useState<number | null>(null);
+  const [earningBreakdown, setEarningBreakdown] = useState<{ base: number; modifiers: number } | null>(null);
 
   // Track which SKUs have completed their level feedback
   const [completedLevelSkus, setCompletedLevelSkus] = useState<Set<string>>(new Set());
@@ -139,12 +140,16 @@ export default function ProviderJobComplete() {
       try {
         const { data: earning } = await supabase
           .from("provider_earnings")
-          .select("total_cents")
+          .select("total_cents, base_amount_cents, modifier_cents")
           .eq("job_id", jobId!)
           .maybeSingle();
         if (earning?.total_cents) {
           const amount = (earning.total_cents / 100).toFixed(2);
           setEarnedCents(earning.total_cents);
+          setEarningBreakdown({
+            base: earning.base_amount_cents ?? earning.total_cents,
+            modifiers: earning.modifier_cents ?? 0,
+          });
           sonnerToast.success(`+$${amount} earned`);
         }
       } catch {
@@ -168,11 +173,19 @@ export default function ProviderJobComplete() {
           <PartyPopper className="h-16 w-16 text-accent mb-4" />
           <h1 className="text-h2 mb-2">Job Submitted!</h1>
           {earnedCents ? (
-            <div className="flex items-center gap-2 mb-2">
-              <DollarSign className="h-5 w-5 text-success" />
-              <span className="text-lg font-bold text-success">
-                +{formatCents(earnedCents)} earned
-              </span>
+            <div className="mb-3">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <DollarSign className="h-5 w-5 text-success" />
+                <span className="text-lg font-bold text-success">
+                  +{formatCents(earnedCents)} earned
+                </span>
+              </div>
+              {earningBreakdown && earningBreakdown.modifiers > 0 && (
+                <div className="flex justify-center gap-4 text-xs text-muted-foreground">
+                  <span>Base: {formatCents(earningBreakdown.base)}</span>
+                  <span>Modifiers: +{formatCents(earningBreakdown.modifiers)}</span>
+                </div>
+              )}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground mb-2">
@@ -272,15 +285,15 @@ export default function ProviderJobComplete() {
 
       {/* Provider summary */}
       <div className="space-y-1.5">
-        <label className="text-sm font-medium">Summary (optional)</label>
+        <label className="text-sm font-medium">Notes (optional)</label>
         <Textarea
           placeholder="Add a brief note about the visit..."
           value={summary}
-          onChange={(e) => setSummary(e.target.value.slice(0, 240))}
+          onChange={(e) => setSummary(e.target.value.slice(0, 500))}
           className="resize-none"
           rows={3}
         />
-        <p className="text-xs text-muted-foreground text-right">{summary.length}/240</p>
+        <p className="text-xs text-muted-foreground text-right">{summary.length}/500</p>
       </div>
 
       {/* Submit */}

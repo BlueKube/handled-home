@@ -4,7 +4,7 @@
 
 **Last updated:** 2026-03-25
 **Status:** Phase 1 in progress
-**Next action:** Begin Phase 2, Batch 4 (provider onboarding progress bar)
+**Next action:** Begin Batch 6 (Job List CTA + Job Complete earnings breakdown)
 **Context:** Full audit of screen-flows.md vs codebase found 116 gaps (23 HIGH, ~50 MED, ~25 LOW). This plan closes them in 6 phases across 18 batches.
 
 ## Execution Mode
@@ -102,7 +102,7 @@ Mechanical pattern: align copy, icons, button variants, and minor UI elements to
 | 2 | P1 | Dashboard rollover + Plan Detail CTA + Routine cost breakdown | ✅ |
 | 3 | P1 | Schedule tappable cards + ThisCycleSummary rollover line | ✅ |
 | 4 | P2 | Provider Onboarding progress bar | ✅ |
-| 5 | P2 | Coverage zone Mapbox map (onboarding + settings) | ⬜ |
+| 5 | P2 | Coverage zone Mapbox map (onboarding + settings) | ✅ |
 | 6 | P2 | Job List CTA + Job Complete earnings breakdown | ⬜ |
 | 7 | P2 | Earnings payout button + Provider support ticket creation + duplicate card bug | ⬜ |
 | 8 | P3 | Admin Provider Detail earnings + Billing route + Payout schedule | ⬜ |
