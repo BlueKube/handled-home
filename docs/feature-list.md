@@ -671,4 +671,24 @@
 
 ---
 
-*Total features: 385 | Last updated: 2026-03-25 | Value-prop tags added per section*
+## Screen-Flows Gap Closure (March 2026) `trust-builder` `provider-value`
+
+377. Provider Onboarding Visual Progress Bar: accent-filled progress bar with step counter and ChevronLeft back navigation across all 6 onboarding steps — DONE
+378. Shared MapboxZoneSelector Component: interactive zone card list with map placeholder (token-gated), used in onboarding coverage and provider settings — DONE
+379. Provider Coverage Settings Edit Mode: toggle-editable zone selection in provider settings using shared MapboxZoneSelector — DONE
+380. Start Next Job CTA: accent full-width button on provider Today tab navigating to first incomplete job — DONE
+381. Job Complete Earnings Breakdown: itemized base pay + modifier display with formatCents on job completion screen — DONE
+382. Notes Field Upgrade: expanded provider job notes from 240 to 500 chars per spec — DONE
+383. Set Up Payout Account Button: accent CTA on provider earnings page when payout account not configured — DONE
+384. Provider Support Ticket Creation: 6-category ticket creation flow with description validation (min 10 chars) and provider-aware database attribution — DONE
+385. Admin Provider Detail Earnings Tab: full earnings view with payout account status, summary stats, active holds with release, recent earnings, and payouts — DONE
+386. Admin Payout Schedule Section: schedule info card with pending count and link to payout control configuration — DONE
+387. Admin Ticket Assignment: claim-based ticket assignment with assigned badges and cache invalidation — DONE
+388. Admin Ticket Attachments: attachment display section with file type, description, upload info, and download link — DONE
+389. Bundle Savings Card Enhancements: dismiss button (localStorage persistence), "View Your Plan" CTA, loading skeleton, and empty state — DONE
+390. Error/Empty State Sweep: QueryErrorCard and EmptyState components added to 20+ critical pages across customer, provider, and admin flows — DONE
+391. Back Button Standardization: ArrowLeft → ChevronLeft icon replacement across 14 pages per project conventions — DONE
+
+---
+
+*Total features: 400 | Last updated: 2026-03-25 | Value-prop tags added per section*
