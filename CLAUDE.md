@@ -99,6 +99,25 @@ This workflow supports autonomous execution via Claude Code Scheduled Tasks. Eac
 
 See `docs/skills/prd-to-production-workflow.md` → "Scheduled Task Automation" for full details.
 
+### Session Resilience
+
+Sessions can stop unexpectedly (context limits, rate limits, timeouts). The workflow is designed so any session can resume from where the last left off.
+
+1. **Push after every commit** — don't accumulate unpushed work. If a session dies with unpushed changes, they may be unrecoverable.
+2. **Start a fresh session at every phase boundary** — phase transitions are natural seams. Don't carry stale context from Phase N into Phase N+1.
+3. **Use `🟡` for partial batches** — if a session stops mid-batch, mark it `🟡 4/7 files done, pushed` in the progress table so the next session knows exactly where to continue.
+4. **Never block on human input during autonomous execution** — if something is ambiguous, make the best judgment call, commit with a note, and flag it for human review in `plan.md`.
+5. **All review lanes run as sub-agents** — review findings stay in sub-agent context, only the final scored report enters the main context. This keeps batches to ~8-10K tokens in the main window.
+
+### Progress tracker status key
+
+| Symbol | Meaning |
+|--------|---------|
+| `✅` | Complete and pushed |
+| `🟡` | In progress — partial work pushed (note what's done) |
+| `⬜` | Not started |
+| `❌` | Blocked (note reason in table) |
+
 ### Review intensity by batch type
 
 | Tag | Agents | When to use |

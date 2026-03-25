@@ -37,7 +37,11 @@ This workflow turns a Product Requirements Document (PRD) into shipped code thro
    - Whether consecutive batches are combinable (same mechanical pattern)
    - Risk areas and deferred items
    - A **Session Handoff** section at the top (updated by every session before exit)
-   - A **Progress Table** with batch status (`⬜` / `✅`) — this is the durable state machine that enables multi-session execution
+   - A **Progress Table** with batch status — this is the durable state machine that enables multi-session execution:
+     - `✅` = complete and pushed
+     - `🟡` = in progress (partial work pushed — note what's done)
+     - `⬜` = not started
+     - `❌` = blocked (note reason)
 5. **Create the working folder:**
    ```
    docs/working/
@@ -656,11 +660,20 @@ When consecutive batches follow an identical pattern (e.g., "remove max-w-lg fro
 **Can combine:** Yes — single find-replace + single review
 ```
 
+### Session resilience rules
+
+1. **Push after every commit** — don't accumulate unpushed work. If a session dies with unpushed changes, they may be unrecoverable. The pattern is always: implement → commit → push → review → fix → commit → push.
+2. **Start a fresh session at every phase boundary** — phase transitions are natural context seams. A fresh session starts clean with the full context budget, reads `plan.md` to re-anchor, and enters the new phase without carrying stale context from the previous one.
+3. **All review lanes run as sub-agents** — review findings stay in sub-agent context windows, only the final scored report enters the main context. This keeps each batch to ~8-10K tokens in the main window, allowing 20+ batches per session when needed.
+4. **Use `🟡` for partial progress** — if a session must stop mid-batch, mark it `🟡 4/7 files done, pushed` in the progress table with a note. The next session reads this and continues from exactly where work stopped.
+5. **Never block on human input during autonomous execution** — if something is ambiguous, make the best judgment call based on the batch spec, commit with a note explaining the decision, and flag it for human review in `plan.md`.
+
 ### Failure recovery
 
 If a session fails mid-batch (context limit, network error, build failure):
 - The Session Handoff section tells the next session exactly where things stopped
-- Git commits provide incremental checkpoints
+- Git commits + pushes provide incremental checkpoints (every commit is pushed)
+- `🟡` status in the progress table shows exactly what was completed
 - Uncommitted work is lost, but batch specs make reimplementation straightforward
 - The next session reads the handoff, sees the incomplete batch, and picks up from the spec
 
