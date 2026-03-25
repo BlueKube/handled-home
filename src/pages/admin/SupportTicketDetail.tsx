@@ -425,6 +425,13 @@ export default function AdminSupportTicketDetail() {
                     {att.uploaded_by_role} · {format(new Date(att.created_at), "MMM d, h:mm a")}
                   </p>
                 </div>
+                {att.storage_path && (
+                  <Button variant="ghost" size="sm" asChild>
+                    <a href={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/support-attachments/${att.storage_path}`} target="_blank" rel="noopener noreferrer">
+                      View
+                    </a>
+                  </Button>
+                )}
               </Card>
             ))}
           </div>

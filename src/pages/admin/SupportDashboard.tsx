@@ -100,9 +100,10 @@ function TicketRow({ ticket, onClick }: { ticket: SupportTicketRow; onClick: () 
 
   const handleClaim = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!user?.id) return;
     const { error } = await supabase
       .from("support_tickets")
-      .update({ assigned_to_user_id: user?.id } as any)
+      .update({ assigned_to_user_id: user.id } as any)
       .eq("id", ticket.id);
     if (error) toast.error(error.message);
     else {
