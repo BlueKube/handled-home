@@ -1,10 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSupportTickets, type SupportTicketRow } from "@/hooks/useSupportTickets";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { TicketStatusChip } from "@/components/support/TicketStatusChip";
-import { ChevronRight, Inbox, AlertTriangle, ShieldAlert, CreditCard, Users, Clock, Search } from "lucide-react";
+import { ChevronRight, Inbox, AlertTriangle, ShieldAlert, CreditCard, Users, Clock, Search, UserCheck } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 type Queue = "all" | "needs_review" | "damage_safety" | "chargeback_risk" | "provider_dispute" | "sla_breach";
 
@@ -83,9 +89,27 @@ export default function AdminSupportDashboard() {
 }
 
 function TicketRow({ ticket, onClick }: { ticket: SupportTicketRow; onClick: () => void }) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const severityIcon = ticket.severity === "critical" || ticket.severity === "high"
     ? <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
     : null;
+
+  const isAssigned = !!ticket.assigned_to_user_id;
+  const isAssignedToMe = ticket.assigned_to_user_id === user?.id;
+
+  const handleClaim = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const { error } = await supabase
+      .from("support_tickets")
+      .update({ assigned_to_user_id: user?.id } as any)
+      .eq("id", ticket.id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Ticket claimed");
+      queryClient.invalidateQueries({ queryKey: ["support-tickets"] });
+    }
+  };
 
   return (
     <Card className="p-4 flex items-center gap-3 press-feedback cursor-pointer" onClick={onClick}>
@@ -93,6 +117,12 @@ function TicketRow({ ticket, onClick }: { ticket: SupportTicketRow; onClick: () 
         <div className="flex items-center gap-2 mb-1 flex-wrap">
           <TicketStatusChip status={ticket.status} />
           {severityIcon}
+          {isAssigned && (
+            <Badge variant={isAssignedToMe ? "default" : "secondary"} className="text-[10px] gap-1">
+              <UserCheck className="h-2.5 w-2.5" />
+              {isAssignedToMe ? "Mine" : "Assigned"}
+            </Badge>
+          )}
           <span className="text-[11px] text-muted-foreground">
             {format(new Date(ticket.created_at), "MMM d, h:mm a")}
           </span>
@@ -106,7 +136,13 @@ function TicketRow({ ticket, onClick }: { ticket: SupportTicketRow; onClick: () 
           <p className="text-xs text-muted-foreground truncate mt-0.5">{ticket.customer_note}</p>
         ) : null}
       </div>
-      <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+      {!isAssigned ? (
+        <Button variant="outline" size="sm" onClick={handleClaim} className="shrink-0">
+          Claim
+        </Button>
+      ) : (
+        <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+      )}
     </Card>
   );
 }

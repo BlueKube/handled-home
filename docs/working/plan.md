@@ -105,7 +105,7 @@ Mechanical pattern: align copy, icons, button variants, and minor UI elements to
 | 5 | P2 | Coverage zone Mapbox map (onboarding + settings) | ✅ |
 | 6 | P2 | Job List CTA + Job Complete earnings breakdown | ✅ |
 | 7 | P2 | Earnings payout button + Provider support ticket creation + duplicate card bug | ✅ |
-| 8 | P3 | Admin Provider Detail earnings + Billing route + Payout schedule | ⬜ |
+| 8 | P3 | Admin Provider Detail earnings + Billing route + Payout schedule | ✅ |
 | 9 | P3 | Admin Support assignment + Attachments + Bundle Savings | ⬜ |
 | 10 | P4 | Error/empty states: F1-F6 | ⬜ |
 | 11 | P4 | Error/empty states: F7-F11 | ⬜ |
