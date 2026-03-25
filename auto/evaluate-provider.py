@@ -255,14 +255,14 @@ def find_screens_matching(flows: list[FlowSection], keywords: list[str]) -> list
 # Keywords for earnings-related sub-checks
 PAYOUT_PREDICTION_KEYWORDS = [
     "projection", "projected", "at current pace", "est.", "estimated",
-    "per job", "avg", "this week", "today", "period",
+    "per job", "avg", "this week", "today",
     "stats grid", "period selector",
 ]
 
 MODIFIER_KEYWORDS = [
     "modifier", "quality tier", "rush", "high-demand", "bonus",
-    "adjustment", "base", "net", "breakdown", "expandable",
-    "human-readable", "reason", "label",
+    "adjustment", "base pay", "net breakdown", "breakdown", "expandable",
+    "human-readable", "modifier explanation",
 ]
 
 PROJECTION_KEYWORDS = [
@@ -283,13 +283,10 @@ PAYOUT_STATUS_KEYWORDS = [
 ]
 
 
-def score_d1_earnings_transparency(flows: list[FlowSection], text: str) -> tuple[float, list[Issue]]:
+def score_d1_earnings_transparency(flows: list[FlowSection], all_text: str) -> tuple[float, list[Issue]]:
     """D1: Earnings Transparency — can provider predict next payout in 3 seconds?"""
     issues: list[Issue] = []
     points = 0.0  # max 10 (5 sub-checks × 2 points each)
-
-    # Combine all provider flow text for keyword searching
-    all_text = "\n".join(f.full_text for f in flows)
 
     # Sub-check 1: Payout prediction speed (0-2 points)
     # Can provider see next payout at a glance? Stats grid, period selector, projection
@@ -326,6 +323,8 @@ def score_d1_earnings_transparency(flows: list[FlowSection], text: str) -> tuple
         points += 2.0
     elif proj_matches >= 3:
         points += 1.5
+    elif proj_matches >= 2:
+        points += 1.0
     elif proj_matches >= 1:
         points += 0.5
     else:
@@ -368,8 +367,8 @@ ROUTE_LOCK_KEYWORDS = [
 ]
 
 QUEUE_BREADCRUMB_KEYWORDS = [
-    "stop x of y", "breadcrumb", "prev", "next", "navigation arrows",
-    "chevronleft", "chevronright", "queue",
+    "stop x of y", "breadcrumb", "prev/next", "navigation arrows",
+    "chevronleft", "chevronright", "queue breadcrumb",
 ]
 
 ROUTE_OPTIMIZATION_KEYWORDS = [
@@ -378,8 +377,8 @@ ROUTE_OPTIMIZATION_KEYWORDS = [
 ]
 
 AVAILABILITY_KEYWORDS = [
-    "availability", "coverage", "zone", "capacity",
-    "zone selection", "sku capabilities", "schedule",
+    "availability", "coverage", "zone selection", "capacity",
+    "sku capabilities", "coverage & capacity",
 ]
 
 JOB_LIST_KEYWORDS = [
@@ -389,12 +388,10 @@ JOB_LIST_KEYWORDS = [
 ]
 
 
-def score_d2_schedule_control(flows: list[FlowSection], text: str) -> tuple[float, list[Issue]]:
+def score_d2_schedule_control(flows: list[FlowSection], all_text: str) -> tuple[float, list[Issue]]:
     """D2: Schedule Control — route lock, queue, optimization, availability, job views."""
     issues: list[Issue] = []
     points = 0.0  # max 10 (5 sub-checks × 2 points each)
-
-    all_text = "\n".join(f.full_text for f in flows)
 
     # Sub-check 1: Route lock UX (0-2 points)
     lock_matches = count_keyword_matches(all_text, ROUTE_LOCK_KEYWORDS)
@@ -428,7 +425,7 @@ def score_d2_schedule_control(flows: list[FlowSection], text: str) -> tuple[floa
     elif opt_matches >= 2:
         points += 1.5
     elif opt_matches >= 1:
-        points += 0.5
+        points += 1.0
     else:
         issues.append(Issue("D2_schedule", "No route optimization controls found", 2))
 
