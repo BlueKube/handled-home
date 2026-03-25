@@ -6,7 +6,7 @@ import { EntitlementBadge } from "@/components/plans/EntitlementBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Check, X, Info, Sparkles, Calendar, Shield } from "lucide-react";
+import { ChevronLeft, Check, X, Info, Sparkles, Calendar, Shield } from "lucide-react";
 
 export default function CustomerPlanDetail() {
   const { planId } = useParams<{ planId: string }>();
@@ -47,9 +47,10 @@ export default function CustomerPlanDetail() {
     <div className="p-4 pb-24 space-y-6 animate-fade-in">
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground min-h-[44px]"
+        aria-label="Back to Plans"
       >
-        <ArrowLeft className="h-4 w-4" /> Back
+        <ChevronLeft className="h-4 w-4" /> Plans
       </button>
 
       {/* Hero */}
@@ -156,12 +157,15 @@ export default function CustomerPlanDetail() {
         </CardContent>
       </Card>
 
-      <div className="flex gap-3">
-        <Button variant="outline" className="flex-1" onClick={() => navigate(`/customer/routine?plan=${plan.id}`)}>
-          Build Routine
-        </Button>
-        <Button className="flex-1" onClick={() => navigate(`/customer/subscribe?plan=${plan.id}`)}>
-          Subscribe
+      {/* Fixed bottom CTA bar */}
+      <div className="fixed bottom-16 left-0 right-0 z-40 p-4 bg-card/95 backdrop-blur border-t border-border">
+        <Button
+          variant="accent"
+          size="xl"
+          className="w-full"
+          onClick={() => navigate(`/customer/subscribe?plan=${plan.id}`)}
+        >
+          Subscribe to This Plan
         </Button>
       </div>
     </div>
