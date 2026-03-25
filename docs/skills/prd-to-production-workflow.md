@@ -24,7 +24,7 @@ This workflow turns a Product Requirements Document (PRD) into shipped code thro
 
 Each PRD should declare its execution mode:
 
-- **Quality mode** (default) — Full 10-agent review system, full documentation sync. Production-ready.
+- **Quality mode** (default) — Full 8-agent review system, full documentation sync. Production-ready.
 - **Speed mode** — Reduced 4-agent review (Lanes 1 + 2 only, Sonnet tier only, no synthesis). Used for prototypes, validation builds, and low-risk changes. Max 2 fix passes then move on.
 
 ---
@@ -40,7 +40,6 @@ Each PRD should declare its execution mode:
    - Phase list with batch breakdown
    - Dependency order (what must come first)
    - Estimated size per batch (Small / Medium / Large)
-   - Review intensity tag per batch (`review: full` / `review: light` / `review: verify`)
    - Whether consecutive batches are combinable (same mechanical pattern)
    - Risk areas and deferred items
    - A **Session Handoff** section at the top (updated by every session before exit)
@@ -116,37 +115,38 @@ Every batch gets a spec in `docs/working/batch-specs/` before coding starts:
 - Code only what the spec says. If you discover something out of scope, add it to a deferred items list — don't sneak it in.
 - Commit with clear messages: `feat(<scope>): Batch N — {Description}`
 
-### Step 4: Ten-agent code review
+### Step 4: Eight-agent code review
 
 After each commit, run a multi-agent review. This is the quality gate that prevents bugs, drift, and regressions from compounding across batches.
 
-#### Architecture: 4 parallel lanes + 1 synthesis lane × 2 tiers = 10 agents
+**Every batch gets the same review.** There are no intensity tiers, no decision about whether to run fewer agents. The sub-agents use Sonnet and Haiku (inexpensive), run in parallel, and their output stays in sub-agent context — so the cost of always running the full review is negligible, while the cost of skipping it and missing something is high. Consistency matters more than micro-optimization here.
 
-**Stage 1 — Parallel analysis (8 agents):** Launch Lanes 1–4 in parallel, each with a Sonnet (deep) and Haiku (fast) tier.
+#### Architecture: 3 parallel lanes + 1 synthesis lane × 2 tiers = 8 agents
+
+**Stage 1 — Parallel analysis (6 agents):** Launch Lanes 1–3 in parallel, each with a Sonnet (deep) and Haiku (fast) tier.
 
 | Lane | What it checks | Deep tier | Fast tier |
 |------|----------------|-----------|-----------|
 | 1. Spec completeness audit | Does the implementation satisfy every requirement, acceptance criterion, and edge case in the batch spec? | Sonnet | Haiku |
 | 2. Bug scan (diff only) | Bugs visible in the diff alone — no extra context, no codebase knowledge | Sonnet | Haiku |
-| 3. Historical context | git blame / git log on changed files — did we break something intentional? | Sonnet | Haiku |
-| 4. Prior feedback | Have these files had PR review comments before? Are we repeating past mistakes? | Sonnet | Haiku |
+| 3. Historical context & prior feedback | git blame / git log on changed files — did we break something intentional? Have these files had PR review comments before? Are we repeating past mistakes? | Sonnet | Haiku |
 
-**Stage 2 — Synthesis (2 agents):** After Lanes 1–4 return, launch Lane 5 with all findings from the previous stage as input.
+**Stage 2 — Synthesis (2 agents):** After Lanes 1–3 return, launch Lane 4 with all findings from the previous stage as input.
 
 | Lane | What it checks | Deep tier | Fast tier |
 |------|----------------|-----------|-----------|
-| 5. Synthesis & cross-check | Cross-validate findings across lanes, resolve contradictions, catch inter-lane gaps, produce the final scored report | Sonnet | Haiku |
+| 4. Synthesis & cross-check | Cross-validate findings across lanes, resolve contradictions, catch inter-lane gaps, produce the final scored report | Sonnet | Haiku |
 
-Lane 5 is the **only agent that sees other agents' output**. It serves as the communication bridge between lanes. This is critical because:
+Lane 4 is the **only agent that sees other agents' output**. It serves as the communication bridge between lanes. This is critical because:
 - Lane 1 might say "spec item X was implemented" while Lane 2 found a bug in that exact implementation — the synthesis agent connects those dots
 - Lane 3 might say "this pattern was intentional per git history" while Lane 2 flagged it as a bug — the synthesis agent resolves the contradiction
-- If 3 lanes each flag something in the same file, the synthesis agent elevates that file as high-risk
+- If all 3 lanes flag something in the same file, the synthesis agent elevates that file as high-risk
 - Findings that fall between lane boundaries (not quite a bug, not quite a spec gap) get caught here
 
 #### Model assignments
 
-- **Sonnet agents (5):** Deep analysis tier. Lanes 1–4 get the diff + lane-specific context. Lane 5 (synthesis) gets all findings from the previous stage plus the diff and batch spec.
-- **Haiku agents (5):** Fast second-opinion tier. Same inputs as their Sonnet counterparts. Haiku provides a quick sanity check that catches things Sonnet might frame differently or miss.
+- **Sonnet agents (4):** Deep analysis tier. Lanes 1–3 get the diff + lane-specific context. Lane 4 (synthesis) gets all findings from the previous stage plus the diff and batch spec.
+- **Haiku agents (4):** Fast second-opinion tier. Same inputs as their Sonnet counterparts. Haiku provides a quick sanity check that catches things Sonnet might frame differently or miss.
 
 The two-tier approach works because different models catch different things. Sonnet tends to find architectural issues and subtle bugs; Haiku tends to catch obvious oversights and pattern violations that Sonnet sometimes rationalizes away.
 
@@ -160,13 +160,14 @@ Every agent gets:
 Additionally, per lane:
 - **Lane 1:** The full batch spec from `docs/working/batch-specs/` — every requirement, acceptance criterion, scope item, and edge case. The agent cross-references each spec line against the diff and flags anything specified but not built, partially built, or built differently than specified. This is the lane that prevents "finished" batches from shipping incomplete.
 - **Lane 2:** Diff only, no extra context (forces the agent to find bugs from code alone)
-- **Lane 3:** `git blame` and `git log` output for every changed file
-- **Lane 4:** PR review comments from previous PRs touching the same files (via `gh api`)
-- **Lane 5 (synthesis):** All findings from Lanes 1–4 (both tiers), the full diff, and the batch spec. The synthesis agent does not re-review the code — it cross-validates, de-duplicates, resolves contradictions, and produces the final scored report.
+- **Lane 3:** `git blame`, `git log`, and PR review comments for every changed file. This lane combines historical context with prior feedback — in practice, these two concerns draw on the same source material (git history and past reviews) and rarely produce enough findings to justify separate agents.
+- **Lane 4 (synthesis):** All findings from Lanes 1–3 (both tiers), the full diff, and the batch spec. The synthesis agent does not re-review the code — it cross-validates, de-duplicates, resolves contradictions, and produces the final scored report.
 
 > **Why Lane 1 checks spec completeness instead of CLAUDE.md compliance:** CLAUDE.md conventions (semantic tokens, touch targets, padding, aria-labels) are already covered by the Bug Scan and Historical Context lanes — they naturally catch deviations from project patterns. What no other lane catches is *missing work* — requirements that were specified but never implemented. This gap caused an entire cleanup PRD after a previous implementation shipped "complete" with 7 unfinished items. The spec completeness audit closes that gap at the review stage.
 >
-> **Why Lane 5 is a synthesis lane instead of another parallel check:** Parallel lanes are fast but isolated — they can't see each other's findings, which means contradictions go unresolved, related findings across lanes stay disconnected, and inter-lane gaps slip through. The synthesis lane runs sequentially after Lanes 1–4, reads all their output, and produces a unified, cross-validated report. It's the only point in the review where findings from different perspectives are reconciled.
+> **Why Lane 4 is a synthesis lane instead of another parallel check:** Parallel lanes are fast but isolated — they can't see each other's findings, which means contradictions go unresolved, related findings across lanes stay disconnected, and inter-lane gaps slip through. The synthesis lane runs sequentially after Lanes 1–3, reads all their output, and produces a unified, cross-validated report. It's the only point in the review where findings from different perspectives are reconciled.
+>
+> **Why Lanes 3 and 4 (old) were combined:** Historical context (git blame/log) and prior feedback (past PR comments) draw on the same source material and consistently produced the fewest unique findings of any lane. Across multiple full plans, these two lanes combined produced ~1 unique actionable finding that no other lane caught. Combining them simplifies the review from 5 lanes to 4 without meaningful signal loss.
 
 #### Agent prompts
 
@@ -227,7 +228,7 @@ Agent tool:
     If no issues found, say "No issues found."
 ```
 
-Example agent launch (Lane 5, Sonnet tier — Synthesis):
+Example agent launch (Lane 4, Sonnet tier — Synthesis):
 ```
 Agent tool:
   model: sonnet
@@ -235,7 +236,7 @@ Agent tool:
   prompt: |
     You are a review synthesis agent. You did NOT review the code yourself.
     Your job is to cross-validate, de-duplicate, and score the findings
-    from 4 independent review lanes.
+    from 3 independent review lanes.
 
     LANE 1 FINDINGS (Spec Completeness — Sonnet + Haiku):
     [paste findings]
@@ -243,10 +244,7 @@ Agent tool:
     LANE 2 FINDINGS (Bug Scan — Sonnet + Haiku):
     [paste findings]
 
-    LANE 3 FINDINGS (Historical Context — Sonnet + Haiku):
-    [paste findings]
-
-    LANE 4 FINDINGS (Prior Feedback — Sonnet + Haiku):
+    LANE 3 FINDINGS (Historical Context & Prior Feedback — Sonnet + Haiku):
     [paste findings]
 
     BATCH SPEC:
@@ -266,7 +264,7 @@ Agent tool:
     Return the final unified report with scores and categories.
 ```
 
-#### Merging findings (handled by Lane 5)
+#### Merging findings (handled by Lane 4)
 
 The synthesis lane produces the final report. Its job:
 
@@ -289,7 +287,7 @@ The synthesis lane produces the final report. Its job:
 
 Fix findings → re-commit → **lightweight re-review** → repeat until clean. **Maximum 3 passes.**
 
-**Lightweight re-review (passes 2+):** On fix commits, only run Lanes 1–2 (spec completeness + bug scan) plus the synthesis lane — 6 agents instead of 10. Lanes 3–4 (historical context, prior feedback) add negligible value on a fix diff since the history hasn't meaningfully changed. This cuts re-review time nearly in half without losing quality on the things that matter: "did we actually fix it?" and "did the fix introduce new bugs?"
+**Lightweight re-review (passes 2+):** On fix commits, only run Lanes 1–2 (spec completeness + bug scan) plus the synthesis lane — 6 agents instead of 8. Lane 3 (historical context & prior feedback) adds negligible value on a fix diff since the history hasn't meaningfully changed. This cuts re-review time without losing quality on the things that matter: "did we actually fix it?" and "did the fix introduce new bugs?"
 
 If issues persist after 3 passes, escalate to the human for a decision rather than looping indefinitely.
 
@@ -318,6 +316,45 @@ Fix commits use: `fix(<scope>): resolve Batch N review findings`
 ### Step 8: Push
 
 Push the batch to the feature branch.
+
+---
+
+## Override Protocol
+
+This workflow is designed to be followed consistently. However, situations arise where strict adherence to a default rule produces worse outcomes than adapting. When that happens, the agent may deviate — but **deviations must be visible, not silent.**
+
+### When you deviate from the workflow
+
+If you skip a step, combine steps, or do something differently than described above, you MUST:
+
+1. **Note the deviation** in the batch spec, commit message, or plan.md
+2. **State which rule you're overriding** and why
+3. **Tag it:** `[OVERRIDE: <rule-name> — <reason>]`
+
+Examples:
+- `[OVERRIDE: combined batches 10+11 — identical mechanical pattern, single find-replace across both]`
+- `[OVERRIDE: skipped visual validation — batch is backend-only, no UI changes]`
+- `[OVERRIDE: ran 6-agent re-review on initial review — fix commit from prior batch, not new code]`
+
+### What this enables
+
+- The human can grep for `[OVERRIDE` across plan.md and commit history to see every deviation
+- Good judgment calls become visible and can be promoted into workflow defaults
+- Bad judgment calls are caught and corrected, rather than silently compounding
+- The workflow evolves based on real data, not assumptions
+
+### What is never overridable
+
+Some rules are **invariants** — they exist because violating them causes data loss, workflow corruption, or compounding errors. These cannot be overridden:
+
+1. **Push after every commit** — unpushed work is unrecoverable if a session dies
+2. **Write a batch spec before coding** — coding without a spec produces drift
+3. **Run the code review after every batch** — the review is part of the definition of done
+4. **Update Session Handoff before exiting** — the next session depends on this
+5. **Update the progress table** — this is the durable state machine
+6. **Never block on human input during autonomous execution** — make the call, document it, move on
+
+Everything else in this workflow is a **default** — follow it unless you have a specific reason not to, and document the override when you don't.
 
 ---
 
@@ -553,7 +590,7 @@ After a phase is complete and docs are synced:
    - **Overgrown files** — Did any file grow significantly across batches and now needs to be split?
    - **Deferred items** — Review the deferred list accumulated during the phase. Are any quick cleanup tasks (< 15 min) worth folding in now before they compound?
 
-   If cleanup is needed, create a lightweight cleanup batch (no new features — only consolidation, deletion, and extraction). This batch follows the same spec → implement → review → push cycle but uses a lightweight review (Lanes a + b + e only = 6 agents) since it's refactoring, not new logic. Commit as: `refactor(<scope>): consolidate after phase N`.
+   If cleanup is needed, create a lightweight cleanup batch (no new features — only consolidation, deletion, and extraction). This batch follows the same spec → implement → review → push cycle. Commit as: `refactor(<scope>): consolidate after phase N`.
 
    If the codebase is clean, skip this and note "No consolidation needed" in the plan.
 3. **Start a fresh session** — Phase transitions are natural context seams. Start a new session before beginning the next phase. The re-anchor step makes this cheap (~2-5K tokens to read plan.md).
@@ -671,18 +708,6 @@ Before exiting: update the Session Handoff section of plan.md.
 
 Cap at **3–4 batches per session** to stay within context limits. This is a guideline, not a hard rule — small batches (verification-only, mechanical sweeps) can be grouped, while complex batches may take a full session each.
 
-### Review intensity by batch type
-
-Not all batches need the full 10-agent review. Tag batches in the plan:
-
-| Tag | Review level | When to use |
-|-----|-------------|-------------|
-| `review: full` | 10 agents (4 lanes × 2 tiers + synthesis × 2 tiers) | Default. New features, component changes, logic changes |
-| `review: light` | 6 agents (Lanes a + b + synthesis only) | Mechanical sweeps (find-replace across many files), CSS-only changes |
-| `review: verify` | Build validation only (`tsc --noEmit` + `npm run build`) | Verification-only batches (no code changes), doc sync |
-
-This saves significant tokens on repetitive work. The full 10-agent review adds the most value on batches with novel code changes where spec completeness, historical context, and prior feedback are meaningful.
-
 ### Combined batches
 
 When consecutive batches follow an identical pattern (e.g., "remove max-w-lg from all customer pages" across Batches 16-18), they can be combined into a single implementation + single review cycle. The plan should note this possibility:
@@ -719,7 +744,7 @@ If a session fails mid-batch (context limit, network error, build failure):
 [ ] Write batch spec
 [ ] Implement spec (nothing more)
 [ ] Commit and push
-[ ] Code review via sub-agents (full/light/verify — see batch tag in plan)
+[ ] Code review via sub-agents (8 agents — same every batch)
 [ ] Fix findings until clean (max 3 passes)
 [ ] Validate build (tsc + build)
 [ ] Validate visually (screenshots, if UI work)

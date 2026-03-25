@@ -20,8 +20,8 @@ Use a Haiku agent to locate any CLAUDE.md files in the repo root and in director
 ### 3. Summarize changes
 Use a Haiku agent to return a brief summary of the diff.
 
-### 4. Stage 1 — Parallel code review (4 lanes × 2 tiers = 8 agents)
-Launch 8 agents in parallel: one Sonnet agent and one Haiku agent per lane. Each lane has a single review focus — agents within the same lane may find overlapping issues (that's intentional redundancy), but agents should not cross into another lane's focus.
+### 4. Stage 1 — Parallel code review (3 lanes × 2 tiers = 6 agents)
+Launch 6 agents in parallel: one Sonnet agent and one Haiku agent per lane. Each lane has a single review focus — agents within the same lane may find overlapping issues (that's intentional redundancy), but agents should not cross into another lane's focus.
 
 The Sonnet agent in each lane does the deep analysis. The Haiku agent in each lane acts as a fast, independent second set of eyes on the same scope. Both return a list of issues with reasons.
 
@@ -29,13 +29,12 @@ The Sonnet agent in each lane does the deep analysis. The Haiku agent in each la
 
 a. **Spec completeness audit** — Cross-reference every requirement, acceptance criterion, and edge case in the batch spec (from `docs/working/batch-specs/`) against the diff. Flag anything specified but not implemented, partially implemented, or implemented differently than specified. This is the most important lane — it prevents incomplete work from shipping as "done."
 b. **Bug scan** — Shallow scan for obvious bugs in the changed code only. No extra context, no git history, no nitpicks — just the diff.
-c. **Historical context** — Read git blame/history of modified code to spot regressions or issues informed by past changes. Do not cross into the bug scan lane; focus on what the history reveals.
-d. **Prior feedback** — Check previous PRs/commits that touched these files for recurring review comments that may apply here.
+c. **Historical context & prior feedback** — Read git blame/history of modified code to spot regressions or issues informed by past changes. Check previous PRs/commits that touched these files for recurring review comments that may apply here. Do not cross into the bug scan lane; focus on what the history and prior reviews reveal.
 
 ### 5. Stage 2 — Synthesis & cross-check (1 lane × 2 tiers = 2 agents)
-After all 8 Stage 1 agents return, launch Lane e with all findings as input:
+After all 6 Stage 1 agents return, launch Lane d with all findings as input:
 
-e. **Synthesis & cross-check** — Receives all findings from Lanes a–d (both tiers). Cross-validates findings across lanes, resolves contradictions, connects related issues, catches inter-lane gaps, de-duplicates, scores each finding 0–100, and produces the final categorized report.
+d. **Synthesis & cross-check** — Receives all findings from Lanes a–c (both tiers). Cross-validates findings across lanes, resolves contradictions, connects related issues, catches inter-lane gaps, de-duplicates, scores each finding 0–100, and produces the final categorized report.
 
 This is the only lane that sees other agents' output. It serves as the communication bridge between lanes:
 - Connects related findings (e.g., "spec item implemented" from Lane a + "bug in that implementation" from Lane b)
@@ -80,7 +79,7 @@ After fixes are committed for any MUST-FIX or SHOULD-FIX findings, **re-run a li
 - Each original finding was actually resolved (not just claimed fixed)
 - The fix itself didn't introduce new issues
 
-**Lightweight re-review (passes 2+):** Only run Lanes a–b (spec completeness + bug scan) plus Lane e (synthesis) — 6 agents instead of 10. Lanes c–d (historical context, prior feedback) add negligible value on a fix diff since the history hasn't meaningfully changed.
+**Lightweight re-review (passes 2+):** Only run Lanes a–b (spec completeness + bug scan) plus Lane d (synthesis) — 6 agents instead of 8. Lane c (historical context & prior feedback) adds negligible value on a fix diff since the history hasn't meaningfully changed.
 
 Keep looping until a pass comes back clean (no issues scoring 25+). Cap at **3 passes** to avoid infinite loops — if issues persist after 3 passes, report the remaining findings and stop.
 
