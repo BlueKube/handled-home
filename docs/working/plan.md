@@ -101,7 +101,7 @@ Mechanical pattern: align copy, icons, button variants, and minor UI elements to
 | 1 | P1 | Share Landing hero + Onboarding error/skip fixes | ✅ |
 | 2 | P1 | Dashboard rollover + Plan Detail CTA + Routine cost breakdown | ✅ |
 | 3 | P1 | Schedule tappable cards + ThisCycleSummary rollover line | ✅ |
-| 4 | P2 | Provider Onboarding progress bar | ⬜ |
+| 4 | P2 | Provider Onboarding progress bar | ✅ |
 | 5 | P2 | Coverage zone Mapbox map (onboarding + settings) | ⬜ |
 | 6 | P2 | Job List CTA + Job Complete earnings breakdown | ⬜ |
 | 7 | P2 | Earnings payout button + Provider support ticket creation + duplicate card bug | ⬜ |
