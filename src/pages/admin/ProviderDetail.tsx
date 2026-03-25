@@ -4,7 +4,7 @@ import { useProviderAdmin } from "@/hooks/useProviderAdmin";
 import { useAdminProviderLedger } from "@/hooks/useAdminProviderLedger";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useProviderRatingSummary } from "@/hooks/useProviderRatingSummary";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,7 @@ const STATUS_COLORS: Record<string, string> = {
 export default function AdminProviderDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { orgDetailQuery, performAction, updateCoverageStatus } = useProviderAdmin();
   const { data: ratingSummary } = useProviderRatingSummary(id);
   const { data: org, isLoading } = orgDetailQuery(id);
@@ -345,7 +346,11 @@ export default function AdminProviderDetail() {
                         <Button variant="outline" size="sm" onClick={async () => {
                           const { error } = await supabase.rpc("admin_release_hold", { p_hold_id: hold.id, p_reason: "Released from provider detail" });
                           if (error) toast.error(error.message);
-                          else toast.success("Hold released");
+                          else {
+                            toast.success("Hold released");
+                            queryClient.invalidateQueries({ queryKey: ["admin-provider-holds", id] });
+                            queryClient.invalidateQueries({ queryKey: ["admin-provider-earnings", id] });
+                          }
                         }}>
                           <Unlock className="h-3 w-3 mr-1" /> Release
                         </Button>
