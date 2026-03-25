@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowRight, Loader2, MapPin } from "lucide-react";
 import { toast } from "sonner";
+import OnboardingProgressHeader from "@/components/provider/OnboardingProgressHeader";
 
 export default function OnboardingCoverage() {
   const navigate = useNavigate();
@@ -80,7 +81,7 @@ export default function OnboardingCoverage() {
 
   return (
     <div className="animate-fade-in p-4 pb-24">
-      <p className="text-caption mb-1">Step 2 of 6</p>
+      <OnboardingProgressHeader currentStep={2} onBack={() => navigate("/provider/onboarding/org", { state: { orgId, allowedZoneIds } })} />
       <h1 className="text-h2 mb-1">Coverage Zones</h1>
       <p className="text-caption mb-6">Select the zones you'd like to serve. Your requests will be reviewed by our team.</p>
 

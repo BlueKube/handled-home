@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowRight, Loader2, Building2 } from "lucide-react";
 import { toast } from "sonner";
+import OnboardingProgressHeader from "@/components/provider/OnboardingProgressHeader";
 
 export default function OnboardingOrg() {
   const navigate = useNavigate();
@@ -102,7 +103,7 @@ export default function OnboardingOrg() {
 
   return (
     <div className="animate-fade-in p-4 pb-24">
-      <p className="text-caption mb-1">Step 1 of 6</p>
+      <OnboardingProgressHeader currentStep={1} />
       <h1 className="text-h2 mb-1">Your Organization</h1>
       <p className="text-caption mb-6">Tell us about your business.</p>
 

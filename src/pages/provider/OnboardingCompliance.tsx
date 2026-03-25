@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import OnboardingProgressHeader from "@/components/provider/OnboardingProgressHeader";
 import DynamicComplianceRenderer from "@/components/provider/DynamicComplianceRenderer";
 
 interface ComplianceDoc {
@@ -211,7 +212,7 @@ export default function OnboardingCompliance() {
 
   return (
     <div className="animate-fade-in p-4 pb-24">
-      <p className="text-caption mb-1">Step 4 of 6</p>
+      <OnboardingProgressHeader currentStep={4} onBack={() => navigate("/provider/onboarding/capabilities", { state: { orgId, allowedZoneIds } })} />
       <h1 className="text-h2 mb-1">Compliance</h1>
       <p className="text-caption mb-6">
         {requestedCategories.length > 0
