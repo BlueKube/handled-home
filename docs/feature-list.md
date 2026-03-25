@@ -665,4 +665,10 @@
 
 ---
 
-*Total features: 384 | Last updated: 2026-03-24 | Value-prop tags added per section*
+## XLVII. Automated Quality Scoring Harnesses `trust-builder`
+
+376. Provider Experience Auto-Evaluator: 7-dimension scoring harness (earnings transparency, schedule control, fairness signals, onboarding friction, retention hooks, BYOC tools, cognitive walkthroughs) with 5 anti-gaming guards — DONE
+
+---
+
+*Total features: 385 | Last updated: 2026-03-25 | Value-prop tags added per section*
