@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { Loader2, ChevronLeft, Eye, FileText, Clock } from "lucide-react";
 import { format } from "date-fns";
 
@@ -44,6 +45,14 @@ export default function AdminApplications() {
   });
 
   const actionableCount = data.filter((a: any) => ["submitted", "under_review"].includes(a.status)).length;
+
+  if (applications.isError) {
+    return (
+      <div className="animate-fade-in p-6">
+        <QueryErrorCard message="Failed to load applications." onRetry={() => applications.refetch()} />
+      </div>
+    );
+  }
 
   if (applications.isLoading) {
     return (

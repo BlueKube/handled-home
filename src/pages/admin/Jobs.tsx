@@ -8,6 +8,7 @@ import { useZones } from "@/hooks/useZones";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { ChevronRight, Briefcase, Clock } from "lucide-react";
 import { format } from "date-fns";
 
@@ -24,7 +25,7 @@ export default function AdminJobs() {
   const zonesQuery = useZones();
   const zones = zonesQuery.data ?? [];
 
-  const { jobs, loading } = useAdminJobs({
+  const { jobs, loading, isError, refetch } = useAdminJobs({
     status: status === "__all__" ? undefined : status,
     zone_id: zoneId === "__all__" ? undefined : zoneId,
     date_from: dateFrom || undefined,
@@ -70,7 +71,9 @@ export default function AdminJobs() {
         )}
       </div>
 
-      {loading ? (
+      {isError ? (
+        <QueryErrorCard message="Failed to load jobs." onRetry={() => refetch()} />
+      ) : loading ? (
         <div className="space-y-3">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}</div>
       ) : jobs.length === 0 ? (
         <div className="flex flex-col items-center py-16 text-center">

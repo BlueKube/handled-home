@@ -103,6 +103,8 @@ export function useAdminJobs(filters: AdminJobFilters = {}) {
     jobs: jobsQuery.data?.jobs ?? [],
     totalCount: jobsQuery.data?.totalCount ?? 0,
     loading: jobsQuery.isLoading,
+    isError: jobsQuery.isError,
+    refetch: jobsQuery.refetch,
     overrideComplete,
     resolveIssue,
   };

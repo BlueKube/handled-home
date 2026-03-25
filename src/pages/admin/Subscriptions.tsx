@@ -11,6 +11,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { Search } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -20,7 +21,7 @@ const STATUSES = ["all", "active", "trialing", "past_due", "paused", "canceling"
 export default function AdminSubscriptions() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [search, setSearch] = useState("");
-  const { data: subscriptions, isLoading } = useAdminSubscriptions({ status: statusFilter, search });
+  const { data: subscriptions, isLoading, isError, refetch } = useAdminSubscriptions({ status: statusFilter, search });
   const [selectedSubId, setSelectedSubId] = useState<string | null>(null);
 
   return (
@@ -38,7 +39,9 @@ export default function AdminSubscriptions() {
         </TabsList>
       </Tabs>
 
-      {isLoading ? (
+      {isError ? (
+        <QueryErrorCard message="Failed to load subscriptions." onRetry={() => refetch()} />
+      ) : isLoading ? (
         <div className="space-y-3">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 w-full" />)}</div>
       ) : (
         <div className="space-y-3">
