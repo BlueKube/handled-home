@@ -1011,7 +1011,7 @@ def calculate_gaming_penalty(flows: list[FlowSection], all_text: str) -> tuple[f
     expected_ids = set(PROVIDER_FLOW_IDS)
     missing = expected_ids - found_ids
     if missing:
-        p = len(missing) * 3.0  # 3 points per missing flow
+        p = min(len(missing) * 3.0, 15.0)  # 3 points per missing flow, cap 15
         penalty += p
         missing_str = ", ".join(str(m) for m in sorted(missing))
         issues.append(Issue("Guard_completeness",
