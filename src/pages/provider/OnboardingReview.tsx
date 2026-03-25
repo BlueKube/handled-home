@@ -20,6 +20,7 @@ export default function OnboardingReview() {
 
   // P1: Fall back to useProviderOrg
   const effectiveOrgId = location.state?.orgId || org?.id;
+  const allowedZoneIds = location.state?.allowedZoneIds || [];
 
   const { members } = useProviderMembers(effectiveOrgId);
   const { coverage } = useProviderCoverage(effectiveOrgId);
@@ -54,7 +55,7 @@ export default function OnboardingReview() {
 
   return (
     <div className="animate-fade-in p-4 pb-24">
-      <OnboardingProgressHeader currentStep={6} onBack={() => navigate("/provider/onboarding/agreement", { state: { orgId: effectiveOrgId, allowedZoneIds: location.state?.allowedZoneIds } })} />
+      <OnboardingProgressHeader currentStep={6} onBack={() => navigate("/provider/onboarding/agreement", { state: { orgId: effectiveOrgId, allowedZoneIds } })} />
       <h1 className="text-h2 mb-1">Review & Submit</h1>
       <p className="text-caption mb-6">Review your application before submitting. All sections must be complete.</p>
 

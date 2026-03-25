@@ -20,17 +20,17 @@ export default function OnboardingProgressHeader({
         {onBack ? (
           <button
             onClick={onBack}
-            className="h-8 w-8 flex items-center justify-center rounded-lg -ml-1 hover:bg-muted transition-colors"
+            className="h-11 w-11 flex items-center justify-center rounded-lg -ml-1 hover:bg-muted transition-colors"
             aria-label="Go back"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
         ) : (
-          <div className="w-8" />
+          <div className="w-11" />
         )}
         <span className="text-caption flex-1">Step {currentStep} of {totalSteps}</span>
       </div>
-      <Progress value={progressPercent} className="h-1.5 [&>div]:bg-accent" />
+      <Progress value={progressPercent} className="h-1.5 [&>div]:!bg-accent" />
     </div>
   );
 }
