@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TicketStatusChip } from "@/components/support/TicketStatusChip";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { ChevronLeft, CheckCircle2, Clock, FileText, Send, Camera, X } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
@@ -24,7 +25,7 @@ const REVIEW_REASONS = [
 export default function ProviderSupportTicketDetail() {
   const { ticketId } = useParams<{ ticketId: string }>();
   const navigate = useNavigate();
-  const { ticket, events, isLoading } = useSupportTicketDetail(ticketId);
+  const { ticket, events, isLoading, error } = useSupportTicketDetail(ticketId);
   const actions = useTicketActions(ticketId ?? "");
 
   const [statement, setStatement] = useState("");
@@ -34,6 +35,14 @@ export default function ProviderSupportTicketDetail() {
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  if (error) {
+    return (
+      <div className="animate-fade-in p-4 pb-24">
+        <QueryErrorCard message="Failed to load support ticket." />
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -214,13 +223,6 @@ export default function ProviderSupportTicketDetail() {
           )}
         </Card>
       )}
-      {ticket.resolution_summary && (
-        <Card className="p-4 bg-success/5 border-success/20">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-success mb-1">Resolution</h3>
-          <p className="text-sm">{ticket.resolution_summary}</p>
-        </Card>
-      )}
-
       {/* Provider actions */}
       {!isResolved && (
         <section className="space-y-3">

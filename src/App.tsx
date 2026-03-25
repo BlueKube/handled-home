@@ -77,6 +77,7 @@ import ProviderOnboardingReview from "@/pages/provider/OnboardingReview";
 import ProviderWorkSetup from "@/pages/provider/WorkSetup";
 import ProviderAvailability from "@/pages/provider/Availability";
 import ProviderSupport from "@/pages/provider/Support";
+import ProviderSupportNew from "@/pages/provider/SupportNew";
 import ProviderSupportTicketDetail from "@/pages/provider/SupportTicketDetail";
 import ProviderReferrals from "@/pages/provider/Referrals";
 import ProviderInviteCustomers from "@/pages/provider/InviteCustomers";
@@ -248,6 +249,7 @@ const App = () => (
                 <Route path="/provider/coverage" element={<ProviderCoverage />} />
                 <Route path="/provider/settings" element={<ProviderSettings />} />
                 <Route path="/provider/support" element={<ProviderSupport />} />
+                <Route path="/provider/support/new" element={<ProviderSupportNew />} />
                 <Route path="/provider/support/tickets/:ticketId" element={<ProviderSupportTicketDetail />} />
                 <Route path="/provider/referrals" element={<ProviderReferrals />} />
                 <Route path="/provider/referrals/invite-customers" element={<ProviderInviteCustomers />} />

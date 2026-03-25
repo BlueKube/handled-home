@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  ArrowLeft,
+  ChevronLeft,
   CheckCircle,
   Camera,
   Clock,
@@ -77,7 +77,7 @@ export default function HomeTimeline() {
       {/* Header */}
       <div className="flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="p-2 rounded-lg hover:bg-secondary">
-          <ArrowLeft className="h-5 w-5" />
+          <ChevronLeft className="h-5 w-5" />
         </button>
         <div>
           <h1 className="text-h2">Home Timeline</h1>

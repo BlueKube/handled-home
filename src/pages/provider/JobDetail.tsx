@@ -5,6 +5,7 @@ import { useProviderJobs } from "@/hooks/useProviderJobs";
 import { useReportProviderIssue, type ProviderIssueType } from "@/hooks/useProviderIssueReport";
 import { useProposeProviderAction } from "@/hooks/useProviderSelfHealing";
 import { StatusBadge } from "@/components/StatusBadge";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -94,7 +95,7 @@ function QueueBreadcrumb({ jobId }: { jobId: string }) {
 export default function ProviderJobDetail() {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
-  const { data, isLoading } = useJobDetail(jobId);
+  const { data, isLoading, isError, refetch } = useJobDetail(jobId);
   const actions = useJobActions(jobId);
   const [issueSheetOpen, setIssueSheetOpen] = useState(false);
   const [selfHealOpen, setSelfHealOpen] = useState(false);
@@ -103,6 +104,14 @@ export default function ProviderJobDetail() {
 
   // Resolve visit_id for the report_provider_issue RPC
   const { data: visitId } = useVisitIdForJob(data?.job);
+
+  if (isError) {
+    return (
+      <div className="animate-fade-in p-4 pb-24">
+        <QueryErrorCard message="Failed to load job details." onRetry={() => refetch()} />
+      </div>
+    );
+  }
 
   if (isLoading || !data) {
     return (

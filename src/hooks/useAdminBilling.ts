@@ -54,5 +54,11 @@ export function useAdminBilling() {
     paidToday,
     failedCount,
     isLoading: exceptionsQuery.isLoading,
+    isError: exceptionsQuery.isError || invoicesQuery.isError || payoutsQuery.isError,
+    refetch: () => {
+      exceptionsQuery.refetch();
+      invoicesQuery.refetch();
+      payoutsQuery.refetch();
+    },
   };
 }

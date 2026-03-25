@@ -17,6 +17,7 @@ import { useMarketZoneState } from "@/hooks/useMarketZoneState";
 import { useGrowthEvents } from "@/hooks/useGrowthEvents";
 import { useIsSurfaceEnabled } from "@/hooks/useGrowthSurfaceConfig";
 import { useAuth } from "@/contexts/AuthContext";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { toast } from "sonner";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -51,6 +52,7 @@ export default function ProviderReferrals() {
   const { enabled: providerShareEnabled } = useIsSurfaceEnabled(undefined, "lawn_care", "provider_share");
 
   const isLoading = rewards.isLoading || codes.isLoading || application.isLoading;
+  const isError = rewards.isError || codes.isError;
 
   const earnedCents = rewards.data?.filter((r: any) => ["earned", "applied", "paid"].includes(r.status)).reduce((s: number, r: any) => s + r.amount_cents, 0) ?? 0;
   const onHoldCents = rewards.data?.filter((r: any) => r.status === "on_hold").reduce((s: number, r: any) => s + r.amount_cents, 0) ?? 0;
@@ -96,6 +98,14 @@ export default function ProviderReferrals() {
     navigator.clipboard.writeText(text);
     toast.success("Script copied!");
   };
+
+  if (isError) {
+    return (
+      <div className="animate-fade-in p-4 pb-24">
+        <QueryErrorCard message="Failed to load referral data." onRetry={() => { rewards.refetch(); codes.refetch(); }} />
+      </div>
+    );
+  }
 
   if (isLoading) {
     return <div className="animate-fade-in p-4 pb-24 space-y-4"><Skeleton className="h-24" /><Skeleton className="h-24" /><Skeleton className="h-48" /></div>;

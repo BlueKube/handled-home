@@ -22,11 +22,11 @@ Read and follow `docs/skills/prd-to-production-workflow.md` before starting any 
 
 ### Slash commands
 
-- `/code-review` — 10-agent review (4 parallel lanes + 1 synthesis lane × 2 tiers). Phase mode (no args) or PR mode (`/code-review 123`).
+- `/code-review` — 8-agent review (3 parallel lanes + 1 synthesis lane × 2 tiers). Phase mode (no args) or PR mode (`/code-review 123`).
 
 ### Mandatory Code Review — Non-Negotiable
 
-**After committing every batch, you MUST run the 10-agent code review before moving to the next batch.** No exceptions — even if the user says "keep going," "don't stop," or "finish everything." The review is part of the definition of done for a batch, not a separate optional step.
+**After committing every batch, you MUST run the 8-agent code review before moving to the next batch.** No exceptions — even if the user says "keep going," "don't stop," or "finish everything." The review is part of the definition of done for a batch, not a separate optional step.
 
 **If you catch yourself starting Batch N+1 without having reviewed Batch N, STOP immediately and run the review first.**
 
@@ -36,14 +36,13 @@ A batch is not complete until: `implement → commit → code review → fix loo
 
 The full `/code-review` skill is defined in `docs/skills/prd-to-production-workflow.md`. This inline summary exists so the procedure is never lost to context compression.
 
-**Stage 1 — 4 parallel lanes × 2 tiers = 8 agents (launched simultaneously):**
+**Stage 1 — 3 parallel lanes × 2 tiers = 6 agents (launched simultaneously):**
 
 | Lane | Focus | What to check |
 |------|-------|---------------|
 | **a. Spec completeness** | Cross-reference every requirement, acceptance criterion, and edge case in the batch spec (`docs/working/batch-specs/`) against the diff. Flag anything specified but not implemented, partially implemented, or implemented differently. **Most important lane.** |
 | **b. Bug scan** | Shallow scan for obvious bugs in changed code only. No extra context, no history, no nitpicks — just the diff. |
-| **c. Historical context** | Read git blame/history of modified files. Spot regressions or issues informed by past changes. Do not duplicate Lane b. |
-| **d. Prior feedback** | Check previous fix commits on these files for recurring review comments that may apply here. |
+| **c. Historical context & prior feedback** | Read git blame/history of modified files. Spot regressions or issues informed by past changes. Check previous fix commits for recurring review comments. Do not duplicate Lane b. |
 
 Each lane runs one Sonnet agent (deep analysis) and one Haiku agent (fast second set of eyes). Both tiers in the same lane may find overlapping issues — that's intentional redundancy. Agents must not cross into another lane's focus.
 
@@ -51,7 +50,7 @@ Each lane runs one Sonnet agent (deep analysis) and one Haiku agent (fast second
 
 | Lane | Focus |
 |------|-------|
-| **e. Synthesis & cross-check** | Receives all findings from Lanes a–d (both tiers). De-duplicates, resolves contradictions, connects related issues, catches inter-lane gaps, and scores each finding 0–100. |
+| **d. Synthesis & cross-check** | Receives all findings from Lanes a–c (both tiers). De-duplicates, resolves contradictions, connects related issues, catches inter-lane gaps, and scores each finding 0–100. |
 
 **Scoring rules (applied by synthesis agent):**
 - Cross-tier agreement (both Sonnet and Haiku flagged it): **+30**
@@ -66,7 +65,7 @@ Each lane runs one Sonnet agent (deep analysis) and one Haiku agent (fast second
 - **Drop below 25.**
 
 **Fix loop:**
-After fixing MUST-FIX and SHOULD-FIX findings, run a **lightweight re-review** (Lanes a + b + e only = 6 agents) to verify fixes. Cap at **3 passes** to avoid infinite loops.
+After fixing MUST-FIX and SHOULD-FIX findings, run a **lightweight re-review** (Lanes a + b + d only = 6 agents) to verify fixes. Cap at **3 passes** to avoid infinite loops.
 
 **False positives to skip:**
 - Pre-existing issues not introduced by this diff
@@ -94,8 +93,7 @@ This workflow supports autonomous execution via Claude Code Scheduled Tasks. Eac
 2. **Cap at 3–4 batches per session** to stay within context limits
 3. **Update Session Handoff before exiting** — every session must write its exit state
 4. **PRD queue** — when a plan completes, check `docs/upcoming/` for the next PRD (lowest number), archive the old working folder, and start the new plan
-5. **Review intensity** — use batch tags (`review: full` / `review: light` / `review: verify`) to scale review effort appropriately
-6. **Combinable batches** — consecutive batches with identical mechanical patterns can be merged into one implementation + one review
+5. **Combinable batches** — consecutive batches with identical mechanical patterns can be merged into one implementation + one review
 
 See `docs/skills/prd-to-production-workflow.md` → "Scheduled Task Automation" for full details.
 
@@ -107,7 +105,7 @@ Sessions can stop unexpectedly (context limits, rate limits, timeouts). The work
 2. **Start a fresh session at every phase boundary** — phase transitions are natural seams. Don't carry stale context from Phase N into Phase N+1.
 3. **Use `🟡` for partial batches** — if a session stops mid-batch, mark it `🟡 4/7 files done, pushed` in the progress table so the next session knows exactly where to continue.
 4. **Never block on human input during autonomous execution** — if something is ambiguous, make the best judgment call, commit with a note, and flag it for human review in `plan.md`.
-5. **All review lanes run as sub-agents** — review findings stay in sub-agent context, only the final scored report enters the main context. This keeps batches to ~8-10K tokens in the main window.
+5. **All review lanes run as sub-agents** — review findings stay in sub-agent context, only the final scored report enters the main context. The 8-agent review adds negligible cost (Sonnet/Haiku sub-agents, parallel execution, no main context bloat), so every batch gets the same review — no intensity decisions needed.
 
 ### Progress tracker status key
 
@@ -118,13 +116,9 @@ Sessions can stop unexpectedly (context limits, rate limits, timeouts). The work
 | `⬜` | Not started |
 | `❌` | Blocked (note reason in table) |
 
-### Review intensity by batch type
+### Override Protocol
 
-| Tag | Agents | When to use |
-|-----|--------|-------------|
-| `review: full` | 10 (default) | New features, component changes, logic changes |
-| `review: light` | 6 (Lanes a+b+e) | Mechanical sweeps, CSS-only, find-replace |
-| `review: verify` | 0 (build only) | Verification batches, doc sync, no code changes |
+If you deviate from any workflow default (combining batches, skipping a step, doing something differently), you MUST tag it: `[OVERRIDE: <rule-name> — <reason>]` in the batch spec, commit message, or plan.md. See `docs/skills/prd-to-production-workflow.md` → "Override Protocol" for the full list of invariants (rules that can never be overridden) vs. defaults (rules that can be overridden with documentation).
 
 ## Six North Star Documents
 

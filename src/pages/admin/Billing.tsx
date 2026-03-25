@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useAdminBilling } from "@/hooks/useAdminBilling";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +12,7 @@ import {
   Users, ChevronRight, CreditCard, Clock,
 } from "lucide-react";
 import { PageSkeleton } from "@/components/PageSkeleton";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 function formatCents(cents: number) { return `$${(cents / 100).toFixed(2)}`; }
 
@@ -24,7 +26,7 @@ const subStatusConfig: Record<string, { label: string; color: string }> = {
 
 export default function AdminBillingPage() {
   const nav = useNavigate();
-  const { paidToday, failedCount, exceptions, invoices, isLoading } = useAdminBilling();
+  const { paidToday, failedCount, exceptions, invoices, isLoading, isError, refetch } = useAdminBilling();
 
   const { data: subDistribution } = useQuery({
     queryKey: ["admin-sub-distribution"],
@@ -40,6 +42,12 @@ export default function AdminBillingPage() {
       return dist;
     },
   });
+
+  if (isError) return (
+    <div className="animate-fade-in p-6">
+      <QueryErrorCard message="Failed to load billing data." onRetry={() => refetch()} />
+    </div>
+  );
 
   if (isLoading) return <PageSkeleton />;
 
@@ -105,7 +113,7 @@ export default function AdminBillingPage() {
       <div className="grid grid-cols-2 gap-3">
         <Card
           className="p-3 cursor-pointer hover:shadow-sm transition-shadow"
-          onClick={() => nav("/admin/billing/customers")}
+          onClick={() => toast.info("Search for a customer by name or email to view their ledger")}
         >
           <div className="flex items-center gap-2.5">
             <Receipt className="h-4 w-4 text-accent" />

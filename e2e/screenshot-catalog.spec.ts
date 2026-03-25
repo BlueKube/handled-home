@@ -31,8 +31,6 @@ interface ScreenDef {
   screenType: "dashboard" | "catalog" | "form" | "list" | "detail" | "wizard-step" | "settings" | "landing" | "error";
   /** Optional: text to wait for before capture (regex) */
   waitFor?: RegExp;
-  /** Optional: if true, capture fullPage */
-  fullPage?: boolean;
 }
 
 // ── Screen Definitions ──
@@ -969,7 +967,7 @@ test.describe("Screenshot Catalog", () => {
         const filename = `${screen.id}.png`;
         await page.screenshot({
           path: path.join(MILESTONES_DIR, filename),
-          fullPage: screen.fullPage ?? false,
+          fullPage: true,
         });
 
         tracker.capture({
@@ -1029,7 +1027,7 @@ test.describe("Screenshot Catalog", () => {
         const filename = `${screen.id}.png`;
         await page.screenshot({
           path: path.join(MILESTONES_DIR, filename),
-          fullPage: screen.fullPage ?? false,
+          fullPage: true,
         });
 
         tracker.capture({
@@ -1050,6 +1048,7 @@ test.describe("Screenshot Catalog", () => {
   test.describe("Admin Screens", () => {
     test.use({
       storageState: path.join(__dirname, ".auth", "admin.json"),
+      viewport: { width: 1440, height: 900 },
     });
 
     test.beforeAll(() => {
@@ -1089,7 +1088,7 @@ test.describe("Screenshot Catalog", () => {
         const filename = `${screen.id}.png`;
         await page.screenshot({
           path: path.join(MILESTONES_DIR, filename),
-          fullPage: screen.fullPage ?? false,
+          fullPage: true,
         });
 
         tracker.capture({
@@ -1141,7 +1140,7 @@ test.describe("Screenshot Catalog", () => {
         const filename = `${screen.id}.png`;
         await page.screenshot({
           path: path.join(MILESTONES_DIR, filename),
-          fullPage: screen.fullPage ?? false,
+          fullPage: true,
         });
 
         tracker.capture({

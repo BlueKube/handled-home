@@ -60,5 +60,9 @@ export function useCustomerBilling() {
     latestInvoice,
     hasFailedPayment,
     isLoading: invoicesQuery.isLoading || paymentMethodsQuery.isLoading,
+    isError: invoicesQuery.isError || paymentMethodsQuery.isError || creditsQuery.isError,
+    refetch: async () => {
+      await Promise.all([invoicesQuery.refetch(), paymentMethodsQuery.refetch(), creditsQuery.refetch()]);
+    },
   };
 }

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Camera, ListChecks, Clock, Loader2 } from "lucide-react";
+import OnboardingProgressHeader from "@/components/provider/OnboardingProgressHeader";
 
 export default function OnboardingCapabilities() {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ export default function OnboardingCapabilities() {
 
   return (
     <div className="animate-fade-in p-4 pb-24">
-      <p className="text-caption mb-1">Step 3 of 6</p>
+      <OnboardingProgressHeader currentStep={3} onBack={() => navigate("/provider/onboarding/coverage", { state: { orgId, allowedZoneIds } })} />
       <h1 className="text-h2 mb-1">Your Capabilities</h1>
       <p className="text-caption mb-6">Select the services you can reliably perform. We'll match you with the right jobs.</p>
 

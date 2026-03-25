@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/StatusBadge";
 import {
   ChevronLeft, Camera, Upload, RotateCcw, Plus, CheckCircle2,
-  XCircle, Clock, ArrowLeft,
+  XCircle, Clock,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useRef, useState, useEffect, useMemo } from "react";
@@ -321,7 +321,7 @@ export default function ProviderJobPhotos() {
             variant={allRequiredUploaded ? "accent" : "default"}
             onClick={() => navigate(`/provider/jobs/${jobId}`)}
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ChevronLeft className="h-4 w-4 mr-2" />
             Back to Job Detail
           </Button>
         </div>

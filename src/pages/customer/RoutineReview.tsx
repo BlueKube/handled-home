@@ -11,9 +11,11 @@ import { SeasonalYearStrip } from "@/components/routine/SeasonalYearStrip";
 import { ProofCoach } from "@/components/routine/ProofCoach";
 import { WeekPreviewTimeline } from "@/components/routine/WeekPreviewTimeline";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, ArrowRight, CheckCircle2, AlertTriangle } from "lucide-react";
+import { ChevronLeft, ArrowRight, CheckCircle2, AlertTriangle, Info } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 
 const MODEL_LABELS: Record<string, string> = {
@@ -96,7 +98,7 @@ export default function RoutineReview() {
     <div className="pb-24 animate-fade-in">
       <div className="p-4 space-y-5">
         <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" /> Back
+          <ChevronLeft className="h-4 w-4" /> Back
         </button>
 
         <div>
@@ -134,6 +136,41 @@ export default function RoutineReview() {
             );
           })}
         </div>
+
+        {/* Cost Breakdown */}
+        <Card className="border bg-card">
+          <CardContent className="pt-4 pb-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold">Cost Breakdown</span>
+              <Badge
+                variant="outline"
+                className={fits ? "text-success border-success/30" : "text-destructive border-destructive/30"}
+              >
+                {fits ? "Within Budget" : "Over Limit"}
+              </Badge>
+            </div>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Included {modelLabel}</span>
+                <span>{Math.min(Math.ceil(cycleDemand), included)} / {included}</span>
+              </div>
+              {maxExtras > 0 && (
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Extras used</span>
+                  <span>{Math.max(0, Math.ceil(cycleDemand) - included)} / {maxExtras}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between border-t border-border pt-2 font-medium">
+                <span>Total per cycle</span>
+                <span>{Math.ceil(cycleDemand)} {modelLabel}</span>
+              </div>
+            </div>
+            <div className="flex items-start gap-2 text-xs text-muted-foreground">
+              <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+              <span>Included {modelLabel} come from your plan. Extras are additional services beyond your plan allowance.</span>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* 4-week preview */}
         <WeekPreviewTimeline weeks={weeks} />

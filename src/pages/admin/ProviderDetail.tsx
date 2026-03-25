@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useProviderAdmin } from "@/hooks/useProviderAdmin";
+import { useAdminProviderLedger } from "@/hooks/useAdminProviderLedger";
+import { StatusBadge } from "@/components/StatusBadge";
 import { useProviderRatingSummary } from "@/hooks/useProviderRatingSummary";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, CheckCircle, AlertTriangle, XCircle, Shield, MapPin, Loader2, User, FileText, Star } from "lucide-react";
+import { ChevronLeft, CheckCircle, AlertTriangle, XCircle, Shield, MapPin, Loader2, User, FileText, Star, DollarSign, Unlock } from "lucide-react";
 import { toast } from "sonner";
 import { DecisionTraceCard } from "@/components/admin/DecisionTraceCard";
 import { AdminReadOnlyMap } from "@/components/admin/AdminReadOnlyMap";
@@ -28,9 +30,11 @@ const STATUS_COLORS: Record<string, string> = {
 export default function AdminProviderDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { orgDetailQuery, performAction, updateCoverageStatus } = useProviderAdmin();
   const { data: ratingSummary } = useProviderRatingSummary(id);
   const { data: org, isLoading } = orgDetailQuery(id);
+  const ledger = useAdminProviderLedger(id);
   const [actionDialog, setActionDialog] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const [acting, setActing] = useState(false);
@@ -132,6 +136,7 @@ export default function AdminProviderDetail() {
           <TabsTrigger value="capabilities">Capabilities</TabsTrigger>
           <TabsTrigger value="compliance">Compliance</TabsTrigger>
           {riskFlags.length > 0 && <TabsTrigger value="risks">Risks ({riskFlags.length})</TabsTrigger>}
+          <TabsTrigger value="earnings">Earnings</TabsTrigger>
           <TabsTrigger value="traces">Traces</TabsTrigger>
           <TabsTrigger value="history">History</TabsTrigger>
         </TabsList>
@@ -285,6 +290,116 @@ export default function AdminProviderDetail() {
             </div>
           </TabsContent>
         )}
+
+        <TabsContent value="earnings">
+          {ledger.isLoading ? (
+            <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+          ) : (
+            <div className="space-y-4">
+              {/* Payout Account */}
+              <Card>
+                <CardContent className="py-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">Payout Account</span>
+                    </div>
+                    {ledger.payoutAccount ? (
+                      <StatusBadge status={ledger.payoutAccount.status} />
+                    ) : (
+                      <Badge variant="secondary">Not configured</Badge>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Summary */}
+              <div className="grid grid-cols-2 gap-4">
+                <Card>
+                  <CardContent className="pt-4">
+                    <p className="text-sm text-muted-foreground">Total Earned</p>
+                    <p className="text-2xl font-bold">${(ledger.earnings.reduce((s, e) => s + e.total_cents, 0) / 100).toFixed(2)}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-4">
+                    <p className="text-sm text-muted-foreground">Total Paid</p>
+                    <p className="text-2xl font-bold">${(ledger.payouts.filter(p => p.status === "PAID").reduce((s, p) => s + p.total_cents, 0) / 100).toFixed(2)}</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Active Holds */}
+              {ledger.holds.filter(h => h.status === "ACTIVE").length > 0 && (
+                <Card>
+                  <CardHeader><CardTitle className="text-base">Active Holds</CardTitle></CardHeader>
+                  <CardContent className="space-y-2">
+                    {ledger.holds.filter(h => h.status === "ACTIVE").map((hold) => (
+                      <div key={hold.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="destructive">{hold.severity}</Badge>
+                            <Badge variant="outline">{hold.hold_type}</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">{hold.reason_category || "—"}</p>
+                        </div>
+                        <Button variant="outline" size="sm" onClick={async () => {
+                          const { error } = await supabase.rpc("admin_release_hold", { p_hold_id: hold.id, p_reason: "Released from provider detail" });
+                          if (error) toast.error(error.message);
+                          else {
+                            toast.success("Hold released");
+                            queryClient.invalidateQueries({ queryKey: ["admin-provider-holds", id] });
+                            queryClient.invalidateQueries({ queryKey: ["admin-provider-earnings", id] });
+                          }
+                        }}>
+                          <Unlock className="h-3 w-3 mr-1" /> Release
+                        </Button>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Recent Earnings */}
+              <Card>
+                <CardHeader><CardTitle className="text-base">Recent Earnings ({ledger.earnings.length})</CardTitle></CardHeader>
+                <CardContent className="space-y-2">
+                  {ledger.earnings.length === 0 && <p className="text-muted-foreground text-sm">No earnings</p>}
+                  {ledger.earnings.slice(0, 20).map((e) => (
+                    <div key={e.id} className="flex items-center justify-between p-2 border rounded">
+                      <div>
+                        <p className="text-sm font-medium">${(e.total_cents / 100).toFixed(2)}</p>
+                        <p className="text-xs text-muted-foreground">{(e as any).jobs?.properties?.street_address || "Job"} — {(e as any).jobs?.scheduled_date || "—"}</p>
+                      </div>
+                      <StatusBadge status={e.status} />
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              {/* Payouts */}
+              <Card>
+                <CardHeader><CardTitle className="text-base">Payouts ({ledger.payouts.length})</CardTitle></CardHeader>
+                <CardContent className="space-y-2">
+                  {ledger.payouts.length === 0 && <p className="text-muted-foreground text-sm">No payouts</p>}
+                  {ledger.payouts.slice(0, 10).map((p) => (
+                    <div key={p.id} className="flex items-center justify-between p-2 border rounded">
+                      <div>
+                        <p className="text-sm font-medium">${(p.total_cents / 100).toFixed(2)}</p>
+                        <p className="text-xs text-muted-foreground">{format(new Date(p.created_at), "MMM d, yyyy")}</p>
+                      </div>
+                      <StatusBadge status={p.status} />
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Button variant="outline" className="w-full" onClick={() => navigate(`/admin/payouts/providers/${id}`)}>
+                View Full Ledger
+              </Button>
+            </div>
+          )}
+        </TabsContent>
 
         <TabsContent value="traces">
           <DecisionTraceCard entityType="provider_org" entityId={id} />

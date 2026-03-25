@@ -4,12 +4,11 @@ import { useProviderOrg } from "@/hooks/useProviderOrg";
 import { useProviderCoverage } from "@/hooks/useProviderCoverage";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowRight, Loader2, MapPin } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import OnboardingProgressHeader from "@/components/provider/OnboardingProgressHeader";
+import MapboxZoneSelector from "@/components/provider/MapboxZoneSelector";
 
 export default function OnboardingCoverage() {
   const navigate = useNavigate();
@@ -80,34 +79,18 @@ export default function OnboardingCoverage() {
 
   return (
     <div className="animate-fade-in p-4 pb-24">
-      <p className="text-caption mb-1">Step 2 of 6</p>
+      <OnboardingProgressHeader currentStep={2} onBack={() => navigate("/provider/onboarding/org", { state: { orgId, allowedZoneIds } })} />
       <h1 className="text-h2 mb-1">Coverage Zones</h1>
       <p className="text-caption mb-6">Select the zones you'd like to serve. Your requests will be reviewed by our team.</p>
 
-      <div className="space-y-3 mb-6">
-        {zones?.map((zone) => {
-          const selected = selectedZoneIds.includes(zone.id);
-          return (
-            <Card key={zone.id} className={`press-feedback cursor-pointer ${selected ? "ring-2 ring-accent" : ""}`} onClick={() => toggleZone(zone.id)}>
-              <CardContent className="py-4 flex items-center gap-3">
-                <Checkbox checked={selected} className="pointer-events-none" />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">{zone.name}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    ZIP: {zone.zip_codes?.slice(0, 3).join(", ")}{zone.zip_codes?.length > 3 ? ` +${zone.zip_codes.length - 3} more` : ""}
-                  </p>
-                </div>
-                {selected && <Badge variant="secondary">Requested</Badge>}
-              </CardContent>
-            </Card>
-          );
-        })}
-        {zones?.length === 0 && (
-          <p className="text-center text-muted-foreground py-8">No zones available for your invite code.</p>
-        )}
+      <div className="mb-6">
+        <MapboxZoneSelector
+          zones={zones ?? []}
+          selectedZoneIds={selectedZoneIds}
+          onToggleZone={toggleZone}
+          disabled={saving}
+          emptyMessage="No zones available for your invite code."
+        />
       </div>
 
       <Button

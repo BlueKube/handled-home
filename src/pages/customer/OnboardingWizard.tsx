@@ -26,7 +26,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import {
-  ArrowLeft,
+  ChevronLeft,
   ArrowRight,
   Check,
   CheckCircle,
@@ -180,7 +180,7 @@ export default function OnboardingWizard() {
         <div className="flex items-center justify-between mb-2">
           {canGoBack ? (
             <button onClick={handleBack} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-              <ArrowLeft className="h-4 w-4" /> Back
+              <ChevronLeft className="h-4 w-4" /> Back
             </button>
           ) : (
             <span />
@@ -226,6 +226,11 @@ export default function OnboardingWizard() {
             onSelectPlan={async (planId: string) => {
               await completeStep("plan", { selected_plan_id: planId });
             }}
+            onSkip={async () => {
+              try { await completeStep("plan"); } catch {
+                toast.error("Couldn't save progress — try again.");
+              }
+            }}
           />
         )}
         {effectiveStep === "home_setup" && (
@@ -240,6 +245,11 @@ export default function OnboardingWizard() {
             planId={selectedPlanId}
             onComplete={async () => {
               await completeStep("subscribe");
+            }}
+            onSkip={async () => {
+              try { await completeStep("subscribe"); } catch {
+                toast.error("Couldn't save progress — try again.");
+              }
             }}
           />
         )}
@@ -316,7 +326,9 @@ function PropertyStep({ onComplete }: { onComplete: () => Promise<void> }) {
     try {
       await save(normalized);
       await onComplete();
-    } catch {}
+    } catch {
+      toast.error("Your address couldn't be saved — check your connection and try again.");
+    }
   };
 
   const isValid = Object.keys(validateProperty(form)).length === 0;
@@ -485,7 +497,7 @@ function ZoneCheckStep({ onComplete, onWaitlist }: { onComplete: () => Promise<v
 // ════════════════════════════════════════
 // Step 3: Plan Selection
 // ════════════════════════════════════════
-function PlanStep({ onSelectPlan }: { onSelectPlan: (planId: string) => Promise<void> }) {
+function PlanStep({ onSelectPlan, onSkip }: { onSelectPlan: (planId: string) => Promise<void>; onSkip: () => Promise<void> }) {
   const { data: plans, isLoading } = usePlans("active");
   const { property } = useProperty();
   const [selecting, setSelecting] = useState<string | null>(null);
@@ -605,6 +617,10 @@ function PlanStep({ onSelectPlan }: { onSelectPlan: (planId: string) => Promise<
           <span className="text-sm text-muted-foreground">Saving selection…</span>
         </div>
       )}
+
+      <Button variant="ghost" className="w-full text-sm min-h-[44px]" onClick={onSkip} disabled={!!selecting}>
+        Skip for now — browse plans later from your dashboard
+      </Button>
     </div>
   );
 }
@@ -612,7 +628,7 @@ function PlanStep({ onSelectPlan }: { onSelectPlan: (planId: string) => Promise<
 // ════════════════════════════════════════
 // Step 4: Subscribe
 // ════════════════════════════════════════
-function SubscribeStep({ planId, onComplete }: { planId: string | null; onComplete: () => Promise<void> }) {
+function SubscribeStep({ planId, onComplete, onSkip }: { planId: string | null; onComplete: () => Promise<void>; onSkip: () => Promise<void> }) {
   const { user } = useAuth();
   const { data: plan, isLoading } = useQuery({
     queryKey: ["plans", planId],
@@ -682,6 +698,9 @@ function SubscribeStep({ planId, onComplete }: { planId: string | null; onComple
 
       <Button className="w-full h-12 text-base font-semibold rounded-xl" onClick={handleCheckout} disabled={loading}>
         {loading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Processing…</> : "Subscribe Now"}
+      </Button>
+      <Button variant="ghost" className="w-full text-sm min-h-[44px]" onClick={onSkip} disabled={loading}>
+        Skip for now — subscribe when you're ready
       </Button>
     </div>
   );
@@ -930,7 +949,9 @@ function HomeSetupStep({ onComplete }: { onComplete: () => Promise<void> }) {
     try {
       await saveCoverage(updates);
       setPhase("sizing");
-    } catch {}
+    } catch {
+      toast.error("Your coverage preferences couldn't be saved — check your connection and try again.");
+    }
   };
 
   const handleSizingComplete = async () => {
@@ -938,7 +959,9 @@ function HomeSetupStep({ onComplete }: { onComplete: () => Promise<void> }) {
     try {
       await saveSizing(sizingForm);
       await onComplete();
-    } catch {} finally {
+    } catch {
+      toast.error("Home size details couldn't be saved — you can skip this step and update later in Settings.");
+    } finally {
       setCompleting(false);
     }
   };

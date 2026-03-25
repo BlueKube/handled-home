@@ -6,13 +6,14 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { ClipboardCheck, Camera, Bug, DollarSign, Lightbulb, Clock, ChevronRight, TrendingUp, BarChart3 } from "lucide-react";
 
 export default function ProviderInsights() {
   const { org } = useProviderOrg();
   const navigate = useNavigate();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["provider-insights", org?.id],
     enabled: !!org?.id,
     queryFn: async () => {
@@ -84,6 +85,14 @@ export default function ProviderInsights() {
     if (data.proofCompliance < 90) cues.push("Add more after photos to improve your proof score.");
     if (data.issueRate > 10) cues.push("Issues spiked recently — review access notes before each job.");
     if (data.heldCents > 0) cues.push("Some earnings are on hold. Complete outstanding items to release.");
+  }
+
+  if (isError) {
+    return (
+      <div className="animate-fade-in p-4 pb-24">
+        <QueryErrorCard message="Failed to load performance insights." onRetry={() => refetch()} />
+      </div>
+    );
   }
 
   if (isLoading) {

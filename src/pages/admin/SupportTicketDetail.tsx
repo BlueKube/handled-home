@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TicketStatusChip } from "@/components/support/TicketStatusChip";
 import { ResolutionOfferCard } from "@/components/support/ResolutionOfferCard";
-import { ChevronLeft, Clock, CheckCircle2, AlertTriangle, Shield, Send, Wand2, RefreshCw, ArrowRightLeft } from "lucide-react";
+import { ChevronLeft, Clock, CheckCircle2, AlertTriangle, Shield, Send, Wand2, RefreshCw, ArrowRightLeft, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -404,6 +404,37 @@ export default function AdminSupportTicketDetail() {
               Escalate
             </Button>
           )}
+        </section>
+      )}
+
+      {/* Attachments */}
+      {attachments.length > 0 && (
+        <section className="space-y-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Attachments ({attachments.length})
+          </h3>
+          <div className="space-y-2">
+            {attachments.map((att: any) => (
+              <Card key={att.id} className="p-3 flex items-center gap-3">
+                <div className="h-8 w-8 rounded bg-muted flex items-center justify-center shrink-0">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{att.description || att.file_type || "Attachment"}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {att.uploaded_by_role} · {format(new Date(att.created_at), "MMM d, h:mm a")}
+                  </p>
+                </div>
+                {att.storage_path && (
+                  <Button variant="ghost" size="sm" asChild>
+                    <a href={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/support-attachments/${att.storage_path}`} target="_blank" rel="noopener noreferrer">
+                      View
+                    </a>
+                  </Button>
+                )}
+              </Card>
+            ))}
+          </div>
         </section>
       )}
 

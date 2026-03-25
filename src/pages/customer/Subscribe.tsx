@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, CheckCircle, Loader2 } from "lucide-react";
+import { ChevronLeft, CheckCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function CustomerSubscribe() {
@@ -89,7 +89,7 @@ export default function CustomerSubscribe() {
   return (
     <div className="p-4 pb-24 space-y-6 animate-fade-in">
       <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Back
+        <ChevronLeft className="h-4 w-4" /> Back
       </button>
 
       <h1 className="text-h2">Confirm Your Plan</h1>

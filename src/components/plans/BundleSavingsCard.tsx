@@ -1,10 +1,10 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { PiggyBank, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { PiggyBank, Check, X } from "lucide-react";
 
-/**
- * Estimated monthly cost if a homeowner hires separate vendors for each service.
- * These are conservative averages for suburban US markets.
- */
 const SEPARATE_VENDOR_COSTS: Record<string, { label: string; monthlyCost: number }> = {
   lawn: { label: "Lawn care", monthlyCost: 160 },
   pool: { label: "Pool maintenance", monthlyCost: 120 },
@@ -17,16 +17,39 @@ interface BundleSavingsCardProps {
   planPriceCents?: number;
   planDisplayPrice?: string;
   tierKey: string;
+  loading?: boolean;
 }
 
-/** Services included by tier for the savings comparison */
 const TIER_SERVICES: Record<string, string[]> = {
   essential: ["lawn"],
   plus: ["lawn", "pest"],
   premium: ["lawn", "pest", "pool"],
 };
 
-export function BundleSavingsCard({ planPriceCents, planDisplayPrice, tierKey }: BundleSavingsCardProps) {
+const DISMISS_KEY = "bundle-savings-dismissed";
+
+export function BundleSavingsCard({ planPriceCents, planDisplayPrice, tierKey, loading }: BundleSavingsCardProps) {
+  const navigate = useNavigate();
+  const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISS_KEY) === "true");
+
+  if (dismissed) return null;
+
+  if (loading) {
+    return (
+      <Card className="p-4 bg-accent/5 border-accent/20">
+        <div className="flex items-start gap-3">
+          <Skeleton className="h-9 w-9 rounded-full shrink-0" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-3 w-1/2" />
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-3 w-full" />
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
   const services = TIER_SERVICES[tierKey] ?? TIER_SERVICES.essential;
   const separateTotal = services.reduce(
     (sum, key) => sum + (SEPARATE_VENDOR_COSTS[key]?.monthlyCost ?? 0),
@@ -41,17 +64,42 @@ export function BundleSavingsCard({ planPriceCents, planDisplayPrice, tierKey }:
 
   const savings = separateTotal - planMonthly;
 
-  if (savings <= 0 || planMonthly === 0) return null;
+  if (savings <= 0 || planMonthly === 0) {
+    return (
+      <Card className="p-4 bg-accent/5 border-accent/20">
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+            <PiggyBank className="h-5 w-5 text-accent" />
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Your savings breakdown will appear based on your selected plan.
+          </p>
+        </div>
+      </Card>
+    );
+  }
 
   const savingsPercent = Math.round((savings / separateTotal) * 100);
 
+  const handleDismiss = () => {
+    localStorage.setItem(DISMISS_KEY, "true");
+    setDismissed(true);
+  };
+
   return (
-    <Card className="p-4 bg-accent/5 border-accent/20">
+    <Card className="p-4 bg-accent/5 border-accent/20 relative">
+      <button
+        onClick={handleDismiss}
+        className="absolute top-1 right-1 h-11 w-11 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+        aria-label="Dismiss savings card"
+      >
+        <X className="h-3.5 w-3.5 text-muted-foreground" />
+      </button>
       <div className="flex items-start gap-3">
         <div className="h-9 w-9 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
           <PiggyBank className="h-5 w-5 text-accent" />
         </div>
-        <div className="flex-1">
+        <div className="flex-1 pr-6">
           <p className="text-sm font-semibold text-foreground">
             Save ~${savings}/mo vs. separate vendors
           </p>
@@ -76,6 +124,14 @@ export function BundleSavingsCard({ planPriceCents, planDisplayPrice, tierKey }:
               <span className="ml-auto">${planMonthly}/mo</span>
             </div>
           </div>
+          <Button
+            variant="accent"
+            size="sm"
+            className="w-full mt-3"
+            onClick={() => navigate("/customer/plans")}
+          >
+            View Your Plan
+          </Button>
         </div>
       </div>
     </Card>

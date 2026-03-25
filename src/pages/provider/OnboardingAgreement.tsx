@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, Shield, Loader2, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+import OnboardingProgressHeader from "@/components/provider/OnboardingProgressHeader";
 
 export default function OnboardingAgreement() {
   const navigate = useNavigate();
@@ -89,7 +90,7 @@ export default function OnboardingAgreement() {
 
   return (
     <div className="animate-fade-in p-4 pb-24">
-      <p className="text-caption mb-1">Step 5 of 6</p>
+      <OnboardingProgressHeader currentStep={5} onBack={() => navigate("/provider/onboarding/compliance", { state: { orgId, allowedZoneIds } })} />
       <h1 className="text-h2 mb-1 flex items-center gap-2">
         <Shield className="h-5 w-5 text-primary" />
         Handled Standards

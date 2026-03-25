@@ -4,7 +4,7 @@ import { usePropertyPhotoTimeline } from "@/hooks/usePropertyPhotoTimeline";
 import { PhotoTimeline } from "@/components/customer/PhotoTimeline";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 
 export default function CustomerPhotoTimeline() {
   const navigate = useNavigate();
@@ -15,7 +15,7 @@ export default function CustomerPhotoTimeline() {
     <div className="p-4 pb-24 space-y-4 animate-fade-in">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-5 w-5" />
+          <ChevronLeft className="h-5 w-5" />
         </Button>
         <h1 className="text-h2">Photo Timeline</h1>
       </div>

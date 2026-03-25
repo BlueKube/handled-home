@@ -9,7 +9,10 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { QueryErrorCard } from "@/components/QueryErrorCard";
+import MapboxZoneSelector from "@/components/provider/MapboxZoneSelector";
 import { useProviderOrg } from "@/hooks/useProviderOrg";
 import { useProviderCoverage } from "@/hooks/useProviderCoverage";
 import { useProviderCapabilities } from "@/hooks/useProviderCapabilities";
@@ -277,7 +280,37 @@ function AvailabilitySection() {
 
 function CoverageZones() {
   const { org } = useProviderOrg();
-  const { coverage, loading, isError, refetch } = useProviderCoverage(org?.id);
+  const { coverage, addCoverage, removeCoverage, loading, isError, refetch } = useProviderCoverage(org?.id);
+  const [editing, setEditing] = useState(false);
+
+  // Fetch all active zones for the selector
+  const { data: allZones } = useQuery({
+    queryKey: ["all_active_zones"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("zones")
+        .select("id, name, zip_codes, status")
+        .eq("status", "active");
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: editing,
+  });
+
+  const selectedZoneIds = coverage.map((c: any) => c.zone_id).filter(Boolean);
+
+  const toggleZone = async (zoneId: string) => {
+    try {
+      const existing = coverage.find((c: any) => c.zone_id === zoneId);
+      if (existing) {
+        await removeCoverage.mutateAsync(existing.id);
+      } else if (org?.id) {
+        await addCoverage.mutateAsync({ orgId: org.id, zoneId });
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update zone");
+    }
+  };
 
   if (loading) return <Skeleton className="h-32 rounded-xl" />;
   if (isError) return <QueryErrorCard message="Failed to load coverage zones." onRetry={() => refetch()} />;
@@ -290,15 +323,26 @@ function CoverageZones() {
             <MapPin className="h-4 w-4 text-muted-foreground" />
             Coverage Zones
           </CardTitle>
-          <Badge variant="outline" className="text-xs">{coverage.length} zone{coverage.length !== 1 ? "s" : ""}</Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-xs">{coverage.length} zone{coverage.length !== 1 ? "s" : ""}</Badge>
+            <Button size="sm" variant="outline" onClick={() => setEditing(!editing)}>
+              {editing ? "Done" : "Edit"}
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
-        {coverage.length === 0 ? (
+        {editing ? (
+          <MapboxZoneSelector
+            zones={allZones ?? []}
+            selectedZoneIds={selectedZoneIds}
+            onToggleZone={toggleZone}
+          />
+        ) : coverage.length === 0 ? (
           <div className="text-center py-6">
             <MapPin className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
             <p className="text-sm text-muted-foreground">No coverage zones assigned</p>
-            <p className="text-xs text-muted-foreground/60 mt-1">Coverage zones are assigned during onboarding</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">Tap "Edit" to request coverage zones</p>
           </div>
         ) : (
           <div className="space-y-3">

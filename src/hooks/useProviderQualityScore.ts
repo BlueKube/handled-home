@@ -80,5 +80,7 @@ export function useProviderQualityScore(providerOrgId: string | undefined) {
     rollups: rollupsQuery.data ?? [],
     scoreEvents: scoreEventsQuery.data ?? [],
     isLoading: scoreQuery.isLoading,
+    isError: scoreQuery.isError || rollupsQuery.isError || scoreEventsQuery.isError,
+    refetch: scoreQuery.refetch,
   };
 }

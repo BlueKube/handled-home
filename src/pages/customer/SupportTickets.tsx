@@ -4,7 +4,8 @@ import { useSupportTickets } from "@/hooks/useSupportTickets";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TicketStatusChip } from "@/components/support/TicketStatusChip";
-import { ArrowLeft, ChevronRight, Inbox } from "lucide-react";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
+import { ChevronLeft, ChevronRight, Inbox } from "lucide-react";
 import { format } from "date-fns";
 
 type Filter = "all" | "open" | "resolved";
@@ -12,7 +13,7 @@ type Filter = "all" | "open" | "resolved";
 export default function CustomerSupportTickets() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<Filter>("open");
-  const { data: tickets = [], isLoading } = useSupportTickets();
+  const { data: tickets = [], isLoading, isError, refetch } = useSupportTickets();
 
   const filtered = tickets.filter((t) => {
     if (filter === "open") return !["resolved", "closed"].includes(t.status);
@@ -29,11 +30,15 @@ export default function CustomerSupportTickets() {
   return (
     <div className="p-4 pb-24 space-y-4 animate-fade-in">
       <Button variant="ghost" size="sm" className="gap-1 -ml-2" onClick={() => navigate("/customer/support")}>
-        <ArrowLeft className="h-4 w-4" />
+        <ChevronLeft className="h-4 w-4" />
         Support
       </Button>
 
       <h1 className="text-h2">Your tickets</h1>
+
+      {isError && (
+        <QueryErrorCard message="Failed to load support tickets." onRetry={() => refetch()} />
+      )}
 
       {/* Filter pills */}
       <div className="flex gap-2">

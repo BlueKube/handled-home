@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useProperty, formatPetsForDisplay, PropertyFormData } from "@/hooks/useProperty";
+import { useProperty, formatPetsForDisplay, type PropertyFormData } from "@/hooks/useProperty";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { useZoneLookup } from "@/hooks/useZoneLookup";
 import { usePropertyCoverage } from "@/hooks/usePropertyCoverage";
 import { usePropertySignals } from "@/hooks/usePropertySignals";
@@ -113,7 +114,7 @@ function HomeSetupSection({ navigate }: { navigate: ReturnType<typeof useNavigat
 }
 
 export default function CustomerProperty() {
-  const { property, isLoading, save, isSaving } = useProperty();
+  const { property, isLoading, isError, refetch, save, isSaving } = useProperty();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const isGated = searchParams.get("gated") === "1";
@@ -194,6 +195,19 @@ export default function CustomerProperty() {
   };
 
   const isValid = Object.keys(validate(form)).length === 0;
+
+  if (isError) {
+    return (
+      <div className="animate-fade-in p-4 pb-24">
+        <button onClick={() => navigate("/customer/more")} className="flex items-center gap-1 text-muted-foreground mb-2 hover:text-foreground transition-colors" aria-label="Back to More menu">
+          <ChevronLeft className="h-4 w-4" />
+          <span className="text-sm">More</span>
+        </button>
+        <h1 className="text-h2 mb-4">Your Home</h1>
+        <QueryErrorCard message="Failed to load property details." onRetry={() => refetch()} />
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

@@ -1,15 +1,18 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAdminBilling } from "@/hooks/useAdminBilling";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/StatCard";
-import { DollarSign, Clock } from "lucide-react";
+import { DollarSign, Clock, Calendar, Settings } from "lucide-react";
 import { PageSkeleton } from "@/components/PageSkeleton";
 import { DecisionTraceCard } from "@/components/admin/DecisionTraceCard";
 
 function formatCents(cents: number) { return `$${(cents / 100).toFixed(2)}`; }
 
 export default function AdminPayoutsPage() {
+  const navigate = useNavigate();
   const [selectedPayoutId, setSelectedPayoutId] = useState<string | null>(null);
   const { payouts, isLoading } = useAdminBilling();
 
@@ -26,6 +29,32 @@ export default function AdminPayoutsPage() {
         <StatCard label="Total paid out" value={formatCents(paidTotal)} icon={DollarSign} />
         <StatCard label="Pending" value={String(pendingCount)} icon={Clock} />
       </div>
+
+      {/* Payout Schedule */}
+      <Card>
+        <CardContent className="py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Calendar className="h-5 w-5 text-accent" />
+              <div>
+                <p className="text-sm font-medium">Payout Schedule</p>
+                <p className="text-xs text-muted-foreground">Payouts are processed weekly on Fridays</p>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => navigate("/admin/control/payouts")}>
+              <Settings className="h-3.5 w-3.5 mr-1" />
+              Configure
+            </Button>
+          </div>
+          {pendingCount > 0 && (
+            <div className="mt-3 p-3 rounded-lg bg-muted/50">
+              <p className="text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">{pendingCount} payout{pendingCount !== 1 ? "s" : ""}</span> pending for next cycle
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader className="pb-2">
