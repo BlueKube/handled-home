@@ -650,7 +650,7 @@ def print_results(result: ScoreResult, verbose: bool = False):
             ("D7  Walkthroughs", result.d7_walkthroughs, 0.9),
         ]
         for name, score, weight in dimensions:
-            filled = int(score)
+            filled = round(score)
             bar = "█" * filled + "░" * (10 - filled)
             print(f"  {name:18s} {bar} {score:.1f}/10  (×{weight})")
 
