@@ -928,6 +928,98 @@ def score_d7_cognitive_walkthroughs(flows: list[FlowSection], all_text: str) -> 
     return min(points, 10.0), issues
 
 
+# ─── Anti-Gaming Guards ─────────────────────────────────────────────────────
+
+# Provider promises from masterplan.md to cross-reference
+PROVIDER_PROMISES = [
+    "recurring work",
+    "reduce admin",
+    "less time on the road",
+    "fill their schedule",
+    "grow their business",
+    "denser routes",
+    "route density",
+    "predictable",
+]
+
+
+def calculate_gaming_penalty(flows: list[FlowSection], all_text: str) -> tuple[float, list[Issue]]:
+    """Calculate anti-gaming penalty from 5 guards. Returns (penalty, issues)."""
+    penalty = 0.0
+    issues: list[Issue] = []
+
+    # Guard 1: Word-count bell curve — sweet spot 4k–10k words
+    word_count = count_words(all_text)
+    if word_count < 2000:
+        p = 15.0
+        penalty += p
+        issues.append(Issue("Guard_wordcount", f"Provider flows too thin: {word_count} words (need 4k+)", 3))
+    elif word_count < 4000:
+        p = 8.0 * (1.0 - (word_count - 2000) / 2000)  # gentle ramp 2k–4k
+        penalty += p
+        issues.append(Issue("Guard_wordcount", f"Provider flows below sweet spot: {word_count} words (4k–10k ideal)", 2))
+    elif word_count > 15000:
+        p = 10.0
+        penalty += p
+        issues.append(Issue("Guard_wordcount", f"Provider flows excessively long: {word_count} words (possible padding)", 2))
+    elif word_count > 10000:
+        p = 5.0 * ((word_count - 10000) / 5000)  # gentle ramp 10k–15k
+        penalty += p
+        issues.append(Issue("Guard_wordcount", f"Provider flows above sweet spot: {word_count} words (4k–10k ideal)", 1))
+
+    # Guard 2: Duplicate screen detection — headings >80% similar
+    all_screens = get_all_screens(flows)
+    screen_titles = [s.title for s in all_screens]
+    dup_count = 0
+    for i in range(len(screen_titles)):
+        for j in range(i + 1, len(screen_titles)):
+            if heading_similarity(screen_titles[i], screen_titles[j]) > 0.8:
+                dup_count += 1
+                if dup_count <= 3:  # only report first 3
+                    issues.append(Issue("Guard_duplicates",
+                        f"Similar screen headings: '{screen_titles[i]}' ≈ '{screen_titles[j]}'", 2))
+    penalty += min(dup_count * 2.0, 10.0)
+
+    # Guard 3: Boilerplate detection — Jaccard >0.8 on 50+ word blocks
+    # Split text into paragraphs and check pairwise similarity
+    paragraphs = [p.strip() for p in all_text.split("\n\n") if len(p.split()) >= 50]
+    boilerplate_count = 0
+    for i in range(len(paragraphs)):
+        for j in range(i + 1, len(paragraphs)):
+            if jaccard_similarity(paragraphs[i], paragraphs[j]) > 0.8:
+                boilerplate_count += 1
+                if boilerplate_count <= 3:
+                    issues.append(Issue("Guard_boilerplate",
+                        f"Boilerplate detected: paragraph {i+1} ≈ paragraph {j+1} (Jaccard >0.8)", 2))
+    penalty += min(boilerplate_count * 3.0, 12.0)
+
+    # Guard 4: Masterplan coherence — check provider promises against flow content
+    promises_found = count_keyword_matches(all_text, PROVIDER_PROMISES)
+    if promises_found < 2:
+        p = 8.0
+        penalty += p
+        issues.append(Issue("Guard_coherence",
+            f"Only {promises_found}/{len(PROVIDER_PROMISES)} provider promises reflected in flows", 3))
+    elif promises_found < 4:
+        p = 4.0
+        penalty += p
+        issues.append(Issue("Guard_coherence",
+            f"Only {promises_found}/{len(PROVIDER_PROMISES)} provider promises reflected in flows", 2))
+
+    # Guard 5: Flow completeness — all 10 expected flows present
+    found_ids = {f.flow_id for f in flows}
+    expected_ids = set(PROVIDER_FLOW_IDS)
+    missing = expected_ids - found_ids
+    if missing:
+        p = len(missing) * 3.0  # 3 points per missing flow
+        penalty += p
+        missing_str = ", ".join(str(m) for m in sorted(missing))
+        issues.append(Issue("Guard_completeness",
+            f"Missing provider flows: {missing_str} ({len(missing)}/{len(PROVIDER_FLOW_IDS)})", 3))
+
+    return penalty, issues
+
+
 # ─── Evaluate ───────────────────────────────────────────────────────────────
 
 def evaluate(path: Optional[str] = None, verbose: bool = False) -> ScoreResult:
@@ -971,8 +1063,9 @@ def evaluate(path: Optional[str] = None, verbose: bool = False) -> ScoreResult:
     d7, issues = score_d7_cognitive_walkthroughs(flows, all_text)
     all_issues.extend(issues)
 
-    # ─── Anti-Gaming Placeholder (implemented in Batch 6) ───
-    gaming_penalty = 0.0
+    # ─── Anti-Gaming Guards ───
+    gaming_penalty, g_issues = calculate_gaming_penalty(flows, all_text)
+    all_issues.extend(g_issues)
 
     # ─── Composite Score ───
     scores = {
