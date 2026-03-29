@@ -1,8 +1,34 @@
-# Lessons Learned
+# Lessons Learned & Suggestions
 
-> **Last updated:** 2026-03-28
+> **Last updated:** 2026-03-29
 
 Accumulated across all projects and sessions. Read at the start of every session.
+
+This file serves two purposes:
+1. **Lessons learned** — What went well, what broke, and what to do differently next time.
+2. **Suggestions** — Product ideas, UX improvements, workflow improvements, and agent signals surfaced during development.
+
+---
+
+## How to Add Entries
+
+### Lessons
+Add under the appropriate session heading with a category (Workflow, Architecture, Security, etc.). Each entry is a bold rule followed by a 1-2 sentence explanation with specific data.
+
+### Suggestions
+Add under the Suggestions section. Three types:
+- **Product** — Feature ideas, UX gaps, optimization opportunities
+- **Workflow** — Process improvements, review system changes, tooling ideas
+- **Agent Signals** — Observations about lane effectiveness, scoring calibration, context consumption (include numbers)
+
+Format:
+```markdown
+### [YYYY-MM-DD] Short title
+**Source:** Where/when the idea came from (batch N, phase review, audit, etc.)
+**Type:** Product / Workflow / Agent Signal
+**Impact:** What business or user outcome this improves
+**Effort:** Small / Medium / Large
+```
 
 ---
 
@@ -111,3 +137,19 @@ Accumulated across all projects and sessions. Read at the start of every session
 
 ### Cleanup
 - **Full Pass Cleanup gets skipped even when documented.** 32 batch spec files sat in `docs/working/batch-specs/` through V2, V3, V4, and V5 completions. The cleanup procedure exists in both CLAUDE.md and WORKFLOW.md. It was still missed every time. The procedure needs a checklist format that's harder to skip, or a post-pass verification step: "ls docs/working/batch-specs/ — if files exist, archive them."
+
+---
+
+## Suggestions
+
+### Pending
+
+_No suggestions yet. Entries will accumulate as development continues._
+
+### Promoted (moved to docs/upcoming/)
+
+_None yet._
+
+### Dismissed
+
+_None yet._

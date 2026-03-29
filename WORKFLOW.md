@@ -242,7 +242,7 @@ Push the batch to the feature branch.
 
 ### Step 9: Log suggestions and agent signals (optional)
 
-Append observations to `docs/suggestions.md`. Two types:
+Append observations to `lessons-learned.md` (Suggestions section). Two types:
 
 - **Agent Signals** (about the workflow/process): Lane effectiveness, false positive rates, context consumption patterns, spec quality issues, scoring calibration. Include specific numbers.
 - **Product Suggestions** (about the product): Feature ideas, UX gaps, optimization opportunities noticed during implementation.
@@ -490,7 +490,7 @@ When all phases in the plan are done:
 1. **Final recap** — Review the entire plan against what was actually built
 2. **Open a PR** — Create a pull request from the feature branch into main. Do not merge — the human reviews and merges.
 3. **Recommendations** — Surface any deferred items, tech debt, or follow-up work
-4. **Suggestion round** — Read the north star docs and the completed plan. Add 3-5 entries to `docs/suggestions.md` — both Agent Signals and Product Suggestions.
+4. **Suggestion round** — Read the north star docs and the completed plan. Add 3-5 entries to `lessons-learned.md` (Suggestions section) — both Agent Signals and Product Suggestions.
 5. **Update TODO.md** — Append any human action items discovered during this PRD (API keys, external service config, deployment steps, business decisions). Use the format in `docs/upcoming/TODO.md`.
 6. **Final doc sync** — One last pass across all docs
 7. **Archive** — Move the working folder contents to a uniquely-named archive folder:
@@ -534,13 +534,13 @@ After a round of PRDs is complete, optionally run analysis passes to find and ex
 
 ### Mode A — PRD Discovery (find the next best thing to build)
 
-**Input:** Review `docs/suggestions.md` — both Agent Signals and Product Suggestions accumulated during development.
+**Input:** Review `lessons-learned.md` (Suggestions section) — both Agent Signals and Product Suggestions accumulated during development.
 
 **Method:** Systematically evaluate the product against quality rubrics — UX friction scoring, performance audits, design guidelines conformance checks, accessibility audits, or business model gap analysis. Cross-reference against the north star docs to identify gaps between what the product does and what the business plan says it should do.
 
 **Output:**
 - New PRD files added to `docs/upcoming/`, numbered and ready for the scheduled task loop to pick up
-- `docs/suggestions.md` cleaned up — promoted Product Suggestions moved to the "Promoted" section, weak ideas moved to "Dismissed"
+- `lessons-learned.md` Suggestions cleaned up — promoted items moved to the "Promoted" section, weak ideas moved to "Dismissed"
 
 ### Mode B — Optimization Loops (improve what's already built)
 
@@ -568,7 +568,7 @@ The loop:
 
 ### Mode C — Workflow Health Audit (improve the process itself)
 
-After every 3-5 completed plans, run a workflow audit using the Agent Signals accumulated in `docs/suggestions.md`.
+After every 3-5 completed plans, run a workflow audit using the Agent Signals accumulated in `lessons-learned.md`.
 
 **Compute aggregate metrics from the archives:**
 
@@ -674,7 +674,7 @@ If a session fails mid-batch:
 [ ] Validate visually (screenshots, if UI work)
 [ ] Push fixes
 [ ] Check context capacity with /context — log % in progress table
-[ ] Log suggestions/signals to docs/suggestions.md (if any noticed)
+[ ] Log suggestions/signals to lessons-learned.md (if any noticed)
 [ ] Append human action items to docs/upcoming/TODO.md (if any discovered)
 [ ] If over 60% context: update Session Handoff, start new session
 [ ] Update Session Handoff in plan.md
@@ -705,11 +705,13 @@ docs: sync documentation after phase N              # Doc sync
 /
 ├── CLAUDE.md                           # Universal project instructions for AI agents
 ├── WORKFLOW.md                         # This file — portable PRD-to-Production workflow
+├── DEPLOYMENT.md                       # Deployment guide (env vars, migrations, Edge Functions)
+├── lessons-learned.md                  # Lessons learned + suggestions (read every session)
 ├── README.md                           # Human onboarding guide
 ├── .claude/
 │   ├── settings.json
-│   └── commands/
-│       └── code-review.md              # /code-review slash command
+│   └── hooks/
+│       └── stop-check.sh              # Post-response validation hook
 ├── docs/
 │   ├── masterplan.md                   # REQUIRED — product blueprint
 │   ├── feature-list.md                 # REQUIRED — capability inventory
@@ -717,7 +719,6 @@ docs: sync documentation after phase N              # Doc sync
 │   ├── operating-model.md              # OPTIONAL — add when biz model defined
 │   ├── app-flow-pages-and-roles.md     # OPTIONAL — add when 10+ pages
 │   ├── design-guidelines.md            # OPTIONAL — add when design system solidifies
-│   ├── suggestions.md                  # Inter-agent signals + product ideas
 │   ├── templates/                      # Reusable templates (optimization loops, etc.)
 │   ├── upcoming/                       # PRD queue + persistent operational docs
 │   │   ├── TODO.md                     # Human action items (persistent)
