@@ -10,8 +10,9 @@
 - **Branch:** claude/add-documentation-workflow-OppGZ
 - **Last completed:** PRD-006 (Customer Dashboard & Subscription UX — reviewed ✅)
 - **Last completed (updated):** PRD-009 (Admin fixes — reviewed ✅)
-- **Last completed (updated 2):** PRD-011 (Design System — previewRole fix, reviewed ✅)
-- **Next up:** PRD-012 — Payment & Critical Path Test Coverage
+- **Last completed:** PRD-012 (Security regression tests — reviewed ✅)
+- **Next up:** All 12 PRDs addressed. Full Implementation Plan complete.
+- **PRD status:** 001-006 ✅, 007 deferred, 008 skipped, 009 ✅, 010 deferred, 011 ✅, 012 ✅
 - **Note on PRD-010:** Referrals page already has milestones, share code, credits summary. Social proof counter ("X neighbors") needs backend zone density data. Share pre-written text needs native platform integration. Deferred as enhancement. [OVERRIDE: deferred PRD-010 — page is functional, social proof and native sharing require backend/native work]
 - **Note on PRD-008:** Provider Dashboard already uses first name greeting, Performance screen has correct hierarchy (score banner → streak → stats → metrics → SLA), null states follow correct convention (0 for counts, — for percentages). Audit findings were test-data artifacts. [OVERRIDE: skipped PRD-008 — implementation already correct, same pattern as PRD-004/005]
 - **Note on PRD-007:** Services Catalog page already uses category icons, search, grouping, and sheet detail view — not the raw photo-tile grid the audit described. Adding plan context badges requires a data join not yet in useSkus hook. Deferred as enhancement. [OVERRIDE: deferred PRD-007 — page is functional, plan context badges require non-trivial data layer work]
