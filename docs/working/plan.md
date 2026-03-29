@@ -8,8 +8,8 @@
 
 ## Session Handoff
 - **Branch:** claude/add-documentation-workflow-OppGZ
-- **Last completed:** PRD-002 (all 2 batches — Frontend Performance & Observability)
-- **Next up:** PRD-003 — BYOC Flow End-to-End Fix
+- **Last completed:** PRD-003 (all 3 batches — BYOC Flow End-to-End Fix)
+- **Next up:** PRD-004 — Photo Timeline & Proof System
 - **Context at exit:** ~55-60% (heavy session: 2 audits + 1 full PRD implementation)
 - **Blockers:** Human must set CRON_SECRET as Supabase Edge Function secret (see TODO.md)
 - **PRD queue:** 11 PRDs remaining in docs/upcoming/FULL-IMPLEMENTATION-PLAN.md
