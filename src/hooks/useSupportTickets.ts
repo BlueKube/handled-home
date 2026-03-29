@@ -20,6 +20,7 @@ export type SupportTicketRow = {
   ai_evidence_score: number | null;
   ai_risk_score: number | null;
   sla_due_at: string | null;
+  assigned_to_user_id?: string | null;
   resolved_at: string | null;
   created_at: string;
   updated_at: string;
