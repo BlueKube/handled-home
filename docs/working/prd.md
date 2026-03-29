@@ -1,52 +1,48 @@
-# PRD-002: Frontend Performance & Observability
+# PRD-003: BYOC Flow End-to-End Fix
 
 > **Execution mode:** Quality
-> **Priority:** P1 — Foundation for all subsequent PRDs
-> **Source:** gstack Eng Review (2026-03-29), Risks 3-5
+> **Priority:** P1 — Primary growth engine
+> **Source:** gstack Growth Audit + UI/UX Audit (2026-03-29)
 
 ---
 
 ## Problem Statement
 
-The frontend loads all 142 pages synchronously (no code splitting), the QueryClient has no staleTime configuration (every navigation re-fetches everything), and scheduled Edge Functions have no failure alerting. These infrastructure gaps affect performance, database load, and operational visibility.
+The BYOC loop is the company's primary growth engine but has execution breaks at critical moments: "No enabled categories found" when creating invite links (data state, not bug — needs better UX), empty SMS scripts, provider empty states with no forward CTAs, and a BYOC Center pre-approval gate that's a dead end.
 
 ---
 
 ## Goals
 
-1. Add React.lazy code splitting — reduce initial bundle by 60-70%
-2. Configure QueryClient with sensible staleTime defaults
-3. Add DEPLOYMENT.md pg_cron configuration guidance
-
----
-
-## Non-Goals
-
-- Refactoring component architecture
-- Adding new pages or features
-- Changing Edge Function business logic (covered in PRD-001)
-- Full pg_cron migration (noted as future work)
+1. Fix BYOC link creation UX when categories are empty (link to capability setup)
+2. Seed SMS invite scripts in the database
+3. Add forward-action CTAs to provider empty states (Jobs, History, Organization)
+4. Improve BYOC Center pre-approval waiting state
+5. Improve auth page with invite context (show provider name when arriving via BYOC)
 
 ---
 
 ## Scope
 
-### Batch 1: React.lazy code splitting + QueryClient config
-- Wrap all page imports in App.tsx with React.lazy()
-- Add Suspense boundaries with loading fallbacks
-- Configure QueryClient with staleTime: 60_000 (1 min default), gcTime: 300_000 (5 min)
-- Group imports by role (customer, provider, admin) for natural chunk boundaries
+### Batch 1: BYOC link creation + SMS scripts
+- In ByocCreateLink.tsx: Replace "No enabled categories found" with a helpful message and CTA linking to capability setup (/provider/onboarding/capabilities or /provider/coverage)
+- Create a migration to seed 3 invite scripts in the `invite_scripts` table (casual, professional, brief tones)
 
-### Batch 2: pg_cron documentation
-- Update DEPLOYMENT.md with pg_cron SQL examples for all 11 scheduled functions
-- Document that service role key must be used in Authorization header
+### Batch 2: Provider empty state CTAs
+- Jobs.tsx: Add "Set up your work profile" or "Invite your first customer" CTA in empty state
+- History.tsx: Add "View upcoming jobs" link in empty state
+- Organization.tsx: Add "Complete Onboarding" button linking to /provider/onboarding
+
+### Batch 3: BYOC Center pre-approval + Auth page invite context
+- ByocCenter.tsx: Improve pre-approval gate with progress indicator, estimated timeline, and "Check Application Status" link
+- AuthPage.tsx: When arriving via BYOC invite redirect (?redirect=/byoc/activate/TOKEN), show provider context ("You were invited by [Provider Name]")
 
 ---
 
 ## Acceptance Criteria
-- [ ] All page imports use React.lazy()
-- [ ] Suspense boundary wraps the Routes with a loading fallback
-- [ ] QueryClient has staleTime and gcTime configured
-- [ ] npm run build passes with reduced chunk warnings
+- [ ] ByocCreateLink shows helpful CTA when no categories enabled (not just an error message)
+- [ ] 3 SMS invite scripts are seeded and visible on BYOC Center
+- [ ] Jobs, History, Organization empty states each have a forward-action CTA
+- [ ] BYOC Center pre-approval gate shows progress and next steps
+- [ ] npm run build passes
 - [ ] npx tsc --noEmit passes
-- [ ] DEPLOYMENT.md has pg_cron configuration examples

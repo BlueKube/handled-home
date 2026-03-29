@@ -110,7 +110,16 @@ export default function ByocCreateLink() {
             ))}
           </div>
           {enabledCategories.length === 0 && (
-            <p className="text-sm text-muted-foreground">No enabled categories found.</p>
+            <div className="text-center py-4">
+              <p className="text-sm text-muted-foreground mb-3">You need at least one enabled service category to create invite links.</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/provider/onboarding/capabilities")}
+              >
+                Set Up Service Categories
+              </Button>
+            </div>
           )}
         </CardContent>
       </Card>

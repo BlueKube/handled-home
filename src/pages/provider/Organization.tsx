@@ -307,11 +307,18 @@ export default function ProviderOrganization() {
       <div className="animate-fade-in p-4 pb-24">
         <h1 className="text-h2">Organization</h1>
         <Card className="p-6 mt-4">
-          <div className="text-center space-y-2">
+          <div className="text-center space-y-3">
             <Building2 className="h-10 w-10 text-muted-foreground/40 mx-auto" />
-            <p className="text-sm text-muted-foreground">
-              No organization found. Complete provider onboarding to set up your organization.
+            <p className="text-body font-medium">Set up your organization</p>
+            <p className="text-sm text-muted-foreground max-w-[280px] mx-auto">
+              Your organization is your business profile on Handled Home. Customers see your business name when you service their home.
             </p>
+            <Button
+              className="w-full max-w-[240px]"
+              onClick={() => navigate("/provider/onboarding")}
+            >
+              Complete Onboarding
+            </Button>
           </div>
         </Card>
       </div>
