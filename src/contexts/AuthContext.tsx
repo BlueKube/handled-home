@@ -73,10 +73,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (userRoles.length === 0 && !bootstrapAttempted.current) {
         bootstrapAttempted.current = true;
         const displayName = profileResult.data?.full_name || userEmail || "User";
-        const intendedRole = (userMeta?.intended_role as string) ?? "customer";
+        // Always bootstrap as customer — provider role requires admin approval
         await supabase.rpc("bootstrap_new_user", {
           _full_name: displayName,
-          _role: intendedRole,
+          _role: "customer",
         });
 
         // Re-fetch after bootstrap
