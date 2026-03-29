@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X, Smartphone } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Capacitor } from "@capacitor/core";
 
 const DISMISS_KEY = "smart_app_banner_dismissed_at";
 const DISMISS_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
@@ -15,6 +16,8 @@ export function SmartAppBanner() {
   const isMobile = useIsMobile();
   const [dismissed, setDismissed] = useState(isDismissed);
 
+  // Don't show on native apps (Capacitor) — user already has the app
+  if (Capacitor.isNativePlatform()) return null;
   if (!isMobile || dismissed) return null;
 
   const handleDismiss = () => {
