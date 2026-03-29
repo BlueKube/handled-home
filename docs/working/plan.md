@@ -11,8 +11,9 @@
 - **Last completed:** PRD-003 (all 3 batches — BYOC Flow End-to-End Fix)
 - **Next up:** PRD-006 — Customer Dashboard & Subscription UX
 - **Note:** PRD-004 (Photo Timeline) and PRD-005 (Activity Screen) were found to be already properly implemented during investigation. The audit findings were based on empty-data screenshots, not code deficiencies. Both have proper empty states, loading skeletons, stats pills, value cards, and tap-to-expand interactions. [OVERRIDE: skipped PRD-004 and PRD-005 — implementation already matches spec; audit findings were data-state artifacts, not code issues]
-- **Context at exit:** ~55-60% (heavy session: 2 audits + 1 full PRD implementation)
-- **Blockers:** Human must set CRON_SECRET as Supabase Edge Function secret (see TODO.md)
+- **Context at exit:** 40% — user paused to handle Lovable/Supabase TODO items
+- **Blockers:** Human setting CRON_SECRET + pg_cron config in Supabase (see TODO.md + DEPLOYMENT.md)
+- **Retroactive review:** Complete — all MUST-FIX and SHOULD-FIX findings from 5-lane review resolved
 - **PRD queue:** 11 PRDs remaining in docs/upcoming/FULL-IMPLEMENTATION-PLAN.md
 - **Deferred from PRD-001:** Seed data extraction from migration 20260322 (complex, risk of breaking db push)
 - **Strategic note from user:** Do NOT remove features for MVP. Fix and harden existing features rather than cutting scope. AI coding velocity makes feature completeness feasible. Focus on making everything work end-to-end and adding intelligence to reduce human ops burden.
