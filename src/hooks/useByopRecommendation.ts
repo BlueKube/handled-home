@@ -81,7 +81,7 @@ export function useByopRecommendations(options?: { admin?: boolean }) {
       const { error } = await (supabase
         .from("byop_recommendations" as any)
         .update({ status: "provider_unavailable", reviewed_at: new Date().toISOString() })
-        .eq("id", id);
+        .eq("id", id)) as any;
       if (error) throw error;
     },
     onSuccess: () => {
