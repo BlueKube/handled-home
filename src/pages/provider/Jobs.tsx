@@ -120,6 +120,7 @@ function JobCard({ job, index, total, onMoveUp, onMoveDown, showReorder, isSelec
 }
 
 function TodayJobList() {
+  const navigate = useNavigate();
   const { data: jobs, isLoading } = useProviderJobs("today");
   const { org } = useProviderOrg();
   const { isLocked } = useProviderRoutePlan();
@@ -269,6 +270,7 @@ function TodayJobList() {
 }
 
 function UpcomingJobList() {
+  const navigate = useNavigate();
   const { data: jobs, isLoading } = useProviderJobs("upcoming");
 
   if (isLoading) {

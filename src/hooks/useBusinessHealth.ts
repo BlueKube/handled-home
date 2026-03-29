@@ -87,11 +87,11 @@ export function useBusinessHealth() {
 
       let totalActiveSKUs = 0;
       if (activeSubIds.length > 0) {
-        const { count } = await supabase
-          .from("subscription_items")
+        const { count } = await (supabase
+          .from("subscription_items" as any)
           .select("id", { count: "exact", head: true })
           .in("subscription_id", activeSubIds)
-          .eq("status", "active" as any);
+          .eq("status", "active") as any);
         totalActiveSKUs = count ?? 0;
       }
       const attachRate = activeHouseholds > 0

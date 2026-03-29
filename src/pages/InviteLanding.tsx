@@ -21,7 +21,7 @@ export default function InviteLanding() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("referral_codes")
-        .select("code, is_active")
+        .select("code, program_id")
         .eq("code", code!)
         .maybeSingle();
       if (error) throw error;
@@ -91,7 +91,7 @@ export default function InviteLanding() {
   }
 
   // Invalid or inactive code
-  if (!referral || !referral.is_active) {
+  if (!referral) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-background animate-fade-in">
         <div className="max-w-md w-full text-center space-y-4">
