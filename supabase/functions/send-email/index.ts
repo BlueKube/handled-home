@@ -1,23 +1,29 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+import { requireServiceRole } from "../_shared/auth.ts";
+import { noCorsHeaders } from "../_shared/cors.ts";
 
 /**
  * send-email edge function — transactional email delivery via Resend.
  *
- * Expects to be called internally by process-notification-events.
+ * Restricted to service-role callers only (called internally by process-notification-events).
  * Reads RESEND_API_KEY from secrets; if not configured, logs and marks
  * deliveries as SKIPPED (infrastructure-only mode).
  *
  * Body: { deliveries: Array<{ delivery_id, to_email, subject, html_body }> }
  */
 Deno.serve(async (req: Request) => {
+  // Server-to-server only — no CORS preflight
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { status: 405 });
+  }
+
+  try {
+    requireServiceRole(req);
+  } catch (e: any) {
+    return new Response(JSON.stringify({ error: e.message }), {
+      status: 401,
+      headers: noCorsHeaders,
+    });
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -32,7 +38,7 @@ Deno.serve(async (req: Request) => {
     if (!deliveries || !Array.isArray(deliveries) || deliveries.length === 0) {
       return new Response(
         JSON.stringify({ error: "No deliveries provided" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 400, headers: noCorsHeaders }
       );
     }
 
@@ -58,7 +64,7 @@ Deno.serve(async (req: Request) => {
           suppressed: deliveries.length,
           reason: "RESEND_API_KEY not configured",
         }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { headers: noCorsHeaders }
       );
     }
 
@@ -124,14 +130,14 @@ Deno.serve(async (req: Request) => {
 
     return new Response(
       JSON.stringify({ sent: sentCount, failed: failedCount }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { headers: noCorsHeaders }
     );
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err);
     console.error("[send-email] Fatal error:", errMsg);
     return new Response(
       JSON.stringify({ error: errMsg }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 500, headers: noCorsHeaders }
     );
   }
 });
