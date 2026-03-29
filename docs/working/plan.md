@@ -8,8 +8,8 @@
 
 ## Session Handoff
 - **Branch:** claude/add-documentation-workflow-OppGZ
-- **Last completed:** PRD-001 (all 5 batches — Edge Function Security Hardening)
-- **Next up:** PRD-002 — Frontend Performance & Observability (React.lazy, QueryClient, cron alerting, pg_cron)
+- **Last completed:** PRD-002 (all 2 batches — Frontend Performance & Observability)
+- **Next up:** PRD-003 — BYOC Flow End-to-End Fix
 - **Context at exit:** ~55-60% (heavy session: 2 audits + 1 full PRD implementation)
 - **Blockers:** Human must set CRON_SECRET as Supabase Edge Function secret (see TODO.md)
 - **PRD queue:** 11 PRDs remaining in docs/upcoming/FULL-IMPLEMENTATION-PLAN.md
