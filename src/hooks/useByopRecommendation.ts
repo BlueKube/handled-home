@@ -63,7 +63,7 @@ export function useByopRecommendations(options?: { admin?: boolean }) {
           status: "received",
         } as any)
         .select()
-        .single();
+        .single()) as any;
       if (error) throw error;
       return data as ByopRecommendation;
     },
