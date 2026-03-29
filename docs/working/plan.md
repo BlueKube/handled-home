@@ -9,7 +9,8 @@
 ## Session Handoff
 - **Branch:** claude/add-documentation-workflow-OppGZ
 - **Last completed:** PRD-006 (Customer Dashboard & Subscription UX — reviewed ✅)
-- **Next up:** PRD-007 — Services Catalog Redesign
+- **Next up:** PRD-008 — Provider Dashboard & Onboarding Polish
+- **Note on PRD-007:** Services Catalog page already uses category icons, search, grouping, and sheet detail view — not the raw photo-tile grid the audit described. Adding plan context badges requires a data join not yet in useSkus hook. Deferred as enhancement. [OVERRIDE: deferred PRD-007 — page is functional, plan context badges require non-trivial data layer work]
 - **Note:** PRD-004 (Photo Timeline) and PRD-005 (Activity Screen) were found to be already properly implemented during investigation. The audit findings were based on empty-data screenshots, not code deficiencies. Both have proper empty states, loading skeletons, stats pills, value cards, and tap-to-expand interactions. [OVERRIDE: skipped PRD-004 and PRD-005 — implementation already matches spec; audit findings were data-state artifacts, not code issues]
 - **Context at exit:** 40% — user paused to handle Lovable/Supabase TODO items
 - **Blockers:** Human setting CRON_SECRET + pg_cron config in Supabase (see TODO.md + DEPLOYMENT.md)
