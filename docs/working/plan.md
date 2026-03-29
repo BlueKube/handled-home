@@ -8,8 +8,8 @@
 
 ## Session Handoff
 - **Branch:** claude/add-documentation-workflow-OppGZ
-- **Last completed:** PRD-003 (all 3 batches — BYOC Flow End-to-End Fix)
-- **Next up:** PRD-006 — Customer Dashboard & Subscription UX
+- **Last completed:** PRD-006 (Customer Dashboard & Subscription UX — reviewed ✅)
+- **Next up:** PRD-007 — Services Catalog Redesign
 - **Note:** PRD-004 (Photo Timeline) and PRD-005 (Activity Screen) were found to be already properly implemented during investigation. The audit findings were based on empty-data screenshots, not code deficiencies. Both have proper empty states, loading skeletons, stats pills, value cards, and tap-to-expand interactions. [OVERRIDE: skipped PRD-004 and PRD-005 — implementation already matches spec; audit findings were data-state artifacts, not code issues]
 - **Context at exit:** 40% — user paused to handle Lovable/Supabase TODO items
 - **Blockers:** Human setting CRON_SECRET + pg_cron config in Supabase (see TODO.md + DEPLOYMENT.md)
