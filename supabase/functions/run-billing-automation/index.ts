@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { requireAdminOrCron } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,32 +18,7 @@ serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-      { auth: { persistSession: false } }
-    );
-
-    // This function is called by pg_cron — authenticate via service role
-    // or via admin bearer token
-    const authHeader = req.headers.get("Authorization");
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
-    
-    // If called with anon key (cron), use service role directly
-    // If called with user token, verify admin
-    if (authHeader && !authHeader.includes(anonKey || "")) {
-      const token = authHeader.replace("Bearer ", "");
-      const { data: userData, error: userError } = await supabase.auth.getUser(token);
-      if (userError || !userData.user) throw new Error("Unauthorized");
-
-      const { data: adminRole } = await supabase
-        .from("user_roles")
-        .select("id")
-        .eq("user_id", userData.user.id)
-        .eq("role", "admin")
-        .single();
-      if (!adminRole) throw new Error("Admin access required");
-    }
+    const { supabase } = await requireAdminOrCron(req);
 
     const results: Record<string, any> = {};
 

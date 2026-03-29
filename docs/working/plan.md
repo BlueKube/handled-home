@@ -24,11 +24,11 @@ All batches are in a single phase — this is a security hardening pass, not a f
 
 | Batch | Title | Size | Status | Context |
 |-------|-------|------|--------|---------|
-| B1 | Create shared `_shared/` utilities (auth, CORS, deps) | S | ⬜ | |
-| B2 | Fix Stripe webhook signature bypass | S | ⬜ | |
+| B1 | Create shared `_shared/` utilities (auth, CORS, deps) | S | ✅ | |
+| B2 | Fix Stripe webhook signature bypass | S | ✅ | |
 | B3 | Add CRON_SECRET to 19 unauthed scheduled functions | L | ⬜ | |
-| B4 | Restrict send-email + fix remaining auth issues | S | ⬜ | |
-| B5 | Fix BYOC enumeration + auth bootstrap + seed data | M | ⬜ | |
+| B4 | Restrict send-email + fix remaining auth issues | S | ✅ | |
+| B5 | Fix BYOC enumeration + auth bootstrap + seed data | M | ✅ (seed extraction deferred) | |
 
 ### Dependencies
 - B2, B3, B4 all depend on B1 (they import from `_shared/`)
