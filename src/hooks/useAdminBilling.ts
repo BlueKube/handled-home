@@ -56,7 +56,7 @@ export function useAdminBilling() {
     payouts: payoutsQuery.data ?? [],
     paidToday,
     failedCount,
-    isLoading: exceptionsQuery.isLoading,
+    isLoading: exceptionsQuery.isLoading || invoicesQuery.isLoading || payoutsQuery.isLoading,
     isError: exceptionsQuery.isError || invoicesQuery.isError || payoutsQuery.isError,
     refetch: () => {
       exceptionsQuery.refetch();

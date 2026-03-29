@@ -45,7 +45,7 @@ export default function AdminExceptions() {
         </p>
       ) : (
         <div className="space-y-2">
-          {exceptions.map((ex) => (
+          {filtered.map((ex) => (
             <Card key={ex.id} className="cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setSelectedExId(selectedExId === ex.id ? null : ex.id)}>
               <CardContent className="p-4 space-y-2">
                 <div className="flex items-center gap-2">
