@@ -60,8 +60,6 @@ Deno.serve(async (req: Request) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  requireCronSecret(req);
-
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, serviceKey);
@@ -98,6 +96,8 @@ Deno.serve(async (req: Request) => {
   let errorCount = 0;
 
   try {
+    requireCronSecret(req);
+
     // 1. Claim PENDING events scheduled for now or earlier
     const { data: events, error: claimErr } = await supabase.rpc(
       "claim_notification_events",

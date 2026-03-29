@@ -165,8 +165,6 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  requireCronSecret(req);
-
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, serviceKey);
@@ -222,6 +220,8 @@ Deno.serve(async (req) => {
   const runId = assignmentRun.id;
 
   try {
+    requireCronSecret(req);
+
     // ── Step 1: Load config dials ──
     const { data: configRows } = await supabase
       .from("assignment_config")

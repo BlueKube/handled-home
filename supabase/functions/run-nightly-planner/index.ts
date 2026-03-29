@@ -134,8 +134,6 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  requireCronSecret(req);
-
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, serviceKey);
@@ -201,6 +199,8 @@ Deno.serve(async (req) => {
   const runStartedAt = new Date().toISOString();
 
   try {
+    requireCronSecret(req);
+
     // ── STEP A: Gather Inputs ──
     const lockedEnd = addDays(today, 6); // T0+0 through T0+6 = LOCKED
     const draftEnd = addDays(today, 13); // T0+13

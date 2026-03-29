@@ -158,8 +158,6 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  requireCronSecret(req);
-
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const sb = createClient(supabaseUrl, serviceKey);
@@ -197,6 +195,8 @@ Deno.serve(async (req) => {
   const runId = runLog?.id;
 
   try {
+    requireCronSecret(req);
+
     // ── Load thresholds ──
     const { data: thresholdRows } = await sb
       .from("zone_state_threshold_configs")

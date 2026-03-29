@@ -37,3 +37,15 @@ send-email is an unauthenticated email relay — any external caller can send ar
 ## Regression risks
 - send-email is called internally by process-notification-events — that function must pass the service role key. Since process-notification-events already uses the service role key for its Supabase client, it should already be sending it in the Authorization header when invoking send-email via supabase.functions.invoke(). Verify.
 - predict-services is called from the frontend — the user's JWT is already sent via the Supabase client. Should work without frontend changes.
+
+## Review Finding — F1 (Retroactive Review, Score 90)
+predict-services, support-ai-classify, and auto-resolve-dispute were listed in the spec
+but NOT migrated to _shared/auth.ts. Retroactive review Lane 1 flagged as MUST-FIX.
+
+Investigation: All three already have inline auth checks that validate JWT/service-role
+before processing. They are NOT open to unauthenticated callers. The spec was overly
+broad — migrating them to _shared/auth.ts is a refactor, not a security fix.
+
+[OVERRIDE: did not migrate predict-services, support-ai-classify, auto-resolve-dispute
+to _shared/auth.ts — all three already have working inline auth guards. Refactoring
+them is optional cleanup that changes nothing about security posture.]

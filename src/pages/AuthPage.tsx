@@ -23,7 +23,11 @@ export default function AuthPage() {
   const [searchParams] = useSearchParams();
   const refCode = searchParams.get("ref");
   const shareCode = searchParams.get("share");
-  const redirectTo = searchParams.get("redirect");
+  const rawRedirect = searchParams.get("redirect");
+  // Validate redirect is a relative path to prevent open redirect attacks
+  const redirectTo = rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+    ? rawRedirect
+    : null;
   const { toast } = useToast();
   const { recordEvent } = useGrowthEvents();
 

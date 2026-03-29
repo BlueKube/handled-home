@@ -1,6 +1,16 @@
 -- Seed SMS invite scripts for the BYOC Founding Partner Program
 -- These appear on the provider's BYOC Center for copy-paste into SMS/messaging
 
+-- Use tone + sort_order as conflict target to prevent duplicates on re-run
+-- (invite_scripts has no unique constraint on tone, so we add one first)
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'invite_scripts_tone_key'
+  ) THEN
+    ALTER TABLE public.invite_scripts ADD CONSTRAINT invite_scripts_tone_key UNIQUE (tone);
+  END IF;
+END $$;
+
 INSERT INTO public.invite_scripts (tone, body, sort_order, is_active) VALUES
 (
   'Casual',
@@ -20,4 +30,4 @@ INSERT INTO public.invite_scripts (tone, body, sort_order, is_active) VALUES
   3,
   true
 )
-ON CONFLICT DO NOTHING;
+ON CONFLICT (tone) DO NOTHING;
