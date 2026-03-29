@@ -43,25 +43,53 @@ export default function ByocCenter() {
 
   // Gate: must be approved provider org
   if (!org || (org.status !== "ACTIVE" && org.status !== "PROBATION")) {
+    const isPending = org?.status === "PENDING" || org?.status === "UNDER_REVIEW";
     return (
       <div className="animate-fade-in p-4 pb-24">
         <button onClick={() => navigate("/provider/more")} className="flex items-center gap-1 text-muted-foreground mb-2 hover:text-foreground transition-colors" aria-label="Back to More menu">
           <ChevronLeft className="h-4 w-4" />
           <span className="text-sm">More</span>
         </button>
-        <div className="text-center mt-8">
-        <Gift className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-        <h1 className="text-h2 mb-2">BYOC Center</h1>
-        <p className="text-caption">
-          You need an approved provider account to access the BYOC Center.
-        </p>
-        <Button
-          variant="outline"
-          className="mt-4"
-          onClick={() => navigate("/provider")}
-        >
-          Back to Dashboard
-        </Button>
+        <div className="text-center mt-8 space-y-4">
+          <Gift className="h-12 w-12 text-accent mx-auto" />
+          <h1 className="text-h2">BYOC Center</h1>
+          {isPending ? (
+            <>
+              <p className="text-body text-muted-foreground max-w-[300px] mx-auto">
+                Your application is being reviewed. Once approved, you'll be able to create invite links and bring your existing customers onto Handled Home.
+              </p>
+              <p className="text-caption text-muted-foreground">
+                Most applications are reviewed within 1-2 business days.
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => navigate("/provider/apply")}
+              >
+                Check Application Status
+              </Button>
+            </>
+          ) : !org ? (
+            <>
+              <p className="text-body text-muted-foreground max-w-[300px] mx-auto">
+                Complete your provider onboarding to unlock the BYOC Center and start inviting your existing customers.
+              </p>
+              <Button onClick={() => navigate("/provider/onboarding")}>
+                Start Onboarding
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="text-body text-muted-foreground max-w-[300px] mx-auto">
+                Your provider account needs to be in good standing to access the BYOC Center.
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => navigate("/provider")}
+              >
+                Back to Dashboard
+              </Button>
+            </>
+          )}
         </div>
       </div>
     );

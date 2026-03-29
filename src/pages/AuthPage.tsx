@@ -27,10 +27,12 @@ export default function AuthPage() {
   const { toast } = useToast();
   const { recordEvent } = useGrowthEvents();
 
-  // If arriving with a ref or redirect code, default to signup tab
+  const isByocInvite = redirectTo?.includes("/byoc/activate/");
+
+  // If arriving with a ref, redirect, or BYOC invite, default to signup tab
   useEffect(() => {
-    if (refCode) setTab("signup");
-  }, [refCode]);
+    if (refCode || isByocInvite) setTab("signup");
+  }, [refCode, isByocInvite]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,6 +120,14 @@ export default function AuthPage() {
           <span style={{ color: 'hsl(200 80% 50%)' }}>handled.</span>
         </h1>
       </div>
+
+      {/* BYOC invite context banner */}
+      {isByocInvite && (
+        <div className="mx-auto w-full max-w-xs mb-4 rounded-xl bg-accent/10 border border-accent/20 px-4 py-3 text-center">
+          <p className="text-sm font-medium text-foreground">You've been invited by your service provider</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Create an account to activate your invite</p>
+        </div>
+      )}
 
       {/* Tab switcher */}
       <Tabs value={tab} onValueChange={(v) => setTab(v as "login" | "signup")} className="mb-8 mx-auto w-full max-w-xs">
