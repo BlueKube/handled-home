@@ -33,11 +33,14 @@ export function useAdminBilling() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("provider_payouts")
-        .select("*")
+        .select("*, provider_orgs:provider_org_id(name)")
         .order("created_at", { ascending: false })
         .limit(50);
       if (error) throw error;
-      return data;
+      return (data ?? []).map((p: any) => ({
+        ...p,
+        provider_name: p.provider_orgs?.name ?? null,
+      }));
     },
   });
 

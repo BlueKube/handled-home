@@ -1,48 +1,47 @@
-# PRD-003: BYOC Flow End-to-End Fix
+# PRD-009: Admin Data Display & Navigation Fixes
 
 > **Execution mode:** Quality
-> **Priority:** P1 — Primary growth engine
-> **Source:** gstack Growth Audit + UI/UX Audit (2026-03-29)
+> **Priority:** P2 — Operational readiness
+> **Source:** gstack Eng Review + UI/UX Audit (2026-03-29)
 
 ---
 
 ## Problem Statement
 
-The BYOC loop is the company's primary growth engine but has execution breaks at critical moments: "No enabled categories found" when creating invite links (data state, not bug — needs better UX), empty SMS scripts, provider empty states with no forward CTAs, and a BYOC Center pre-approval gate that's a dead end.
+The Admin Payouts screen shows dollar amounts without provider names — operationally useless for reconciliation. The Exceptions screen lacks entity names and filters. The Reporting page is not in the sidebar nav.
 
 ---
 
 ## Goals
 
-1. Fix BYOC link creation UX when categories are empty (link to capability setup)
-2. Seed SMS invite scripts in the database
-3. Add forward-action CTAs to provider empty states (Jobs, History, Organization)
-4. Improve BYOC Center pre-approval waiting state
-5. Improve auth page with invite context (show provider name when arriving via BYOC)
+1. Add provider names to Payouts screen rows
+2. Add entity names and filters to Exceptions screen
+3. Add Reporting to sidebar navigation
+
+---
+
+## Non-Goals
+
+- Redesigning admin page layouts
+- Adding new admin features
+- Changing Cron Health layout (deferred)
 
 ---
 
 ## Scope
 
-### Batch 1: BYOC link creation + SMS scripts
-- In ByocCreateLink.tsx: Replace "No enabled categories found" with a helpful message and CTA linking to capability setup (/provider/onboarding/capabilities or /provider/coverage)
-- Create a migration to seed 3 invite scripts in the `invite_scripts` table (casual, professional, brief tones)
-
-### Batch 2: Provider empty state CTAs
-- Jobs.tsx: Add "Set up your work profile" or "Invite your first customer" CTA in empty state
-- History.tsx: Add "View upcoming jobs" link in empty state
-- Organization.tsx: Add "Complete Onboarding" button linking to /provider/onboarding
-
-### Batch 3: BYOC Center pre-approval + Auth page invite context
-- ByocCenter.tsx: Improve pre-approval gate with progress indicator, estimated timeline, and "Check Application Status" link
-- AuthPage.tsx: When arriving via BYOC invite redirect (?redirect=/byoc/activate/TOKEN), show provider context ("You were invited by [Provider Name]")
+### Batch 1: Payouts provider identity + Exceptions enrichment + Reporting nav
+- Payouts: Enrich each payout row with provider org name (join provider_payouts → provider_orgs)
+- Exceptions: Enrich with customer/provider name where available, add type filter tabs
+- AdminShell: Add Reporting to sidebar nav under a suitable group
+- Remove party emoji from Exceptions empty state
 
 ---
 
 ## Acceptance Criteria
-- [ ] ByocCreateLink shows helpful CTA when no categories enabled (not just an error message)
-- [ ] 3 SMS invite scripts are seeded and visible on BYOC Center
-- [ ] Jobs, History, Organization empty states each have a forward-action CTA
-- [ ] BYOC Center pre-approval gate shows progress and next steps
+- [ ] Payouts rows show provider org name
+- [ ] Exceptions rows show related entity name (customer or provider)
+- [ ] Exceptions has filter tabs by type or severity
+- [ ] Reporting is in the admin sidebar nav
 - [ ] npm run build passes
 - [ ] npx tsc --noEmit passes

@@ -106,6 +106,7 @@ const navGroups: NavGroup[] = [
     items: [
       { title: "Incentives", url: "/admin/incentives", icon: Megaphone },
       { title: "Growth", url: "/admin/growth", icon: TrendingUp },
+      { title: "Reports", url: "/admin/reports", icon: BarChart3 },
     ],
   },
   {

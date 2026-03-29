@@ -69,7 +69,9 @@ export default function AdminPayoutsPage() {
                    onClick={() => setSelectedPayoutId(selectedPayoutId === p.id ? null : p.id)}>
                 <div>
                   <p className="text-sm font-medium">{formatCents(p.total_cents)}</p>
-                  <p className="text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {(p as any).provider_name ?? "Unknown provider"} · {new Date(p.created_at).toLocaleDateString()}
+                  </p>
                 </div>
                 <Badge variant={p.status === "PAID" ? "default" : p.status === "FAILED" ? "destructive" : "secondary"} className="text-[10px]">
                   {p.status}
