@@ -242,7 +242,55 @@ Several Edge Functions are designed to run on a schedule. Configure via Supabase
 
 To enable pg_cron:
 1. Enable the `pg_cron` extension in Supabase Dashboard > Database > Extensions
-2. Schedule each function via SQL (see Supabase docs for `cron.schedule` + `net.http_post` pattern)
+2. Enable the `pg_net` extension (required for HTTP calls from pg_cron)
+3. Schedule each function via SQL Editor. All scheduled functions now require the service role key in the Authorization header:
+
+```sql
+-- Example: run-nightly-planner at 2am UTC daily
+SELECT cron.schedule(
+  'nightly-planner',
+  '0 2 * * *',
+  $$
+  SELECT net.http_post(
+    url := 'https://YOUR_PROJECT.supabase.co/functions/v1/run-nightly-planner',
+    headers := '{"Authorization": "Bearer YOUR_SERVICE_ROLE_KEY", "Content-Type": "application/json"}'::jsonb,
+    body := '{}'::jsonb
+  )
+  $$
+);
+
+-- run-scheduled-jobs every 15 min
+SELECT cron.schedule('scheduled-jobs', '*/15 * * * *', $$ SELECT net.http_post(url := 'https://YOUR_PROJECT.supabase.co/functions/v1/run-scheduled-jobs', headers := '{"Authorization": "Bearer YOUR_SERVICE_ROLE_KEY", "Content-Type": "application/json"}'::jsonb, body := '{}'::jsonb) $$);
+
+-- send-reminders daily at 7am
+SELECT cron.schedule('send-reminders', '0 7 * * *', $$ SELECT net.http_post(url := 'https://YOUR_PROJECT.supabase.co/functions/v1/send-reminders', headers := '{"Authorization": "Bearer YOUR_SERVICE_ROLE_KEY", "Content-Type": "application/json"}'::jsonb, body := '{}'::jsonb) $$);
+
+-- run-billing-automation daily at 3am
+SELECT cron.schedule('billing-automation', '0 3 * * *', $$ SELECT net.http_post(url := 'https://YOUR_PROJECT.supabase.co/functions/v1/run-billing-automation', headers := '{"Authorization": "Bearer YOUR_SERVICE_ROLE_KEY", "Content-Type": "application/json"}'::jsonb, body := '{}'::jsonb) $$);
+
+-- run-dunning daily at 4am
+SELECT cron.schedule('dunning', '0 4 * * *', $$ SELECT net.http_post(url := 'https://YOUR_PROJECT.supabase.co/functions/v1/run-dunning', headers := '{"Authorization": "Bearer YOUR_SERVICE_ROLE_KEY", "Content-Type": "application/json"}'::jsonb, body := '{}'::jsonb) $$);
+
+-- check-weather daily at 5am
+SELECT cron.schedule('check-weather', '0 5 * * *', $$ SELECT net.http_post(url := 'https://YOUR_PROJECT.supabase.co/functions/v1/check-weather', headers := '{"Authorization": "Bearer YOUR_SERVICE_ROLE_KEY", "Content-Type": "application/json"}'::jsonb, body := '{}'::jsonb) $$);
+
+-- snapshot-rollup daily at 1am
+SELECT cron.schedule('snapshot-rollup', '0 1 * * *', $$ SELECT net.http_post(url := 'https://YOUR_PROJECT.supabase.co/functions/v1/snapshot-rollup', headers := '{"Authorization": "Bearer YOUR_SERVICE_ROLE_KEY", "Content-Type": "application/json"}'::jsonb, body := '{}'::jsonb) $$);
+
+-- compute-quality-scores daily at midnight
+SELECT cron.schedule('quality-scores', '0 0 * * *', $$ SELECT net.http_post(url := 'https://YOUR_PROJECT.supabase.co/functions/v1/compute-quality-scores', headers := '{"Authorization": "Bearer YOUR_SERVICE_ROLE_KEY", "Content-Type": "application/json"}'::jsonb, body := '{}'::jsonb) $$);
+
+-- cleanup-expired-offers hourly
+SELECT cron.schedule('cleanup-offers', '0 * * * *', $$ SELECT net.http_post(url := 'https://YOUR_PROJECT.supabase.co/functions/v1/cleanup-expired-offers', headers := '{"Authorization": "Bearer YOUR_SERVICE_ROLE_KEY", "Content-Type": "application/json"}'::jsonb, body := '{}'::jsonb) $$);
+
+-- check-no-shows every 30 min
+SELECT cron.schedule('check-no-shows', '*/30 * * * *', $$ SELECT net.http_post(url := 'https://YOUR_PROJECT.supabase.co/functions/v1/check-no-shows', headers := '{"Authorization": "Bearer YOUR_SERVICE_ROLE_KEY", "Content-Type": "application/json"}'::jsonb, body := '{}'::jsonb) $$);
+
+-- process-payout weekly Monday 6am
+SELECT cron.schedule('weekly-payout', '0 6 * * 1', $$ SELECT net.http_post(url := 'https://YOUR_PROJECT.supabase.co/functions/v1/process-payout', headers := '{"Authorization": "Bearer YOUR_SERVICE_ROLE_KEY", "Content-Type": "application/json"}'::jsonb, body := '{}'::jsonb) $$);
+```
+
+**Important:** Replace `YOUR_PROJECT` and `YOUR_SERVICE_ROLE_KEY` with your actual values. The service role key is required — all scheduled functions now validate the Authorization header (PRD-001 security hardening).
 
 ---
 
