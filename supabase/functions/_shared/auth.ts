@@ -1,11 +1,12 @@
 /**
  * Shared authentication utilities for Edge Functions.
  *
- * Four auth modes:
+ * Five auth modes:
  * - requireServiceRole  — for internal service-to-service calls (e.g. send-email)
  * - requireCronSecret   — for scheduled/cron functions (accepts service role key OR CRON_SECRET)
  * - requireUserJwt      — for user-facing endpoints (validates JWT, returns user)
  * - requireAdminJwt     — for admin-only endpoints (validates JWT + admin role)
+ * - requireAdminOrCron  — for dual-mode endpoints (admin JWT OR service role/cron secret)
  */
 
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -16,12 +17,31 @@ function extractToken(req: Request): string | null {
   return token || null;
 }
 
+function requireEnv(name: string): string {
+  const value = Deno.env.get(name);
+  if (!value) {
+    throw new Error(`${name} not configured`);
+  }
+  return value;
+}
+
 function createServiceClient(): SupabaseClient {
-  return createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    { auth: { persistSession: false } },
-  );
+  const url = requireEnv("SUPABASE_URL");
+  const key = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
+  return createClient(url, key, { auth: { persistSession: false } });
+}
+
+async function assertAdminRole(userId: string, supabase: SupabaseClient): Promise<void> {
+  const { data: adminRole } = await supabase
+    .from("user_roles")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .single();
+
+  if (!adminRole) {
+    throw new Error("Admin access required");
+  }
 }
 
 /**
@@ -31,11 +51,8 @@ function createServiceClient(): SupabaseClient {
  */
 export function requireServiceRole(req: Request): void {
   const token = extractToken(req);
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const serviceRoleKey = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
 
-  if (!serviceRoleKey) {
-    throw new Error("SUPABASE_SERVICE_ROLE_KEY not configured");
-  }
   if (token !== serviceRoleKey) {
     throw new Error("Service role key required");
   }
@@ -51,12 +68,8 @@ export function requireServiceRole(req: Request): void {
  */
 export function requireCronSecret(req: Request): void {
   const token = extractToken(req);
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const serviceRoleKey = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
   const cronSecret = Deno.env.get("CRON_SECRET");
-
-  if (!serviceRoleKey) {
-    throw new Error("SUPABASE_SERVICE_ROLE_KEY not configured");
-  }
 
   const isAuthorized =
     token === serviceRoleKey ||
@@ -107,7 +120,7 @@ export async function requireAdminOrCron(
     throw new Error("Authorization header required");
   }
 
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const serviceRoleKey = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
   const cronSecret = Deno.env.get("CRON_SECRET");
   const supabase = createServiceClient();
 
@@ -125,16 +138,7 @@ export async function requireAdminOrCron(
     throw new Error("Invalid or expired token");
   }
 
-  const { data: adminRole } = await supabase
-    .from("user_roles")
-    .select("id")
-    .eq("user_id", data.user.id)
-    .eq("role", "admin")
-    .single();
-
-  if (!adminRole) {
-    throw new Error("Admin access required");
-  }
+  await assertAdminRole(data.user.id, supabase);
 
   return { user: { id: data.user.id, email: data.user.email }, supabase };
 }
@@ -159,16 +163,7 @@ export async function requireAdminJwt(
     throw new Error("Invalid or expired token");
   }
 
-  const { data: adminRole } = await supabase
-    .from("user_roles")
-    .select("id")
-    .eq("user_id", data.user.id)
-    .eq("role", "admin")
-    .single();
-
-  if (!adminRole) {
-    throw new Error("Admin access required");
-  }
+  await assertAdminRole(data.user.id, supabase);
 
   return { user: { id: data.user.id, email: data.user.email }, supabase };
 }
