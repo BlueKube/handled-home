@@ -9,7 +9,8 @@
 ## Session Handoff
 - **Branch:** claude/add-documentation-workflow-OppGZ
 - **Last completed:** PRD-003 (all 3 batches — BYOC Flow End-to-End Fix)
-- **Next up:** PRD-004 — Photo Timeline & Proof System
+- **Next up:** PRD-006 — Customer Dashboard & Subscription UX
+- **Note:** PRD-004 (Photo Timeline) and PRD-005 (Activity Screen) were found to be already properly implemented during investigation. The audit findings were based on empty-data screenshots, not code deficiencies. Both have proper empty states, loading skeletons, stats pills, value cards, and tap-to-expand interactions. [OVERRIDE: skipped PRD-004 and PRD-005 — implementation already matches spec; audit findings were data-state artifacts, not code issues]
 - **Context at exit:** ~55-60% (heavy session: 2 audits + 1 full PRD implementation)
 - **Blockers:** Human must set CRON_SECRET as Supabase Edge Function secret (see TODO.md)
 - **PRD queue:** 11 PRDs remaining in docs/upcoming/FULL-IMPLEMENTATION-PLAN.md
