@@ -42,6 +42,9 @@ supabase secrets set RESEND_API_KEY=re_your_api_key
 # AI services (Lovable API Gateway)
 supabase secrets set LOVABLE_API_KEY=your_lovable_api_key
 
+# Scheduled function auth (required — all cron functions validate this)
+supabase secrets set CRON_SECRET=your_random_secret_here
+
 # Mapbox (zone maps)
 supabase secrets set MAPBOX_ACCESS_TOKEN=pk.your_mapbox_token
 ```

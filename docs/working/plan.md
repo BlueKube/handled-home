@@ -8,11 +8,12 @@
 
 ## Session Handoff
 - **Branch:** feat/001-edge-function-security
-- **Last completed:** None (plan created)
-- **Next up:** Batch 1 — Shared utilities (`_shared/`)
+- **Last completed:** Batch 5 (all batches complete)
+- **Next up:** None — PRD-001 complete. Open PR and begin PRD-002.
 - **Context at exit:** —
-- **Blockers:** None
+- **Blockers:** Human must set CRON_SECRET as Supabase Edge Function secret (see TODO.md)
 - **PRD queue:** 11 PRDs remaining in docs/upcoming/FULL-IMPLEMENTATION-PLAN.md
+- **Deferred:** Seed data extraction from migration 20260322 (complex, risk of breaking db push)
 
 ---
 
@@ -26,7 +27,7 @@ All batches are in a single phase — this is a security hardening pass, not a f
 |-------|-------|------|--------|---------|
 | B1 | Create shared `_shared/` utilities (auth, CORS, deps) | S | ✅ | |
 | B2 | Fix Stripe webhook signature bypass | S | ✅ | |
-| B3 | Add CRON_SECRET to 19 unauthed scheduled functions | L | ⬜ | |
+| B3 | Add CRON_SECRET to 19 unauthed scheduled functions | L | ✅ | |
 | B4 | Restrict send-email + fix remaining auth issues | S | ✅ | |
 | B5 | Fix BYOC enumeration + auth bootstrap + seed data | M | ✅ (seed extraction deferred) | |
 
