@@ -35,10 +35,10 @@ export function useByopRecommendations(options?: { admin?: boolean }) {
     queryKey: isAdmin ? ["byop-recommendations", "admin"] : ["byop-recommendations", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      let query = supabase
-        .from("byop_recommendations")
+      let query = (supabase
+        .from("byop_recommendations" as any)
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })) as any;
       if (!isAdmin) {
         query = query.eq("customer_id", user!.id);
       }
@@ -51,8 +51,8 @@ export function useByopRecommendations(options?: { admin?: boolean }) {
   const submit = useMutation({
     mutationFn: async (payload: ByopSubmitPayload) => {
       if (!user) throw new Error("Not authenticated");
-      const { data, error } = await supabase
-        .from("byop_recommendations")
+      const { data, error } = await (supabase
+        .from("byop_recommendations" as any)
         .insert({
           customer_id: user.id,
           provider_name: payload.provider_name,
@@ -63,7 +63,7 @@ export function useByopRecommendations(options?: { admin?: boolean }) {
           status: "received",
         } as any)
         .select()
-        .single();
+        .single()) as any;
       if (error) throw error;
       return data as ByopRecommendation;
     },
@@ -78,10 +78,10 @@ export function useByopRecommendations(options?: { admin?: boolean }) {
 
   const declineRecommendation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("byop_recommendations")
-        .update({ status: "provider_unavailable", reviewed_at: new Date().toISOString() } as any)
-        .eq("id", id);
+      const { error } = await (supabase
+        .from("byop_recommendations" as any)
+        .update({ status: "provider_unavailable", reviewed_at: new Date().toISOString() })
+        .eq("id", id)) as any;
       if (error) throw error;
     },
     onSuccess: () => {
