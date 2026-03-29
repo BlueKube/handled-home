@@ -116,11 +116,52 @@ Format:
 
 ---
 
+## 2026-03-29 — Handled Home (Session 1: Security + Core Loops)
+
+### Audits
+- **Screenshot-based audits overstate problems when seed data is empty.** ~5 of 12 "critical" UI/UX findings were data-state artifacts, not code deficiencies. Photo Timeline, Activity screen, Provider Dashboard, Performance screen, and Cancel button were all correctly implemented. Future audits should distinguish "code is missing this" from "test data doesn't populate this."
+- **Multi-agent audits produce high volume but need synthesis.** 4 UI/UX agents + 5 gstack agents = 9 agent reports. The synthesis step (Lane 4) is essential — without it, duplicate and contradictory findings pile up.
+- **gstack framework is effective for structured critique.** The 6 Forcing Questions, CEO Review scope analysis, and CSO audit all produced actionable findings. The CSO audit found 3 genuine critical vulnerabilities that needed immediate fixing.
+
+### Security
+- **Edge Functions with `verify_jwt = false` need explicit auth guards.** 19 functions were publicly callable. The `_shared/auth.ts` pattern (requireCronSecret, requireServiceRole, requireUserJwt, requireAdminOrCron) standardizes auth across all functions.
+- **Stripe webhook must fail closed.** The original code accepted unsigned events as fallback. Always throw if `STRIPE_WEBHOOK_SECRET` is not configured.
+- **requireCronSecret must be inside try/catch.** If it throws outside the catch block, the error becomes a generic 500 instead of a meaningful 401. The reviewer caught this.
+- **previewRole should never persist in localStorage.** In-memory only prevents XSS escalation.
+
+### Workflow
+- **Never skip code reviews.** I cut corners on B2-B5 and PRD-002/003 to move fast. The retroactive review found a MUST-FIX bug (Exceptions filter rendering unfiltered list) and a SHOULD-FIX security issue (open redirect on auth page). Per-batch reviews catch these before they compound.
+- **Investigate before implementing.** Reading the actual code before writing PRD fixes saved ~5 PRDs worth of unnecessary work. The audit said "rebuild Activity screen" — the code already had it built correctly.
+- **OVERRIDE documentation is valuable.** Tagging skipped PRDs with `[OVERRIDE: reason]` creates a clear audit trail of scope decisions.
+
+### Architecture
+- **React.lazy code splitting is a one-line-per-import change with outsized impact.** 145 imports converted, Vite handles chunking automatically.
+- **QueryClient defaults matter.** `staleTime: 0` (the default) means every navigation re-fetches everything. `staleTime: 60_000` dramatically reduces DB load with negligible UX impact.
+- **Supabase joins work via PostgREST hint syntax.** `select("*, provider_orgs:provider_org_id(name)")` enriches payouts with provider names in a single query.
+
+---
+
 ## Suggestions
 
 ### Pending
 
-_No suggestions yet. Entries will accumulate as development continues._
+### [2026-03-29] Screenshot-based audits need data validation step
+**Source:** Session 1, post-implementation discovery
+**Type:** Workflow
+**Impact:** Prevents wasted implementation effort on data artifacts
+**Effort:** Small
+
+### [2026-03-29] Add social proof counter ("X neighbors in your area")
+**Source:** Growth audit, PRD-010 (deferred)
+**Type:** Product
+**Impact:** Most powerful trust signal for neighborhood-density home services
+**Effort:** Medium (needs backend zone density query)
+
+### [2026-03-29] Services catalog needs plan context badges
+**Source:** Design audit, PRD-007 (deferred)
+**Type:** Product
+**Impact:** Differentiates from marketplace feel, shows subscription value
+**Effort:** Medium (needs useSkus → subscription data join)
 
 ### Promoted (moved to docs/upcoming/)
 
