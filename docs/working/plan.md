@@ -7,13 +7,14 @@
 ---
 
 ## Session Handoff
-- **Branch:** feat/001-edge-function-security
-- **Last completed:** Batch 5 (all batches complete)
-- **Next up:** None — PRD-001 complete. Open PR and begin PRD-002.
-- **Context at exit:** —
+- **Branch:** claude/add-documentation-workflow-OppGZ
+- **Last completed:** PRD-001 (all 5 batches — Edge Function Security Hardening)
+- **Next up:** PRD-002 — Frontend Performance & Observability (React.lazy, QueryClient, cron alerting, pg_cron)
+- **Context at exit:** ~55-60% (heavy session: 2 audits + 1 full PRD implementation)
 - **Blockers:** Human must set CRON_SECRET as Supabase Edge Function secret (see TODO.md)
 - **PRD queue:** 11 PRDs remaining in docs/upcoming/FULL-IMPLEMENTATION-PLAN.md
-- **Deferred:** Seed data extraction from migration 20260322 (complex, risk of breaking db push)
+- **Deferred from PRD-001:** Seed data extraction from migration 20260322 (complex, risk of breaking db push)
+- **Strategic note from user:** Do NOT remove features for MVP. Fix and harden existing features rather than cutting scope. AI coding velocity makes feature completeness feasible. Focus on making everything work end-to-end and adding intelligence to reduce human ops burden.
 
 ---
 
