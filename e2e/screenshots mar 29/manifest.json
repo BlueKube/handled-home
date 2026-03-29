@@ -1,0 +1,947 @@
+[
+  {
+    "filename": "admin-applications.png",
+    "flow": "admin-config",
+    "step": "admin-applications",
+    "stepNumber": 30,
+    "route": "https://handled-home.lovable.app/admin/providers/applications",
+    "userGoal": "Review and approve/reject provider applications",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-assignment-config.png",
+    "flow": "admin-config",
+    "step": "admin-assignment-config",
+    "stepNumber": 19,
+    "route": "https://handled-home.lovable.app/admin/assignments/config",
+    "userGoal": "Tune assignment engine weights, thresholds, and capacity parameters",
+    "screenType": "settings"
+  },
+  {
+    "filename": "admin-assignments.png",
+    "flow": "admin-config",
+    "step": "admin-assignments",
+    "stepNumber": 18,
+    "route": "https://handled-home.lovable.app/admin/assignments",
+    "userGoal": "View assignment dashboard and provider-job matching",
+    "screenType": "dashboard"
+  },
+  {
+    "filename": "admin-audit.png",
+    "flow": "admin-config",
+    "step": "admin-audit",
+    "stepNumber": 46,
+    "route": "https://handled-home.lovable.app/admin/audit",
+    "userGoal": "View audit logs for all system actions",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-billing.png",
+    "flow": "admin-config",
+    "step": "admin-billing",
+    "stepNumber": 31,
+    "route": "https://handled-home.lovable.app/admin/billing",
+    "userGoal": "View billing overview and customer payment status",
+    "screenType": "dashboard"
+  },
+  {
+    "filename": "admin-bundles.png",
+    "flow": "admin-config",
+    "step": "admin-bundles",
+    "stepNumber": 28,
+    "route": "https://handled-home.lovable.app/admin/bundles",
+    "userGoal": "Manage bundles and routine templates",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-control-change-log.png",
+    "flow": "admin-config",
+    "step": "admin-control-change-log",
+    "stepNumber": 37,
+    "route": "https://handled-home.lovable.app/admin/control/change-log",
+    "userGoal": "View audit trail of configuration changes",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-control-change-requests.png",
+    "flow": "admin-config",
+    "step": "admin-control-change-requests",
+    "stepNumber": 36,
+    "route": "https://handled-home.lovable.app/admin/control/change-requests",
+    "userGoal": "Review and approve pending configuration change requests",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-control-config.png",
+    "flow": "admin-config",
+    "step": "admin-control-config",
+    "stepNumber": 35,
+    "route": "https://handled-home.lovable.app/admin/control/config",
+    "userGoal": "Manage system configuration and feature flags",
+    "screenType": "settings"
+  },
+  {
+    "filename": "admin-control-payouts.png",
+    "flow": "admin-config",
+    "step": "admin-control-payouts",
+    "stepNumber": 34,
+    "route": "https://handled-home.lovable.app/admin/control/payouts",
+    "userGoal": "Configure provider payout engine and split rules",
+    "screenType": "settings"
+  },
+  {
+    "filename": "admin-control-pricing.png",
+    "flow": "admin-config",
+    "step": "admin-control-pricing",
+    "stepNumber": 33,
+    "route": "https://handled-home.lovable.app/admin/control/pricing",
+    "userGoal": "Configure pricing rules and margin targets",
+    "screenType": "settings"
+  },
+  {
+    "filename": "admin-cron-health.png",
+    "flow": "admin-ops",
+    "step": "admin-cron-health",
+    "stepNumber": 47,
+    "route": "https://handled-home.lovable.app/admin/cron-health",
+    "userGoal": "Monitor cron job health and execution status",
+    "screenType": "detail"
+  },
+  {
+    "filename": "admin-dashboard.png",
+    "flow": "admin-ops",
+    "step": "admin-dashboard",
+    "stepNumber": 0,
+    "route": "https://handled-home.lovable.app/admin",
+    "userGoal": "View global KPIs and operational overview",
+    "screenType": "dashboard"
+  },
+  {
+    "filename": "admin-exceptions.png",
+    "flow": "admin-ops",
+    "step": "admin-exceptions",
+    "stepNumber": 22,
+    "route": "https://handled-home.lovable.app/admin/exceptions",
+    "userGoal": "View and triage the exception queue by severity",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-feedback.png",
+    "flow": "admin-config",
+    "step": "admin-feedback",
+    "stepNumber": 43,
+    "route": "https://handled-home.lovable.app/admin/feedback",
+    "userGoal": "Review user feedback and transparency metrics",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-growth.png",
+    "flow": "admin-config",
+    "step": "admin-growth",
+    "stepNumber": 41,
+    "route": "https://handled-home.lovable.app/admin/growth",
+    "userGoal": "Manage growth surfaces, referral programs, and BYOC attribution",
+    "screenType": "dashboard"
+  },
+  {
+    "filename": "admin-incentives.png",
+    "flow": "admin-config",
+    "step": "admin-incentives",
+    "stepNumber": 42,
+    "route": "https://handled-home.lovable.app/admin/incentives",
+    "userGoal": "Configure incentive programs and reward rules",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-jobs.png",
+    "flow": "admin-ops",
+    "step": "admin-jobs",
+    "stepNumber": 21,
+    "route": "https://handled-home.lovable.app/admin/jobs",
+    "userGoal": "Browse and filter all jobs across zones",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-more.png",
+    "flow": "admin-config",
+    "step": "admin-more",
+    "stepNumber": 51,
+    "route": "https://handled-home.lovable.app/admin/more",
+    "userGoal": "Access less-frequent admin actions",
+    "screenType": "settings"
+  },
+  {
+    "filename": "admin-notification-health.png",
+    "flow": "admin-ops",
+    "step": "admin-notification-health",
+    "stepNumber": 48,
+    "route": "https://handled-home.lovable.app/admin/notification-health",
+    "userGoal": "Monitor notification delivery health and failure rates",
+    "screenType": "detail"
+  },
+  {
+    "filename": "admin-notifications.png",
+    "flow": "admin-config",
+    "step": "admin-notifications",
+    "stepNumber": 52,
+    "route": "https://handled-home.lovable.app/admin/notifications",
+    "userGoal": "View admin notification inbox",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-ops-billing.png",
+    "flow": "admin-ops",
+    "step": "admin-ops-billing",
+    "stepNumber": 5,
+    "route": "https://handled-home.lovable.app/admin/ops/billing",
+    "userGoal": "Track billing health and revenue metrics",
+    "screenType": "detail"
+  },
+  {
+    "filename": "admin-ops-cockpit.png",
+    "flow": "admin-ops",
+    "step": "admin-ops-cockpit",
+    "stepNumber": 1,
+    "route": "https://handled-home.lovable.app/admin/ops",
+    "userGoal": "Monitor real-time operational health across all zones",
+    "screenType": "dashboard"
+  },
+  {
+    "filename": "admin-ops-definitions.png",
+    "flow": "admin-ops",
+    "step": "admin-ops-definitions",
+    "stepNumber": 8,
+    "route": "https://handled-home.lovable.app/admin/ops/definitions",
+    "userGoal": "View KPI definitions and metric methodology",
+    "screenType": "detail"
+  },
+  {
+    "filename": "admin-ops-dispatch.png",
+    "flow": "admin-ops",
+    "step": "admin-ops-dispatch",
+    "stepNumber": 9,
+    "route": "https://handled-home.lovable.app/admin/ops/dispatch",
+    "userGoal": "Monitor dispatcher queues and assignment pipeline",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-ops-exception-analytics.png",
+    "flow": "admin-ops",
+    "step": "admin-ops-exception-analytics",
+    "stepNumber": 11,
+    "route": "https://handled-home.lovable.app/admin/ops/exception-analytics",
+    "userGoal": "Analyze exception trends and patterns",
+    "screenType": "detail"
+  },
+  {
+    "filename": "admin-ops-exceptions.png",
+    "flow": "admin-ops",
+    "step": "admin-ops-exceptions",
+    "stepNumber": 10,
+    "route": "https://handled-home.lovable.app/admin/ops/exceptions",
+    "userGoal": "Triage operational exceptions with split-panel view",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-ops-growth.png",
+    "flow": "admin-ops",
+    "step": "admin-ops-growth",
+    "stepNumber": 7,
+    "route": "https://handled-home.lovable.app/admin/ops/growth",
+    "userGoal": "Monitor growth metrics and funnel analytics",
+    "screenType": "detail"
+  },
+  {
+    "filename": "admin-ops-jobs.png",
+    "flow": "admin-ops",
+    "step": "admin-ops-jobs",
+    "stepNumber": 4,
+    "route": "https://handled-home.lovable.app/admin/ops/jobs",
+    "userGoal": "Monitor jobs and proof-of-work health",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-ops-levels.png",
+    "flow": "admin-ops",
+    "step": "admin-ops-levels",
+    "stepNumber": 12,
+    "route": "https://handled-home.lovable.app/admin/ops/levels",
+    "userGoal": "View level analytics and tier distribution",
+    "screenType": "detail"
+  },
+  {
+    "filename": "admin-ops-service-days.png",
+    "flow": "admin-ops",
+    "step": "admin-ops-service-days",
+    "stepNumber": 3,
+    "route": "https://handled-home.lovable.app/admin/ops/service-days",
+    "userGoal": "Monitor service day health and completion rates",
+    "screenType": "detail"
+  },
+  {
+    "filename": "admin-ops-support.png",
+    "flow": "admin-ops",
+    "step": "admin-ops-support",
+    "stepNumber": 6,
+    "route": "https://handled-home.lovable.app/admin/ops/support",
+    "userGoal": "Monitor support queue depth and response times",
+    "screenType": "detail"
+  },
+  {
+    "filename": "admin-ops-zones.png",
+    "flow": "admin-ops",
+    "step": "admin-ops-zones",
+    "stepNumber": 2,
+    "route": "https://handled-home.lovable.app/admin/ops/zones",
+    "userGoal": "Monitor zone health with capacity and demand metrics",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-payouts.png",
+    "flow": "admin-config",
+    "step": "admin-payouts",
+    "stepNumber": 32,
+    "route": "https://handled-home.lovable.app/admin/payouts",
+    "userGoal": "View provider payout status and disbursement queue",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-plans.png",
+    "flow": "admin-config",
+    "step": "admin-plans",
+    "stepNumber": 26,
+    "route": "https://handled-home.lovable.app/admin/plans",
+    "userGoal": "Create and manage subscription plans with pricing",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-playbooks.png",
+    "flow": "admin-config",
+    "step": "admin-playbooks",
+    "stepNumber": 44,
+    "route": "https://handled-home.lovable.app/admin/playbooks",
+    "userGoal": "Manage operational playbooks and SOPs",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-providers.png",
+    "flow": "admin-config",
+    "step": "admin-providers",
+    "stepNumber": 29,
+    "route": "https://handled-home.lovable.app/admin/providers",
+    "userGoal": "View all providers with status and performance data",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-reports.png",
+    "flow": "admin-config",
+    "step": "admin-reports",
+    "stepNumber": 45,
+    "route": "https://handled-home.lovable.app/admin/reports",
+    "userGoal": "Generate and view reporting and analytics",
+    "screenType": "dashboard"
+  },
+  {
+    "filename": "admin-scheduling-exceptions.png",
+    "flow": "admin-config",
+    "step": "admin-scheduling-exceptions",
+    "stepNumber": 17,
+    "route": "https://handled-home.lovable.app/admin/scheduling/exceptions",
+    "userGoal": "Manage scheduling exceptions and overrides",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-scheduling-planner.png",
+    "flow": "admin-config",
+    "step": "admin-scheduling-planner",
+    "stepNumber": 14,
+    "route": "https://handled-home.lovable.app/admin/scheduling/planner",
+    "userGoal": "Plan and optimize service schedules",
+    "screenType": "dashboard"
+  },
+  {
+    "filename": "admin-scheduling-policy.png",
+    "flow": "admin-config",
+    "step": "admin-scheduling-policy",
+    "stepNumber": 15,
+    "route": "https://handled-home.lovable.app/admin/scheduling/policy",
+    "userGoal": "Configure scheduling policies and rules",
+    "screenType": "settings"
+  },
+  {
+    "filename": "admin-scheduling-windows.png",
+    "flow": "admin-config",
+    "step": "admin-scheduling-windows",
+    "stepNumber": 16,
+    "route": "https://handled-home.lovable.app/admin/scheduling/windows",
+    "userGoal": "Manage appointment window templates",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-scheduling.png",
+    "flow": "admin-config",
+    "step": "admin-scheduling",
+    "stepNumber": 13,
+    "route": "https://handled-home.lovable.app/admin/scheduling",
+    "userGoal": "View scheduling operations overview",
+    "screenType": "dashboard"
+  },
+  {
+    "filename": "admin-service-days.png",
+    "flow": "admin-config",
+    "step": "admin-service-days",
+    "stepNumber": 20,
+    "route": "https://handled-home.lovable.app/admin/service-days",
+    "userGoal": "Manage service day assignments and configuration",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-settings.png",
+    "flow": "admin-config",
+    "step": "admin-settings",
+    "stepNumber": 50,
+    "route": "https://handled-home.lovable.app/admin/settings",
+    "userGoal": "Manage admin account settings",
+    "screenType": "settings"
+  },
+  {
+    "filename": "admin-skus.png",
+    "flow": "admin-config",
+    "step": "admin-skus",
+    "stepNumber": 25,
+    "route": "https://handled-home.lovable.app/admin/skus",
+    "userGoal": "Manage the full SKU catalog — create, edit, archive services",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-subscriptions.png",
+    "flow": "admin-config",
+    "step": "admin-subscriptions",
+    "stepNumber": 27,
+    "route": "https://handled-home.lovable.app/admin/subscriptions",
+    "userGoal": "View and manage active customer subscriptions",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-support-macros.png",
+    "flow": "admin-config",
+    "step": "admin-support-macros",
+    "stepNumber": 40,
+    "route": "https://handled-home.lovable.app/admin/support/macros",
+    "userGoal": "Manage support response macros and templates",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-support-policies.png",
+    "flow": "admin-config",
+    "step": "admin-support-policies",
+    "stepNumber": 39,
+    "route": "https://handled-home.lovable.app/admin/support/policies",
+    "userGoal": "Configure support policies and SLA rules",
+    "screenType": "list"
+  },
+  {
+    "filename": "admin-support.png",
+    "flow": "admin-config",
+    "step": "admin-support",
+    "stepNumber": 38,
+    "route": "https://handled-home.lovable.app/admin/support",
+    "userGoal": "Manage support console and ticket queue",
+    "screenType": "dashboard"
+  },
+  {
+    "filename": "admin-test-toggles.png",
+    "flow": "admin-config",
+    "step": "admin-test-toggles",
+    "stepNumber": 49,
+    "route": "https://handled-home.lovable.app/admin/test-toggles",
+    "userGoal": "Toggle market states and growth surface configs for testing",
+    "screenType": "settings"
+  },
+  {
+    "filename": "admin-zone-builder.png",
+    "flow": "admin-config",
+    "step": "admin-zone-builder",
+    "stepNumber": 24,
+    "route": "https://handled-home.lovable.app/admin/zones/builder",
+    "userGoal": "Build and edit zone boundaries with map editor",
+    "screenType": "wizard-step"
+  },
+  {
+    "filename": "admin-zones.png",
+    "flow": "admin-config",
+    "step": "admin-zones",
+    "stepNumber": 23,
+    "route": "https://handled-home.lovable.app/admin/zones",
+    "userGoal": "Manage service regions and zones",
+    "screenType": "list"
+  },
+  {
+    "filename": "customer-billing-history.png",
+    "flow": "customer-app",
+    "step": "customer-billing-history",
+    "stepNumber": 7,
+    "route": "https://handled-home.lovable.app/customer/billing/history",
+    "userGoal": "View complete invoice history with line-item detail",
+    "screenType": "list"
+  },
+  {
+    "filename": "customer-billing-methods.png",
+    "flow": "customer-app",
+    "step": "customer-billing-methods",
+    "stepNumber": 6,
+    "route": "https://handled-home.lovable.app/customer/billing/methods",
+    "userGoal": "Add or manage payment methods",
+    "screenType": "form"
+  },
+  {
+    "filename": "customer-billing.png",
+    "flow": "customer-app",
+    "step": "customer-billing",
+    "stepNumber": 5,
+    "route": "https://handled-home.lovable.app/customer/billing",
+    "userGoal": "View billing overview, balance, and next charge date",
+    "screenType": "detail"
+  },
+  {
+    "filename": "customer-coverage-map.png",
+    "flow": "customer-app",
+    "step": "customer-coverage-map",
+    "stepNumber": 10,
+    "route": "https://handled-home.lovable.app/customer/coverage-map",
+    "userGoal": "See if property is in a covered service zone",
+    "screenType": "detail"
+  },
+  {
+    "filename": "customer-dashboard.png",
+    "flow": "customer-app",
+    "step": "customer-dashboard",
+    "stepNumber": 0,
+    "route": "https://handled-home.lovable.app/customer",
+    "userGoal": "See personalized dashboard with next visit, health score, and alerts",
+    "screenType": "dashboard"
+  },
+  {
+    "filename": "customer-history.png",
+    "flow": "customer-app",
+    "step": "customer-history",
+    "stepNumber": 13,
+    "route": "https://handled-home.lovable.app/customer/activity",
+    "userGoal": "Browse complete service history with filters",
+    "screenType": "list"
+  },
+  {
+    "filename": "customer-home-assistant.png",
+    "flow": "customer-app",
+    "step": "customer-home-assistant",
+    "stepNumber": 16,
+    "route": "https://handled-home.lovable.app/customer/home-assistant",
+    "userGoal": "Get AI-powered service recommendations for home",
+    "screenType": "detail"
+  },
+  {
+    "filename": "customer-more.png",
+    "flow": "customer-app",
+    "step": "customer-more",
+    "stepNumber": 18,
+    "route": "https://handled-home.lovable.app/customer/more",
+    "userGoal": "Access less-frequent actions from the More menu",
+    "screenType": "settings"
+  },
+  {
+    "filename": "customer-notifications.png",
+    "flow": "customer-app",
+    "step": "customer-notifications",
+    "stepNumber": 19,
+    "route": "https://handled-home.lovable.app/customer/notifications",
+    "userGoal": "View all notifications in inbox",
+    "screenType": "list"
+  },
+  {
+    "filename": "customer-photos.png",
+    "flow": "customer-app",
+    "step": "customer-photos",
+    "stepNumber": 15,
+    "route": "https://handled-home.lovable.app/customer/photos",
+    "userGoal": "Browse before/after photo timeline from past visits",
+    "screenType": "list"
+  },
+  {
+    "filename": "customer-plans.png",
+    "flow": "customer-app",
+    "step": "customer-plans",
+    "stepNumber": 2,
+    "route": "https://handled-home.lovable.app/customer/plans",
+    "userGoal": "Compare subscription plans and choose the right one",
+    "screenType": "catalog"
+  },
+  {
+    "filename": "customer-property-sizing.png",
+    "flow": "customer-app",
+    "step": "customer-property-sizing",
+    "stepNumber": 11,
+    "route": "https://handled-home.lovable.app/customer/property-sizing",
+    "userGoal": "Set property size for accurate service pricing",
+    "screenType": "form"
+  },
+  {
+    "filename": "customer-property.png",
+    "flow": "customer-app",
+    "step": "customer-property",
+    "stepNumber": 9,
+    "route": "https://handled-home.lovable.app/customer/property",
+    "userGoal": "View and edit property address and details",
+    "screenType": "form"
+  },
+  {
+    "filename": "customer-referrals.png",
+    "flow": "customer-viral",
+    "step": "customer-referrals",
+    "stepNumber": 8,
+    "route": "https://handled-home.lovable.app/customer/referrals",
+    "userGoal": "Get referral code, share link, and track referral earnings",
+    "screenType": "detail"
+  },
+  {
+    "filename": "customer-routine.png",
+    "flow": "customer-app",
+    "step": "customer-routine",
+    "stepNumber": 3,
+    "route": "https://handled-home.lovable.app/customer/routine",
+    "userGoal": "View and edit service routine — add, remove, change cadence",
+    "screenType": "form"
+  },
+  {
+    "filename": "customer-services.png",
+    "flow": "customer-app",
+    "step": "customer-services",
+    "stepNumber": 1,
+    "route": "https://handled-home.lovable.app/customer/services",
+    "userGoal": "Browse available services and add them to routine",
+    "screenType": "catalog"
+  },
+  {
+    "filename": "customer-settings.png",
+    "flow": "customer-app",
+    "step": "customer-settings",
+    "stepNumber": 17,
+    "route": "https://handled-home.lovable.app/customer/settings",
+    "userGoal": "Manage account settings — name, phone, avatar",
+    "screenType": "settings"
+  },
+  {
+    "filename": "customer-subscription.png",
+    "flow": "customer-app",
+    "step": "customer-subscription",
+    "stepNumber": 4,
+    "route": "https://handled-home.lovable.app/customer/subscription",
+    "userGoal": "Manage subscription — upgrade, downgrade, pause, or cancel",
+    "screenType": "detail"
+  },
+  {
+    "filename": "customer-support.png",
+    "flow": "customer-app",
+    "step": "customer-support",
+    "stepNumber": 12,
+    "route": "https://handled-home.lovable.app/customer/support",
+    "userGoal": "Access support options and submit tickets",
+    "screenType": "dashboard"
+  },
+  {
+    "filename": "customer-upcoming.png",
+    "flow": "customer-app",
+    "step": "customer-upcoming",
+    "stepNumber": 14,
+    "route": "https://handled-home.lovable.app/customer/schedule",
+    "userGoal": "View all upcoming scheduled visits",
+    "screenType": "list"
+  },
+  {
+    "filename": "provider-apply.png",
+    "flow": "provider-onboarding",
+    "step": "provider-apply",
+    "stepNumber": 28,
+    "route": "https://handled-home.lovable.app/provider/apply",
+    "userGoal": "Apply as a service provider with category and coverage",
+    "screenType": "form"
+  },
+  {
+    "filename": "provider-availability.png",
+    "flow": "provider-app",
+    "step": "provider-availability",
+    "stepNumber": 10,
+    "route": "https://handled-home.lovable.app/provider/availability",
+    "userGoal": "Set availability calendar and blocked windows",
+    "screenType": "form"
+  },
+  {
+    "filename": "provider-byoc-center.png",
+    "flow": "provider-viral",
+    "step": "provider-byoc-center",
+    "stepNumber": 19,
+    "route": "https://handled-home.lovable.app/provider/byoc",
+    "userGoal": "Manage BYOC invite links and track customer conversions",
+    "screenType": "dashboard"
+  },
+  {
+    "filename": "provider-byoc-create.png",
+    "flow": "provider-viral",
+    "step": "provider-byoc-create",
+    "stepNumber": 20,
+    "route": "https://handled-home.lovable.app/provider/byoc/create-link",
+    "userGoal": "Create a new branded invite link for an existing customer",
+    "screenType": "form"
+  },
+  {
+    "filename": "provider-coverage.png",
+    "flow": "provider-app",
+    "step": "provider-coverage",
+    "stepNumber": 11,
+    "route": "https://handled-home.lovable.app/provider/coverage",
+    "userGoal": "View and update service coverage areas",
+    "screenType": "detail"
+  },
+  {
+    "filename": "provider-dashboard.png",
+    "flow": "provider-app",
+    "step": "provider-dashboard",
+    "stepNumber": 0,
+    "route": "https://handled-home.lovable.app/provider",
+    "userGoal": "See today's jobs, earnings summary, and quality score at a glance",
+    "screenType": "dashboard"
+  },
+  {
+    "filename": "provider-earnings.png",
+    "flow": "provider-app",
+    "step": "provider-earnings",
+    "stepNumber": 3,
+    "route": "https://handled-home.lovable.app/provider/earnings",
+    "userGoal": "View total earnings with breakdown by period",
+    "screenType": "detail"
+  },
+  {
+    "filename": "provider-history.png",
+    "flow": "provider-app",
+    "step": "provider-history",
+    "stepNumber": 2,
+    "route": "https://handled-home.lovable.app/provider/history",
+    "userGoal": "Browse completed job history with filters",
+    "screenType": "list"
+  },
+  {
+    "filename": "provider-insights-history.png",
+    "flow": "provider-app",
+    "step": "provider-insights-history",
+    "stepNumber": 9,
+    "route": "https://handled-home.lovable.app/provider/insights/history",
+    "userGoal": "View weekly performance trends over time",
+    "screenType": "list"
+  },
+  {
+    "filename": "provider-insights.png",
+    "flow": "provider-app",
+    "step": "provider-insights",
+    "stepNumber": 8,
+    "route": "https://handled-home.lovable.app/provider/insights",
+    "userGoal": "See growth insights and trend analysis",
+    "screenType": "detail"
+  },
+  {
+    "filename": "provider-invite-customers.png",
+    "flow": "provider-viral",
+    "step": "provider-invite-customers",
+    "stepNumber": 18,
+    "route": "https://handled-home.lovable.app/provider/referrals/invite-customers",
+    "userGoal": "Invite existing customers to join the platform",
+    "screenType": "form"
+  },
+  {
+    "filename": "provider-jobs.png",
+    "flow": "provider-app",
+    "step": "provider-jobs",
+    "stepNumber": 1,
+    "route": "https://handled-home.lovable.app/provider/jobs",
+    "userGoal": "View today's job list with addresses and service details",
+    "screenType": "list"
+  },
+  {
+    "filename": "provider-more.png",
+    "flow": "provider-app",
+    "step": "provider-more",
+    "stepNumber": 29,
+    "route": "https://handled-home.lovable.app/provider/more",
+    "userGoal": "Access less-frequent actions from the More menu",
+    "screenType": "settings"
+  },
+  {
+    "filename": "provider-notifications.png",
+    "flow": "provider-app",
+    "step": "provider-notifications",
+    "stepNumber": 30,
+    "route": "https://handled-home.lovable.app/provider/notifications",
+    "userGoal": "View all notifications in inbox",
+    "screenType": "list"
+  },
+  {
+    "filename": "provider-onboarding-agreement.png",
+    "flow": "provider-onboarding",
+    "step": "provider-onboarding-agreement",
+    "stepNumber": 26,
+    "route": "https://handled-home.lovable.app/provider/onboarding/agreement",
+    "userGoal": "Review and sign the service agreement",
+    "screenType": "wizard-step"
+  },
+  {
+    "filename": "provider-onboarding-capabilities.png",
+    "flow": "provider-onboarding",
+    "step": "provider-onboarding-capabilities",
+    "stepNumber": 24,
+    "route": "https://handled-home.lovable.app/provider/onboarding/capabilities",
+    "userGoal": "Select service capabilities and SKU authorization",
+    "screenType": "wizard-step"
+  },
+  {
+    "filename": "provider-onboarding-compliance.png",
+    "flow": "provider-onboarding",
+    "step": "provider-onboarding-compliance",
+    "stepNumber": 25,
+    "route": "https://handled-home.lovable.app/provider/onboarding/compliance",
+    "userGoal": "Upload insurance, tax, and background check documents",
+    "screenType": "wizard-step"
+  },
+  {
+    "filename": "provider-onboarding-coverage.png",
+    "flow": "provider-onboarding",
+    "step": "provider-onboarding-coverage",
+    "stepNumber": 23,
+    "route": "https://handled-home.lovable.app/provider/onboarding/coverage",
+    "userGoal": "Define service coverage zones during onboarding",
+    "screenType": "wizard-step"
+  },
+  {
+    "filename": "provider-onboarding-org.png",
+    "flow": "provider-onboarding",
+    "step": "provider-onboarding-org",
+    "stepNumber": 22,
+    "route": "https://handled-home.lovable.app/provider/onboarding/org",
+    "userGoal": "Set up organization name and business details",
+    "screenType": "wizard-step"
+  },
+  {
+    "filename": "provider-onboarding-review.png",
+    "flow": "provider-onboarding",
+    "step": "provider-onboarding-review",
+    "stepNumber": 27,
+    "route": "https://handled-home.lovable.app/provider/onboarding/review",
+    "userGoal": "Final review of all onboarding steps before submission",
+    "screenType": "wizard-step"
+  },
+  {
+    "filename": "provider-onboarding.png",
+    "flow": "provider-onboarding",
+    "step": "provider-onboarding",
+    "stepNumber": 21,
+    "route": "https://handled-home.lovable.app/provider/onboarding",
+    "userGoal": "View onboarding hub with step completion status",
+    "screenType": "dashboard"
+  },
+  {
+    "filename": "provider-organization.png",
+    "flow": "provider-app",
+    "step": "provider-organization",
+    "stepNumber": 13,
+    "route": "https://handled-home.lovable.app/provider/organization",
+    "userGoal": "Manage organization profile and business details",
+    "screenType": "form"
+  },
+  {
+    "filename": "provider-payout-history.png",
+    "flow": "provider-app",
+    "step": "provider-payout-history",
+    "stepNumber": 5,
+    "route": "https://handled-home.lovable.app/provider/payouts/history",
+    "userGoal": "View payout history with amounts and dates",
+    "screenType": "list"
+  },
+  {
+    "filename": "provider-payouts.png",
+    "flow": "provider-app",
+    "step": "provider-payouts",
+    "stepNumber": 4,
+    "route": "https://handled-home.lovable.app/provider/payouts",
+    "userGoal": "Track payout status and next deposit date",
+    "screenType": "detail"
+  },
+  {
+    "filename": "provider-performance.png",
+    "flow": "provider-app",
+    "step": "provider-performance",
+    "stepNumber": 6,
+    "route": "https://handled-home.lovable.app/provider/performance",
+    "userGoal": "View performance metrics and gamification score",
+    "screenType": "detail"
+  },
+  {
+    "filename": "provider-quality.png",
+    "flow": "provider-app",
+    "step": "provider-quality",
+    "stepNumber": 7,
+    "route": "https://handled-home.lovable.app/provider/quality",
+    "userGoal": "View quality score and tier status",
+    "screenType": "detail"
+  },
+  {
+    "filename": "provider-referrals.png",
+    "flow": "provider-viral",
+    "step": "provider-referrals",
+    "stepNumber": 17,
+    "route": "https://handled-home.lovable.app/provider/referrals",
+    "userGoal": "Refer other providers and invite customers to the platform",
+    "screenType": "detail"
+  },
+  {
+    "filename": "provider-settings.png",
+    "flow": "provider-app",
+    "step": "provider-settings",
+    "stepNumber": 15,
+    "route": "https://handled-home.lovable.app/provider/settings",
+    "userGoal": "Manage account settings and preferences",
+    "screenType": "settings"
+  },
+  {
+    "filename": "provider-skus.png",
+    "flow": "provider-app",
+    "step": "provider-skus",
+    "stepNumber": 14,
+    "route": "https://handled-home.lovable.app/provider/skus",
+    "userGoal": "View authorized service categories",
+    "screenType": "list"
+  },
+  {
+    "filename": "provider-support.png",
+    "flow": "provider-app",
+    "step": "provider-support",
+    "stepNumber": 16,
+    "route": "https://handled-home.lovable.app/provider/support",
+    "userGoal": "Access support and submit operational tickets",
+    "screenType": "dashboard"
+  },
+  {
+    "filename": "provider-work-setup.png",
+    "flow": "provider-app",
+    "step": "provider-work-setup",
+    "stepNumber": 12,
+    "route": "https://handled-home.lovable.app/provider/work-setup",
+    "userGoal": "Configure work preferences and setup",
+    "screenType": "form"
+  },
+  {
+    "filename": "public-auth.png",
+    "flow": "public",
+    "step": "public-auth",
+    "stepNumber": 0,
+    "route": "https://handled-home.lovable.app/auth",
+    "userGoal": "Sign up or log in to the platform",
+    "screenType": "form"
+  }
+]
