@@ -15,10 +15,10 @@ function isDismissed(): boolean {
 export function SmartAppBanner() {
   const isMobile = useIsMobile();
   const [dismissed, setDismissed] = useState(isDismissed);
+  const isNativeApp = Capacitor.isNativePlatform();
 
-  // Don't show on native apps (Capacitor) — user already has the app
-  if (Capacitor.isNativePlatform()) return null;
-  if (!isMobile || dismissed) return null;
+  // Don't show on native apps (user already has the app) or non-mobile or dismissed
+  if (isNativeApp || !isMobile || dismissed) return null;
 
   const handleDismiss = () => {
     localStorage.setItem(DISMISS_KEY, String(Date.now()));
