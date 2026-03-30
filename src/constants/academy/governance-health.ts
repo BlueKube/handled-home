@@ -79,7 +79,9 @@ RULES FOR TOGGLES:
 
 4. Document what each toggle does in its description field. "Enable new billing flow" tells the next operator nothing. "Routes checkout through Stripe's new Payment Element API instead of legacy Card Element — reduces payment failures by ~15% in testing" tells them everything.
 
-5. Before turning on a toggle that affects billing or scheduling, check with a senior operator. These systems have downstream effects that aren't always obvious.`,
+5. Before turning on a toggle that affects billing or scheduling, check with a senior operator. These systems have downstream effects that aren't always obvious.
+
+EXAMPLE: When we tested the new checkout flow, we created a toggle called "new-checkout-v2" with owner: ops team, expiration: 30 days, description: "Routes checkout through Stripe Payment Element API instead of legacy Card Element — reduces payment failures by ~15% in testing." We enabled it for 10% of Zone A customers first, watched conversion rates for a week, then expanded to 50%, then 100%. After 3 weeks of stable metrics, we removed the toggle and made the feature permanent. The whole lifecycle — create, test, expand, remove — took 25 days. That's what healthy toggle usage looks like.`,
   },
   {
     id: "launch-readiness",

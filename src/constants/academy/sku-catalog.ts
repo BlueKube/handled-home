@@ -5,7 +5,7 @@ export const skuCatalogSections: TrainingSection[] = [
     id: "overview",
     title: "What is a SKU and Why Does It Matter?",
     type: "overview",
-    content: `A SKU (Service Keeping Unit) is the atomic unit of work in Handled Home. Every job, every invoice line item, every proof requirement, every scheduling rule traces back to a SKU. Getting SKUs right prevents 80% of downstream problems. Getting them wrong creates issues that ripple through scheduling, billing, provider satisfaction, and customer complaints.
+    content: `A SKU (Stock Keeping Unit — in our context, each SKU represents a specific service type) is the atomic unit of work in Handled Home. Every job, every invoice line item, every proof requirement, every scheduling rule traces back to a SKU. Getting SKUs right prevents 80% of downstream problems. Getting them wrong creates issues that ripple through scheduling, billing, provider satisfaction, and customer complaints.
 
 A SKU defines: what the service is (lawn mowing, pest treatment, window cleaning), how long it takes, what proof the provider must submit, what the checklist includes, which levels/variants exist, and what it costs to deliver.
 
