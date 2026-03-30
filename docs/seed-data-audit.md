@@ -15,23 +15,25 @@
 
 **Source file:** `supabase/migrations/20260223032019_543e40f8-d9ca-4417-987f-516ca49fd766.sql`
 
-| SKU | Category | Duration (min) | Base Price (cents) | Source | Impact | Notes |
-|-----|----------|---------------:|-------------------:|--------|--------|-------|
-| Standard Mow | mowing | 30 | 4900 | 🔸 Estimated | ⚠️ High | Duration varies by lot size (15min for 1/8 acre vs 60min for 1/2 acre). Flat 30min is a placeholder. |
-| Edge & Trim | mowing | 15 | 1500 | 🔸 Estimated | | Add-on; duration reasonable for small lots |
-| Leaf Cleanup | mowing | 45 | 3500 | 🔸 Estimated | ⚠️ High | Highly seasonal; 45min may be low for heavy fall cleanup |
-| Hedge Trimming | mowing | 30 | 2500 | 🔸 Estimated | | Depends on hedge count/height |
-| Weed Treatment | mowing | 20 | 2000 | 🔸 Estimated | | Chemical vs. manual matters; 20min is optimistic for manual |
-| Fertilization | mowing | 20 | 3000 | 🔸 Estimated | | Application time depends on lot size |
-| Mulch Application | mowing | 45 | 4500 | ❓ Needs Interview | ⚠️ High | Material cost not included in base price; 45min may be low for large beds |
-| Spring Prep | mowing | 60 | 7500 | ❓ Needs Interview | ⚠️ High | Compound task; scope undefined — what's included? |
-| Window Cleaning | windows | 45 | 6500 | 🔸 Estimated | ⚠️ High | 45min for how many windows? Needs per-story-tier durations |
-| Power Wash | power_wash | 60 | 8500 | ❓ Needs Interview | ⚠️ High | Equipment setup time? Surface area? Driveway vs. whole house? |
-| Pool Service | pool | 30 | 5000 | ❓ Needs Interview | ⚠️ High | Chemical testing + cleaning varies; 30min may be tight |
-| Pest Control | pest | 20 | 4000 | 🔸 Estimated | | Interior + exterior? 20min is reasonable for perimeter-only |
-| Dog Poop Cleanup | pet_waste | 15 | 2500 | ✅ Calibrated | | Simple task, 15min is standard for weekly pickup |
+| SKU | Category | Duration (min) | Base Price (cents) | Handle Cost | Source | Impact | Notes |
+|-----|----------|---------------:|-------------------:|:-----------:|--------|--------|-------|
+| Standard Mow | mowing | 30 | 4900 | 1 | 🔸 Estimated | ⚠️ High | Duration varies by lot size (15min for 1/8 acre vs 60min for 1/2 acre). Flat 30min is a placeholder. |
+| Edge & Trim | mowing | 15 | 1500 | 1 | 🔸 Estimated | | Add-on; duration reasonable for small lots |
+| Leaf Cleanup | mowing | 45 | 3500 | 1 | 🔸 Estimated | ⚠️ High | Highly seasonal; 45min may be low for heavy fall cleanup |
+| Hedge Trimming | mowing | 30 | 2500 | 1 | 🔸 Estimated | | Depends on hedge count/height |
+| Weed Treatment | mowing | 20 | 2000 | 1 | 🔸 Estimated | | Chemical vs. manual matters; 20min is optimistic for manual |
+| Fertilization | mowing | 20 | 3000 | 1 | 🔸 Estimated | | Application time depends on lot size |
+| Mulch Application | mowing | 45 | 4500 | 1 | ❓ Needs Interview | ⚠️ High | Material cost not included in base price; 45min may be low for large beds |
+| Spring Prep | mowing | 60 | 7500 | 1 | ❓ Needs Interview | ⚠️ High | Compound task; scope undefined — what's included? |
+| Window Cleaning | windows | 45 | 6500 | 1 | 🔸 Estimated | ⚠️ High | 45min for how many windows? Needs per-story-tier durations |
+| Power Wash | power_wash | 60 | 8500 | 1 | ❓ Needs Interview | ⚠️ High | Equipment setup time? Surface area? Driveway vs. whole house? |
+| Pool Service | pool | 30 | 5000 | 1 | ❓ Needs Interview | ⚠️ High | Chemical testing + cleaning varies; 30min may be tight |
+| Pest Control | pest | 20 | 4000 | 1 | 🔸 Estimated | | Interior + exterior? 20min is reasonable for perimeter-only |
+| Dog Poop Cleanup | pet_waste | 15 | 2500 | 1 | ✅ Calibrated | | Simple task, 15min is standard for weekly pickup |
 
-**Key finding:** All durations are flat (not tiered by property size). The system supports property sizing tiers, but SKU seed data doesn't use them. This is the #1 calibration priority — a 30-minute mow on a 1/4 acre lot could take 60+ minutes on a 1/2 acre.
+**Key finding #1:** All durations are flat (not tiered by property size). The system supports property sizing tiers, but SKU seed data doesn't use them. This is the #1 calibration priority — a 30-minute mow on a 1/4 acre lot could take 60+ minutes on a 1/2 acre.
+
+**Key finding #2:** Every SKU has handle_cost = 1 (the column default). This means a 15-minute Edge & Trim and a 60-minute Spring Prep both cost the same 1 handle — there is no economic differentiation. Handle costs must be calibrated per-SKU before launch (e.g., mow = 3 handles, edge & trim = 1, power wash = 5). This is tagged ❓ Needs Interview with ⚠️ High impact — flat handle costs break the entire subscription spread model.
 
 ---
 
@@ -47,7 +49,7 @@
 
 **vs. Session 1 simulation findings:** The market simulation optimized to $129/$179/$279 pricing with $45/job payout for near break-even at month 14. Current seed prices ($49/$85/$149) are significantly lower. **Plan pricing is the #1 revenue lever — these values must be reconciled with the simulation before launch.**
 
-**Handle system interaction:** Plans grant handles, not minutes directly. The minutes/cycle value is the operational constraint. Handle costs per SKU (set separately) determine how many services fit in a plan. This relationship needs end-to-end validation.
+**Handle system interaction:** The seeded plans use a `minutes_per_cycle` model — the minutes/cycle value is the operational constraint. Handles are a parallel currency layer: plans grant handle allowances, and each SKU has a handle cost (currently all defaulting to 1). The relationship between minutes-based entitlements and handle-based consumption needs end-to-end validation to confirm which model is active at checkout and enforcement time.
 
 ---
 
@@ -92,7 +94,7 @@
 | Parameter | Value | Source | Impact | Notes |
 |-----------|-------|--------|--------|-------|
 | billing.auto_retry_days | 3 | ✅ Calibrated | | Industry standard |
-| billing.dunning_max_steps | 4 | ✅ Calibrated | | Conservative; 5-step ladder in code |
+| billing.dunning_max_steps | 4 | 🔸 Estimated | | Config says 4 but code implements a 5-step ladder — reconcile before launch |
 | payout.weekly_day | Friday | ✅ Calibrated | | Product decision — providers paid end of week |
 | payout.min_threshold_cents | 1000 ($10) | 🔸 Estimated | | Low threshold; may generate many small payouts |
 | quality.probation_threshold | 65 | 🔸 Estimated | | Below this, provider enters probation |
@@ -176,13 +178,14 @@ Ordered by economic impact:
 | # | Item | Current Value | Why It Matters | Risk if Wrong |
 |---|------|---------------|----------------|---------------|
 | 1 | **Plan pricing** | $49/$85/$149 | Simulation says $129/$179/$279 needed for break-even | Revenue 40-60% below sustainability |
-| 2 | **SKU durations by property size** | Flat (not tiered) | A 30-min mow estimate on a large lot means provider loses money | Provider churn, margin collapse |
-| 3 | **Provider payout per job** | Not seeded (simulation: $45) | The spread between sub price and payout = entire margin | Business viability |
-| 4 | **BYOC bonus economics** | $10/wk × 90d = $130/customer | High if churn happens before month 4 | CAC exceeds LTV |
-| 5 | **Window cleaning duration** | 45 min flat | Per-story matters: 1-story = 30min, 2-story = 60-90min | Under-scoping the hardest jobs |
-| 6 | **Power wash scope** | 60 min flat | Driveway vs. whole house is 2-3× difference | Provider disputes, losses |
-| 7 | **Pool service duration** | 30 min | Chemical testing adds 10-15 min; may need 45 | Under-serving customers |
-| 8 | **Zone capacity limits** | 8-12 stops/day | If providers can only do 6, the whole schedule breaks | Overcommitment, missed visits |
+| 2 | **Per-SKU handle costs** | All = 1 (column default) | A 15-min trim and 60-min spring prep both cost 1 handle — no economic differentiation | Subscription spread model is meaningless |
+| 3 | **SKU durations by property size** | Flat (not tiered) | A 30-min mow estimate on a large lot means provider loses money | Provider churn, margin collapse |
+| 4 | **Provider payout per job** | Not seeded (simulation: $45) | The spread between sub price and payout = entire margin | Business viability |
+| 5 | **BYOC bonus economics** | $10/wk × 90d = $130/customer | High if churn happens before month 4 | CAC exceeds LTV |
+| 6 | **Window cleaning duration** | 45 min flat | Per-story matters: 1-story = 30min, 2-story = 60-90min | Under-scoping the hardest jobs |
+| 7 | **Power wash scope** | 60 min flat | Driveway vs. whole house is 2-3× difference | Provider disputes, losses |
+| 8 | **Pool service duration** | 30 min | Chemical testing adds 10-15 min; may need 45 | Under-serving customers |
+| 9 | **Zone capacity limits** | 8-12 stops/day | If providers can only do 6, the whole schedule breaks | Overcommitment, missed visits |
 
 ---
 
@@ -190,18 +193,18 @@ Ordered by economic impact:
 
 | Category | Total Values | ✅ Calibrated | 🔸 Estimated | ❓ Needs Interview |
 |----------|:----------:|:------------:|:------------:|:-----------------:|
-| SKU durations/pricing | 13 | 1 | 8 | 4 |
+| SKU durations/pricing/handles | 14 | 1 | 8 | 5 |
 | Plan pricing/entitlements | 3 | 0 | 3 | 0 |
 | Zone configuration | 5 | 0 | 5 | 0 |
 | Assignment algorithm | 7 | 1 | 6 | 0 |
-| Billing/payout config | 10 | 5 | 3 | 2 |
+| Billing/payout config | 10 | 4 | 4 | 2 |
 | Provider tiers | 3 | 0 | 3 | 0 |
 | Zone builder | 5 | 2 | 3 | 0 |
 | Holidays | 1 set | 1 | 0 | 0 |
 | Notification templates | 3 sets | 3 | 0 | 0 |
-| **Totals** | **~50** | **13 (26%)** | **31 (62%)** | **6 (12%)** |
+| **Totals** | **~51** | **12 (24%)** | **32 (63%)** | **7 (14%)** |
 
-**Bottom line:** 74% of seed data values are estimated or need interviews. The 6 "Needs Interview" items are concentrated in SKU durations and BYOC economics — exactly where wrong values cause the most damage.
+**Bottom line:** 76% of seed data values are estimated or need interviews. The 7 "Needs Interview" items are concentrated in SKU durations, handle costs, and BYOC economics — exactly where wrong values cause the most damage.
 
 ---
 
