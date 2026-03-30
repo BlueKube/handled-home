@@ -139,6 +139,13 @@ Format:
 - **QueryClient defaults matter.** `staleTime: 0` (the default) means every navigation re-fetches everything. `staleTime: 60_000` dramatically reduces DB load with negligible UX impact.
 - **Supabase joins work via PostgREST hint syntax.** `select("*, provider_orgs:provider_org_id(name)")` enriches payouts with provider names in a single query.
 
+### Market Simulation
+- **Single zones don't break even.** Fixed overhead ($1850/month) dominates revenue at <40 customers. Multi-zone amortization is the path to profitability.
+- **Provider payout is the #1 economic lever.** The spread between subscription price and provider payout determines everything. At $55/job with $99 Essential plan, the spread is negative.
+- **Optimized configuration: $129/$179/$279 pricing + $45/job payout + 4 zones.** Reaches -4% margin by month 12, break-even ~month 14. Total launch investment ~$21K.
+- **Handle-limited job calculation matters.** Assuming 4 jobs/customer/month (unlimited) produces wildly different economics than handle-limited consumption (~2-7 jobs depending on tier).
+- **The autoresearch loop works for business model optimization.** 100 experiments in <30 seconds, surfacing which assumptions matter most. Pricing sensitivity was the top finding.
+
 ---
 
 ## Suggestions
