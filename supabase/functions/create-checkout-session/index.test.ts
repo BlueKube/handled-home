@@ -71,20 +71,23 @@ Deno.test("rejects request with invalid JWT", async () => {
     },
     body: JSON.stringify({ plan_id: "test" }),
   });
-  // Invalid JWT should fail claims extraction
+  // Invalid JWT should fail claims extraction — handler returns 401
   const status = res.status;
-  assertEquals(status === 401 || status === 500, true);
+  assertEquals(status, 401);
   const body = await res.json();
   assertExists(body.error);
 });
 
-Deno.test("error response has correct shape", async () => {
+Deno.test("auth rejection returns structured error on empty body", async () => {
+  // Note: auth fails before plan_id validation runs.
+  // plan_id validation (400 "plan_id is required") requires valid JWT
+  // and is tested at staging level.
   const res = await fetch(BASE, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({}),
   });
+  assertEquals(res.status, 401);
   const body = await res.json();
-  // Should have an error field in all error responses
   assertExists(body.error);
 });

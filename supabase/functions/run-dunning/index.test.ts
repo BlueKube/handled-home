@@ -73,13 +73,14 @@ Deno.test("rejects invalid cron secret", async () => {
   assertExists(body);
 });
 
-Deno.test("response body contains expected shape on error", async () => {
+Deno.test("error response contains status and message fields", async () => {
   const res = await fetch(BASE, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: "{}",
   });
   const body = await res.json();
-  // Error responses should have status or message field
-  assertExists(body.status || body.message || body.error);
+  // run-dunning error responses return { status: "error", message: String(error) }
+  assertExists(body.status);
+  assertExists(body.message);
 });

@@ -48,8 +48,9 @@ Deno.test("rejects anon key as admin token", async () => {
   assertExists(body.error);
 });
 
-Deno.test("rejects request without payout_id", async () => {
-  // Even with auth failing first, the response should indicate an error
+Deno.test("rejects invalid token with empty body", async () => {
+  // Note: auth fails before payout_id validation runs.
+  // payout_id validation is tested at staging level with valid admin credentials.
   const res = await fetch(BASE, {
     method: "POST",
     headers: {
@@ -63,8 +64,9 @@ Deno.test("rejects request without payout_id", async () => {
   assertExists(body.error);
 });
 
-Deno.test("rejects request with nonexistent payout_id", async () => {
-  // Auth will fail first, but validates the error path
+Deno.test("rejects invalid token with payout_id in body", async () => {
+  // Note: auth fails before payout_id lookup runs.
+  // Payout lookup and Stripe transfer are tested at staging level.
   const res = await fetch(BASE, {
     method: "POST",
     headers: {
