@@ -148,7 +148,7 @@ Think of handles like cell phone data: you get an allocation, and overages cost 
       },
       {
         text: "Review plan performance quarterly: subscriber counts per plan, handle utilization rates, upgrade/downgrade trends. This tells you if your tier structure is working or if customers are gravitating to one plan and ignoring the others.",
-        type: "weekly-check",
+        type: "set-and-forget",
       },
     ],
   },

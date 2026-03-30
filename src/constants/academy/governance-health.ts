@@ -38,6 +38,11 @@ The morning health check routine: Cron Health → Notification Health → Audit 
         description: "If billing cron usually takes 30 seconds but yesterday took 5 minutes, something changed — maybe your subscriber count grew, maybe a query is slow, maybe the database is under load. Duration creep is an early warning sign of future failures.",
         screenshot: { alt: "Cron run duration history" },
       },
+      {
+        title: "When cron fails — what to do",
+        description: "If you see a failure: (1) Check which job failed — billing and assignment are P0 emergencies, snapshot rollup is P2. (2) For billing cron failure: escalate immediately to a senior operator or engineering. No billing means no invoices, no dunning, and no revenue recorded. (3) For assignment failure: tomorrow's routes won't generate. Check if it can be manually re-triggered; if not, escalate. (4) For payout cron failure on Friday: providers won't get paid. This needs same-day resolution. (5) For snapshot or analytics failures: note it, but don't panic — operations continue normally. Check again tomorrow. If it fails 2 days in a row, escalate.",
+        screenshot: { alt: "Cron Health page showing a failed job with action steps" },
+      },
     ],
   },
   {
