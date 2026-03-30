@@ -132,10 +132,20 @@ export function simulate(input?: ModelAssumptions): SimulationResult {
     customersWithSecondService = Math.round(attachEligible * attachRate);
 
     // --- JOBS ---
-    // Each customer generates ~4 jobs per month (weekly service)
-    // Customers with second service generate additional jobs
-    const baseJobs = activeCustomers * 4;
-    const addonJobs = customersWithSecondService * 2; // Add-on is typically biweekly
+    // In the handles model, customers don't get unlimited service.
+    // Each plan has a handle allowance per 28-day cycle.
+    // Essential: ~14 handles (2 services/month at ~7 handles each)
+    // Plus: ~28 handles (weekly service)
+    // Premium: ~50 handles (weekly + extras)
+    // Average handles per cycle determines jobs generated.
+    const handlesPerJobAvg = 7; // ~7 handles = 1 standard lawn visit
+    const avgHandlesPerCycle =
+      14 * m.plan_mix_essential +
+      28 * m.plan_mix_plus +
+      50 * m.plan_mix_premium;
+    const jobsPerCustomerPerMonth = avgHandlesPerCycle / handlesPerJobAvg;
+    const baseJobs = Math.round(activeCustomers * jobsPerCustomerPerMonth);
+    const addonJobs = Math.round(customersWithSecondService * (m.avg_handles_per_addon / handlesPerJobAvg));
     const totalJobs = baseJobs + addonJobs;
 
     // --- REVENUE ---
