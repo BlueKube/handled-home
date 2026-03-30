@@ -145,6 +145,24 @@ When NOT to activate: Snow removal is weather-dependent by nature — don't canc
 After weather clears, check the rescheduling queue. Weather mode creates a backlog that can take 2-3 days to clear. If you activated weather mode for 2 days, expect the following week to be 15-20% heavier than normal as rescheduled jobs stack up.`,
   },
   {
+    id: "window-templates",
+    title: "Window Templates — Shaping When Work Happens",
+    type: "text",
+    content: `Window Templates define the appointment windows available for each service type in each zone. They're one of the most powerful and underused scheduling tools.
+
+A window template specifies: the time blocks customers can choose from (e.g., 8am–12pm, 12pm–4pm), the duration of each window, and which SKUs or zones the template applies to. Different service types naturally need different windows:
+
+• Lawn care: wide windows work (8am–12pm morning block). The customer doesn't need to be home. Provider flexibility is more important than precision.
+• Pest treatment: narrow windows are better (10am–12pm, 2pm–4pm). The homeowner often needs to be present for interior treatment, so a tighter window reduces their waiting time.
+• Pool service: morning-only windows (7am–11am) work best. Chemical treatments need sun exposure time, and customers want to use their pool in the afternoon.
+
+WHERE TO FIND THEM: Admin → Scheduling → Window Templates. Each template shows the service types it applies to, the zones it covers, and the time blocks configured.
+
+WHEN TO MODIFY: When you see a pattern of under-booked afternoon slots with overbooked morning slots, the fix isn't more providers — it's better window design. Staggering windows (8–10am, 9–11am, 10am–12pm) instead of a single 8am–12pm block creates more bookable slots without adding capacity.
+
+CAUTION: Window template changes affect all future bookings in the affected zones/SKUs immediately. Existing locked jobs keep their original windows. Make changes Monday–Wednesday so you can observe the impact before the weekend.`,
+  },
+  {
     id: "pro-tips",
     title: "Pro Tips from Veteran Operators",
     type: "pro-tips",

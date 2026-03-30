@@ -39,7 +39,13 @@ Healthy: 20-30% of referral links convert to signups, and 50%+ of signups become
 BYOP FUNNEL
 Customer recommends provider → Admin reviews recommendation → Provider is contacted → Provider applies → Provider is approved
 
-Healthy: This is slower by nature (weeks, not days). Track "recommendations per month" as a leading indicator. If customers are recommending providers you can't reach, the contact method needs work.
+Healthy: This is slower by nature (weeks, not days). A healthy BYOP pipeline sees 5-10 recommendations per month per active zone. Track two conversion metrics: contact success rate (can you actually reach the recommended provider? target: 60%+) and application-to-approval rate (of those who apply, how many pass screening? target: 40-50%).
+
+When a BYOP recommendation arrives, it appears in the Applications queue tagged as "Customer Referred." Review it within 48 hours — the recommending customer is waiting to hear if their provider will join. Check: does the recommended provider's service area overlap with your active zones? Is the zone already at capacity? If the zone is saturated, you can still contact the provider for a future zone or waitlist.
+
+Rejection criteria: geographic mismatch (provider is 45+ minutes from the zone), zone already at provider capacity, unverifiable credentials, or the provider is already on a competing platform with an exclusivity clause. When you reject, always close the loop with the customer who recommended them — a brief "thank you, we're not adding providers in that area right now" preserves the relationship.
+
+Key difference from BYOC: BYOC is provider-initiated (they bring existing customers). BYOP is customer-initiated (they recommend a provider they trust). BYOP fills supply gaps in zones where you need more providers, while BYOC fills demand gaps in zones where you need more customers. Both are valuable, but they solve different problems.
 
 K-FACTOR
 The K-factor measures viral growth: average referrals per customer × referral conversion rate. A K-factor above 0.3 means each customer brings in roughly one new customer per 3 customers. Above 1.0 means organic viral growth (rare in home services). Track this monthly — it tells you if your referral program is actually working or just giving away credits.`,
