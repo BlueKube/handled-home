@@ -106,3 +106,105 @@ UPDATE public.service_skus SET
   price_hint_cents = 10000,
   pricing_notes = 'Per-shrub: $15-$25. Per linear foot (hedge): $2-$5. 2-4 times/year. Provider payout ~$100.'
 WHERE id = 'c1000000-0000-0000-0000-000000000004';
+
+-- ============================================
+-- B2: Treatment/Cleanup SKUs (IDs 005-008)
+-- ============================================
+
+-- Weed Treatment
+UPDATE public.service_skus SET
+  description = 'Targeted or broadcast herbicide application for lawn and bed weed control. Requires licensed applicator.',
+  category = 'treatment',
+  duration_minutes = 35,
+  base_price_cents = 8500,
+  handle_cost = 8,
+  scheduling_profile = 'day_commit',
+  access_mode = 'exterior_only',
+  fulfillment_mode = 'independent_cadence',
+  presence_required = false,
+  weather_sensitive = true,
+  inclusions = ARRAY['Pre-emergent or post-emergent application','Broadcast spray across full lawn','Spot treatment of visible weeds','Treatment notification sign posted'],
+  exclusions = ARRAY['Hand weeding','Bed weed barrier installation','Invasive species removal','Hardscape weed treatment'],
+  checklist = '[{"label":"Apply pre/post-emergent as needed","required":true},{"label":"Spot treat visible weeds","required":true},{"label":"Post notification sign","required":true}]'::jsonb,
+  required_photos = '["after"]'::jsonb,
+  proof_rules = '{"photo_required": true, "privacy_safe": false}'::jsonb,
+  customer_prep = ARRAY['Keep pets off lawn for 24 hours after treatment','No irrigation for 24-48 hours after application'],
+  required_equipment = ARRAY['Backpack sprayer','Broadcast spreader','PPE (gloves, eye protection)','Treatment notification signs'],
+  provider_category = 'outdoor',
+  requires_training_gate = true,
+  price_hint_cents = 6500,
+  pricing_notes = 'Requires state pesticide applicator license. 4-7 apps/year. Research: $65-$150/app (Thumbtack 2024). Provider payout ~$65.'
+WHERE id = 'c1000000-0000-0000-0000-000000000005';
+
+-- Fertilization
+UPDATE public.service_skus SET
+  description = 'Seasonal lawn fertilizer application. Usually bundled with weed treatment in a lawn care program.',
+  category = 'treatment',
+  duration_minutes = 30,
+  base_price_cents = 7500,
+  handle_cost = 8,
+  scheduling_profile = 'day_commit',
+  access_mode = 'exterior_only',
+  fulfillment_mode = 'independent_cadence',
+  presence_required = false,
+  weather_sensitive = true,
+  inclusions = ARRAY['Granular or liquid fertilizer application','Seasonal-appropriate NPK blend','Coverage of full turf area'],
+  exclusions = ARRAY['Soil testing','Weed control','Aeration','Overseeding','Lime/sulfur adjustment'],
+  checklist = '[{"label":"Apply fertilizer at correct rate","required":true},{"label":"Cover full turf area","required":true},{"label":"Avoid hard surfaces","required":true}]'::jsonb,
+  required_photos = '["after"]'::jsonb,
+  proof_rules = '{"photo_required": true, "privacy_safe": false}'::jsonb,
+  customer_prep = ARRAY['Water lawn within 24-48 hours after application','Keep pets off treated area until watered in'],
+  required_equipment = ARRAY['Broadcast spreader','Backpack sprayer (liquid apps)','Fertilizer product'],
+  provider_category = 'outdoor',
+  requires_training_gate = true,
+  price_hint_cents = 5500,
+  pricing_notes = 'Usually bundled with weed treatment. 4-7 apps/year. Research: $55-$110/app. Provider payout ~$55. Annual program: $275-$660.'
+WHERE id = 'c1000000-0000-0000-0000-000000000006';
+
+-- Mulch Application
+UPDATE public.service_skus SET
+  description = 'Spread mulch in garden beds. Priced by scope — typical suburban home needs 3-8 cubic yards.',
+  category = 'cleanup',
+  duration_minutes = 180,
+  base_price_cents = 35000,
+  handle_cost = 22,
+  scheduling_profile = 'day_commit',
+  access_mode = 'exterior_only',
+  fulfillment_mode = 'same_week_allowed',
+  presence_required = false,
+  weather_sensitive = false,
+  inclusions = ARRAY['Edge all beds','Lay weed barrier where needed','Spread mulch at 2-3 inch depth','Detail around plants and features'],
+  exclusions = ARRAY['Old mulch removal','New bed creation','Planting','Soil amendment','Mulch material (billed separately or included in quote)'],
+  checklist = '[{"label":"Edge all beds","required":true},{"label":"Lay weed barrier","required":false},{"label":"Spread mulch evenly","required":true},{"label":"Detail around plants","required":true},{"label":"Clean up spills","required":true}]'::jsonb,
+  required_photos = '["before","after"]'::jsonb,
+  proof_rules = '{"photo_required": true, "privacy_safe": false}'::jsonb,
+  customer_prep = ARRAY['Select mulch type in advance','Ensure bed access is clear'],
+  required_equipment = ARRAY['Wheelbarrows','Pitchforks','Rakes','Bed edger','Mulch blower (large jobs)'],
+  provider_category = 'outdoor',
+  price_hint_cents = 17500,
+  pricing_notes = 'Per cubic yard installed: $55-$85 (standard), $65-$110 (premium). 1 yard = ~100-160 sq ft at 2-3". Provider payout ~$175. 1-2x/year.'
+WHERE id = 'c1000000-0000-0000-0000-000000000007';
+
+-- Spring Prep
+UPDATE public.service_skus SET
+  description = 'Comprehensive spring yard preparation. The seasonal reset that starts the growing season right.',
+  category = 'cleanup',
+  duration_minutes = 240,
+  base_price_cents = 35000,
+  handle_cost = 25,
+  scheduling_profile = 'day_commit',
+  access_mode = 'exterior_only',
+  fulfillment_mode = 'same_week_allowed',
+  presence_required = false,
+  weather_sensitive = true,
+  inclusions = ARRAY['Rake/blow winter debris from lawn and beds','Cut back dead perennials','Edge all beds','Pre-emergent weed treatment','Spot weed pulling','Prune dead/damaged shrub branches','First mow of season'],
+  exclusions = ARRAY['Mulch application (separate SKU)','Aeration','Overseeding','Fertilizer application (separate SKU)','Tree pruning above 10 feet'],
+  checklist = '[{"label":"Clear winter debris","required":true},{"label":"Cut back perennials","required":true},{"label":"Edge beds","required":true},{"label":"Apply pre-emergent","required":true},{"label":"Prune dead branches","required":true},{"label":"First mow","required":true}]'::jsonb,
+  required_photos = '["before","after"]'::jsonb,
+  proof_rules = '{"photo_required": true, "privacy_safe": false}'::jsonb,
+  customer_prep = ARRAY['Remove temporary winter items from yard','Note any new plantings or changes'],
+  required_equipment = ARRAY['Full lawn care kit','Pruners','Bed edger','Pre-emergent product','Rakes','Blowers'],
+  provider_category = 'outdoor',
+  price_hint_cents = 20000,
+  pricing_notes = 'Research: $250-$450 standard prep (medium lot). Provider payout ~$200. 1x/year (March-May). May require multiple crew types.'
+WHERE id = 'c1000000-0000-0000-0000-000000000008';
