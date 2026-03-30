@@ -9,8 +9,8 @@
 
 ## Session Handoff
 - **Branch:** claude/add-feature-maturity-ratings-tMeen
-- **Last completed:** PRD-015 (SKU Calibration Workflow)
-- **Next up:** PRD-017 — Seasonal Revenue Modeling
+- **Last completed:** PRD-017 (Seasonal Revenue Modeling)
+- **Next up:** PRD-021 — Services Catalog Plan Context
 - **Context at exit:** —
 - **Blockers:** None
 - **PRD queue:** 13 PRDs remaining (014–026)
@@ -25,7 +25,7 @@
 | 014 | Seed Data Audit & Cleanup | M | ✅ | 5% |
 | 015 | SKU Calibration Workflow | M | ✅ | 10% |
 | 016 | Provider Interview Data Entry | M | ⬜ | |
-| 017 | Seasonal Revenue Modeling | M | ⬜ | |
+| 017 | Seasonal Revenue Modeling | M | ✅ | 15% |
 | 018 | Multi-Category Economics | M | ⬜ | |
 | 019 | Provider Acquisition Funnel | S | ⬜ | |
 | 020 | Census Data Integration | M | ⬜ | |
