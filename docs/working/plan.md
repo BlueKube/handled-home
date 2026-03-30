@@ -9,8 +9,8 @@
 
 ## Session Handoff
 - **Branch:** claude/add-feature-maturity-ratings-tMeen
-- **Last completed:** PRD-021 (Services Catalog Plan Context)
-- **Next up:** PRD-023 — Payment & Billing Test Coverage
+- **Last completed:** PRD-023 (Payment & Billing Test Coverage)
+- **Next up:** PRD-026 — Pre-Launch Checklist & Smoke Test
 - **Context at exit:** —
 - **Blockers:** None
 - **PRD queue:** 13 PRDs remaining (014–026)
@@ -31,7 +31,7 @@
 | 020 | Census Data Integration | M | ⬜ | |
 | 021 | Services Catalog Plan Context | M | ✅ | 20% |
 | 022 | Design System Alignment | M | ⬜ | |
-| 023 | Payment & Billing Test Coverage | L | ⬜ | |
+| 023 | Payment & Billing Test Coverage | L | ✅ | 30% |
 | 024 | Provider Outreach Materials | M | ⬜ | |
 | 025 | Zone Builder Calibration | M | ⬜ | |
 | 026 | Pre-Launch Checklist & Smoke Test | M | ⬜ | |
