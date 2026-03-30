@@ -133,7 +133,7 @@ UPDATE public.service_skus SET
   provider_category = 'outdoor',
   requires_training_gate = true,
   price_hint_cents = 6500,
-  pricing_notes = 'Requires state pesticide applicator license. 4-7 apps/year. Research: $65-$150/app (Thumbtack 2024). Provider payout ~$65.'
+  pricing_notes = 'Requires state pesticide applicator license. 4-7 apps/year. Research: $65-$150/app (Thumbtack 2024). Provider payout ~$65. Handle cost (8) exceeds time-based estimate (~5.5) because licensed applicator work commands a premium per-handle rate vs general lawn care.'
 WHERE id = 'c1000000-0000-0000-0000-000000000005';
 
 -- Fertilization
@@ -158,7 +158,7 @@ UPDATE public.service_skus SET
   provider_category = 'outdoor',
   requires_training_gate = true,
   price_hint_cents = 5500,
-  pricing_notes = 'Usually bundled with weed treatment. 4-7 apps/year. Research: $55-$110/app. Provider payout ~$55. Annual program: $275-$660.'
+  pricing_notes = 'Usually bundled with weed treatment. 4-7 apps/year. Research: $55-$110/app. Provider payout ~$55. Annual program: $275-$660. Handle cost (8) exceeds time-based estimate (~4.7) because licensed applicator work commands a premium per-handle rate. Aligns with weed treatment anchor.'
 WHERE id = 'c1000000-0000-0000-0000-000000000006';
 
 -- Mulch Application
@@ -214,19 +214,21 @@ WHERE id = 'c1000000-0000-0000-0000-000000000008';
 -- ============================================
 
 -- Window Cleaning
+-- NOTE: Base SKU defaults to exterior-only (no homeowner needed). Interior
+-- cleaning is level-dependent — Level 2+ overrides access_mode to customer_present.
 UPDATE public.service_skus SET
-  description = 'Professional window cleaning — exterior only, interior + exterior, or full detail. 2-story surcharge applies.',
+  description = 'Professional window cleaning — exterior only at base level. Interior + exterior and full detail available at higher service levels. 2-story surcharge applies.',
   category = 'windows',
-  duration_minutes = 180,
-  base_price_cents = 27500,
-  handle_cost = 22,
+  duration_minutes = 90,
+  base_price_cents = 15000,
+  handle_cost = 13,
   scheduling_profile = 'appointment_window',
   access_mode = 'exterior_only',
   fulfillment_mode = 'same_week_allowed',
   presence_required = false,
   weather_sensitive = true,
-  inclusions = ARRAY['Clean both sides of all windows','Frame and sill wipe','Screen cleaning','Track vacuuming'],
-  exclusions = ARRAY['Hard water stain removal','Skylight interior','Storm window disassembly','Mirror cleaning'],
+  inclusions = ARRAY['Clean exterior side of all windows','Frame wipe','Screen rinse'],
+  exclusions = ARRAY['Interior window cleaning (see higher service levels)','Hard water stain removal','Skylight interior','Storm window disassembly','Mirror cleaning'],
   checklist = '[{"label":"Clean all exterior windows","required":true},{"label":"Clean all interior windows","required":true},{"label":"Wipe frames and sills","required":true},{"label":"Clean screens","required":true},{"label":"Vacuum tracks","required":true}]'::jsonb,
   required_photos = '["after"]'::jsonb,
   proof_rules = '{"photo_required": true, "privacy_safe": true}'::jsonb,
@@ -287,28 +289,31 @@ UPDATE public.service_skus SET
 WHERE id = 'c1000000-0000-0000-0000-00000000000b';
 
 -- Pest Control
+-- NOTE: Base SKU defaults to exterior-only (most common booking). Interior
+-- treatment is level-dependent — Level 2+ overrides access_mode to customer_present.
+-- sku_levels will specify per-level presence_required when levels are created (PRD-046).
 UPDATE public.service_skus SET
-  description = 'Perimeter spray, inspection, and treatment for general household pests. Licensed applicator required.',
+  description = 'Exterior perimeter spray, de-web, and granular treatment for general household pests. Interior treatment available at higher service levels. Licensed applicator required.',
   category = 'pest',
-  duration_minutes = 45,
-  base_price_cents = 12500,
-  handle_cost = 9,
+  duration_minutes = 25,
+  base_price_cents = 10000,
+  handle_cost = 6,
   scheduling_profile = 'day_commit',
   access_mode = 'exterior_only',
   fulfillment_mode = 'independent_cadence',
   presence_required = false,
   weather_sensitive = true,
-  inclusions = ARRAY['Exterior perimeter spray','De-web eaves and entry points','Granular treatment around foundation','Interior baseboard spray','Kitchen and bath crack-and-crevice treatment','Glue board monitors'],
-  exclusions = ARRAY['Termite treatment','Mosquito yard treatment','Rodent exclusion','Bed bug treatment','Wildlife removal'],
-  checklist = '[{"label":"Spray exterior perimeter","required":true},{"label":"De-web eaves","required":true},{"label":"Apply granular treatment","required":true},{"label":"Treat interior baseboards","required":true},{"label":"Treat kitchen/bath areas","required":true}]'::jsonb,
+  inclusions = ARRAY['Exterior perimeter spray','De-web eaves and entry points','Granular treatment around foundation','Bait station placement'],
+  exclusions = ARRAY['Interior treatment (see higher service levels)','Termite treatment','Mosquito yard treatment','Rodent exclusion','Bed bug treatment','Wildlife removal'],
+  checklist = '[{"label":"Spray exterior perimeter","required":true},{"label":"De-web eaves","required":true},{"label":"Apply granular treatment","required":true},{"label":"Place bait stations","required":true}]'::jsonb,
   required_photos = '[]'::jsonb,
   proof_rules = '{"photo_required": false, "privacy_safe": true}'::jsonb,
-  customer_prep = ARRAY['Clear items from along baseboards','Ensure access to kitchen cabinets under sink','Keep pets secured during treatment'],
-  required_equipment = ARRAY['Backpack sprayer','Compressed air sprayer','Bait stations','Granular spreader','Glue boards','PPE'],
+  customer_prep = ARRAY['Ensure exterior perimeter is accessible','Move items away from foundation'],
+  required_equipment = ARRAY['Backpack sprayer','Compressed air sprayer','Bait stations','Granular spreader','PPE'],
   provider_category = 'outdoor',
   requires_training_gate = true,
-  price_hint_cents = 7000,
-  pricing_notes = 'Quarterly standard. Initial visit higher ($150-$250). Quarterly: $100-$175. Provider payout ~$70. All 50 states require pest control license.'
+  price_hint_cents = 4500,
+  pricing_notes = 'Quarterly standard. Base=exterior only (6 handles). Int+Ext level=9 handles. Comprehensive=15 handles. All 50 states require pest control license.'
 WHERE id = 'c1000000-0000-0000-0000-00000000000c';
 
 -- Dog Poop Cleanup
@@ -383,7 +388,7 @@ INSERT INTO public.service_skus (
   'Fall Prep',
   'Comprehensive fall yard preparation and winterization. The seasonal bookend to Spring Prep.',
   'cleanup', 'active',
-  300, 40000, 25,
+  240, 40000, 25,
   'day_commit', 'exterior_only', 'same_week_allowed',
   false, true,
   ARRAY['Full leaf removal (1-2 passes)','Final mow of season','Cut back perennials','Winterizer fertilizer application','Overseed bare spots','Blow out beds and hardscapes'],
