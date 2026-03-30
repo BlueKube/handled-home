@@ -60,7 +60,7 @@ Earnings from completed jobs are held for a configurable period (typically 48-72
 
 WHY PAYOUT CONFIGURATION MATTERS
 
-Provider payout is the #1 economic lever. The $45-$65/job range for lawn care is where the negotiation happens. Too low and providers leave. Too high and your margin disappears. The right number depends on your market: a provider in Austin ($45/job) has lower cost of living than one in San Francisco (where $65 might be the floor).
+Provider payout is the #1 economic lever. The $45–$65/job provider payout range for lawn care (not the customer-facing price, which is higher) is where the negotiation happens. Too low and providers leave. Too high and your margin disappears. The right number depends on your market: a provider in Austin ($45/job) has lower cost of living than one in San Francisco (where $65 might be the floor).
 
 Providers who see consistent, predictable weekly payouts are significantly more likely to stay on the platform. Unpredictable or delayed payments are the #1 reason providers leave any gig platform. The payout configuration should prioritize reliability over optimization.`,
   },

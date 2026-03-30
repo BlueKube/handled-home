@@ -113,7 +113,7 @@ A mismatch between what was billed and what should have been billed. These are u
     id: "analytics",
     title: "Exception Analytics — Finding Patterns",
     type: "text",
-    content: `The Exception Analytics page (accessed from Ops Cockpit or Execution menu) shows you trends over time. This is where exception management turns from reactive firefighting into proactive process improvement.
+    content: `The Exception Analytics page (at Admin → Ops → Exception Analytics, or via the Execution section in the sidebar) shows you trends over time. Note: the Ops Cockpit doesn't link directly to this page — navigate via the sidebar menu. This is where exception management turns from reactive firefighting into proactive process improvement.
 
 Key things to look for:
 

@@ -19,7 +19,7 @@ ACTIVE — The provider is on the schedule, completing jobs, submitting proof, g
 
 PERFORMANCE MANAGEMENT — Ongoing coaching and feedback loop. Weekly metrics review, quality flag triage, customer complaint response. Good operators don't wait for problems to escalate — they catch signals early and course-correct.
 
-PROBATION — Triggered by specific thresholds (2+ no-shows in 30 days, proof compliance below 80%, or a pattern of quality complaints). Probation is a formal intervention with a defined review window. It's not punitive — it's structured. Some providers turn it around. Some don't.
+PROBATION — Driven by the quality score system (visible in the Playbooks page). Score 50–70 triggers a written warning. Below 50 triggers formal probation. Below 30 triggers suspension review. The score is affected by no-shows (3 within 30 days triggers a probation review), proof compliance, and customer complaints. Probation is a formal intervention with a defined review window. It's not punitive — it's structured. Some providers turn it around. Some don't.
 
 OFFBOARDING — Voluntary (provider leaves) or involuntary (deactivation). Voluntary exits get an exit interview and final payout settlement. Involuntary exits require documentation of the cause, admin deactivation of their account, and notification. Always document why. You will be asked.
 
@@ -52,7 +52,7 @@ The lifecycle is a pipeline. Your job is to keep quality providers moving throug
       },
       {
         title: "Complete Stripe Connect onboarding",
-        description: "Until the provider completes Stripe identity verification, payouts are blocked. From the provider record → Payout Settings, send them the Stripe Connect onboarding link. Follow up after 48 hours if they haven't completed it. New providers are often confused by the identity verification steps — they may need reassurance that it's standard. Do not activate the provider for scheduling until Stripe onboarding shows ACTIVE status.",
+        description: "Until the provider completes Stripe identity verification, payouts are blocked. From the provider record → Payout Settings, send them the Stripe Connect onboarding link. Follow up after 48 hours if they haven't completed it. New providers are often confused by the identity verification steps — they may need reassurance that it's standard. Important: the system does not prevent job assignment for providers without active payout accounts — this is a manual discipline you must enforce. Do not activate the provider for scheduling until their payout account shows READY status. If you skip this check, the provider will complete jobs, accumulate earnings, and discover they can't get paid — which destroys the relationship immediately.",
         screenshot: { alt: "Provider Stripe Connect status in payout settings" },
       },
       {
@@ -173,7 +173,7 @@ The lifecycle is a pipeline. Your job is to keep quality providers moving throug
         severity: "critical",
       },
       {
-        text: "Be extremely careful about letting a provider accumulate no-shows without triggering the formal probation process. Two no-shows in 30 days is the threshold — not two no-shows and then 'we'll give it one more chance.' The probation trigger exists because informal warnings don't create accountability. Providers who've tested the system and found no real consequence will continue the behavior. Apply the thresholds consistently across your entire roster.",
+        text: "Be extremely careful about letting a provider accumulate no-shows without triggering the formal process. Three no-shows within 30 days triggers a probation review via the quality score system (see Playbooks page). Don't override the system with 'we'll give it one more chance.' The probation trigger exists because informal warnings don't create accountability. Providers who've tested the system and found no real consequence will continue the behavior. Apply the thresholds consistently across your entire roster.",
         severity: "critical",
       },
       {
