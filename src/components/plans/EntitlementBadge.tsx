@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Check, Plus, X, Shield } from "lucide-react";
 
-type EntitlementStatus = "included" | "extra_allowed" | "blocked" | "provider_only" | "available";
+export type EntitlementStatus = "included" | "extra_allowed" | "blocked" | "provider_only" | "available";
 
 const config: Record<EntitlementStatus, { label: string; icon: React.ElementType; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   included: { label: "Included", icon: Check, variant: "default" },

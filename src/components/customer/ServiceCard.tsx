@@ -4,9 +4,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import type { ServiceSku } from "@/hooks/useSkus";
 import { getServiceImage } from "@/lib/serviceImages";
 import { getCategoryIcon, getCategoryGradient } from "@/lib/serviceCategories";
-import { EntitlementBadge } from "@/components/plans/EntitlementBadge";
-
-type EntitlementStatus = "included" | "extra_allowed" | "blocked" | "provider_only" | "available";
+import { EntitlementBadge, type EntitlementStatus } from "@/components/plans/EntitlementBadge";
 
 interface ServiceCardProps {
   sku: ServiceSku;

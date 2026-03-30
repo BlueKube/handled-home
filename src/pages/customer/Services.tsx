@@ -10,6 +10,7 @@ import { ServiceCard } from "@/components/customer/ServiceCard";
 import { getCategoryLabel, getCategoryIcon, CATEGORY_ORDER } from "@/lib/serviceCategories";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
 import { useEntitlements } from "@/hooks/useEntitlements";
+import type { EntitlementStatus } from "@/components/plans/EntitlementBadge";
 
 export default function CustomerServices() {
   const [search, setSearch] = useState("");
@@ -23,11 +24,11 @@ export default function CustomerServices() {
   const { data: entitlements } = useEntitlements(
     subscription?.plan_id ?? null,
     subscription?.zone_id ?? null,
-    subscription?.entitlement_version_id,
+    subscription?.entitlement_version_id ?? null,
   );
 
   const skuStatusMap = useMemo(() => {
-    const map = new Map<string, "included" | "extra_allowed" | "blocked" | "provider_only" | "available">();
+    const map = new Map<string, EntitlementStatus>();
     if (entitlements?.skus) {
       for (const sku of entitlements.skus) {
         map.set(sku.sku_id, sku.status);
