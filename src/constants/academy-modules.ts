@@ -5,6 +5,21 @@ import {
   TrendingUp, Shield, Lock, BookOpen, GraduationCap,
 } from "lucide-react";
 import type { TrainingSection } from "@/components/academy/AcademySection";
+import { opsCockpitSections } from "./academy/ops-cockpit";
+import { jobsSchedulingSections } from "./academy/jobs-scheduling";
+import { exceptionManagementSections } from "./academy/exception-management";
+import { providerLifecycleSections } from "./academy/provider-lifecycle";
+import { customerBillingSections } from "./academy/customer-billing";
+import { providerPayoutsSections } from "./academy/provider-payouts";
+import { zonesMarketsSections } from "./academy/zones-markets";
+import { skuCatalogSections } from "./academy/sku-catalog";
+import { plansBundlesSections } from "./academy/plans-bundles";
+import { supportOperationsSections } from "./academy/support-operations";
+import { growthIncentivesSections } from "./academy/growth-incentives";
+import { governanceHealthSections } from "./academy/governance-health";
+import { controlRoomSections } from "./academy/control-room";
+import { sopsPlaybooksSections } from "./academy/sops-playbooks";
+import { firstWeekSections } from "./academy/first-week";
 
 export interface AcademyModule {
   id: string;
@@ -40,7 +55,7 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     icon: Gauge,
     estimatedMinutes: 25,
     category: "daily-ops",
-    sections: [],
+    sections: opsCockpitSections,
   },
   {
     id: "jobs-scheduling",
@@ -49,7 +64,7 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     icon: ListChecks,
     estimatedMinutes: 35,
     category: "daily-ops",
-    sections: [],
+    sections: jobsSchedulingSections,
   },
   {
     id: "exception-management",
@@ -58,7 +73,7 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     icon: AlertTriangle,
     estimatedMinutes: 20,
     category: "daily-ops",
-    sections: [],
+    sections: exceptionManagementSections,
   },
   {
     id: "provider-lifecycle",
@@ -67,7 +82,7 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     icon: Users,
     estimatedMinutes: 30,
     category: "weekly-ops",
-    sections: [],
+    sections: providerLifecycleSections,
   },
   {
     id: "customer-billing",
@@ -76,7 +91,7 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     icon: DollarSign,
     estimatedMinutes: 20,
     category: "weekly-ops",
-    sections: [],
+    sections: customerBillingSections,
   },
   {
     id: "provider-payouts",
@@ -85,7 +100,7 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     icon: Wallet,
     estimatedMinutes: 20,
     category: "weekly-ops",
-    sections: [],
+    sections: providerPayoutsSections,
   },
   {
     id: "zones-markets",
@@ -94,7 +109,7 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     icon: Map,
     estimatedMinutes: 30,
     category: "weekly-ops",
-    sections: [],
+    sections: zonesMarketsSections,
   },
   {
     id: "sku-catalog",
@@ -103,7 +118,7 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     icon: Package,
     estimatedMinutes: 25,
     category: "setup",
-    sections: [],
+    sections: skuCatalogSections,
   },
   {
     id: "plans-bundles",
@@ -112,7 +127,7 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     icon: Layers,
     estimatedMinutes: 25,
     category: "setup",
-    sections: [],
+    sections: plansBundlesSections,
   },
   {
     id: "support-operations",
@@ -121,7 +136,7 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     icon: HelpCircle,
     estimatedMinutes: 20,
     category: "reactive",
-    sections: [],
+    sections: supportOperationsSections,
   },
   {
     id: "growth-incentives",
@@ -130,7 +145,7 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     icon: TrendingUp,
     estimatedMinutes: 20,
     category: "reactive",
-    sections: [],
+    sections: growthIncentivesSections,
   },
   {
     id: "governance-health",
@@ -139,7 +154,7 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     icon: Shield,
     estimatedMinutes: 25,
     category: "governance",
-    sections: [],
+    sections: governanceHealthSections,
   },
   {
     id: "control-room",
@@ -148,7 +163,7 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     icon: Lock,
     estimatedMinutes: 20,
     category: "governance",
-    sections: [],
+    sections: controlRoomSections,
   },
   {
     id: "sops-playbooks",
@@ -157,7 +172,7 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     icon: BookOpen,
     estimatedMinutes: 15,
     category: "governance",
-    sections: [],
+    sections: sopsPlaybooksSections,
   },
   {
     id: "first-week",
@@ -166,6 +181,6 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     icon: GraduationCap,
     estimatedMinutes: 45,
     category: "onboarding",
-    sections: [],
+    sections: firstWeekSections,
   },
 ];

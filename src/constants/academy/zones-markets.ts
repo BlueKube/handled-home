@@ -1,0 +1,225 @@
+import type { TrainingSection } from "@/components/academy/AcademySection";
+
+export const zonesMarketsSections: TrainingSection[] = [
+  {
+    id: "overview",
+    title: "What Are Zones and Why Do They Matter?",
+    type: "overview",
+    content: `A zone is the fundamental unit of your market. It's not just a geographic boundary — it's the container for all your density economics. Every provider you onboard, every customer you acquire, and every job you schedule lives inside a zone. Get the zones wrong and nothing else works well.
+
+We use an H3 hex grid system. Hexagons tile perfectly without gaps or overlaps, and every hex at the same resolution has the same area — so when you compare utilization across zones, you're comparing apples to apples. Don't try to draw irregular shapes to match city limits or zip codes. Align to the hex grid and let the math work.
+
+Why does density matter? Because home services is a proximity business. When a provider's next job is 5 minutes away instead of 35, they can fit more jobs in a day, earn more per hour, and they churn less. When customers see providers who know their neighborhood, they convert faster and stay longer. Density is the engine — everything else is just levers.
+
+The zone lifecycle has four stages:
+
+• Planning — You've identified demand signals (referral traffic, waitlist signups, inbound provider interest) but haven't launched. The zone exists in the system as a draft. You're deciding boundaries, doing capacity planning, and building your pre-launch provider bench.
+
+• Soft Launch — You have at least 5 active providers and have begun accepting customers, but you're not yet running paid acquisition. This is a validation phase. You're confirming that the demand is real, that providers can handle the job mix, and that your NPS is strong enough to justify scaling.
+
+• Live — The zone is fully operational. You're running acquisition, monitoring health weekly, and managing capacity proactively. This is where most of your operational time goes.
+
+• Paused / Sunset — Demand dried up, a competitor moved in, or provider supply collapsed and you couldn't rebuild it. Pausing is reversible; sunsetting is not. Don't sunset a zone without a 90-day recovery attempt first — markets can be rebuilt if you're patient.`,
+  },
+  {
+    id: "zone-design",
+    title: "Zone Design: Drawing Boundaries That Work",
+    type: "walkthrough",
+    steps: [
+      {
+        title: "Start with the demand signal, not the map",
+        description:
+          "Before you draw a single boundary, pull your referral traffic heatmap and your inbound provider applications. Where are customers already searching? Where are providers already living? The best zone design follows existing density signals — you're formalizing what's already happening, not trying to create demand from scratch. If you don't have data yet, use US Census tract population density as a proxy: target areas with 3,000+ households per square mile as your initial anchor.",
+        screenshot: { alt: "Referral traffic heatmap overlaid on H3 hex grid" },
+      },
+      {
+        title: "Draw the boundary at the natural density break",
+        description:
+          "Look for the edges where the heatmap cools off — that's where your zone boundary belongs. Don't try to include a neighborhood 'just in case' if the signal is weak there. A tight zone with strong density outperforms a large zone with thin coverage every single time. As a rule of thumb: launch zones should cover 15,000–40,000 households. Below 15K you won't generate enough job volume to retain providers. Above 40K you'll have drive-time problems before you have the provider count to solve them.",
+        screenshot: { alt: "Zone boundary drawn at density break with household count overlay" },
+      },
+      {
+        title: "Set provider density requirements before you open the zone",
+        description:
+          "Minimum viable zone requires 5 active providers across at least 3 different service categories. 'Active' means they've completed at least 1 job in the last 30 days — not just onboarded. Ideal launch density is 8–12 providers. Below 5, you'll have unacceptable response times and customers will churn before you can fix it. Above 15, you'll have underutilized providers who will churn for the same reason. The sweet spot is sustainable density, not maximum density.",
+        screenshot: { alt: "Provider density map showing active providers within zone boundary" },
+      },
+      {
+        title: "Set customer density thresholds for zone viability",
+        description:
+          "A zone becomes self-sustaining when it reaches 200 active subscribers. Below 100, providers are doing too much dead-driving and the economics don't work for them. Between 100–200, you're in the fragile zone — keep monitoring weekly. Above 200, the flywheel starts: providers are busy, response times are short, referrals compound. Your target steady state is 300–500 customers per zone before you consider splitting.",
+        screenshot: { alt: "Zone customer density chart showing viability thresholds" },
+      },
+      {
+        title: "Configure the zone in the system",
+        description:
+          "In Admin → Markets → Zones, create the zone record with the H3 hex IDs that define the boundary, the zone name, target launch date, assigned Zone Manager (if applicable), and minimum/maximum provider counts. Set the capacity thresholds here — the system uses these to trigger health alerts. Save as Draft until you're ready to move into soft launch. You can't accept customers in a Draft zone.",
+        screenshot: { alt: "Zone configuration form in Admin Markets panel" },
+      },
+    ],
+  },
+  {
+    id: "zone-health",
+    title: "Zone Health Monitoring",
+    type: "text",
+    content: `The Zone Health table lives at the bottom of the Ops Cockpit. It's a real-time report card for every active zone. Check it as part of your morning routine — most days it's all green and takes 30 seconds. When a zone turns yellow or red, that's your signal to dig in before it becomes a customer or provider churn event.
+
+Each zone row shows:
+
+• Health Score (Green / Yellow / Red) — a composite of the five metrics below. Green = all thresholds met. Yellow = one metric below threshold. Red = two or more metrics below threshold or any critical metric in breach.
+
+• Utilization Rate — percentage of available provider hours that are booked. Target range: 65–85%. Below 65%: providers are underutilized and may churn. Above 85%: customers face scheduling delays, quality suffers, and providers burn out.
+
+• Response Time (median, hours) — time from customer request to confirmed booking. Target: under 4 hours. Above 8 hours is a red flag; customers who wait more than 24 hours cancel at 3x the baseline rate.
+
+• Active Provider Count — providers with at least 1 completed job in the last 30 days. Must stay above your zone minimum (5 for standard zones, 8 for zones above 300 customers).
+
+• Issue Rate — jobs with a reported quality issue divided by total jobs in the zone, last 30 days. Target: below 8%. Above 12% triggers a zone health alert. Above 15% is a critical threshold — investigate immediately.
+
+• NPS (zone-level, last 90 days) — customer Net Promoter Score for jobs completed in this zone. Target: 40+. Below 20 is a serious signal. Below 0 means customers are actively detracting.
+
+When a zone goes yellow: read the metrics to diagnose the specific problem, then address that problem — don't try to "improve the zone" generically. Utilization low? You have a demand problem or a provider excess problem. Issue rate high? You have a quality problem — pull individual job reviews. Response time high? You have a capacity problem — recruit providers or reduce acceptance rate.`,
+  },
+  {
+    id: "capacity-planning",
+    title: "Capacity Planning: Under, Over, Split, Merge",
+    type: "walkthrough",
+    steps: [
+      {
+        title: "Diagnosing an undercapacity zone",
+        description:
+          "Signs: utilization above 85%, response time above 6 hours, providers declining jobs, customer churn ticking up. Root cause is almost always a provider supply problem — either you don't have enough providers, or the providers you have aren't working enough hours. First check: is the issue supply (not enough providers) or availability (providers are onboarded but not taking jobs)? Pull the Provider Availability report. If providers are available but not accepting, you have a matching or pricing problem. If they're simply not online, you have a retention or engagement problem.",
+        screenshot: { alt: "Provider Availability report showing online hours vs accepted jobs" },
+      },
+      {
+        title: "Diagnosing an overcapacity zone",
+        description:
+          "Signs: utilization below 55%, providers completing fewer than 8 jobs per week, provider churn spiking as they seek more reliable income. You have too many providers for the demand. Short-term fix: pause provider recruitment and run a customer acquisition push. Medium-term fix: assess whether the zone's demand ceiling is genuinely low, or whether you simply haven't grown into the potential. If demand has plateaued after 90 days of acquisition effort, consider a zone merge.",
+        screenshot: { alt: "Zone utilization trend chart showing overcapacity indicators" },
+      },
+      {
+        title: "When to split a zone",
+        description:
+          "Split triggers: zone has 500+ active customers, provider count is above 20, and response time is starting to creep up despite adequate provider count. What's happening is geographic sprawl — the zone has grown large enough that providers are driving across it rather than clustering. Before you split, make sure your new zones each have at least 8 providers who live or operate in that sub-area. A clean split creates two healthy zones. A premature split creates two fragile zones. Don't split below 400 customers total.",
+        screenshot: { alt: "Zone split wizard showing proposed sub-zone boundaries and provider distribution" },
+      },
+      {
+        title: "When to merge zones",
+        description:
+          "Merge triggers: two adjacent zones are both below 150 customers, both have fewer than 6 active providers, and neither has shown growth in 60 days. The combined zone needs to clear 8 providers and 200 customers post-merge to be viable — if it won't, you're merging two failing zones into one, which just delays the decision. Merges require customer communication (some customers will see a new Zone Manager or slightly different response times) and provider communication (territory expectations may change).",
+        screenshot: { alt: "Zone merge confirmation screen showing combined metrics projection" },
+      },
+    ],
+  },
+  {
+    id: "market-launch",
+    title: "Launching a New Market: From Zero to Multi-Zone",
+    type: "walkthrough",
+    steps: [
+      {
+        title: "Pre-launch checklist (30 days before soft launch)",
+        description:
+          "You need 8 pre-screened providers ready to activate on day one — not 8 in the pipeline, 8 who have completed background checks, signed agreements, and confirmed their availability. You need a waitlist of at least 50 interested customers (use a landing page + referral incentive to build this before launch). You need your SKU catalog configured for this market's job types, your pricing set against local competitive rates, and your first-week scheduling capacity blocked. If any of these are not ready, push the launch date — a bad launch is worse than a late one.",
+        screenshot: { alt: "Pre-launch checklist in Admin Markets showing completion status" },
+      },
+      {
+        title: "Soft launch: the first 2 weeks",
+        description:
+          "Activate your waitlist first — these are your most motivated early customers and the ones most likely to refer. Cap acceptance at 75% of your provider capacity so you have a buffer for problems. Do not run paid acquisition yet. Your job in the first two weeks is to find the operational issues that your planning didn't anticipate: scheduling conflicts specific to this market, customer expectations that differ from your other markets, provider behaviors that need coaching. Get your NPS above 40 before you scale.",
+        screenshot: { alt: "Soft launch dashboard showing waitlist activation and early job metrics" },
+      },
+      {
+        title: "Graduating from soft launch to live",
+        description:
+          "Criteria to go live: NPS above 40 over the last 30 days, issue rate below 8%, at least 8 active providers (completed at least 1 job each in the last 14 days), utilization between 60–80%. When all four are met, flip the zone status to Live in Admin → Markets → Zones. This unlocks paid acquisition campaigns. Brief your providers that volume will increase — manage their expectations so they're prepared, not overwhelmed.",
+        screenshot: { alt: "Zone status change modal with graduation criteria checklist" },
+      },
+      {
+        title: "Scaling from 1 zone to multi-zone",
+        description:
+          "Don't open Zone 2 until Zone 1 is healthy (green health score, stable for 60+ days). The temptation to expand while Zone 1 is still 'mostly working' is the most common mistake in market expansion. Zone 2 will pull your operational attention. If Zone 1 is fragile when that happens, it will deteriorate faster than you can manage both. The rule is: your first zone is your proof of concept. Your second zone is your proof that you can replicate it. Only expand when you can genuinely afford to split your attention.",
+        screenshot: { alt: "Multi-zone market map showing Zone 1 health before Zone 2 launch" },
+      },
+    ],
+  },
+  {
+    id: "pro-tips",
+    title: "Pro Tips: What Experience Actually Teaches You",
+    type: "pro-tips",
+    proTips: [
+      {
+        text: "Design zones around provider commute patterns, not customer distribution.",
+        context:
+          "Customers are distributed based on housing density — you can't control that. But you can choose zone boundaries that cluster providers near where they already live and work. A provider who drives 8 minutes to their first job instead of 28 minutes will complete 20–30% more jobs per day and churn at half the rate. Check the zip code distribution of your provider applicants before you finalize any boundary.",
+      },
+      {
+        text: "Your first 50 customers in a zone set the quality bar for everything that follows.",
+        context:
+          "Early customers give more detailed reviews, refer more aggressively (in both directions), and set the word-of-mouth reputation for the zone. Assign your best providers to early customers. Personally follow up on the first 10 jobs in any new zone. The cost of one bad early impression is disproportionate — it shapes the review signal that determines whether the zone builds momentum or stalls.",
+      },
+      {
+        text: "Utilization at 70% feels inefficient but it's actually optimal — don't push for 90%.",
+        context:
+          "At 90% utilization, you have zero buffer for sick providers, last-minute cancellations, or unexpected demand spikes. One provider calling out sick can cascade into 5 customer reschedules in a densely booked zone. At 70%, you absorb that without drama. The revenue difference between 70% and 90% utilization is real, but the churn cost of over-scheduling providers is larger. Run your zone like an airline that sells 78% of seats, not 99%.",
+      },
+      {
+        text: "A zone's health score lags reality by about 3 weeks — watch leading indicators, not the composite.",
+        context:
+          "The composite health score is a trailing metric — it reflects what happened, not what's happening. The leading indicators are: provider availability hours booked next week (drops first when providers are disengaging), referral conversion rate (drops 2–3 weeks before NPS shows it), and job cancellation rate (spikes before utilization moves). Build the habit of watching these raw metrics daily in healthy zones, not just when the composite turns yellow.",
+      },
+    ],
+  },
+  {
+    id: "watch-outs",
+    title: "Watch-Outs: The Mistakes That Cost Real Money",
+    type: "watch-outs",
+    watchOuts: [
+      {
+        text: "Expanding to a second zone before your first zone is genuinely stable will break both. The operational attention required to rescue a struggling zone is enormous — if Zone 2 launches while Zone 1 is still fragile, you will not have the bandwidth to save either. The correct move is always: stabilize first, expand second. Never expand under pressure of excitement or investor timelines if the unit economics aren't proven.",
+        severity: "critical",
+      },
+      {
+        text: "Ignoring provider density thresholds because you're 'close enough' creates a cascading failure. Five providers at 80% utilization looks fine until one goes on vacation, one gets sick, and one churns in the same week. You're now at two providers serving a zone built for five — customers wait days, complaints spike, remaining providers get overwhelmed and churn too. There is no safe version of under-provisioning. The minimum threshold exists because we learned what happens when you fall below it.",
+        severity: "critical",
+      },
+      {
+        text: "Drawing zone boundaries to match political or administrative boundaries (zip codes, city limits, county lines) rather than density patterns creates misshapen zones where providers spend more time driving than working. A zone that follows a zip code boundary might be long and thin, routing providers back and forth across it all day. Follow the hex grid and the density heatmap. Administrative boundaries are convenient for paperwork — they're bad for operations.",
+        severity: "caution",
+      },
+    ],
+  },
+  {
+    id: "real-world",
+    title: "Real-World Context: The Market You're Operating In",
+    type: "real-world",
+    realWorldData: [
+      {
+        text: "The US home services market exceeds $500 billion annually and remains highly fragmented — the largest national players capture only low single-digit percentage points of total spend. The vast majority of spending still goes to local, unbranded providers. This means the opportunity for a platform that aggregates quality providers and delivers a reliable customer experience is genuinely large, but the competition is local and relationship-driven, not just price-driven. Zone density strategy matters because the winning advantage in this market is trust at the neighborhood level, not scale at the national level.",
+        source: "IBISWorld Home Services Industry Report; HomeAdvisor / Angi market sizing data",
+      },
+      {
+        text: "Route density directly determines provider economics: when jobs are geographically clustered, providers reduce drive time by 30–40% compared to scattered bookings. The average US household spends $6,000–$9,000 per year on home maintenance and repair. A provider covering a dense 20,000-household zone can realistically complete 6–8 jobs per day with tight routing, versus 3–4 jobs in a sprawling low-density zone. That difference compounds into a 40–60% income gap, which is why providers in dense zones churn at a fraction of the rate of providers in thin zones.",
+        source: "Harvard Joint Center for Housing Studies (household maintenance spend); internal route optimization benchmarks",
+      },
+    ],
+  },
+  {
+    id: "automation",
+    title: "What the System Does For You (and What It Doesn't)",
+    type: "automation",
+    automationNotes: [
+      {
+        text: "Zone health scores recalculate automatically every 6 hours using the latest utilization, issue rate, response time, provider count, and NPS data. You do not need to trigger this manually. If a zone crosses a threshold into Yellow or Red, a Risk Alert is automatically created in the Ops Cockpit and an email notification is sent to the assigned admin. You just need to check the cockpit — the system will tell you when something needs attention.",
+        type: "set-and-forget",
+      },
+      {
+        text: "Check provider count and utilization in every active zone at the start of each day. The automated health score catches threshold breaches, but it does not catch slow trends — a zone that's been at 67% utilization for three weeks is technically green but directionally concerning. Eyeballing the trend is a human judgment the system won't make for you. Takes 90 seconds; do it every morning before you look at anything else.",
+        type: "daily-check",
+      },
+      {
+        text: "Review the Zone Growth table every Monday: customers added, providers added, NPS trend, and referral conversion rate versus the prior week. This is your market expansion intelligence — it tells you which zones are building momentum (candidates for a split in 60–90 days) and which are stalling (candidates for a capacity intervention or a merge decision). The system surfaces raw metrics; you supply the strategic interpretation.",
+        type: "weekly-check",
+      },
+    ],
+  },
+];
