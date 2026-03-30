@@ -154,9 +154,9 @@ A window template specifies: the time blocks customers can choose from (e.g., 8a
 
 • Lawn care: wide windows work (8am–12pm morning block). The customer doesn't need to be home. Provider flexibility is more important than precision.
 • Pest treatment: narrow windows are better (10am–12pm, 2pm–4pm). The homeowner often needs to be present for interior treatment, so a tighter window reduces their waiting time.
-• Pool service: morning-only windows (7am–11am) work best. Chemical treatments need sun exposure time, and customers want to use their pool in the afternoon.
+• Pool service: morning-only windows (7am–11am) work best. Chemical treatments need sun exposure time. More importantly, customers want their pool usable by afternoon — so they actively prefer morning service.
 
-WHERE TO FIND THEM: Admin → Scheduling → Window Templates. Each template shows the service types it applies to, the zones it covers, and the time blocks configured.
+You'll find Window Templates at Admin → Scheduling → Window Templates. Each template shows the service types it applies to, the zones it covers, and the time blocks configured.
 
 WHEN TO MODIFY: When you see a pattern of under-booked afternoon slots with overbooked morning slots, the fix isn't more providers — it's better window design. Staggering windows (8–10am, 9–11am, 10am–12pm) instead of a single 8am–12pm block creates more bookable slots without adding capacity.
 
