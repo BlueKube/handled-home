@@ -32,6 +32,12 @@
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
       <!-- LEFT: Controls -->
       <div class="lg:col-span-1 space-y-3">
+        <!-- Scenario Presets -->
+        <div class="card">
+          <div class="section-title">Quick Scenarios</div>
+          <div class="grid grid-cols-2 gap-2" id="presets"></div>
+        </div>
+
         <!-- Zone Controls -->
         <div class="card">
           <div class="section-title">Zone Configuration</div>
@@ -106,6 +112,20 @@
             <div class="section-title">Provider Utilization %</div>
             <canvas id="chart-utilization" height="200"></canvas>
           </div>
+        </div>
+
+        <!-- Provider Economics -->
+        <div class="card" id="provider-economics-card">
+          <div class="section-title">Provider Economics — Will They Stay?</div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="provider-metrics"></div>
+          <div class="mt-3 text-xs text-slate-400" id="provider-verdict"></div>
+        </div>
+
+        <!-- Sensitivity Analysis -->
+        <div class="card">
+          <div class="section-title">Sensitivity Analysis — What Breaks the Model?</div>
+          <p class="text-xs text-slate-500 mb-2">Each row shows the M12 margin impact if the assumption is 20% worse than current.</p>
+          <div id="sensitivity-bars"></div>
         </div>
 
         <!-- Monthly Table -->
@@ -243,6 +263,8 @@
       }
 
       updateUI(combined, breakEven, zoneCount, overhead);
+      updateProviderEconomics(combined, p);
+      updateSensitivity(combined, p);
     }
 
     // === UI RENDERING ===
@@ -322,6 +344,130 @@
           { label: "Target 80%", data: Array(12).fill(80), borderColor: "#64748b", borderDash: [5, 5], pointRadius: 0 },
         ] }, options: chartOpts
       });
+    }
+
+    // === SCENARIO PRESETS ===
+    const PRESETS = {
+      "Austin Suburban": { homes_in_zone: 4500, home_ownership_rate: 0.68, income_qualifying_rate: 0.45, essential_price: 99, plus_price: 159, premium_price: 249, provider_payout: 55, monthly_ops_overhead: 1500 },
+      "Austin Optimized": { homes_in_zone: 4500, home_ownership_rate: 0.68, income_qualifying_rate: 0.45, essential_price: 129, plus_price: 179, premium_price: 279, provider_payout: 45, monthly_ops_overhead: 1500 },
+      "Denver Suburbs": { homes_in_zone: 3800, home_ownership_rate: 0.72, income_qualifying_rate: 0.50, essential_price: 119, plus_price: 179, premium_price: 279, provider_payout: 55, monthly_ops_overhead: 1800 },
+      "Charlotte NC": { homes_in_zone: 5200, home_ownership_rate: 0.64, income_qualifying_rate: 0.38, essential_price: 89, plus_price: 139, premium_price: 229, provider_payout: 42, monthly_ops_overhead: 1200 },
+      "Phoenix AZ": { homes_in_zone: 6000, home_ownership_rate: 0.70, income_qualifying_rate: 0.42, essential_price: 99, plus_price: 159, premium_price: 249, provider_payout: 48, monthly_ops_overhead: 1400 },
+      "Worst Case": { homes_in_zone: 3000, home_ownership_rate: 0.55, income_qualifying_rate: 0.30, essential_price: 89, plus_price: 139, premium_price: 229, provider_payout: 65, monthly_ops_overhead: 2500, byoc_activation_rate: 0.15, month_1_churn: 0.25 },
+    };
+
+    document.getElementById("presets").innerHTML = Object.keys(PRESETS).map(name =>
+      `<button onclick="applyPreset('${name}')" class="text-xs py-1.5 px-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors truncate">${name}</button>`
+    ).join("");
+
+    function applyPreset(name) {
+      const preset = PRESETS[name];
+      if (!preset) return;
+      for (const [key, val] of Object.entries(preset)) {
+        const el = document.querySelector(`[data-key="${key}"] input`);
+        if (el) {
+          el.value = val;
+          el.dispatchEvent(new Event("input"));
+        }
+      }
+    }
+
+    // === PROVIDER ECONOMICS ===
+    function updateProviderEconomics(months, p) {
+      const payout = p.provider_payout;
+      const stops = p.provider_stops_per_day;
+      const days = 5;
+
+      const dailyEarnings = payout * stops;
+      const weeklyEarnings = dailyEarnings * days;
+      const monthlyEarnings = weeklyEarnings * 4;
+      const annualEarnings = monthlyEarnings * 12;
+
+      // Compare to industry benchmarks
+      const industryAvgAnnual = 45000; // landscaper average
+      const earningsPct = (annualEarnings / industryAvgAnnual * 100);
+
+      // Utilization at month 12
+      const last = months[11];
+      const zoneCount = parseInt(document.querySelector('[data-key="zone_count"] input')?.value ?? "4");
+      const totalProviders = zoneCount * p.providers_at_launch;
+      const totalCapacity = totalProviders * stops * days * 4;
+      const utilization = last ? Math.min(100, (last.jobs / totalCapacity) * 100) : 0;
+
+      const metrics = [
+        { label: "Daily Earnings", value: `$${dailyEarnings}`, cls: dailyEarnings >= 250 ? "positive" : dailyEarnings >= 180 ? "neutral" : "negative" },
+        { label: "Weekly Earnings", value: `$${weeklyEarnings}`, cls: weeklyEarnings >= 1200 ? "positive" : weeklyEarnings >= 800 ? "neutral" : "negative" },
+        { label: "Monthly Earnings", value: `$${monthlyEarnings.toLocaleString()}`, cls: monthlyEarnings >= 4500 ? "positive" : monthlyEarnings >= 3000 ? "neutral" : "negative" },
+        { label: "vs Industry Avg", value: `${earningsPct.toFixed(0)}%`, cls: earningsPct >= 100 ? "positive" : earningsPct >= 75 ? "neutral" : "negative" },
+      ];
+
+      document.getElementById("provider-metrics").innerHTML = metrics.map(m =>
+        `<div class="metric"><div class="number text-base ${m.cls}">${m.value}</div><div class="label">${m.label}</div></div>`
+      ).join("");
+
+      // Verdict
+      let verdict = "";
+      if (monthlyEarnings >= 4500 && utilization >= 60) {
+        verdict = `✅ <span class="positive">Providers earn $${monthlyEarnings.toLocaleString()}/mo at ${utilization.toFixed(0)}% utilization — competitive with industry average. They'll likely stay.</span>`;
+      } else if (monthlyEarnings >= 3000) {
+        verdict = `⚠️ <span class="text-amber-400">Providers earn $${monthlyEarnings.toLocaleString()}/mo — below industry average ($3,750/mo). May need to supplement with BYOC bonuses or density improvement to retain.</span>`;
+      } else {
+        verdict = `❌ <span class="negative">Providers earn $${monthlyEarnings.toLocaleString()}/mo — significantly below industry average. High churn risk. Increase payout or stops/day.</span>`;
+      }
+      document.getElementById("provider-verdict").innerHTML = verdict;
+    }
+
+    // === SENSITIVITY ANALYSIS ===
+    function updateSensitivity(baseMonths, p) {
+      const baseM12Margin = baseMonths[11]?.marginPct ?? -100;
+
+      // Test each key assumption at +20% worse
+      const sensitivities = [
+        { key: "provider_payout", label: "Provider Payout +20%", worse: v => v * 1.2 },
+        { key: "month_1_churn", label: "Month 1 Churn +20%", worse: v => Math.min(0.5, v * 1.2) },
+        { key: "steady_churn", label: "Steady Churn +20%", worse: v => Math.min(0.3, v * 1.2) },
+        { key: "essential_price", label: "Essential Price -20%", worse: v => v * 0.8 },
+        { key: "plus_price", label: "Plus Price -20%", worse: v => v * 0.8 },
+        { key: "byoc_activation_rate", label: "BYOC Activation -20%", worse: v => v * 0.8 },
+        { key: "monthly_ops_overhead", label: "Ops Overhead +20%", worse: v => v * 1.2 },
+        { key: "homes_in_zone", label: "Homes/Zone -20%", worse: v => v * 0.8 },
+        { key: "attach_rate_90d", label: "Attach Rate -20%", worse: v => v * 0.8 },
+        { key: "providers_at_launch", label: "1 Fewer Provider", worse: v => Math.max(1, v - 1) },
+      ];
+
+      const results = sensitivities.map(s => {
+        const modified = { ...p, [s.key]: s.worse(p[s.key]) };
+        const zoneCount = parseInt(document.querySelector('[data-key="zone_count"] input')?.value ?? "4");
+        const overhead = (modified.monthly_ops_overhead + modified.monthly_tech_overhead) * 100;
+        const variations = [{ h: 1, i: 1 }, { h: 0.9, i: 1.1 }, { h: 1.1, i: 0.9 }, { h: 0.85, i: 1.15 }, { h: 1.2, i: 0.85 }, { h: 0.95, i: 1.05 }];
+        const allZones = [];
+        for (let z = 0; z < zoneCount; z++) {
+          const v = variations[z % variations.length];
+          allZones.push(simulateZone({ ...modified, homes_in_zone: Math.round(modified.homes_in_zone * v.h), income_qualifying_rate: Math.min(0.85, modified.income_qualifying_rate * v.i), byoc_customers_per_provider: Math.max(5, Math.round(modified.byoc_customers_per_provider * (1 - z * 0.15))) }));
+        }
+        let rev = 0, pay = 0, bonus = 0, ref = 0;
+        for (const zm of allZones) { rev += zm[11].revenue; pay += zm[11].provPay; bonus += zm[11].byocBonus; ref += zm[11].refCredits; }
+        const margin = rev - (pay + bonus + ref + overhead);
+        const marginPct = rev > 0 ? (margin / rev) * 100 : -100;
+        return { ...s, marginPct, delta: marginPct - baseM12Margin };
+      });
+
+      results.sort((a, b) => a.delta - b.delta); // Worst impact first
+
+      const maxDelta = Math.max(...results.map(r => Math.abs(r.delta)), 1);
+
+      document.getElementById("sensitivity-bars").innerHTML = results.map(r => {
+        const barWidth = Math.min(100, Math.abs(r.delta) / maxDelta * 100);
+        const color = r.delta < -5 ? "#f87171" : r.delta < -2 ? "#fbbf24" : "#4ade80";
+        return `
+          <div class="flex items-center gap-2 py-1">
+            <span class="text-xs text-slate-400 w-40 shrink-0 truncate">${r.label}</span>
+            <div class="flex-1 h-4 bg-slate-800 rounded overflow-hidden relative">
+              <div class="h-full rounded" style="width: ${barWidth}%; background: ${color};"></div>
+            </div>
+            <span class="text-xs font-mono w-16 text-right ${r.delta < -5 ? 'text-red-400' : r.delta < -2 ? 'text-amber-400' : 'text-green-400'}">${r.delta >= 0 ? "+" : ""}${r.delta.toFixed(1)}%</span>
+          </div>`;
+      }).join("");
     }
 
     // === SLIDER INITIALIZATION ===
