@@ -704,4 +704,27 @@
 
 ---
 
-*Total features: 410 | Last updated: 2026-03-30 | Session 2 features added (SKU calibration, seasonal modeling, entitlement badges, billing tests, launch readiness)*
+## Admin Academy — Training Center `trust-builder` `provider-value`
+
+392. Academy shell: module grid with search, category filtering, and module detail pages — 8/10
+393. AnnotatedScreenshot component: CSS overlay annotation system with box, arrow, pulse, and step annotation types — 8/10
+394. AcademySection renderer: 7 content types (overview, walkthrough, pro-tips, watch-outs, automation, real-world, text) — 8/10
+395. Ops Cockpit & Daily Rhythm training module: morning check-in walkthrough, dispatcher queues, health gauges, real-world market data — 8/10
+396. Jobs & Scheduling Operations training module: 14-day planner, assignment engine, weather mode, scheduling policy — 8/10
+397. Exception Management training module: triage flow, common exception types, analytics guidance — 8/10
+398. Provider Lifecycle training module: application evaluation, onboarding, performance metrics, probation process — 8/10
+399. Customer Billing & Ledgers training module: subscription lifecycle, dunning ladder, credits/refunds, chargebacks — 8/10
+400. Provider Payouts & Money training module: payout schedule, holds, Stripe Connect, failure investigation — 8/10
+401. Zones, Capacity & Market Launch training module: zone design, health monitoring, capacity planning, launch process — 8/10
+402. SKU Catalog Management training module: SKU design, duration calibration, proof requirements, real-world pricing — 8/10
+403. Plans, Bundles & Entitlements training module: plan design, handle economy, entitlement versioning — 8/10
+404. Support Operations training module: ticket triage, common ticket types, macro library, provider-side support — 8/10
+405. Growth & Incentives training module: BYOC/BYOP/referral funnels, incentive management, fraud detection — 8/10
+406. Governance & System Health training module: cron health, audit log, feature toggles, launch readiness — 8/10
+407. Control Room (Superuser) training module: pricing hierarchy, payout rules, change requests — 8/10
+408. SOPs & Playbooks training module: 8 standard operating procedures with decision branching, daily/weekly rhythms — 8/10
+409. Your First Week onboarding module: 5-day structured plan (observe → shadow → do → own) — 8/10
+
+---
+
+*Total features: 428 | Last updated: 2026-03-30 | Session 3 features added (Admin Academy training center with 15 modules)*
