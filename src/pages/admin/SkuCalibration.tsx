@@ -3,52 +3,13 @@ import { useSkus, useUpdateSku, type ServiceSku } from "@/hooks/useSkus";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { Download, Check, AlertTriangle, Scale } from "lucide-react";
-
-interface CalibrationValues {
-  duration_small?: number;
-  duration_medium?: number;
-  duration_large?: number;
-  duration_xl?: number;
-  handle_cost?: number;
-  price_hint_cents?: number;
-}
+import { Download, Scale } from "lucide-react";
+import { CalibrationRow, getDelta, type CalibrationValues } from "@/components/admin/CalibrationRow";
 
 type CalibrationState = Record<string, CalibrationValues>;
-
-function getDelta(current: number, proposed: number | undefined): number | null {
-  if (proposed === undefined || proposed === 0) return null;
-  return ((proposed - current) / current) * 100;
-}
-
-function DeltaBadge({ delta }: { delta: number | null }) {
-  if (delta === null) return null;
-  const abs = Math.abs(delta);
-  if (abs < 5) return <Badge variant="secondary" className="text-[10px] font-mono">{delta > 0 ? "+" : ""}{delta.toFixed(0)}%</Badge>;
-  if (abs < 20) return <Badge className="text-[10px] font-mono bg-amber-500/10 text-amber-500 border-amber-500/20">{delta > 0 ? "+" : ""}{delta.toFixed(0)}%</Badge>;
-  return <Badge className="text-[10px] font-mono bg-destructive/10 text-destructive border-destructive/20">{delta > 0 ? "+" : ""}{delta.toFixed(0)}%</Badge>;
-}
-
-function CalibrationInput({ value, onChange, placeholder }: {
-  value: number | undefined;
-  onChange: (v: number | undefined) => void;
-  placeholder: string;
-}) {
-  return (
-    <Input
-      type="number"
-      min={0}
-      className="h-7 w-20 text-xs font-mono"
-      placeholder={placeholder}
-      value={value ?? ""}
-      onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
-    />
-  );
-}
 
 export default function SkuCalibration() {
   const { data: skus, isLoading } = useSkus({ status: "active" });
@@ -73,12 +34,12 @@ export default function SkuCalibration() {
     const cal = calibration[sku.id];
     if (!cal) return;
 
-    const avgDuration = [cal.duration_small, cal.duration_medium, cal.duration_large, cal.duration_xl]
+    const durationSamples = [cal.duration_small, cal.duration_medium, cal.duration_large, cal.duration_xl]
       .filter((v): v is number => v !== undefined && v > 0);
 
     const updates: Record<string, unknown> = {};
-    if (avgDuration.length > 0) {
-      updates.duration_minutes = Math.round(avgDuration.reduce((a, b) => a + b, 0) / avgDuration.length);
+    if (durationSamples.length > 0) {
+      updates.duration_minutes = Math.round(durationSamples.reduce((a, b) => a + b, 0) / durationSamples.length);
     }
     if (cal.price_hint_cents !== undefined && cal.price_hint_cents > 0) {
       updates.price_hint_cents = cal.price_hint_cents;
@@ -134,7 +95,7 @@ export default function SkuCalibration() {
     a.href = url;
     a.download = `sku-calibration-${new Date().toISOString().split("T")[0]}.json`;
     a.click();
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 200);
   };
 
   if (isLoading || !skus) {
@@ -195,93 +156,16 @@ export default function SkuCalibration() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {skus.map((sku) => {
-              const cal = calibration[sku.id] || {};
-              const durationDelta = getDelta(sku.duration_minutes, cal.duration_medium);
-              const priceDelta = sku.price_hint_cents ? getDelta(sku.price_hint_cents, cal.price_hint_cents) : null;
-              const hasValues = Object.values(cal).some((v) => v !== undefined && v > 0);
-
-              return (
-                <TableRow key={sku.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div>
-                        <p className="text-sm font-medium">{sku.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{sku.category}</p>
-                      </div>
-                      {durationDelta !== null && Math.abs(durationDelta) >= 20 && (
-                        <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center font-mono text-sm">
-                    {sku.duration_minutes}
-                    {durationDelta !== null && (
-                      <div className="mt-0.5"><DeltaBadge delta={durationDelta} /></div>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <CalibrationInput
-                      value={cal.duration_small}
-                      onChange={(v) => setCal(sku.id, "duration_small", v)}
-                      placeholder={String(Math.round(sku.duration_minutes * 0.7))}
-                    />
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <CalibrationInput
-                      value={cal.duration_medium}
-                      onChange={(v) => setCal(sku.id, "duration_medium", v)}
-                      placeholder={String(sku.duration_minutes)}
-                    />
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <CalibrationInput
-                      value={cal.duration_large}
-                      onChange={(v) => setCal(sku.id, "duration_large", v)}
-                      placeholder={String(Math.round(sku.duration_minutes * 1.4))}
-                    />
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <CalibrationInput
-                      value={cal.duration_xl}
-                      onChange={(v) => setCal(sku.id, "duration_xl", v)}
-                      placeholder={String(Math.round(sku.duration_minutes * 1.8))}
-                    />
-                  </TableCell>
-                  <TableCell className="text-center font-mono text-sm">
-                    {sku.price_hint_cents ? `$${(sku.price_hint_cents / 100).toFixed(0)}` : "—"}
-                    {priceDelta !== null && (
-                      <div className="mt-0.5"><DeltaBadge delta={priceDelta} /></div>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <CalibrationInput
-                      value={cal.price_hint_cents}
-                      onChange={(v) => setCal(sku.id, "price_hint_cents", v)}
-                      placeholder={sku.price_hint_cents ? String(sku.price_hint_cents) : "0"}
-                    />
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <CalibrationInput
-                      value={cal.handle_cost}
-                      onChange={(v) => setCal(sku.id, "handle_cost", v)}
-                      placeholder="1"
-                    />
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 px-2"
-                      disabled={!hasValues || updateSku.isPending}
-                      onClick={() => applyCalibration(sku)}
-                    >
-                      <Check className="h-3.5 w-3.5" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            {skus.map((sku) => (
+              <CalibrationRow
+                key={sku.id}
+                sku={sku}
+                cal={calibration[sku.id] || {}}
+                setCal={setCal}
+                onApply={applyCalibration}
+                isPending={updateSku.isPending}
+              />
+            ))}
           </TableBody>
         </Table>
       </Card>
