@@ -148,6 +148,7 @@ const AdminControlChangeRequests = lazy(() => import("@/pages/admin/ControlChang
 const AdminControlChangeLog = lazy(() => import("@/pages/admin/ControlChangeLog"));
 const AdminControlConfig = lazy(() => import("@/pages/admin/ControlConfig"));
 const AdminPlaybooks = lazy(() => import("@/pages/admin/Playbooks"));
+const AdminSkuCalibration = lazy(() => import("@/pages/admin/SkuCalibration"));
 const AdminCronHealth = lazy(() => import("@/pages/admin/CronHealth"));
 const AdminSchedulingPolicy = lazy(() => import("@/pages/admin/SchedulingPolicy"));
 const AdminPlannerDashboard = lazy(() => import("@/pages/admin/PlannerDashboard"));
@@ -340,6 +341,7 @@ const App = () => (
                   <Route path="/admin/control/change-log" element={<AdminControlChangeLog />} />
                   <Route path="/admin/control/config" element={<AdminControlConfig />} />
                   <Route path="/admin/playbooks" element={<AdminPlaybooks />} />
+                  <Route path="/admin/sku-calibration" element={<AdminSkuCalibration />} />
                   <Route path="/admin/cron-health" element={<AdminCronHealth />} />
                   <Route path="/admin/notifications" element={<SharedNotifications />} />
                 </Route>
