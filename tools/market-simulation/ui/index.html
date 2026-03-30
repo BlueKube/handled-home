@@ -350,7 +350,7 @@
         const byocBonus = m <= bonusDurationMonths ? Math.round(survivingByoc * bonusWeeklyCents * 4) : 0;
         const refCredits = Math.round(newRef * 3000);
 
-        months.push({ month: m, customers: active, jobs, revenue, provPay, byocBonus, refCredits, newByoc, newRef, newOrg });
+        months.push({ month: m, customers: active, jobs, revenue, provPay, byocBonus, refCredits, newByoc, newRef, newOrg, seasonalMult });
       }
       return months;
     }
@@ -403,7 +403,7 @@
         const marginPct = rev > 0 ? (margin / rev) * 100 : -100;
         cumMargin += margin;
         if (cumMargin > 0 && !breakEven) breakEven = m + 1;
-        combined.push({ month: m + 1, customers: cust, jobs, revenue: rev, provPay: pay, overhead, margin, marginPct, cumMargin, newByoc: nByoc, newRef: nRef, newOrg: nOrg });
+        combined.push({ month: m + 1, customers: cust, jobs, revenue: rev, provPay: pay, overhead, margin, marginPct, cumMargin, newByoc: nByoc, newRef: nRef, newOrg: nOrg, seasonalMult: allZoneMonths[0][m].seasonalMult });
       }
 
       updateUI(combined, breakEven, zoneCount, overhead);
@@ -437,8 +437,7 @@
 
       // Table
       document.getElementById("table-body").innerHTML = months.map(m => {
-        const sMult = getSeasonalMultiplier((m.month - 1) % 12);
-        const sColor = sMult >= 0.9 ? 'positive' : sMult >= 0.7 ? 'text-amber-400' : 'negative';
+        const sColor = m.seasonalMult >= 0.9 ? 'positive' : m.seasonalMult >= 0.7 ? 'text-amber-400' : 'negative';
         return `<tr class="border-b border-slate-800">
           <td class="py-1.5">${m.month}</td>
           <td class="text-right">${m.customers}</td>
@@ -448,7 +447,7 @@
           <td class="text-right">$${(m.overhead/100).toFixed(0)}</td>
           <td class="text-right ${m.margin >= 0 ? 'positive' : 'negative'}">$${(m.margin/100).toFixed(0)}</td>
           <td class="text-right ${m.marginPct >= 0 ? 'positive' : 'negative'}">${m.marginPct.toFixed(1)}%</td>
-          <td class="text-right ${sColor}">${sMult.toFixed(2)}</td>
+          <td class="text-right ${sColor}">${m.seasonalMult.toFixed(2)}</td>
         </tr>`;
       }).join("");
 
@@ -774,6 +773,7 @@
       const valueSpan = el.querySelector(".value");
       input.addEventListener("input", () => {
         valueSpan.textContent = formatVal(parseFloat(input.value));
+        if (key.startsWith("sw_")) renderSeasonalCurve();
         runSimulation();
       });
     });
