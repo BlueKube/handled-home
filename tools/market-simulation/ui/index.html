@@ -243,7 +243,10 @@
         const provPay = Math.round(jobs * p.provider_payout * 100);
         const bonusWeeklyCents = (p.byoc_bonus_weekly || 10) * 100;
         const bonusDurationMonths = Math.ceil((p.byoc_bonus_weeks || 12) / 4);
-        const byocBonus = m <= bonusDurationMonths ? Math.round(byocAtLaunch * bonusWeeklyCents * 4) : 0;
+        // Apply compound churn to BYOC customers (match simulate.ts F7 fix)
+        const byocSurvival = m === 1 ? (1 - p.month_1_churn) : m === 2 ? (1 - p.month_1_churn) * (1 - 0.07) : (1 - p.month_1_churn) * (1 - 0.07) * Math.pow(1 - p.steady_churn, m - 2);
+        const survivingByoc = Math.round(byocAtLaunch * byocSurvival);
+        const byocBonus = m <= bonusDurationMonths ? Math.round(survivingByoc * bonusWeeklyCents * 4) : 0;
         const refCredits = Math.round(newRef * 3000);
 
         months.push({ month: m, customers: active, jobs, revenue, provPay, byocBonus, refCredits, newByoc, newRef, newOrg });

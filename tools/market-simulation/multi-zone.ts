@@ -159,7 +159,7 @@ export function simulateMultiZone(
     ? zones.reduce((s, z) => s + z.metrics.attach_rate_90d, 0) / zones.length
     : 0;
   const utilization = month12
-    ? (month12.total_jobs / (zoneCount * base.provider_stops_per_day * base.provider_working_days_per_week * 4) * 100)
+    ? (month12.total_jobs / (zoneCount * base.providers_at_launch * base.provider_stops_per_day * base.provider_working_days_per_week * 4) * 100)
     : 0;
 
   const score =
