@@ -67,6 +67,8 @@
 34. Admin duplicate-SKU action for safe scope changes — 8/10
 35. Weather sensitivity flag per SKU — 8/10
 35b. Admin SKU Calibration page: compare seed values vs. provider-reported durations/costs, delta highlighting, per-tier inputs, calibration export report — 8/10
+35c. 23 SKUs fully calibrated with routing metadata (scheduling_profile, access_mode, fulfillment_mode, weather_sensitive), handle costs anchored to 7-handle standard mow model, and structured inclusions/exclusions — DONE
+35d. 5 new SKUs added: Gutter Cleaning, Fall Prep, Trash Can Cleaning, Grill Cleaning, Dryer Vent Cleaning — DONE
 
 ---
 
@@ -80,6 +82,7 @@
 41. Level recommendation system with reason codes for providers to suggest the correct level — 8/10
 42. Courtesy upgrade: provider performs a higher level for free, once per property/SKU/6 months — 8/10
 43. Admin analytics: recommendation + courtesy upgrade counts, mismatch detection by zone — 8/10
+43b. 54 sku_levels seed data across 23 SKUs — research-calibrated handle costs, planned minutes, inclusions/exclusions, and proof checklists per level. Covers lawn care (4 SKUs), treatment/seasonal (5), specialty (5), new outdoor (4), and home assistant (5) — DONE
 
 ---
 

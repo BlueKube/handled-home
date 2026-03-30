@@ -1,4 +1,4 @@
-# PRD-046: SKU Level Definitions — Create All Levels
+# PRD-047 — Simulator Validation & Reasoning Report
 
 > **Date:** 2026-03-30
 > **Mode:** Quality
@@ -8,31 +8,40 @@
 
 ## Problem
 
-Zero sku_levels rows exist in the database. Every service is a flat single-tier offering. Customers can't choose between service levels (e.g., basic mow vs. premium mow), and the platform can't assign different handle costs or durations per level.
+We have 54 sku_levels with calibrated handle costs across 23 SKUs. These costs were derived from research and the 7-handle anchor model, but they haven't been validated against the market simulator. We also need a comprehensive reasoning report documenting why each SKU/level/pricing decision was made — this report will be the baseline reference for provider interviews.
 
-## Requirements
+## Goals
 
-### R1: Create sku_levels for lawn/yard services (SKUs 001-008 + Fall Prep)
-Each SKU gets 2-3 levels with: label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template.
+1. Run the market simulator (`tools/market-simulation/`) with the new handle cost data to validate profitability across all subscription tiers
+2. Identify any SKUs where handle economics don't work (provider payout exceeds revenue per handle)
+3. Generate a comprehensive reasoning report explaining all decisions
+4. Document any recommended database schema enhancements discovered during calibration
 
-### R2: Create sku_levels for specialty services (SKUs 009-00d + Gutter, Trash, Grill, Dryer Vent)
-Same structure. Some SKUs have only 1-2 levels (Trash Can, Dog Poop).
+## Deliverables
 
-### R3: Create sku_levels for home assistant SKUs (5 existing)
-Single-level entries to establish the pattern.
+### D1: Simulator Validation
+- Update simulator model assumptions if needed to reflect the 23-SKU catalog
+- Run 12-month projection for each subscription tier (Essential/Plus/Premium)
+- Flag any SKU/level combinations where the platform loses money
+- Produce a summary table of revenue vs cost per handle by SKU
 
-### R4: Update seed files
-Mirror all level data in seed-rich-metro.sql.
+### D2: Reasoning Report
+A markdown document (`docs/sku-calibration-report.md`) covering:
+- **Handle economics model** — the 7-handle anchor, time-based vs cost-based formulas
+- **Per-SKU reasoning** — why each handle cost was chosen, what research informed it
+- **Tier progression logic** — how L1→L2→L3 inclusions/exclusions were designed
+- **Licensed service premium** — why Weed Treatment, Fertilization, Pest Control use cost-based anchoring
+- **New SKU justification** — why Gutter, Trash Can, Grill, Dryer Vent, Fall Prep were added
+- **What was deferred** — Christmas Lights, Garage Cleanout, and why
+- **Database field recommendations** — presence_required, access_mode overrides on sku_levels
 
-## Level Design (from FULL-IMPLEMENTATION-PLAN)
-
-See the Handle Cost Table in FULL-IMPLEMENTATION-PLAN-SKU-CALIBRATION.md for the complete level matrix.
+### D3: Schema Enhancement Recommendations (optional)
+- Document recommended new columns for sku_levels table
+- If time permits, create migration to add them
 
 ## Acceptance Criteria
 
-- [ ] Every active SKU has at least 1 sku_level row
-- [ ] Handle costs are consistent with the 7-handle anchor
-- [ ] Level numbers are sequential (1, 2, 3)
-- [ ] Inclusions/exclusions are non-empty arrays
-- [ ] Migration SQL executes cleanly
-- [ ] `npm run build` passes
+- [ ] Simulator runs clean with current handle costs
+- [ ] No SKU/level combination produces negative margin at weighted-average revenue
+- [ ] Reasoning report committed to docs/
+- [ ] Feature-list.md updated with report status
