@@ -29,6 +29,7 @@ export interface MonthSnapshot {
   provider_utilization_pct: number;
   attach_rate: number;
   cumulative_cac_cents: number;
+  seasonal_multiplier: number;
 }
 
 export interface SimulationResult {
@@ -133,6 +134,15 @@ export function simulate(input?: ModelAssumptions): SimulationResult {
         : m.second_service_attach_90d;
     customersWithSecondService = Math.round(attachEligible * attachRate);
 
+    // --- SEASONAL ADJUSTMENT ---
+    // Blend category-specific multipliers by service mix weight
+    const monthIdx = (month - 1) % 12; // 0-indexed
+    const seasonalMultiplier =
+      m.seasonal_lawn[monthIdx] * m.seasonal_weight_lawn +
+      m.seasonal_pest[monthIdx] * m.seasonal_weight_pest +
+      m.seasonal_windows[monthIdx] * m.seasonal_weight_windows +
+      m.seasonal_pool[monthIdx] * m.seasonal_weight_pool;
+
     // --- JOBS ---
     // In the handles model, customers don't get unlimited service.
     // Each plan has a handle allowance per 28-day cycle.
@@ -140,14 +150,15 @@ export function simulate(input?: ModelAssumptions): SimulationResult {
     // Plus: ~28 handles (weekly service)
     // Premium: ~50 handles (weekly + extras)
     // Average handles per cycle determines jobs generated.
+    // Seasonal multiplier reduces job volume in off-season months.
     const handlesPerJobAvg = 7; // ~7 handles = 1 standard lawn visit
     const avgHandlesPerCycle =
       14 * m.plan_mix_essential +
       28 * m.plan_mix_plus +
       50 * m.plan_mix_premium;
     const jobsPerCustomerPerMonth = avgHandlesPerCycle / handlesPerJobAvg;
-    const baseJobs = Math.round(activeCustomers * jobsPerCustomerPerMonth);
-    const addonJobs = Math.round(customersWithSecondService * (m.avg_handles_per_addon / handlesPerJobAvg));
+    const baseJobs = Math.round(activeCustomers * jobsPerCustomerPerMonth * seasonalMultiplier);
+    const addonJobs = Math.round(customersWithSecondService * (m.avg_handles_per_addon / handlesPerJobAvg) * seasonalMultiplier);
     const totalJobs = baseJobs + addonJobs;
 
     // --- REVENUE ---
@@ -156,8 +167,10 @@ export function simulate(input?: ModelAssumptions): SimulationResult {
       m.plus_price_cents * m.plan_mix_plus +
       m.premium_price_cents * m.plan_mix_premium;
 
+    // Subscription revenue is fixed (customers pay regardless of season),
+    // but addon revenue scales with seasonal demand
     const subscriptionRevenue = Math.round(activeCustomers * avgSubscriptionCents);
-    const addonRevenue = Math.round(customersWithSecondService * m.avg_handles_per_addon * 500); // ~$5 per handle
+    const addonRevenue = Math.round(customersWithSecondService * m.avg_handles_per_addon * 500 * seasonalMultiplier);
     const totalRevenue = subscriptionRevenue + addonRevenue;
 
     // --- COSTS ---
@@ -203,6 +216,7 @@ export function simulate(input?: ModelAssumptions): SimulationResult {
       provider_utilization_pct: utilization,
       attach_rate: attachRate,
       cumulative_cac_cents: cumulativeCac,
+      seasonal_multiplier: seasonalMultiplier,
     });
   }
 

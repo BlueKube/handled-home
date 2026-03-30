@@ -9,8 +9,8 @@
 
 ## Session Handoff
 - **Branch:** claude/add-feature-maturity-ratings-tMeen
-- **Last completed:** PRD-014 (Seed Data Audit & Cleanup)
-- **Next up:** PRD-015 — SKU Calibration Workflow
+- **Last completed:** PRD-015 (SKU Calibration Workflow)
+- **Next up:** PRD-017 — Seasonal Revenue Modeling
 - **Context at exit:** —
 - **Blockers:** None
 - **PRD queue:** 13 PRDs remaining (014–026)
@@ -23,7 +23,7 @@
 |-----|-------|------|--------|---------|
 | 013 | Feature Maturity Ratings | S | ✅ | — (Session 1) |
 | 014 | Seed Data Audit & Cleanup | M | ✅ | 5% |
-| 015 | SKU Calibration Workflow | M | ⬜ | |
+| 015 | SKU Calibration Workflow | M | ✅ | 10% |
 | 016 | Provider Interview Data Entry | M | ⬜ | |
 | 017 | Seasonal Revenue Modeling | M | ⬜ | |
 | 018 | Multi-Category Economics | M | ⬜ | |
