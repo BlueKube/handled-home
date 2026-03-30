@@ -143,6 +143,93 @@ When a zone goes yellow: read the metrics to diagnose the specific problem, then
     ],
   },
   {
+    id: "zone-sizing",
+    title: "Zone Sizing — The Math Behind Good Boundaries",
+    type: "text",
+    content: `The rules of thumb in the Zone Design section above will get you started, but when you're committing real money to a market launch, you need actual math. Zone sizing is drive-time-based, not geographic — a zone's value is determined by how many jobs a provider can complete in a day, which is entirely a function of drive time between stops.
+
+ZONE SIZING INPUTS
+
+Before drawing boundaries, gather these data points for your target area:
+
+• Drive time between stops — From provider interviews and Google Maps API. This is the primary zone boundary determinant. Target: no more than 15 minutes between any two stops within the zone.
+• Population density — From Census data / ACS (American Community Survey). Tells you demand potential per square mile.
+• Home ownership rate — From Census data. Renters rarely purchase home services subscriptions. Target areas with >60% ownership.
+• Median household income — From Census / ACS. Willingness to pay for subscription services. Target areas where >40% of households have HHI above $75K.
+• Lot sizes — From Zillow or county records. Directly impacts service duration variation across properties.
+• HOA density — From local knowledge. HOA neighborhoods have uniform service requirements, which means more efficient routes.
+• Competitor density — From Thumbtack/Angi listings in target ZIP codes. High density means existing provider supply you can recruit from; it also means customers already buy these services.
+• Climate zone — From USDA / NOAA data. Determines seasonal cadence patterns (year-round lawn care in Texas vs. April-October in Minnesota).
+
+ZONE SIZE HEURISTICS BY ENVIRONMENT
+
+Dense suburban (lots under 1/4 acre): 3-5 mile radius, 8-10 stops/day, 60-90 min total drive time budget.
+Standard suburban (1/4 to 1/2 acre): 5-8 mile radius, 6-8 stops/day, 90-120 min total drive time budget.
+Exurban (1/2 to 2 acres): 8-12 mile radius, 4-6 stops/day, 120-150 min total drive time budget.
+Rural (2+ acres): Not viable at launch. Drive time kills the economics.
+
+THE VIABILITY FORMULA
+
+A zone is viable when:
+
+homes_in_zone × home_ownership_rate × income_qualifying_rate × conversion_rate ≥ min_customers
+
+Where:
+• homes_in_zone: from Census block data for the hex cells in your zone
+• home_ownership_rate: from ACS data (target >60%)
+• income_qualifying_rate: % of households with HHI >$75K (target >40%)
+• conversion_rate: conservative 1-2% at launch (proven markets may hit 3-5%)
+• min_customers: 15 per zone for provider economics to work at launch
+
+Example: A zone with 25,000 homes, 70% ownership, 45% income-qualifying, at 1.5% conversion = 25,000 × 0.70 × 0.45 × 0.015 = 118 customers. That's well above the 15 minimum and approaching the 200 self-sustaining threshold from the capacity section above.
+
+HOW THIS CONNECTS TO THE H3 HEX GRID
+
+The platform uses H3 hex-grid geo cells (the Zone Builder wizard). This means boundaries can be computationally optimized:
+1. Start with provider home base locations as seed points
+2. Grow the zone by adding adjacent H3 cells
+3. Score each candidate cell: demand_density × accessibility - drive_time_cost
+4. Stop when the zone reaches the capacity target or the drive-time limit
+5. The Zone Builder wizard already supports this workflow
+
+The hex grid advantage: every hex at the same resolution has the same area, so utilization comparisons across zones are apples-to-apples. Don't fight the grid by trying to match city limits or ZIP codes.`,
+  },
+  {
+    id: "expansion",
+    title: "Expansion — When and How to Grow",
+    type: "text",
+    content: `Expansion is the most expensive mistake you can make if you do it too early, and the most expensive opportunity you miss if you do it too late. The data will tell you when — but only if you're watching the right metrics.
+
+EXPANSION DECISION CRITERIA
+
+A zone is ready to expand (add a second zone in the same metro, or replicate the model in a new metro) when ALL of these thresholds are met:
+
+• 60-day customer retention: >70% — Proves the subscription delivers enough value that customers stay.
+• Provider NPS: >40 — Proves providers will recommend the platform. Below 40, you'll struggle to recruit in a new zone via word-of-mouth.
+• Attach rate (2nd service within 60 days): >25% — Proves bundle expansion is working, not just single-service adoption.
+• Gross margin per zone: >15% — Proves unit economics are viable. Below 15%, expansion just multiplies losses.
+• Support minutes per job: <5 min — Proves ops are scalable. Above 5 min/job, you'll drown in tickets when volume doubles.
+
+If any metric is below threshold, fix it in the existing zone before opening a new one. Expansion amplifies both your strengths and your weaknesses.
+
+REGIONAL VARIATION — WHAT CHANGES MARKET TO MARKET
+
+When expanding to a new metro or region, these factors vary and need local calibration:
+
+• Climate: Snow states need a different seasonal calendar than Sun Belt markets. Lawn care is 12 months/year in Austin but 7-8 months in Minneapolis. This changes your revenue model, provider utilization patterns, and which service categories anchor the subscription.
+• Lot size: Northeast yards are smaller than Texas yards. This impacts service duration per level, handle cost per job, and stops-per-day targets.
+• Income: Higher income markets support higher subscription prices. Use zone pricing multipliers (set in the Control Room) rather than changing base prices.
+• Density: Urban vs. suburban vs. exurban changes zone radius, stops-per-day targets, and the minimum provider count needed for acceptable response times.
+• Competition: Saturated markets have abundant provider supply to recruit from but face customer acquisition headwinds. Underserved markets have the opposite profile.
+• Regulation: Some states require licensing for pest control, tree trimming, or pressure washing. Map compliance requirements per category before launching in a new state.
+
+THE GOAL: REPLICABLE MARKET LAUNCH
+
+The long-term goal is to turn on a new region with minimal human intervention. The system already automates: ZIP code boundaries (Census TIGER files), population/income/ownership data (ACS), and zone boundary suggestions (H3 builder with drive-time API). What still requires human judgment: local provider recruitment, regional SKU calibration from provider interviews (see the SKU Catalog module), competitive positioning, and pricing strategy. Each new market launch should be faster than the last — template what worked, investigate what didn't.
+
+For the full pilot launch playbook — including the 12-week timeline, provider recruitment strategy, and success metrics — see the Market Launch & Provider Recruitment module.`,
+  },
+  {
     id: "pro-tips",
     title: "Pro Tips: What Experience Actually Teaches You",
     type: "pro-tips",

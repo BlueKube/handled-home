@@ -69,6 +69,54 @@ A completed job without proof photos is an unverified claim. It may be perfectly
     ],
   },
   {
+    id: "provider-interviews",
+    title: "Provider Interviews — Getting Real Calibration Data",
+    type: "walkthrough",
+    steps: [
+      {
+        title: "Who to interview and how many",
+        description: "Interview 5-10 providers across your target service categories before calibrating any SKU. Mix experience levels: include at least 2 mid-career providers (15-25 existing customers, 2-5 years in business) and 1-2 newer operators. Mid-career providers give you the most realistic duration and cost data because they've optimized their workflow but aren't so fast that their numbers are outliers. One provider's numbers are an anecdote. Three providers saying the same thing is data you can act on.",
+        screenshot: { alt: "Provider interview scheduling tracker" },
+      },
+      {
+        title: "The questions that produce calibration data",
+        description: `For each service type, ask these duration and scope questions:
+
+• "For a typical 2,000 sqft home with a standard yard, how long does a basic mow take? Edge and trim? Full service?" — This gives you level-by-level duration data.
+• "What about a 4,000 sqft home? A small townhome?" — This gives you property-size tier data (Small/Medium/Large/XL).
+• "What makes a job take longer than expected?" — This reveals the variables your seed data doesn't account for: slope, obstacles, gate access, dog waste.
+• "How many stops per day is ideal? Maximum?" — This feeds zone capacity planning.
+• "What's your drive time between stops on a good day? Bad day?" — This feeds zone sizing.
+• "What equipment do you bring for each service level?" — This validates your SKU inclusions match what providers actually deliver.
+
+Also ask economics questions: "What do you currently charge per visit? What's your minimum to make a trip worthwhile? What would you need to earn per job on our platform to say yes?" These feed your payout configuration in the Control Room.`,
+        screenshot: { alt: "Provider interview question guide" },
+      },
+      {
+        title: "Map interview data to system parameters",
+        description: `Every interview answer maps to a specific system setting. Here's the translation table:
+
+• Basic service duration → sku_levels.planned_minutes (SKU Levels)
+• Equipment needed → provider capabilities / equipment kits (Provider work profile)
+• Per-visit price expectation → provider payout rates (Payout engine in Control Room)
+• Min stops to justify a trip → zones.min_jobs_per_day (Zone capacity settings)
+• Max stops per day → zones.max_homes_per_day (Zone capacity settings)
+• Drive time between stops → zone boundary sizing input (Zone Builder)
+• Weather sensitivity → service_skus.weather_sensitive flag (SKU flags)
+• Property size impact on duration → sku_levels by tier (Level auto-selection)
+• Seasonal patterns → seasonal service templates (Seasonal calendar)
+
+Don't eyeball the translation. Enter the raw provider data into the calibration form, read the delta indicators, and let the system show you where your seed data was wrong. See the SKU Calibration section above for the step-by-step workflow.`,
+        screenshot: { alt: "Interview data to system parameter mapping table" },
+      },
+      {
+        title: "Validate with a delta review before applying",
+        description: "After entering provider-reported data, the calibration page shows delta indicators. Green (<5%) means your guess was close. Yellow (5-20%) means adjust. Red (>20%) means your scheduling, billing, and route planning are based on wrong numbers — fix immediately. If two providers gave you wildly different numbers for the same service, investigate: are they working different property sizes? Different service levels? Different equipment? The discrepancy is data, not noise. For the full provider recruitment and interview playbook — including who to target, where to find them, and how to pitch — see the Market Launch & Provider Recruitment module.",
+        screenshot: { alt: "Calibration delta review with provider data comparison" },
+      },
+    ],
+  },
+  {
     id: "pro-tips",
     title: "Pro Tips from Veteran Operators",
     type: "pro-tips",
