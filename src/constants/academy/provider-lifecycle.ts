@@ -26,88 +26,113 @@ OFFBOARDING — Voluntary (provider leaves) or involuntary (deactivation). Volun
 The lifecycle is a pipeline. Your job is to keep quality providers moving through it productively, and to remove poor performers before they damage your customer relationships or your good providers' trust in the platform.`,
   },
   {
-    id: "lifecycle-walkthrough",
-    title: "The Provider Lifecycle: Application to Active (and Beyond)",
+    id: "onboarding-walkthrough",
+    title: "Provider Onboarding — Step by Step",
     type: "walkthrough",
     steps: [
       {
-        title: "Application arrives — do your first pass",
-        description:
-          "When an application comes in, start with the basics before reading anything in detail: Is the service type something we need in their requested zone? Do we have capacity for another provider there? If the answer to either is no, you can decline immediately with a brief note. Don't waste 20 minutes evaluating someone for a zone that's already fully covered.",
-        screenshot: { alt: "Applications page showing incoming applications" },
+        title: "Review the application and initial screening",
+        description: "Navigate to Providers → Applications → Pending. Review each application for completeness: years of experience, equipment owned, service types offered, and coverage area. Flag any applications with vague answers or no equipment listed — follow up before advancing. Applicants who can't describe their own equipment are a red flag. Reject outright if the coverage area doesn't match any open zones.",
+        screenshot: { alt: "Provider application review screen with status filters" },
       },
       {
-        title: "Evaluate the application — what to look for",
-        description:
-          "Look for three things in order: (1) Experience signal — how long have they been doing this work? Do they have their own equipment? Are they running a real small business or is this a side hustle experiment? (2) Zone fit — do they live or operate close enough to the zones they're requesting to have realistic route density? A provider who lives 40 minutes from their zone will eventually quit because the drive time kills their economics. (3) Communication quality — how did they fill out the application? Vague, incomplete answers are a red flag. A provider who can't describe their own services clearly will struggle to communicate with customers.",
-        screenshot: { alt: "Provider application detail view" },
+        title: "Initiate and track the background check",
+        description: "For every applicant you advance, initiate a background check from the application record. The check runs through our integrated vendor and returns within 2–3 business days. You're looking for: no felony convictions in the past 7 years, no fraud-related offenses, no violence on record. Minor infractions (old traffic violations, misdemeanors 10+ years ago) are judgment calls — escalate to your manager if unsure. Never approve a provider without a completed, cleared background check.",
+        screenshot: { alt: "Background check initiation and status tracker" },
       },
       {
-        title: "Red flags — know them cold",
-        description:
-          "Decline or investigate further if you see: no personal equipment (they'll be dependent on renting, which makes them unreliable), geographic mismatch between address and requested zones, application filled out in under 2 minutes (copy-paste or not taking it seriously), requesting zones in categories where we have low demand, or anything in the application that suggests they're already overcommitted with other work. The last one is subtle — a provider working 60 hours/week elsewhere is unlikely to give us reliable service.",
-        screenshot: { alt: "Application red flag indicators" },
+        title: "Verify documents and equipment",
+        description: "Required documents vary by state, but the baseline is: government-issued ID, proof of equipment ownership or rental, and liability insurance certificate (minimum $1M general liability). Upload all documents to the provider record under the Documents tab. Mark each one as verified manually — the system won't do it for you. A provider with unverified docs should not be activated. If insurance is expired or the coverage amount is insufficient, request an updated certificate before advancing.",
+        screenshot: { alt: "Provider document upload and verification checklist" },
       },
       {
-        title: "Approve the application and set zone coverage",
-        description:
-          "When you approve, you assign the specific zones the provider can service. Don't just approve everything they requested — be deliberate. If they requested 4 zones but you only have demand in 2, approve those 2 and note that expansion is possible once they're established. The zone coverage approval is a binding operational decision: the assignment engine will start sending them jobs in those zones immediately.",
-        screenshot: { alt: "Zone coverage approval modal" },
+        title: "Assign territory and service types",
+        description: "Go to the provider record → Territory tab. Assign them to one or more service zones based on their stated coverage area and current zone demand. Don't over-assign zones to a new provider — start with their primary area and expand after they've shown reliability. Then set their service types (mowing, trimming, cleanup, etc.) — only assign what they confirmed they can actually perform. Wrong service type assignments lead to job mismatches and immediate quality complaints.",
+        screenshot: { alt: "Provider territory and service type assignment interface" },
       },
       {
-        title: "Onboarding — what happens after approval",
-        description:
-          "After approval, the provider needs to complete onboarding before they go Active. This typically means connecting a payout account (Stripe Connect or equivalent), confirming availability windows, and acknowledging service standards. Until payout is connected, their status will show as 'Onboarding' — they cannot be assigned jobs. If a provider sits in Onboarding for more than 7 days, reach out. The most common blockers are confusion about the payout setup or a bank account they don't have immediate access to.",
-        screenshot: { alt: "Provider detail showing Onboarding status" },
+        title: "Complete Stripe Connect onboarding",
+        description: "Until the provider completes Stripe identity verification, payouts are blocked. From the provider record → Payout Settings, send them the Stripe Connect onboarding link. Follow up after 48 hours if they haven't completed it. New providers are often confused by the identity verification steps — they may need reassurance that it's standard. Do not activate the provider for scheduling until Stripe onboarding shows ACTIVE status.",
+        screenshot: { alt: "Provider Stripe Connect status in payout settings" },
       },
       {
-        title: "Active — normal operations",
-        description:
-          "Once a provider is Active, the assignment engine will route jobs to them based on their zones, availability, and capacity. Your job now shifts from evaluation to performance monitoring. Check their proof compliance rate and issue rate in the Provider Detail page. Most providers need 2–3 weeks to settle into a consistent pattern. Don't make judgments on the first week of data.",
-        screenshot: { alt: "Provider detail showing Active status with performance metrics" },
+        title: "Complete the training and standards walkthrough",
+        description: "Every new provider completes a standards walkthrough before their first job. This covers: photo proof requirements (before, during, and after photos per job), how to use the provider app, communication standards with customers, cancellation and reschedule policy, and what triggers a quality flag. Providers who skip this step generate more complaints in their first 30 days. Log the training completion date in the provider record.",
+        screenshot: { alt: "Provider training completion checklist in onboarding record" },
       },
       {
-        title: "Probation — when performance slips",
-        description:
-          "Probation is a formal status change you trigger manually from the Provider Detail page. It signals that the provider has a documented performance issue but we're not ready to suspend them yet. Probation limits new job assignments (they keep existing jobs, get fewer new ones), triggers more frequent check-ins, and creates a formal record. Before putting someone on probation, make sure you've had the conversation first. Surprise probation creates resentment. Probation after a conversation creates accountability.",
-        screenshot: { alt: "Provider status change controls on detail page" },
-      },
-      {
-        title: "Suspension — the last resort",
-        description:
-          "Suspension immediately prevents new job assignments and removes the provider from active routing. It does NOT automatically cancel their existing scheduled jobs — those need to be handled manually. Before suspending, always check active job count first (visible in Provider Detail). A provider with 15 jobs scheduled this week represents 15 customer disruptions if suspended abruptly. Suspension is appropriate for: no-show patterns that didn't resolve on probation, policy violations (not submitting proof, customer complaints about conduct), or a provider who has gone radio silent.",
-        screenshot: { alt: "Suspension confirmation dialog with active job warning" },
+        title: "First job review",
+        description: "Personally review the proof submission from a new provider's first job. Did they submit before/during/after photos? Are the photos actually of the property (not blurry, not just grass with no identifiable landmarks)? Is the quality visibly acceptable? New providers who understand the proof standard in week one perform measurably better at 60 days. If the first proof submission is weak, reach out immediately with specific feedback — not a form message. Name what's missing.",
+        screenshot: { alt: "Job proof review showing photo grid for first-job audit" },
       },
     ],
   },
   {
-    id: "performance-metrics",
-    title: "Reading Provider Performance Metrics",
+    id: "performance-management",
+    title: "Provider Performance Management",
     type: "walkthrough",
     steps: [
       {
-        title: "Proof compliance rate — your first signal",
-        description:
-          "This is the percentage of completed jobs where the provider submitted required photo proof. Target is 95%+. A provider at 90% is slipping. A provider at 80% is a problem. Low proof compliance has a compounding effect: customers dispute jobs, you can't resolve disputes without proof, and you start losing money on legitimate service. This metric degrades gradually — watch for the trend, not just the snapshot.",
-        screenshot: { alt: "Proof compliance rate on Provider Detail" },
+        title: "Understand the metrics that matter",
+        description: "The platform tracks six key performance indicators for every provider: (1) Job Completion Rate — percentage of accepted jobs completed vs. cancelled or no-showed; (2) On-Time Rate — arrivals within the service window; (3) Quality Score — composite from customer ratings and admin quality flags; (4) Proof Compliance Rate — percentage of jobs with proof submitted within 2 hours of completion; (5) Communication Score — response time to platform messages and customer contacts; (6) Callback Rate — percentage of jobs that generate a customer callback or complaint. Review these weekly for your active roster.",
+        screenshot: { alt: "Provider performance dashboard with six KPI summary tiles" },
       },
       {
-        title: "Issue rate — quality signal",
-        description:
-          "Jobs with reported issues divided by total completed jobs. Target is under 3%. Above 5% warrants a conversation. Above 10% warrants probation consideration. Important: look at issue type, not just count. Equipment failure and customer disputes are very different problems. A provider with 3 customer complaints has a behavior issue. A provider with 3 equipment failures has a logistics issue. The fix is different for each.",
-        screenshot: { alt: "Issue rate breakdown on Provider Detail" },
+        title: "Run the weekly performance review",
+        description: "Every Monday morning, pull the provider performance report for the prior week (Providers → Reports → Weekly Performance). Sort by Quality Score ascending — your lowest performers are at the top. Anyone below 3.8/5.0 on quality or below 90% on completion rate gets a personal review. Check what jobs generated the flags, read the customer comments, look at the proof photos. This is your early warning system — catch problems in week 2, not week 8.",
+        screenshot: { alt: "Weekly provider performance report sorted by quality score" },
       },
       {
-        title: "No-show and late rate — reliability signal",
-        description:
-          "This is the hardest metric for providers to recover from. A single no-show is noticed by the customer. Two no-shows in a month is a pattern. Check whether no-shows correlate with specific days of the week (suggests a scheduling conflict they haven't disclosed) or specific conditions. If a provider has zero no-shows for 6 months and then two in a week, something changed in their life — have the conversation before assuming bad intent.",
-        screenshot: { alt: "Reliability metrics section on Provider Detail" },
+        title: "Review quality flags and customer feedback",
+        description: "Quality flags are generated automatically when: a customer submits a complaint, an admin reviews proof and marks it insufficient, or a job receives a rating below 3 stars. Navigate to Providers → Flags → Open to see every unresolved flag. For each flag: read the customer's exact words, look at the proof photos, check if this provider has prior flags for similar issues. Flags that aren't reviewed and closed within 48 hours age out of your working queue — don't let them pile up.",
+        screenshot: { alt: "Quality flag queue showing open flags with age and provider" },
       },
       {
-        title: "Job volume and capacity utilization — load signal",
-        description:
-          "How many jobs per week is this provider completing? Are they at their self-reported capacity? A provider running at 120% of their stated capacity will eventually burn out or cut corners. A provider running at 40% of capacity might be available for more zone coverage or might be supplementing with outside work — either way, worth understanding.",
-        screenshot: { alt: "Job volume chart on Provider Detail" },
+        title: "Manage photo proof compliance",
+        description: "Proof compliance threshold is 90% — providers must submit compliant proof on at least 9 of every 10 jobs. 'Compliant proof' means: at least one before photo, at least one after photo, photos submitted within 2 hours of job completion. Drop below 90% for two consecutive weeks, and the provider gets a formal warning. Drop below 80% and it triggers a probation review. You can see compliance by provider at Providers → select provider → Performance tab → Proof Compliance.",
+        screenshot: { alt: "Provider proof compliance history chart with threshold markers" },
+      },
+      {
+        title: "Close the customer feedback loop",
+        description: "When a customer rates a job below 4 stars or submits a written complaint, the feedback must touch the provider. Not as a passive notification — as a direct message with specific coaching. 'A customer mentioned the edging on the sidewalk was missed' is useful. 'Customer wasn't happy' is not. Providers who receive specific, actionable feedback on quality complaints show measurably better performance in the following 4 weeks. Close the loop within 24 hours of the feedback arriving.",
+        screenshot: { alt: "Customer feedback detail linked to provider coaching message thread" },
+      },
+    ],
+  },
+  {
+    id: "managing-issues",
+    title: "Managing Provider Issues",
+    type: "walkthrough",
+    steps: [
+      {
+        title: "Handle a no-show",
+        description: "A no-show is a provider who accepted a job and didn't complete it without cancelling in advance. First step: reach out to the provider immediately to understand what happened. Genuine emergencies happen — document them. Then: reassign the job to another provider (or manually reschedule with the customer), and flag the no-show in the provider record. No-shows are cumulative: 1 no-show in 30 days = documented warning. 2 no-shows in 30 days = automatic probation trigger. 3 no-shows in any 60-day window = deactivation review.",
+        screenshot: { alt: "No-show incident logging form with reason and reassignment status" },
+      },
+      {
+        title: "Handle a quality complaint",
+        description: "A quality complaint is when a customer explicitly reports dissatisfaction with the work performed. Start with the proof photos — does the work look acceptable in the photos? If yes, the complaint may be a perception or expectation mismatch (worth noting, not necessarily the provider's fault). If the photos show poor work, the complaint is valid. Either way: contact the provider within 24 hours. If the complaint is valid, document it in the provider record and send a coaching message. If two or more valid quality complaints arrive in a 30-day window, escalate to a formal performance review.",
+        screenshot: { alt: "Quality complaint intake linked to job record and proof photos" },
+      },
+      {
+        title: "Address schedule reliability issues",
+        description: "A provider who consistently arrives late (outside the service window) or who frequently requests reschedules creates downstream problems: customer dissatisfaction, routing disruption, and lost revenue. Review the on-time rate for any provider flagged for lateness. If on-time rate drops below 85% in any 2-week period, initiate a coaching call. Often there's a structural issue — the provider took on too many zones, or they're working another job that creates conflicts. Solve the root cause, not just the symptom.",
+        screenshot: { alt: "Provider on-time rate trend with service window compliance chart" },
+      },
+      {
+        title: "Handle communication problems",
+        description: "Providers who don't respond to platform messages, ignore customer contact requests, or go silent for extended periods create compounding problems. The platform logs all message delivery and read receipts. If a provider hasn't responded to platform messages within 24 hours on two or more occasions in a month, trigger a direct outreach (phone call, not message). If they're non-responsive by phone, place their availability on hold until contact is made. A provider you can't reach is a liability. Don't assign jobs to unreachable providers.",
+        screenshot: { alt: "Provider communication log with message read receipts and response times" },
+      },
+      {
+        title: "Initiate formal probation",
+        description: "Probation is triggered by: 2+ no-shows in 30 days, proof compliance below 80% for two consecutive weeks, quality score below 3.5 for two consecutive weeks, or two or more valid quality complaints in 30 days. Navigate to the provider record → Status → Place on Probation. Set the review window (standard is 30 days). Document the trigger clearly in the probation record — specific dates, specific incidents, specific metrics. Send the provider a clear written summary of what triggered probation, what the performance expectations are during the review window, and what the outcome criteria are. No surprises.",
+        screenshot: { alt: "Probation initiation form with trigger documentation and review window" },
+      },
+      {
+        title: "Conduct the probation review",
+        description: "At the end of the probation window, pull the performance data for the review period. Compare it to the criteria you set at the start. Did the provider meet the benchmarks? If yes: close probation, update status to Active, send a positive note. If no: escalate to deactivation review. If partial improvement: use judgment — is there genuine trajectory? Have they demonstrated effort? Document your decision and the reasoning either way. Probation reviews that aren't conducted on schedule send the message that standards are negotiable.",
+        screenshot: { alt: "Probation review summary comparing trigger metrics to review period performance" },
       },
     ],
   },
