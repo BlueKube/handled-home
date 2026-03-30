@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requireCronSecret } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -614,6 +615,8 @@ Deno.serve(async (req) => {
     .single();
 
   try {
+    requireCronSecret(req);
+
     // ── Step 1: Load config dials ──
     const { data: configRows } = await supabase
       .from("assignment_config")

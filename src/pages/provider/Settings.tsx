@@ -79,7 +79,7 @@ export default function ProviderSettings() {
       <RoleSwitcher />
       <PreviewAsCard />
 
-      <Button variant="destructive" onClick={handleSignOut} className="w-full flex items-center gap-2">
+      <Button variant="ghost" onClick={handleSignOut} className="w-full flex items-center gap-2 text-destructive hover:text-destructive hover:bg-destructive/5">
         <LogOut className="h-4 w-4" />
         Sign Out
       </Button>

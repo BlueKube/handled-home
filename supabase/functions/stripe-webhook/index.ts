@@ -1,11 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+import { noCorsHeaders } from "../_shared/cors.ts";
 
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
@@ -13,25 +9,39 @@ const logStep = (step: string, details?: any) => {
 };
 
 serve(async (req) => {
+  // Webhooks are server-to-server — no CORS preflight needed
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { status: 405 });
   }
 
   try {
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY not configured");
 
+    const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+    if (!webhookSecret) throw new Error("STRIPE_WEBHOOK_SECRET not configured — cannot verify webhook signatures");
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
     const body = await req.text();
     const sig = req.headers.get("stripe-signature");
 
+    if (!sig) {
+      return new Response(JSON.stringify({ error: "Missing stripe-signature header" }), {
+        status: 401,
+        headers: noCorsHeaders,
+      });
+    }
+
     let event: Stripe.Event;
-    const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
-    if (webhookSecret && sig) {
+    try {
       event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
-    } else {
-      event = JSON.parse(body);
+    } catch (err: any) {
+      logStep("Signature verification failed", { error: err.message });
+      return new Response(JSON.stringify({ error: "Invalid signature" }), {
+        status: 401,
+        headers: noCorsHeaders,
+      });
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -51,7 +61,7 @@ serve(async (req) => {
     if (dedupeErr?.code === "23505") {
       logStep("Duplicate webhook event, skipping", { eventId: event.id });
       return new Response(JSON.stringify({ received: true, duplicate: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: noCorsHeaders,
       });
     }
 
@@ -600,13 +610,13 @@ serve(async (req) => {
       .eq("processor_event_id", event.id);
 
     return new Response(JSON.stringify({ received: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: noCorsHeaders,
     });
   } catch (error: any) {
     console.error("Webhook error:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: noCorsHeaders,
     });
   }
 });

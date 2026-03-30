@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requireCronSecret } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -194,6 +195,8 @@ Deno.serve(async (req) => {
   const runId = runLog?.id;
 
   try {
+    requireCronSecret(req);
+
     // ── Load thresholds ──
     const { data: thresholdRows } = await sb
       .from("zone_state_threshold_configs")

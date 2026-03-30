@@ -1,0 +1,378 @@
+# Handled Home — PRD (Sprint 3E): Handled Receipts (Proof-of-Work) + Tasteful Post-Visit Expansion
+**Sprint:** 3E  
+**Depends on:** 3A Levels + 3B Signals + 3C Growth surfaces + 3D Ops Cockpit (optional, but recommended)  
+**Product:** Handled Home (mobile-only iOS/Android)  
+**Core thesis alignment:** Turn every service into a **premium artifact** that increases trust, reduces disputes, improves retention, and enables **high-converting, non-spammy** “next time” upgrades/add-ons.
+
+---
+
+## 0) Executive Summary (What 3E really does)
+Handled Home’s moat is not a catalog. It’s **trust + habit + history**.
+
+Sprint 3E upgrades “Visits” into **Handled Receipts** — a consistent, auditable, premium record of every job:
+- Photos + checklist proof
+- Clear scope + Level context (scheduled vs performed)
+- Issues + resolution trail
+- “Recommended next time” actions that feel helpful (not salesy)
+
+This sprint turns the app into something customers *keep* because it becomes their home’s maintenance memory and makes future decisions frictionless.
+
+---
+
+## 1) Goals
+
+### 1.1 Customer goals
+- Instantly understand what was done, what changed, and what to expect next.
+- Trust the outcome via proof (photos/checklists) without needing to call/text anyone.
+- Feel fully in control: accept or decline suggested changes with one tap.
+- Have a clean history for reference (“when were gutters last cleaned?”).
+
+### 1.2 Business goals
+- Increase retention by making the membership feel real and valuable after every visit.
+- Increase expansion by converting satisfaction moments into “next cycle” actions:
+  - Level adjustments (same service)
+  - Adjacent add-ons (“while we’re here next time”)
+- Reduce support costs by making evidence and scope explicit.
+
+### 1.3 Operational goals
+- Reduce disputes and time-to-resolution with structured evidence.
+- Enforce provider proof compliance without heavy ops overhead.
+- Feed back into Levels calibration via recommendation and courtesy upgrade visibility.
+
+---
+
+## 2) Non-goals (v1 of 3E)
+- Full PDF generation engine (optional later; sharing can be basic initially)
+- Real-time provider GPS tracking (not needed here)
+- Extensive social sharing virality mechanics (keep it premium and minimal)
+- Complex dispute workflow redesign (use existing support structures; just integrate)
+
+---
+
+## 3) Key Concepts
+
+### 3.1 Handled Receipt
+A standard, premium “receipt” for every completed job that includes:
+- What service + Level was scheduled
+- What service + Level was actually performed (if courtesy upgrade)
+- Proof-of-work (photos + checklist completion)
+- Notes and exceptions
+- Issues raised and resolution status (if any)
+- One-tap “next time” adjustments
+
+### 3.2 Receipt-Driven Expansion (Tasteful)
+Expansion surfaces only appear in contexts where they feel helpful:
+- “To keep this standard, update to Level 3 next time (+5 handles)”
+- “While we’re here next cycle, add inside windows (+X handles)”
+Rules: few, relevant, skippable, not repeated aggressively.
+
+---
+
+## 4) UX / IA Changes
+
+### 4.1 Navigation rename
+- Rename customer tab: **Visits → Receipts** (or “History” if you prefer softer language)
+- Home preview tile should reference “Receipts” not “Visits.”
+
+### 4.2 Empty-state upgrades (premium even before first job)
+When there are no receipts:
+- Show a “sample receipt card” skeleton:
+  - 2 photo placeholders (before/after)
+  - checklist completion preview
+  - “Handled standard” badge
+- Copy:
+  - “After each service, you’ll get a Handled Receipt with photos + checklist proof.”
+
+This prevents the “dead dashboard” feeling.
+
+---
+
+## 5) Customer Experience Requirements
+
+## 5.1 Receipts list screen
+**Screen:** Receipts (list)
+- Filter by property (if multi-property supported)
+- Filter by service category (optional v1)
+- Each row shows:
+  - service name
+  - date/time
+  - “Handled standard met” status
+  - # photos
+  - issues flag (if present)
+  - Level label (e.g., “Level 2”)
+  - Provider name/org (as allowed)
+
+## 5.2 Receipt detail screen (core deliverable)
+Receipt detail must show, in this order:
+
+### Section A — Summary header
+- Service name (SKU)
+- Date/time
+- Property
+- Provider identity (name/org) + rating surface (optional)
+- Status badge:
+  - ✅ Completed — Handled Standard Met
+  - ⚠️ Completed — Attention Needed (if proof missing or issue opened)
+
+### Section B — Scope & Level block (trust + clarity)
+- **Scheduled Level:** Level X (label + short description)
+- If courtesy upgrade:
+  - **Performed Level:** Level Y (Courtesy Upgrade)
+  - Reason code (short)
+- What’s included (collapsed bullets)
+- What’s excluded (collapsed bullets)
+- Time window (if available)
+
+### Section C — Proof-of-work
+- Photo gallery with required minimum counts shown:
+  - “8/8 photos uploaded”
+- Checklist completion:
+  - show top-level checklist categories with completed counts
+  - allow “view checklist” drill-in (optional v1)
+
+### Section D — Notes & Exceptions
+- Provider notes (short and structured)
+- Customer-visible flags (“gate locked”, “dog in yard”, etc.)
+
+### Section E — Issues / Support (if applicable)
+- Issue status (open/in progress/resolved)
+- Evidence attached
+- Link to open support thread/ticket
+
+### Section F — Next time (tasteful recommendation module)
+Only show if there is a high-confidence, relevant recommendation.
+
+Examples:
+- **Level recommendation** from provider:
+  - “Recommended next time: Level 3 (+5 handles)”
+  - Reason: “Inside windows requested / many windows / 2 stories”
+  - CTA: **Update going forward**
+  - Alternative: “Keep current level” (with calm warning)
+- **While we’re here next time** (adjacent add-on):
+  - “Add screen cleaning next time (+X handles)”
+  - CTA: **Add to next cycle**
+
+Hard rule: max **2** items in this module.
+
+---
+
+## 6) Provider Proof Compliance Integration
+
+### 6.1 Receipt should reflect compliance clearly
+Receipt must show:
+- required photos minimum vs actual
+- checklist completion percentage or pass/fail
+
+### 6.2 Missing proof behavior
+If proof is missing:
+- Receipt shows “Attention needed” state
+- Customer sees:
+  - “We’re waiting on final proof from your provider.”
+- Ops/Admin gets an alert hook (or queue item in Cockpit drilldown).
+
+Do NOT hide incomplete receipts; show them with transparent status.
+
+---
+
+## 7) Recommendation & Upsell Rules (critical to keep premium feel)
+
+## 7.1 Recommendation sources (priority order)
+1. **Provider Level Recommendation** (from 3A completion flow)
+2. **Courtesy Upgrade** performed level vs scheduled
+3. **System inference** (signals + history) for adjacent add-ons, only if high confidence
+
+## 7.2 Recommendation types supported (v1)
+- **Level Upgrade** (same SKU)
+- **Level Downgrade** (rare; only if provider explicitly recommends lower)
+- **Adjacent Add-on** (related service)
+- **Switch suggestion** (only if relevant and non-invasive; optional v1)
+
+## 7.3 Frequency / throttling
+- Never show more than 2 recommendations per receipt
+- Do not repeat the same recommendation:
+  - more than 2 times in 14 days
+  - more than once per receipt type without new evidence
+- If customer taps “Not interested,” suppress for 90 days.
+
+## 7.4 Tone and copy
+- Use “to keep the standard consistent” framing
+- Avoid “upgrade now!” tone
+- Show incremental value + incremental handles clearly
+
+Examples:
+- “We upgraded you today to meet Handled standards. To keep this result, Level 3 is recommended going forward (+5 handles).”
+- “Level 2 includes outside only. Level 3 adds inside windows for +5 handles.”
+
+---
+
+## 8) Actions (One-tap changes) & Scheduling Rules
+
+### 8.1 “Update going forward” behavior
+When customer accepts a level change:
+- Update the routine item’s `sku_level_id`
+- Apply **next cycle** by default
+- Show confirmation:
+  - “Updated starting next cycle.”
+
+### 8.2 “Add next time” behavior (adjacent add-on)
+- Adds service as:
+  - one-time next cycle add-on OR
+  - routine item (depending on SKU type and default cadence)
+- Must pass:
+  - eligibility (coverage map)
+  - capacity checks (if known)
+- If capacity conflict:
+  - show “We’ll schedule this for the next available cycle” (no scary errors)
+
+### 8.3 “Keep current level” behavior
+If customer declines a provider recommendation:
+- record a decline event
+- show calm warning:
+  - “We’ll do our best within the scheduled time window.”
+
+---
+
+## 9) Data Model Requirements
+
+### 9.1 Receipt representation (likely existing jobs table + proof tables)
+Receipt is derived from:
+- `jobs` (service date/time, sku_id, scheduled level, performed level)
+- `job_proof_photos` (urls, types, timestamps)
+- `job_checklist` (items, completion)
+- `job_level_feedback` (sufficient, recommended level, reason code)
+- `issues/disputes` (if any)
+
+### 9.2 New tables (if needed)
+#### `receipt_recommendations`
+Store computed recommendations (so UI is deterministic):
+- `id`
+- `job_id`
+- `type` (LEVEL_CHANGE / ADD_ADJACENT)
+- `sku_id` (if add-on)
+- `level_id` (if level change)
+- `reason` (string)
+- `handles_delta`
+- `priority`
+- `created_at`
+
+#### `receipt_actions`
+Track what the customer did:
+- `id`
+- `job_id`
+- `action_type` (ACCEPT_RECOMMENDATION / DECLINE / HIDE)
+- `payload` json
+- `created_at`
+
+---
+
+## 10) Admin/Ops Integration (minimal but essential)
+
+### 10.1 Admin view of receipt
+Admin must be able to view the same receipt artifact for support:
+- See proof
+- See scheduled vs performed level
+- See recommendations and whether customer accepted
+
+### 10.2 Ops Cockpit hooks (if 3D exists)
+Receipts should feed cockpit KPIs:
+- proof compliance rate
+- issues per 100 jobs
+- courtesy upgrade rate
+- level recommendation rate
+
+---
+
+## 11) Analytics & Success Metrics
+
+### 11.1 Key success metrics for 3E
+- Receipt view rate (customers opening receipts)
+- Reduction in support contacts per job
+- Faster time-to-resolution for issues (proxy)
+- Acceptance rate of post-visit Level recommendations
+- Acceptance rate of “add next time” add-ons
+- Receipt-driven expansion contribution:
+  - % of new routine changes originating from receipts
+
+### 11.2 Event tracking (required)
+- `receipt_list_viewed`
+- `receipt_opened`
+- `receipt_photo_opened`
+- `receipt_recommendation_shown`
+- `receipt_recommendation_accepted`
+- `receipt_recommendation_declined`
+- `receipt_recommendation_hidden`
+- `receipt_issue_opened` (if allowed)
+
+---
+
+## 12) Acceptance Criteria (Must Pass)
+
+### Customer
+- Receipts tab renamed and list renders correctly.
+- Receipt detail shows:
+  - scheduled vs performed level
+  - proof photos count vs required
+  - checklist completion
+  - issues (if any)
+- Receipt recommendations (max 2) are relevant and actionable.
+- “Update going forward” applies next cycle and updates routine item.
+- “Add next time” creates a next-cycle add item.
+
+### Provider/Ops
+- Missing proof state is visible and triggers an ops-follow-up path.
+- Admin can view receipt and see all evidence and actions.
+
+### System
+- Recommendations are deterministic (computed once, saved or reproducible).
+- Throttling and suppression rules prevent spam.
+
+---
+
+## 13) Implementation Plan (Task Breakdown)
+
+### 13.1 UI/UX
+1. Rename Visits → Receipts in nav and routing
+2. Receipts list screen (filters + states)
+3. Receipt detail screen (Sections A–F)
+4. Empty states with sample receipt preview
+
+### 13.2 Proof integration
+5. Photo gallery + required count display
+6. Checklist summary + drilldown (optional)
+
+### 13.3 Recommendations engine v1
+7. Generate recommendations from:
+   - provider recommendation
+   - courtesy upgrade
+   - high-confidence adjacent add-on rules
+8. Store recommendations (optional table) or generate deterministically
+9. Add throttling + hide feedback
+
+### 13.4 Actions
+10. “Update going forward” routine update (next cycle)
+11. “Add next time” add-on insertion (next cycle)
+12. Instrumentation and logging
+
+### 13.5 Admin
+13. Admin receipt view + support hooks
+
+---
+
+## 14) Opinionated Notes (How to make this excellent)
+- Receipts are a premium artifact: clean layout, minimal clutter, strong “proof” visuals.
+- Never treat receipts like invoices; treat them like a **home maintenance record**.
+- Expansion must feel like concierge guidance:
+  - fewer recommendations
+  - higher confidence
+  - always optional
+- The best first recommendation type is usually **Level correction** because it is directly tied to evidence and quality, not “buy more.”
+
+---
+
+## 15) What this unlocks next
+- Higher retention and perceived membership value
+- Lower disputes and support burden
+- A natural, trustworthy upsell path that scales ARR per household
+- Better data for Levels calibration and provider coaching
+
+**End of Sprint 3E PRD**

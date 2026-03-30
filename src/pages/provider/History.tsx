@@ -49,7 +49,10 @@ export default function ProviderHistory() {
           compact
           icon={Clock}
           title="No completed jobs yet"
-          body="Jobs you complete will appear here with their details and status."
+          body="Jobs you complete will appear here with their details and status. Check your upcoming jobs to see what's next."
+          ctaLabel="View Jobs"
+          ctaAction={() => navigate("/provider/jobs")}
+          ctaVariant="outline"
         />
       ) : (
         Object.entries(grouped)

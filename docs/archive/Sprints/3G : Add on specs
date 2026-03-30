@@ -1,0 +1,480 @@
+# Handled Home — Add-on Specs: Provider Onboarding Screen Inventory + Supabase Schema + RLS Checklist
+**Adds to:** Provider Onboarding / BYOC PRD Addendum  
+**Goal:** Give Lovable an unambiguous build target: routes, components, tables, policies, indexes, and minimal APIs.
+
+---
+
+# PART A — Screen Inventory (Routes + Components)
+
+> Naming is illustrative. Match your current routing conventions.
+
+## A1) Provider Entry & Opportunity
+### `/(auth)/role-select`
+**Purpose:** Choose customer vs provider  
+**Components:**
+- RoleChoiceCard (Customer / Provider)
+- ContinueButton
+
+### `/provider/entry/categories`
+**Purpose:** Select categories (multi-select)  
+**Components:**
+- CategoryMultiSelect (chips)
+- ContinueButton
+
+### `/provider/entry/coverage`
+**Purpose:** Home base + service area (ZIPs or zones)  
+**Components:**
+- InputHomeBaseZip
+- MultiZipPicker OR ZonePicker
+- ContinueButton
+
+### `/provider/opportunity`
+**Purpose:** Show dynamic “Good News” banner based on zone×category state  
+**Components:**
+- OpportunityBanner (variant A–E)
+- OpportunityBenefitsList
+- FoundingPartnerBadge (optional)
+- CTAButton (Apply Now / Join Waitlist)
+**Logic:**
+- Resolve ZIPs → zone_id(s)
+- For each selected category, fetch `market_zone_category_state`
+- Compute best banner variant (priority: EARLY > OPEN > WAITLIST > CLOSED)
+
+---
+
+## A2) Provider Application Wizard
+> Wizard should persist draft progress and support resume.
+
+### `/provider/apply/start`
+**Purpose:** Pitch page, set expectations  
+**Components:**
+- BenefitBullets
+- “How it works” mini timeline
+- ContinueButton
+- SaveDraftIndicator
+
+### `/provider/apply/profile`
+**Purpose:** Business identity  
+**Components:**
+- TextFields (name, business name)
+- ContactFields (phone, email)
+- BusinessTypeSelect
+- TeamSizeSelect
+- YearsInBusinessSelect
+- ContinueButton
+
+### `/provider/apply/services`
+**Purpose:** Categories + availability  
+**Components:**
+- CategoryConfirmMultiSelect
+- AvailabilityPicker (days + hours)
+- Optional: CapabilitiesByCategory (toggles)
+- ContinueButton
+
+### `/provider/apply/byoc`
+**Purpose:** BYOC potential intake (optional but encouraged)  
+**Components:**
+- Toggle (Have existing customers?)
+- If yes:
+  - PerCategoryCountRanges
+  - WillingnessSelect
+  - RelationshipTypeSelect
+- ContinueButton
+
+### `/provider/apply/compliance`
+**Purpose:** Category-driven compliance for CA  
+**Components:**
+- DynamicRequirementsRenderer
+  - License fields (if required)
+  - Insurance fields + COI upload
+  - Background check consent (if required)
+- ContinueButton
+
+### `/provider/apply/standards-preview`
+**Purpose:** Show “Handled Standards” summary before clause taps  
+**Components:**
+- StandardsSummaryCards (SKU+Levels, Proof, No side payments, etc.)
+- ContinueButton
+
+### `/provider/apply/agreement`
+**Purpose:** Clause-by-clause acceptance (12 clauses)  
+**Components:**
+- ClauseCard (title, short text)
+- AgreeButton
+- ProgressIndicator (e.g., 3/12)
+**Behavior:**
+- Must accept all required clauses to proceed.
+
+### `/provider/apply/payouts`
+**Purpose:** Stripe Connect setup  
+**Components:**
+- ConnectToStripeButton
+- StatusIndicator (Connected ✅)
+- ContinueButton (enabled only when connected)
+
+### `/provider/apply/review-submit`
+**Purpose:** Review + submit  
+**Components:**
+- SummarySections
+- SubmitButton
+- TermsAcknowledgement (“submitted info is accurate”)
+
+### `/provider/apply/submitted`
+**Purpose:** Confirmation + next steps  
+**Components:**
+- StatusCard “Under review”
+- Checklist: “Docs uploaded” / “Stripe connected” / “Ops review”
+- Button: Done
+
+---
+
+## A3) Provider Status & Home
+### `/provider/home`
+**Purpose:** Provider landing post-approval (or post-submit status)  
+**Components:**
+- ApplicationStatusBanner (Under Review / Waitlisted / Approved)
+- SetupChecklist (availability, profile, etc.)
+- JobsList (only if approved)
+
+### `/provider/status`
+**Purpose:** Dedicated application status page (optional)  
+**Components:**
+- StatusTimeline (Draft→Submitted→Under Review→Approved)
+- MissingItemsList (if docs missing)
+- ContactSupportButton
+
+---
+
+## A4) BYOC Center (Unlocked only after approval)
+### `/provider/byoc`
+**Purpose:** Invite tools + tracking  
+**Components:**
+- IncentivesSummaryCard (if enabled)
+- CopyScriptButtons (SMS/Email)
+- ShareInviteLinkButton
+- InviteStats (sent/activated/retained)
+- ComplianceReminder (“Don’t promise permanent pricing”)
+
+### `/provider/byoc/create-link`
+**Purpose:** Generate invite link(s) using default mapping  
+**Components:**
+- CategoryPicker
+- DefaultServiceMappingReview (SKU + Level + cadence)
+- Optional MigrationCreditPreset (if enabled)
+- GenerateLinkButton
+
+### `/provider/byoc/invites`
+**Purpose:** Track invites  
+**Components:**
+- InvitesTable (customer alias, status, created_at)
+- FilterByStatus
+
+---
+
+## A5) Customer BYOC Activation (Deep Link Flow)
+### `/byoc/activate/:token`
+**Purpose:** Customer activates service with provider  
+**Components:**
+- ProviderIntroCard (“You keep your provider”)
+- ServiceSummaryCard (SKU + Level + cadence)
+- AddressConfirm (property picker / create property)
+- PaymentMethodAdd
+- ConfirmActivationButton
+**After activation:**
+- Success screen + minimal “what next”
+- Defer upsells until after first receipt.
+
+---
+
+## A6) Admin Ops Screens (Manual Review)
+### `/admin/providers/applications`
+**Components:**
+- ApplicationsTable (filters by status, zone, category)
+- QuickView Drawer
+
+### `/admin/providers/applications/:id`
+**Components:**
+- ApplicantSummary
+- Coverage + categories + zone(s)
+- ComplianceChecklist (license, COI, etc.)
+- AgreementAcceptanceLog (clause list + timestamps)
+- DecisionButtons: Approve / Approve w Conditions / Waitlist / Reject
+- Notes field + canned reasons
+
+### `/admin/providers/orgs/:org_id`
+**Components:**
+- ProviderOrgProfile
+- Documents list + verify/reject
+- Performance snapshot (optional later)
+
+---
+
+# PART B — Supabase Schema (Tables + Columns)
+
+## B1) Core provider identity
+### `provider_orgs`
+- `id` uuid pk
+- `display_name` text
+- `legal_name` text null
+- `business_type` text (SOLE_PROP|LLC|CORP|OTHER)
+- `team_size` text
+- `years_in_business` int null
+- `phone` text
+- `email` text
+- `home_base_zip` text
+- `created_at`, `updated_at`
+
+### `provider_org_members`
+- `id` uuid pk
+- `org_id` uuid fk
+- `user_id` uuid fk
+- `role` text (OWNER|ADMIN|TECH)
+- `created_at`
+
+## B2) Provider capabilities & coverage
+### `provider_org_categories`
+- `id` uuid pk
+- `org_id` uuid fk
+- `category_key` text
+- `status` text (APPLIED|APPROVED|PAUSED)
+- `created_at`, `updated_at`
+
+### `provider_org_coverage`
+- `id` uuid pk
+- `org_id` uuid fk
+- `zone_id` uuid fk
+- `category_key` text
+- `is_primary` bool default false
+- `status` text (REQUESTED|ACTIVE|WAITLISTED|DISABLED)
+- `created_at`, `updated_at`
+- unique (org_id, zone_id, category_key)
+
+### `provider_org_availability`
+- `id` uuid pk
+- `org_id` uuid fk
+- `days_json` jsonb (e.g., {mon:{start,end}, ...})
+- `created_at`, `updated_at`
+
+## B3) Provider application (wizard)
+### `provider_applications`
+- `id` uuid pk
+- `user_id` uuid fk
+- `org_id` uuid fk (nullable until org created)
+- `status` text (DRAFT|SUBMITTED|UNDER_REVIEW|APPROVED|APPROVED_CONDITIONAL|WAITLISTED|REJECTED)
+- `requested_categories` text[] 
+- `requested_zone_ids` uuid[]
+- `byoc_estimate_json` jsonb
+- `compliance_json` jsonb
+- `pitch_variant_seen` text null
+- `submitted_at` timestamptz null
+- `reviewed_at` timestamptz null
+- `decision_reason` text null
+- `created_at`, `updated_at`
+
+## B4) Agreement acceptance (clause-by-clause)
+### `provider_agreement_acceptance`
+- `id` uuid pk
+- `application_id` uuid fk
+- `clause_key` text
+- `accepted_at` timestamptz
+- `ip_address` text null
+- `device_id` text null
+
+**Clause keys (v1):**
+- IC_RELATIONSHIP
+- SKU_LEVELS
+- PROOF_REQUIRED
+- NO_SIDE_PAYMENTS
+- PROFESSIONAL_CONDUCT
+- ROUTE_DISCIPLINE
+- COURTESY_UPGRADES_POLICY
+- BYOC_INTEGRITY
+- CONFIDENTIALITY_DATA
+- NO_CIRCUMVENT_PLACEHOLDER_CA
+- LICENSE_INSURANCE
+- TERMINATION
+
+## B5) Compliance docs & verification
+### `provider_compliance_documents`
+- `id` uuid pk
+- `org_id` uuid fk
+- `doc_type` text (COI|CSLB_LICENSE_PROOF|BUSINESS_LICENSE|OTHER)
+- `storage_path` text
+- `expires_at` date null
+- `status` text (UPLOADED|VERIFIED|REJECTED)
+- `verified_by` uuid null
+- `verified_at` timestamptz null
+- `rejection_reason` text null
+- `created_at`, `updated_at`
+
+### `provider_licenses` (optional structured)
+- `id` uuid pk
+- `org_id` uuid fk
+- `state` text default 'CA'
+- `license_number` text
+- `classification` text null
+- `status_attested_good_standing` bool
+- `verified_status` text (UNVERIFIED|VERIFIED|REJECTED)
+- `verified_at` timestamptz null
+
+### `provider_insurance` (optional structured)
+- `id` uuid pk
+- `org_id` uuid fk
+- `carrier` text null
+- `policy_number` text null
+- `coverage_amount` numeric null
+- `has_workers_comp` bool null
+- `expires_at` date null
+- `verified_status` text (UNVERIFIED|VERIFIED|REJECTED)
+- `verified_at` timestamptz null
+
+## B6) Market state inputs (already likely exists)
+### `market_zone_category_state`
+- `zone_id` uuid
+- `category_key` text
+- `status` text (EARLY|OPEN|WAITLIST|CLOSED)
+- `updated_at` timestamptz
+
+## B7) BYOC invites
+### `byoc_invite_links`
+- `id` uuid pk
+- `org_id` uuid fk
+- `zone_id` uuid fk
+- `category_key` text
+- `sku_id` uuid
+- `default_level_id` uuid
+- `default_cadence` text (WEEKLY|BIWEEKLY|MONTHLY|ONCE)
+- `migration_credit_preset_id` uuid null
+- `token` text unique
+- `created_at`
+
+### `byoc_invite_events`
+- `id` uuid pk
+- `invite_id` uuid fk
+- `event_type` text (CREATED|SHARED|OPENED|ACTIVATION_STARTED|PAYMENT_ADDED|ACTIVATED|FIRST_JOB_COMPLETED)
+- `actor` text (PROVIDER|CUSTOMER|SYSTEM)
+- `payload` jsonb
+- `created_at`
+
+### `byoc_activations`
+- `id` uuid pk
+- `invite_id` uuid fk
+- `customer_user_id` uuid fk
+- `property_id` uuid fk
+- `provider_org_id` uuid fk
+- `sku_id` uuid
+- `level_id` uuid
+- `cadence` text
+- `status` text (ACTIVE|CANCELLED)
+- `activated_at` timestamptz
+- `created_at`
+
+## B8) Optional: Migration credit presets (price bridge)
+### `migration_credit_presets`
+- `id` uuid pk
+- `name` text
+- `amount_type` text (DOLLARS|HANDLES)
+- `amount_value` numeric
+- `duration_cycles` int
+- `max_total_value` numeric null
+- `reason_code` text default 'BYOC_MIGRATION'
+- `is_active` bool
+
+---
+
+# PART C — RLS Policies (Checklist)
+
+## C1) `provider_applications`
+- Providers can:
+  - SELECT their own rows (user_id = auth.uid())
+  - INSERT/UPDATE their own DRAFT/SUBMITTED rows
+  - Cannot update after status becomes UNDER_REVIEW unless allowed fields (docs uploads ok)
+- Admin can SELECT/UPDATE all
+
+## C2) `provider_agreement_acceptance`
+- Provider can INSERT acceptance rows only for their application
+- Provider can SELECT their acceptance rows
+- Admin can SELECT all
+
+## C3) `provider_orgs`, `provider_org_members`
+- Provider can SELECT/UPDATE orgs where they are a member (join on org_members)
+- Admin full access
+
+## C4) Compliance docs
+- Provider can INSERT/SELECT docs for their org
+- Provider cannot set VERIFIED status
+- Admin can set VERIFIED/REJECTED and add notes
+
+## C5) BYOC tables
+- Provider can CREATE invite links only if org is approved
+- Provider can SELECT invites/events for their org
+- Customer can access `byoc/activate/:token` via token-based edge function or security-definer RPC (do NOT expose all invites)
+- Admin can access all
+
+---
+
+# PART D — Indexes & Constraints (Performance + Integrity)
+
+## D1) Unique constraints
+- `provider_org_coverage` unique (org_id, zone_id, category_key)
+- `provider_agreement_acceptance` unique (application_id, clause_key)
+- `byoc_invite_links` token unique
+
+## D2) Indexes
+- `provider_applications(status, created_at)`
+- `provider_org_coverage(zone_id, category_key, status)`
+- `provider_agreement_acceptance(application_id)`
+- `provider_compliance_documents(org_id, status)`
+- `byoc_invite_events(invite_id, created_at)`
+- `byoc_activations(provider_org_id, activated_at)`
+
+---
+
+# PART E — Minimal API / RPC Contracts (Lovable-friendly)
+
+## E1) Resolve opportunity banner
+**RPC:** `get_provider_opportunity(user_zip_list, category_list)`  
+Returns:
+- zone_id(s)
+- per-category market state
+- best banner variant
+- founding partner slots remaining (if tracked)
+
+## E2) Create/Resume application
+**RPC:** `get_or_create_provider_application(user_id)`  
+Returns application id + saved progress.
+
+## E3) Submit application
+**RPC:** `submit_provider_application(application_id)`  
+Validates:
+- required fields complete
+- all agreement clauses accepted
+- payout setup status (if required)
+Then sets status SUBMITTED/UNDER_REVIEW.
+
+## E4) Create BYOC invite link
+**RPC:** `create_byoc_invite_link(org_id, zone_id, category_key, sku_id, default_level_id, cadence, credit_preset_id?)`
+
+## E5) BYOC activation (token gate)
+**Edge Function:** `activate_byoc_invite(token, customer_user_id, property_id, payment_method_id)`  
+Validates token, creates activation, links provider, sets up service/routine item.
+
+---
+
+# PART F — Acceptance Tests (Must Pass)
+
+## F1) Provider onboarding
+- Provider sees correct opportunity banner based on zone/category state.
+- Provider can complete wizard, accept all clauses, connect payouts, and submit.
+- Draft persists across app close/reopen.
+- Ops can approve and provider sees approved state.
+
+## F2) Agreement acceptance
+- Each clause requires a tap.
+- Cannot submit until all required clauses accepted.
+- Acceptance log visible to ops.
+
+## F3) BYOC
+- Approved provider can generate invite link and share scripts.
+- Customer can activate via token and attach payment.
+- Activation creates mapped service (SKU + Level) without manual ops steps.

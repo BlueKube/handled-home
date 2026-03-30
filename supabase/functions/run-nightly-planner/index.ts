@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requireCronSecret } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -198,6 +199,8 @@ Deno.serve(async (req) => {
   const runStartedAt = new Date().toISOString();
 
   try {
+    requireCronSecret(req);
+
     // ── STEP A: Gather Inputs ──
     const lockedEnd = addDays(today, 6); // T0+0 through T0+6 = LOCKED
     const draftEnd = addDays(today, 13); // T0+13

@@ -42,20 +42,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [activeRole, setActiveRole] = useState<AppRole>("customer");
-  const [previewRole, setPreviewRoleState] = useState<AppRole | null>(
-    () => (localStorage.getItem("handled_preview_role") as AppRole | null)
-  );
+  const [previewRole, setPreviewRoleState] = useState<AppRole | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
 
   const effectiveRole: AppRole = previewRole ?? activeRole;
 
   const setPreviewRole = (role: AppRole | null) => {
     setPreviewRoleState(role);
-    if (role) {
-      localStorage.setItem("handled_preview_role", role);
-    } else {
-      localStorage.removeItem("handled_preview_role");
-    }
   };
   const [loading, setLoading] = useState(true);
   const bootstrapAttempted = useRef(false);
@@ -73,10 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (userRoles.length === 0 && !bootstrapAttempted.current) {
         bootstrapAttempted.current = true;
         const displayName = profileResult.data?.full_name || userEmail || "User";
-        const intendedRole = (userMeta?.intended_role as string) ?? "customer";
+        // Always bootstrap as customer — provider role requires admin approval
         await supabase.rpc("bootstrap_new_user", {
           _full_name: displayName,
-          _role: intendedRole,
+          _role: "customer",
         });
 
         // Re-fetch after bootstrap
@@ -153,7 +146,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setActiveRole("customer");
     bootstrapAttempted.current = false;
     localStorage.removeItem(STORAGE_KEYS.ACTIVE_ROLE);
-    localStorage.removeItem("handled_preview_role");
     setPreviewRoleState(null);
   };
 

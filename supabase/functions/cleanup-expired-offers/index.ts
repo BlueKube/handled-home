@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requireCronSecret } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,26 +12,8 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // L13: Secret-based auth check — accept either service role key or CRON_SECRET
-  const authHeader = req.headers.get("authorization") ?? "";
-  const token = authHeader.replace(/^Bearer\s+/i, "");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const cronSecret = Deno.env.get("CRON_SECRET");
-  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
-
-  const isAuthorized =
-    token === serviceRoleKey ||
-    (cronSecret && token === cronSecret) ||
-    token === anonKey; // allow anon key for pg_cron calls
-
-  if (!isAuthorized) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
   try {
+    requireCronSecret(req);
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!

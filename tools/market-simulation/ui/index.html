@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Handled Home — Market Simulator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; background: #0f172a; color: #e2e8f0; }
+    .slider-group label { font-size: 0.75rem; color: #94a3b8; }
+    .slider-group .value { font-size: 0.875rem; font-weight: 600; color: #38bdf8; }
+    input[type="range"] { accent-color: #38bdf8; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; padding: 1.25rem; }
+    .metric { text-align: center; }
+    .metric .number { font-size: 1.75rem; font-weight: 700; }
+    .metric .label { font-size: 0.7rem; color: #94a3b8; margin-top: 0.25rem; }
+    .positive { color: #4ade80; }
+    .negative { color: #f87171; }
+    .neutral { color: #38bdf8; }
+    .section-title { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-bottom: 0.5rem; font-weight: 600; }
+  </style>
+</head>
+<body class="min-h-screen p-4 md:p-6">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-white">Handled Home <span class="text-cyan-400">Market Simulator</span></h1>
+      <p class="text-sm text-slate-400 mt-1">Adjust assumptions. See 12-month projections instantly.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+      <!-- LEFT: Controls -->
+      <div class="lg:col-span-1 space-y-3">
+        <!-- Scenario Presets -->
+        <div class="card">
+          <div class="section-title">Quick Scenarios</div>
+          <div class="grid grid-cols-2 gap-2" id="presets"></div>
+        </div>
+
+        <!-- Zone Controls -->
+        <div class="card">
+          <div class="section-title">Zone Configuration</div>
+          <div class="slider-group" data-key="zone_count" data-min="1" data-max="6" data-step="1" data-default="4" data-format="int"></div>
+          <div class="slider-group" data-key="homes_in_zone" data-min="2000" data-max="10000" data-step="500" data-default="4500" data-format="int"></div>
+          <div class="slider-group" data-key="home_ownership_rate" data-min="0.4" data-max="0.9" data-step="0.05" data-default="0.68" data-format="pct"></div>
+          <div class="slider-group" data-key="income_qualifying_rate" data-min="0.2" data-max="0.7" data-step="0.05" data-default="0.45" data-format="pct"></div>
+        </div>
+
+        <!-- Pricing -->
+        <div class="card">
+          <div class="section-title">Subscription Pricing</div>
+          <div class="slider-group" data-key="essential_price" data-min="69" data-max="199" data-step="5" data-default="99" data-format="dollar"></div>
+          <div class="slider-group" data-key="plus_price" data-min="99" data-max="249" data-step="5" data-default="159" data-format="dollar"></div>
+          <div class="slider-group" data-key="premium_price" data-min="179" data-max="399" data-step="5" data-default="249" data-format="dollar"></div>
+          <div class="slider-group" data-key="plan_mix_essential" data-min="0.1" data-max="0.6" data-step="0.05" data-default="0.35" data-format="pct"></div>
+          <div class="slider-group" data-key="plan_mix_plus" data-min="0.2" data-max="0.6" data-step="0.05" data-default="0.45" data-format="pct"></div>
+        </div>
+
+        <!-- Provider Economics -->
+        <div class="card">
+          <div class="section-title">Provider Economics</div>
+          <div class="slider-group" data-key="providers_at_launch" data-min="1" data-max="8" data-step="1" data-default="3" data-format="int"></div>
+          <div class="slider-group" data-key="provider_payout" data-min="25" data-max="75" data-step="5" data-default="55" data-format="dollar"></div>
+          <div class="slider-group" data-key="provider_stops_per_day" data-min="4" data-max="10" data-step="1" data-default="6" data-format="int"></div>
+        </div>
+
+        <!-- BYOC -->
+        <div class="card">
+          <div class="section-title">BYOC Growth</div>
+          <div class="slider-group" data-key="byoc_customers_per_provider" data-min="5" data-max="30" data-step="1" data-default="18" data-format="int"></div>
+          <div class="slider-group" data-key="byoc_invite_send_rate" data-min="0.2" data-max="0.9" data-step="0.05" data-default="0.55" data-format="pct"></div>
+          <div class="slider-group" data-key="byoc_activation_rate" data-min="0.1" data-max="0.6" data-step="0.05" data-default="0.28" data-format="pct"></div>
+          <div class="slider-group" data-key="byoc_bonus_weekly" data-min="5" data-max="25" data-step="1" data-default="10" data-format="dollar"></div>
+          <div class="slider-group" data-key="byoc_bonus_weeks" data-min="4" data-max="24" data-step="4" data-default="12" data-format="int" data-label-suffix=" weeks"></div>
+        </div>
+
+        <!-- Retention -->
+        <div class="card">
+          <div class="section-title">Retention & Churn</div>
+          <div class="slider-group" data-key="month_1_churn" data-min="0.05" data-max="0.3" data-step="0.01" data-default="0.12" data-format="pct"></div>
+          <div class="slider-group" data-key="steady_churn" data-min="0.02" data-max="0.1" data-step="0.005" data-default="0.035" data-format="pct"></div>
+          <div class="slider-group" data-key="attach_rate_90d" data-min="0.05" data-max="0.5" data-step="0.05" data-default="0.28" data-format="pct"></div>
+        </div>
+
+        <!-- Overhead -->
+        <div class="card">
+          <div class="section-title">Overhead Costs</div>
+          <div class="slider-group" data-key="monthly_ops_overhead" data-min="500" data-max="5000" data-step="250" data-default="1500" data-format="dollar"></div>
+          <div class="slider-group" data-key="monthly_tech_overhead" data-min="200" data-max="1500" data-step="100" data-default="350" data-format="dollar"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Results -->
+      <div class="lg:col-span-3 space-y-4">
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3" id="kpi-cards"></div>
+
+        <!-- Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="card">
+            <div class="section-title">Customers Over Time</div>
+            <canvas id="chart-customers" height="200"></canvas>
+          </div>
+          <div class="card">
+            <div class="section-title">Revenue vs Costs</div>
+            <canvas id="chart-financials" height="200"></canvas>
+          </div>
+          <div class="card">
+            <div class="section-title">Gross Margin %</div>
+            <canvas id="chart-margin" height="200"></canvas>
+          </div>
+          <div class="card">
+            <div class="section-title">Provider Utilization %</div>
+            <canvas id="chart-utilization" height="200"></canvas>
+          </div>
+        </div>
+
+        <!-- Row 2: New charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="card">
+            <div class="section-title">Cumulative P&L (Cash Burn Curve)</div>
+            <canvas id="chart-cumulative" height="200"></canvas>
+          </div>
+          <div class="card">
+            <div class="section-title">Customer Acquisition Sources</div>
+            <canvas id="chart-acquisition" height="200"></canvas>
+          </div>
+          <div class="card">
+            <div class="section-title">Provider Capacity Planning</div>
+            <canvas id="chart-capacity" height="200"></canvas>
+          </div>
+          <div class="card">
+            <div class="section-title">BYOC Bonus ROI</div>
+            <div id="byoc-roi" class="space-y-2"></div>
+          </div>
+        </div>
+
+        <!-- Scenario Comparison -->
+        <div class="card">
+          <div class="section-title">Scenario Comparison</div>
+          <div class="flex gap-2 mb-3">
+            <button onclick="saveScenario()" class="text-xs py-1.5 px-3 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white transition-colors">Save Current</button>
+            <button onclick="clearScenarios()" class="text-xs py-1.5 px-3 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors">Clear All</button>
+          </div>
+          <div id="scenario-table"></div>
+        </div>
+
+        <!-- Provider Economics -->
+        <div class="card" id="provider-economics-card">
+          <div class="section-title">Provider Economics — Will They Stay?</div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="provider-metrics"></div>
+          <div class="mt-3 text-xs text-slate-400" id="provider-verdict"></div>
+        </div>
+
+        <!-- Sensitivity Analysis -->
+        <div class="card">
+          <div class="section-title">Sensitivity Analysis — What Breaks the Model?</div>
+          <p class="text-xs text-slate-500 mb-2">Each row shows the M12 margin impact if the assumption is 20% worse than current.</p>
+          <div id="sensitivity-bars"></div>
+        </div>
+
+        <!-- Monthly Table -->
+        <div class="card overflow-x-auto">
+          <div class="section-title">Monthly Projections</div>
+          <table class="w-full text-xs" id="monthly-table">
+            <thead>
+              <tr class="text-slate-400 border-b border-slate-700">
+                <th class="py-2 text-left">Month</th>
+                <th class="py-2 text-right">Customers</th>
+                <th class="py-2 text-right">Jobs</th>
+                <th class="py-2 text-right">Revenue</th>
+                <th class="py-2 text-right">Prov. Pay</th>
+                <th class="py-2 text-right">Overhead</th>
+                <th class="py-2 text-right">Margin</th>
+                <th class="py-2 text-right">Margin %</th>
+              </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // === SIMULATION ENGINE (inline, mirrors simulate.ts logic) ===
+
+    const LABELS = {
+      zone_count: "Number of Zones",
+      homes_in_zone: "Homes per Zone",
+      home_ownership_rate: "Home Ownership Rate",
+      income_qualifying_rate: "Income Qualifying Rate",
+      essential_price: "Essential Plan ($/mo)",
+      plus_price: "Plus Plan ($/mo)",
+      premium_price: "Premium Plan ($/mo)",
+      plan_mix_essential: "% on Essential",
+      plan_mix_plus: "% on Plus",
+      providers_at_launch: "Providers per Zone",
+      provider_payout: "Provider Payout ($/job)",
+      provider_stops_per_day: "Stops per Day",
+      byoc_customers_per_provider: "BYOC Customers/Provider",
+      byoc_invite_send_rate: "BYOC Send Rate",
+      byoc_activation_rate: "BYOC Activation Rate",
+      month_1_churn: "Month 1 Churn Rate",
+      steady_churn: "Steady-State Churn",
+      attach_rate_90d: "90-Day Attach Rate",
+      monthly_ops_overhead: "Ops Overhead ($/mo)",
+      monthly_tech_overhead: "Tech Overhead ($/mo)",
+      byoc_bonus_weekly: "BYOC Bonus ($/wk/cust)",
+      byoc_bonus_weeks: "Bonus Duration (weeks)",
+    };
+
+    function simulateZone(p) {
+      const byocAtLaunch = Math.round(p.providers_at_launch * p.byoc_customers_per_provider * p.byoc_invite_send_rate * p.byoc_activation_rate);
+      const organicPool = p.homes_in_zone * p.home_ownership_rate * p.income_qualifying_rate;
+      const planMixPremium = Math.max(0, 1 - p.plan_mix_essential - p.plan_mix_plus);
+
+      let active = byocAtLaunch, paused = 0, secondService = 0;
+      const months = [];
+      const handlesPerJob = 7;
+      const avgHandles = 14 * p.plan_mix_essential + 28 * p.plan_mix_plus + 50 * planMixPremium;
+      const jobsPerCust = avgHandles / handlesPerJob;
+
+      for (let m = 1; m <= 12; m++) {
+        const newByoc = m <= 3 ? Math.round(p.providers_at_launch * p.byoc_customers_per_provider * p.byoc_invite_send_rate * p.byoc_activation_rate * (m === 1 ? 0.5 : m === 2 ? 0.3 : 0.2)) : 0;
+        const newRef = Math.round(active * 0.04 * 0.18);
+        const remainingPool = Math.max(0, organicPool - active);
+        const newOrg = Math.round(remainingPool * 0.012 * 0.03 * m);
+        const churnRate = m === 1 ? p.month_1_churn : m === 2 ? 0.07 : p.steady_churn;
+        const potentialChurn = Math.round(active * churnRate);
+        const actualPaused = Math.round(potentialChurn * 0.45);
+        const returning = Math.round(paused * 0.55 * 0.25);
+        paused = paused + actualPaused - returning;
+        active = Math.max(0, active + newByoc + newRef + newOrg - potentialChurn + returning);
+
+        const attachRate = m <= 1 ? 0.08 : m <= 2 ? 0.18 : p.attach_rate_90d;
+        secondService = Math.round(active * attachRate);
+        const jobs = Math.round(active * jobsPerCust) + Math.round(secondService * (3 / handlesPerJob));
+
+        const avgSub = p.essential_price * 100 * p.plan_mix_essential + p.plus_price * 100 * p.plan_mix_plus + p.premium_price * 100 * planMixPremium;
+        const revenue = Math.round(active * avgSub) + Math.round(secondService * 3 * 500);
+        const provPay = Math.round(jobs * p.provider_payout * 100);
+        const bonusWeeklyCents = (p.byoc_bonus_weekly || 10) * 100;
+        const bonusDurationMonths = Math.ceil((p.byoc_bonus_weeks || 12) / 4);
+        // Apply compound churn to BYOC customers (match simulate.ts F7 fix)
+        const byocSurvival = m === 1 ? (1 - p.month_1_churn) : m === 2 ? (1 - p.month_1_churn) * (1 - 0.07) : (1 - p.month_1_churn) * (1 - 0.07) * Math.pow(1 - p.steady_churn, m - 2);
+        const survivingByoc = Math.round(byocAtLaunch * byocSurvival);
+        const byocBonus = m <= bonusDurationMonths ? Math.round(survivingByoc * bonusWeeklyCents * 4) : 0;
+        const refCredits = Math.round(newRef * 3000);
+
+        months.push({ month: m, customers: active, jobs, revenue, provPay, byocBonus, refCredits, newByoc, newRef, newOrg });
+      }
+      return months;
+    }
+
+    function runSimulation() {
+      const p = {};
+      document.querySelectorAll('.slider-group').forEach(el => {
+        const key = el.dataset.key;
+        const input = el.querySelector('input');
+        if (input) p[key] = parseFloat(input.value);
+      });
+
+      const zoneCount = p.zone_count || 4;
+      const overhead = (p.monthly_ops_overhead + p.monthly_tech_overhead) * 100;
+
+      // Run zones with slight variation
+      const variations = [
+        { h: 1, i: 1 }, { h: 0.9, i: 1.1 }, { h: 1.1, i: 0.9 },
+        { h: 0.85, i: 1.15 }, { h: 1.2, i: 0.85 }, { h: 0.95, i: 1.05 }
+      ];
+      const allZoneMonths = [];
+      for (let z = 0; z < zoneCount; z++) {
+        const v = variations[z % variations.length];
+        const zp = { ...p,
+          homes_in_zone: Math.round(p.homes_in_zone * v.h),
+          income_qualifying_rate: Math.min(0.85, p.income_qualifying_rate * v.i),
+          byoc_customers_per_provider: Math.max(5, Math.round(p.byoc_customers_per_provider * (1 - z * 0.15))),
+        };
+        allZoneMonths.push(simulateZone(zp));
+      }
+
+      // Combine
+      const combined = [];
+      let cumMargin = 0, breakEven = null;
+      for (let m = 0; m < 12; m++) {
+        let cust = 0, jobs = 0, rev = 0, pay = 0, bonus = 0, ref = 0, nByoc = 0, nRef = 0, nOrg = 0;
+        for (const zm of allZoneMonths) {
+          cust += zm[m].customers;
+          jobs += zm[m].jobs;
+          rev += zm[m].revenue;
+          pay += zm[m].provPay;
+          bonus += zm[m].byocBonus;
+          ref += zm[m].refCredits;
+          nByoc += zm[m].newByoc || 0;
+          nRef += zm[m].newRef || 0;
+          nOrg += zm[m].newOrg || 0;
+        }
+        const totalCost = pay + bonus + ref + overhead;
+        const margin = rev - totalCost;
+        const marginPct = rev > 0 ? (margin / rev) * 100 : -100;
+        cumMargin += margin;
+        if (cumMargin > 0 && !breakEven) breakEven = m + 1;
+        combined.push({ month: m + 1, customers: cust, jobs, revenue: rev, provPay: pay, overhead, margin, marginPct, cumMargin, newByoc: nByoc, newRef: nRef, newOrg: nOrg });
+      }
+
+      updateUI(combined, breakEven, zoneCount, overhead);
+      updateProviderEconomics(combined, p);
+      updateSensitivity(combined, p);
+    }
+
+    // === UI RENDERING ===
+
+    let charts = {};
+
+    function updateUI(months, breakEven, zoneCount, overhead) {
+      const last = months[11];
+      const totalRev = months.reduce((s, m) => s + m.revenue, 0);
+      const totalMargin = months.reduce((s, m) => s + m.margin, 0);
+      const avgMarginPct = months.reduce((s, m) => s + m.marginPct, 0) / 12;
+
+      // KPI Cards
+      const kpis = [
+        { label: "M12 Customers", value: last.customers, cls: "neutral" },
+        { label: "M12 Margin %", value: last.marginPct.toFixed(1) + "%", cls: last.marginPct >= 0 ? "positive" : "negative" },
+        { label: "Break-Even", value: breakEven ? `Month ${breakEven}` : "Never", cls: breakEven ? "positive" : "negative" },
+        { label: "12mo Revenue", value: "$" + (totalRev / 100).toLocaleString("en", { maximumFractionDigits: 0 }), cls: "neutral" },
+        { label: "12mo Margin", value: "$" + (totalMargin / 100).toLocaleString("en", { maximumFractionDigits: 0 }), cls: totalMargin >= 0 ? "positive" : "negative" },
+        { label: "Zones", value: zoneCount, cls: "neutral" },
+      ];
+
+      document.getElementById("kpi-cards").innerHTML = kpis.map(k =>
+        `<div class="card metric"><div class="number ${k.cls}">${k.value}</div><div class="label">${k.label}</div></div>`
+      ).join("");
+
+      // Table
+      document.getElementById("table-body").innerHTML = months.map(m =>
+        `<tr class="border-b border-slate-800">
+          <td class="py-1.5">${m.month}</td>
+          <td class="text-right">${m.customers}</td>
+          <td class="text-right">${m.jobs}</td>
+          <td class="text-right">$${(m.revenue/100).toFixed(0)}</td>
+          <td class="text-right">$${(m.provPay/100).toFixed(0)}</td>
+          <td class="text-right">$${(m.overhead/100).toFixed(0)}</td>
+          <td class="text-right ${m.margin >= 0 ? 'positive' : 'negative'}">$${(m.margin/100).toFixed(0)}</td>
+          <td class="text-right ${m.marginPct >= 0 ? 'positive' : 'negative'}">${m.marginPct.toFixed(1)}%</td>
+        </tr>`
+      ).join("");
+
+      // Charts
+      const labels = months.map(m => "M" + m.month);
+      const chartOpts = { responsive: true, plugins: { legend: { display: true, labels: { color: "#94a3b8", font: { size: 10 } } } }, scales: { x: { ticks: { color: "#64748b" }, grid: { color: "#1e293b" } }, y: { ticks: { color: "#64748b" }, grid: { color: "#1e293b" } } } };
+
+      if (charts.customers) charts.customers.destroy();
+      charts.customers = new Chart(document.getElementById("chart-customers"), {
+        type: "line", data: { labels, datasets: [{ label: "Active Customers", data: months.map(m => m.customers), borderColor: "#38bdf8", backgroundColor: "rgba(56,189,248,0.1)", fill: true, tension: 0.3 }] }, options: chartOpts
+      });
+
+      if (charts.financials) charts.financials.destroy();
+      charts.financials = new Chart(document.getElementById("chart-financials"), {
+        type: "bar", data: { labels, datasets: [
+          { label: "Revenue", data: months.map(m => m.revenue / 100), backgroundColor: "#4ade80" },
+          { label: "Provider Pay", data: months.map(m => m.provPay / 100), backgroundColor: "#f87171" },
+          { label: "Overhead", data: months.map(m => m.overhead / 100), backgroundColor: "#fbbf24" },
+        ] }, options: { ...chartOpts, scales: { ...chartOpts.scales, x: { ...chartOpts.scales.x, stacked: false }, y: { ...chartOpts.scales.y, stacked: false } } }
+      });
+
+      if (charts.margin) charts.margin.destroy();
+      charts.margin = new Chart(document.getElementById("chart-margin"), {
+        type: "line", data: { labels, datasets: [
+          { label: "Margin %", data: months.map(m => m.marginPct), borderColor: months[11].marginPct >= 0 ? "#4ade80" : "#f87171", tension: 0.3, fill: false },
+          { label: "Break-Even", data: Array(12).fill(0), borderColor: "#64748b", borderDash: [5, 5], pointRadius: 0 },
+        ] }, options: chartOpts
+      });
+
+      if (charts.utilization) charts.utilization.destroy();
+      const provCapacity = months.map(m => {
+        const zc = parseInt(document.querySelector('[data-key="zone_count"] input')?.value ?? "4");
+        const spd = parseInt(document.querySelector('[data-key="provider_stops_per_day"] input')?.value ?? "6");
+        const cap = zc * parseInt(document.querySelector('[data-key="providers_at_launch"] input')?.value ?? "3") * spd * 5 * 4;
+        return cap > 0 ? Math.min(100, (m.jobs / cap) * 100) : 0;
+      });
+      charts.utilization = new Chart(document.getElementById("chart-utilization"), {
+        type: "line", data: { labels, datasets: [
+          { label: "Utilization %", data: provCapacity, borderColor: "#a78bfa", tension: 0.3, fill: { target: "origin", above: "rgba(167,139,250,0.1)" } },
+          { label: "Target 80%", data: Array(12).fill(80), borderColor: "#64748b", borderDash: [5, 5], pointRadius: 0 },
+        ] }, options: chartOpts
+      });
+
+      // === CUMULATIVE P&L ===
+      if (charts.cumulative) charts.cumulative.destroy();
+      const cumData = months.map(m => m.cumMargin / 100);
+      charts.cumulative = new Chart(document.getElementById("chart-cumulative"), {
+        type: "line", data: { labels, datasets: [
+          { label: "Cumulative P&L", data: cumData, borderColor: cumData[11] >= 0 ? "#4ade80" : "#f87171", backgroundColor: cumData.map(v => v >= 0 ? "rgba(74,222,128,0.15)" : "rgba(248,113,113,0.15)"), fill: true, tension: 0.3, segment: { borderColor: ctx => (ctx.p0.parsed.y < 0 && ctx.p1.parsed.y < 0) ? "#f87171" : ctx.p0.parsed.y >= 0 ? "#4ade80" : "#fbbf24" } },
+          { label: "Break-Even", data: Array(12).fill(0), borderColor: "#64748b", borderDash: [5, 5], pointRadius: 0 },
+        ] }, options: { ...chartOpts, scales: { ...chartOpts.scales, y: { ...chartOpts.scales.y, ticks: { ...chartOpts.scales.y.ticks, callback: v => "$" + v.toLocaleString() } } } }
+      });
+
+      // === ACQUISITION SOURCES ===
+      if (charts.acquisition) charts.acquisition.destroy();
+      charts.acquisition = new Chart(document.getElementById("chart-acquisition"), {
+        type: "bar", data: { labels, datasets: [
+          { label: "BYOC", data: months.map(m => m.newByoc || 0), backgroundColor: "#38bdf8" },
+          { label: "Referral", data: months.map(m => m.newRef || 0), backgroundColor: "#a78bfa" },
+          { label: "Organic", data: months.map(m => m.newOrg || 0), backgroundColor: "#4ade80" },
+        ] }, options: { ...chartOpts, scales: { ...chartOpts.scales, x: { ...chartOpts.scales.x, stacked: true }, y: { ...chartOpts.scales.y, stacked: true } } }
+      });
+
+      // === PROVIDER CAPACITY PLANNING ===
+      if (charts.capacity) charts.capacity.destroy();
+      const zc = parseInt(document.querySelector('[data-key="zone_count"] input')?.value ?? "4");
+      const prov = parseInt(document.querySelector('[data-key="providers_at_launch"] input')?.value ?? "3");
+      const spd = parseInt(document.querySelector('[data-key="provider_stops_per_day"] input')?.value ?? "6");
+      const totalProviders = zc * prov;
+      const monthlyCapPerProvider = spd * 5 * 4;
+      // Find when you need more providers (utilization > 80%)
+      const provNeeded = months.map(m => Math.ceil(m.jobs / (monthlyCapPerProvider * 0.8)));
+      charts.capacity = new Chart(document.getElementById("chart-capacity"), {
+        type: "line", data: { labels, datasets: [
+          { label: "Providers Needed (80% util)", data: provNeeded, borderColor: "#fbbf24", backgroundColor: "rgba(251,191,36,0.1)", fill: true, tension: 0.3, stepped: true },
+          { label: "Current Providers", data: Array(12).fill(totalProviders), borderColor: "#64748b", borderDash: [5, 5], pointRadius: 0 },
+        ] }, options: { ...chartOpts, scales: { ...chartOpts.scales, y: { ...chartOpts.scales.y, beginAtZero: true, ticks: { ...chartOpts.scales.y.ticks, stepSize: 1 } } } }
+      });
+      // Find the month where you need to hire
+      const hireMonth = provNeeded.findIndex(n => n > totalProviders);
+      const capacityNote = hireMonth >= 0
+        ? `⚠️ You need to recruit provider #${totalProviders + 1} by Month ${hireMonth + 1}`
+        : `✅ Current ${totalProviders} providers handle 12-month demand`;
+      document.getElementById("chart-capacity").parentElement.querySelector(".section-title").innerHTML =
+        `Provider Capacity Planning <span class="text-xs font-normal ml-2 ${hireMonth >= 0 ? 'text-amber-400' : 'text-green-400'}">${capacityNote}</span>`;
+
+      // === BYOC BONUS ROI ===
+      const bonusWeekly = parseFloat(document.querySelector('[data-key="byoc_bonus_weekly"] input')?.value ?? "10");
+      const bonusWeeks = parseInt(document.querySelector('[data-key="byoc_bonus_weeks"] input')?.value ?? "12");
+      const byocCustPerProv = parseInt(document.querySelector('[data-key="byoc_customers_per_provider"] input')?.value ?? "18");
+      const sendRate = parseFloat(document.querySelector('[data-key="byoc_invite_send_rate"] input')?.value ?? "0.55");
+      const actRate = parseFloat(document.querySelector('[data-key="byoc_activation_rate"] input')?.value ?? "0.28");
+      const byocPerProvider = Math.round(byocCustPerProv * sendRate * actRate);
+      const totalBonusCostPerProv = byocPerProvider * bonusWeekly * bonusWeeks;
+      const avgSubCents = parseFloat(document.querySelector('[data-key="essential_price"] input')?.value ?? "99") * 100 * parseFloat(document.querySelector('[data-key="plan_mix_essential"] input')?.value ?? "0.35") + parseFloat(document.querySelector('[data-key="plus_price"] input')?.value ?? "159") * 100 * parseFloat(document.querySelector('[data-key="plan_mix_plus"] input')?.value ?? "0.45") + parseFloat(document.querySelector('[data-key="premium_price"] input')?.value ?? "249") * 100 * (1 - parseFloat(document.querySelector('[data-key="plan_mix_essential"] input')?.value ?? "0.35") - parseFloat(document.querySelector('[data-key="plan_mix_plus"] input')?.value ?? "0.45"));
+      const churnRate = parseFloat(document.querySelector('[data-key="steady_churn"] input')?.value ?? "0.035");
+      const retentionFactor12mo = Math.pow(1 - churnRate, 12);
+      const ltv12mo = (avgSubCents / 100) * 12 * retentionFactor12mo;
+      const roiPct = totalBonusCostPerProv > 0 ? ((ltv12mo * byocPerProvider - totalBonusCostPerProv) / totalBonusCostPerProv * 100) : 0;
+
+      document.getElementById("byoc-roi").innerHTML = `
+        <div class="grid grid-cols-2 gap-2">
+          <div class="metric"><div class="number text-sm neutral">${byocPerProvider}</div><div class="label">BYOC Customers/Provider</div></div>
+          <div class="metric"><div class="number text-sm neutral">$${totalBonusCostPerProv}</div><div class="label">Total Bonus Cost/Provider</div></div>
+          <div class="metric"><div class="number text-sm neutral">$${(totalBonusCostPerProv / Math.max(1, byocPerProvider)).toFixed(0)}</div><div class="label">Acquisition Cost/Customer</div></div>
+          <div class="metric"><div class="number text-sm neutral">$${ltv12mo.toFixed(0)}</div><div class="label">Est. 12mo LTV/Customer</div></div>
+        </div>
+        <div class="mt-2 text-xs ${roiPct >= 100 ? 'text-green-400' : roiPct >= 0 ? 'text-amber-400' : 'text-red-400'} font-medium">
+          ${roiPct >= 100 ? '✅' : roiPct >= 0 ? '⚠️' : '❌'} BYOC Bonus ROI: ${roiPct.toFixed(0)}% — ${roiPct >= 100 ? 'Strong return. Every $1 in bonuses generates $' + ((roiPct + 100) / 100).toFixed(2) + ' in LTV.' : roiPct >= 0 ? 'Positive but thin. Consider reducing bonus duration or increasing activation rate.' : 'Negative ROI. Bonus cost exceeds customer LTV. Reduce bonus or improve retention.'}
+        </div>
+      `;
+    }
+
+    // === SCENARIO COMPARISON ===
+    let savedScenarios = [];
+
+    function saveScenario() {
+      const p = {};
+      document.querySelectorAll('.slider-group').forEach(el => {
+        const key = el.dataset.key;
+        const input = el.querySelector('input');
+        if (input) p[key] = parseFloat(input.value);
+      });
+      // Run sim to get key metrics
+      const zoneCount = p.zone_count || 4;
+      const overhead = (p.monthly_ops_overhead + p.monthly_tech_overhead) * 100;
+      const variations = [{ h: 1, i: 1 }, { h: 0.9, i: 1.1 }, { h: 1.1, i: 0.9 }, { h: 0.85, i: 1.15 }, { h: 1.2, i: 0.85 }, { h: 0.95, i: 1.05 }];
+      const allZones = [];
+      for (let z = 0; z < zoneCount; z++) {
+        const v = variations[z % variations.length];
+        allZones.push(simulateZone({ ...p, homes_in_zone: Math.round(p.homes_in_zone * v.h), income_qualifying_rate: Math.min(0.85, p.income_qualifying_rate * v.i), byoc_customers_per_provider: Math.max(5, Math.round(p.byoc_customers_per_provider * (1 - z * 0.15))) }));
+      }
+      let rev12 = 0, pay12 = 0, cust12 = 0, bonus12 = 0, ref12 = 0;
+      for (const zm of allZones) { rev12 += zm[11].revenue; pay12 += zm[11].provPay; cust12 += zm[11].customers; bonus12 += zm[11].byocBonus; ref12 += zm[11].refCredits; }
+      const margin12 = rev12 - (pay12 + bonus12 + ref12 + overhead);
+      const marginPct = rev12 > 0 ? (margin12 / rev12 * 100) : -100;
+
+      savedScenarios.push({
+        name: `Scenario ${savedScenarios.length + 1}`,
+        pricing: `$${p.essential_price}/$${p.plus_price}/$${p.premium_price}`,
+        payout: `$${p.provider_payout}`,
+        zones: zoneCount,
+        m12Cust: cust12,
+        m12Margin: marginPct.toFixed(1) + "%",
+        m12Rev: "$" + (rev12 / 100).toLocaleString("en", { maximumFractionDigits: 0 }),
+      });
+      renderScenarios();
+    }
+
+    function clearScenarios() { savedScenarios = []; renderScenarios(); }
+
+    function renderScenarios() {
+      if (savedScenarios.length === 0) {
+        document.getElementById("scenario-table").innerHTML = '<p class="text-xs text-slate-500">Save configurations to compare side-by-side.</p>';
+        return;
+      }
+      document.getElementById("scenario-table").innerHTML = `
+        <table class="w-full text-xs">
+          <thead><tr class="text-slate-400 border-b border-slate-700">
+            <th class="py-1 text-left">Name</th><th class="py-1 text-right">Pricing</th><th class="py-1 text-right">Payout</th>
+            <th class="py-1 text-right">Zones</th><th class="py-1 text-right">M12 Cust</th><th class="py-1 text-right">M12 Margin</th><th class="py-1 text-right">M12 Revenue</th>
+          </tr></thead>
+          <tbody>${savedScenarios.map(s => `<tr class="border-b border-slate-800">
+            <td class="py-1">${s.name}</td><td class="py-1 text-right">${s.pricing}</td><td class="py-1 text-right">${s.payout}</td>
+            <td class="py-1 text-right">${s.zones}</td><td class="py-1 text-right">${s.m12Cust}</td>
+            <td class="py-1 text-right ${parseFloat(s.m12Margin) >= 0 ? 'positive' : 'negative'}">${s.m12Margin}</td>
+            <td class="py-1 text-right">${s.m12Rev}</td>
+          </tr>`).join("")}</tbody>
+        </table>`;
+    }
+    renderScenarios();
+
+    // === SCENARIO PRESETS ===
+    const PRESETS = {
+      "Austin Suburban": { homes_in_zone: 4500, home_ownership_rate: 0.68, income_qualifying_rate: 0.45, essential_price: 99, plus_price: 159, premium_price: 249, provider_payout: 55, monthly_ops_overhead: 1500 },
+      "Austin Optimized": { homes_in_zone: 4500, home_ownership_rate: 0.68, income_qualifying_rate: 0.45, essential_price: 129, plus_price: 179, premium_price: 279, provider_payout: 45, monthly_ops_overhead: 1500 },
+      "Denver Suburbs": { homes_in_zone: 3800, home_ownership_rate: 0.72, income_qualifying_rate: 0.50, essential_price: 119, plus_price: 179, premium_price: 279, provider_payout: 55, monthly_ops_overhead: 1800 },
+      "Charlotte NC": { homes_in_zone: 5200, home_ownership_rate: 0.64, income_qualifying_rate: 0.38, essential_price: 89, plus_price: 139, premium_price: 229, provider_payout: 42, monthly_ops_overhead: 1200 },
+      "Phoenix AZ": { homes_in_zone: 6000, home_ownership_rate: 0.70, income_qualifying_rate: 0.42, essential_price: 99, plus_price: 159, premium_price: 249, provider_payout: 48, monthly_ops_overhead: 1400 },
+      "Worst Case": { homes_in_zone: 3000, home_ownership_rate: 0.55, income_qualifying_rate: 0.30, essential_price: 89, plus_price: 139, premium_price: 229, provider_payout: 65, monthly_ops_overhead: 2500, byoc_activation_rate: 0.15, month_1_churn: 0.25 },
+    };
+
+    document.getElementById("presets").innerHTML = Object.keys(PRESETS).map(name =>
+      `<button onclick="applyPreset('${name}')" class="text-xs py-1.5 px-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors truncate">${name}</button>`
+    ).join("");
+
+    function applyPreset(name) {
+      const preset = PRESETS[name];
+      if (!preset) return;
+      for (const [key, val] of Object.entries(preset)) {
+        const el = document.querySelector(`[data-key="${key}"] input`);
+        if (el) {
+          el.value = val;
+          el.dispatchEvent(new Event("input"));
+        }
+      }
+    }
+
+    // === PROVIDER ECONOMICS ===
+    function updateProviderEconomics(months, p) {
+      const payout = p.provider_payout;
+      const stops = p.provider_stops_per_day;
+      const days = 5;
+
+      const dailyEarnings = payout * stops;
+      const weeklyEarnings = dailyEarnings * days;
+      const monthlyEarnings = weeklyEarnings * 4;
+      const annualEarnings = monthlyEarnings * 12;
+
+      // Compare to industry benchmarks
+      const industryAvgAnnual = 45000; // landscaper average
+      const earningsPct = (annualEarnings / industryAvgAnnual * 100);
+
+      // Utilization at month 12
+      const last = months[11];
+      const zoneCount = parseInt(document.querySelector('[data-key="zone_count"] input')?.value ?? "4");
+      const totalProviders = zoneCount * p.providers_at_launch;
+      const totalCapacity = totalProviders * stops * days * 4;
+      const utilization = last ? Math.min(100, (last.jobs / totalCapacity) * 100) : 0;
+
+      const metrics = [
+        { label: "Daily Earnings", value: `$${dailyEarnings}`, cls: dailyEarnings >= 250 ? "positive" : dailyEarnings >= 180 ? "neutral" : "negative" },
+        { label: "Weekly Earnings", value: `$${weeklyEarnings}`, cls: weeklyEarnings >= 1200 ? "positive" : weeklyEarnings >= 800 ? "neutral" : "negative" },
+        { label: "Monthly Earnings", value: `$${monthlyEarnings.toLocaleString()}`, cls: monthlyEarnings >= 4500 ? "positive" : monthlyEarnings >= 3000 ? "neutral" : "negative" },
+        { label: "vs Industry Avg", value: `${earningsPct.toFixed(0)}%`, cls: earningsPct >= 100 ? "positive" : earningsPct >= 75 ? "neutral" : "negative" },
+      ];
+
+      document.getElementById("provider-metrics").innerHTML = metrics.map(m =>
+        `<div class="metric"><div class="number text-base ${m.cls}">${m.value}</div><div class="label">${m.label}</div></div>`
+      ).join("");
+
+      // Verdict
+      let verdict = "";
+      if (monthlyEarnings >= 4500 && utilization >= 60) {
+        verdict = `✅ <span class="positive">Providers earn $${monthlyEarnings.toLocaleString()}/mo at ${utilization.toFixed(0)}% utilization — competitive with industry average. They'll likely stay.</span>`;
+      } else if (monthlyEarnings >= 3000) {
+        verdict = `⚠️ <span class="text-amber-400">Providers earn $${monthlyEarnings.toLocaleString()}/mo — below industry average ($3,750/mo). May need to supplement with BYOC bonuses or density improvement to retain.</span>`;
+      } else {
+        verdict = `❌ <span class="negative">Providers earn $${monthlyEarnings.toLocaleString()}/mo — significantly below industry average. High churn risk. Increase payout or stops/day.</span>`;
+      }
+      document.getElementById("provider-verdict").innerHTML = verdict;
+    }
+
+    // === SENSITIVITY ANALYSIS ===
+    function updateSensitivity(baseMonths, p) {
+      const baseM12Margin = baseMonths[11]?.marginPct ?? -100;
+
+      // Test each key assumption at +20% worse
+      const sensitivities = [
+        { key: "provider_payout", label: "Provider Payout +20%", worse: v => v * 1.2 },
+        { key: "month_1_churn", label: "Month 1 Churn +20%", worse: v => Math.min(0.5, v * 1.2) },
+        { key: "steady_churn", label: "Steady Churn +20%", worse: v => Math.min(0.3, v * 1.2) },
+        { key: "essential_price", label: "Essential Price -20%", worse: v => v * 0.8 },
+        { key: "plus_price", label: "Plus Price -20%", worse: v => v * 0.8 },
+        { key: "byoc_activation_rate", label: "BYOC Activation -20%", worse: v => v * 0.8 },
+        { key: "monthly_ops_overhead", label: "Ops Overhead +20%", worse: v => v * 1.2 },
+        { key: "homes_in_zone", label: "Homes/Zone -20%", worse: v => v * 0.8 },
+        { key: "attach_rate_90d", label: "Attach Rate -20%", worse: v => v * 0.8 },
+        { key: "providers_at_launch", label: "1 Fewer Provider", worse: v => Math.max(1, v - 1) },
+      ];
+
+      const results = sensitivities.map(s => {
+        const modified = { ...p, [s.key]: s.worse(p[s.key]) };
+        const zoneCount = parseInt(document.querySelector('[data-key="zone_count"] input')?.value ?? "4");
+        const overhead = (modified.monthly_ops_overhead + modified.monthly_tech_overhead) * 100;
+        const variations = [{ h: 1, i: 1 }, { h: 0.9, i: 1.1 }, { h: 1.1, i: 0.9 }, { h: 0.85, i: 1.15 }, { h: 1.2, i: 0.85 }, { h: 0.95, i: 1.05 }];
+        const allZones = [];
+        for (let z = 0; z < zoneCount; z++) {
+          const v = variations[z % variations.length];
+          allZones.push(simulateZone({ ...modified, homes_in_zone: Math.round(modified.homes_in_zone * v.h), income_qualifying_rate: Math.min(0.85, modified.income_qualifying_rate * v.i), byoc_customers_per_provider: Math.max(5, Math.round(modified.byoc_customers_per_provider * (1 - z * 0.15))) }));
+        }
+        let rev = 0, pay = 0, bonus = 0, ref = 0;
+        for (const zm of allZones) { rev += zm[11].revenue; pay += zm[11].provPay; bonus += zm[11].byocBonus; ref += zm[11].refCredits; }
+        const margin = rev - (pay + bonus + ref + overhead);
+        const marginPct = rev > 0 ? (margin / rev) * 100 : -100;
+        return { ...s, marginPct, delta: marginPct - baseM12Margin };
+      });
+
+      results.sort((a, b) => a.delta - b.delta); // Worst impact first
+
+      const maxDelta = Math.max(...results.map(r => Math.abs(r.delta)), 1);
+
+      document.getElementById("sensitivity-bars").innerHTML = results.map(r => {
+        const barWidth = Math.min(100, Math.abs(r.delta) / maxDelta * 100);
+        const color = r.delta < -5 ? "#f87171" : r.delta < -2 ? "#fbbf24" : "#4ade80";
+        return `
+          <div class="flex items-center gap-2 py-1">
+            <span class="text-xs text-slate-400 w-40 shrink-0 truncate">${r.label}</span>
+            <div class="flex-1 h-4 bg-slate-800 rounded overflow-hidden relative">
+              <div class="h-full rounded" style="width: ${barWidth}%; background: ${color};"></div>
+            </div>
+            <span class="text-xs font-mono w-16 text-right ${r.delta < -5 ? 'text-red-400' : r.delta < -2 ? 'text-amber-400' : 'text-green-400'}">${r.delta >= 0 ? "+" : ""}${r.delta.toFixed(1)}%</span>
+          </div>`;
+      }).join("");
+    }
+
+    // === SLIDER INITIALIZATION ===
+
+    document.querySelectorAll(".slider-group").forEach(el => {
+      const key = el.dataset.key;
+      const min = parseFloat(el.dataset.min);
+      const max = parseFloat(el.dataset.max);
+      const step = parseFloat(el.dataset.step);
+      const def = parseFloat(el.dataset.default);
+      const fmt = el.dataset.format;
+
+      const label = LABELS[key] || key;
+      const formatVal = v => {
+        if (fmt === "dollar") return "$" + v;
+        if (fmt === "pct") return (v * 100).toFixed(0) + "%";
+        return v;
+      };
+
+      el.innerHTML = `
+        <div class="flex justify-between items-center mb-1">
+          <label>${label}</label>
+          <span class="value">${formatVal(def)}</span>
+        </div>
+        <input type="range" min="${min}" max="${max}" step="${step}" value="${def}" class="w-full h-1.5" />
+      `;
+
+      const input = el.querySelector("input");
+      const valueSpan = el.querySelector(".value");
+      input.addEventListener("input", () => {
+        valueSpan.textContent = formatVal(parseFloat(input.value));
+        runSimulation();
+      });
+    });
+
+    // Initial run
+    runSimulation();
+  </script>
+</body>
+</html>

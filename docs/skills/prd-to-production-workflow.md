@@ -319,7 +319,7 @@ Push the batch to the feature branch.
 
 ### Step 9: Log suggestions (optional)
 
-If you noticed gaps, UX friction, missing features, or business opportunities during this batch, append them to `docs/suggestions.md`. Keep entries brief (title, source, impact, effort, tags). Do not stop work to research suggestions — this is a 30-second append, not a research task. Skip this step if nothing stood out.
+If you noticed gaps, UX friction, missing features, or business opportunities during this batch, append them to `lessons-learned.md` (Suggestions section). Keep entries brief (title, source, impact, effort, tags). Do not stop work to research suggestions — this is a 30-second append, not a research task. Skip this step if nothing stood out.
 
 ---
 
@@ -609,7 +609,7 @@ When all phases in the plan are done:
 
 1. **Final recap** — Review the entire plan against what was actually built
 2. **Recommendations** — Surface any deferred items, tech debt, or follow-up work
-3. **Suggestion round** — Read the 6 north star docs and the completed plan. Add 3-5 suggestions to `docs/suggestions.md` based on what you learned during this implementation cycle — patterns you noticed, features that would complement what was just built, UX gaps that became apparent.
+3. **Suggestion round** — Read the 6 north star docs and the completed plan. Add 3-5 suggestions to `lessons-learned.md` (Suggestions section) based on what you learned during this implementation cycle — patterns you noticed, features that would complement what was just built, UX gaps that became apparent.
 4. **Final doc sync** — One last pass across all docs
 5. **Archive** — Move the working folder contents to a uniquely-named archive folder:
    ```
@@ -641,13 +641,13 @@ Human brings the next PRD. Return to Phase 1.
 
 After a round of PRDs is complete, optionally run an analysis pass to find the next highest-impact work.
 
-**Input:** Start by reviewing `docs/suggestions.md` — this contains ideas accumulated during normal development. Promote the strongest suggestions into full PRDs, then look for additional opportunities the suggestions didn't cover.
+**Input:** Start by reviewing `lessons-learned.md` (Suggestions section) — this contains ideas accumulated during normal development. Promote the strongest suggestions into full PRDs, then look for additional opportunities the suggestions didn't cover.
 
 **Method:** Systematically evaluate the product against quality rubrics — UX friction scoring, performance audits, design guidelines conformance checks, accessibility audits, or business model gap analysis. Cross-reference against the 6 north star docs to identify gaps between what the product does and what the business plan says it should do.
 
 **Output:**
 - New PRD files added to `docs/upcoming/`, numbered and ready for the scheduled task loop to pick up
-- `docs/suggestions.md` cleaned up — promoted items moved to the "Promoted" section, weak ideas moved to "Dismissed"
+- `lessons-learned.md` Suggestions cleaned up — promoted items moved to the "Promoted" section, weak ideas moved to "Dismissed"
 
 This phase feeds the continuous improvement loop: build → measure → analyze → generate PRDs → build again.
 
@@ -760,7 +760,7 @@ If a session fails mid-batch (context limit, network error, build failure):
 [ ] Validate build (tsc + build)
 [ ] Validate visually (screenshots, if UI work)
 [ ] Push fixes
-[ ] Log suggestions to docs/suggestions.md (if any noticed)
+[ ] Log suggestions to lessons-learned.md (if any noticed)
 [ ] Update Session Handoff in plan.md
 [ ] (If last batch in phase) Consolidation check → fresh session → sync docs
 ```
@@ -792,7 +792,6 @@ docs/
   design-guidelines.md
   app-flow-pages-and-roles.md
   feature-list.md
-  suggestions.md                     # AI suggestion box — ideas surfaced during development
   skills/
     prd-to-production-workflow.md    # This file
   upcoming/                          # PRDs queued for future work (numbered: 001-xxx.md)

@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { requireCronSecret } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -95,6 +96,8 @@ Deno.serve(async (req: Request) => {
   let errorCount = 0;
 
   try {
+    requireCronSecret(req);
+
     // 1. Claim PENDING events scheduled for now or earlier
     const { data: events, error: claimErr } = await supabase.rpc(
       "claim_notification_events",

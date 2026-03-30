@@ -30,7 +30,7 @@ export function AddressLookupTool() {
 
     try {
       // Step 1: Geocode via Mapbox
-      const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
+      const mapboxToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
       if (!mapboxToken) {
         toast.error("Mapbox token not configured");
         setLoading(false);

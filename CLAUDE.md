@@ -335,11 +335,13 @@ When changing a primary CTA or user flow entry point, grep for all links to the 
 /
 ├── CLAUDE.md                           # This file — universal agent instructions
 ├── WORKFLOW.md                         # Portable PRD-to-Production workflow reference
+├── DEPLOYMENT.md                       # Deployment guide (env vars, migrations, Edge Functions)
+├── lessons-learned.md                  # Lessons learned + suggestions (read every session)
 ├── README.md                           # Human onboarding guide
 ├── .claude/
 │   ├── settings.json                   # Claude Code settings
-│   └── commands/
-│       └── code-review.md              # /code-review slash command
+│   └── hooks/
+│       └── stop-check.sh              # Post-response validation hook
 ├── docs/
 │   ├── masterplan.md                   # REQUIRED — product blueprint
 │   ├── feature-list.md                 # REQUIRED — capability inventory
@@ -347,7 +349,6 @@ When changing a primary CTA or user flow entry point, grep for all links to the 
 │   ├── operating-model.md              # OPTIONAL — add when business model defined
 │   ├── app-flow-pages-and-roles.md     # OPTIONAL — add when 10+ pages
 │   ├── design-guidelines.md            # OPTIONAL — add when design system solidifies
-│   ├── suggestions.md                  # Inter-agent signal file + product ideas
 │   ├── working/                        # Active PRD + plan + batch specs
 │   │   ├── prd.md
 │   │   ├── plan.md
@@ -571,7 +572,7 @@ Generic patterns used across this codebase. For project-specific conventions, se
 - One component per file
 - **Decompose at 300 lines.** If a component grows past 300 lines in a batch, extract sections in the same batch — not a future PRD.
 - No inline business logic in JSX — extract to hooks or utilities
-- Commit only what the batch spec says; out-of-scope discoveries go to `docs/suggestions.md`, not into the diff
+- Commit only what the batch spec says; out-of-scope discoveries go to `lessons-learned.md` (Suggestions section), not into the diff
 - **Never put API keys in `VITE_` variables.** Client-side env vars are bundled into the browser. Any third-party API call with a secret goes in an Edge Function.
 - **Dark mode colors:** Never use light-mode Tailwind colors (`bg-green-100`, `text-green-600`) in a dark-first theme. Use dark variants (`bg-green-900/40`, `text-green-400`).
 - **Default unauthenticated users to `null`**, never to a permissioned role like "operator".
@@ -580,42 +581,18 @@ Generic patterns used across this codebase. For project-specific conventions, se
 
 ## 14. Suggestions & Agent Signals
 
-`docs/suggestions.md` serves two purposes: inter-agent communication about the workflow, and product improvement ideas.
+Suggestions and agent signals are logged in `lessons-learned.md` (Suggestions section at the bottom). This file lives at the project root.
 
-### Structure
+### What to log
 
-```markdown
-# Suggestions
-
-## Agent Signals
-<!-- Observations about the workflow, review system, or process.
-     Written by: Any agent during execution.
-     Read by: Orchestration Agent, Human, future agents. -->
-
-### YYYY-MM-DD — [Agent Role] (Batch N)
-- [Observation with specific data]
-
-## Product Suggestions
-<!-- Ideas for features, UX improvements, optimizations.
-     Written by: Implementation Agent during batch work.
-     Read by: Define Agent, Human, Orchestration Agent. -->
-
-### YYYY-MM-DD — [Agent Role] (Batch N)
-- [Idea with context]
-```
-
-### What to log as Agent Signals
-
-- Review lane effectiveness: "Lane 3 produced 0 unique findings in Batches 1-7 — all duplicated Lane 2."
-- Spec quality issues: "Lane 1 flagged 3 false positives because deferred items weren't listed in the batch spec."
-- Context consumption patterns: "Batch 5 (Large) consumed 18% context due to 3-pass review fix loop."
-- Workflow friction: "Batch specs averaging 45 lines — non-goals section adds no value on Small batches."
-- Scoring calibration: "5 SHOULD-FIX findings scored 26-30 were all style-only — threshold may be too low."
+- **Product suggestions** — Feature ideas, UX gaps, optimization opportunities noticed during implementation.
+- **Workflow suggestions** — Process improvements, review system changes, tooling ideas.
+- **Agent Signals** — Observations about lane effectiveness, scoring calibration, context consumption. Include specific numbers.
 
 ### Rules
 
 - **Keep entries brief** — 1-2 sentences with specific data. This is a 30-second append, not a report.
-- **Always include the date, agent role, and batch number** for traceability.
+- **Always include the date and source** for traceability.
 - **Do not stop work to write suggestions** — append at the end of a batch, during the suggestion step.
 - **Agent Signals are data, not opinions** — include numbers, counts, and specific examples.
 

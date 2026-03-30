@@ -120,6 +120,7 @@ function JobCard({ job, index, total, onMoveUp, onMoveDown, showReorder, isSelec
 }
 
 function TodayJobList() {
+  const navigate = useNavigate();
   const { data: jobs, isLoading } = useProviderJobs("today");
   const { org } = useProviderOrg();
   const { isLocked } = useProviderRoutePlan();
@@ -187,7 +188,10 @@ function TodayJobList() {
         compact
         icon={MapPin}
         title="No jobs scheduled for today"
-        body="Jobs will appear here when assigned to your route."
+        body="Jobs will appear here when assigned to your route. In the meantime, invite your existing customers to get started."
+        ctaLabel="Invite Customers"
+        ctaAction={() => navigate("/provider/byoc")}
+        ctaVariant="outline"
       />
     );
   }
@@ -266,6 +270,7 @@ function TodayJobList() {
 }
 
 function UpcomingJobList() {
+  const navigate = useNavigate();
   const { data: jobs, isLoading } = useProviderJobs("upcoming");
 
   if (isLoading) {
@@ -284,7 +289,10 @@ function UpcomingJobList() {
         compact
         icon={MapPin}
         title="No upcoming jobs"
-        body="Jobs will appear here when assigned to your schedule."
+        body="Jobs will appear here when assigned to your schedule. Invite customers to start filling your route."
+        ctaLabel="Invite Customers"
+        ctaAction={() => navigate("/provider/byoc")}
+        ctaVariant="outline"
       />
     );
   }
