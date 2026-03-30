@@ -28,13 +28,17 @@ Where to find them:
 • Local trade association directories: These providers take their business seriously enough to join a professional organization.
 • Facebook groups for local service providers: Join groups like "[City] Landscapers" or "[City] Home Services." Observe for a week before recruiting — learn who's active, who's helpful, who's frustrated with their current setup.
 
+QUALIFYING IN 10 MINUTES
+
+Once you find a candidate, a short phone call tells you if they're worth pursuing. Three questions: "How many regular customers do you have right now?" (confirms archetype), "What's the worst part of running your business?" (reveals their pain — the answer should be admin, scheduling, or customer acquisition, not "I don't like the work"), and "If we could fill your open days with recurring jobs, would you take them?" (tests willingness). If they say their schedule is full and they're happy, they're Archetype C — thank them and move on. If they light up talking about eliminating admin work, they're your person.
+
 ARCHETYPE B: NEW PROVIDERS (your backup bench)
 
 Providers with 0-5 customers, high energy, still building their reputation. Your value prop to them: "Get customers from day one without cold-calling." Use Archetype B providers as backups, not primaries — their quality is untested. Pair each new provider with a veteran for the first 2 weeks so they learn your standards.
 
 ARCHETYPE C: ESTABLISHED PROVIDERS WITH 40+ CUSTOMERS (not at launch)
 
-Don't waste time recruiting them at launch. They have no pain you solve — their schedule is full, their reputation is built, and they don't need your platform. Convert them later via BYOC after you've proven that density-optimized routes save them 30% in drive time. That's the only pitch that works for Archetype C.`,
+Don't waste time recruiting them at launch. They have no pain you solve — their schedule is full, their reputation is built, and they don't need your platform. Convert them later via BYOC after you've proven that density-optimized routes meaningfully reduce their drive time. That's the only pitch that works for Archetype C — concrete data from your own zone showing how clustering jobs saves hours per week. If an Archetype C provider reaches out on their own during launch, add them to a "future provider" list with a note on their capacity and follow up at week 10 with the density pitch.`,
   },
   {
     id: "the-pitch",
@@ -72,7 +76,7 @@ THE FOUR OBJECTIONS YOU'LL HEAR EVERY TIME
         description: `You need these before you accept a single customer:
 
 • 8 pre-screened providers ready to activate on day one — not 8 in the pipeline, 8 who have completed background checks, signed agreements, and confirmed their availability. Start with 12-15 candidates to account for dropoff.
-• A waitlist of at least 50 interested customers — use a landing page with a referral incentive to build this before launch. These early signups are your most motivated customers.
+• A waitlist of at least 50 interested customers — use a landing page with a referral incentive to build this before launch. Why 50? At typical waitlist-to-activation conversion rates, 50 signups yields ~20 activated customers — enough to keep 8 providers partially busy while you work out operational issues. If you can't get to 50, your landing page copy or referral incentive needs work — fix that before you set a launch date.
 • SKU catalog calibrated for this market — durations and levels validated from provider interviews (see the SKU Catalog module's Provider Interviews section).
 • Pricing set against local competitive rates — check what Thumbtack/Angi providers charge in your target ZIP codes. Your subscription needs to feel like a deal compared to à la carte.
 • First-week scheduling capacity blocked — reserve 25% buffer so you're not maxed out on day one.
@@ -87,7 +91,7 @@ If any of these are not ready, push the launch date. A bad launch is worse than 
       },
       {
         title: "Go-live graduation: the four criteria",
-        description: "Flip the zone to Live status (Admin → Markets → Zones) when ALL four criteria are met over the last 30 days: NPS above 40, issue rate below 8%, at least 8 active providers (completed at least 1 job each in the last 14 days), utilization between 60-80%. This unlocks paid acquisition campaigns. Brief your providers that volume will increase — manage their expectations so they're prepared, not overwhelmed. Missing even one criterion means you're not ready. See the Zones & Markets module for the full graduation workflow.",
+        description: "Flip the zone to Live status (Admin → Markets → Zones) when ALL four criteria are met: NPS above 40 over the last 30 days, issue rate below 8%, at least 8 active providers (completed at least 1 job each in the last 14 days), utilization between 60-80%. This unlocks paid acquisition campaigns. Brief your providers that volume will increase — manage their expectations so they're prepared, not overwhelmed. Missing even one criterion means you're not ready. See the Zones & Markets module for the full graduation workflow.",
         screenshot: { alt: "Zone status change modal with graduation criteria" },
       },
       {
@@ -99,7 +103,7 @@ Week 5: Provider onboarding. BYOC training, app walkthrough, expectations settin
 Week 6: Soft launch — providers bring 5-10 BYOC customers each. You're now live with real customers.
 Week 7-8: Monitor. First service completions, proof photo compliance, billing receipts. Fix what breaks.
 Week 9-10: Measure. Retention, add-on attach rate, provider satisfaction. Is the model working?
-Week 11-12: Decide. Expand zones, recalibrate, or pivot. The data from weeks 6-10 tells you which.`,
+Week 11-12: Decide. Pull the five success metrics (see below) and match to one of three paths: If 60-day retention is above 70% AND gross margin is above 15%, you have a working model — expand to a second zone. If retention is above 70% but margin is below 15%, the customers like it but the economics are wrong — recalibrate pricing and payout rates. If retention is below 60%, the subscription isn't delivering enough value — investigate root cause before spending anything on growth.`,
         screenshot: { alt: "12-week pilot timeline with milestone markers" },
       },
     ],
@@ -120,7 +124,7 @@ PROVIDER UTILIZATION
 What percentage of available provider capacity is filled with jobs? Target: above 50% by week 8. Below 40% means you don't have enough customers to keep providers busy — they'll churn for better income elsewhere. Above 60% at this stage is excellent.
 
 SERVICE QUALITY (ISSUE RATE)
-Issues reported per 100 completed jobs. Target: below 10% during pilot (stricter than the 3% platform-wide target for mature zones — pilot zones have smaller samples and more variance). Above 15% means a systemic quality problem: wrong providers, wrong SKU definitions, or mismatched customer expectations.
+Issues reported per 100 completed jobs. Target: below 8% — this is the same threshold used for go-live graduation (see the Zones & Markets module). During the first 4 weeks of soft launch, you may see rates above 8% as you work out operational kinks — that's expected. But by the go-live graduation check, you need to be below 8% consistently. Above 15% at any point means a systemic quality problem: wrong providers, wrong SKU definitions, or mismatched customer expectations.
 
 UNIT ECONOMICS (GROSS MARGIN)
 Is the subscription spread positive per zone? Revenue minus provider payouts minus direct costs, divided by revenue. Target: above 15% gross margin by week 12. Don't panic at 10% in week 6 — density hasn't kicked in yet. But if you're below 10% at week 12, investigate pricing and payout rates. See the Zones & Markets module for how the 15% expansion threshold relates to the 25% mature-zone target.`,
@@ -176,7 +180,7 @@ Is the subscription spread positive per zone? Revenue minus provider payouts min
     type: "automation",
     automationNotes: [
       {
-        text: "BYOC invite tracking is fully automated — the system tracks which providers sent invites, which customers activated, and the bonus payouts. You don't need to manually reconcile BYOC bonuses. Check the Growth page's BYOP Recommendation Tracker to monitor funnel health.",
+        text: "BYOC invite tracking is fully automated — the system tracks which providers sent invites, which customers activated, and the bonus payouts. You don't need to manually reconcile BYOC bonuses. Check the Growth dashboard to monitor BYOC funnel health (invite-to-activation conversion, active BYOC customers per provider).",
         type: "set-and-forget",
       },
       {
