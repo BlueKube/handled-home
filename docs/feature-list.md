@@ -724,7 +724,8 @@
 407. Control Room (Superuser) training module: pricing hierarchy, payout rules, change requests — 8/10
 408. SOPs & Playbooks training module: 8 standard operating procedures with decision branching, daily/weekly rhythms — 8/10
 409. Your First Week onboarding module: 5-day structured plan (observe → shadow → do → own) — 8/10
+410. Market Launch & Provider Recruitment training module: provider targeting (3 archetypes), value prop/objection handling, pilot launch checklist, 12-week milestone map, success metrics — 8/10
 
 ---
 
-*Total features: 428 | Last updated: 2026-03-30 | Session 3 features added (Admin Academy training center with 15 modules)*
+*Total features: 429 | Last updated: 2026-03-30 | Session 3 features added (Admin Academy training center with 16 modules)*

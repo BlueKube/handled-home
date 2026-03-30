@@ -11,7 +11,7 @@
 | Batch | Title | Size | Files | Status | Context |
 |-------|-------|------|-------|--------|---------|
 | B1 | Fold into existing modules (R1, R2) | M | sku-catalog.ts, zones-markets.ts | ✅ | |
-| B2 | New Market Launch module (R3) | M | market-launch.ts, academy-modules.ts | ⬜ | |
+| B2 | New Market Launch module (R3) | M | market-launch.ts, academy-modules.ts | ✅ | |
 
 ---
 
@@ -32,7 +32,7 @@ Combines Lane A + B findings, de-duplicates, scores.
 
 ## Session Handoff
 - **Branch:** claude/add-feature-maturity-ratings-tMeen
-- **Last completed:** None — starting fresh
-- **Next up:** B1 — Fold into existing modules
+- **Last completed:** B2 — All batches complete
+- **Next up:** None — PRD-044 complete. Archive docs/working/.
 - **Context at exit:** —
 - **Blockers:** None
