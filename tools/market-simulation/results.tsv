@@ -149,3 +149,13 @@ experiment_id	assumption_changed	old_value	new_value	score	delta	kept	margin_pct
 98	min_customers_for_viability	15.0000	15.0000	2916.10	0.00	no	-23.9	100.0	37.4	31.1	8	never	52
 99	initial_conversion_rate	0.0120	0.0131	3001.57	85.47	YES	-22.6	100.0	39.6	31.1	8	never	56
 100	essential_price_cents	12790.0000	12588.0000	2985.61	-15.96	no	-23.1	100.0	39.6	31.1	8	never	56
+1	provider_drive_minutes_per_stop	10.0000	11.0000	317.86	0.00	no	-100.1	100.0	26.1	28.0	12	never	41
+2	referral_conversion_rate	0.1800	0.1926	317.86	0.00	no	-100.1	100.0	26.1	28.0	12	never	41
+3	monthly_tech_overhead_cents	35000.0000	35235.0000	315.65	-2.21	no	-100.2	100.0	26.1	28.0	12	never	41
+4	referral_rate_per_customer_per_month	0.0400	0.0388	317.86	0.00	no	-100.1	100.0	26.1	28.0	12	never	41
+5	monthly_ops_overhead_cents	150000.0000	145568.0000	359.49	41.63	YES	-98.8	100.0	26.1	28.0	12	never	41
+6	homes_in_zone	4500.0000	13557.0000	1635.41	1275.91	YES	-76.8	100.0	55.0	28.0	8	never	114
+7	max_homes_per_day	8.0000	9.0000	1635.41	0.00	no	-76.8	100.0	55.0	28.0	8	never	114
+8	monthly_ops_overhead_cents	145568.0000	90628.0000	1955.02	319.61	YES	-66.2	100.0	55.0	28.0	8	never	114
+9	max_drive_minutes_between_stops	12.0000	11.0000	1955.02	0.00	no	-66.2	100.0	55.0	28.0	8	never	114
+10	month_1_churn_rate	0.1200	0.2394	1906.66	-48.36	no	-67.1	100.0	54.0	28.0	8	never	113

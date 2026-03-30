@@ -225,7 +225,8 @@
       for (let m = 1; m <= 12; m++) {
         const newByoc = m <= 3 ? Math.round(p.providers_at_launch * p.byoc_customers_per_provider * p.byoc_invite_send_rate * p.byoc_activation_rate * (m === 1 ? 0.5 : m === 2 ? 0.3 : 0.2)) : 0;
         const newRef = Math.round(active * 0.04 * 0.18);
-        const newOrg = Math.round(organicPool * 0.012 * 0.03 * m);
+        const remainingPool = Math.max(0, organicPool - active);
+        const newOrg = Math.round(remainingPool * 0.012 * 0.03 * m);
         const churnRate = m === 1 ? p.month_1_churn : m === 2 ? 0.07 : p.steady_churn;
         const potentialChurn = Math.round(active * churnRate);
         const actualPaused = Math.round(potentialChurn * 0.45);
@@ -240,7 +241,9 @@
         const avgSub = p.essential_price * 100 * p.plan_mix_essential + p.plus_price * 100 * p.plan_mix_plus + p.premium_price * 100 * planMixPremium;
         const revenue = Math.round(active * avgSub) + Math.round(secondService * 3 * 500);
         const provPay = Math.round(jobs * p.provider_payout * 100);
-        const byocBonus = m <= 3 ? Math.round(byocAtLaunch * 1000 * 4) : 0;
+        const bonusWeeklyCents = (p.byoc_bonus_weekly || 10) * 100;
+        const bonusDurationMonths = Math.ceil((p.byoc_bonus_weeks || 12) / 4);
+        const byocBonus = m <= bonusDurationMonths ? Math.round(byocAtLaunch * bonusWeeklyCents * 4) : 0;
         const refCredits = Math.round(newRef * 3000);
 
         months.push({ month: m, customers: active, jobs, revenue, provPay, byocBonus, refCredits, newByoc, newRef, newOrg });
@@ -434,7 +437,9 @@
       const byocPerProvider = Math.round(byocCustPerProv * sendRate * actRate);
       const totalBonusCostPerProv = byocPerProvider * bonusWeekly * bonusWeeks;
       const avgSubCents = parseFloat(document.querySelector('[data-key="essential_price"] input')?.value ?? "99") * 100 * parseFloat(document.querySelector('[data-key="plan_mix_essential"] input')?.value ?? "0.35") + parseFloat(document.querySelector('[data-key="plus_price"] input')?.value ?? "159") * 100 * parseFloat(document.querySelector('[data-key="plan_mix_plus"] input')?.value ?? "0.45") + parseFloat(document.querySelector('[data-key="premium_price"] input')?.value ?? "249") * 100 * (1 - parseFloat(document.querySelector('[data-key="plan_mix_essential"] input')?.value ?? "0.35") - parseFloat(document.querySelector('[data-key="plan_mix_plus"] input')?.value ?? "0.45"));
-      const ltv12mo = (avgSubCents / 100) * 12 * (1 - parseFloat(document.querySelector('[data-key="steady_churn"] input')?.value ?? "0.035"));
+      const churnRate = parseFloat(document.querySelector('[data-key="steady_churn"] input')?.value ?? "0.035");
+      const retentionFactor12mo = Math.pow(1 - churnRate, 12);
+      const ltv12mo = (avgSubCents / 100) * 12 * retentionFactor12mo;
       const roiPct = totalBonusCostPerProv > 0 ? ((ltv12mo * byocPerProvider - totalBonusCostPerProv) / totalBonusCostPerProv * 100) : 0;
 
       document.getElementById("byoc-roi").innerHTML = `
@@ -469,9 +474,9 @@
         const v = variations[z % variations.length];
         allZones.push(simulateZone({ ...p, homes_in_zone: Math.round(p.homes_in_zone * v.h), income_qualifying_rate: Math.min(0.85, p.income_qualifying_rate * v.i), byoc_customers_per_provider: Math.max(5, Math.round(p.byoc_customers_per_provider * (1 - z * 0.15))) }));
       }
-      let rev12 = 0, pay12 = 0, cust12 = 0;
-      for (const zm of allZones) { rev12 += zm[11].revenue; pay12 += zm[11].provPay; cust12 += zm[11].customers; }
-      const margin12 = rev12 - (pay12 + overhead);
+      let rev12 = 0, pay12 = 0, cust12 = 0, bonus12 = 0, ref12 = 0;
+      for (const zm of allZones) { rev12 += zm[11].revenue; pay12 += zm[11].provPay; cust12 += zm[11].customers; bonus12 += zm[11].byocBonus; ref12 += zm[11].refCredits; }
+      const margin12 = rev12 - (pay12 + bonus12 + ref12 + overhead);
       const marginPct = rev12 > 0 ? (margin12 / rev12 * 100) : -100;
 
       savedScenarios.push({

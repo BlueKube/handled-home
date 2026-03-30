@@ -151,11 +151,22 @@ export function simulateMultiZone(
 
   const month12 = combinedMonths[11];
 
+  // Compute actual retention and attach from zone data
+  const avgRetention = zones.length > 0
+    ? zones.reduce((s, z) => s + z.metrics.retention_60d_pct, 0) / zones.length
+    : 0;
+  const avgAttach = zones.length > 0
+    ? zones.reduce((s, z) => s + z.metrics.attach_rate_90d, 0) / zones.length
+    : 0;
+  const utilization = month12
+    ? (month12.total_jobs / (zoneCount * base.provider_stops_per_day * base.provider_working_days_per_week * 4) * 100)
+    : 0;
+
   const score =
     avgMargin * 30 +
-    100 * 25 + // Retention assumed from single-zone (already validated)
-    (month12 ? (month12.total_jobs / (zoneCount * base.provider_stops_per_day * base.provider_working_days_per_week * 4) * 100) : 0) * 20 +
-    28 * 15 + // Attach rate from single-zone
+    avgRetention * 25 +
+    utilization * 20 +
+    avgAttach * 15 +
     (breakEvenMonth ?? 52) * -10;
 
   return {

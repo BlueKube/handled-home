@@ -55,22 +55,25 @@ function mutateOne(current: ModelAssumptions): {
     newValue = Math.round(newValue * 10000) / 10000;
   }
 
-  // Ensure plan mix sums to ~1.0
+  // Ensure plan mix sums to exactly 1.0 by renormalizing all three
   const planMixKeys: (keyof ModelAssumptions)[] = [
     "plan_mix_essential",
     "plan_mix_plus",
     "plan_mix_premium",
   ];
+  const mutated = { ...current, [key]: newValue };
   if (planMixKeys.includes(key)) {
-    const otherKeys = planMixKeys.filter((k) => k !== key);
-    const otherSum = otherKeys.reduce((s, k) => s + current[k], 0);
-    if (otherSum > 0) {
-      newValue = Math.min(newValue, 1 - 0.05 * otherKeys.length); // Leave room for others
+    const total = planMixKeys.reduce((s, k) => s + mutated[k], 0);
+    if (total > 0) {
+      for (const k of planMixKeys) {
+        mutated[k] = Math.round((mutated[k] / total) * 10000) / 10000;
+      }
+      newValue = mutated[key]; // Update newValue to the normalized value
     }
   }
 
   return {
-    mutated: { ...current, [key]: newValue },
+    mutated,
     key,
     oldValue,
     newValue,

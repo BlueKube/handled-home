@@ -91,8 +91,10 @@ export function simulate(input?: ModelAssumptions): SimulationResult {
     );
 
     // Organic growth (from marketing, word of mouth, app store)
+    // Deplete pool by total acquired to model market saturation
+    const remainingPool = Math.max(0, organicPool - totalAcquired);
     const newOrganic = Math.round(
-      organicPool * m.initial_conversion_rate * m.monthly_organic_growth_rate * month
+      remainingPool * m.initial_conversion_rate * m.monthly_organic_growth_rate * month
     );
 
     const totalNew = newByoc + newReferral + newOrganic;
@@ -161,11 +163,12 @@ export function simulate(input?: ModelAssumptions): SimulationResult {
     // --- COSTS ---
     const providerPayouts = Math.round(totalJobs * m.provider_payout_per_job_cents);
 
-    // BYOC bonuses (only during bonus window)
+    // BYOC bonuses (only during bonus window, only for surviving customers)
+    // Approximate surviving BYOC customers using overall retention rate
+    const byocSurvivalRate = month === 1 ? (1 - m.month_1_churn_rate) : month === 2 ? (1 - m.month_1_churn_rate) * (1 - m.month_2_churn_rate) : (1 - m.month_1_churn_rate) * (1 - m.month_2_churn_rate) * Math.pow(1 - m.steady_state_monthly_churn, month - 2);
+    const survivingByocCustomers = Math.round(byocCustomersAtLaunch * byocSurvivalRate);
     const byocBonuses = month <= Math.ceil(m.byoc_bonus_duration_weeks / 4)
-      ? Math.round(
-          byocCustomersAtLaunch * m.byoc_bonus_per_week_cents * 4
-        )
+      ? Math.round(survivingByocCustomers * m.byoc_bonus_per_week_cents * 4)
       : 0;
 
     const referralCredits = Math.round(newReferral * m.referral_credit_cents);
@@ -211,10 +214,10 @@ export function simulate(input?: ModelAssumptions): SimulationResult {
   const peakCustomers = Math.max(...months.map(m => m.active_customers));
   const finalCustomers = months[11]?.active_customers ?? 0;
 
-  // Retention: of customers active in month 1, how many are still active in month 3?
+  // Retention: of customers active in month 1, how many are still active in month 2? (~60 days)
   const month1Customers = months[0]?.active_customers ?? 0;
-  const month3Customers = months[2]?.active_customers ?? 0;
-  const retention60d = month1Customers > 0 ? Math.min(100, (month3Customers / month1Customers) * 100) : 0;
+  const month2Customers = months[1]?.active_customers ?? 0;
+  const retention60d = month1Customers > 0 ? Math.min(100, (month2Customers / month1Customers) * 100) : 0;
 
   // Attach rate at 90 days
   const attachRate90d = months[2]?.attach_rate ?? 0;
