@@ -974,3 +974,171 @@ INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_descriptio
   true
 )
 ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- ============================================================
+-- PRD-046 B4: New SKU Levels + Home Assistant Levels
+-- ============================================================
+
+-- Gutter Cleaning: 3 levels
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+(
+  'c2000000-0000-0000-000e-000000000001',
+  'c1000000-0000-0000-0000-00000000000e', 1,
+  'Standard Clean', 'Clear gutters and downspouts, flush with water, basic debris removal',
+  ARRAY['Clear gutters of debris','Flush downspouts with water','Basic debris removal from ground'],
+  ARRAY['Gutter guard installation','Fascia repair','Roof debris removal','Sealing'],
+  75, 2, 10,
+  '[{"label":"Clear all gutters","required":true},{"label":"Flush downspouts","required":true},{"label":"Remove ground debris","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-000e-000000000002',
+  'c1000000-0000-0000-0000-00000000000e', 2,
+  'Full Service', 'Clear, flush, minor sealing, roof edge cleanup, and ground cleanup',
+  ARRAY['Clear all gutters','Flush all downspouts','Minor gutter joint sealing','Roof edge debris removal','Ground cleanup around downspouts'],
+  ARRAY['Gutter guard installation','Fascia or soffit repair','Roof work beyond edge'],
+  120, 2, 15,
+  '[{"label":"Clear all gutters","required":true},{"label":"Flush downspouts","required":true},{"label":"Seal joints","required":true},{"label":"Clean roof edge","required":true},{"label":"Ground cleanup","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-000e-000000000003',
+  'c1000000-0000-0000-0000-00000000000e', 3,
+  'Premium', 'Full system service — clear, flush, seal, check hangers, splash zones, photo documentation',
+  ARRAY['Clear and flush entire gutter system','Seal all joints','Check and tighten hangers','Clean ground splash zones','Full roof edge cleanup','Photo documentation of system condition'],
+  ARRAY['Gutter guard installation','Structural repair','Roof work beyond edge'],
+  150, 3, 22,
+  '[{"label":"Clear and flush system","required":true},{"label":"Seal joints","required":true},{"label":"Check hangers","required":true},{"label":"Clean splash zones","required":true},{"label":"Photo documentation","required":true}]'::jsonb,
+  true
+)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- Trash Can Cleaning: 1 level
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+(
+  'c2000000-0000-0000-0010-000000000001',
+  'c1000000-0000-0000-0000-000000000010', 1,
+  'Monthly Wash', 'Power rinse interior and exterior, deodorize, set upright to dry',
+  ARRAY['Power rinse interior','Power rinse exterior','Deodorize','Set upright to dry'],
+  ARRAY['Trash removal','Liner replacement','Pest treatment'],
+  10, 1, 3,
+  '[{"label":"Rinse interior","required":true},{"label":"Rinse exterior","required":true},{"label":"Deodorize","required":true}]'::jsonb,
+  true
+)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- Grill Cleaning: 2 levels
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+(
+  'c2000000-0000-0000-0011-000000000001',
+  'c1000000-0000-0000-0000-000000000011', 1,
+  'Quick Clean', 'Scrape grates, brush interior, wipe exterior, empty grease trap',
+  ARRAY['Scrape grates','Brush interior','Wipe exterior surfaces','Empty grease trap'],
+  ARRAY['Part removal','Gas line check','Cover cleaning'],
+  40, 1, 6,
+  '[{"label":"Scrape grates","required":true},{"label":"Brush interior","required":true},{"label":"Wipe exterior","required":true},{"label":"Empty grease trap","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-0011-000000000002',
+  'c1000000-0000-0000-0000-000000000011', 2,
+  'Deep Clean', 'Full disassembly, soak and scrub, degrease, clean grease management, reassemble',
+  ARRAY['Disassemble removable parts','Soak and scrub grates and heat plates','Degrease interior','Clean exterior thoroughly','Empty and clean grease management system','Reassemble all parts'],
+  ARRAY['Gas line work','Igniter replacement','Structural repair'],
+  75, 2, 13,
+  '[{"label":"Disassemble parts","required":true},{"label":"Soak and scrub grates","required":true},{"label":"Degrease interior","required":true},{"label":"Clean exterior","required":true},{"label":"Clean grease system","required":true},{"label":"Reassemble","required":true}]'::jsonb,
+  true
+)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- Dryer Vent Cleaning: 2 levels
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+(
+  'c2000000-0000-0000-0012-000000000001',
+  'c1000000-0000-0000-0000-000000000012', 1,
+  'Standard Clean', 'Disconnect, brush and vacuum full vent run, reconnect, test airflow',
+  ARRAY['Disconnect dryer from vent','Brush and vacuum full vent run','Reconnect dryer','Test airflow'],
+  ARRAY['Booster fan service','Vent rerouting','Dryer service or repair'],
+  40, 1, 8,
+  '[{"label":"Disconnect dryer","required":true},{"label":"Brush and vacuum vent","required":true},{"label":"Reconnect dryer","required":true},{"label":"Test airflow","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-0012-000000000002',
+  'c1000000-0000-0000-0000-000000000012', 2,
+  'Clean + Inspect', 'Full vent cleaning plus cap inspection, lint trap deep clean, airflow measurement, condition report',
+  ARRAY['Full vent brush and vacuum','Exterior vent cap inspection','Lint trap deep clean','Airflow measurement before and after','Condition report with photos'],
+  ARRAY['Vent replacement','Dryer repair','Booster fan installation'],
+  60, 2, 11,
+  '[{"label":"Brush and vacuum vent","required":true},{"label":"Inspect vent cap","required":true},{"label":"Deep clean lint trap","required":true},{"label":"Measure airflow","required":true},{"label":"Provide condition report","required":true}]'::jsonb,
+  true
+)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- Home Assistant SKUs: 1 level each (5 SKUs)
+-- These use auto-generated UUIDs so we look up sku_id by name
+
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active)
+SELECT
+  'c2000000-0000-0000-00a1-000000000001'::uuid,
+  id, 1,
+  'Kitchen Reset', 'Dishes done, counters wiped, floor swept, trash taken out',
+  ARRAY['Dish washing and drying','Counter and stovetop wipe-down','Floor sweep and spot mop','Trash and recycling takeout','Appliance exterior wipe'],
+  ARRAY['Deep cleaning behind appliances','Oven interior cleaning','Grocery shopping','Organizing pantry contents'],
+  60, 1, 4,
+  '[{"label":"Dishes washed and put away","required":true},{"label":"Counters wiped","required":true},{"label":"Floor swept","required":true},{"label":"Trash taken out","required":true}]'::jsonb,
+  true
+FROM public.service_skus WHERE name = 'Kitchen Reset'
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active)
+SELECT
+  'c2000000-0000-0000-00a2-000000000001'::uuid,
+  id, 1,
+  'Laundry Sprint', 'Focused laundry folding — sorted, folded, and placed',
+  ARRAY['Folding clean laundry','Sorting by person or type','Placing in designated areas'],
+  ARRAY['Ironing or steaming','Washing or drying loads','Dry cleaning or delicates handling'],
+  30, 1, 2,
+  '[{"label":"Laundry folded","required":true},{"label":"Items sorted and placed","required":true}]'::jsonb,
+  true
+FROM public.service_skus WHERE name = 'Laundry Folding Sprint'
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active)
+SELECT
+  'c2000000-0000-0000-00a3-000000000001'::uuid,
+  id, 1,
+  'Quick Tidy', 'Surfaces cleared, cushions fluffed, common areas tidied',
+  ARRAY['Surface clearing and organizing','Cushion and pillow fluffing','General tidying of common areas','Light dusting of visible surfaces'],
+  ARRAY['Deep cleaning','Moving heavy furniture','Organizing closets or drawers'],
+  30, 1, 2,
+  '[{"label":"Surfaces cleared","required":true},{"label":"Cushions arranged","required":true},{"label":"Visible areas tidied","required":true}]'::jsonb,
+  true
+FROM public.service_skus WHERE name = 'Quick Tidy Sprint'
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active)
+SELECT
+  'c2000000-0000-0000-00a4-000000000001'::uuid,
+  id, 1,
+  'Party Reset', 'Post-hosting reset — dishes, trash, surfaces, floors back to normal',
+  ARRAY['All dishes washed and put away','Trash and recycling collected','Counters and tables wiped','Floors swept and spot mopped','Furniture returned to position'],
+  ARRAY['Stain removal from upholstery','Carpet shampooing','Outdoor cleanup'],
+  90, 1, 6,
+  '[{"label":"Dishes done","required":true},{"label":"Trash collected","required":true},{"label":"Surfaces wiped","required":true},{"label":"Floors swept","required":true}]'::jsonb,
+  true
+FROM public.service_skus WHERE name = 'Post-Party Reset'
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active)
+SELECT
+  'c2000000-0000-0000-00a5-000000000001'::uuid,
+  id, 1,
+  'Bed & Bath', 'Beds made, bathroom surfaces wiped, towels swapped, floors swept',
+  ARRAY['Bed making with fresh linens','Bathroom counter and mirror wipe','Toilet exterior clean','Towel swap','Floor sweep in both rooms'],
+  ARRAY['Shower or tub deep scrub','Window washing','Closet organization'],
+  60, 1, 4,
+  '[{"label":"Bed made with fresh linens","required":true},{"label":"Bathroom surfaces wiped","required":true},{"label":"Towels swapped","required":true},{"label":"Floors swept","required":true}]'::jsonb,
+  true
+FROM public.service_skus WHERE name = 'Bed + Bath Reset'
+ON CONFLICT (sku_id, level_number) DO NOTHING;
