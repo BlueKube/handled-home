@@ -334,3 +334,152 @@ UPDATE public.service_skus SET
   price_hint_cents = 1500,
   pricing_notes = 'Weekly: $12-$20/visit (1 dog). Multi-dog: +$5-$8/dog. Provider payout ~$15. 90M pet dogs in US. High retention.'
 WHERE id = 'c1000000-0000-0000-0000-00000000000d';
+
+-- ============================================
+-- B4: New SKUs (IDs 00e-012)
+-- ============================================
+
+-- Gutter Cleaning
+INSERT INTO public.service_skus (
+  id, name, description, category, status,
+  duration_minutes, base_price_cents, handle_cost,
+  scheduling_profile, access_mode, fulfillment_mode,
+  presence_required, weather_sensitive,
+  inclusions, exclusions,
+  checklist, required_photos, proof_rules,
+  customer_prep, required_equipment,
+  provider_category, price_hint_cents, pricing_notes
+) VALUES (
+  'c1000000-0000-0000-0000-00000000000e',
+  'Gutter Cleaning',
+  'Clear debris from gutters and flush downspouts. Recommended 2x/year (spring + fall). 2-story surcharge applies.',
+  'cleanup', 'active',
+  90, 17500, 15,
+  'day_commit', 'exterior_only', 'same_week_allowed',
+  false, true,
+  ARRAY['Clear all gutter channels of debris','Flush downspouts','Check gutter guards if present','Bag debris for disposal'],
+  ARRAY['Gutter repair','Guard installation','Roof repair','Fascia work','Interior downspout clearing'],
+  '[{"label":"Clear all gutter channels","required":true},{"label":"Flush all downspouts","required":true},{"label":"Check gutter guards","required":false},{"label":"Bag and remove debris","required":true}]'::jsonb,
+  '["before","after"]'::jsonb,
+  '{"photo_required": true, "privacy_safe": false}'::jsonb,
+  ARRAY['Ensure ladder access around full perimeter','Move vehicles away from house'],
+  ARRAY['Extension ladders','Gutter scoop','Garden hose','Bucket','Safety harness (2+ story)'],
+  'outdoor', 12000,
+  'Research: $119-$234/visit (Angi 2025). 2-story: +50%. 2x/year. Provider payout ~$120. Bundles well with window cleaning.'
+) ON CONFLICT (id) DO NOTHING;
+
+-- Fall Prep
+INSERT INTO public.service_skus (
+  id, name, description, category, status,
+  duration_minutes, base_price_cents, handle_cost,
+  scheduling_profile, access_mode, fulfillment_mode,
+  presence_required, weather_sensitive,
+  inclusions, exclusions,
+  checklist, required_photos, proof_rules,
+  customer_prep, required_equipment,
+  provider_category, price_hint_cents, pricing_notes
+) VALUES (
+  'c1000000-0000-0000-0000-00000000000f',
+  'Fall Prep',
+  'Comprehensive fall yard preparation and winterization. The seasonal bookend to Spring Prep.',
+  'cleanup', 'active',
+  300, 40000, 25,
+  'day_commit', 'exterior_only', 'same_week_allowed',
+  false, true,
+  ARRAY['Full leaf removal (1-2 passes)','Final mow of season','Cut back perennials','Winterizer fertilizer application','Overseed bare spots','Blow out beds and hardscapes'],
+  ARRAY['Gutter cleaning (separate SKU)','Irrigation blowout','Shrub wrapping','Aeration (add-on)','Mulch application (separate SKU)'],
+  '[{"label":"Remove all leaves","required":true},{"label":"Final mow","required":true},{"label":"Cut back perennials","required":true},{"label":"Apply winterizer","required":true},{"label":"Overseed bare spots","required":false},{"label":"Blow beds clean","required":true}]'::jsonb,
+  '["before","after"]'::jsonb,
+  '{"photo_required": true, "privacy_safe": false}'::jsonb,
+  ARRAY['Remove temporary items from yard','Note any plants to protect over winter'],
+  ARRAY['Full lawn care kit','Leaf blowers','Leaf vacuum','Rakes','Fertilizer spreader','Seed spreader','Pruners'],
+  'outdoor', 20000,
+  'Research: $300-$500 standard (medium lot). Provider payout ~$200. 1x/year (Oct-Dec). Counterpart to Spring Prep.'
+) ON CONFLICT (id) DO NOTHING;
+
+-- Trash Can Cleaning
+INSERT INTO public.service_skus (
+  id, name, description, category, status,
+  duration_minutes, base_price_cents, handle_cost,
+  scheduling_profile, access_mode, fulfillment_mode,
+  presence_required, weather_sensitive,
+  inclusions, exclusions,
+  checklist, required_photos, proof_rules,
+  customer_prep, required_equipment,
+  provider_category, price_hint_cents, pricing_notes
+) VALUES (
+  'c1000000-0000-0000-0000-000000000010',
+  'Trash Can Cleaning',
+  'Sanitize and deodorize residential trash and recycling cans. Service on collection day when cans are curbside and empty.',
+  'cleanup', 'active',
+  10, 3500, 3,
+  'day_commit', 'exterior_only', 'same_day_preferred',
+  false, false,
+  ARRAY['Pressure wash interior of 2 cans','Sanitize with disinfectant','Apply enzyme deodorizer','Rinse exterior'],
+  ARRAY['Cans with more than 2 receptacles (add-on pricing)','Dumpsters','Compost bins'],
+  '[{"label":"Wash interior of all cans","required":true},{"label":"Apply sanitizer","required":true},{"label":"Deodorize","required":true},{"label":"Rinse exterior","required":true}]'::jsonb,
+  '["after"]'::jsonb,
+  '{"photo_required": true, "privacy_safe": false}'::jsonb,
+  ARRAY['Leave cans at curb on collection day','Empty cans before service'],
+  ARRAY['Pressure washer','Sanitizer','Enzyme deodorizer','Water tank or hose access'],
+  'outdoor', 2000,
+  'Monthly: $25-$40/visit (2 cans). Each additional: +$8-$12. Provider payout ~$20. Niche but 80%+ retention in HOA markets.'
+) ON CONFLICT (id) DO NOTHING;
+
+-- Grill Cleaning
+INSERT INTO public.service_skus (
+  id, name, description, category, status,
+  duration_minutes, base_price_cents, handle_cost,
+  scheduling_profile, access_mode, fulfillment_mode,
+  presence_required, weather_sensitive,
+  inclusions, exclusions,
+  checklist, required_photos, proof_rules,
+  customer_prep, required_equipment,
+  provider_category, price_hint_cents, pricing_notes
+) VALUES (
+  'c1000000-0000-0000-0000-000000000011',
+  'Grill Cleaning',
+  'Professional grill deep clean — disassembly, degreasing, and reassembly. Seasonal service (pre-summer + pre-winter).',
+  'cleanup', 'active',
+  75, 17500, 13,
+  'appointment_window', 'exterior_only', 'same_week_allowed',
+  false, false,
+  ARRAY['Full disassembly of removable parts','Degrease firebox','Clean and season grates','Clean heat plates/flavorizer bars','Burner inspection','Exterior detail','Grease management system clean'],
+  ARRAY['Part replacement','Structural repair','Built-in island repair','Rotisserie kit cleaning'],
+  '[{"label":"Disassemble removable parts","required":true},{"label":"Degrease firebox","required":true},{"label":"Clean and season grates","required":true},{"label":"Clean heat plates","required":true},{"label":"Inspect burners","required":true},{"label":"Detail exterior","required":true},{"label":"Reassemble and test","required":true}]'::jsonb,
+  '["before","after"]'::jsonb,
+  '{"photo_required": true, "privacy_safe": false}'::jsonb,
+  ARRAY['Ensure grill is cool','Turn off gas supply','Clear area around grill'],
+  ARRAY['Commercial degreaser','Wire brushes','Scraper set','Shop vac','Detail cloths','Replacement grates (inventory)'],
+  'outdoor', 10000,
+  'Standard deep clean: $150-$225. Full service: $200-$300. Provider payout ~$100. 2x/year (pre-summer + pre-winter).'
+) ON CONFLICT (id) DO NOTHING;
+
+-- Dryer Vent Cleaning
+INSERT INTO public.service_skus (
+  id, name, description, category, status,
+  duration_minutes, base_price_cents, handle_cost,
+  scheduling_profile, access_mode, fulfillment_mode,
+  presence_required, weather_sensitive,
+  inclusions, exclusions,
+  checklist, required_photos, proof_rules,
+  customer_prep, required_equipment,
+  provider_category, price_hint_cents, pricing_notes
+) VALUES (
+  'c1000000-0000-0000-0000-000000000012',
+  'Dryer Vent Cleaning',
+  'Professional dryer vent cleaning for fire prevention. NFPA recommends annual service. 2,900 home fires/year from clogged vents.',
+  'home_assistant', 'active',
+  45, 14000, 11,
+  'appointment_window', 'customer_present', 'window_booking',
+  true, false,
+  ARRAY['Disconnect dryer','Clean lint trap housing','Rotary brush full vent run','Compressed air blow-out','Reconnect dryer','Airflow test','Inspect vent path for damage','Check exterior vent flap'],
+  ARRAY['Vent repair or rerouting','Booster fan work','Full vent replacement','Electrical work'],
+  '[{"label":"Disconnect dryer safely","required":true},{"label":"Clean lint trap housing","required":true},{"label":"Brush and blow full vent","required":true},{"label":"Inspect vent path","required":true},{"label":"Check exterior flap","required":true},{"label":"Reconnect and test","required":true},{"label":"Measure airflow","required":false}]'::jsonb,
+  '["before","after"]'::jsonb,
+  '{"photo_required": true, "privacy_safe": true}'::jsonb,
+  ARRAY['Ensure access to dryer (clear laundry area)','Know location of exterior vent termination'],
+  ARRAY['Rotary brush kit','High-powered blower','HEPA vacuum','Vent inspection camera','Anemometer','Replacement vent covers','Foil tape'],
+  'home_assistant', 9000,
+  'Standard clean: $100-$175. Clean + inspect: $150-$250. Provider payout ~$90. Annual service. NFPA/CSIA recommended. Safety-driven demand.'
+) ON CONFLICT (id) DO NOTHING;
