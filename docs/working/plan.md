@@ -1,6 +1,6 @@
 # Plan: PRD-047 — Simulator Validation & Reasoning Report
 
-> **Branch:** claude/add-feature-maturity-ratings-tMeen
+> **Branch:** claude/sku-calibration-validation-WFqgD
 > **Mode:** Quality
 > **Review:** 2-lane (Small batch: 1 combined reviewer + 1 synthesis)
 
@@ -17,7 +17,7 @@
 ---
 
 ## Session Handoff
-- **Branch:** claude/add-feature-maturity-ratings-tMeen
+- **Branch:** claude/sku-calibration-validation-WFqgD
 - **Last completed:** PRD-046 (archived to docs/archive/sku-level-definitions-2026-03-30/)
 - **Next up:** B1 — Run market simulator
 - **Context at exit:** 60%
