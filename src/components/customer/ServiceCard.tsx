@@ -4,14 +4,18 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import type { ServiceSku } from "@/hooks/useSkus";
 import { getServiceImage } from "@/lib/serviceImages";
 import { getCategoryIcon, getCategoryGradient } from "@/lib/serviceCategories";
+import { EntitlementBadge } from "@/components/plans/EntitlementBadge";
+
+type EntitlementStatus = "included" | "extra_allowed" | "blocked" | "provider_only" | "available";
 
 interface ServiceCardProps {
   sku: ServiceSku;
   onClick: () => void;
   variant?: "default" | "featured";
+  entitlementStatus?: EntitlementStatus;
 }
 
-export function ServiceCard({ sku, onClick, variant = "default" }: ServiceCardProps) {
+export function ServiceCard({ sku, onClick, variant = "default", entitlementStatus }: ServiceCardProps) {
   const image = getServiceImage(sku.id, sku.name, sku.image_url);
   const CategoryIcon = getCategoryIcon(sku.category);
   const gradient = getCategoryGradient(sku.category);
@@ -36,6 +40,11 @@ export function ServiceCard({ sku, onClick, variant = "default" }: ServiceCardPr
             </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          {entitlementStatus && (
+            <div className="absolute top-2 right-2">
+              <EntitlementBadge status={entitlementStatus} />
+            </div>
+          )}
           <div className="absolute bottom-0 left-0 right-0 p-3">
             <h3 className="text-white font-semibold text-sm leading-tight">{sku.name}</h3>
             <div className="flex items-center gap-2 mt-1">
@@ -78,7 +87,8 @@ export function ServiceCard({ sku, onClick, variant = "default" }: ServiceCardPr
         {sku.description && (
           <p className="text-caption mt-0.5 line-clamp-1">{sku.description}</p>
         )}
-        <div className="flex items-center gap-2 mt-2">
+        <div className="flex items-center gap-2 mt-2 flex-wrap">
+          {entitlementStatus && <EntitlementBadge status={entitlementStatus} />}
           <Badge variant="secondary" className="gap-1 text-xs">
             <Clock className="h-3 w-3" /> {sku.duration_minutes}m
           </Badge>
