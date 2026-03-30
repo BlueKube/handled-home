@@ -97,8 +97,8 @@ Revenue minus provider payouts divided by revenue. If this drops below 25%, you'
 
 For context, the U.S. landscaping industry operates at $188.8B annually with thousands of small operators. Most independent landscapers charge $49–$203 per lawn mowing visit depending on lot size, and operating margins vary wildly (15%–40%) based on route density. Our model works because density-optimized routes cut drive time, which is the #1 margin killer.
 
-ISSUE RATE (target: <3%)
-Jobs with reported issues divided by total completed jobs. Above 5% means something systemic is wrong. Check if it's one provider dragging the average up. One provider with a 15% issue rate in a zone of 5 providers will make the zone average look bad even if the other 4 are at 1%.`,
+ISSUE RATE (platform-wide target: <3%)
+Jobs with reported issues divided by total completed jobs. Above 5% means something systemic is wrong. Check if it's one provider dragging the average up. One provider with a 15% issue rate in a zone of 5 providers will make the zone average look bad even if the other 4 are at 1%. Note: zone-level thresholds are higher (under 8% for launch readiness) because individual zones have smaller sample sizes and more variance. The <3% target is the platform-wide aggregate.`,
   },
   {
     id: "pro-tips",

@@ -57,7 +57,7 @@ MISSED JOB
 The scheduled visit didn't happen. Check: was the provider assigned? Did they check in? Did the customer report them as a no-show, or did nobody notice? Missed jobs that get caught by the system (provider didn't check in by end of day) are better than ones caught by the customer calling to complain. Fix: assign to backup provider for tomorrow if possible, notify the customer either way.
 
 FAILED PAYMENT
-Stripe couldn't charge the customer's card. Before you panic, check the dunning step. Step 1 (auto-retry in 2 days) and step 2 (email reminder) are handled automatically. Only intervene at step 3+ or if the customer reaches out. Common causes: expired card, insufficient funds, bank fraud hold. The solution is almost always "update your card" — make it easy for the customer to do that.
+Stripe couldn't charge the customer's card. Before you panic, check the dunning step. Step 1 (immediate auto-retry on Day 0) and step 2 (second retry + email on Day 3) are handled automatically. Only intervene at step 3+ (Day 7) or if the customer reaches out. Common causes: expired card, insufficient funds, bank fraud hold. The solution is almost always "update your card" — make it easy for the customer to do that.
 
 CUSTOMER-REPORTED ISSUE
 The customer said something was wrong with the service. Severity depends on the issue type: "my lawn wasn't edged" is different from "the provider never showed up." Always check the proof photos before responding — in 30% of cases, the photos show the work was actually done and the customer missed it (they were at work, checked the wrong area, etc.).

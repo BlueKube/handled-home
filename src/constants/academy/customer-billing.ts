@@ -163,7 +163,7 @@ Do not manually intervene at Steps 1-2. The automation is handling it. Interrupt
       },
       {
         title: "Flag chargebacks immediately",
-        description: "A DISPUTE entry means the customer filed a chargeback with their bank. You have a narrow window (typically 7 days) to respond to Stripe with evidence. Pull the job record, proof photos, communication history, and service log. Document everything. Uncontested chargebacks cost you the dispute amount plus a $15 Stripe fee. More importantly, a pattern of chargebacks can trigger Stripe account review.",
+        description: "A DISPUTE entry means the customer filed a chargeback with their bank. You have a narrow window to respond to Stripe with evidence — typically 7–21 days depending on card network and dispute type, but always treat the Stripe notification date as day zero and act within the first 7 days to be safe. Pull the job record, proof photos, communication history, and service log. Document everything. Uncontested chargebacks cost you the dispute amount plus a Stripe dispute fee (~$15). More importantly, a pattern of chargebacks can trigger Stripe account review.",
         screenshot: { alt: "Dispute entry in ledger with response deadline" },
       },
     ],

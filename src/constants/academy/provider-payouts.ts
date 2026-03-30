@@ -109,12 +109,12 @@ The threshold exists to reduce Stripe transfer fees on micro-transactions. Below
       },
       {
         title: "Check onboarding status for a new provider",
-        description: "Go to Providers → select provider → Payout Settings. The Stripe Connect status shows: NOT STARTED (they haven't begun onboarding), IN PROGRESS (they've started but haven't completed identity verification), ACTIVE (fully onboarded, payouts enabled), or RESTRICTED (Stripe flagged their account — requires Stripe support). If a provider is IN PROGRESS for more than 48 hours, send them a direct link to complete verification.",
+        description: "Go to Providers → select provider → Payout Settings. The system shows whether the payout account is READY (fully onboarded, payouts enabled) or not yet connected. If a provider's payout account isn't showing as READY, they either haven't started the Stripe onboarding flow, are partway through identity verification, or their account has a restriction. If a provider hasn't completed setup within 48 hours of approval, reach out directly with the onboarding link.",
         screenshot: { alt: "Provider Stripe Connect onboarding status" },
       },
       {
-        title: "Handle a RESTRICTED Connect account",
-        description: "A RESTRICTED status means Stripe has placed a hold on the provider's Connect account — usually due to identity verification failure, unusual activity, or banking info mismatch. You cannot fix this directly. The provider needs to resolve it with Stripe via their own Connect dashboard. Your role: tell the provider what's happening, share the Stripe support link, and set expectations that resolution can take 2–5 business days.",
+        title: "Handle a restricted or problematic Connect account",
+        description: "If Stripe has placed a restriction on a provider's Connect account — usually due to identity verification failure, unusual activity, or banking info mismatch — you cannot fix this directly. The provider needs to resolve it with Stripe via their own Connect dashboard. Your role: tell the provider what's happening, share the Stripe support link, and set expectations that resolution can take 2–5 business days. Monitor the provider's payout account status in their detail page until it shows READY again.",
         screenshot: { alt: "Restricted Stripe Connect account detail" },
       },
     ],
@@ -135,9 +135,9 @@ The threshold exists to reduce Stripe transfer fees on micro-transactions. Below
         screenshot: { alt: "Payout failure detail with Stripe reason code" },
       },
       {
-        title: "Re-trigger a manual payout after fixing the root cause",
-        description: "Once the underlying issue is fixed (provider updated banking info, Connect account re-verified), navigate to the provider's payout record → Retry Payout. Manual retries process outside the Friday batch and typically initiate within 24 hours. Tell the provider you've triggered the retry and the expected timeline. Don't leave them wondering if it's fixed.",
-        screenshot: { alt: "Manual payout retry button on provider record" },
+        title: "Resolve the root cause and wait for the next batch",
+        description: "Once the underlying issue is fixed (provider updated banking info, Connect account re-verified), the corrected payout will be included in the next Friday batch automatically. There is no manual retry button in the admin panel — payouts process through the weekly cron cycle. Tell the provider the issue is resolved and their payout will be included in the next Friday run. If the fix happens early in the week, they'll see funds the following Monday/Tuesday. If it's Thursday or later, it may roll to the week after.",
+        screenshot: { alt: "Provider payout record showing resolved status" },
       },
       {
         title: "Check platform balance for platform-level failures",
@@ -217,16 +217,16 @@ The threshold exists to reduce Stripe transfer fees on micro-transactions. Below
     type: "real-world",
     realWorldData: [
       {
-        text: "Provider payout is the #1 economic lever. The $45–$65/job range for lawn care is where the negotiation happens. Providers who see consistent, predictable weekly payouts are 3x more likely to stay on the platform. The #1 reason providers leave any platform is unpredictable or delayed payments.",
-        source: "Angi, HomeAdvisor provider economics research (2025)",
+        text: "Provider payout is the #1 economic lever. The $45–$65/job estimated range for lawn care provider payouts is where the negotiation happens. Providers who see consistent, predictable weekly payouts are significantly more likely to stay on the platform. Industry consensus: unpredictable or delayed payments are the #1 reason providers leave any gig platform.",
+        source: "Industry benchmarks, internal provider economics modeling",
       },
       {
         text: "The average independent landscaper earns $37–$55/hour, but most small operators cite cash flow unpredictability as their top operational pain point — not the hourly rate. A platform that pays weekly and reliably is a competitive advantage, not just a hygiene feature. Emphasize payment reliability in provider recruitment.",
         source: "Bureau of Labor Statistics, Jobber contractor survey (2025)",
       },
       {
-        text: "In gig economy platforms, payment delay is the leading cause of provider churn in the first 90 days. Providers who experience at least one payment issue in their first month are 2.4x more likely to deactivate within 90 days, even if the issue is resolved. First-payment experience is critical — new provider onboarding should include explicit payout timeline education.",
-        source: "Stripe partner research, platform economics benchmarks (2024)",
+        text: "In gig economy platforms, payment delay is a leading cause of provider churn in the first 90 days. Providers who experience payment issues in their first month are substantially more likely to deactivate, even if the issue is resolved. First-payment experience is critical — new provider onboarding should include explicit payout timeline education.",
+        source: "Gig economy platform retention research, internal benchmarking",
       },
     ],
   },

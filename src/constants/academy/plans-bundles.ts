@@ -128,8 +128,8 @@ Think of handles like cell phone data: you get an allocation, and overages cost 
         source: "Deep research report — Three Tier Bundles, Angi pricing data (2026)",
       },
       {
-        text: "Handled Home's actual pricing ($129/$179/$279) works because the model isn't 'all-included at retail rates' — it's a managed subscription where density-optimized routing, recurring relationships, and bundled scheduling reduce per-visit costs below retail. The subscription spread is the margin, not a markup on individual services.",
-        source: "Handled Home simulation model (Austin 4-zone scenario)",
+        text: "Handled Home's current pricing ($129/$179/$279) uses a membership-plus-credits model, not all-inclusive bundles. At these price points, you can't include every service at full retail cadence — the math doesn't close. Instead, each tier includes a handle budget that covers a defined scope of services. Customers who need more can add services at member rates. Industry research suggests all-inclusive home maintenance bundles require $349–$499/month minimum to be viable, which is why our model uses managed entitlements rather than unlimited access.",
+        source: "Handled Home simulation model; deep-research-report-2.md bundle analysis",
       },
     ],
   },
