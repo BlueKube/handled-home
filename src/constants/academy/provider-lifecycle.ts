@@ -142,31 +142,24 @@ The lifecycle is a pipeline. Your job is to keep quality providers moving throug
     type: "pro-tips",
     proTips: [
       {
-        text: "A provider with 95% proof compliance and 2% issue rate is worth more than one who completes jobs faster but skips photos. Speed is recoverable. Trust, once broken with a customer over an unverified job, is not.",
-        context: "Proof compliance is the single best leading indicator of long-term provider reliability.",
+        text: "The single most powerful retention tool is predictability. Providers don't need to love the platform — they need to trust it. Consistent job flow, consistent communication, consistent payouts. When any of those three break down, providers leave before they even tell you something's wrong.",
+        context: "Retention strategy starts at onboarding, not at the point of churn. Set expectations clearly, then deliver on them consistently. The providers who stay the longest are the ones whose first 30 days went smoothly.",
       },
       {
-        text: "Always read a provider's job history before having a performance conversation. If they've been excellent for 8 months and slipped in the last 3 weeks, that's a life circumstance conversation, not a disciplinary one. Coming in with context shows respect and usually produces a better outcome.",
-        context: "The Provider Detail job history timeline is your cheat sheet before any difficult conversation.",
+        text: "Learn to read the difference between a provider having a bad week versus a provider with a structural problem. One missed job in a month during a provider's first kid's soccer season is different from a provider who's averaging 2 late arrivals a week for the past six weeks. Respond to patterns, not events.",
+        context: "Over-correcting on isolated incidents burns out good providers. Under-correcting on patterns lets problems compound until a customer relationship is damaged. The skill is distinguishing between the two.",
       },
       {
-        text: "The BYOC (Bring Your Own Customer) invite system is your most powerful growth tool. When a provider invites existing customers, those customers arrive pre-sold on the provider, require no marketing spend, and have higher retention because the relationship predates the platform. Encourage every new provider to send BYOC invites in week one — don't leave this to chance.",
-        context: "BYOC customers churn at roughly half the rate of cold-acquired customers in our model.",
+        text: "When you're deciding whether to coach or cut, ask one question: if this provider performs at exactly the level they've performed for the past 30 days, can you grow your business with them? If the answer is yes, coach. If the answer is no, the coaching conversation is just delaying an inevitable deactivation — and every week you delay costs you customer relationships.",
+        context: "Operators who hold onto underperformers too long do so because the labor market is tight. That's real. But a provider who generates more complaints than revenue is worse than no provider. The labor gap is temporary. Customer trust damage is harder to recover.",
       },
       {
-        text: "When approving zone coverage, approve narrowly and expand later — not broadly and restrict later. It's easy to add zones to a performing provider. It's awkward and friction-heavy to remove zones from one who's struggling to cover what they were given.",
-        context: "Providers feel zone removal as a demotion even when the reason is operational.",
+        text: "Your best providers will receive recruiting calls from competitors. The countermeasure isn't matching offers — it's being the platform they don't want to leave. That means: solving their problems quickly, recognizing good work explicitly, and never making them chase you for answers on pay or scheduling.",
+        context: "Provider retention is a relationship, not a transaction. The operators who keep their best providers for years treat them like the business partners they are — not like warm bodies filling a schedule slot.",
       },
       {
-        text: "Check payout account status separately from operational status in the Providers List. A provider can be Active but have an expired or disconnected payout account. They'll keep doing jobs, not get paid, get frustrated, and quit — and blame the platform. Catch this early with a weekly scan of payout status for all Active providers.",
-        context: "Payout failures are silent until the provider notices, which is usually after several weeks.",
-      },
-      {
-        text: "The probation conversation lands better when you lead with data, not judgment. 'Your proof compliance dropped from 96% to 78% over the last 4 weeks — can you help me understand what's happening?' works better than 'You haven't been submitting your photos.' Same information, very different reception.",
-        context: "Providers are small business owners. They respond to business conversations, not employee management.",
-      },
-      {
-        text: "New providers in their first 30 days need more attention than your established roster. Set a reminder to check their metrics weekly for the first month. Catching a bad habit at week 3 is a one-conversation fix. Catching it at month 6 is a potential offboarding.",
+        text: "Do an exit interview every time a provider leaves voluntarily, even if it's just two questions: what worked, and what didn't. Aggregate these over time. When 8 out of 10 voluntary exits cite the same friction point, that's not a provider problem — that's a platform or ops problem. The exit data is your product feedback loop.",
+        context: "Most platforms skip exit interviews because the person is already leaving. That's backwards. Voluntary exits are your most honest informants — they have no incentive to tell you what you want to hear.",
       },
     ],
   },
@@ -176,70 +169,50 @@ The lifecycle is a pipeline. Your job is to keep quality providers moving throug
     type: "watch-outs",
     watchOuts: [
       {
-        text: "Never suspend a provider without checking their active job count first. Suspending a provider with 15 jobs scheduled this week means 15 homes don't get serviced. Always review the active job count in Provider Detail, reassign or cancel those jobs manually, then suspend. Skipping this step turns one provider problem into 15 customer problems in a single click.",
+        text: "Never activate a provider for scheduling before their Stripe Connect onboarding is ACTIVE and their background check is cleared. A provider who completes jobs before their background check returns creates legal and insurance exposure if the check comes back with disqualifying results. The temptation to onboard fast during high demand is real — resist it. The liability isn't worth a single week of capacity.",
         severity: "critical",
       },
       {
-        text: "Don't approve zone coverage based on provider requests alone. Check actual demand in those zones first. A provider approved for a zone with no customers is a provider who will do zero jobs, feel like the platform isn't working for them, and churn before they ever get traction. Set them up to succeed by matching their coverage to where demand actually exists.",
+        text: "Be extremely careful about letting a provider accumulate no-shows without triggering the formal probation process. Two no-shows in 30 days is the threshold — not two no-shows and then 'we'll give it one more chance.' The probation trigger exists because informal warnings don't create accountability. Providers who've tested the system and found no real consequence will continue the behavior. Apply the thresholds consistently across your entire roster.",
+        severity: "critical",
+      },
+      {
+        text: "Don't conflate a provider being likable or communicative with being a strong performer. The providers who respond quickly to messages and sound great on the phone are often the same ones generating the most quality complaints. Run the metrics. Personality and performance are not correlated. The data tells the truth; your gut tells you what you want to hear.",
         severity: "caution",
-      },
-      {
-        text: "Don't mistake 'quiet' for 'performing well.' A provider you haven't thought about in two months might be fine — or they might have a slowly degrading compliance rate you haven't noticed because they're not generating active incidents. The Provider Detail metrics are passive — they don't alert you unless you look. Build a habit of reviewing your bottom-quartile performers weekly, not just when something breaks.",
-        severity: "caution",
-      },
-      {
-        text: "BYOC invite links are provider-specific and expire. If a provider asks why their invites aren't working, check the link expiry first before assuming a platform bug. Regenerate from the Provider Detail BYOC section and resend. Providers who hit a broken invite link often give up and don't follow up — you lose the customer acquisition, not just the invite.",
-        severity: "caution",
-      },
-    ],
-  },
-  {
-    id: "automation",
-    title: "What's Automated vs. What Needs Your Judgment",
-    type: "automation",
-    automationNotes: [
-      {
-        text: "No-show detection runs automatically after a job window closes without a provider check-in or proof submission. The system flags the job as a potential no-show and creates a dispatcher queue item. You still decide the outcome — the automation surfaces the problem, you resolve it.",
-        type: "daily-check",
-      },
-      {
-        text: "Payout processing runs on an automated schedule via the connected payout account. You don't trigger payouts manually. What you do check is whether payout accounts are connected and healthy — a broken payout account means completed work goes uncompensated until fixed.",
-        type: "weekly-check",
-      },
-      {
-        text: "BYOC invite tracking is automated — when a customer accepts a BYOC invite and creates an account, the system links them to the originating provider and attributes the acquisition. You don't need to track this manually. Review BYOC conversion rates in the Provider Detail monthly to identify which providers are actively using the system.",
-        type: "weekly-check",
-      },
-      {
-        text: "Status transitions from Active → Probation → Suspended are always manual. The platform will never automatically put a provider on probation or suspend them based on metrics. That decision requires human judgment — you own it entirely.",
-        type: "daily-check",
-      },
-      {
-        text: "Onboarding completion is tracked automatically. Once a provider connects their payout account and completes all required steps, their status transitions from Onboarding to Active without any admin action needed. You only intervene when a provider gets stuck in Onboarding for too long.",
-        type: "set-and-forget",
       },
     ],
   },
   {
     id: "real-world",
-    title: "Real-World Context — Know Your Provider Base",
+    title: "Real-World Context",
     type: "real-world",
     realWorldData: [
       {
-        text: "The U.S. landscaping industry is $188.8B (2025). Most providers are small businesses with 1-5 crews — not solo operators with one mower. When you're evaluating an application, you're often evaluating a small business owner who has been doing this for years. Treat them accordingly — they have leverage (they have other customers) and they have professional pride.",
-        source: "IBISWorld landscaping market report (2025)",
+        text: "Independent landscapers and solo home service operators spend 20–30% of their work week on administrative overhead: scheduling, invoicing, customer communication, and chasing payments. A platform that handles all of that is a genuine value proposition — but only if providers trust the platform to execute reliably. Every time the platform fails on scheduling, payment, or communication, it erodes the core reason a provider chose it over operating independently.",
+        source: "Jobber small business survey, landscaping segment (2025)",
       },
       {
-        text: "Average lawn mowing costs $49–$203 per visit nationally, with a national average around $122. Provider economics are tight — drive time between jobs is unpaid dead time. This is why zone density matters so much for provider retention. A provider who can do 8 jobs within a 3-mile radius earns far more per hour than one who drives 15 minutes between each job.",
-        source: "Angi, HomeAdvisor consumer cost guides (2025)",
+        text: "The home services labor market runs at 40–60% annual turnover, making provider retention the single hardest operational challenge for gig platforms. Platforms that manage to hold their best providers for 12+ months do so primarily through operational reliability and responsive admin support — not higher pay rates. Pay matters, but providers will leave a higher-paying platform that's chaotic for a lower-paying one that runs smoothly.",
+        source: "HomeAdvisor industry workforce analysis; Angi platform retention benchmarks (2024–2025)",
+      },
+    ],
+  },
+  {
+    id: "automation",
+    title: "What's Automated vs. What Needs Your Eyes",
+    type: "automation",
+    automationNotes: [
+      {
+        text: "Probation triggers are automatically flagged in the system when thresholds are breached (2+ no-shows in 30 days, proof compliance below 80%, quality score below 3.5 for two consecutive weeks). The flag appears in your Providers → Flags queue marked as a probation trigger. The flag does not automatically place the provider on probation — that requires a human decision. Review and act on probation trigger flags within 48 hours. Flags that age past 72 hours without action send the implicit message that the threshold is not enforced.",
+        type: "daily-check",
       },
       {
-        text: "Provider acquisition through BYOC (Bring Your Own Customer) is the primary growth strategy — providers bring existing customers into the platform, reducing cold-start risk for both the provider and the platform. A BYOC provider has immediate revenue on day one, which is the #1 factor in provider retention through the first 90 days. Providers who don't earn in their first 30 days churn at dramatically higher rates.",
-        source: "Platform operating model, BYOC program design rationale",
+        text: "Weekly performance reports generate automatically every Monday morning and are available in Providers → Reports → Weekly Performance. You do not need to pull this manually or set a reminder — the report is always current as of Sunday night. Your job is to actually read it every Monday, sort by quality score ascending, and action anyone below threshold. The report is only useful if someone reads it.",
+        type: "weekly-check",
       },
       {
-        text: "The average home services provider churns from platforms within 12 months if they don't reach a sustainable weekly job volume. For lawn care, that threshold is roughly 8–10 jobs/week for a solo operator to cover costs and earn a reasonable hourly rate. When you evaluate a provider's performance, 'are they on track to hit sustainable volume?' should be a standing question.",
-        source: "Marketplace platform retention research; internal operating model assumptions",
+        text: "Background check requests are automatically submitted when you advance an applicant from the screening stage. Results are returned to the provider record by the vendor within 2–3 business days and marked CLEARED, FLAGGED FOR REVIEW, or DISQUALIFIED. CLEARED is automatic — no action needed. FLAGGED FOR REVIEW requires you to read the details and make a judgment call. DISQUALIFIED locks the applicant from advancing and sends them an automated decline notification. Review flagged background checks within 24 hours — applicants are waiting.",
+        type: "set-and-forget",
       },
     ],
   },
