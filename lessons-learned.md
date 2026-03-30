@@ -169,6 +169,26 @@ Format:
 **Type:** Product
 **Impact:** Differentiates from marketplace feel, shows subscription value
 **Effort:** Medium (needs useSkus → subscription data join)
+**Status:** ✅ Implemented in PRD-021 (Session 2, 2026-03-30)
+
+---
+
+## Session 2 Lessons (2026-03-30)
+
+### [2026-03-30] Deno tests for edge functions can only validate auth guards without staging credentials
+**Source:** PRD-023 (Payment & Billing Test Coverage)
+**Type:** Workflow
+Edge function integration tests hit a hard boundary: without valid service role keys, tests can only verify CORS and auth rejection. Business logic coverage requires a staging Supabase instance. Plan for this in CI setup.
+
+### [2026-03-30] Tautological health checks are worse than no checks
+**Source:** PRD-026 code review (Lane 1+2 cross-validated)
+**Type:** Workflow
+A `>= 0` condition on a count field always passes, giving operators false confidence. Review caught it at score 75 (MUST-FIX). Health check pages need careful threshold review — every check must be capable of failing.
+
+### [2026-03-30] Lane 3 skip rule works well for first-batch-in-phase
+**Source:** PRD-026 review setup
+**Type:** Agent Signal
+Skipping Lane 3 (historical context) when there's no prior review history on changed files saved an agent without losing signal. Lane 2 already covers pattern detection. All 6 reviews across Session 2 found real issues; zero false-positive MUST-FIX findings.
 
 ### Promoted (moved to docs/upcoming/)
 

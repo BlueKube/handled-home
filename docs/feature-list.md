@@ -63,8 +63,10 @@
 31. SKU lifecycle: draft → active → paused → archived (never hard-deleted) — 8/10
 32. Visual service catalog with hero images, featured flags, and category grouping — 8/10
 33. Customer-facing catalog with horizontal featured scroll, category groups, and search — 8/10
+33b. Customer service cards show entitlement badges (Included / Extra Allowed / Blocked / Available) based on subscription plan context — 8/10
 34. Admin duplicate-SKU action for safe scope changes — 8/10
 35. Weather sensitivity flag per SKU — 8/10
+35b. Admin SKU Calibration page: compare seed values vs. provider-reported durations/costs, delta highlighting, per-tier inputs, calibration export report — 8/10
 
 ---
 
@@ -419,6 +421,7 @@
 221. Admin system config table with 18+ configurable parameters (dunning steps, bonus caps, thresholds) — 8/10
 222. Admin change request system with requester/reviewer workflow — 5/10
 223. Admin adjustment records for manual financial corrections — 8/10
+223b. Launch Readiness dashboard: 9 automated pre-launch checks (zones, SKUs, plans, Stripe pricing, providers, payouts, cron health, BYOC invites, entitlements) with green/red/amber status badges — 8/10
 
 ---
 
@@ -459,6 +462,7 @@
 241. 20+ deployed edge functions covering assignment, billing, weather, payouts, notifications, AI — 8/10
 242. Cron-based orchestrator (`run-scheduled-jobs`) with per-sub-job idempotency keys — 8/10
 243. `cron_run_log` for full observability of every automated run — 8/10
+243b. Deno integration tests for billing edge functions: run-billing-automation, process-payout, run-dunning, create-checkout-session — CORS, auth guard, error shape coverage — 7/10
 
 ---
 
@@ -623,6 +627,15 @@
 
 ---
 
+## XLII-B. Market Simulation Tool (Standalone) `margin-lever` `density-driver`
+
+348b. Zone-level market simulation engine: models subscription growth, churn, jobs, revenue, costs, and break-even across configurable time horizons — 8/10
+348c. Multi-zone combined P&L with aggregate break-even detection and zone-by-zone detail tables — 8/10
+348d. Seasonal revenue modeling: per-category 12-month multiplier arrays (lawn/pest/windows/pool) blended by service mix weights, with 5 market presets (Austin, Phoenix, Denver, Charlotte, None) — 8/10
+348e. Interactive simulation UI: sliders for all model assumptions, real-time chart and table updates, seasonal curve visualization — 8/10
+
+---
+
 ## XLIII. Simplicity by Design `mental-load-reduction`
 
 349. No calendar browsing anywhere — scheduling is automatic and routine-based — 7/10
@@ -691,4 +704,4 @@
 
 ---
 
-*Total features: 400 | Last updated: 2026-03-29 | Maturity ratings added | Value-prop tags added per section*
+*Total features: 410 | Last updated: 2026-03-30 | Session 2 features added (SKU calibration, seasonal modeling, entitlement badges, billing tests, launch readiness)*
