@@ -156,6 +156,7 @@ const AdminAssignmentDashboard = lazy(() => import("@/pages/admin/AssignmentDash
 const AdminAssignmentConfig = lazy(() => import("@/pages/admin/AssignmentConfig"));
 const AdminWindowTemplates = lazy(() => import("@/pages/admin/WindowTemplates"));
 const AdminSchedulingExceptions = lazy(() => import("@/pages/admin/SchedulingExceptions"));
+const AdminLaunchReadiness = lazy(() => import("@/pages/admin/LaunchReadiness"));
 
 // Shared pages
 const SharedNotifications = lazy(() => import("@/pages/shared/Notifications"));
@@ -343,6 +344,7 @@ const App = () => (
                   <Route path="/admin/playbooks" element={<AdminPlaybooks />} />
                   <Route path="/admin/sku-calibration" element={<AdminSkuCalibration />} />
                   <Route path="/admin/cron-health" element={<AdminCronHealth />} />
+                  <Route path="/admin/launch-readiness" element={<AdminLaunchReadiness />} />
                   <Route path="/admin/notifications" element={<SharedNotifications />} />
                 </Route>
 

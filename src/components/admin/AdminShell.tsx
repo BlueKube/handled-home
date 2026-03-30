@@ -29,7 +29,7 @@ import {
   Megaphone, TrendingUp,
   HelpCircle, FileText, BookOpen,
   Activity, Bell, MessageSquare, ToggleLeft,
-  Settings,
+  Settings, Rocket,
 } from "lucide-react";
 import type { AdminRole } from "@/hooks/useAdminMembership";
 
@@ -126,6 +126,7 @@ const navGroups: NavGroup[] = [
       { title: "Notification Health", url: "/admin/notification-health", icon: Bell },
       { title: "Feedback", url: "/admin/feedback", icon: MessageSquare },
       { title: "Test Toggles", url: "/admin/test-toggles", icon: ToggleLeft },
+      { title: "Launch Readiness", url: "/admin/launch-readiness", icon: Rocket },
     ],
   },
   {
