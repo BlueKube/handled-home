@@ -157,6 +157,8 @@ const AdminAssignmentConfig = lazy(() => import("@/pages/admin/AssignmentConfig"
 const AdminWindowTemplates = lazy(() => import("@/pages/admin/WindowTemplates"));
 const AdminSchedulingExceptions = lazy(() => import("@/pages/admin/SchedulingExceptions"));
 const AdminLaunchReadiness = lazy(() => import("@/pages/admin/LaunchReadiness"));
+const AdminAcademy = lazy(() => import("@/pages/admin/Academy"));
+const AdminAcademyModule = lazy(() => import("@/pages/admin/AcademyModule"));
 
 // Shared pages
 const SharedNotifications = lazy(() => import("@/pages/shared/Notifications"));
@@ -345,6 +347,8 @@ const App = () => (
                   <Route path="/admin/sku-calibration" element={<AdminSkuCalibration />} />
                   <Route path="/admin/cron-health" element={<AdminCronHealth />} />
                   <Route path="/admin/launch-readiness" element={<AdminLaunchReadiness />} />
+                  <Route path="/admin/academy" element={<AdminAcademy />} />
+                  <Route path="/admin/academy/:moduleId" element={<AdminAcademyModule />} />
                   <Route path="/admin/notifications" element={<SharedNotifications />} />
                 </Route>
 

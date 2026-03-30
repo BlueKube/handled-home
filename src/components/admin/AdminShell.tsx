@@ -29,7 +29,7 @@ import {
   Megaphone, TrendingUp,
   HelpCircle, FileText, BookOpen,
   Activity, Bell, MessageSquare, ToggleLeft,
-  Settings, Rocket,
+  Settings, Rocket, GraduationCap,
 } from "lucide-react";
 import type { AdminRole } from "@/hooks/useAdminMembership";
 
@@ -143,6 +143,12 @@ const navGroups: NavGroup[] = [
     label: "Playbooks",
     items: [
       { title: "SOPs", url: "/admin/playbooks", icon: BookOpen },
+    ],
+  },
+  {
+    label: "Academy",
+    items: [
+      { title: "Training Center", url: "/admin/academy", icon: GraduationCap },
     ],
   },
 ];
