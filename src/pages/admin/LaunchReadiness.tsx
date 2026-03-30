@@ -64,7 +64,7 @@ function useReadinessChecks() {
       checks.push({
         label: "Stripe Pricing Configured",
         description: "All active plans have Stripe price IDs",
-        status: missingStripe === 0 && (planCount ?? 0) > 0 ? "pass" : missingStripe > 0 ? "fail" : "warn",
+        status: missingStripe === 0 && (planCount ?? 0) > 0 ? "pass" : "fail",
         detail: missingStripe > 0
           ? `${missingStripe} plan(s) missing Stripe price`
           : "All plans configured",
@@ -114,7 +114,7 @@ function useReadinessChecks() {
       checks.push({
         label: "BYOC Invites Available",
         description: "BYOC invite system has entries or is ready",
-        status: (byocTemplateCount ?? 0) >= 0 ? "pass" : "fail",
+        status: (byocTemplateCount ?? 0) > 0 ? "pass" : "warn",
         detail: `${byocTemplateCount ?? 0} invite(s) created`,
       });
 
