@@ -810,3 +810,167 @@ INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_descriptio
   true
 )
 ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- ============================================================
+-- PRD-046 B3: Specialty Service SKU Levels
+-- ============================================================
+
+-- Window Cleaning: 3 levels
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+(
+  'c2000000-0000-0000-0009-000000000001',
+  'c1000000-0000-0000-0000-000000000009', 1,
+  'Exterior Only', 'Exterior windows only — squeegee, rinse, screen and sill wipe',
+  ARRAY['Squeegee and rinse all exterior windows','Screen wipe down','Sill wipe'],
+  ARRAY['Interior windows','Storm windows','Skylights','Hard water stain removal'],
+  90, 2, 13,
+  '[{"label":"Clean all exterior windows","required":true},{"label":"Wipe screens","required":true},{"label":"Wipe sills","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-0009-000000000002',
+  'c1000000-0000-0000-0000-000000000009', 2,
+  'Interior + Exterior', 'Both sides of all accessible windows plus screen and track cleaning',
+  ARRAY['Clean both sides of all accessible windows','Remove and clean screens','Clean sills and tracks'],
+  ARRAY['Skylights','Hard water stain removal','Storm window disassembly'],
+  180, 2, 22,
+  '[{"label":"Clean interior windows","required":true},{"label":"Clean exterior windows","required":true},{"label":"Remove and clean screens","required":true},{"label":"Clean sills and tracks","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-0009-000000000003',
+  'c1000000-0000-0000-0000-000000000009', 3,
+  'Full Detail', 'All windows both sides, screen reinstall, track detailing, hard water treatment',
+  ARRAY['All windows interior and exterior','Screen removal, cleaning, and reinstall','Track and sill detailing','Hard water stain treatment','Storm window cleaning'],
+  ARRAY['Skylight access requiring specialized equipment'],
+  270, 3, 35,
+  '[{"label":"Clean all windows both sides","required":true},{"label":"Remove, clean, reinstall screens","required":true},{"label":"Detail tracks and sills","required":true},{"label":"Treat hard water stains","required":true},{"label":"Clean storm windows","required":true}]'::jsonb,
+  true
+)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- Power Wash: 3 levels
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+(
+  'c2000000-0000-0000-000a-000000000001',
+  'c1000000-0000-0000-0000-00000000000a', 1,
+  'Single Surface', 'One surface type — driveway, patio, deck, or walkway',
+  ARRAY['Pre-treat stains on selected surface','Pressure wash one surface type','Blow dry edges'],
+  ARRAY['Second surface types','House siding','Roof','Chemical treatment or sealing'],
+  90, 2, 13,
+  '[{"label":"Pre-treat stains","required":true},{"label":"Pressure wash surface","required":true},{"label":"Blow dry edges","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-000a-000000000002',
+  'c1000000-0000-0000-0000-00000000000a', 2,
+  'Home Exterior', 'House siding, foundation, all walkways and patios with mildew pre-treatment',
+  ARRAY['Wash house siding','Wash foundation','Wash all walkways and patios','Pre-treat mildew and algae'],
+  ARRAY['Roof washing','Fencing','Deck','Chemical sealing'],
+  150, 2, 25,
+  '[{"label":"Wash house siding","required":true},{"label":"Wash foundation","required":true},{"label":"Wash walkways and patios","required":true},{"label":"Pre-treat mildew and algae","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-000a-000000000003',
+  'c1000000-0000-0000-0000-00000000000a', 3,
+  'Full Property', 'Complete property — siding, hardscapes, deck, fencing, furniture, post-wash inspection',
+  ARRAY['Wash siding and foundation','Wash all hardscapes','Wash deck and fencing','Wash driveway','Clean outdoor furniture','Pre-treat all surfaces','Post-wash inspection'],
+  ARRAY['Roof washing','Paint stripping','Sealing or staining'],
+  300, 3, 44,
+  '[{"label":"Wash siding and foundation","required":true},{"label":"Wash all hardscapes","required":true},{"label":"Wash deck and fencing","required":true},{"label":"Wash driveway","required":true},{"label":"Clean outdoor furniture","required":true},{"label":"Post-wash inspection","required":true}]'::jsonb,
+  true
+)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- Pool Service: 3 levels
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+(
+  'c2000000-0000-0000-000b-000000000001',
+  'c1000000-0000-0000-0000-00000000000b', 1,
+  'Chemical Check', 'Test water chemistry and add chemicals as needed',
+  ARRAY['Test water chemistry (pH, chlorine, alkalinity)','Add chemicals as needed','Log readings'],
+  ARRAY['Skimming','Brushing','Vacuuming','Equipment check'],
+  15, 1, 3,
+  '[{"label":"Test water chemistry","required":true},{"label":"Add chemicals as needed","required":true},{"label":"Log readings","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-000b-000000000002',
+  'c1000000-0000-0000-0000-00000000000b', 2,
+  'Weekly Maintenance', 'Skim, brush, vacuum, test and adjust chemicals, empty baskets',
+  ARRAY['Skim surface','Brush walls and tile line','Vacuum pool floor','Test and adjust chemicals','Empty skimmer baskets'],
+  ARRAY['Filter cleaning','Equipment repair','Drain clearing'],
+  35, 2, 6,
+  '[{"label":"Skim surface","required":true},{"label":"Brush walls and tile line","required":true},{"label":"Vacuum floor","required":true},{"label":"Test and adjust chemicals","required":true},{"label":"Empty skimmer baskets","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-000b-000000000003',
+  'c1000000-0000-0000-0000-00000000000b', 3,
+  'Full Service', 'Complete pool care — weekly maintenance plus filter, equipment, and tile scrub',
+  ARRAY['Skim surface','Brush walls and tile line','Vacuum pool floor','Test and adjust chemicals','Empty skimmer baskets','Check pump and filter pressure','Backwash or clean filter','Inspect equipment','Clean pump strainer basket','Tile line scrub'],
+  ARRAY['Equipment repair or replacement','Acid wash','Drain and refill'],
+  50, 2, 8,
+  '[{"label":"Skim surface","required":true},{"label":"Brush walls","required":true},{"label":"Vacuum floor","required":true},{"label":"Test chemicals","required":true},{"label":"Empty baskets","required":true},{"label":"Check pump/filter","required":true},{"label":"Clean filter","required":true},{"label":"Inspect equipment","required":true}]'::jsonb,
+  true
+)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- Pest Control: 3 levels
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+(
+  'c2000000-0000-0000-000c-000000000001',
+  'c1000000-0000-0000-0000-00000000000c', 1,
+  'Exterior Perimeter', 'Foundation perimeter spray, entry point treatment, web removal',
+  ARRAY['Perimeter spray around foundation','Entry point treatment (doors, windows, utility penetrations)','Web removal from exterior'],
+  ARRAY['Interior treatment','Baiting systems','Crawlspace','Attic access'],
+  25, 1, 6,
+  '[{"label":"Spray foundation perimeter","required":true},{"label":"Treat entry points","required":true},{"label":"Remove exterior webs","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-000c-000000000002',
+  'c1000000-0000-0000-0000-00000000000c', 2,
+  'Interior + Exterior', 'Full perimeter plus interior baseboard, kitchen/bath, and crack treatment',
+  ARRAY['Full exterior perimeter spray','Interior baseboard spray','Kitchen and bath treatment','Crack and crevice application'],
+  ARRAY['Crawlspace','Attic access','Baiting systems','Wildlife removal'],
+  45, 2, 9,
+  '[{"label":"Spray exterior perimeter","required":true},{"label":"Spray interior baseboards","required":true},{"label":"Treat kitchen and bath","required":true},{"label":"Crack and crevice application","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-000c-000000000003',
+  'c1000000-0000-0000-0000-00000000000c', 3,
+  'Comprehensive', 'Full interior/exterior, crawlspace/attic inspection, bait stations, service report',
+  ARRAY['Full interior and exterior treatment','Crawlspace and accessible attic inspection','Bait station placement','Targeted treatment by pest type','Detailed service report'],
+  ARRAY['Wildlife removal','Structural repair','Fumigation'],
+  75, 2, 15,
+  '[{"label":"Full interior treatment","required":true},{"label":"Full exterior treatment","required":true},{"label":"Inspect crawlspace/attic","required":true},{"label":"Place bait stations","required":true},{"label":"Provide service report","required":true}]'::jsonb,
+  true
+)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- Dog Poop Cleanup: 2 levels
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+(
+  'c2000000-0000-0000-000d-000000000001',
+  'c1000000-0000-0000-0000-00000000000d', 1,
+  'Weekly Yard', 'Full yard walk, pick up and bag all waste, dispose — 1-dog household',
+  ARRAY['Walk full yard','Pick up and bag all waste','Tie and dispose in bin'],
+  ARRAY['Deodorizing','Sanitizing','Patio or deck areas'],
+  15, 1, 2,
+  '[{"label":"Walk full yard","required":true},{"label":"Pick up all waste","required":true},{"label":"Dispose in bin","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-000d-000000000002',
+  'c1000000-0000-0000-0000-00000000000d', 2,
+  'Multi-Dog Yard', 'Full yard walk for multi-dog households, includes patio/deck check',
+  ARRAY['Full yard walk for multi-dog households','Pick up and bag all waste','Check patio and deck areas','Dispose in bin'],
+  ARRAY['Deodorizing','Sanitizing','Kennel or run cleaning'],
+  25, 1, 3,
+  '[{"label":"Walk full yard","required":true},{"label":"Pick up all waste","required":true},{"label":"Check patio and deck","required":true},{"label":"Dispose in bin","required":true}]'::jsonb,
+  true
+)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
