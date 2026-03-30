@@ -208,3 +208,129 @@ UPDATE public.service_skus SET
   price_hint_cents = 20000,
   pricing_notes = 'Research: $250-$450 standard prep (medium lot). Provider payout ~$200. 1x/year (March-May). May require multiple crew types.'
 WHERE id = 'c1000000-0000-0000-0000-000000000008';
+
+-- ============================================
+-- B3: Specialty SKUs (IDs 009-00d)
+-- ============================================
+
+-- Window Cleaning
+UPDATE public.service_skus SET
+  description = 'Professional window cleaning — exterior only, interior + exterior, or full detail. 2-story surcharge applies.',
+  category = 'windows',
+  duration_minutes = 180,
+  base_price_cents = 27500,
+  handle_cost = 22,
+  scheduling_profile = 'appointment_window',
+  access_mode = 'exterior_only',
+  fulfillment_mode = 'same_week_allowed',
+  presence_required = false,
+  weather_sensitive = true,
+  inclusions = ARRAY['Clean both sides of all windows','Frame and sill wipe','Screen cleaning','Track vacuuming'],
+  exclusions = ARRAY['Hard water stain removal','Skylight interior','Storm window disassembly','Mirror cleaning'],
+  checklist = '[{"label":"Clean all exterior windows","required":true},{"label":"Clean all interior windows","required":true},{"label":"Wipe frames and sills","required":true},{"label":"Clean screens","required":true},{"label":"Vacuum tracks","required":true}]'::jsonb,
+  required_photos = '["after"]'::jsonb,
+  proof_rules = '{"photo_required": true, "privacy_safe": true}'::jsonb,
+  customer_prep = ARRAY['Clear windowsills of items','Ensure access to all windows','Unlock windows for interior cleaning'],
+  required_equipment = ARRAY['Squeegees','T-bars and scrubbers','Extension poles','Water-fed pole system','Ladders','Razor blades'],
+  provider_category = 'outdoor',
+  price_hint_cents = 17500,
+  pricing_notes = 'Per pane (int+ext): $6-$12. Flat rate by home: $200-$500. 2-story: +50-75%. Provider payout ~$175. 2-4x/year.'
+WHERE id = 'c1000000-0000-0000-0000-000000000009';
+
+-- Power Wash
+UPDATE public.service_skus SET
+  description = 'Pressure washing for driveways, patios, siding, decks, and fences. Soft wash for delicate surfaces.',
+  category = 'power_wash',
+  duration_minutes = 150,
+  base_price_cents = 30000,
+  handle_cost = 25,
+  scheduling_profile = 'day_commit',
+  access_mode = 'exterior_only',
+  fulfillment_mode = 'same_week_allowed',
+  presence_required = false,
+  weather_sensitive = true,
+  inclusions = ARRAY['House siding soft wash','Driveway pressure wash','Patio/walkway pressure wash','Pre-soak detergent application','Rinse all surfaces'],
+  exclusions = ARRAY['Deck staining/sealing','Oil stain removal','Roof washing','Paint preparation','Fence staining'],
+  checklist = '[{"label":"Pre-soak with detergent","required":true},{"label":"Soft wash siding","required":true},{"label":"Pressure wash driveway","required":true},{"label":"Pressure wash patio/walks","required":true},{"label":"Final rinse all surfaces","required":true}]'::jsonb,
+  required_photos = '["before","after"]'::jsonb,
+  proof_rules = '{"photo_required": true, "privacy_safe": false}'::jsonb,
+  customer_prep = ARRAY['Move vehicles off driveway','Close windows','Move patio furniture if possible','Ensure water spigot access'],
+  required_equipment = ARRAY['Commercial pressure washer (3000-4000 PSI)','Surface cleaner attachment','Soft wash pump','50-100ft hose','Detergent tanks'],
+  provider_category = 'outdoor',
+  price_hint_cents = 20000,
+  pricing_notes = 'Per sq ft (concrete): $0.15-$0.40. Home exterior pkg: $400-$800. Full property: $700-$1400. Provider payout ~$200. Annual service.'
+WHERE id = 'c1000000-0000-0000-0000-00000000000a';
+
+-- Pool Service
+UPDATE public.service_skus SET
+  description = 'Weekly pool maintenance — chemical balance, skimming, brushing, and equipment monitoring.',
+  category = 'pool',
+  duration_minutes = 35,
+  base_price_cents = 5000,
+  handle_cost = 6,
+  scheduling_profile = 'day_commit',
+  access_mode = 'provider_access',
+  fulfillment_mode = 'same_day_preferred',
+  presence_required = false,
+  weather_sensitive = false,
+  inclusions = ARRAY['Test and balance water chemistry','Skim surface debris','Brush walls and tile line','Vacuum pool floor','Empty skimmer and pump baskets','Check water level'],
+  exclusions = ARRAY['Equipment repair/replacement','Filter deep clean (quarterly add-on)','Acid wash','Green-to-clean recovery','Tile calcium removal'],
+  checklist = '[{"label":"Test water chemistry","required":true},{"label":"Balance pH/chlorine","required":true},{"label":"Skim surface","required":true},{"label":"Brush walls","required":true},{"label":"Vacuum floor","required":true},{"label":"Empty baskets","required":true}]'::jsonb,
+  required_photos = '[]'::jsonb,
+  proof_rules = '{"photo_required": false, "privacy_safe": false}'::jsonb,
+  customer_prep = ARRAY['Ensure gate access or provide code','Remove pool toys/floats before service'],
+  required_equipment = ARRAY['Test kit','Chemical caddy','Telepole with brush/net/vacuum','Leaf canister'],
+  provider_category = 'outdoor',
+  requires_training_gate = true,
+  price_hint_cents = 4500,
+  pricing_notes = 'Weekly service: $120-$200/mo standard. Pool size affects price. Provider payout ~$45/visit. CPO certification often required.'
+WHERE id = 'c1000000-0000-0000-0000-00000000000b';
+
+-- Pest Control
+UPDATE public.service_skus SET
+  description = 'Perimeter spray, inspection, and treatment for general household pests. Licensed applicator required.',
+  category = 'pest',
+  duration_minutes = 45,
+  base_price_cents = 12500,
+  handle_cost = 9,
+  scheduling_profile = 'day_commit',
+  access_mode = 'exterior_only',
+  fulfillment_mode = 'independent_cadence',
+  presence_required = false,
+  weather_sensitive = true,
+  inclusions = ARRAY['Exterior perimeter spray','De-web eaves and entry points','Granular treatment around foundation','Interior baseboard spray','Kitchen and bath crack-and-crevice treatment','Glue board monitors'],
+  exclusions = ARRAY['Termite treatment','Mosquito yard treatment','Rodent exclusion','Bed bug treatment','Wildlife removal'],
+  checklist = '[{"label":"Spray exterior perimeter","required":true},{"label":"De-web eaves","required":true},{"label":"Apply granular treatment","required":true},{"label":"Treat interior baseboards","required":true},{"label":"Treat kitchen/bath areas","required":true}]'::jsonb,
+  required_photos = '[]'::jsonb,
+  proof_rules = '{"photo_required": false, "privacy_safe": true}'::jsonb,
+  customer_prep = ARRAY['Clear items from along baseboards','Ensure access to kitchen cabinets under sink','Keep pets secured during treatment'],
+  required_equipment = ARRAY['Backpack sprayer','Compressed air sprayer','Bait stations','Granular spreader','Glue boards','PPE'],
+  provider_category = 'outdoor',
+  requires_training_gate = true,
+  price_hint_cents = 7000,
+  pricing_notes = 'Quarterly standard. Initial visit higher ($150-$250). Quarterly: $100-$175. Provider payout ~$70. All 50 states require pest control license.'
+WHERE id = 'c1000000-0000-0000-0000-00000000000c';
+
+-- Dog Poop Cleanup
+UPDATE public.service_skus SET
+  description = 'Weekly yard waste removal for dog owners. Quick, recurring service with high retention.',
+  category = 'pet_waste',
+  duration_minutes = 15,
+  base_price_cents = 2000,
+  handle_cost = 2,
+  scheduling_profile = 'day_commit',
+  access_mode = 'provider_access',
+  fulfillment_mode = 'same_day_preferred',
+  presence_required = false,
+  weather_sensitive = false,
+  inclusions = ARRAY['Scan full yard','Bag all waste','Dispose in trash receptacle','Close gate on exit'],
+  exclusions = ARRAY['Yard deodorizing','Pet feeding/care','Indoor cleanup'],
+  checklist = '[{"label":"Scan full yard systematically","required":true},{"label":"Bag and dispose all waste","required":true},{"label":"Secure gate on exit","required":true}]'::jsonb,
+  required_photos = '["after"]'::jsonb,
+  proof_rules = '{"photo_required": true, "privacy_safe": false}'::jsonb,
+  customer_prep = ARRAY['Ensure gate is accessible or unlocked','Secure aggressive dogs during service'],
+  required_equipment = ARRAY['Waste bags','Scoop/rake','Disposal container'],
+  provider_category = 'outdoor',
+  price_hint_cents = 1500,
+  pricing_notes = 'Weekly: $12-$20/visit (1 dog). Multi-dog: +$5-$8/dog. Provider payout ~$15. 90M pet dogs in US. High retention.'
+WHERE id = 'c1000000-0000-0000-0000-00000000000d';
