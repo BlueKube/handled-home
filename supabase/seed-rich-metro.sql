@@ -48,16 +48,22 @@ INSERT INTO user_roles (id, user_id, role) VALUES
   ('a1000000-0000-0000-0000-000000000003', 'f4000000-0000-0000-0000-000000000009', 'admin')
 ON CONFLICT (id) DO NOTHING;
 
--- Pre-seed: create missing service SKUs
-INSERT INTO service_skus (id, name, description, category, duration_minutes, base_price_cents, status, weather_sensitive) VALUES
-  ('c1000000-0000-0000-0000-000000000001', 'Standard Mow',     'Full lawn mowing service',          'mowing',  30, 4900, 'active', true),
-  ('c1000000-0000-0000-0000-000000000002', 'Edge & Trim',      'Edge trimming along all borders',   'mowing',  15, 1500, 'active', true),
-  ('c1000000-0000-0000-0000-000000000003', 'Leaf Cleanup',     'Full leaf removal and disposal',    'mowing',  45, 3500, 'active', true),
-  ('c1000000-0000-0000-0000-000000000004', 'Hedge Trimming',   'Shape and trim all hedges',         'mowing',  30, 2500, 'active', false),
-  ('c1000000-0000-0000-0000-000000000005', 'Weed Treatment',   'Spot weed treatment for beds',      'mowing',  20, 2000, 'active', true),
-  ('c1000000-0000-0000-0000-000000000006', 'Fertilization',    'Lawn fertilizer application',       'mowing',  20, 3000, 'active', true),
-  ('c1000000-0000-0000-0000-000000000007', 'Mulch Application','Spread mulch in garden beds',       'mowing',  45, 4500, 'active', true),
-  ('c1000000-0000-0000-0000-000000000008', 'Spring Prep',      'Full spring yard preparation',      'mowing',  60, 7500, 'active', true)
+-- Pre-seed: create service SKUs with research-calibrated data
+-- Handle cost anchor: 7 handles = 1 standard lawn mow (~45 min, ~$55 payout)
+INSERT INTO service_skus (id, name, description, category, duration_minutes, base_price_cents, handle_cost, status, weather_sensitive) VALUES
+  ('c1000000-0000-0000-0000-000000000001', 'Standard Mow',      'Full-service lawn mowing with edging and blowoff',            'mowing',     45,  7500,  7, 'active', true),
+  ('c1000000-0000-0000-0000-000000000002', 'Edge & Trim',       'Precision edge trimming along all borders and hardscapes',    'trimming',   25,  3500,  4, 'active', false),
+  ('c1000000-0000-0000-0000-000000000003', 'Leaf Cleanup',      'Seasonal leaf removal from lawn, beds, and hardscapes',       'cleanup',   120, 25000, 15, 'active', true),
+  ('c1000000-0000-0000-0000-000000000004', 'Hedge Trimming',    'Shape and maintain hedges and shrubs',                        'trimming',   90, 15000, 13, 'active', false),
+  ('c1000000-0000-0000-0000-000000000005', 'Weed Treatment',    'Targeted or broadcast herbicide for lawn weed control',       'treatment',  35,  8500,  8, 'active', true),
+  ('c1000000-0000-0000-0000-000000000006', 'Fertilization',     'Seasonal lawn fertilizer application',                        'treatment',  30,  7500,  8, 'active', true),
+  ('c1000000-0000-0000-0000-000000000007', 'Mulch Application', 'Spread mulch in garden beds with edging and weed barrier',    'cleanup',   180, 35000, 22, 'active', false),
+  ('c1000000-0000-0000-0000-000000000008', 'Spring Prep',       'Comprehensive spring yard preparation',                       'cleanup',   240, 35000, 25, 'active', true),
+  ('c1000000-0000-0000-0000-00000000000e', 'Gutter Cleaning',   'Clear debris from gutters and flush downspouts',              'cleanup',    90, 17500, 15, 'active', true),
+  ('c1000000-0000-0000-0000-00000000000f', 'Fall Prep',         'Comprehensive fall yard preparation and winterization',       'cleanup',   300, 40000, 25, 'active', true),
+  ('c1000000-0000-0000-0000-000000000010', 'Trash Can Cleaning','Sanitize and deodorize residential trash and recycling cans', 'cleanup',    10,  3500,  3, 'active', false),
+  ('c1000000-0000-0000-0000-000000000011', 'Grill Cleaning',    'Professional grill deep clean with disassembly and degreasing','cleanup',   75, 17500, 13, 'active', false),
+  ('c1000000-0000-0000-0000-000000000012', 'Dryer Vent Cleaning','Professional dryer vent cleaning for fire prevention',       'home_assistant', 45, 14000, 11, 'active', false)
 ON CONFLICT (id) DO NOTHING;
 
 DO $$
@@ -112,7 +118,7 @@ DECLARE
   v_org7 uuid := 'f2000000-0000-0000-0000-000000000006'; -- Sunrise Property Care
   v_org8 uuid := 'f2000000-0000-0000-0000-000000000007'; -- Premier Pest Solutions
 
-  -- SKU IDs (all existing)
+  -- SKU IDs
   v_sku_mow     uuid := 'c1000000-0000-0000-0000-000000000001';
   v_sku_edge    uuid := 'c1000000-0000-0000-0000-000000000002';
   v_sku_leaf    uuid := 'c1000000-0000-0000-0000-000000000003';
@@ -126,6 +132,11 @@ DECLARE
   v_sku_pool    uuid := 'c1000000-0000-0000-0000-00000000000b';
   v_sku_pest    uuid := 'c1000000-0000-0000-0000-00000000000c';
   v_sku_poop    uuid := 'c1000000-0000-0000-0000-00000000000d';
+  v_sku_gutter  uuid := 'c1000000-0000-0000-0000-00000000000e';
+  v_sku_fall    uuid := 'c1000000-0000-0000-0000-00000000000f';
+  v_sku_trash   uuid := 'c1000000-0000-0000-0000-000000000010';
+  v_sku_grill   uuid := 'c1000000-0000-0000-0000-000000000011';
+  v_sku_dryer   uuid := 'c1000000-0000-0000-0000-000000000012';
 
   -- Existing property
   v_prop1 uuid := 'edfedf3d-251d-4de7-89a8-1ce5f439e12e';
