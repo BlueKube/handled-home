@@ -1,4 +1,4 @@
-# PRD-045: SKU Catalog Foundation — Fix Existing + Add New SKUs
+# PRD-046: SKU Level Definitions — Create All Levels
 
 > **Date:** 2026-03-30
 > **Mode:** Quality
@@ -8,49 +8,31 @@
 
 ## Problem
 
-The current seed data has 13 outdoor SKUs with:
-- All 8 original SKUs miscategorized as "mowing" (weed treatment, fertilization, mulch, etc. should be in their correct categories)
-- Default routing fields that don't match service reality (a dryer vent cleaning shouldn't default to exterior_only/day_commit)
-- Minimal descriptions, empty inclusions/exclusions, missing checklists
-- Handle costs all set to default of 1
-- 5 viable service categories missing from the catalog
+Zero sku_levels rows exist in the database. Every service is a flat single-tier offering. Customers can't choose between service levels (e.g., basic mow vs. premium mow), and the platform can't assign different handle costs or durations per level.
 
 ## Requirements
 
-### R1: Fix existing outdoor SKU metadata
-Update all 13 outdoor SKUs with:
-- Correct category (matching src/lib/serviceCategories.ts)
-- Accurate descriptions, inclusions, exclusions
-- Correct routing fields (scheduling_profile, access_mode, fulfillment_mode)
-- Correct presence_required, weather_sensitive
-- Calibrated handle_cost (using 7 handles = standard mow anchor)
-- Realistic duration_minutes and base_price_cents
-- Proof requirements (required_photos) and checklists
+### R1: Create sku_levels for lawn/yard services (SKUs 001-008 + Fall Prep)
+Each SKU gets 2-3 levels with: label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template.
 
-### R2: Add 5 new SKUs
-- Gutter Cleaning (cleanup)
-- Fall Prep (cleanup)
-- Trash Can Cleaning (cleanup)
-- Grill Cleaning (cleanup)
-- Dryer Vent Cleaning (home_assistant)
+### R2: Create sku_levels for specialty services (SKUs 009-00d + Gutter, Trash, Grill, Dryer Vent)
+Same structure. Some SKUs have only 1-2 levels (Trash Can, Dog Poop).
 
-### R3: Update seed-rich-metro.sql
-- Update the main INSERT INTO service_skus statement with all corrections
-- Add new SKU inserts
-- Ensure all v_sku_ variable references remain valid
-- Update the migration file (20260322) to match
+### R3: Create sku_levels for home assistant SKUs (5 existing)
+Single-level entries to establish the pattern.
 
-### R4: Update serviceCategories.ts if needed
-- Verify all categories used in SKUs exist in the serviceCategories constant
+### R4: Update seed files
+Mirror all level data in seed-rich-metro.sql.
+
+## Level Design (from FULL-IMPLEMENTATION-PLAN)
+
+See the Handle Cost Table in FULL-IMPLEMENTATION-PLAN-SKU-CALIBRATION.md for the complete level matrix.
 
 ## Acceptance Criteria
 
-- [ ] All 13 existing outdoor SKUs have correct categories
-- [ ] All SKUs have non-empty inclusions and exclusions arrays
-- [ ] All SKUs have correct routing fields
-- [ ] Handle costs are internally consistent (7 handles = standard mow)
-- [ ] 5 new SKUs added with complete metadata
-- [ ] Seed data SQL executes without errors
-- [ ] No duplicate SKU IDs
+- [ ] Every active SKU has at least 1 sku_level row
+- [ ] Handle costs are consistent with the 7-handle anchor
+- [ ] Level numbers are sequential (1, 2, 3)
+- [ ] Inclusions/exclusions are non-empty arrays
+- [ ] Migration SQL executes cleanly
 - [ ] `npm run build` passes
-- [ ] `npx tsc --noEmit` passes

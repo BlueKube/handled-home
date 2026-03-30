@@ -488,3 +488,151 @@ INSERT INTO public.service_skus (
   'home_assistant', 9000,
   'Standard clean: $100-$175. Clean + inspect: $150-$250. Provider payout ~$90. Annual service. NFPA/CSIA recommended. Safety-driven demand.'
 ) ON CONFLICT (id) DO NOTHING;
+
+-- ============================================
+-- PRD-046: SKU LEVEL DEFINITIONS
+-- ============================================
+-- Handle cost anchor: 7 handles = 1 standard lawn mow (~45 min)
+-- Formula: handles ≈ planned_minutes / 6.4 (time-based) or provider_payout / $7.86 (cost-based)
+-- Licensed/specialty work uses cost-based anchoring (premium per handle)
+-- ============================================
+
+-- ============================================
+-- B1: Lawn Care Levels (SKUs 001-004)
+-- ============================================
+
+-- Standard Mow: 3 levels
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+(
+  'c2000000-0000-0000-0001-000000000001',
+  'c1000000-0000-0000-0000-000000000001', 1,
+  'Basic Mow', 'Mow and go — cut only, no edging or trimming',
+  ARRAY['Mow all turf areas','Mulch clippings in place'],
+  ARRAY['Edging','String trimming','Blowing','Bagging'],
+  30, 1, 5,
+  '[{"label":"Mow all turf areas","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-0001-000000000002',
+  'c1000000-0000-0000-0000-000000000001', 2,
+  'Standard Mow', 'Full-service mow with trimming, edging, and blowoff',
+  ARRAY['Mow all turf areas','String trim around obstacles','Edge along hardscapes','Blow clippings off hard surfaces'],
+  ARRAY['Bagging/clipping removal','Bed weeding','Hedge trimming'],
+  45, 1, 7,
+  '[{"label":"Mow all turf areas","required":true},{"label":"String trim borders","required":true},{"label":"Edge hardscapes","required":true},{"label":"Blow hard surfaces","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-0001-000000000003',
+  'c1000000-0000-0000-0000-000000000001', 3,
+  'Premium Mow', 'Show-ready cut with bagging, cross-cut pattern, and spot weed pulling',
+  ARRAY['Mow all turf areas with cross-cut pattern','String trim around obstacles','Edge along hardscapes','Blow clippings off hard surfaces','Bag and remove clippings','Spot weed pulling in adjacent beds'],
+  ARRAY['Full bed weeding','Hedge trimming','Fertilization'],
+  65, 2, 10,
+  '[{"label":"Mow with pattern","required":true},{"label":"String trim","required":true},{"label":"Edge hardscapes","required":true},{"label":"Bag clippings","required":true},{"label":"Blow hard surfaces","required":true},{"label":"Spot weed pull","required":false}]'::jsonb,
+  true
+)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- Edge & Trim: 3 levels
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+(
+  'c2000000-0000-0000-0002-000000000001',
+  'c1000000-0000-0000-0000-000000000002', 1,
+  'Trim Only', 'String trimmer around obstacles — no mechanical edging',
+  ARRAY['String trim around fences, trees, beds, and AC units'],
+  ARRAY['Mechanical edging','Bed edge re-definition','Blowing'],
+  15, 1, 2,
+  '[{"label":"Trim around all obstacles","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-0002-000000000002',
+  'c1000000-0000-0000-0000-000000000002', 2,
+  'Edge & Trim', 'String trimming plus mechanical edging along all hardscapes',
+  ARRAY['String trim around all obstacles','Mechanical edge along driveway and sidewalks','Blow debris off hardscapes'],
+  ARRAY['Bed edge re-definition','Mowing','Weed removal'],
+  25, 1, 4,
+  '[{"label":"Trim all obstacles","required":true},{"label":"Edge all hardscapes","required":true},{"label":"Blow clean","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-0002-000000000003',
+  'c1000000-0000-0000-0000-000000000002', 3,
+  'Detail Edge', 'Full trim and edge plus bed border re-definition',
+  ARRAY['String trim around all obstacles','Mechanical edge along all hardscapes','Re-cut bed borders with vertical edge','Blow all debris clean'],
+  ARRAY['Mowing','Weed removal','Mulching'],
+  40, 1, 6,
+  '[{"label":"Trim all obstacles","required":true},{"label":"Edge hardscapes","required":true},{"label":"Re-cut bed borders","required":true},{"label":"Blow clean","required":true}]'::jsonb,
+  true
+)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- Leaf Cleanup: 3 levels
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+(
+  'c2000000-0000-0000-0003-000000000001',
+  'c1000000-0000-0000-0000-000000000003', 1,
+  'Leaf Blowout', 'Blow leaves off lawn and hardscapes into tree line or pile area',
+  ARRAY['Blow leaves off lawn','Blow leaves off hardscapes','Pile at designated area on property'],
+  ARRAY['Removal from property','Bed cleaning','Gutter cleaning','Raking'],
+  45, 1, 8,
+  '[{"label":"Blow leaves off lawn","required":true},{"label":"Blow hardscapes clean","required":true},{"label":"Pile at designated area","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-0003-000000000002',
+  'c1000000-0000-0000-0000-000000000003', 2,
+  'Full Cleanup', 'Blow, rake, and vacuum leaves from lawn, beds, and hardscapes',
+  ARRAY['Blow leaves from all areas','Rake beds clean','Vacuum or bag leaves on lawn','Pile or bag at curb for pickup','Clear all hardscapes'],
+  ARRAY['Off-site haul-away','Gutter cleaning','Branch removal','Bed detailing'],
+  120, 2, 15,
+  '[{"label":"Clear all turf","required":true},{"label":"Rake beds","required":true},{"label":"Bag or pile at curb","required":true},{"label":"Clear hardscapes","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-0003-000000000003',
+  'c1000000-0000-0000-0000-000000000003', 3,
+  'Removal & Haul', 'Complete leaf removal with off-site disposal and under-shrub cleanup',
+  ARRAY['All Full Cleanup inclusions','Load into truck for off-site disposal','Under-shrub and tight-space cleanup','Bed detailing around plants'],
+  ARRAY['Gutter cleaning','Large branch removal','Stump removal'],
+  180, 2, 25,
+  '[{"label":"Clear all areas","required":true},{"label":"Clean under shrubs","required":true},{"label":"Detail beds","required":true},{"label":"Load for haul-away","required":true}]'::jsonb,
+  true
+)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- Hedge Trimming: 3 levels
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+(
+  'c2000000-0000-0000-0004-000000000001',
+  'c1000000-0000-0000-0000-000000000004', 1,
+  'Shape Trim', 'Maintain existing shape — trim new growth and blow debris',
+  ARRAY['Trim top and accessible sides to maintain shape','Blow debris off beds'],
+  ARRAY['Reshaping','Interior thinning','Dead wood removal','Haul-away'],
+  45, 1, 6,
+  '[{"label":"Trim to existing shape","required":true},{"label":"Blow debris clean","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-0004-000000000002',
+  'c1000000-0000-0000-0000-000000000004', 2,
+  'Full Trim', 'Shape all sides plus dead branch removal and full cleanup',
+  ARRAY['Shape all sides including hard-to-reach areas','Remove dead branches','Clean up all debris on-site','Blow beds and hardscapes clean'],
+  ARRAY['Rejuvenation pruning','Stump removal','Heavy reshaping','Chemical treatment'],
+  90, 2, 13,
+  '[{"label":"Shape all sides","required":true},{"label":"Remove dead branches","required":true},{"label":"Clean up debris","required":true},{"label":"Blow area clean","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-0004-000000000003',
+  'c1000000-0000-0000-0000-000000000004', 3,
+  'Sculpt & Restore', 'Species-appropriate pruning with thinning, reshaping, and haul-away',
+  ARRAY['Species-appropriate pruning (not just shearing)','Interior thinning for airflow','Full reshaping to desired form','Dead wood removal','All debris hauled away','Plant health assessment'],
+  ARRAY['Tree work above 10 feet','Chemical treatment','Stump grinding'],
+  150, 2, 22,
+  '[{"label":"Prune species-appropriately","required":true},{"label":"Thin interior","required":true},{"label":"Reshape to form","required":true},{"label":"Remove dead wood","required":true},{"label":"Haul away debris","required":true}]'::jsonb,
+  true
+)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
