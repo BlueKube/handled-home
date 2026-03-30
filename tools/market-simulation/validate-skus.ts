@@ -336,7 +336,7 @@ function main() {
   console.log(`    Plus ($159/28h):         ${fmt$(PLUS_RPH)}`);
   console.log(`    Premium ($249/50h):      ${fmt$(PREMIUM_RPH)}`);
   console.log(`    Weighted avg:            ${fmt$(WEIGHTED_RPH)}`);
-  console.log(`  Per-handle deficit:        ${fmt$(WEIGHTED_RPH - COST_PER_HANDLE_CENTS)} (revenue - cost)`);
+  console.log(`  Per-handle cost overage:   ${fmt$(COST_PER_HANDLE_CENTS - WEIGHTED_RPH)} (cost exceeds revenue by this amount)`);
   console.log(`  → Model relies on handle underutilization for positive margins`);
 
   // ── 3. Per-SKU Analysis ──
@@ -385,15 +385,15 @@ function main() {
   console.log(`Negative margin:  ${negativeMargin.length}`);
 
   if (negativeMargin.length > 0) {
-    console.log("\n⚠ NEGATIVE MARGIN SKUs (at weighted avg revenue per handle):");
-    for (const a of negativeMargin) {
-      console.log(`  ${a.sku} L${a.level} (${a.label}): ${fmt$(a.marginAtWeighted)} margin on ${a.handlesCost} handles`);
-    }
+    console.log(`\n⚠ ALL ${negativeMargin.length} SKU/levels have negative per-handle margin — this is expected.`);
+    console.log(`  Revenue per handle (${fmt$(WEIGHTED_RPH)}) < Cost per handle (${fmt$(COST_PER_HANDLE_CENTS)})`);
+    console.log(`  The subscription model profits from handle underutilization, not per-service margin.`);
   }
 
-  if (flagged.length > 0 && negativeMargin.length === 0) {
-    console.log("\n⚠ FLAGGED SKUs (thin margin or high cost-anchor premium):");
-    for (const a of flagged) {
+  const otherFlagged = flagged.filter(a => a.flag !== "NEGATIVE_MARGIN_AT_WEIGHTED_AVG");
+  if (otherFlagged.length > 0) {
+    console.log("\n⚠ ADDITIONAL FLAGS (thin margin or high cost-anchor premium):");
+    for (const a of otherFlagged) {
       console.log(`  ${a.sku} L${a.level} (${a.label}): ${a.flag} — ${a.marginPctAtWeighted}% margin`);
     }
   }
@@ -513,7 +513,7 @@ function main() {
   console.log("\n" + "═".repeat(90));
   console.log("  VALIDATION SUMMARY");
   console.log("─".repeat(90));
-  console.log("  Per-handle economics: Revenue ($6.03) < Cost ($7.86) per handle.");
+  console.log(`  Per-handle economics: Revenue (${fmt$(WEIGHTED_RPH)}) < Cost (${fmt$(COST_PER_HANDLE_CENTS)}) per handle.`);
   console.log("  This is BY DESIGN — the subscription model profits from handle underutilization.");
   console.log("");
   console.log(`  Break-even utilization:  ${(breakEvenUtil * 100).toFixed(1)}%`);
