@@ -71,6 +71,8 @@
           <div class="slider-group" data-key="byoc_customers_per_provider" data-min="5" data-max="30" data-step="1" data-default="18" data-format="int"></div>
           <div class="slider-group" data-key="byoc_invite_send_rate" data-min="0.2" data-max="0.9" data-step="0.05" data-default="0.55" data-format="pct"></div>
           <div class="slider-group" data-key="byoc_activation_rate" data-min="0.1" data-max="0.6" data-step="0.05" data-default="0.28" data-format="pct"></div>
+          <div class="slider-group" data-key="byoc_bonus_weekly" data-min="5" data-max="25" data-step="1" data-default="10" data-format="dollar"></div>
+          <div class="slider-group" data-key="byoc_bonus_weeks" data-min="4" data-max="24" data-step="4" data-default="12" data-format="int" data-label-suffix=" weeks"></div>
         </div>
 
         <!-- Retention -->
@@ -112,6 +114,36 @@
             <div class="section-title">Provider Utilization %</div>
             <canvas id="chart-utilization" height="200"></canvas>
           </div>
+        </div>
+
+        <!-- Row 2: New charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="card">
+            <div class="section-title">Cumulative P&L (Cash Burn Curve)</div>
+            <canvas id="chart-cumulative" height="200"></canvas>
+          </div>
+          <div class="card">
+            <div class="section-title">Customer Acquisition Sources</div>
+            <canvas id="chart-acquisition" height="200"></canvas>
+          </div>
+          <div class="card">
+            <div class="section-title">Provider Capacity Planning</div>
+            <canvas id="chart-capacity" height="200"></canvas>
+          </div>
+          <div class="card">
+            <div class="section-title">BYOC Bonus ROI</div>
+            <div id="byoc-roi" class="space-y-2"></div>
+          </div>
+        </div>
+
+        <!-- Scenario Comparison -->
+        <div class="card">
+          <div class="section-title">Scenario Comparison</div>
+          <div class="flex gap-2 mb-3">
+            <button onclick="saveScenario()" class="text-xs py-1.5 px-3 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white transition-colors">Save Current</button>
+            <button onclick="clearScenarios()" class="text-xs py-1.5 px-3 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors">Clear All</button>
+          </div>
+          <div id="scenario-table"></div>
         </div>
 
         <!-- Provider Economics -->
@@ -175,6 +207,8 @@
       attach_rate_90d: "90-Day Attach Rate",
       monthly_ops_overhead: "Ops Overhead ($/mo)",
       monthly_tech_overhead: "Tech Overhead ($/mo)",
+      byoc_bonus_weekly: "BYOC Bonus ($/wk/cust)",
+      byoc_bonus_weeks: "Bonus Duration (weeks)",
     };
 
     function simulateZone(p) {
@@ -209,7 +243,7 @@
         const byocBonus = m <= 3 ? Math.round(byocAtLaunch * 1000 * 4) : 0;
         const refCredits = Math.round(newRef * 3000);
 
-        months.push({ month: m, customers: active, jobs, revenue, provPay, byocBonus, refCredits });
+        months.push({ month: m, customers: active, jobs, revenue, provPay, byocBonus, refCredits, newByoc, newRef, newOrg });
       }
       return months;
     }
@@ -245,7 +279,7 @@
       const combined = [];
       let cumMargin = 0, breakEven = null;
       for (let m = 0; m < 12; m++) {
-        let cust = 0, jobs = 0, rev = 0, pay = 0, bonus = 0, ref = 0;
+        let cust = 0, jobs = 0, rev = 0, pay = 0, bonus = 0, ref = 0, nByoc = 0, nRef = 0, nOrg = 0;
         for (const zm of allZoneMonths) {
           cust += zm[m].customers;
           jobs += zm[m].jobs;
@@ -253,13 +287,16 @@
           pay += zm[m].provPay;
           bonus += zm[m].byocBonus;
           ref += zm[m].refCredits;
+          nByoc += zm[m].newByoc || 0;
+          nRef += zm[m].newRef || 0;
+          nOrg += zm[m].newOrg || 0;
         }
         const totalCost = pay + bonus + ref + overhead;
         const margin = rev - totalCost;
         const marginPct = rev > 0 ? (margin / rev) * 100 : -100;
         cumMargin += margin;
         if (cumMargin > 0 && !breakEven) breakEven = m + 1;
-        combined.push({ month: m + 1, customers: cust, jobs, revenue: rev, provPay: pay, overhead, margin, marginPct });
+        combined.push({ month: m + 1, customers: cust, jobs, revenue: rev, provPay: pay, overhead, margin, marginPct, cumMargin, newByoc: nByoc, newRef: nRef, newOrg: nOrg });
       }
 
       updateUI(combined, breakEven, zoneCount, overhead);
@@ -344,7 +381,133 @@
           { label: "Target 80%", data: Array(12).fill(80), borderColor: "#64748b", borderDash: [5, 5], pointRadius: 0 },
         ] }, options: chartOpts
       });
+
+      // === CUMULATIVE P&L ===
+      if (charts.cumulative) charts.cumulative.destroy();
+      const cumData = months.map(m => m.cumMargin / 100);
+      charts.cumulative = new Chart(document.getElementById("chart-cumulative"), {
+        type: "line", data: { labels, datasets: [
+          { label: "Cumulative P&L", data: cumData, borderColor: cumData[11] >= 0 ? "#4ade80" : "#f87171", backgroundColor: cumData.map(v => v >= 0 ? "rgba(74,222,128,0.15)" : "rgba(248,113,113,0.15)"), fill: true, tension: 0.3, segment: { borderColor: ctx => (ctx.p0.parsed.y < 0 && ctx.p1.parsed.y < 0) ? "#f87171" : ctx.p0.parsed.y >= 0 ? "#4ade80" : "#fbbf24" } },
+          { label: "Break-Even", data: Array(12).fill(0), borderColor: "#64748b", borderDash: [5, 5], pointRadius: 0 },
+        ] }, options: { ...chartOpts, scales: { ...chartOpts.scales, y: { ...chartOpts.scales.y, ticks: { ...chartOpts.scales.y.ticks, callback: v => "$" + v.toLocaleString() } } } }
+      });
+
+      // === ACQUISITION SOURCES ===
+      if (charts.acquisition) charts.acquisition.destroy();
+      charts.acquisition = new Chart(document.getElementById("chart-acquisition"), {
+        type: "bar", data: { labels, datasets: [
+          { label: "BYOC", data: months.map(m => m.newByoc || 0), backgroundColor: "#38bdf8" },
+          { label: "Referral", data: months.map(m => m.newRef || 0), backgroundColor: "#a78bfa" },
+          { label: "Organic", data: months.map(m => m.newOrg || 0), backgroundColor: "#4ade80" },
+        ] }, options: { ...chartOpts, scales: { ...chartOpts.scales, x: { ...chartOpts.scales.x, stacked: true }, y: { ...chartOpts.scales.y, stacked: true } } }
+      });
+
+      // === PROVIDER CAPACITY PLANNING ===
+      if (charts.capacity) charts.capacity.destroy();
+      const zc = parseInt(document.querySelector('[data-key="zone_count"] input')?.value ?? "4");
+      const prov = parseInt(document.querySelector('[data-key="providers_at_launch"] input')?.value ?? "3");
+      const spd = parseInt(document.querySelector('[data-key="provider_stops_per_day"] input')?.value ?? "6");
+      const totalProviders = zc * prov;
+      const monthlyCapPerProvider = spd * 5 * 4;
+      // Find when you need more providers (utilization > 80%)
+      const provNeeded = months.map(m => Math.ceil(m.jobs / (monthlyCapPerProvider * 0.8)));
+      charts.capacity = new Chart(document.getElementById("chart-capacity"), {
+        type: "line", data: { labels, datasets: [
+          { label: "Providers Needed (80% util)", data: provNeeded, borderColor: "#fbbf24", backgroundColor: "rgba(251,191,36,0.1)", fill: true, tension: 0.3, stepped: true },
+          { label: "Current Providers", data: Array(12).fill(totalProviders), borderColor: "#64748b", borderDash: [5, 5], pointRadius: 0 },
+        ] }, options: { ...chartOpts, scales: { ...chartOpts.scales, y: { ...chartOpts.scales.y, beginAtZero: true, ticks: { ...chartOpts.scales.y.ticks, stepSize: 1 } } } }
+      });
+      // Find the month where you need to hire
+      const hireMonth = provNeeded.findIndex(n => n > totalProviders);
+      const capacityNote = hireMonth >= 0
+        ? `⚠️ You need to recruit provider #${totalProviders + 1} by Month ${hireMonth + 1}`
+        : `✅ Current ${totalProviders} providers handle 12-month demand`;
+      document.getElementById("chart-capacity").parentElement.querySelector(".section-title").innerHTML =
+        `Provider Capacity Planning <span class="text-xs font-normal ml-2 ${hireMonth >= 0 ? 'text-amber-400' : 'text-green-400'}">${capacityNote}</span>`;
+
+      // === BYOC BONUS ROI ===
+      const bonusWeekly = parseFloat(document.querySelector('[data-key="byoc_bonus_weekly"] input')?.value ?? "10");
+      const bonusWeeks = parseInt(document.querySelector('[data-key="byoc_bonus_weeks"] input')?.value ?? "12");
+      const byocCustPerProv = parseInt(document.querySelector('[data-key="byoc_customers_per_provider"] input')?.value ?? "18");
+      const sendRate = parseFloat(document.querySelector('[data-key="byoc_invite_send_rate"] input')?.value ?? "0.55");
+      const actRate = parseFloat(document.querySelector('[data-key="byoc_activation_rate"] input')?.value ?? "0.28");
+      const byocPerProvider = Math.round(byocCustPerProv * sendRate * actRate);
+      const totalBonusCostPerProv = byocPerProvider * bonusWeekly * bonusWeeks;
+      const avgSubCents = parseFloat(document.querySelector('[data-key="essential_price"] input')?.value ?? "99") * 100 * parseFloat(document.querySelector('[data-key="plan_mix_essential"] input')?.value ?? "0.35") + parseFloat(document.querySelector('[data-key="plus_price"] input')?.value ?? "159") * 100 * parseFloat(document.querySelector('[data-key="plan_mix_plus"] input')?.value ?? "0.45") + parseFloat(document.querySelector('[data-key="premium_price"] input')?.value ?? "249") * 100 * (1 - parseFloat(document.querySelector('[data-key="plan_mix_essential"] input')?.value ?? "0.35") - parseFloat(document.querySelector('[data-key="plan_mix_plus"] input')?.value ?? "0.45"));
+      const ltv12mo = (avgSubCents / 100) * 12 * (1 - parseFloat(document.querySelector('[data-key="steady_churn"] input')?.value ?? "0.035"));
+      const roiPct = totalBonusCostPerProv > 0 ? ((ltv12mo * byocPerProvider - totalBonusCostPerProv) / totalBonusCostPerProv * 100) : 0;
+
+      document.getElementById("byoc-roi").innerHTML = `
+        <div class="grid grid-cols-2 gap-2">
+          <div class="metric"><div class="number text-sm neutral">${byocPerProvider}</div><div class="label">BYOC Customers/Provider</div></div>
+          <div class="metric"><div class="number text-sm neutral">$${totalBonusCostPerProv}</div><div class="label">Total Bonus Cost/Provider</div></div>
+          <div class="metric"><div class="number text-sm neutral">$${(totalBonusCostPerProv / Math.max(1, byocPerProvider)).toFixed(0)}</div><div class="label">Acquisition Cost/Customer</div></div>
+          <div class="metric"><div class="number text-sm neutral">$${ltv12mo.toFixed(0)}</div><div class="label">Est. 12mo LTV/Customer</div></div>
+        </div>
+        <div class="mt-2 text-xs ${roiPct >= 100 ? 'text-green-400' : roiPct >= 0 ? 'text-amber-400' : 'text-red-400'} font-medium">
+          ${roiPct >= 100 ? '✅' : roiPct >= 0 ? '⚠️' : '❌'} BYOC Bonus ROI: ${roiPct.toFixed(0)}% — ${roiPct >= 100 ? 'Strong return. Every $1 in bonuses generates $' + ((roiPct + 100) / 100).toFixed(2) + ' in LTV.' : roiPct >= 0 ? 'Positive but thin. Consider reducing bonus duration or increasing activation rate.' : 'Negative ROI. Bonus cost exceeds customer LTV. Reduce bonus or improve retention.'}
+        </div>
+      `;
     }
+
+    // === SCENARIO COMPARISON ===
+    let savedScenarios = [];
+
+    function saveScenario() {
+      const p = {};
+      document.querySelectorAll('.slider-group').forEach(el => {
+        const key = el.dataset.key;
+        const input = el.querySelector('input');
+        if (input) p[key] = parseFloat(input.value);
+      });
+      // Run sim to get key metrics
+      const zoneCount = p.zone_count || 4;
+      const overhead = (p.monthly_ops_overhead + p.monthly_tech_overhead) * 100;
+      const variations = [{ h: 1, i: 1 }, { h: 0.9, i: 1.1 }, { h: 1.1, i: 0.9 }, { h: 0.85, i: 1.15 }, { h: 1.2, i: 0.85 }, { h: 0.95, i: 1.05 }];
+      const allZones = [];
+      for (let z = 0; z < zoneCount; z++) {
+        const v = variations[z % variations.length];
+        allZones.push(simulateZone({ ...p, homes_in_zone: Math.round(p.homes_in_zone * v.h), income_qualifying_rate: Math.min(0.85, p.income_qualifying_rate * v.i), byoc_customers_per_provider: Math.max(5, Math.round(p.byoc_customers_per_provider * (1 - z * 0.15))) }));
+      }
+      let rev12 = 0, pay12 = 0, cust12 = 0;
+      for (const zm of allZones) { rev12 += zm[11].revenue; pay12 += zm[11].provPay; cust12 += zm[11].customers; }
+      const margin12 = rev12 - (pay12 + overhead);
+      const marginPct = rev12 > 0 ? (margin12 / rev12 * 100) : -100;
+
+      savedScenarios.push({
+        name: `Scenario ${savedScenarios.length + 1}`,
+        pricing: `$${p.essential_price}/$${p.plus_price}/$${p.premium_price}`,
+        payout: `$${p.provider_payout}`,
+        zones: zoneCount,
+        m12Cust: cust12,
+        m12Margin: marginPct.toFixed(1) + "%",
+        m12Rev: "$" + (rev12 / 100).toLocaleString("en", { maximumFractionDigits: 0 }),
+      });
+      renderScenarios();
+    }
+
+    function clearScenarios() { savedScenarios = []; renderScenarios(); }
+
+    function renderScenarios() {
+      if (savedScenarios.length === 0) {
+        document.getElementById("scenario-table").innerHTML = '<p class="text-xs text-slate-500">Save configurations to compare side-by-side.</p>';
+        return;
+      }
+      document.getElementById("scenario-table").innerHTML = `
+        <table class="w-full text-xs">
+          <thead><tr class="text-slate-400 border-b border-slate-700">
+            <th class="py-1 text-left">Name</th><th class="py-1 text-right">Pricing</th><th class="py-1 text-right">Payout</th>
+            <th class="py-1 text-right">Zones</th><th class="py-1 text-right">M12 Cust</th><th class="py-1 text-right">M12 Margin</th><th class="py-1 text-right">M12 Revenue</th>
+          </tr></thead>
+          <tbody>${savedScenarios.map(s => `<tr class="border-b border-slate-800">
+            <td class="py-1">${s.name}</td><td class="py-1 text-right">${s.pricing}</td><td class="py-1 text-right">${s.payout}</td>
+            <td class="py-1 text-right">${s.zones}</td><td class="py-1 text-right">${s.m12Cust}</td>
+            <td class="py-1 text-right ${parseFloat(s.m12Margin) >= 0 ? 'positive' : 'negative'}">${s.m12Margin}</td>
+            <td class="py-1 text-right">${s.m12Rev}</td>
+          </tr>`).join("")}</tbody>
+        </table>`;
+    }
+    renderScenarios();
 
     // === SCENARIO PRESETS ===
     const PRESETS = {
