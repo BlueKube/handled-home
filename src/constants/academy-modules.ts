@@ -2,7 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   Gauge, ListChecks, AlertTriangle, Users, DollarSign,
   Wallet, Map, Package, Layers, HelpCircle,
-  TrendingUp, Shield, Lock, BookOpen, GraduationCap,
+  TrendingUp, Shield, Lock, BookOpen, GraduationCap, Rocket,
 } from "lucide-react";
 import type { TrainingSection } from "@/components/academy/AcademySection";
 import { opsCockpitSections } from "./academy/ops-cockpit";
@@ -20,6 +20,7 @@ import { governanceHealthSections } from "./academy/governance-health";
 import { controlRoomSections } from "./academy/control-room";
 import { sopsPlaybooksSections } from "./academy/sops-playbooks";
 import { firstWeekSections } from "./academy/first-week";
+import { marketLaunchSections } from "./academy/market-launch";
 
 export interface AcademyModule {
   id: string;
@@ -128,6 +129,15 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     estimatedMinutes: 25,
     category: "setup",
     sections: plansBundlesSections,
+  },
+  {
+    id: "market-launch",
+    title: "Market Launch & Provider Recruitment",
+    subtitle: "Provider targeting, the recruitment pitch, pilot launch checklist, and the 12-week milestone map. How to go from zero to a live zone.",
+    icon: Rocket,
+    estimatedMinutes: 30,
+    category: "setup",
+    sections: marketLaunchSections,
   },
   {
     id: "support-operations",

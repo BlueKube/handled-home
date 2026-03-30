@@ -10,7 +10,7 @@
 
 | Batch | Title | Size | Files | Status | Context |
 |-------|-------|------|-------|--------|---------|
-| B1 | Fold into existing modules (R1, R2) | M | sku-catalog.ts, zones-markets.ts | ⬜ | |
+| B1 | Fold into existing modules (R1, R2) | M | sku-catalog.ts, zones-markets.ts | ✅ | |
 | B2 | New Market Launch module (R3) | M | market-launch.ts, academy-modules.ts | ⬜ | |
 
 ---
