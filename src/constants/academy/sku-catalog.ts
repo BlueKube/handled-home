@@ -75,7 +75,7 @@ A completed job without proof photos is an unverified claim. It may be perfectly
     steps: [
       {
         title: "Who to interview and how many",
-        description: "Interview 5-10 providers across your target service categories before calibrating any SKU. Mix experience levels: include at least 2 mid-career providers (15-25 existing customers, 2-5 years in business) and 1-2 newer operators. Mid-career providers give you the most realistic duration and cost data because they've optimized their workflow but aren't so fast that their numbers are outliers. One provider's numbers are an anecdote. Three providers saying the same thing is data you can act on.",
+        description: "Interview 5-10 providers across your target service categories before calibrating any SKU. Mix experience levels: include at least 2 mid-career providers (15-25 existing customers, 2-5 years in business) and 1-2 newer operators. Mid-career providers give you the most realistic duration and cost data because they've optimized their workflow but aren't so fast that their numbers are outliers.",
         screenshot: { alt: "Provider interview scheduling tracker" },
       },
       {
@@ -94,7 +94,7 @@ Also ask economics questions: "What do you currently charge per visit? What's yo
       },
       {
         title: "Map interview data to system parameters",
-        description: `Every interview answer maps to a specific system setting. Here's the translation table:
+        description: `The interview is only valuable if you actually put the data into the system. Every answer maps to a specific setting — miss a translation and you did the work for nothing.
 
 • Basic service duration → sku_levels.planned_minutes (SKU Levels)
 • Equipment needed → provider capabilities / equipment kits (Provider work profile)
@@ -106,12 +106,12 @@ Also ask economics questions: "What do you currently charge per visit? What's yo
 • Property size impact on duration → sku_levels by tier (Level auto-selection)
 • Seasonal patterns → seasonal service templates (Seasonal calendar)
 
-Don't eyeball the translation. Enter the raw provider data into the calibration form, read the delta indicators, and let the system show you where your seed data was wrong. See the SKU Calibration section above for the step-by-step workflow.`,
+The most common mistake is mapping duration answers to the wrong level tier — a provider saying "45 minutes" for a standard lot doesn't mean 45 minutes for the Maintenance level. Always verify which level they're describing before entering data. Use the SKU Calibration workflow above to enter and validate.`,
         screenshot: { alt: "Interview data to system parameter mapping table" },
       },
       {
         title: "Validate with a delta review before applying",
-        description: "After entering provider-reported data, the calibration page shows delta indicators. Green (<5%) means your guess was close. Yellow (5-20%) means adjust. Red (>20%) means your scheduling, billing, and route planning are based on wrong numbers — fix immediately. If two providers gave you wildly different numbers for the same service, investigate: are they working different property sizes? Different service levels? Different equipment? The discrepancy is data, not noise. For the full provider recruitment and interview playbook — including who to target, where to find them, and how to pitch — see the Market Launch & Provider Recruitment module.",
+        description: "After entering provider data, the calibration page shows delta indicators — see SKU Calibration above for the full threshold breakdown. What matters at this step: if two providers gave you wildly different numbers for the same service, investigate before averaging. Are they working different property sizes? Different service levels? Different equipment? The discrepancy is data, not noise — it usually means your level definitions aren't granular enough, or your property-size tiers need adjustment. For the full provider recruitment and interview playbook — including who to target, where to find them, and how to pitch — see the Market Launch & Provider Recruitment module.",
         screenshot: { alt: "Calibration delta review with provider data comparison" },
       },
     ],

@@ -179,9 +179,9 @@ Where:
 • home_ownership_rate: from ACS data (target >60%)
 • income_qualifying_rate: % of households with HHI >$75K (target >40%)
 • conversion_rate: conservative 1-2% at launch (proven markets may hit 3-5%)
-• min_customers: 15 per zone for provider economics to work at launch
+• min_customers: 15 — this is the mathematical floor to justify drawing the boundary at all (enough jobs for providers to cover gas and time). It is NOT the operational launch target. The capacity section above defines the real thresholds: 50 waitlisted customers before soft launch, 100 before the zone stops being fragile, 200 before the flywheel is self-sustaining.
 
-Example: A zone with 25,000 homes, 70% ownership, 45% income-qualifying, at 1.5% conversion = 25,000 × 0.70 × 0.45 × 0.015 = 118 customers. That's well above the 15 minimum and approaching the 200 self-sustaining threshold from the capacity section above.
+Example: A zone with 25,000 homes, 70% ownership, 45% income-qualifying, at 1.5% conversion = 25,000 × 0.70 × 0.45 × 0.015 = 118 customers. That clears the 15-customer viability floor and puts you in the 100-200 range where the zone is growing but still needs active management before reaching the 200 self-sustaining threshold.
 
 HOW THIS CONNECTS TO THE H3 HEX GRID
 
@@ -207,10 +207,10 @@ A zone is ready to expand (add a second zone in the same metro, or replicate the
 • 60-day customer retention: >70% — Proves the subscription delivers enough value that customers stay.
 • Provider NPS: >40 — Proves providers will recommend the platform. Below 40, you'll struggle to recruit in a new zone via word-of-mouth.
 • Attach rate (2nd service within 60 days): >25% — Proves bundle expansion is working, not just single-service adoption.
-• Gross margin per zone: >15% — Proves unit economics are viable. Below 15%, expansion just multiplies losses.
+• Gross margin per zone: >15% — Proves unit economics are viable at launch scale. Below 15%, expansion just multiplies losses. (The mature-zone operating target is 25%+ — see the Ops Cockpit health gauges. 15% is the minimum to prove the model works before density improvements push margin higher.)
 • Support minutes per job: <5 min — Proves ops are scalable. Above 5 min/job, you'll drown in tickets when volume doubles.
 
-If any metric is below threshold, fix it in the existing zone before opening a new one. Expansion amplifies both your strengths and your weaknesses.
+If any metric is below threshold, fix it in the existing zone before opening a new one. There is no partial credit — a zone at 14% margin is not "almost ready to expand," it's a margin problem that will be worse in a new market where you have zero operational efficiency gains. Expansion amplifies both your strengths and your weaknesses.
 
 REGIONAL VARIATION — WHAT CHANGES MARKET TO MARKET
 
@@ -221,7 +221,7 @@ When expanding to a new metro or region, these factors vary and need local calib
 • Income: Higher income markets support higher subscription prices. Use zone pricing multipliers (set in the Control Room) rather than changing base prices.
 • Density: Urban vs. suburban vs. exurban changes zone radius, stops-per-day targets, and the minimum provider count needed for acceptable response times.
 • Competition: Saturated markets have abundant provider supply to recruit from but face customer acquisition headwinds. Underserved markets have the opposite profile.
-• Regulation: Some states require licensing for pest control, tree trimming, or pressure washing. Map compliance requirements per category before launching in a new state.
+• Regulation: Check this first — it's the one that can block you entirely. Some states require licensing for pest control, tree trimming, or pressure washing. A licensing requirement can make an entire service category non-viable in a new state, which changes your plan and bundle composition before you recruit a single provider. Map compliance requirements per category before doing anything else in a new market.
 
 THE GOAL: REPLICABLE MARKET LAUNCH
 
