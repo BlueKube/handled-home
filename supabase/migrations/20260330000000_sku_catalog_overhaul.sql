@@ -636,3 +636,177 @@ INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_descriptio
   true
 )
 ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- ============================================================
+-- PRD-046 B2: Treatment & Seasonal SKU Levels
+-- ============================================================
+
+-- Weed Treatment: 3 levels
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+(
+  'c2000000-0000-0000-0005-000000000001',
+  'c1000000-0000-0000-0000-000000000005', 1,
+  'Spot Treatment', 'Target visible weeds only — no broadcast application',
+  ARRAY['Spot spray visible weeds','Mark treated areas'],
+  ARRAY['Broadcast spray','Pre-emergent application','Bed treatment','Hardscape treatment'],
+  20, 1, 5,
+  '[{"label":"Spot spray visible weeds","required":true},{"label":"Mark treated areas","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-0005-000000000002',
+  'c1000000-0000-0000-0000-000000000005', 2,
+  'Full Lawn', 'Broadcast spray across full lawn plus spot treatment',
+  ARRAY['Pre-emergent or post-emergent application','Broadcast spray full lawn','Spot treatment of visible weeds','Post notification sign'],
+  ARRAY['Hand weeding','Bed weed barrier installation','Invasive species removal','Hardscape treatment'],
+  35, 1, 8,
+  '[{"label":"Apply pre/post-emergent","required":true},{"label":"Broadcast spray full lawn","required":true},{"label":"Spot treat visible weeds","required":true},{"label":"Post notification sign","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-0005-000000000003',
+  'c1000000-0000-0000-0000-000000000005', 3,
+  'Comprehensive', 'Full lawn broadcast plus beds, hardscape cracks, and invasive ID',
+  ARRAY['Full lawn broadcast spray','Targeted bed treatment','Hardscape crack treatment','Invasive species identification and treatment','Post notification sign'],
+  ARRAY['Hand weeding','Bed weed barrier installation','Tree and shrub root treatment'],
+  55, 2, 13,
+  '[{"label":"Broadcast spray full lawn","required":true},{"label":"Treat beds","required":true},{"label":"Treat hardscape cracks","required":true},{"label":"ID and treat invasives","required":true},{"label":"Post notification sign","required":true}]'::jsonb,
+  true
+)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- Fertilization: 3 levels
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+(
+  'c2000000-0000-0000-0006-000000000001',
+  'c1000000-0000-0000-0000-000000000006', 1,
+  'Basic Application', 'Granular fertilizer — seasonal blend, full turf coverage',
+  ARRAY['Granular fertilizer application','Seasonal-appropriate blend','Full turf coverage'],
+  ARRAY['Soil testing','Liquid application','Spot treatment','Lime or sulfur adjustment'],
+  20, 1, 5,
+  '[{"label":"Apply granular fertilizer","required":true},{"label":"Cover full turf area","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-0006-000000000002',
+  'c1000000-0000-0000-0000-000000000006', 2,
+  'Standard Program', 'Granular or liquid application with slow-release formula',
+  ARRAY['Granular or liquid fertilizer application','Seasonal NPK blend','Full turf coverage','Slow-release formula'],
+  ARRAY['Soil testing','Aeration','Overseeding','Lime or sulfur adjustment'],
+  30, 1, 8,
+  '[{"label":"Apply fertilizer (granular or liquid)","required":true},{"label":"Cover full turf area","required":true},{"label":"Use slow-release formula","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-0006-000000000003',
+  'c1000000-0000-0000-0000-000000000006', 3,
+  'Premium Program', 'Custom NPK blend with liquid + granular and micronutrient supplement',
+  ARRAY['Custom NPK blend based on season','Liquid and granular application','Micronutrient supplement','Full turf coverage','Soil health notes provided'],
+  ARRAY['Soil lab testing','Aeration','Overseeding'],
+  45, 2, 13,
+  '[{"label":"Apply custom NPK blend","required":true},{"label":"Apply liquid and granular","required":true},{"label":"Add micronutrient supplement","required":true},{"label":"Cover full turf area","required":true},{"label":"Provide soil health notes","required":true}]'::jsonb,
+  true
+)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- Mulch Application: 3 levels
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+(
+  'c2000000-0000-0000-0007-000000000001',
+  'c1000000-0000-0000-0000-000000000007', 1,
+  'Basic Spread', 'Spread mulch at 2-3 inch depth — no edging or barrier',
+  ARRAY['Spread mulch at 2-3 inch depth','Basic cleanup of spills'],
+  ARRAY['Bed edging','Weed barrier','Old mulch removal','Plant detailing'],
+  90, 2, 13,
+  '[{"label":"Spread mulch at 2-3 inch depth","required":true},{"label":"Clean up spills","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-0007-000000000002',
+  'c1000000-0000-0000-0000-000000000007', 2,
+  'Edge & Spread', 'Edge all beds, lay weed barrier, spread and detail around plants',
+  ARRAY['Edge all beds','Lay weed barrier where needed','Spread mulch at 2-3 inch depth','Detail around plants and features'],
+  ARRAY['Old mulch removal','New bed creation','Planting','Soil amendment'],
+  180, 2, 22,
+  '[{"label":"Edge all beds","required":true},{"label":"Lay weed barrier","required":true},{"label":"Spread mulch evenly","required":true},{"label":"Detail around plants","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-0007-000000000003',
+  'c1000000-0000-0000-0000-000000000007', 3,
+  'Full Refresh', 'Remove old mulch, edge, install barrier, spread fresh at 3 inches, haul debris',
+  ARRAY['Remove old mulch top layer','Edge all beds','Install weed barrier','Spread fresh mulch at 3 inch depth','Detail around all plants and features','Clean up all spills','Haul away debris'],
+  ARRAY['New bed creation','Planting','Soil amendment','Hardscape repair'],
+  300, 3, 35,
+  '[{"label":"Remove old mulch layer","required":true},{"label":"Edge all beds","required":true},{"label":"Install weed barrier","required":true},{"label":"Spread mulch at 3 inches","required":true},{"label":"Detail around plants","required":true},{"label":"Haul away debris","required":true}]'::jsonb,
+  true
+)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- Spring Prep: 3 levels
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+(
+  'c2000000-0000-0000-0008-000000000001',
+  'c1000000-0000-0000-0000-000000000008', 1,
+  'Basic Cleanup', 'Clear winter debris and first mow — no bed work or treatment',
+  ARRAY['Rake and blow winter debris from lawn','Cut back dead perennials','First mow of season'],
+  ARRAY['Bed edging','Pre-emergent application','Shrub pruning','Mulch application','Aeration'],
+  120, 2, 13,
+  '[{"label":"Clear winter debris from lawn","required":true},{"label":"Cut back dead perennials","required":true},{"label":"First mow of season","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-0008-000000000002',
+  'c1000000-0000-0000-0000-000000000008', 2,
+  'Standard Prep', 'Full cleanup with bed edging, pre-emergent, and shrub pruning',
+  ARRAY['Rake and blow winter debris from lawn and beds','Cut back dead perennials','Edge all beds','Pre-emergent weed treatment','Prune dead and damaged shrub branches','First mow of season'],
+  ARRAY['Mulch application','Aeration','Overseeding','Fertilizer application','Tree pruning above 10 feet'],
+  240, 2, 25,
+  '[{"label":"Clear winter debris","required":true},{"label":"Cut back perennials","required":true},{"label":"Edge beds","required":true},{"label":"Apply pre-emergent","required":true},{"label":"Prune shrubs","required":true},{"label":"First mow","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-0008-000000000003',
+  'c1000000-0000-0000-0000-000000000008', 3,
+  'Premium Prep', 'Complete spring restoration — full debris removal, bed redefining, weed pulling, plant assessment',
+  ARRAY['Full debris removal from lawn, beds, and hardscapes','Cut back all perennials','Edge and redefine all beds','Pre-emergent weed treatment','Spot weed pulling','Prune all shrubs','First mow with bagging','Blow all hardscapes clean','Plant health assessment'],
+  ARRAY['Mulch application','Aeration','Overseeding','Fertilizer application','Tree pruning above 10 feet'],
+  420, 3, 44,
+  '[{"label":"Full debris removal","required":true},{"label":"Cut back all perennials","required":true},{"label":"Edge and redefine beds","required":true},{"label":"Apply pre-emergent","required":true},{"label":"Spot weed pulling","required":true},{"label":"Prune all shrubs","required":true},{"label":"First mow with bagging","required":true},{"label":"Blow hardscapes","required":true},{"label":"Plant health assessment","required":true}]'::jsonb,
+  true
+)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- Fall Prep: 3 levels
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+(
+  'c2000000-0000-0000-000f-000000000001',
+  'c1000000-0000-0000-0000-00000000000f', 1,
+  'Basic Cleanup', 'Single-pass leaf removal, final mow, blow beds and hardscapes',
+  ARRAY['Single-pass leaf removal','Final mow of season','Blow beds and hardscapes'],
+  ARRAY['Perennial cutback','Winterizer application','Overseeding','Gutter cleaning','Shrub wrapping'],
+  120, 2, 13,
+  '[{"label":"Remove leaves (single pass)","required":true},{"label":"Final mow of season","required":true},{"label":"Blow beds and hardscapes","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-000f-000000000002',
+  'c1000000-0000-0000-0000-00000000000f', 2,
+  'Standard Prep', 'Multi-pass leaf removal, perennial cutback, and winterizer application',
+  ARRAY['Full leaf removal (1-2 passes)','Final mow of season','Cut back perennials','Winterizer fertilizer application','Blow out beds and hardscapes'],
+  ARRAY['Gutter cleaning','Irrigation blowout','Shrub wrapping','Aeration','Mulch application'],
+  300, 2, 25,
+  '[{"label":"Full leaf removal","required":true},{"label":"Final mow","required":true},{"label":"Cut back perennials","required":true},{"label":"Apply winterizer","required":true},{"label":"Blow out beds and hardscapes","required":true}]'::jsonb,
+  true
+),
+(
+  'c2000000-0000-0000-000f-000000000003',
+  'c1000000-0000-0000-0000-00000000000f', 3,
+  'Premium Prep', 'Complete fall restoration — multi-pass leaf clearing, overseeding, tender plant protection',
+  ARRAY['Multi-pass leaf removal until clear','Final mow with bagging','Cut back all perennials','Winterizer fertilizer application','Overseed bare spots','Blow out all beds and hardscapes','Protect tender plants','Full property walkthrough'],
+  ARRAY['Gutter cleaning','Irrigation blowout','Shrub wrapping','Mulch application'],
+  480, 3, 44,
+  '[{"label":"Multi-pass leaf removal","required":true},{"label":"Final mow with bagging","required":true},{"label":"Cut back all perennials","required":true},{"label":"Apply winterizer","required":true},{"label":"Overseed bare spots","required":true},{"label":"Blow out beds and hardscapes","required":true},{"label":"Protect tender plants","required":true},{"label":"Full property walkthrough","required":true}]'::jsonb,
+  true
+)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
