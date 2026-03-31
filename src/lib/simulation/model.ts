@@ -168,6 +168,7 @@ export const bounds: Record<string, [number, number]> = {
   plan_mix_essential: [0.15, 0.50],
   plan_mix_plus: [0.30, 0.60],
   plan_mix_premium: [0.05, 0.35],
+  billing_cycle_days: [28, 28],
 
   provider_payout_per_job_cents: [2500, 7500],
   provider_stops_per_day: [4, 10],
