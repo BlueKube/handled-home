@@ -186,6 +186,11 @@ The B2 fact-check review found 2 MUST-FIX issues: 4 of 6 margin percentages in t
 **Type:** Architecture
 Adding nullable override columns to sku_levels (presence_required, access_mode, weather_sensitive) with NULL = "inherit from parent SKU" is a clean pattern that avoids duplicating data while supporting per-level behavioral differences. Only 4 of 54 levels needed overrides (Window Cleaning L2/L3, Pest Control L2/L3), validating that the inheritance default handles 93% of cases without explicit values.
 
+### [2026-03-31] Workflow simplification: 6 planning levels → 4, "full pass" → "round"
+**Source:** Post-round workflow retrospective
+**Type:** Workflow
+Eliminated separate PRD files and the `docs/working/prd.md` layer. Each phase section in `FULL-IMPLEMENTATION-PLAN.md` is now a self-contained PRD — no separate file needed. Renamed "full pass" to "round" for clarity. Renamed workflow procedure headings from "Phase 0-7" to "Step 0-8" to avoid collision with implementation phases. Added glossary to both CLAUDE.md and WORKFLOW.md defining Round, Phase, Batch, and Step. Added "micro" review tier (1 agent) for mechanical batches and fact-checker lane for business-critical documents.
+
 ---
 
 ## Suggestions
