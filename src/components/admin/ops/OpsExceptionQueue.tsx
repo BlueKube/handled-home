@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertTriangle, Clock, Shield, Zap } from "lucide-react";
 import { formatDistanceToNow, differenceInHours } from "date-fns";
-import type { OpsExceptionFilters, OpsExceptionWithRelations } from "@/hooks/useOpsExceptions";
+import type { OpsExceptionFilters, OpsExceptionWithRelations, ExceptionDomain } from "@/hooks/useOpsExceptions";
 
 interface Props {
   exceptions: OpsExceptionWithRelations[];
@@ -62,7 +62,7 @@ export function OpsExceptionQueue({ exceptions, filters, onFilterChange, selecte
 
       {/* Filters */}
       <div className="flex gap-2 flex-wrap">
-        <Select value={filters.domain ?? "all"} onValueChange={(v) => onFilterChange({ ...filters, domain: v as any })}>
+        <Select value={filters.domain ?? "all"} onValueChange={(v) => onFilterChange({ ...filters, domain: v as ExceptionDomain, exception_type: "all" })}>
           <SelectTrigger className="w-[120px] h-8 text-xs">
             <SelectValue placeholder="Domain" />
           </SelectTrigger>
@@ -102,7 +102,7 @@ export function OpsExceptionQueue({ exceptions, filters, onFilterChange, selecte
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Active</SelectItem>
+            <SelectItem value="all">All Active</SelectItem>
             <SelectItem value="open">Open</SelectItem>
             <SelectItem value="acknowledged">Acknowledged</SelectItem>
             <SelectItem value="in_progress">In Progress</SelectItem>
