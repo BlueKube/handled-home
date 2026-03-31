@@ -5,6 +5,7 @@ import SimulatorControls from "@/components/admin/simulator/SimulatorControls";
 import SimulatorMetricCards from "@/components/admin/simulator/SimulatorMetricCards";
 import SimulatorCharts from "@/components/admin/simulator/SimulatorCharts";
 import SimulatorProjectionTable from "@/components/admin/simulator/SimulatorProjectionTable";
+import SimulatorPresets from "@/components/admin/simulator/SimulatorPresets";
 import { Activity } from "lucide-react";
 
 export default function Simulator() {
@@ -14,6 +15,10 @@ export default function Simulator() {
 
   const handleChange = (key: keyof ModelAssumptions, value: number) => {
     setCurrentAssumptions((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleLoadScenario = (loaded: ModelAssumptions) => {
+    setCurrentAssumptions({ ...loaded });
   };
 
   const result = useMemo(() => simulate(currentAssumptions), [currentAssumptions]);
@@ -34,6 +39,11 @@ export default function Simulator() {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1 max-h-[calc(100vh-16rem)] overflow-y-auto pr-1">
+          <SimulatorPresets
+            assumptions={currentAssumptions}
+            onLoad={handleLoadScenario}
+          />
+          <div className="mt-3" />
           <SimulatorControls
             assumptions={currentAssumptions}
             onChange={handleChange}
