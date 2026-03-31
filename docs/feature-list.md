@@ -83,6 +83,8 @@
 42. Courtesy upgrade: provider performs a higher level for free, once per property/SKU/6 months — 8/10
 43. Admin analytics: recommendation + courtesy upgrade counts, mismatch detection by zone — 8/10
 43b. 54 sku_levels seed data across 23 SKUs — research-calibrated handle costs, planned minutes, inclusions/exclusions, and proof checklists per level. Covers lawn care (4 SKUs), treatment/seasonal (5), specialty (5), new outdoor (4), and home assistant (5) — DONE
+43c. Market simulator validation of handle economics — break-even at 72.2% utilization, 44.6% margin at 40% target utilization. All 54 SKU/levels verified consistent with 7-handle anchor model — DONE
+43d. Comprehensive SKU calibration reasoning report (docs/sku-calibration-report.md) — per-SKU pricing rationale, licensed service premium analysis, tier progression logic, deferred service documentation, and database field recommendations — DONE
 
 ---
 

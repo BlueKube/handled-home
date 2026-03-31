@@ -164,6 +164,18 @@ The cleanup PRD (PRD-043, 3 batches) took less effort than the original build bu
 **Type:** Agent Signal
 Replacing standard code-review lanes (Spec Completeness / Bug Scan / Historical Context) with content-appropriate lanes (Senior Editor / Fact Checker / Synthesis) produced higher-quality findings. The Fact Checker lane caught 5 of 8 issues by cross-referencing training content against the actual codebase — something a standard Bug Scan lane wouldn't attempt on `.ts` content files. Custom lanes should be considered for any batch where the content type doesn't match the default lane focus.
 
+## Session 4 Lessons (2026-03-31)
+
+### [2026-03-31] Per-handle margin is always negative by design — this is not a bug
+**Source:** PRD-047 B1 (Simulator Validation)
+**Type:** Workflow
+Revenue per handle ($6.03) < cost per handle ($7.86) means every individual service visit is a net loss. The subscription model profits from handle underutilization (break-even at 72.2%). Initial validation scripts that flag "negative margin" on every SKU are correct but misleading — the flag logic needs to account for the underutilization model rather than treating each negative-margin SKU as a problem.
+
+### [2026-03-31] Standalone validation tools benefit from review just like production code
+**Source:** PRD-047 B1 review
+**Type:** Agent Signal
+The B1 review found 2 SHOULD-FIX issues in a tools/ script — display logic that silently suppressed warnings, and hardcoded values that would go stale. Even non-production tooling that generates reports needs review, because misleading tool output leads to bad business decisions.
+
 ---
 
 ## Suggestions
