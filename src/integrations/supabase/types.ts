@@ -9890,6 +9890,12 @@ export type Database = {
         | "customer_reschedule"
         | "weather_safety"
         | "quality_block"
+        | "payment_failed"
+        | "payment_past_due"
+        | "payout_failed"
+        | "dispute_opened"
+        | "earnings_held"
+        | "reconciliation_mismatch"
       plan_window: "locked" | "draft"
       provider_application_status:
         | "draft"
@@ -10183,6 +10189,12 @@ export const Constants = {
         "customer_reschedule",
         "weather_safety",
         "quality_block",
+        "payment_failed",
+        "payment_past_due",
+        "payout_failed",
+        "dispute_opened",
+        "earnings_held",
+        "reconciliation_mismatch",
       ],
       plan_window: ["locked", "draft"],
       provider_application_status: [
