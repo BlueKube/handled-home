@@ -3,6 +3,8 @@ import { assumptions as defaultAssumptions, type ModelAssumptions } from "@/lib/
 import { simulate } from "@/lib/simulation/simulate";
 import SimulatorControls from "@/components/admin/simulator/SimulatorControls";
 import SimulatorMetricCards from "@/components/admin/simulator/SimulatorMetricCards";
+import SimulatorCharts from "@/components/admin/simulator/SimulatorCharts";
+import SimulatorProjectionTable from "@/components/admin/simulator/SimulatorProjectionTable";
 import { Activity } from "lucide-react";
 
 export default function Simulator() {
@@ -37,11 +39,9 @@ export default function Simulator() {
             onChange={handleChange}
           />
         </div>
-        <div className="lg:col-span-3">
-          {/* Charts and projection table will be added in B3 */}
-          <div className="text-center text-muted-foreground py-20 border border-dashed rounded-lg">
-            Charts and monthly projection table (B3)
-          </div>
+        <div className="lg:col-span-3 space-y-4">
+          <SimulatorCharts result={result} />
+          <SimulatorProjectionTable result={result} />
         </div>
       </div>
     </div>
