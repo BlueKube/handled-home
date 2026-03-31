@@ -66,6 +66,19 @@ export interface ModelAssumptions {
   cac_per_customer_cents: number;
   monthly_ops_overhead_cents: number;
   monthly_tech_overhead_cents: number;
+
+  // === SEASONAL MULTIPLIERS (12-month arrays, Jan=0...Dec=11) ===
+  // Blended revenue multiplier per month. 1.0 = baseline, 0.6 = 40% drop.
+  // Weighted by service category mix: lawn ~60%, pest ~20%, windows ~10%, pool ~10%
+  seasonal_lawn: [number, number, number, number, number, number, number, number, number, number, number, number];
+  seasonal_pest: [number, number, number, number, number, number, number, number, number, number, number, number];
+  seasonal_windows: [number, number, number, number, number, number, number, number, number, number, number, number];
+  seasonal_pool: [number, number, number, number, number, number, number, number, number, number, number, number];
+  // Category weights for blending (must sum to 1.0)
+  seasonal_weight_lawn: number;
+  seasonal_weight_pest: number;
+  seasonal_weight_windows: number;
+  seasonal_weight_pool: number;
 }
 
 /**
@@ -153,6 +166,21 @@ export const assumptions: ModelAssumptions = {
   cac_per_customer_cents: 3500,  // BYOC = near-zero; organic = higher; blended
   monthly_ops_overhead_cents: 150000,  // 1 part-time ops person
   monthly_tech_overhead_cents: 35000,  // Supabase Pro + Resend + Stripe fees
+
+  // Seasonal multipliers — Austin, TX defaults
+  // Lawn: dormant Nov-Feb (0.6), ramp Mar/Oct (0.8), peak Apr-Sep (1.0)
+  seasonal_lawn:    [0.6, 0.6, 0.8, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.8, 0.6, 0.6],
+  // Pest: steady year-round, slight spring/summer bump
+  seasonal_pest:    [0.9, 0.9, 1.0, 1.1, 1.1, 1.1, 1.1, 1.1, 1.0, 1.0, 0.9, 0.9],
+  // Windows: spring/fall peaks, low winter
+  seasonal_windows: [0.5, 0.5, 0.8, 1.2, 1.0, 0.8, 0.8, 0.8, 1.0, 1.2, 0.7, 0.5],
+  // Pool: Mar-Oct active, closed Nov-Feb in Austin
+  seasonal_pool:    [0.0, 0.0, 0.5, 0.8, 1.0, 1.2, 1.2, 1.2, 1.0, 0.8, 0.3, 0.0],
+  // Category weights (approximate Austin service mix)
+  seasonal_weight_lawn: 0.55,
+  seasonal_weight_pest: 0.20,
+  seasonal_weight_windows: 0.15,
+  seasonal_weight_pool: 0.10,
 };
 
 /**
@@ -210,4 +238,14 @@ export const bounds: Record<keyof ModelAssumptions, [number, number]> = {
   cac_per_customer_cents: [1000, 15000],
   monthly_ops_overhead_cents: [50000, 500000],
   monthly_tech_overhead_cents: [20000, 150000],
+
+  // Seasonal — optimizer doesn't mutate these (fixed per market)
+  seasonal_lawn: [0.0, 1.5],
+  seasonal_pest: [0.0, 1.5],
+  seasonal_windows: [0.0, 1.5],
+  seasonal_pool: [0.0, 1.5],
+  seasonal_weight_lawn: [0.0, 1.0],
+  seasonal_weight_pest: [0.0, 1.0],
+  seasonal_weight_windows: [0.0, 1.0],
+  seasonal_weight_pool: [0.0, 1.0],
 };

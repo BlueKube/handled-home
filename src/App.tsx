@@ -148,6 +148,7 @@ const AdminControlChangeRequests = lazy(() => import("@/pages/admin/ControlChang
 const AdminControlChangeLog = lazy(() => import("@/pages/admin/ControlChangeLog"));
 const AdminControlConfig = lazy(() => import("@/pages/admin/ControlConfig"));
 const AdminPlaybooks = lazy(() => import("@/pages/admin/Playbooks"));
+const AdminSkuCalibration = lazy(() => import("@/pages/admin/SkuCalibration"));
 const AdminCronHealth = lazy(() => import("@/pages/admin/CronHealth"));
 const AdminSchedulingPolicy = lazy(() => import("@/pages/admin/SchedulingPolicy"));
 const AdminPlannerDashboard = lazy(() => import("@/pages/admin/PlannerDashboard"));
@@ -155,6 +156,9 @@ const AdminAssignmentDashboard = lazy(() => import("@/pages/admin/AssignmentDash
 const AdminAssignmentConfig = lazy(() => import("@/pages/admin/AssignmentConfig"));
 const AdminWindowTemplates = lazy(() => import("@/pages/admin/WindowTemplates"));
 const AdminSchedulingExceptions = lazy(() => import("@/pages/admin/SchedulingExceptions"));
+const AdminLaunchReadiness = lazy(() => import("@/pages/admin/LaunchReadiness"));
+const AdminAcademy = lazy(() => import("@/pages/admin/Academy"));
+const AdminAcademyModule = lazy(() => import("@/pages/admin/AcademyModule"));
 
 // Shared pages
 const SharedNotifications = lazy(() => import("@/pages/shared/Notifications"));
@@ -340,7 +344,11 @@ const App = () => (
                   <Route path="/admin/control/change-log" element={<AdminControlChangeLog />} />
                   <Route path="/admin/control/config" element={<AdminControlConfig />} />
                   <Route path="/admin/playbooks" element={<AdminPlaybooks />} />
+                  <Route path="/admin/sku-calibration" element={<AdminSkuCalibration />} />
                   <Route path="/admin/cron-health" element={<AdminCronHealth />} />
+                  <Route path="/admin/launch-readiness" element={<AdminLaunchReadiness />} />
+                  <Route path="/admin/academy" element={<AdminAcademy />} />
+                  <Route path="/admin/academy/:moduleId" element={<AdminAcademyModule />} />
                   <Route path="/admin/notifications" element={<SharedNotifications />} />
                 </Route>
 

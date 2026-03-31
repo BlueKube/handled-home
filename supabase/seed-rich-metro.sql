@@ -48,17 +48,249 @@ INSERT INTO user_roles (id, user_id, role) VALUES
   ('a1000000-0000-0000-0000-000000000003', 'f4000000-0000-0000-0000-000000000009', 'admin')
 ON CONFLICT (id) DO NOTHING;
 
--- Pre-seed: create missing service SKUs
-INSERT INTO service_skus (id, name, description, category, duration_minutes, base_price_cents, status, weather_sensitive) VALUES
-  ('c1000000-0000-0000-0000-000000000001', 'Standard Mow',     'Full lawn mowing service',          'mowing',  30, 4900, 'active', true),
-  ('c1000000-0000-0000-0000-000000000002', 'Edge & Trim',      'Edge trimming along all borders',   'mowing',  15, 1500, 'active', true),
-  ('c1000000-0000-0000-0000-000000000003', 'Leaf Cleanup',     'Full leaf removal and disposal',    'mowing',  45, 3500, 'active', true),
-  ('c1000000-0000-0000-0000-000000000004', 'Hedge Trimming',   'Shape and trim all hedges',         'mowing',  30, 2500, 'active', false),
-  ('c1000000-0000-0000-0000-000000000005', 'Weed Treatment',   'Spot weed treatment for beds',      'mowing',  20, 2000, 'active', true),
-  ('c1000000-0000-0000-0000-000000000006', 'Fertilization',    'Lawn fertilizer application',       'mowing',  20, 3000, 'active', true),
-  ('c1000000-0000-0000-0000-000000000007', 'Mulch Application','Spread mulch in garden beds',       'mowing',  45, 4500, 'active', true),
-  ('c1000000-0000-0000-0000-000000000008', 'Spring Prep',      'Full spring yard preparation',      'mowing',  60, 7500, 'active', true)
+-- Pre-seed: create service SKUs with research-calibrated data
+-- Handle cost anchor: 7 handles = 1 standard lawn mow (~45 min, ~$55 payout)
+INSERT INTO service_skus (id, name, description, category, duration_minutes, base_price_cents, handle_cost, status, weather_sensitive) VALUES
+  ('c1000000-0000-0000-0000-000000000001', 'Standard Mow',      'Full-service lawn mowing with edging and blowoff',            'mowing',     45,  7500,  7, 'active', true),
+  ('c1000000-0000-0000-0000-000000000002', 'Edge & Trim',       'Precision edge trimming along all borders and hardscapes',    'trimming',   25,  3500,  4, 'active', false),
+  ('c1000000-0000-0000-0000-000000000003', 'Leaf Cleanup',      'Seasonal leaf removal from lawn, beds, and hardscapes',       'cleanup',   120, 25000, 15, 'active', true),
+  ('c1000000-0000-0000-0000-000000000004', 'Hedge Trimming',    'Shape and maintain hedges and shrubs',                        'trimming',   90, 15000, 13, 'active', false),
+  ('c1000000-0000-0000-0000-000000000005', 'Weed Treatment',    'Targeted or broadcast herbicide for lawn weed control',       'treatment',  35,  8500,  8, 'active', true),
+  ('c1000000-0000-0000-0000-000000000006', 'Fertilization',     'Seasonal lawn fertilizer application',                        'treatment',  30,  7500,  8, 'active', true),
+  ('c1000000-0000-0000-0000-000000000007', 'Mulch Application', 'Spread mulch in garden beds with edging and weed barrier',    'cleanup',   180, 35000, 22, 'active', false),
+  ('c1000000-0000-0000-0000-000000000008', 'Spring Prep',       'Comprehensive spring yard preparation',                       'cleanup',   240, 35000, 25, 'active', true),
+  ('c1000000-0000-0000-0000-000000000009', 'Window Cleaning',   'Professional exterior window cleaning with frame wipe',        'windows',    90, 15000, 13, 'active', true),
+  ('c1000000-0000-0000-0000-00000000000a', 'Power Wash',        'Pressure washing for driveways, patios, and siding',          'power_wash',150, 30000, 25, 'active', true),
+  ('c1000000-0000-0000-0000-00000000000b', 'Pool Service',      'Weekly pool maintenance — chemical balance and cleaning',      'pool',       35,  5000,  6, 'active', false),
+  ('c1000000-0000-0000-0000-00000000000c', 'Pest Control',      'Exterior perimeter spray and treatment for general pests',     'pest',       25, 10000,  6, 'active', true),
+  ('c1000000-0000-0000-0000-00000000000d', 'Dog Poop Cleanup',  'Weekly yard waste removal for dog owners',                    'pet_waste',  15,  2000,  2, 'active', false),
+  ('c1000000-0000-0000-0000-00000000000e', 'Gutter Cleaning',   'Clear debris from gutters and flush downspouts',              'cleanup',    90, 17500, 15, 'active', true),
+  ('c1000000-0000-0000-0000-00000000000f', 'Fall Prep',         'Comprehensive fall yard preparation and winterization',       'cleanup',   240, 40000, 25, 'active', true),
+  ('c1000000-0000-0000-0000-000000000010', 'Trash Can Cleaning','Sanitize and deodorize residential trash and recycling cans', 'cleanup',    10,  3500,  3, 'active', false),
+  ('c1000000-0000-0000-0000-000000000011', 'Grill Cleaning',    'Professional grill deep clean with disassembly and degreasing','cleanup',   75, 17500, 13, 'active', false),
+  ('c1000000-0000-0000-0000-000000000012', 'Dryer Vent Cleaning','Professional dryer vent cleaning for fire prevention',       'home_assistant', 45, 14000, 11, 'active', false)
 ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- SKU Levels Seed Data (mirrors migration 20260330000000)
+-- ============================================================
+
+-- B1: Lawn Care Levels
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+-- Standard Mow: 3 levels
+('c2000000-0000-0000-0001-000000000001', 'c1000000-0000-0000-0000-000000000001', 1, 'Basic Mow', 'Mow and go — cut only, no edging or trimming',
+ ARRAY['Mow all turf areas','Mulch clippings in place'], ARRAY['Edging','String trimming','Blowing','Bagging'],
+ 30, 1, 5, '[{"label":"Mow all turf areas","required":true}]'::jsonb, true),
+('c2000000-0000-0000-0001-000000000002', 'c1000000-0000-0000-0000-000000000001', 2, 'Standard Mow', 'Full-service mow with edging, trimming, and blowoff',
+ ARRAY['Mow all turf areas','String trim around obstacles','Edge along hardscapes','Blow clippings off hardscapes'], ARRAY['Bagging','Bed edging','Spot weed pulling'],
+ 45, 1, 7, '[{"label":"Mow all turf areas","required":true},{"label":"String trim obstacles","required":true},{"label":"Edge hardscapes","required":true},{"label":"Blow off hardscapes","required":true}]'::jsonb, true),
+('c2000000-0000-0000-0001-000000000003', 'c1000000-0000-0000-0000-000000000001', 3, 'Premium Mow', 'Manicure cut — bagging, bed edge maintenance, and spot weed pulling',
+ ARRAY['Mow all turf areas with pattern alternation','String trim all obstacles','Edge along all hardscapes','Bag and remove clippings','Maintain bed edge lines','Spot pull weeds in beds','Blow all surfaces clean'], ARRAY['Fertilization','Weed treatment','Shrub trimming'],
+ 65, 2, 10, '[{"label":"Mow with pattern","required":true},{"label":"String trim","required":true},{"label":"Edge hardscapes","required":true},{"label":"Bag clippings","required":true},{"label":"Maintain bed edges","required":true},{"label":"Blow clean","required":true}]'::jsonb, true),
+-- Edge & Trim: 3 levels
+('c2000000-0000-0000-0002-000000000001', 'c1000000-0000-0000-0000-000000000002', 1, 'Trim Only', 'String trim around obstacles — no edging',
+ ARRAY['String trim around trees, fences, beds, and obstacles'], ARRAY['Stick edging','Bed edge re-cutting','Blowing'],
+ 15, 1, 2, '[{"label":"String trim all obstacles","required":true}]'::jsonb, true),
+('c2000000-0000-0000-0002-000000000002', 'c1000000-0000-0000-0000-000000000002', 2, 'Edge & Trim', 'String trim plus mechanical edging along all hardscapes',
+ ARRAY['String trim around all obstacles','Mechanical edge along sidewalks, driveways, and patios','Blow debris off hardscapes'], ARRAY['Bed edge re-cutting','Spot weeding','Detail work'],
+ 25, 1, 4, '[{"label":"String trim obstacles","required":true},{"label":"Edge hardscapes","required":true},{"label":"Blow debris","required":true}]'::jsonb, true),
+('c2000000-0000-0000-0002-000000000003', 'c1000000-0000-0000-0000-000000000002', 3, 'Detail Edge', 'Full edging with bed re-cutting and clean edge lines on all borders',
+ ARRAY['String trim around all obstacles','Mechanical edge along all hardscapes','Re-cut bed edges (spade or mechanical)','Clean edge lines on all bed borders','Blow all debris clean'], ARRAY['Mulch application','Planting','Weed treatment'],
+ 40, 1, 6, '[{"label":"String trim obstacles","required":true},{"label":"Edge hardscapes","required":true},{"label":"Re-cut bed edges","required":true},{"label":"Clean edge lines","required":true},{"label":"Blow clean","required":true}]'::jsonb, true),
+-- Leaf Cleanup: 3 levels
+('c2000000-0000-0000-0003-000000000001', 'c1000000-0000-0000-0000-000000000003', 1, 'Leaf Blowout', 'Blow leaves off lawn and hardscapes — no hauling',
+ ARRAY['Blow leaves off lawn areas','Blow leaves off hardscapes','Consolidate into tree line or designated pile'], ARRAY['Hauling','Gutter cleaning','Bed detail work','Raking'],
+ 45, 1, 8, '[{"label":"Blow leaves off lawn","required":true},{"label":"Blow hardscapes clean","required":true}]'::jsonb, true),
+('c2000000-0000-0000-0003-000000000002', 'c1000000-0000-0000-0000-000000000003', 2, 'Full Cleanup', 'Blow, rake beds, vacuum/mulch on lawn, pile at curb or one load haul-away',
+ ARRAY['Blow all lawn areas','Rake leaves from beds','Vacuum or mulch leaves on lawn','Pile at curb or load for haul-away (1 truck load)'], ARRAY['Gutter cleaning','Multiple haul-away trips','Branch removal','Perennial cutback'],
+ 120, 2, 15, '[{"label":"Blow all lawn areas","required":true},{"label":"Rake beds","required":true},{"label":"Vacuum/mulch lawn leaves","required":true},{"label":"Pile or load for haul-away","required":true}]'::jsonb, true),
+('c2000000-0000-0000-0003-000000000003', 'c1000000-0000-0000-0000-000000000003', 3, 'Removal & Haul', 'Complete leaf removal — all areas cleared, debris hauled, beds detailed',
+ ARRAY['Clear all areas including under shrubs and in beds','Detail bed cleanup','Load all debris for haul-away (unlimited)','Final blow of all hardscapes'], ARRAY['Tree pruning','Gutter cleaning','Mulch application'],
+ 180, 2, 25, '[{"label":"Clear all areas","required":true},{"label":"Clean under shrubs","required":true},{"label":"Detail beds","required":true},{"label":"Load for haul-away","required":true}]'::jsonb, true),
+-- Hedge Trimming: 3 levels
+('c2000000-0000-0000-0004-000000000001', 'c1000000-0000-0000-0000-000000000004', 1, 'Shape Trim', 'Maintain existing shape — trim new growth and blow debris',
+ ARRAY['Trim top and accessible sides to maintain shape','Blow debris off beds'], ARRAY['Reshaping','Interior thinning','Dead wood removal','Haul-away'],
+ 45, 1, 6, '[{"label":"Trim to existing shape","required":true},{"label":"Blow debris clean","required":true}]'::jsonb, true),
+('c2000000-0000-0000-0004-000000000002', 'c1000000-0000-0000-0000-000000000004', 2, 'Full Trim', 'Shape all sides plus dead branch removal and full cleanup',
+ ARRAY['Shape all sides including hard-to-reach areas','Remove dead branches','Clean up all debris on-site','Blow beds and hardscapes clean'], ARRAY['Rejuvenation pruning','Stump removal','Heavy reshaping','Chemical treatment'],
+ 90, 2, 13, '[{"label":"Shape all sides","required":true},{"label":"Remove dead branches","required":true},{"label":"Clean up debris","required":true},{"label":"Blow area clean","required":true}]'::jsonb, true),
+('c2000000-0000-0000-0004-000000000003', 'c1000000-0000-0000-0000-000000000004', 3, 'Sculpt & Restore', 'Species-appropriate pruning with thinning, reshaping, and haul-away',
+ ARRAY['Species-appropriate pruning (not just shearing)','Interior thinning for airflow','Full reshaping to desired form','Dead wood removal','All debris hauled away','Plant health assessment'], ARRAY['Tree work above 10 feet','Chemical treatment','Stump grinding'],
+ 150, 2, 22, '[{"label":"Prune species-appropriately","required":true},{"label":"Thin interior","required":true},{"label":"Reshape to form","required":true},{"label":"Remove dead wood","required":true},{"label":"Haul away debris","required":true}]'::jsonb, true)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- B2: Treatment & Seasonal Levels
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+-- Weed Treatment: 3 levels
+('c2000000-0000-0000-0005-000000000001', 'c1000000-0000-0000-0000-000000000005', 1, 'Spot Treatment', 'Target visible weeds only — no broadcast application',
+ ARRAY['Spot spray visible weeds','Mark treated areas'], ARRAY['Broadcast spray','Pre-emergent application','Bed treatment','Hardscape treatment'],
+ 20, 1, 5, '[{"label":"Spot spray visible weeds","required":true},{"label":"Mark treated areas","required":true}]'::jsonb, true),
+('c2000000-0000-0000-0005-000000000002', 'c1000000-0000-0000-0000-000000000005', 2, 'Full Lawn', 'Broadcast spray across full lawn plus spot treatment',
+ ARRAY['Pre-emergent or post-emergent application','Broadcast spray full lawn','Spot treatment of visible weeds','Post notification sign'], ARRAY['Hand weeding','Bed weed barrier installation','Invasive species removal','Hardscape treatment'],
+ 35, 1, 8, '[{"label":"Apply pre/post-emergent","required":true},{"label":"Broadcast spray full lawn","required":true},{"label":"Spot treat visible weeds","required":true},{"label":"Post notification sign","required":true}]'::jsonb, true),
+('c2000000-0000-0000-0005-000000000003', 'c1000000-0000-0000-0000-000000000005', 3, 'Comprehensive', 'Full lawn broadcast plus beds, hardscape cracks, and invasive ID',
+ ARRAY['Full lawn broadcast spray','Targeted bed treatment','Hardscape crack treatment','Invasive species identification and treatment','Post notification sign'], ARRAY['Hand weeding','Bed weed barrier installation','Tree and shrub root treatment'],
+ 55, 2, 13, '[{"label":"Broadcast spray full lawn","required":true},{"label":"Treat beds","required":true},{"label":"Treat hardscape cracks","required":true},{"label":"ID and treat invasives","required":true},{"label":"Post notification sign","required":true}]'::jsonb, true),
+-- Fertilization: 3 levels
+('c2000000-0000-0000-0006-000000000001', 'c1000000-0000-0000-0000-000000000006', 1, 'Basic Application', 'Granular fertilizer — seasonal blend, full turf coverage',
+ ARRAY['Granular fertilizer application','Seasonal-appropriate blend','Full turf coverage'], ARRAY['Soil testing','Liquid application','Spot treatment','Lime or sulfur adjustment'],
+ 20, 1, 5, '[{"label":"Apply granular fertilizer","required":true},{"label":"Cover full turf area","required":true}]'::jsonb, true),
+('c2000000-0000-0000-0006-000000000002', 'c1000000-0000-0000-0000-000000000006', 2, 'Standard Program', 'Granular or liquid application with slow-release formula',
+ ARRAY['Granular or liquid fertilizer application','Seasonal NPK blend','Full turf coverage','Slow-release formula'], ARRAY['Soil testing','Aeration','Overseeding','Lime or sulfur adjustment'],
+ 30, 1, 8, '[{"label":"Apply fertilizer (granular or liquid)","required":true},{"label":"Cover full turf area","required":true},{"label":"Use slow-release formula","required":true}]'::jsonb, true),
+('c2000000-0000-0000-0006-000000000003', 'c1000000-0000-0000-0000-000000000006', 3, 'Premium Program', 'Custom NPK blend with liquid + granular and micronutrient supplement',
+ ARRAY['Custom NPK blend based on season','Liquid and granular application','Micronutrient supplement','Full turf coverage','Soil health notes provided'], ARRAY['Soil lab testing','Aeration','Overseeding'],
+ 45, 2, 13, '[{"label":"Apply custom NPK blend","required":true},{"label":"Apply liquid and granular","required":true},{"label":"Add micronutrient supplement","required":true},{"label":"Cover full turf area","required":true},{"label":"Provide soil health notes","required":true}]'::jsonb, true),
+-- Mulch Application: 3 levels
+('c2000000-0000-0000-0007-000000000001', 'c1000000-0000-0000-0000-000000000007', 1, 'Basic Spread', 'Spread mulch at 2-3 inch depth — no edging or barrier',
+ ARRAY['Spread mulch at 2-3 inch depth','Basic cleanup of spills'], ARRAY['Bed edging','Weed barrier','Old mulch removal','Plant detailing'],
+ 90, 2, 13, '[{"label":"Spread mulch at 2-3 inch depth","required":true},{"label":"Clean up spills","required":true}]'::jsonb, true),
+('c2000000-0000-0000-0007-000000000002', 'c1000000-0000-0000-0000-000000000007', 2, 'Edge & Spread', 'Edge all beds, lay weed barrier, spread and detail around plants',
+ ARRAY['Edge all beds','Lay weed barrier where needed','Spread mulch at 2-3 inch depth','Detail around plants and features'], ARRAY['Old mulch removal','New bed creation','Planting','Soil amendment'],
+ 180, 2, 22, '[{"label":"Edge all beds","required":true},{"label":"Lay weed barrier","required":true},{"label":"Spread mulch evenly","required":true},{"label":"Detail around plants","required":true}]'::jsonb, true),
+('c2000000-0000-0000-0007-000000000003', 'c1000000-0000-0000-0000-000000000007', 3, 'Full Refresh', 'Remove old mulch, edge, install barrier, spread fresh at 3 inches, haul debris',
+ ARRAY['Remove old mulch top layer','Edge all beds','Install weed barrier','Spread fresh mulch at 3 inch depth','Detail around all plants and features','Clean up all spills','Haul away debris'], ARRAY['New bed creation','Planting','Soil amendment','Hardscape repair'],
+ 300, 3, 35, '[{"label":"Remove old mulch layer","required":true},{"label":"Edge all beds","required":true},{"label":"Install weed barrier","required":true},{"label":"Spread mulch at 3 inches","required":true},{"label":"Detail around plants","required":true},{"label":"Haul away debris","required":true}]'::jsonb, true),
+-- Spring Prep: 3 levels
+('c2000000-0000-0000-0008-000000000001', 'c1000000-0000-0000-0000-000000000008', 1, 'Basic Cleanup', 'Clear winter debris and first mow — no bed work or treatment',
+ ARRAY['Rake and blow winter debris from lawn','Cut back dead perennials','First mow of season'], ARRAY['Bed edging','Pre-emergent application','Shrub pruning','Mulch application','Aeration'],
+ 120, 2, 13, '[{"label":"Clear winter debris from lawn","required":true},{"label":"Cut back dead perennials","required":true},{"label":"First mow of season","required":true}]'::jsonb, true),
+('c2000000-0000-0000-0008-000000000002', 'c1000000-0000-0000-0000-000000000008', 2, 'Standard Prep', 'Full cleanup with bed edging, pre-emergent, and shrub pruning',
+ ARRAY['Rake and blow winter debris from lawn and beds','Cut back dead perennials','Edge all beds','Pre-emergent weed treatment','Prune dead and damaged shrub branches','First mow of season'], ARRAY['Mulch application','Aeration','Overseeding','Fertilizer application','Tree pruning above 10 feet'],
+ 240, 2, 25, '[{"label":"Clear winter debris","required":true},{"label":"Cut back perennials","required":true},{"label":"Edge beds","required":true},{"label":"Apply pre-emergent","required":true},{"label":"Prune shrubs","required":true},{"label":"First mow","required":true}]'::jsonb, true),
+('c2000000-0000-0000-0008-000000000003', 'c1000000-0000-0000-0000-000000000008', 3, 'Premium Prep', 'Complete spring restoration — full debris removal, bed redefining, weed pulling, plant assessment',
+ ARRAY['Full debris removal from lawn, beds, and hardscapes','Cut back all perennials','Edge and redefine all beds','Pre-emergent weed treatment','Spot weed pulling','Prune all shrubs','First mow with bagging','Blow all hardscapes clean','Plant health assessment'], ARRAY['Mulch application','Aeration','Overseeding','Fertilizer application','Tree pruning above 10 feet'],
+ 420, 3, 44, '[{"label":"Full debris removal","required":true},{"label":"Cut back all perennials","required":true},{"label":"Edge and redefine beds","required":true},{"label":"Apply pre-emergent","required":true},{"label":"Spot weed pulling","required":true},{"label":"Prune all shrubs","required":true},{"label":"First mow with bagging","required":true},{"label":"Blow hardscapes","required":true},{"label":"Plant health assessment","required":true}]'::jsonb, true),
+-- Fall Prep: 3 levels
+('c2000000-0000-0000-000f-000000000001', 'c1000000-0000-0000-0000-00000000000f', 1, 'Basic Cleanup', 'Single-pass leaf removal, final mow, blow beds and hardscapes',
+ ARRAY['Single-pass leaf removal','Final mow of season','Blow beds and hardscapes'], ARRAY['Perennial cutback','Winterizer application','Overseeding','Gutter cleaning','Shrub wrapping'],
+ 120, 2, 13, '[{"label":"Remove leaves (single pass)","required":true},{"label":"Final mow of season","required":true},{"label":"Blow beds and hardscapes","required":true}]'::jsonb, true),
+('c2000000-0000-0000-000f-000000000002', 'c1000000-0000-0000-0000-00000000000f', 2, 'Standard Prep', 'Multi-pass leaf removal, perennial cutback, and winterizer application',
+ ARRAY['Full leaf removal (1-2 passes)','Final mow of season','Cut back perennials','Winterizer fertilizer application','Blow out beds and hardscapes'], ARRAY['Gutter cleaning','Irrigation blowout','Shrub wrapping','Aeration','Mulch application'],
+ 300, 2, 25, '[{"label":"Full leaf removal","required":true},{"label":"Final mow","required":true},{"label":"Cut back perennials","required":true},{"label":"Apply winterizer","required":true},{"label":"Blow out beds and hardscapes","required":true}]'::jsonb, true),
+('c2000000-0000-0000-000f-000000000003', 'c1000000-0000-0000-0000-00000000000f', 3, 'Premium Prep', 'Complete fall restoration — multi-pass leaf clearing, overseeding, tender plant protection',
+ ARRAY['Multi-pass leaf removal until clear','Final mow with bagging','Cut back all perennials','Winterizer fertilizer application','Overseed bare spots','Blow out all beds and hardscapes','Protect tender plants','Full property walkthrough'], ARRAY['Gutter cleaning','Irrigation blowout','Shrub wrapping','Mulch application'],
+ 480, 3, 44, '[{"label":"Multi-pass leaf removal","required":true},{"label":"Final mow with bagging","required":true},{"label":"Cut back all perennials","required":true},{"label":"Apply winterizer","required":true},{"label":"Overseed bare spots","required":true},{"label":"Blow out beds and hardscapes","required":true},{"label":"Protect tender plants","required":true},{"label":"Full property walkthrough","required":true}]'::jsonb, true)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- B3: Specialty Service Levels
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+-- Window Cleaning: 3 levels
+('c2000000-0000-0000-0009-000000000001', 'c1000000-0000-0000-0000-000000000009', 1, 'Exterior Only', 'Exterior windows only — squeegee, rinse, screen and sill wipe',
+ ARRAY['Squeegee and rinse all exterior windows','Screen wipe down','Sill wipe'], ARRAY['Interior windows','Storm windows','Skylights','Hard water stain removal'],
+ 90, 2, 13, '[{"label":"Clean all exterior windows","required":true},{"label":"Wipe screens","required":true},{"label":"Wipe sills","required":true}]'::jsonb, true),
+('c2000000-0000-0000-0009-000000000002', 'c1000000-0000-0000-0000-000000000009', 2, 'Interior + Exterior', 'Both sides of all accessible windows plus screen and track cleaning',
+ ARRAY['Clean both sides of all accessible windows','Remove and clean screens','Clean sills and tracks'], ARRAY['Skylights','Hard water stain removal','Storm window disassembly'],
+ 180, 2, 22, '[{"label":"Clean interior windows","required":true},{"label":"Clean exterior windows","required":true},{"label":"Remove and clean screens","required":true},{"label":"Clean sills and tracks","required":true}]'::jsonb, true),
+('c2000000-0000-0000-0009-000000000003', 'c1000000-0000-0000-0000-000000000009', 3, 'Full Detail', 'All windows both sides, screen reinstall, track detailing, hard water treatment',
+ ARRAY['All windows interior and exterior','Screen removal, cleaning, and reinstall','Track and sill detailing','Hard water stain treatment','Storm window cleaning'], ARRAY['Skylight access requiring specialized equipment'],
+ 270, 3, 35, '[{"label":"Clean all windows both sides","required":true},{"label":"Remove, clean, reinstall screens","required":true},{"label":"Detail tracks and sills","required":true},{"label":"Treat hard water stains","required":true},{"label":"Clean storm windows","required":true}]'::jsonb, true),
+-- Power Wash: 3 levels
+('c2000000-0000-0000-000a-000000000001', 'c1000000-0000-0000-0000-00000000000a', 1, 'Single Surface', 'One surface type — driveway, patio, deck, or walkway',
+ ARRAY['Pre-treat stains on selected surface','Pressure wash one surface type','Blow dry edges'], ARRAY['Second surface types','House siding','Roof','Chemical treatment or sealing'],
+ 90, 2, 13, '[{"label":"Pre-treat stains","required":true},{"label":"Pressure wash surface","required":true},{"label":"Blow dry edges","required":true}]'::jsonb, true),
+('c2000000-0000-0000-000a-000000000002', 'c1000000-0000-0000-0000-00000000000a', 2, 'Home Exterior', 'House siding, foundation, all walkways and patios with mildew pre-treatment',
+ ARRAY['Wash house siding','Wash foundation','Wash all walkways and patios','Pre-treat mildew and algae'], ARRAY['Roof washing','Fencing','Deck','Chemical sealing'],
+ 150, 2, 25, '[{"label":"Wash house siding","required":true},{"label":"Wash foundation","required":true},{"label":"Wash walkways and patios","required":true},{"label":"Pre-treat mildew and algae","required":true}]'::jsonb, true),
+('c2000000-0000-0000-000a-000000000003', 'c1000000-0000-0000-0000-00000000000a', 3, 'Full Property', 'Complete property — siding, hardscapes, deck, fencing, furniture, post-wash inspection',
+ ARRAY['Wash siding and foundation','Wash all hardscapes','Wash deck and fencing','Wash driveway','Clean outdoor furniture','Pre-treat all surfaces','Post-wash inspection'], ARRAY['Roof washing','Paint stripping','Sealing or staining'],
+ 300, 3, 44, '[{"label":"Wash siding and foundation","required":true},{"label":"Wash all hardscapes","required":true},{"label":"Wash deck and fencing","required":true},{"label":"Wash driveway","required":true},{"label":"Clean outdoor furniture","required":true},{"label":"Post-wash inspection","required":true}]'::jsonb, true),
+-- Pool Service: 3 levels
+('c2000000-0000-0000-000b-000000000001', 'c1000000-0000-0000-0000-00000000000b', 1, 'Chemical Check', 'Test water chemistry and add chemicals as needed',
+ ARRAY['Test water chemistry (pH, chlorine, alkalinity)','Add chemicals as needed','Log readings'], ARRAY['Skimming','Brushing','Vacuuming','Equipment check'],
+ 15, 1, 3, '[{"label":"Test water chemistry","required":true},{"label":"Add chemicals as needed","required":true},{"label":"Log readings","required":true}]'::jsonb, true),
+('c2000000-0000-0000-000b-000000000002', 'c1000000-0000-0000-0000-00000000000b', 2, 'Weekly Maintenance', 'Skim, brush, vacuum, test and adjust chemicals, empty baskets',
+ ARRAY['Skim surface','Brush walls and tile line','Vacuum pool floor','Test and adjust chemicals','Empty skimmer baskets'], ARRAY['Filter cleaning','Equipment repair','Drain clearing'],
+ 35, 2, 6, '[{"label":"Skim surface","required":true},{"label":"Brush walls and tile line","required":true},{"label":"Vacuum floor","required":true},{"label":"Test and adjust chemicals","required":true},{"label":"Empty skimmer baskets","required":true}]'::jsonb, true),
+('c2000000-0000-0000-000b-000000000003', 'c1000000-0000-0000-0000-00000000000b', 3, 'Full Service', 'Complete pool care — weekly maintenance plus filter, equipment, and tile scrub',
+ ARRAY['Skim surface','Brush walls and tile line','Vacuum pool floor','Test and adjust chemicals','Empty skimmer baskets','Check pump and filter pressure','Backwash or clean filter','Inspect equipment','Clean pump strainer basket','Tile line scrub'], ARRAY['Equipment repair or replacement','Acid wash','Drain and refill'],
+ 50, 2, 8, '[{"label":"Skim surface","required":true},{"label":"Brush walls","required":true},{"label":"Vacuum floor","required":true},{"label":"Test chemicals","required":true},{"label":"Empty baskets","required":true},{"label":"Check pump/filter","required":true},{"label":"Clean filter","required":true},{"label":"Inspect equipment","required":true}]'::jsonb, true),
+-- Pest Control: 3 levels
+('c2000000-0000-0000-000c-000000000001', 'c1000000-0000-0000-0000-00000000000c', 1, 'Exterior Perimeter', 'Foundation perimeter spray, entry point treatment, web removal',
+ ARRAY['Perimeter spray around foundation','Entry point treatment (doors, windows, utility penetrations)','Web removal from exterior'], ARRAY['Interior treatment','Baiting systems','Crawlspace','Attic access'],
+ 25, 1, 6, '[{"label":"Spray foundation perimeter","required":true},{"label":"Treat entry points","required":true},{"label":"Remove exterior webs","required":true}]'::jsonb, true),
+('c2000000-0000-0000-000c-000000000002', 'c1000000-0000-0000-0000-00000000000c', 2, 'Interior + Exterior', 'Full perimeter plus interior baseboard, kitchen/bath, and crack treatment',
+ ARRAY['Full exterior perimeter spray','Interior baseboard spray','Kitchen and bath treatment','Crack and crevice application'], ARRAY['Crawlspace','Attic access','Baiting systems','Wildlife removal'],
+ 45, 2, 9, '[{"label":"Spray exterior perimeter","required":true},{"label":"Spray interior baseboards","required":true},{"label":"Treat kitchen and bath","required":true},{"label":"Crack and crevice application","required":true}]'::jsonb, true),
+('c2000000-0000-0000-000c-000000000003', 'c1000000-0000-0000-0000-00000000000c', 3, 'Comprehensive', 'Full interior/exterior, crawlspace/attic inspection, bait stations, service report',
+ ARRAY['Full interior and exterior treatment','Crawlspace and accessible attic inspection','Bait station placement','Targeted treatment by pest type','Detailed service report'], ARRAY['Wildlife removal','Structural repair','Fumigation'],
+ 75, 2, 15, '[{"label":"Full interior treatment","required":true},{"label":"Full exterior treatment","required":true},{"label":"Inspect crawlspace/attic","required":true},{"label":"Place bait stations","required":true},{"label":"Provide service report","required":true}]'::jsonb, true),
+-- Dog Poop Cleanup: 2 levels
+('c2000000-0000-0000-000d-000000000001', 'c1000000-0000-0000-0000-00000000000d', 1, 'Weekly Yard', 'Full yard walk, pick up and bag all waste, dispose — 1-dog household',
+ ARRAY['Walk full yard','Pick up and bag all waste','Tie and dispose in bin'], ARRAY['Deodorizing','Sanitizing','Patio or deck areas'],
+ 15, 1, 2, '[{"label":"Walk full yard","required":true},{"label":"Pick up all waste","required":true},{"label":"Dispose in bin","required":true}]'::jsonb, true),
+('c2000000-0000-0000-000d-000000000002', 'c1000000-0000-0000-0000-00000000000d', 2, 'Multi-Dog Yard', 'Full yard walk for multi-dog households, includes patio/deck check',
+ ARRAY['Full yard walk for multi-dog households','Pick up and bag all waste','Check patio and deck areas','Dispose in bin'], ARRAY['Deodorizing','Sanitizing','Kennel or run cleaning'],
+ 25, 1, 3, '[{"label":"Walk full yard","required":true},{"label":"Pick up all waste","required":true},{"label":"Check patio and deck","required":true},{"label":"Dispose in bin","required":true}]'::jsonb, true)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- B4: New SKU Levels
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active) VALUES
+-- Gutter Cleaning: 3 levels
+('c2000000-0000-0000-000e-000000000001', 'c1000000-0000-0000-0000-00000000000e', 1, 'Standard Clean', 'Clear gutters and downspouts, flush with water, basic debris removal',
+ ARRAY['Clear gutters of debris','Flush downspouts with water','Basic debris removal from ground'], ARRAY['Gutter guard installation','Fascia repair','Roof debris removal','Sealing'],
+ 75, 2, 10, '[{"label":"Clear all gutters","required":true},{"label":"Flush downspouts","required":true},{"label":"Remove ground debris","required":true}]'::jsonb, true),
+('c2000000-0000-0000-000e-000000000002', 'c1000000-0000-0000-0000-00000000000e', 2, 'Full Service', 'Clear, flush, minor sealing, roof edge cleanup, and ground cleanup',
+ ARRAY['Clear all gutters','Flush all downspouts','Minor gutter joint sealing','Roof edge debris removal','Ground cleanup around downspouts'], ARRAY['Gutter guard installation','Fascia or soffit repair','Roof work beyond edge'],
+ 120, 2, 15, '[{"label":"Clear all gutters","required":true},{"label":"Flush downspouts","required":true},{"label":"Seal joints","required":true},{"label":"Clean roof edge","required":true},{"label":"Ground cleanup","required":true}]'::jsonb, true),
+('c2000000-0000-0000-000e-000000000003', 'c1000000-0000-0000-0000-00000000000e', 3, 'Premium', 'Full system service — clear, flush, seal, check hangers, splash zones, photo documentation',
+ ARRAY['Clear and flush entire gutter system','Seal all joints','Check and tighten hangers','Clean ground splash zones','Full roof edge cleanup','Photo documentation of system condition'], ARRAY['Gutter guard installation','Structural repair','Roof work beyond edge'],
+ 150, 3, 22, '[{"label":"Clear and flush system","required":true},{"label":"Seal joints","required":true},{"label":"Check hangers","required":true},{"label":"Clean splash zones","required":true},{"label":"Photo documentation","required":true}]'::jsonb, true),
+-- Trash Can Cleaning: 1 level
+('c2000000-0000-0000-0010-000000000001', 'c1000000-0000-0000-0000-000000000010', 1, 'Monthly Wash', 'Power rinse interior and exterior, deodorize, set upright to dry',
+ ARRAY['Power rinse interior','Power rinse exterior','Deodorize','Set upright to dry'], ARRAY['Trash removal','Liner replacement','Pest treatment'],
+ 10, 1, 3, '[{"label":"Rinse interior","required":true},{"label":"Rinse exterior","required":true},{"label":"Deodorize","required":true}]'::jsonb, true),
+-- Grill Cleaning: 2 levels
+('c2000000-0000-0000-0011-000000000001', 'c1000000-0000-0000-0000-000000000011', 1, 'Quick Clean', 'Scrape grates, brush interior, wipe exterior, empty grease trap',
+ ARRAY['Scrape grates','Brush interior','Wipe exterior surfaces','Empty grease trap'], ARRAY['Part removal','Gas line check','Cover cleaning'],
+ 40, 1, 6, '[{"label":"Scrape grates","required":true},{"label":"Brush interior","required":true},{"label":"Wipe exterior","required":true},{"label":"Empty grease trap","required":true}]'::jsonb, true),
+('c2000000-0000-0000-0011-000000000002', 'c1000000-0000-0000-0000-000000000011', 2, 'Deep Clean', 'Full disassembly, soak and scrub, degrease, clean grease management, reassemble',
+ ARRAY['Disassemble removable parts','Soak and scrub grates and heat plates','Degrease interior','Clean exterior thoroughly','Empty and clean grease management system','Reassemble all parts'], ARRAY['Gas line work','Igniter replacement','Structural repair'],
+ 75, 2, 13, '[{"label":"Disassemble parts","required":true},{"label":"Soak and scrub grates","required":true},{"label":"Degrease interior","required":true},{"label":"Clean exterior","required":true},{"label":"Clean grease system","required":true},{"label":"Reassemble","required":true}]'::jsonb, true),
+-- Dryer Vent Cleaning: 2 levels
+('c2000000-0000-0000-0012-000000000001', 'c1000000-0000-0000-0000-000000000012', 1, 'Standard Clean', 'Disconnect, brush and vacuum full vent run, reconnect, test airflow',
+ ARRAY['Disconnect dryer from vent','Brush and vacuum full vent run','Reconnect dryer','Test airflow'], ARRAY['Booster fan service','Vent rerouting','Dryer service or repair'],
+ 40, 1, 8, '[{"label":"Disconnect dryer","required":true},{"label":"Brush and vacuum vent","required":true},{"label":"Reconnect dryer","required":true},{"label":"Test airflow","required":true}]'::jsonb, true),
+('c2000000-0000-0000-0012-000000000002', 'c1000000-0000-0000-0000-000000000012', 2, 'Clean + Inspect', 'Full vent cleaning plus cap inspection, lint trap deep clean, airflow measurement, condition report',
+ ARRAY['Full vent brush and vacuum','Exterior vent cap inspection','Lint trap deep clean','Airflow measurement before and after','Condition report with photos'], ARRAY['Vent replacement','Dryer repair','Booster fan installation'],
+ 60, 2, 11, '[{"label":"Brush and vacuum vent","required":true},{"label":"Inspect vent cap","required":true},{"label":"Deep clean lint trap","required":true},{"label":"Measure airflow","required":true},{"label":"Provide condition report","required":true}]'::jsonb, true)
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+-- B4: Home Assistant SKU Levels (name-based lookup for auto-generated UUIDs)
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active)
+SELECT 'c2000000-0000-0000-00a1-000000000001'::uuid, id, 1, 'Kitchen Reset', 'Dishes done, counters wiped, floor swept, trash taken out',
+ ARRAY['Dish washing and drying','Counter and stovetop wipe-down','Floor sweep and spot mop','Trash and recycling takeout','Appliance exterior wipe'], ARRAY['Deep cleaning behind appliances','Oven interior cleaning','Grocery shopping','Organizing pantry contents'],
+ 60, 1, 4, '[{"label":"Dishes washed and put away","required":true},{"label":"Counters wiped","required":true},{"label":"Floor swept","required":true},{"label":"Trash taken out","required":true}]'::jsonb, true
+FROM public.service_skus WHERE name = 'Kitchen Reset'
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active)
+SELECT 'c2000000-0000-0000-00a2-000000000001'::uuid, id, 1, 'Laundry Sprint', 'Focused laundry folding — sorted, folded, and placed',
+ ARRAY['Folding clean laundry','Sorting by person or type','Placing in designated areas'], ARRAY['Ironing or steaming','Washing or drying loads','Dry cleaning or delicates handling'],
+ 30, 1, 2, '[{"label":"Laundry folded","required":true},{"label":"Items sorted and placed","required":true}]'::jsonb, true
+FROM public.service_skus WHERE name = 'Laundry Folding Sprint'
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active)
+SELECT 'c2000000-0000-0000-00a3-000000000001'::uuid, id, 1, 'Quick Tidy', 'Surfaces cleared, cushions fluffed, common areas tidied',
+ ARRAY['Surface clearing and organizing','Cushion and pillow fluffing','General tidying of common areas','Light dusting of visible surfaces'], ARRAY['Deep cleaning','Moving heavy furniture','Organizing closets or drawers'],
+ 30, 1, 2, '[{"label":"Surfaces cleared","required":true},{"label":"Cushions arranged","required":true},{"label":"Visible areas tidied","required":true}]'::jsonb, true
+FROM public.service_skus WHERE name = 'Quick Tidy Sprint'
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active)
+SELECT 'c2000000-0000-0000-00a4-000000000001'::uuid, id, 1, 'Party Reset', 'Post-hosting reset — dishes, trash, surfaces, floors back to normal',
+ ARRAY['All dishes washed and put away','Trash and recycling collected','Counters and tables wiped','Floors swept and spot mopped','Furniture returned to position'], ARRAY['Stain removal from upholstery','Carpet shampooing','Outdoor cleanup'],
+ 90, 1, 6, '[{"label":"Dishes done","required":true},{"label":"Trash collected","required":true},{"label":"Surfaces wiped","required":true},{"label":"Floors swept","required":true}]'::jsonb, true
+FROM public.service_skus WHERE name = 'Post-Party Reset'
+ON CONFLICT (sku_id, level_number) DO NOTHING;
+
+INSERT INTO public.sku_levels (id, sku_id, level_number, label, short_description, inclusions, exclusions, planned_minutes, proof_photo_min, handles_cost, proof_checklist_template, is_active)
+SELECT 'c2000000-0000-0000-00a5-000000000001'::uuid, id, 1, 'Bed & Bath', 'Beds made, bathroom surfaces wiped, towels swapped, floors swept',
+ ARRAY['Bed making with fresh linens','Bathroom counter and mirror wipe','Toilet exterior clean','Towel swap','Floor sweep in both rooms'], ARRAY['Shower or tub deep scrub','Window washing','Closet organization'],
+ 60, 1, 4, '[{"label":"Bed made with fresh linens","required":true},{"label":"Bathroom surfaces wiped","required":true},{"label":"Towels swapped","required":true},{"label":"Floors swept","required":true}]'::jsonb, true
+FROM public.service_skus WHERE name = 'Bed + Bath Reset'
+ON CONFLICT (sku_id, level_number) DO NOTHING;
 
 DO $$
 DECLARE
@@ -112,7 +344,7 @@ DECLARE
   v_org7 uuid := 'f2000000-0000-0000-0000-000000000006'; -- Sunrise Property Care
   v_org8 uuid := 'f2000000-0000-0000-0000-000000000007'; -- Premier Pest Solutions
 
-  -- SKU IDs (all existing)
+  -- SKU IDs
   v_sku_mow     uuid := 'c1000000-0000-0000-0000-000000000001';
   v_sku_edge    uuid := 'c1000000-0000-0000-0000-000000000002';
   v_sku_leaf    uuid := 'c1000000-0000-0000-0000-000000000003';
@@ -126,6 +358,11 @@ DECLARE
   v_sku_pool    uuid := 'c1000000-0000-0000-0000-00000000000b';
   v_sku_pest    uuid := 'c1000000-0000-0000-0000-00000000000c';
   v_sku_poop    uuid := 'c1000000-0000-0000-0000-00000000000d';
+  v_sku_gutter  uuid := 'c1000000-0000-0000-0000-00000000000e';
+  v_sku_fall    uuid := 'c1000000-0000-0000-0000-00000000000f';
+  v_sku_trash   uuid := 'c1000000-0000-0000-0000-000000000010';
+  v_sku_grill   uuid := 'c1000000-0000-0000-0000-000000000011';
+  v_sku_dryer   uuid := 'c1000000-0000-0000-0000-000000000012';
 
   -- Existing property
   v_prop1 uuid := 'edfedf3d-251d-4de7-89a8-1ce5f439e12e';

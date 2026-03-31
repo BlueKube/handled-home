@@ -89,6 +89,29 @@
           <div class="slider-group" data-key="monthly_ops_overhead" data-min="500" data-max="5000" data-step="250" data-default="1500" data-format="dollar"></div>
           <div class="slider-group" data-key="monthly_tech_overhead" data-min="200" data-max="1500" data-step="100" data-default="350" data-format="dollar"></div>
         </div>
+
+        <!-- Seasonal Adjustments -->
+        <div class="card">
+          <div class="section-title">Seasonal Adjustments</div>
+          <div class="mb-2">
+            <label class="text-xs text-slate-400">Market Profile</label>
+            <select id="seasonal-preset" class="w-full mt-1 text-xs bg-slate-800 border border-slate-600 rounded-lg px-2 py-1.5 text-slate-200" onchange="applySeasonalPreset(this.value)">
+              <option value="austin">Austin, TX</option>
+              <option value="phoenix">Phoenix, AZ</option>
+              <option value="denver">Denver, CO</option>
+              <option value="charlotte">Charlotte, NC</option>
+              <option value="none">No Seasonality</option>
+            </select>
+          </div>
+          <div class="mb-2">
+            <label class="text-xs text-slate-400">Category Weights</label>
+            <div class="slider-group" data-key="sw_lawn" data-min="0" data-max="1" data-step="0.05" data-default="0.55" data-format="pct"></div>
+            <div class="slider-group" data-key="sw_pest" data-min="0" data-max="1" data-step="0.05" data-default="0.20" data-format="pct"></div>
+            <div class="slider-group" data-key="sw_windows" data-min="0" data-max="1" data-step="0.05" data-default="0.15" data-format="pct"></div>
+            <div class="slider-group" data-key="sw_pool" data-min="0" data-max="1" data-step="0.05" data-default="0.10" data-format="pct"></div>
+          </div>
+          <div id="seasonal-curve" class="mt-2"></div>
+        </div>
       </div>
 
       <!-- RIGHT: Results -->
@@ -174,6 +197,7 @@
                 <th class="py-2 text-right">Overhead</th>
                 <th class="py-2 text-right">Margin</th>
                 <th class="py-2 text-right">Margin %</th>
+                <th class="py-2 text-right">Seasonal</th>
               </tr>
             </thead>
             <tbody id="table-body"></tbody>
@@ -209,7 +233,80 @@
       monthly_tech_overhead: "Tech Overhead ($/mo)",
       byoc_bonus_weekly: "BYOC Bonus ($/wk/cust)",
       byoc_bonus_weeks: "Bonus Duration (weeks)",
+      sw_lawn: "Lawn Weight",
+      sw_pest: "Pest Weight",
+      sw_windows: "Windows Weight",
+      sw_pool: "Pool Weight",
     };
+
+    // === SEASONAL MULTIPLIER DATA ===
+    const SEASONAL_PRESETS = {
+      austin: {
+        lawn:    [0.6, 0.6, 0.8, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.8, 0.6, 0.6],
+        pest:    [0.9, 0.9, 1.0, 1.1, 1.1, 1.1, 1.1, 1.1, 1.0, 1.0, 0.9, 0.9],
+        windows: [0.5, 0.5, 0.8, 1.2, 1.0, 0.8, 0.8, 0.8, 1.0, 1.2, 0.7, 0.5],
+        pool:    [0.0, 0.0, 0.5, 0.8, 1.0, 1.2, 1.2, 1.2, 1.0, 0.8, 0.3, 0.0],
+      },
+      phoenix: {
+        lawn:    [0.7, 0.7, 0.9, 1.0, 1.0, 0.8, 0.7, 0.7, 0.9, 1.0, 0.8, 0.7],
+        pest:    [0.8, 0.8, 1.0, 1.2, 1.2, 1.2, 1.2, 1.2, 1.1, 1.0, 0.8, 0.8],
+        windows: [0.6, 0.6, 0.9, 1.1, 0.9, 0.7, 0.7, 0.7, 0.9, 1.1, 0.8, 0.6],
+        pool:    [0.3, 0.3, 0.7, 1.0, 1.2, 1.2, 1.2, 1.2, 1.1, 0.8, 0.5, 0.3],
+      },
+      denver: {
+        lawn:    [0.0, 0.0, 0.4, 0.8, 1.0, 1.0, 1.0, 1.0, 0.9, 0.6, 0.2, 0.0],
+        pest:    [0.5, 0.5, 0.8, 1.0, 1.1, 1.1, 1.1, 1.1, 1.0, 0.8, 0.5, 0.5],
+        windows: [0.3, 0.3, 0.6, 1.0, 1.2, 1.0, 1.0, 1.0, 1.2, 0.8, 0.4, 0.3],
+        pool:    [0.0, 0.0, 0.0, 0.5, 0.8, 1.2, 1.2, 1.2, 0.8, 0.3, 0.0, 0.0],
+      },
+      charlotte: {
+        lawn:    [0.5, 0.5, 0.8, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.8, 0.5, 0.5],
+        pest:    [0.8, 0.8, 1.0, 1.1, 1.1, 1.1, 1.1, 1.1, 1.0, 1.0, 0.8, 0.8],
+        windows: [0.5, 0.5, 0.8, 1.1, 1.0, 0.8, 0.8, 0.8, 1.0, 1.1, 0.7, 0.5],
+        pool:    [0.0, 0.0, 0.3, 0.7, 1.0, 1.2, 1.2, 1.2, 1.0, 0.7, 0.2, 0.0],
+      },
+      none: {
+        lawn:    [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+        pest:    [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+        windows: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+        pool:    [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+      },
+    };
+    let currentSeasonal = SEASONAL_PRESETS.austin;
+
+    function applySeasonalPreset(name) {
+      currentSeasonal = SEASONAL_PRESETS[name] || SEASONAL_PRESETS.austin;
+      renderSeasonalCurve();
+      runSimulation();
+    }
+
+    function getSeasonalMultiplier(monthIdx) {
+      const wLawn = parseFloat(document.querySelector('[data-key="sw_lawn"] input')?.value ?? "0.55");
+      const wPest = parseFloat(document.querySelector('[data-key="sw_pest"] input')?.value ?? "0.20");
+      const wWindows = parseFloat(document.querySelector('[data-key="sw_windows"] input')?.value ?? "0.15");
+      const wPool = parseFloat(document.querySelector('[data-key="sw_pool"] input')?.value ?? "0.10");
+      return currentSeasonal.lawn[monthIdx] * wLawn +
+             currentSeasonal.pest[monthIdx] * wPest +
+             currentSeasonal.windows[monthIdx] * wWindows +
+             currentSeasonal.pool[monthIdx] * wPool;
+    }
+
+    function renderSeasonalCurve() {
+      const monthLabels = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const bars = monthLabels.map((lbl, i) => {
+        const mult = getSeasonalMultiplier(i);
+        const height = Math.round(mult * 24);
+        const color = mult >= 0.9 ? "#4ade80" : mult >= 0.7 ? "#fbbf24" : "#f87171";
+        return `<div class="flex flex-col items-center gap-0.5">
+          <span class="text-[9px] text-slate-400">${mult.toFixed(2)}</span>
+          <div style="height:${height}px;width:12px;background:${color};border-radius:2px;"></div>
+          <span class="text-[9px] text-slate-500">${lbl}</span>
+        </div>`;
+      });
+      document.getElementById("seasonal-curve").innerHTML =
+        `<div class="flex items-end justify-between gap-0.5">${bars.join("")}</div>
+         <p class="text-[10px] text-slate-500 mt-1 text-center">Blended seasonal multiplier by month</p>`;
+    }
 
     function simulateZone(p) {
       const byocAtLaunch = Math.round(p.providers_at_launch * p.byoc_customers_per_provider * p.byoc_invite_send_rate * p.byoc_activation_rate);
@@ -236,10 +333,14 @@
 
         const attachRate = m <= 1 ? 0.08 : m <= 2 ? 0.18 : p.attach_rate_90d;
         secondService = Math.round(active * attachRate);
-        const jobs = Math.round(active * jobsPerCust) + Math.round(secondService * (3 / handlesPerJob));
+
+        // Apply seasonal multiplier to jobs (fewer lawn mows in winter)
+        const seasonalMult = getSeasonalMultiplier((m - 1) % 12);
+        const jobs = Math.round(active * jobsPerCust * seasonalMult) + Math.round(secondService * (3 / handlesPerJob) * seasonalMult);
 
         const avgSub = p.essential_price * 100 * p.plan_mix_essential + p.plus_price * 100 * p.plan_mix_plus + p.premium_price * 100 * planMixPremium;
-        const revenue = Math.round(active * avgSub) + Math.round(secondService * 3 * 500);
+        // Subscription revenue is fixed (customers pay regardless of season); addon revenue scales with season
+        const revenue = Math.round(active * avgSub) + Math.round(secondService * 3 * 500 * seasonalMult);
         const provPay = Math.round(jobs * p.provider_payout * 100);
         const bonusWeeklyCents = (p.byoc_bonus_weekly || 10) * 100;
         const bonusDurationMonths = Math.ceil((p.byoc_bonus_weeks || 12) / 4);
@@ -249,7 +350,7 @@
         const byocBonus = m <= bonusDurationMonths ? Math.round(survivingByoc * bonusWeeklyCents * 4) : 0;
         const refCredits = Math.round(newRef * 3000);
 
-        months.push({ month: m, customers: active, jobs, revenue, provPay, byocBonus, refCredits, newByoc, newRef, newOrg });
+        months.push({ month: m, customers: active, jobs, revenue, provPay, byocBonus, refCredits, newByoc, newRef, newOrg, seasonalMult });
       }
       return months;
     }
@@ -302,7 +403,7 @@
         const marginPct = rev > 0 ? (margin / rev) * 100 : -100;
         cumMargin += margin;
         if (cumMargin > 0 && !breakEven) breakEven = m + 1;
-        combined.push({ month: m + 1, customers: cust, jobs, revenue: rev, provPay: pay, overhead, margin, marginPct, cumMargin, newByoc: nByoc, newRef: nRef, newOrg: nOrg });
+        combined.push({ month: m + 1, customers: cust, jobs, revenue: rev, provPay: pay, overhead, margin, marginPct, cumMargin, newByoc: nByoc, newRef: nRef, newOrg: nOrg, seasonalMult: allZoneMonths[0][m].seasonalMult });
       }
 
       updateUI(combined, breakEven, zoneCount, overhead);
@@ -335,8 +436,9 @@
       ).join("");
 
       // Table
-      document.getElementById("table-body").innerHTML = months.map(m =>
-        `<tr class="border-b border-slate-800">
+      document.getElementById("table-body").innerHTML = months.map(m => {
+        const sColor = m.seasonalMult >= 0.9 ? 'positive' : m.seasonalMult >= 0.7 ? 'text-amber-400' : 'negative';
+        return `<tr class="border-b border-slate-800">
           <td class="py-1.5">${m.month}</td>
           <td class="text-right">${m.customers}</td>
           <td class="text-right">${m.jobs}</td>
@@ -345,8 +447,9 @@
           <td class="text-right">$${(m.overhead/100).toFixed(0)}</td>
           <td class="text-right ${m.margin >= 0 ? 'positive' : 'negative'}">$${(m.margin/100).toFixed(0)}</td>
           <td class="text-right ${m.marginPct >= 0 ? 'positive' : 'negative'}">${m.marginPct.toFixed(1)}%</td>
-        </tr>`
-      ).join("");
+          <td class="text-right ${sColor}">${m.seasonalMult.toFixed(2)}</td>
+        </tr>`;
+      }).join("");
 
       // Charts
       const labels = months.map(m => "M" + m.month);
@@ -670,11 +773,13 @@
       const valueSpan = el.querySelector(".value");
       input.addEventListener("input", () => {
         valueSpan.textContent = formatVal(parseFloat(input.value));
+        if (key.startsWith("sw_")) renderSeasonalCurve();
         runSimulation();
       });
     });
 
     // Initial run
+    renderSeasonalCurve();
     runSimulation();
   </script>
 </body>

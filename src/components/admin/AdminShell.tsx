@@ -24,12 +24,12 @@ import {
 import {
   Gauge, ListChecks, CalendarDays, CalendarClock, AlertTriangle,
   Users, Shield, Globe, BarChart3, Map,
-  Package, CreditCard, Layers, SlidersHorizontal,
+  Package, CreditCard, Layers, SlidersHorizontal, Scale,
   DollarSign, Wallet, Lock as LockIcon,
   Megaphone, TrendingUp,
   HelpCircle, FileText, BookOpen,
   Activity, Bell, MessageSquare, ToggleLeft,
-  Settings,
+  Settings, Rocket, GraduationCap,
 } from "lucide-react";
 import type { AdminRole } from "@/hooks/useAdminMembership";
 
@@ -89,6 +89,7 @@ const navGroups: NavGroup[] = [
     label: "Catalog",
     items: [
       { title: "SKUs", url: "/admin/skus", icon: Package },
+      { title: "SKU Calibration", url: "/admin/sku-calibration", icon: Scale },
       { title: "Level Analytics", url: "/admin/ops/levels", icon: SlidersHorizontal },
       { title: "Plans", url: "/admin/plans", icon: CreditCard },
       { title: "Bundles", url: "/admin/bundles", icon: Layers },
@@ -125,6 +126,7 @@ const navGroups: NavGroup[] = [
       { title: "Notification Health", url: "/admin/notification-health", icon: Bell },
       { title: "Feedback", url: "/admin/feedback", icon: MessageSquare },
       { title: "Test Toggles", url: "/admin/test-toggles", icon: ToggleLeft },
+      { title: "Launch Readiness", url: "/admin/launch-readiness", icon: Rocket },
     ],
   },
   {
@@ -141,6 +143,12 @@ const navGroups: NavGroup[] = [
     label: "Playbooks",
     items: [
       { title: "SOPs", url: "/admin/playbooks", icon: BookOpen },
+    ],
+  },
+  {
+    label: "Academy",
+    items: [
+      { title: "Training Center", url: "/admin/academy", icon: GraduationCap },
     ],
   },
 ];

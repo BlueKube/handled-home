@@ -63,8 +63,12 @@
 31. SKU lifecycle: draft → active → paused → archived (never hard-deleted) — 8/10
 32. Visual service catalog with hero images, featured flags, and category grouping — 8/10
 33. Customer-facing catalog with horizontal featured scroll, category groups, and search — 8/10
+33b. Customer service cards show entitlement badges (Included / Extra Allowed / Blocked / Available) based on subscription plan context — 8/10
 34. Admin duplicate-SKU action for safe scope changes — 8/10
 35. Weather sensitivity flag per SKU — 8/10
+35b. Admin SKU Calibration page: compare seed values vs. provider-reported durations/costs, delta highlighting, per-tier inputs, calibration export report — 8/10
+35c. 23 SKUs fully calibrated with routing metadata (scheduling_profile, access_mode, fulfillment_mode, weather_sensitive), handle costs anchored to 7-handle standard mow model, and structured inclusions/exclusions — DONE
+35d. 5 new SKUs added: Gutter Cleaning, Fall Prep, Trash Can Cleaning, Grill Cleaning, Dryer Vent Cleaning — DONE
 
 ---
 
@@ -78,6 +82,7 @@
 41. Level recommendation system with reason codes for providers to suggest the correct level — 8/10
 42. Courtesy upgrade: provider performs a higher level for free, once per property/SKU/6 months — 8/10
 43. Admin analytics: recommendation + courtesy upgrade counts, mismatch detection by zone — 8/10
+43b. 54 sku_levels seed data across 23 SKUs — research-calibrated handle costs, planned minutes, inclusions/exclusions, and proof checklists per level. Covers lawn care (4 SKUs), treatment/seasonal (5), specialty (5), new outdoor (4), and home assistant (5) — DONE
 
 ---
 
@@ -419,6 +424,7 @@
 221. Admin system config table with 18+ configurable parameters (dunning steps, bonus caps, thresholds) — 8/10
 222. Admin change request system with requester/reviewer workflow — 5/10
 223. Admin adjustment records for manual financial corrections — 8/10
+223b. Launch Readiness dashboard: 9 automated pre-launch checks (zones, SKUs, plans, Stripe pricing, providers, payouts, cron health, BYOC invites, entitlements) with green/red/amber status badges — 8/10
 
 ---
 
@@ -459,6 +465,7 @@
 241. 20+ deployed edge functions covering assignment, billing, weather, payouts, notifications, AI — 8/10
 242. Cron-based orchestrator (`run-scheduled-jobs`) with per-sub-job idempotency keys — 8/10
 243. `cron_run_log` for full observability of every automated run — 8/10
+243b. Deno integration tests for billing edge functions: run-billing-automation, process-payout, run-dunning, create-checkout-session — CORS, auth guard, error shape coverage — 7/10
 
 ---
 
@@ -623,6 +630,15 @@
 
 ---
 
+## XLII-B. Market Simulation Tool (Standalone) `margin-lever` `density-driver`
+
+348b. Zone-level market simulation engine: models subscription growth, churn, jobs, revenue, costs, and break-even across configurable time horizons — 8/10
+348c. Multi-zone combined P&L with aggregate break-even detection and zone-by-zone detail tables — 8/10
+348d. Seasonal revenue modeling: per-category 12-month multiplier arrays (lawn/pest/windows/pool) blended by service mix weights, with 5 market presets (Austin, Phoenix, Denver, Charlotte, None) — 8/10
+348e. Interactive simulation UI: sliders for all model assumptions, real-time chart and table updates, seasonal curve visualization — 8/10
+
+---
+
 ## XLIII. Simplicity by Design `mental-load-reduction`
 
 349. No calendar browsing anywhere — scheduling is automatic and routine-based — 7/10
@@ -691,4 +707,28 @@
 
 ---
 
-*Total features: 400 | Last updated: 2026-03-29 | Maturity ratings added | Value-prop tags added per section*
+## Admin Academy — Training Center `trust-builder` `provider-value`
+
+392. Academy shell: module grid with search, category filtering, and module detail pages — 8/10
+393. AnnotatedScreenshot component: CSS overlay annotation system with box, arrow, pulse, and step annotation types — 8/10
+394. AcademySection renderer: 7 content types (overview, walkthrough, pro-tips, watch-outs, automation, real-world, text) — 8/10
+395. Ops Cockpit & Daily Rhythm training module: morning check-in walkthrough, dispatcher queues, health gauges, real-world market data — 8/10
+396. Jobs & Scheduling Operations training module: 14-day planner, assignment engine, weather mode, scheduling policy — 8/10
+397. Exception Management training module: triage flow, common exception types, analytics guidance — 8/10
+398. Provider Lifecycle training module: application evaluation, onboarding, performance metrics, probation process — 8/10
+399. Customer Billing & Ledgers training module: subscription lifecycle, dunning ladder, credits/refunds, chargebacks — 8/10
+400. Provider Payouts & Money training module: payout schedule, holds, Stripe Connect, failure investigation — 8/10
+401. Zones, Capacity & Market Launch training module: zone design, health monitoring, capacity planning, launch process — 8/10
+402. SKU Catalog Management training module: SKU design, duration calibration, proof requirements, real-world pricing — 8/10
+403. Plans, Bundles & Entitlements training module: plan design, handle economy, entitlement versioning — 8/10
+404. Support Operations training module: ticket triage, common ticket types, macro library, provider-side support — 8/10
+405. Growth & Incentives training module: BYOC/BYOP/referral funnels, incentive management, fraud detection — 8/10
+406. Governance & System Health training module: cron health, audit log, feature toggles, launch readiness — 8/10
+407. Control Room (Superuser) training module: pricing hierarchy, payout rules, change requests — 8/10
+408. SOPs & Playbooks training module: 8 standard operating procedures with decision branching, daily/weekly rhythms — 8/10
+409. Your First Week onboarding module: 5-day structured plan (observe → shadow → do → own) — 8/10
+410. Market Launch & Provider Recruitment training module: provider targeting (3 archetypes), value prop/objection handling, pilot launch checklist, 12-week milestone map, success metrics — 8/10
+
+---
+
+*Total features: 429 | Last updated: 2026-03-30 | Session 3 features added (Admin Academy training center with 16 modules)*

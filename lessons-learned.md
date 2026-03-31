@@ -1,6 +1,6 @@
 # Lessons Learned & Suggestions
 
-> **Last updated:** 2026-03-29
+> **Last updated:** 2026-03-30
 
 Accumulated across all projects and sessions. Read at the start of every session.
 
@@ -146,6 +146,24 @@ Format:
 - **Handle-limited job calculation matters.** Assuming 4 jobs/customer/month (unlimited) produces wildly different economics than handle-limited consumption (~2-7 jobs depending on tier).
 - **The autoresearch loop works for business model optimization.** 100 experiments in <30 seconds, surfacing which assumptions matter most. Pricing sensitivity was the top finding.
 
+## Session 3 Lessons (2026-03-30)
+
+### [2026-03-30] Content work benefits from structured review even more than code does
+**Source:** PRD-043 (Academy Content Cleanup), post-hoc editorial + fact-checker review
+**Type:** Workflow
+15 Academy training modules were written in a single continuous session, skipping the PRD → Plan → Batch → Review process. Two post-hoc reviews (Senior Editor + Fact Checker) caught 8 SHOULD-FIX issues that would have actively misled operators:
+- **Nonexistent UI elements:** "Retry Payout" button referenced in provider-payouts.ts doesn't exist in the codebase — operators would hunt for it.
+- **Factual contradictions:** Dunning Step 1 described as "auto-retry in 2 days" in exception-management.ts but "immediate retry (Day 0)" in customer-billing.ts. Probation triggers described as count-based in provider-lifecycle.ts but the codebase uses a points-based system.
+- **Wrong navigation paths:** BYOP recommendations described as appearing in the Applications queue, but they live in the Growth page's BYOP Recommendation Tracker. Exception Analytics described as accessible from Ops Cockpit, but it's only reachable via the sidebar menu.
+- **Incorrect terminology:** Stripe Connect account status labels used NOT_STARTED/IN_PROGRESS/ACTIVE/RESTRICTED but the codebase uses "READY".
+- **Thin modules:** support-operations.ts (105 lines) and sops-playbooks.ts (97 lines) were too sparse for their topic importance — expanded by 75% and 100% respectively after review.
+The cleanup PRD (PRD-043, 3 batches) took less effort than the original build but caught errors that would have trained operators on incorrect workflows. Rule: always run structured reviews on training content — the cost of a factual error in training is higher than in code because operators internalize it as truth.
+
+### [2026-03-30] Custom review lanes work well for non-code content
+**Source:** PRD-043 review configuration
+**Type:** Agent Signal
+Replacing standard code-review lanes (Spec Completeness / Bug Scan / Historical Context) with content-appropriate lanes (Senior Editor / Fact Checker / Synthesis) produced higher-quality findings. The Fact Checker lane caught 5 of 8 issues by cross-referencing training content against the actual codebase — something a standard Bug Scan lane wouldn't attempt on `.ts` content files. Custom lanes should be considered for any batch where the content type doesn't match the default lane focus.
+
 ---
 
 ## Suggestions
@@ -169,6 +187,26 @@ Format:
 **Type:** Product
 **Impact:** Differentiates from marketplace feel, shows subscription value
 **Effort:** Medium (needs useSkus → subscription data join)
+**Status:** ✅ Implemented in PRD-021 (Session 2, 2026-03-30)
+
+---
+
+## Session 2 Lessons (2026-03-30)
+
+### [2026-03-30] Deno tests for edge functions can only validate auth guards without staging credentials
+**Source:** PRD-023 (Payment & Billing Test Coverage)
+**Type:** Workflow
+Edge function integration tests hit a hard boundary: without valid service role keys, tests can only verify CORS and auth rejection. Business logic coverage requires a staging Supabase instance. Plan for this in CI setup.
+
+### [2026-03-30] Tautological health checks are worse than no checks
+**Source:** PRD-026 code review (Lane 1+2 cross-validated)
+**Type:** Workflow
+A `>= 0` condition on a count field always passes, giving operators false confidence. Review caught it at score 75 (MUST-FIX). Health check pages need careful threshold review — every check must be capable of failing.
+
+### [2026-03-30] Lane 3 skip rule works well for first-batch-in-phase
+**Source:** PRD-026 review setup
+**Type:** Agent Signal
+Skipping Lane 3 (historical context) when there's no prior review history on changed files saved an agent without losing signal. Lane 2 already covers pattern detection. All 6 reviews across Session 2 found real issues; zero false-positive MUST-FIX findings.
 
 ### Promoted (moved to docs/upcoming/)
 

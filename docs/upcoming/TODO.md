@@ -20,6 +20,18 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 - [ ] **Admin payout schedule (F29)** — UI will show a payout schedule view, but actual payout execution requires Stripe Connect integration on the backend.
 - [ ] **Provider earnings/payout data (F21, F26)** — "Set Up Payout Account" button and admin Provider Detail earnings section will link to appropriate pages, but actual Stripe Connect onboarding flow is a backend concern.
 
+## Session 2 Items (2026-03-30)
+
+- [ ] **Edge function integration tests need staging credentials** — Current Deno tests for billing/payout/dunning/checkout only validate CORS and auth guard rejection. Testing actual business logic (billing cycle creation, payout processing) requires valid Supabase service role keys in a staging environment.
+  - **Why:** Tests were scoped to what's possible without live credentials
+  - **Blocked:** Full payment flow test coverage
+- [ ] **SKU calibration values are still seed data** — The SKU Calibration admin page is built but no real provider interviews have been conducted. All duration/cost values remain "guessed" per the seed data audit.
+  - **Why:** Requires human provider interviews using the launch playbook interview guide
+  - **Blocked:** Accurate pricing and scheduling
+- [ ] **Simulation tool is standalone** — The market simulation lives in `tools/market-simulation/` and runs via `npx tsx simulate.ts` or the local HTML UI. It is not integrated into the admin console.
+  - **Why:** Designed as an offline planning tool, not a production feature
+  - **Blocked:** Nothing — intentional design choice
+
 ## Low-Priority Cosmetic (Optional)
 
 - [ ] **ArrowLeft → ChevronLeft icon swap** — Several provider pages use `ArrowLeft` where spec says `ChevronLeft`. Will be fixed in Phase 5 batch if touching those files, but verify after completion.

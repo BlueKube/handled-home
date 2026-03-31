@@ -8,6 +8,9 @@ import type { ServiceSku } from "@/hooks/useSkus";
 import { SkuDetailView } from "@/components/SkuDetailView";
 import { ServiceCard } from "@/components/customer/ServiceCard";
 import { getCategoryLabel, getCategoryIcon, CATEGORY_ORDER } from "@/lib/serviceCategories";
+import { useCustomerSubscription } from "@/hooks/useSubscription";
+import { useEntitlements } from "@/hooks/useEntitlements";
+import type { EntitlementStatus } from "@/components/plans/EntitlementBadge";
 
 export default function CustomerServices() {
   const [search, setSearch] = useState("");
@@ -16,6 +19,23 @@ export default function CustomerServices() {
   const { data: skus = [], isLoading } = useSkus({
     search: search || undefined,
   });
+
+  const { data: subscription } = useCustomerSubscription();
+  const { data: entitlements } = useEntitlements(
+    subscription?.plan_id ?? null,
+    subscription?.zone_id ?? null,
+    subscription?.entitlement_version_id ?? null,
+  );
+
+  const skuStatusMap = useMemo(() => {
+    const map = new Map<string, EntitlementStatus>();
+    if (entitlements?.skus) {
+      for (const sku of entitlements.skus) {
+        map.set(sku.sku_id, sku.status);
+      }
+    }
+    return map;
+  }, [entitlements]);
 
   const featured = useMemo(
     () => skus.filter((s) => s.is_featured).sort((a, b) => a.display_order - b.display_order),
@@ -70,7 +90,7 @@ export default function CustomerServices() {
         /* Flat search results */
         <div className="grid grid-cols-2 gap-3">
           {skus.map((sku) => (
-            <ServiceCard key={sku.id} sku={sku} onClick={() => setSelectedSku(sku)} />
+            <ServiceCard key={sku.id} sku={sku} onClick={() => setSelectedSku(sku)} entitlementStatus={skuStatusMap.get(sku.id)} />
           ))}
         </div>
       ) : (
@@ -90,6 +110,7 @@ export default function CustomerServices() {
                       sku={sku}
                       variant="featured"
                       onClick={() => setSelectedSku(sku)}
+                      entitlementStatus={skuStatusMap.get(sku.id)}
                     />
                   ))}
                 </div>
@@ -113,6 +134,7 @@ export default function CustomerServices() {
                       key={sku.id}
                       sku={sku}
                       onClick={() => setSelectedSku(sku)}
+                      entitlementStatus={skuStatusMap.get(sku.id)}
                     />
                   ))}
                 </div>
