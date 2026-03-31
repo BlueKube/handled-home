@@ -14,7 +14,14 @@ export default function Simulator() {
   });
 
   const handleChange = (key: keyof ModelAssumptions, value: number) => {
-    setCurrentAssumptions((prev) => ({ ...prev, [key]: value }));
+    setCurrentAssumptions((prev) => {
+      const next = { ...prev, [key]: value };
+      // Normalize plan mix: premium = 1 - essential - plus (clamped to 0)
+      if (key === "plan_mix_essential" || key === "plan_mix_plus") {
+        next.plan_mix_premium = Math.max(0, 1 - next.plan_mix_essential - next.plan_mix_plus);
+      }
+      return next;
+    });
   };
 
   const handleLoadScenario = (loaded: ModelAssumptions) => {
