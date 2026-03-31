@@ -51,16 +51,17 @@ Revenue per handle ($6.03) < Cost per handle ($7.86) = **-$1.83 per-handle defic
 
 This is intentional. The business model works like a gym membership:
 
-| Utilization | Effective Revenue/Handle | Margin |
-|-------------|------------------------|--------|
+| Utilization | Effective Revenue/Handle | Weighted Margin |
+|-------------|------------------------|-----------------|
 | 40% (light user) | $15.08 | **+44.6%** |
-| 55% (moderate) | $10.96 | **+19.4%** |
-| 65% (target max) | $9.28 | **+5.8%** |
+| 65% (moderate user) | $9.28 | **+10.0%** |
 | 72.2% (break-even) | $8.35 | **0.0%** |
-| 90% (heavy user) | $6.70 | **-17.3%** |
-| 100% (max usage) | $6.03 | **-30.4%** |
+| 90% (heavy user) | $6.70 | **-24.7%** |
+| 100% (max usage) | $6.03 | **-38.5%** |
 
 The break-even point is **72.2% utilization**. Target operating range is 40-65%.
+
+**Note:** Margin is weighted across plan mix (35% Essential / 45% Plus / 20% Premium). Higher-tier plans lose money faster at high utilization because they have more handles at a lower per-handle price.
 
 ### 2.4 Two Anchoring Methods
 
@@ -427,13 +428,13 @@ Run with current model assumptions (`tools/market-simulation/model.ts`):
 
 ### 8.2 Consumption Scenarios
 
-| Scenario | Utilization | Monthly Cost (Ess.) | Margin |
-|----------|-------------|---------------------|--------|
-| Light user | 40% | $54.84 | **+44.6%** |
-| Moderate user | 55% | $75.41 | **+19.4%** |
-| Target max | 65% | $89.12 | **+5.8%** |
-| **Break-even** | **72.2%** | **$97.98** | **0.0%** |
-| Heavy user | 90% | $123.29 | **-17.3%** |
+| Scenario | Utilization | Weighted Revenue | Weighted Cost | Weighted Margin |
+|----------|-------------|-----------------|---------------|-----------------|
+| Light user | 40% | $156.00 | $86.43 | **+44.6%** |
+| Moderate user | 65% | $156.00 | $140.45 | **+10.0%** |
+| **Break-even** | **72.2%** | **$156.00** | **$156.00** | **0.0%** |
+| Heavy user | 90% | $156.00 | $194.46 | **-24.7%** |
+| Full usage | 100% | $156.00 | $216.07 | **-38.5%** |
 
 ### 8.3 Handle Cost Consistency
 
