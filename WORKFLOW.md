@@ -10,13 +10,16 @@ A portable, repeatable workflow for taking a product idea through phased impleme
 
 This workflow turns a `FULL-IMPLEMENTATION-PLAN.md` into shipped code through small, reviewed, documented batches. It prevents drift, maintains quality, and keeps documentation in sync with reality.
 
-**Key concepts:**
+### Glossary
 
-- **Round** — One complete execution of a `FULL-IMPLEMENTATION-PLAN.md`. A top-to-bottom build or refresh of the app. Round 1 builds the foundation. Subsequent rounds polish, harden, add features, and improve. Rounds are large-scope — they run for hours or days.
-- **Phase** — A logical group of related work within a round. Each phase is a self-contained PRD (problem, goals, scope, deliverables) defined as a section in the implementation plan.
-- **Batch** — A small unit of work within a phase. 1 theme, 1–3 files. Gets a spec, implementation, and review cycle.
+| Term | What it means | Scope | Document |
+|------|--------------|-------|----------|
+| **Round** | One complete execution of a `FULL-IMPLEMENTATION-PLAN.md` — a top-to-bottom build or refresh of the app. Round 1 builds the foundation. Subsequent rounds polish, harden, add features, and improve what was built. Rounds are large-scope and designed to run for hours or days. When someone says "let's brainstorm a new round," they mean: review what exists, identify what needs building/improving, and write a new implementation plan. | Contains multiple phases | `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` |
+| **Phase** | A logical group of related work within a round. Each phase is a self-contained PRD (problem, goals, scope, deliverables) written as a section in the implementation plan. Phases execute sequentially. | Contains multiple batches | Section heading in `FULL-IMPLEMENTATION-PLAN.md` |
+| **Batch** | The smallest unit of work. 1 theme, 1–3 files. Every batch gets: a spec written before coding, an implementation, and a review cycle. | 1 spec + 1 commit + 1 review | `docs/working/batch-specs/` |
+| **Step** | A procedure in this workflow document (Step 0 through Step 8). Steps describe *how* to execute, not *what* to build. | Workflow procedure | This file |
 
-**The loop:** Phase → Plan → Batch → Review → Doc Sync → Next Batch → Next Phase → Archive
+**The execution loop:** Phase → Plan → Batch → Review → Doc Sync → Next Batch → Next Phase → Archive
 
 ---
 

@@ -88,7 +88,14 @@ The full implementation procedure lives in `WORKFLOW.md`. Read it before executi
 
 The loop: **Phase → Plan → Batch → Review → Doc Sync → Next Batch → Next Phase → Archive**
 
-A **Round** is one complete execution of a `FULL-IMPLEMENTATION-PLAN.md` — a top-to-bottom build or refresh of the app. Each round contains multiple phases. Each phase is a self-contained PRD (problem, goals, scope) defined as a section in the implementation plan.
+### Glossary
+
+| Term | What it means |
+|------|--------------|
+| **Round** | One complete execution of a `FULL-IMPLEMENTATION-PLAN.md` — a top-to-bottom build or refresh of the app. Round 1 builds the foundation. Subsequent rounds polish, harden, add features, and improve. Large-scope: runs for hours or days. "Let's brainstorm a new round" = review what exists, identify what needs work, write a new implementation plan. |
+| **Phase** | A logical group of related work within a round. Each phase is a self-contained PRD (problem, goals, scope, deliverables) written as a section in the implementation plan. |
+| **Batch** | The smallest unit of work. 1 theme, 1–3 files. Gets a spec, implementation, and review cycle. |
+| **Step** | A procedure in `WORKFLOW.md` (Step 0–8). Describes *how* to execute, not *what* to build. |
 
 Each phase declares an execution mode:
 - **Quality mode** (default) — Tiered review (1–5 agents sized to batch risk), full doc sync. Production-ready.
