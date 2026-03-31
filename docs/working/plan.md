@@ -10,7 +10,7 @@
 
 | Batch | Title | Size | Status | Context |
 |-------|-------|------|--------|---------|
-| B1 | Run market simulator against new handle costs, flag issues | S | ⬜ | |
+| B1 | Run market simulator against new handle costs, flag issues | S | ✅ | |
 | B2 | Generate comprehensive reasoning report (docs/sku-calibration-report.md) | M | ⬜ | |
 | B3 | Schema enhancement recommendations + doc sync + final review | S | ⬜ | |
 
