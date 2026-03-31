@@ -1,4 +1,4 @@
-# Workflow — PRD to Production
+# Workflow — Implementation Plan to Production
 
 > **Last updated:** 2026-03-31
 
@@ -20,7 +20,7 @@ This workflow turns a `FULL-IMPLEMENTATION-PLAN.md` into shipped code through sm
 
 ---
 
-## Phase 0: Idea → Implementation Plan
+## Step 0: Idea → Implementation Plan
 
 **Owner:** Human
 
@@ -42,7 +42,7 @@ Each phase should declare its execution mode:
 
 ---
 
-## Phase 1: Phase → Plan
+## Step 1: Decompose Phase into Batches
 
 **Owner:** Claude (with human approval)
 
@@ -71,9 +71,9 @@ Each phase should declare its execution mode:
 
 ---
 
-## Phase 2: Batch Execution (repeat for each batch)
+## Step 2: Batch Execution (repeat for each batch)
 
-### Step 1: Re-anchor to the plan
+### 2.1: Re-anchor to the plan
 
 Before starting any batch:
 - **Read `docs/working/plan.md`** — re-read the plan to stay aligned with batches, dependencies, and progress
@@ -83,7 +83,7 @@ Before starting any batch:
 At the **start of each phase** (i.e., the first batch of a new phase):
 - **Read the current phase section from `FULL-IMPLEMENTATION-PLAN.md`** — re-ground in the problem, goals, and scope before entering a new phase of work
 
-### Step 2: Write the batch spec
+### 2.2: Write the batch spec
 
 Every batch gets a spec in `docs/working/batch-specs/` before coding starts:
 
@@ -125,7 +125,7 @@ Every batch gets a spec in `docs/working/batch-specs/` before coding starts:
 - [ ] Touch targets adequate
 ```
 
-### Step 3: Implement the spec
+### 2.3: Implement the spec
 
 - Code only what the spec says. If you discover something out of scope, add it to a deferred items list — don't sneak it in.
 - Commit with clear messages: `feat(<scope>): Batch N — {Description}`
@@ -133,7 +133,7 @@ Every batch gets a spec in `docs/working/batch-specs/` before coding starts:
 - **If the batch changes UI**, take a screenshot after the commit to verify visually. Use the raw Chromium binary with `--virtual-time-budget=8000` if Playwright CLI fails.
 - **If a component exceeds 300 lines** after your changes, extract sections into separate files in the same batch.
 
-### Step 4: Tiered code review
+### 2.4: Tiered code review
 
 After each commit, run a multi-agent review. This is the quality gate that prevents bugs, drift, and regressions from compounding across batches.
 
@@ -224,7 +224,7 @@ Fix findings → re-commit → **lightweight re-review** → repeat until clean.
 
 If issues persist after 3 passes, escalate to the human for a decision rather than looping indefinitely.
 
-### Step 5: Validate build
+### 2.5: Validate build
 
 ```bash
 # TypeScript check (no emit)
@@ -236,21 +236,21 @@ npm run build
 
 Both must pass before a batch is considered done.
 
-### Step 6: Validate visually (when applicable)
+### 2.6: Validate visually (when applicable)
 
 - Screenshot key pages affected by the batch
 - Check: layout, dark mode, empty states, touch targets, safe areas
 - If screenshots show real issues, the batch is not done
 
-### Step 7: Commit review fixes
+### 2.7: Commit review fixes
 
 Fix commits use: `fix(<scope>): resolve Batch N review findings`
 
-### Step 8: Push
+### 2.8: Push
 
 Push the batch to the feature branch.
 
-### Step 9: Log suggestions and agent signals (optional)
+### 2.9: Log suggestions and agent signals (optional)
 
 Append observations to `lessons-learned.md` (Suggestions section). Two types:
 
@@ -261,7 +261,7 @@ Format: `### YYYY-MM-DD — [Agent Role] (Batch N)` followed by 1-2 sentences pe
 
 Keep entries brief. Do not stop work to research suggestions — this is a 30-second append, not a research task. Skip this step if nothing stood out.
 
-### Step 10: Doc sync and cleanup (after each phase completes)
+### 2.10: Doc sync and cleanup (after each phase completes)
 
 When all batches in a phase are `✅`:
 
@@ -316,7 +316,7 @@ Everything else in this workflow is a **default** — follow it unless you have 
 
 ---
 
-## Phase 3: Documentation Sync (after each phase)
+## Step 3: Documentation Sync (after each phase)
 
 After completing a phase (group of related batches), sync all project documentation.
 
@@ -472,7 +472,7 @@ Use subagents to parallelize the review across multiple documents. For each doc,
 
 ---
 
-## Phase 4: Phase Transition
+## Step 4: Phase Transition
 
 After a phase is complete and docs are synced:
 
@@ -488,11 +488,11 @@ After a phase is complete and docs are synced:
    If the codebase is clean, skip this and note "No consolidation needed" in the plan.
 3. **Check context capacity** — If under 60%, continue to the next phase. If over 60%, update Session Handoff and start a fresh session.
 4. **Read the next phase section** from `FULL-IMPLEMENTATION-PLAN.md`
-5. **Decompose into a new plan.md** — Return to Phase 1 for the new phase
+5. **Decompose into a new plan.md** — Return to Step 1 for the new phase
 
 ---
 
-## Phase 5: Phase Completion & Archive
+## Step 5: Phase Completion & Archive
 
 When all batches in a phase are done:
 
@@ -508,16 +508,16 @@ When all batches in a phase are done:
        └── batch-specs/
    ```
 6. **Clean the working folder** — `docs/working/` should now be empty and ready for the next phase.
-7. **Continue or complete** — If more phases remain in the round, return to Phase 1 with the next phase section. If the round is complete, proceed to Phase 5.5 (Round Cleanup).
+7. **Continue or complete** — If more phases remain in the round, return to Step 1 with the next phase section. If the round is complete, proceed to Step 6 (Round Cleanup).
 
 ---
 
-## Phase 5.5: Round Cleanup (after last phase in a FULL-IMPLEMENTATION-PLAN)
+## Step 6: Round Cleanup (after last phase in a FULL-IMPLEMENTATION-PLAN)
 
 A **Round** is the execution of an entire `FULL-IMPLEMENTATION-PLAN.md` — all phases from first to last. Each round is a top-to-bottom build or refresh of the app. When the final phase in a round completes, perform these additional cleanup steps:
 
 1. **Open a PR** — Create a pull request from the feature branch into main. Do not merge — the human reviews and merges.
-2. **Archive the working folder** — Same as Phase 5 step 5, if not already done.
+2. **Archive the working folder** — Same as Step 5 item 5, if not already done.
 3. **Final TODO.md sweep** — Review all phases in the completed round for any missed human action items. Append to `docs/upcoming/TODO.md`.
 4. **Final doc sync** — Update `docs/feature-list.md` with final statuses. Verify cross-document consistency.
 5. **Report context level** — Run `/context` and report the result to the user. Log the percentage in the final plan or commit message.
@@ -530,15 +530,15 @@ After a round completes, the human reviews what was built, identifies areas need
 
 ---
 
-## Phase 6: Next Round (Manual or Scheduled)
+## Step 7: Next Round (Manual or Scheduled)
 
-Human writes the next `FULL-IMPLEMENTATION-PLAN.md` for the next round. Return to Phase 0.
+Human writes the next `FULL-IMPLEMENTATION-PLAN.md` for the next round. Return to Step 0.
 
 **For automated scheduled execution within a round**, Claude Code picks up the next phase from the implementation plan automatically. See "Scheduled Task Automation" below.
 
 ---
 
-## Phase 7: Autoresearch (Optional, Between Rounds)
+## Step 8: Autoresearch (Optional, Between Rounds)
 
 After a round of PRDs is complete, optionally run analysis passes to find and execute improvements. Three modes:
 
