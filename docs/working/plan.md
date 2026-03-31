@@ -14,18 +14,18 @@ Build the missing provider accountability infrastructure: incident tracking, no-
 
 | Batch | Title | Size | Status | Context |
 |-------|-------|------|--------|---------|
-| B1 | Migration: provider_incidents + provider_probation tables | S | ⬜ | |
-| B2 | Hooks + types for incidents and probation | S | ⬜ | |
-| B3 | Admin Provider Accountability page (incidents queue + probation status) | M | ⬜ | |
-| B4 | Provider-facing probation status card on dashboard | S | ⬜ | |
-| B5 | Doc sync + feature-list update | Micro | ⬜ | |
+| B1 | Migration: provider_incidents + provider_probation tables | S | ✅ | |
+| B2 | Hooks + types for incidents and probation | S | ✅ | |
+| B3 | Admin Provider Accountability page (incidents queue + probation status) | M | ✅ | |
+| B4 | Provider-facing probation status card on dashboard | S | ✅ | |
+| B5 | Doc sync + feature-list update | Micro | ✅ | |
 
 ---
 
 ## Session Handoff
 - **Branch:** claude/sku-calibration-validation-WFqgD
-- **Last completed:** Phase 2 (Exception Management Unification) — all 4 batches ✅
-- **Next up:** B1 — Migration for provider tables
-- **Context at exit:** N/A (continuing)
+- **Last completed:** B5 (Phase 3 complete)
+- **Next up:** Phase 4 — Billing & Payout Hardening
+- **Context at exit:** ~55%
 - **Blockers:** None
-- **Round progress:** Phase 2 of 7 complete, starting Phase 3
+- **Round progress:** Phase 3 of 7 complete
