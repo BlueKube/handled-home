@@ -10,37 +10,46 @@ Define the product first. Write the right documents. Use those documents as cano
 
 This process improves product clarity, team alignment, AI coding performance, scope control, and iteration speed.
 
+## Key Terms
+
+| Term | What it means |
+|------|--------------|
+| **Round** | One complete execution of a `FULL-IMPLEMENTATION-PLAN.md` — a top-to-bottom build or refresh of the app. Round 1 builds the foundation. Subsequent rounds polish, harden, add features, and improve. Large-scope: runs for hours or days. |
+| **Phase** | A logical group of related work within a round. Each phase is a self-contained PRD (problem, goals, scope, deliverables) written as a section in the implementation plan. |
+| **Batch** | The smallest unit of work. 1 theme, 1-3 files. Gets a spec written before coding, an implementation, and a review cycle. |
+| **Step** | A procedure in `WORKFLOW.md` (Step 0-8). Describes *how* to execute, not *what* to build. |
+
 ## What's In This Repo
 
 | File | Purpose | Customize? |
 |------|---------|-----------|
 | `CLAUDE.md` | Universal AI agent instructions — review process, session management, invariants | Sections 12-13 only |
-| `WORKFLOW.md` | PRD-to-production execution procedure | No |
+| `WORKFLOW.md` | Implementation plan to production execution procedure | No |
 | `lessons-learned.md` | Accumulated learnings and rules from past sessions | Append only |
 | `DEPLOYMENT.md` | Deployment guide template (Supabase + Lovable) | Yes — fill in per project |
 | `.claude/settings.json` | Hook configuration for automated enforcement | Adjust checks as needed |
 | `.claude/hooks/stop-check.sh` | Stop hook — checks for API keys, stale files, oversized components | Adjust thresholds as needed |
-| `docs/working/` | Active PRD, plan, and batch specs (empty — ready for first PRD) | Created during execution |
+| `docs/working/` | Active plan and batch specs (empty — ready for first phase) | Created during execution |
 | `docs/upcoming/TODO.md` | Human action items template | Fill in during execution |
-| `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` | Master PRD roadmap template | Fill in per project |
+| `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` | Round scope — phases (PRDs) + deliverables | Fill in per round |
 
 ## How It Works at a Glance
 
-### Phase 1 — Define
+### 1. Define
 Create the three core product-definition documents outside the repo, using a Define Agent. These capture strategy, capabilities, and user flows before any implementation work begins.
 
-### Phase 2 — Plan
-A Planning Agent reads the core docs plus a PRD and produces docs/working/plan.md — a batched, sequenced implementation plan broken into discrete chunks of work.
+### 2. Plan a Round
+Write a `FULL-IMPLEMENTATION-PLAN.md` that scopes the entire round. Break it into phase sections, where each phase is a self-contained PRD with problem, goals, scope, and deliverables. Place it at `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md`.
 
-### Phase 3 — Build
-An Implementation Agent works through the plan batch by batch, writing a batch spec before touching code, then implementing, then triggering code review agents before moving on.
+### 3. Build
+An Implementation Agent works through each phase, decomposing it into batches. For each batch: write a spec before touching code, implement, run code review agents, fix findings, push. Repeat until the phase is done, then move to the next phase.
 
-### Phase 4 — Iterate
-As the product evolves, update the upstream docs when product behavior changes. Derive new PRDs from the updated truth. Don't let code and documentation drift apart.
+### 4. Iterate (Next Round)
+When the round is complete, review what was built. Identify features that need polish, hardening, new capabilities, or updates. Write a new `FULL-IMPLEMENTATION-PLAN.md` for the next round. Each round is a full top-to-bottom refresh that builds on the previous round's work.
 
 ## The Three Core Documents
 
-These live in docs/ and are required before implementation begins.
+These live in `docs/` and are required before implementation begins.
 
 ### docs/masterplan.md — Product Blueprint
 The top-level strategic definition of the product.
@@ -67,21 +76,36 @@ The canonical map of how users move through the product.
 
 | Role | Model | Responsibility |
 |------|-------|---------------|
-| Define Agent | GPT-5.4 or Claude | Brainstorms and builds the three core docs |
-| Planning Agent | Claude Code (Opus) | Reads core docs + PRD, produces plan.md |
+| Define Agent | GPT or Claude | Brainstorms and builds the three core docs |
+| Planning Agent | Claude Code (Opus) | Reads core docs + phase section, produces plan.md with batches |
 | Implementation Agent | Claude Code (Opus) | Executes the plan batch by batch |
-| Review Agents | Sonnet + Haiku | Code review after each batch, tiered by size |
+| Review Agents | Sonnet (1-5 agents) | Code review after each batch, tiered by size (Micro/Small/Medium/Large) |
 | Orchestration Agent | Human + periodic AI | Maintains quality and directs the system |
 
 ## Getting Started
 
 1. **Start with an idea.** Write a rough description of the app.
-2. **Use the Define Agent** to build the three core docs (Draft → Critique → Revise cycle).
+2. **Use the Define Agent** to build the three core docs (Draft, Critique, Revise cycle).
 3. **Review and tighten them** as a human.
 4. **Set up this repo structure.** Clone the starter kit.
-5. **Create your first PRD.** Save to docs/upcoming/001-mvp.md, or ask Claude Code to build a much larger FULL-IMPLEMENTATION-PLAN.md listing potential PRDs based on the 3 core documents.
-6. **Hand off to Claude Code.** Let the Planning Agent produce plan.md, then begin batch execution.
-7. **After the FULL-IMPLEMENTATION-PLAN is completed (called a "FULL PASS"), review what was done and what worked well and what can improve, then create a new FULL-IMPLEMENTATION-PLAN.md in the upcoming folder for the next "FULL PASS".
+5. **Write your first implementation plan.** Create `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` with phase sections scoping the full Round 1 build. Or ask Claude Code to help brainstorm it based on the 3 core documents.
+6. **Hand off to Claude Code.** The agent decomposes the first phase into batches in `plan.md`, then begins batch execution.
+7. **After the round is complete,** review what was done, what worked, and what can improve. Write a new `FULL-IMPLEMENTATION-PLAN.md` for the next round.
+
+## The Round Cycle
+
+```
+Round 1: Build the foundation
+  Phase 1 → Phase 2 → ... → Phase N → Round Cleanup → PR
+
+Round 2: Polish, harden, add features
+  Phase 1 → Phase 2 → ... → Phase N → Round Cleanup → PR
+
+Round 3: Scale, optimize, expand
+  Phase 1 → Phase 2 → ... → Phase N → Round Cleanup → PR
+```
+
+Each round gets better because `lessons-learned.md` accumulates what worked and what didn't. The workflow documents (`CLAUDE.md`, `WORKFLOW.md`) evolve based on real execution data.
 
 ## Common Mistakes
 
@@ -108,4 +132,4 @@ The canonical map of how users move through the product.
 
 ### First session in a new project
 After copying these files, tell the agent:
-> Read CLAUDE.md, WORKFLOW.md, and lessons-learned.md. This is a new project. Create the three core documents (masterplan.md, feature-list.md, screen-flows.md), then we'll build the FULL-IMPLEMENTATION-PLAN.md.
+> Read CLAUDE.md, WORKFLOW.md, and lessons-learned.md. This is a new project. Create the three core documents (masterplan.md, feature-list.md, screen-flows.md), then we'll brainstorm the first round.
