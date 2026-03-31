@@ -445,7 +445,11 @@ All 54 SKU/level handle costs verified against migration. No transcription error
 
 ---
 
-## 9. Database Field Recommendations
+## 9. Database Field Enhancements (Implemented)
+
+> **Status:** All 9 fields implemented in PRD-048 (migration `20260331000000_sku_schema_enhancements.sql`).
+> Override values seeded for Window Cleaning L2/L3 and Pest Control L2/L3.
+> Licensing, seasonal availability, and recommended frequency metadata seeded for all relevant SKUs.
 
 ### 9.1 High Priority (sku_levels)
 

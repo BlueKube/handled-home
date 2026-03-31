@@ -176,6 +176,16 @@ Revenue per handle ($6.03) < cost per handle ($7.86) means every individual serv
 **Type:** Agent Signal
 The B1 review found 2 SHOULD-FIX issues in a tools/ script — display logic that silently suppressed warnings, and hardcoded values that would go stale. Even non-production tooling that generates reports needs review, because misleading tool output leads to bad business decisions.
 
+### [2026-03-31] Fact-checking reasoning reports catches margin calculation errors that would mislead pricing decisions
+**Source:** PRD-047 B2 review
+**Type:** Agent Signal
+The B2 fact-check review found 2 MUST-FIX issues: 4 of 6 margin percentages in the underutilization table were wrong (using mixed formulas), and the consumption scenarios table had a fabricated 55% scenario not present in simulator output. At 90% utilization, the report understated the loss by 7.4 points (-17.3% vs -24.7%). For any document that will inform business pricing decisions, run a dedicated fact-checker lane that cross-references claims against actual data sources.
+
+### [2026-03-31] NULL-inheritance columns are clean and safe for level-specific overrides
+**Source:** PRD-048 B1 (Schema Enhancements)
+**Type:** Architecture
+Adding nullable override columns to sku_levels (presence_required, access_mode, weather_sensitive) with NULL = "inherit from parent SKU" is a clean pattern that avoids duplicating data while supporting per-level behavioral differences. Only 4 of 54 levels needed overrides (Window Cleaning L2/L3, Pest Control L2/L3), validating that the inheritance default handles 93% of cases without explicit values.
+
 ---
 
 ## Suggestions
