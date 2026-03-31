@@ -76,6 +76,7 @@ const navGroups: NavGroup[] = [
     items: [
       { title: "Customer Billing", url: "/admin/billing", icon: Users },
       { title: "Providers", url: "/admin/providers", icon: Shield },
+      { title: "Accountability", url: "/admin/accountability", icon: AlertTriangle },
     ],
   },
   {

@@ -150,6 +150,7 @@ const AdminControlConfig = lazy(() => import("@/pages/admin/ControlConfig"));
 const AdminPlaybooks = lazy(() => import("@/pages/admin/Playbooks"));
 const AdminSkuCalibration = lazy(() => import("@/pages/admin/SkuCalibration"));
 const AdminSimulator = lazy(() => import("@/pages/admin/Simulator"));
+const AdminProviderAccountability = lazy(() => import("@/pages/admin/ProviderAccountability"));
 const AdminCronHealth = lazy(() => import("@/pages/admin/CronHealth"));
 const AdminSchedulingPolicy = lazy(() => import("@/pages/admin/SchedulingPolicy"));
 const AdminPlannerDashboard = lazy(() => import("@/pages/admin/PlannerDashboard"));
@@ -347,6 +348,7 @@ const App = () => (
                   <Route path="/admin/playbooks" element={<AdminPlaybooks />} />
                   <Route path="/admin/sku-calibration" element={<AdminSkuCalibration />} />
                   <Route path="/admin/simulator" element={<AdminSimulator />} />
+                  <Route path="/admin/accountability" element={<AdminProviderAccountability />} />
                   <Route path="/admin/cron-health" element={<AdminCronHealth />} />
                   <Route path="/admin/launch-readiness" element={<AdminLaunchReadiness />} />
                   <Route path="/admin/academy" element={<AdminAcademy />} />
