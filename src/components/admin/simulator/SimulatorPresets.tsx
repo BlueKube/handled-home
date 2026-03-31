@@ -23,7 +23,11 @@ function loadScenarios(): SavedScenario[] {
 }
 
 function saveScenarios(scenarios: SavedScenario[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(scenarios));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(scenarios));
+  } catch {
+    // localStorage may be full or unavailable (private browsing)
+  }
 }
 
 const OPTIMISTIC: Partial<ModelAssumptions> = {
