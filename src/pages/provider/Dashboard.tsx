@@ -15,6 +15,7 @@ import { ProviderNotificationBanners } from "@/components/provider/NotificationB
 import { ProviderStatusBanner } from "@/components/provider/ProviderStatusBanner";
 import { MarketHeatBanner } from "@/components/provider/MarketHeatBanner";
 import { ByocBanner } from "@/components/provider/ByocBanner";
+import { ProbationBanner } from "@/components/provider/ProbationBanner";
 import { EarningsProjectionCard } from "@/components/provider/EarningsProjectionCard";
 import { DailyRecapCard } from "@/components/provider/DailyRecapCard";
 import { RouteProgressCard } from "@/components/provider/RouteProgressCard";
@@ -261,6 +262,7 @@ export default function ProviderDashboard() {
 
       {/* Account status banners */}
       <ProviderStatusBanner status={orgStatus} />
+      <ProbationBanner />
 
       {/* SLA Notification Banners */}
       <ProviderNotificationBanners />
