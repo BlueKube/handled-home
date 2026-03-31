@@ -5019,6 +5019,115 @@ export type Database = {
           },
         ]
       }
+      provider_incidents: {
+        Row: {
+          id: string
+          provider_org_id: string
+          incident_type: string
+          severity: string
+          is_excused: boolean
+          excuse_reason: string | null
+          classified_by_user_id: string | null
+          visit_id: string | null
+          zone_id: string | null
+          details: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          provider_org_id: string
+          incident_type: string
+          severity?: string
+          is_excused?: boolean
+          excuse_reason?: string | null
+          classified_by_user_id?: string | null
+          visit_id?: string | null
+          zone_id?: string | null
+          details?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          provider_org_id?: string
+          incident_type?: string
+          severity?: string
+          is_excused?: boolean
+          excuse_reason?: string | null
+          classified_by_user_id?: string | null
+          visit_id?: string | null
+          zone_id?: string | null
+          details?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_incidents_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_probation: {
+        Row: {
+          id: string
+          provider_org_id: string
+          status: string
+          entry_reason: string
+          sla_level_at_entry: string | null
+          targets: Json
+          deadline_at: string
+          progress_notes: string | null
+          outcome: string | null
+          resolved_at: string | null
+          resolved_by_user_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          provider_org_id: string
+          status?: string
+          entry_reason: string
+          sla_level_at_entry?: string | null
+          targets?: Json
+          deadline_at: string
+          progress_notes?: string | null
+          outcome?: string | null
+          resolved_at?: string | null
+          resolved_by_user_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          provider_org_id?: string
+          status?: string
+          entry_reason?: string
+          sla_level_at_entry?: string | null
+          targets?: Json
+          deadline_at?: string
+          progress_notes?: string | null
+          outcome?: string | null
+          resolved_at?: string | null
+          resolved_by_user_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_probation_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       provider_orgs: {
         Row: {
           accountable_owner_user_id: string

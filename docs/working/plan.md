@@ -1,4 +1,4 @@
-# Plan: Phase 2 — Exception Management Unification
+# Plan: Phase 3 — Provider Accountability System
 
 > **Branch:** claude/sku-calibration-validation-WFqgD
 > **Mode:** Quality
@@ -8,29 +8,24 @@
 
 ## Approach
 
-The ops_exceptions system is mature (6 statuses, SLA tracking, action history, assignment, rich filtering). The billing_exceptions system is minimal (OPEN/RESOLVED, no SLA, no actions). Rather than building a third unified system, we'll:
-
-1. Add billing exception types to the ops_exceptions enum
-2. Create a migration that adds billing-related exception types
-3. Build a unified hook that queries ops_exceptions (which now contains both)
-4. Update the Exceptions page to use the unified ops queue
-5. Add next-best-action suggestions per exception type
+Build the missing provider accountability infrastructure: incident tracking, no-show escalation, probation system, and auto-suspend/promote. This phase creates the database schema and core UI — the automation wiring (cron jobs that auto-create incidents and probation entries) is a future enhancement.
 
 ## Batches
 
 | Batch | Title | Size | Status | Context |
 |-------|-------|------|--------|---------|
-| B1 | Migration: add billing exception types to ops_exceptions enum | S | ✅ | |
-| B2 | Unified exception hook + update Exceptions page to use ops queue | S | ✅ | |
-| B3 | Next-best-action engine + one-tap resolution actions | M | ✅ | |
-| B4 | Doc sync + feature-list update | Micro | ✅ | |
+| B1 | Migration: provider_incidents + provider_probation tables | S | ⬜ | |
+| B2 | Hooks + types for incidents and probation | S | ⬜ | |
+| B3 | Admin Provider Accountability page (incidents queue + probation status) | M | ⬜ | |
+| B4 | Provider-facing probation status card on dashboard | S | ⬜ | |
+| B5 | Doc sync + feature-list update | Micro | ⬜ | |
 
 ---
 
 ## Session Handoff
 - **Branch:** claude/sku-calibration-validation-WFqgD
-- **Last completed:** B4 (Phase 2 complete)
-- **Next up:** Phase 3 — Provider Accountability System
-- **Context at exit:** ~50%
+- **Last completed:** Phase 2 (Exception Management Unification) — all 4 batches ✅
+- **Next up:** B1 — Migration for provider tables
+- **Context at exit:** N/A (continuing)
 - **Blockers:** None
-- **Round progress:** Phase 2 of 7 complete
+- **Round progress:** Phase 2 of 7 complete, starting Phase 3
