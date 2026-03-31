@@ -458,9 +458,9 @@
 
 ## XXXVI. Exception Management `trust-builder`
 
-238. Unified exception queue: failed payments, disputes, payout failures, held earnings, reconciliation mismatches — 4/10
-239. Per-exception "next best action" CTA with audit trail link — 4/10
-240. Severity-sorted display with one-tap resolution actions — 4/10
+238. Unified exception queue: ops + billing exceptions in one queue with domain filter (All/Ops/Billing), 15 exception types, SLA tracking, severity-sorted — 8/10
+239. Per-exception "next best action" CTA — structured repair actions per type with one-tap buttons that record actions with pre-filled type and reason codes — 8/10
+240. Severity-sorted display with one-tap resolution actions — acknowledge, start work, escalate, record action, resolve — 8/10
 
 ---
 

@@ -20,17 +20,17 @@ The ops_exceptions system is mature (6 statuses, SLA tracking, action history, a
 
 | Batch | Title | Size | Status | Context |
 |-------|-------|------|--------|---------|
-| B1 | Migration: add billing exception types to ops_exceptions enum + auto-generation triggers | S | ⬜ | |
-| B2 | Unified exception hook + update Exceptions page to use ops queue | S | ⬜ | |
-| B3 | Next-best-action engine + one-tap resolution actions | M | ⬜ | |
-| B4 | Doc sync + feature-list update | Micro | ⬜ | |
+| B1 | Migration: add billing exception types to ops_exceptions enum | S | ✅ | |
+| B2 | Unified exception hook + update Exceptions page to use ops queue | S | ✅ | |
+| B3 | Next-best-action engine + one-tap resolution actions | M | ✅ | |
+| B4 | Doc sync + feature-list update | Micro | ✅ | |
 
 ---
 
 ## Session Handoff
 - **Branch:** claude/sku-calibration-validation-WFqgD
-- **Last completed:** Phase 1 (Simulator Admin Integration) — all 4 batches ✅
-- **Next up:** B1 — Migration for billing exception types
-- **Context at exit:** N/A (continuing)
+- **Last completed:** B4 (Phase 2 complete)
+- **Next up:** Phase 3 — Provider Accountability System
+- **Context at exit:** ~50%
 - **Blockers:** None
-- **Round progress:** Phase 1 of 7 complete, starting Phase 2
+- **Round progress:** Phase 2 of 7 complete
