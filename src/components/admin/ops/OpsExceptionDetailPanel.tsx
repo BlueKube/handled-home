@@ -12,6 +12,8 @@ import { format, formatDistanceToNow, differenceInHours } from "date-fns";
 import { useOpsExceptionDetail, useOpsExceptionActions, useUpdateExceptionStatus } from "@/hooks/useOpsExceptions";
 import { OpsActionDialog } from "./OpsActionDialog";
 import { DecisionTraceCard } from "@/components/admin/DecisionTraceCard";
+import { useRecordOpsAction } from "@/hooks/useOpsExceptions";
+import { EXCEPTION_ACTIONS } from "@/lib/exception-actions";
 import { toast } from "sonner";
 
 interface Props {
@@ -35,24 +37,21 @@ const TYPE_LABELS: Record<string, string> = {
   customer_reschedule: "Customer Reschedule",
   weather_safety: "Weather Safety",
   quality_block: "Quality Block",
+  payment_failed: "Payment Failed",
+  payment_past_due: "Payment Past Due",
+  payout_failed: "Payout Failed",
+  dispute_opened: "Dispute Opened",
+  earnings_held: "Earnings Held",
+  reconciliation_mismatch: "Reconciliation Mismatch",
 };
 
-const REPAIR_SUGGESTIONS: Record<string, string[]> = {
-  window_at_risk: ["Reorder stops to fit window", "Swap to backup provider", "Extend window"],
-  service_week_at_risk: ["Schedule visit for remaining days", "Move to next week with customer notification"],
-  provider_overload: ["Move visits to backup provider", "Redistribute across adjacent days"],
-  coverage_break: ["Assign backup provider", "Recruit new provider for zone"],
-  access_failure: ["Confirm reschedule hold with customer", "Send crew back later today"],
-  customer_reschedule: ["Offer appointment windows", "Apply to next available date"],
-  weather_safety: ["Batch reschedule affected zone", "Issue weather credit"],
-  quality_block: ["Schedule redo visit", "Issue quality credit", "Flag provider for review"],
-  provider_unavailable: ["Assign backup provider", "Contact provider for ETA"],
-};
+// Repair suggestions now come from src/lib/exception-actions.ts
 
 export function OpsExceptionDetailPanel({ exceptionId, onClose }: Props) {
   const { data: exception, isLoading } = useOpsExceptionDetail(exceptionId);
   const { data: actions } = useOpsExceptionActions(exceptionId);
   const updateStatus = useUpdateExceptionStatus();
+  const recordAction = useRecordOpsAction();
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
 
   if (isLoading) {
@@ -74,7 +73,21 @@ export function OpsExceptionDetailPanel({ exceptionId, onClose }: Props) {
     ? differenceInHours(new Date(exception.sla_target_at), new Date())
     : null;
   const isResolved = exception.status === "resolved";
-  const suggestions = REPAIR_SUGGESTIONS[exception.exception_type] ?? [];
+  const repairActions = EXCEPTION_ACTIONS[exception.exception_type] ?? [];
+
+  const handleQuickAction = async (actionType: string, reasonCode: string, label: string) => {
+    try {
+      await recordAction.mutateAsync({
+        exceptionId: exception.id,
+        actionType,
+        reasonCode,
+        reasonNote: `Quick action: ${label}`,
+      });
+      toast.success(`Action recorded: ${label}`);
+    } catch {
+      toast.error("Failed to record action");
+    }
+  };
 
   const handleStatusChange = async (status: "acknowledged" | "in_progress" | "escalated" | "resolved" | "snoozed", resolutionNote?: string) => {
     try {
@@ -177,19 +190,28 @@ export function OpsExceptionDetailPanel({ exceptionId, onClose }: Props) {
         </Card>
       )}
 
-      {/* Repair Suggestions */}
-      {!isResolved && suggestions.length > 0 && (
+      {/* Next Best Actions */}
+      {!isResolved && repairActions.length > 0 && (
         <Card>
           <CardHeader className="py-2 px-3">
-            <CardTitle className="text-xs uppercase tracking-wider text-muted-foreground">Suggested Repairs</CardTitle>
+            <CardTitle className="text-xs uppercase tracking-wider text-muted-foreground">Suggested Actions</CardTitle>
           </CardHeader>
-          <CardContent className="px-3 pb-3 space-y-1">
-            {suggestions.map((s, i) => (
-              <div key={i} className="flex items-center gap-2 text-sm p-1.5 rounded hover:bg-muted/50">
-                <ArrowUpRight className="h-3 w-3 text-primary shrink-0" />
-                <span>{s}</span>
-              </div>
-            ))}
+          <CardContent className="px-3 pb-3">
+            <div className="flex gap-2 flex-wrap">
+              {repairActions.map((action) => (
+                <Button
+                  key={action.actionType}
+                  size="sm"
+                  variant={action.variant}
+                  className="text-xs"
+                  disabled={recordAction.isPending}
+                  onClick={() => handleQuickAction(action.actionType, action.reasonCode, action.label)}
+                >
+                  <ArrowUpRight className="h-3 w-3 mr-1" />
+                  {action.label}
+                </Button>
+              ))}
+            </div>
           </CardContent>
         </Card>
       )}
