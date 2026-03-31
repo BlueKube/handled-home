@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-> **Last updated:** 2026-03-28
+> **Last updated:** 2026-03-31
 
 Universal instructions for AI agents working in this repo. No project-specific content lives here — all project context lives in the canonical documents below.
 
@@ -42,12 +42,11 @@ Read `docs/masterplan.md` at the start of every session. It is the foundational 
 | `docs/app-flow-pages-and-roles.md` | When the app reaches 10+ pages | Route tree, page inventory, role gates, user journeys, navigation hierarchy |
 | `docs/design-guidelines.md` | When the design system solidifies | Color tokens, typography scale, spacing system, component specs, accessibility standards |
 
-### Working documents (active PRD cycle only)
+### Working documents (active execution only)
 
 | Document | Owner | What it owns |
 |---|---|---|
-| `docs/working/prd.md` | Human | Current PRD being executed |
-| `docs/working/plan.md` | Planning Agent | Phased plan, batch breakdown, progress table, Session Handoff |
+| `docs/working/plan.md` | Planning Agent | Current phase batches, progress table, Session Handoff |
 | `docs/working/batch-specs/` | Implementation Agent | One spec file per batch, written before coding |
 
 ### Persistent operational documents
@@ -55,7 +54,7 @@ Read `docs/masterplan.md` at the start of every session. It is the foundational 
 | Document | Owner | What it owns |
 |---|---|---|
 | `docs/upcoming/TODO.md` | Human + Agent | Human action items that agents cannot do (API keys, external config, decisions). Agents append items during execution; human resolves them between sessions. |
-| `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` | Human | Master PRD roadmap across a full pass (all PRDs in sequence) |
+| `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` | Human | Round scope — all phases with problem, goals, and scope per phase. Each phase section is a self-contained PRD. |
 
 ---
 
@@ -73,7 +72,8 @@ Read `docs/masterplan.md` at the start of every session. It is the foundational 
 | Design system and patterns | `docs/design-guidelines.md` |
 | Workflow procedure | `WORKFLOW.md` |
 | Repo and agent instructions | `CLAUDE.md` (this file) |
-| Active plan and batch progress | `docs/working/plan.md` |
+| Active phase plan and batch progress | `docs/working/plan.md` |
+| Round scope, phase definitions (PRDs) | `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` |
 | Human action items (API keys, config, decisions) | `docs/upcoming/TODO.md` |
 
 If a fact appears in two documents, one of them is wrong. Investigate before editing either.
@@ -84,12 +84,21 @@ If the code and docs disagree, investigate which is correct — sometimes the co
 
 ## 4. Workflow (Non-Negotiable)
 
-The full implementation procedure lives in `WORKFLOW.md`. Read it before executing any PRD.
+The full implementation procedure lives in `WORKFLOW.md`. Read it before executing any phase.
 
-The loop: **PRD → Plan → Phase → Batch → Review → Doc Sync → Next Batch → Archive**
+The loop: **Phase → Plan → Batch → Review → Doc Sync → Next Batch → Next Phase → Archive**
 
-Each PRD declares an execution mode:
-- **Quality mode** (default) — Tiered review (2–5 agents sized to batch risk), full doc sync. Production-ready.
+### Glossary
+
+| Term | What it means |
+|------|--------------|
+| **Round** | One complete execution of a `FULL-IMPLEMENTATION-PLAN.md` — a top-to-bottom build or refresh of the app. Round 1 builds the foundation. Subsequent rounds polish, harden, add features, and improve. Large-scope: runs for hours or days. "Let's brainstorm a new round" = review what exists, identify what needs work, write a new implementation plan. |
+| **Phase** | A logical group of related work within a round. Each phase is a self-contained PRD (problem, goals, scope, deliverables) written as a section in the implementation plan. |
+| **Batch** | The smallest unit of work. 1 theme, 1–3 files. Gets a spec, implementation, and review cycle. |
+| **Step** | A procedure in `WORKFLOW.md` (Step 0–8). Describes *how* to execute, not *what* to build. |
+
+Each phase declares an execution mode:
+- **Quality mode** (default) — Tiered review (1–5 agents sized to batch risk), full doc sync. Production-ready.
 - **Speed mode** — Reduced 2-agent review (1 combined reviewer + 1 synthesis, no Lane 3). Max 2 fix passes. For prototypes and low-risk changes.
 
 The mandatory code review procedure is inlined in Section 5 below, so it survives context compression if `WORKFLOW.md` is dropped from context.
@@ -109,6 +118,9 @@ Run after every batch commit. This is part of the definition of done — it is n
 | **Large** — new integrations, multi-file refactors | 5 | 3 parallel Sonnet lanes + 1 Sonnet synthesis + 1 Haiku synthesis |
 | **Medium** — typical feature batch | 4 | 3 parallel Sonnet lanes + 1 Sonnet synthesis |
 | **Small** — templates, config, minor changes | 2 | 1 combined Sonnet reviewer (spec + bugs) + 1 Sonnet synthesis |
+| **Micro** — type defs, doc syncs, config-only | 1 | 1 combined Sonnet reviewer (spec + bugs), no synthesis |
+
+**Micro tier:** Use when the batch is a mechanical transcription of already-specified data — type definition updates, documentation syncs, config changes with no logic. The single reviewer confirms correctness. Synthesis adds nothing when there's only one input lane.
 
 ### Stage 1 — Parallel analysis (Lanes 1–3, Medium/Large only)
 
@@ -135,6 +147,16 @@ Skip Lane 3 if:
 When Lane 3 is skipped, Medium batches run as: 2 parallel lanes + synthesis = 3 agents total.
 
 Lane 3's value is regression detection. Without history to compare against, it produces generic pattern-checking that Lane 2 already covers.
+
+### Fact-checker lane (for business-critical documents)
+
+When a batch produces a document that will inform business decisions (pricing reports, operating model changes, reasoning reports, training content), replace Lane 2 (Bug Scan) with a **Fact Checker** lane:
+
+- Cross-reference every claim against actual data sources (simulator output, migration files, model.ts constants)
+- Verify all numbers, percentages, and dollar amounts
+- Flag any claim that cannot be traced to a specific source
+
+This lane caught margin calculation errors in the SKU calibration reasoning report that would have understated losses by 7.4 percentage points at 90% utilization. Standard Bug Scan would not have caught this.
 
 ### What each agent receives
 
@@ -349,14 +371,13 @@ When changing a primary CTA or user flow entry point, grep for all links to the 
 │   ├── operating-model.md              # OPTIONAL — add when business model defined
 │   ├── app-flow-pages-and-roles.md     # OPTIONAL — add when 10+ pages
 │   ├── design-guidelines.md            # OPTIONAL — add when design system solidifies
-│   ├── working/                        # Active PRD + plan + batch specs
-│   │   ├── prd.md
-│   │   ├── plan.md
-│   │   └── batch-specs/
-│   ├── upcoming/                       # PRD queue (numbered: 001-xxx.md)
-│   │   ├── TODO.md                     # Human action items (persistent across PRDs)
-│   │   └── FULL-IMPLEMENTATION-PLAN.md # Master PRD roadmap for a full pass
-│   └── archive/                        # Completed PRDs (kebab-name-YYYY-MM-DD/)
+│   ├── working/                        # Active plan + batch specs
+│   │   ├── plan.md                     # Current phase batches + session handoff
+│   │   └── batch-specs/                # One spec per batch
+│   ├── upcoming/                       # Round scope + human action items
+│   │   ├── TODO.md                     # Human action items (persistent across rounds)
+│   │   └── FULL-IMPLEMENTATION-PLAN.md # Round scope — phases (PRDs) + deliverables
+│   └── archive/                        # Completed phases (kebab-name-YYYY-MM-DD/)
 └── src/                                # Application source code
 ```
 
@@ -368,7 +389,7 @@ These rules prevent data loss and enable reliable multi-session execution.
 
 1. **Push after every commit.** The pattern is always: implement → commit → push → review → fix → commit → push. Unpushed commits are unrecoverable if a session dies.
 
-2. **Start a fresh session at every phase boundary.** Phase transitions are natural context seams. A fresh session starts with the full context budget, reads `plan.md` to re-anchor, and enters the new phase without stale context.
+2. **Start a fresh session at every round boundary.** Round transitions (completing a full `FULL-IMPLEMENTATION-PLAN.md`) are natural context seams. Within a round, continue across phase boundaries if context allows — check capacity with `/context` and start a new session when over 60%.
 
 3. **All review lanes run as sub-agents.** Review findings stay in sub-agent context windows — only the final scored report enters the main context. This keeps each batch to ~8–10K tokens in the main window, enabling 20+ batches per session when needed.
 
@@ -388,31 +409,22 @@ Every session MUST update the `## Session Handoff` section of `docs/working/plan
 
 ```markdown
 ## Session Handoff
-- **Branch:** feat/[prd-name-kebab]
-- **Last completed:** Batch N
-- **Next up:** Batch N+1 — [title] (or "None — plan complete")
+- **Branch:** feat/[round-name-kebab]
+- **Last completed:** Batch N (Phase: [phase name])
+- **Next up:** Batch N+1 — [title] (or "Phase complete — next phase: [name]")
 - **Context at exit:** N%
 - **Blockers:** None (or describe)
-- **PRD queue:** N files remaining in docs/upcoming/
+- **Round progress:** Phase X of Y complete
 ```
 
 A new session reads this section first (~10 lines) to know exactly where to resume.
 
-### PRD queue
+### Phase transitions
 
-For multi-PRD automation, place numbered PRD files in `docs/upcoming/`:
-
-```
-docs/upcoming/
-├── 001-feature-name.md
-├── 002-next-feature.md
-└── 003-another-feature.md
-```
-
-When a plan completes (all batches `✅`):
-1. Archive `docs/working/` to `docs/archive/[feature-name]-[YYYY-MM-DD]/`
-2. Move the lowest-numbered PRD from `docs/upcoming/` to `docs/working/prd.md`
-3. Decompose it into a new `plan.md`
+When a plan completes (all batches in the current phase are `✅`):
+1. Archive `docs/working/` to `docs/archive/[phase-name]-[YYYY-MM-DD]/`
+2. Read the next phase section from `FULL-IMPLEMENTATION-PLAN.md`
+3. Decompose it into a new `plan.md` with batch breakdown
 4. Begin batch execution
 
 ### Dynamic session management
@@ -421,7 +433,7 @@ Do not use a fixed batch cap. Instead, **check context capacity after each batch
 
 - **Under 60% capacity:** Continue to the next batch.
 - **Over 60% capacity:** Finish the current batch, update Session Handoff, start a new session.
-- **At a full pass boundary:** Always start a new session regardless of capacity. A full pass is the completion of an entire `FULL-IMPLEMENTATION-PLAN.md` — all PRDs from start to finish.
+- **At a round boundary:** Always start a new session regardless of capacity. A round is the completion of an entire `FULL-IMPLEMENTATION-PLAN.md` — all phases from start to finish.
 
 Log the context capacity percentage in the progress table after each batch (see Section 9).
 
@@ -434,13 +446,11 @@ BRANCH RULE: The Session Handoff specifies the feature branch.
 If that branch exists on origin: git fetch && git checkout [branch]
 If it does not exist: git checkout -b [branch]
 
-If all batches are ✅:
-  - Open a PR from the feature branch into main (do not merge)
-  - Archive docs/working/
-  - Check docs/upcoming/ for the next PRD (lowest number)
-  - If found: create a new feature branch, move PRD to docs/working/prd.md,
-    decompose into plan.md, begin batch execution
-  - If empty: exit — nothing to do
+If all batches are ✅ (current phase complete):
+  - Archive docs/working/ to docs/archive/
+  - Read FULL-IMPLEMENTATION-PLAN.md for the next phase
+  - If next phase exists: decompose into new plan.md, begin batch execution
+  - If no more phases (round complete): open a PR, run Round Cleanup, exit
 
 If batches remain ⬜:
   - Continue from the first incomplete batch
@@ -511,7 +521,7 @@ These are invariants. Violating them causes data loss, workflow corruption, or c
 4. **Update Session Handoff before exiting** — the next session depends on this
 5. **Update the progress table** — this is the durable state machine
 6. **Never block on human input during autonomous execution** — make the call, document it, move on
-7. **Apply or document migrations before moving on** — unappplied migrations cause downstream tools (Lovable) to stub working code
+7. **Apply or document migrations before moving on** — unapplied migrations cause downstream tools (Lovable) to stub working code
 8. **Always pass actual diffs to review agents** — pseudocode summaries produce false positives. Use `git diff HEAD~1...HEAD`, not a written description of the changes.
 
 Everything else is a **default** — follow it unless you have a specific reason not to, and document the override when you don't.
@@ -605,7 +615,7 @@ Suggestions and agent signals are logged in `lessons-learned.md` (Suggestions se
 | `docs/masterplan.md` + all available north star docs | Start of every session |
 | `lessons-learned.md` | Start of every session |
 
-| `docs/working/prd.md` | Start of each phase (first batch of a new phase) |
+| Current phase section from `FULL-IMPLEMENTATION-PLAN.md` | Start of each phase (first batch of a new phase) |
 | `docs/working/plan.md` (Session Handoff section first) | Start of each batch |
 | Batch spec from `docs/working/batch-specs/` | Before coding each batch |
 
@@ -613,45 +623,47 @@ When north star docs are current, Claude makes informed decisions. When they're 
 
 ---
 
-## Full Pass Cleanup (Non-Negotiable)
+## Round Cleanup (Non-Negotiable)
 
-A "Full Pass" is the execution of an entire `FULL-IMPLEMENTATION-PLAN.md` file — all PRDs from start to finish. When the last PRD in a full pass completes, perform these cleanup steps before closing out:
+A **Round** is the execution of an entire `FULL-IMPLEMENTATION-PLAN.md` file — all phases from start to finish. Each round is a top-to-bottom build or refresh of the app: the first round builds the foundation, subsequent rounds polish, harden, add features, and improve what was built. Rounds are designed to be large-scope, running for hours or days if needed.
+
+When the last phase in a round completes, perform these cleanup steps before closing out:
 
 ### 1. Archive the working folder
-Move `docs/working/prd.md`, `docs/working/plan.md`, and `docs/working/batch-specs/*` to `docs/archive/[kebab-name]-[YYYY-MM-DD]/`. The working folder should be empty after this step.
+Move `docs/working/plan.md` and `docs/working/batch-specs/*` to `docs/archive/[kebab-name]-[YYYY-MM-DD]/`. The working folder should be empty after this step.
 
 ### 2. Clean up `docs/upcoming/`
-Remove any executed PRD files (e.g., `001-xxx.md` through `NNN-xxx.md`) that were already completed. Only `TODO.md`, `FULL-IMPLEMENTATION-PLAN.md`, and any future unexecuted PRDs should remain.
+Only `TODO.md` and `FULL-IMPLEMENTATION-PLAN.md` should remain. The implementation plan stays as a record of what was executed.
 
 ### 3. Update `docs/upcoming/TODO.md`
 Append any human action items discovered during execution — API keys, external service setup, manual configuration, deployment steps, or decisions the agent could not make autonomously. Use the format defined in `TODO.md`.
 
 ### 4. Final doc sync
-Update `docs/feature-list.md` with final statuses for all features touched during the full pass. Verify consistency across north star docs.
+Update `docs/feature-list.md` with final statuses for all features touched during the round. Verify consistency across north star docs.
 
 ### 5. Report context level
-Run `/context` and report the result to the user. This helps calibrate session management and context consumption patterns across full passes.
+Run `/context` and report the result to the user. This helps calibrate session management and context consumption patterns across rounds.
 
 ### Why this matters
-Without cleanup, stale files accumulate across passes — executed PRDs linger in `docs/upcoming/`, working folders contain orphaned specs, and human action items get lost. The cleanup step ensures the repo is ready for the next pass or the next project.
+Without cleanup, stale files accumulate across rounds — working folders contain orphaned specs and human action items get lost. The cleanup step ensures the repo is ready for the next round.
 
 ---
 
 ## Human Action Items (`docs/upcoming/TODO.md`)
 
 ### Purpose
-Agents encounter work during execution that requires human involvement — API keys, external service configuration, deployment steps, business decisions. Rather than blocking or silently skipping these, agents append items to `docs/upcoming/TODO.md`.
+Agents encounter work during execution that requires human involvement — API keys, external service configuration, deployment steps, business decisions. Rather than blocking or silently skipping these, agents append items to `docs/upcoming/TODO.md`. Items persist across phases and rounds.
 
 ### Rules
 1. **Append, don't block.** If you encounter something that needs human action, add it to `TODO.md` and continue execution.
 2. **Be specific.** Include what needs to be done, why, and what is blocked until it's resolved.
-3. **Include the source.** Tag each item with the PRD or batch it came from.
+3. **Include the source.** Tag each item with the phase/batch it came from.
 4. **Never delete items.** Only the human moves items to the "Resolved" section.
 5. **Read at session start.** Check `TODO.md` at the start of each session to see if any blockers have been resolved.
 
 ### Format
 ```markdown
-### YYYY-MM-DD — [Source PRD or Context]
+### YYYY-MM-DD — [Source Phase/Batch or Context]
 - [ ] Action item description
   - **Why:** Brief explanation
   - **Blocked:** What is blocked (or "Nothing blocked")

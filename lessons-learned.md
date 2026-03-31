@@ -164,6 +164,33 @@ The cleanup PRD (PRD-043, 3 batches) took less effort than the original build bu
 **Type:** Agent Signal
 Replacing standard code-review lanes (Spec Completeness / Bug Scan / Historical Context) with content-appropriate lanes (Senior Editor / Fact Checker / Synthesis) produced higher-quality findings. The Fact Checker lane caught 5 of 8 issues by cross-referencing training content against the actual codebase — something a standard Bug Scan lane wouldn't attempt on `.ts` content files. Custom lanes should be considered for any batch where the content type doesn't match the default lane focus.
 
+## Session 4 Lessons (2026-03-31)
+
+### [2026-03-31] Per-handle margin is always negative by design — this is not a bug
+**Source:** PRD-047 B1 (Simulator Validation)
+**Type:** Workflow
+Revenue per handle ($6.03) < cost per handle ($7.86) means every individual service visit is a net loss. The subscription model profits from handle underutilization (break-even at 72.2%). Initial validation scripts that flag "negative margin" on every SKU are correct but misleading — the flag logic needs to account for the underutilization model rather than treating each negative-margin SKU as a problem.
+
+### [2026-03-31] Standalone validation tools benefit from review just like production code
+**Source:** PRD-047 B1 review
+**Type:** Agent Signal
+The B1 review found 2 SHOULD-FIX issues in a tools/ script — display logic that silently suppressed warnings, and hardcoded values that would go stale. Even non-production tooling that generates reports needs review, because misleading tool output leads to bad business decisions.
+
+### [2026-03-31] Fact-checking reasoning reports catches margin calculation errors that would mislead pricing decisions
+**Source:** PRD-047 B2 review
+**Type:** Agent Signal
+The B2 fact-check review found 2 MUST-FIX issues: 4 of 6 margin percentages in the underutilization table were wrong (using mixed formulas), and the consumption scenarios table had a fabricated 55% scenario not present in simulator output. At 90% utilization, the report understated the loss by 7.4 points (-17.3% vs -24.7%). For any document that will inform business pricing decisions, run a dedicated fact-checker lane that cross-references claims against actual data sources.
+
+### [2026-03-31] NULL-inheritance columns are clean and safe for level-specific overrides
+**Source:** PRD-048 B1 (Schema Enhancements)
+**Type:** Architecture
+Adding nullable override columns to sku_levels (presence_required, access_mode, weather_sensitive) with NULL = "inherit from parent SKU" is a clean pattern that avoids duplicating data while supporting per-level behavioral differences. Only 4 of 54 levels needed overrides (Window Cleaning L2/L3, Pest Control L2/L3), validating that the inheritance default handles 93% of cases without explicit values.
+
+### [2026-03-31] Workflow simplification: 6 planning levels → 4, "full pass" → "round"
+**Source:** Post-round workflow retrospective
+**Type:** Workflow
+Eliminated separate PRD files and the `docs/working/prd.md` layer. Each phase section in `FULL-IMPLEMENTATION-PLAN.md` is now a self-contained PRD — no separate file needed. Renamed "full pass" to "round" for clarity. Renamed workflow procedure headings from "Phase 0-7" to "Step 0-8" to avoid collision with implementation phases. Added glossary to both CLAUDE.md and WORKFLOW.md defining Round, Phase, Batch, and Step. Added "micro" review tier (1 agent) for mechanical batches and fact-checker lane for business-critical documents.
+
 ---
 
 ## Suggestions
