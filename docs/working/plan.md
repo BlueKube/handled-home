@@ -10,17 +10,17 @@
 
 | Batch | Title | Size | Status | Context |
 |-------|-------|------|--------|---------|
-| B1 | Port simulation engine to src/lib/simulation/ | S | ⬜ | |
-| B2 | Simulator page — controls panel + metric cards | S | ⬜ | |
-| B3 | Simulator page — charts + monthly projection table | S | ⬜ | |
-| B4 | Scenario presets, save/load, admin nav integration | S | ⬜ | |
+| B1 | Port simulation engine to src/lib/simulation/ | S | ✅ | |
+| B2 | Simulator page — controls panel + metric cards | S | ✅ | |
+| B3 | Simulator page — charts + monthly projection table | S | ✅ | |
+| B4 | Scenario presets, save/load, admin nav integration | S | ✅ | |
 
 ---
 
 ## Session Handoff
 - **Branch:** claude/sku-calibration-validation-WFqgD
-- **Last completed:** Round 5 plan created
-- **Next up:** B1 — Port simulation engine
-- **Context at exit:** N/A (continuing)
+- **Last completed:** B4 (Phase 1 complete)
+- **Next up:** Phase 2 — Exception Management Unification
+- **Context at exit:** ~35%
 - **Blockers:** None
-- **Round progress:** Phase 1 of 7
+- **Round progress:** Phase 1 of 7 complete

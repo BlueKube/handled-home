@@ -86,6 +86,7 @@
 43c. Market simulator validation of handle economics — break-even at 72.2% utilization, 44.6% margin at 40% target utilization. All 54 SKU/levels verified consistent with 7-handle anchor model — DONE
 43d. Comprehensive SKU calibration reasoning report (docs/sku-calibration-report.md) — per-SKU pricing rationale, licensed service premium analysis, tier progression logic, deferred service documentation, and database field recommendations — DONE
 43e. Database schema enhancements — 9 new columns on sku_levels (presence_required, access_mode, weather_sensitive, provider_payout_hint_cents, property_size_tier) and service_skus (licensing_required, seasonal_availability, recommended_frequency, min_provider_rating). Level-specific overrides for Window Cleaning and Pest Control interior access. Licensing, seasonal, and frequency metadata seeded for all relevant SKUs — DONE
+43f. Admin Market Simulator — full 12-month simulation dashboard at /admin/simulator with real-time sliders (zone, pricing, provider, BYOC, retention, overhead), 6 KPI metric cards, 4 charts (revenue vs pay, margin/utilization, active customers, acquisition sources), monthly projection table, 3 scenario presets (baseline/optimistic/conservative), 4 seasonal market profiles, localStorage save/load — DONE
 
 ---
 
