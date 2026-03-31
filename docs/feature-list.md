@@ -452,9 +452,11 @@
 
 233. Automated invoice generation with cycle-based idempotency — 7/10
 234. Automated dunning with 5-step escalation ladder — 6/10
+234b. Admin dunning step tracker — shows all subscriptions in dunning with step/stage, severity badges, timing, critical count for step 3+ — 8/10
 235. Auto-apply referral credits to invoices — 8/10
 236. Auto-release provider earning holds nightly — 8/10
 237. Weekly payout runs with threshold enforcement and rollover — 6/10
+237b. Admin payout rollover dashboard — shows providers below $25 threshold with accumulated earnings, count, and distance to threshold — 8/10
 
 ---
 
