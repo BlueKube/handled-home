@@ -21,6 +21,7 @@ type Lead = {
   status: string;
   notes: string | null;
   created_at: string;
+  notified_at: string | null;
 };
 
 type Referral = {
@@ -260,7 +261,14 @@ function LeadsTab({ leads, isLoading, isError, onUpdateStatus }: {
                         </SelectContent>
                       </Select>
                     </td>
-                    <td className="p-3 text-xs text-muted-foreground">{new Date(lead.created_at).toLocaleDateString()}</td>
+                    <td className="p-3 text-xs text-muted-foreground">
+                      {new Date(lead.created_at).toLocaleDateString()}
+                      {lead.notified_at && (
+                        <span className="block text-[10px] text-violet-500">
+                          Notified {new Date(lead.notified_at).toLocaleDateString()}
+                        </span>
+                      )}
+                    </td>
                     <td className="p-3">
                       {lead.status === "new" && (
                         <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => onUpdateStatus(lead.id, "contacted")}>
