@@ -58,3 +58,25 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 - [ ] **Add TestFlight testers** — App Store Connect → TestFlight → add by email
   - **Why:** Only invited testers can install
   - **Blocked:** Nothing — do after upload
+
+## App Store Review Submission (2026-04-01)
+
+- [ ] **Create reviewer auth user** — Supabase Auth dashboard → create user `reviewer@handledhome.com` with a strong password, auto-confirm email
+  - **Why:** Apple reviewers need a pre-populated test account to review the app
+  - **Blocked:** App Store review
+
+- [ ] **Run reviewer seed SQL** — Edit `supabase/seed-apple-reviewer.sql` (replace placeholder UUID with actual user ID), then run against production
+  - **Why:** Seeds property, subscription, and role for the reviewer account
+  - **Blocked:** App Store review
+
+- [ ] **Fill out App Store Connect privacy labels** — Declare all data types collected (see table in DEPLOYMENT.md § 5b)
+  - **Why:** Apple requires privacy nutrition labels for all apps
+  - **Blocked:** App Store submission
+
+- [ ] **Enter reviewer credentials in App Store Connect** — App Information → App Review Information → sign-in credentials + review notes
+  - **Why:** Reviewers need credentials and context to test the app
+  - **Blocked:** App Store review
+
+- [ ] **Submit for App Store review** — After TestFlight testing is satisfactory
+  - **Why:** Required for public App Store listing
+  - **Blocked:** TestFlight testing complete
