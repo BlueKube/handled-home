@@ -18,7 +18,7 @@ export interface OpsExceptionWithRelations extends OpsException {
 
 export type ExceptionDomain = "all" | "ops" | "billing";
 
-const BILLING_TYPES: OpsExceptionType[] = [
+const BILLING_TYPES: string[] = [
   "payment_failed", "payment_past_due", "payout_failed",
   "dispute_opened", "earnings_held", "reconciliation_mismatch",
 ];
