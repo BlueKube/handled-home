@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LogOut, Mail, ChevronLeft, FileText, Shield, Users, Send, X } from "lucide-react";
+import { LogOut, Mail, ChevronLeft, FileText, Shield, Users, Send, X, Truck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { HelpTip } from "@/components/ui/help-tip";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,6 +62,19 @@ export default function CustomerSettings() {
       <RoleSwitcher />
       <PreviewAsCard />
       <HouseholdSection />
+
+      {/* Moving */}
+      <Link to="/customer/moving">
+        <Card className="cursor-pointer hover:bg-muted/30 transition-colors">
+          <CardContent className="py-4 flex items-center gap-3">
+            <Truck className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <p className="text-sm font-medium">I'm moving</p>
+              <p className="text-xs text-muted-foreground">Transfer your plan or pause services</p>
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
 
       {/* Legal */}
       <div className="flex gap-3">
