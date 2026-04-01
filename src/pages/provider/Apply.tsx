@@ -35,7 +35,7 @@ const STATUS_ICONS: Record<string, React.ReactNode> = {
   open: <CheckCircle className="h-5 w-5 text-success" />,
   soft_launch: <Sparkles className="h-5 w-5 text-primary" />,
   waitlist: <Clock className="h-5 w-5 text-warning" />,
-  not_supported: <AlertCircle className="h-5 w-5 text-muted-foreground" />,
+  not_supported: <Megaphone className="h-5 w-5 text-primary" />,
   submitted: <Clock className="h-5 w-5 text-primary" />,
   under_review: <Clock className="h-5 w-5 text-primary" />,
   approved: <CheckCircle className="h-5 w-5 text-success" />,
@@ -52,6 +52,15 @@ const STATUS_MESSAGES: Record<string, { title: string; desc: string }> = {
   waitlisted: { title: "We're building your zone", desc: "We're working on launching in your area. Help us get there faster — refer providers you trust in the categories below." },
   rejected: { title: "Not approved", desc: "Check notifications for details. You may reapply later." },
   draft: { title: "Draft application", desc: "Continue your application below." },
+};
+
+const ZONE_STATUS_LABELS: Record<string, string> = {
+  CLOSED: "Building",
+  WAITLIST_ONLY: "Building",
+  PROVIDER_RECRUITING: "Recruiting",
+  SOFT_LAUNCH: "Launching soon",
+  OPEN: "Active",
+  PROTECT_QUALITY: "Building",
 };
 
 const TOTAL_STEPS = 5;
@@ -124,7 +133,7 @@ export default function ProviderApply() {
         );
         setBannerVariant(variant);
       } else {
-        setBannerVariant(result.status === "not_supported" ? "HELP_LAUNCH" : "HELP_LAUNCH");
+        setBannerVariant("HELP_LAUNCH");
       }
     } catch (err: any) {
       toast.error(err?.message || "Could not check zone availability. Please try again.");
@@ -413,8 +422,8 @@ export default function ProviderApply() {
                       className="flex items-center justify-between text-sm"
                     >
                       <span>{z.zone_name}</span>
-                      <Badge variant="outline" className="text-xs capitalize">
-                        {z.launch_status.replace(/_/g, " ").toLowerCase()}
+                      <Badge variant="outline" className="text-xs">
+                        {ZONE_STATUS_LABELS[z.launch_status] ?? "Building"}
                       </Badge>
                     </div>
                   ))}
