@@ -508,6 +508,7 @@
 264. Browse-first public experience at /browse — hero, ZIP coverage check, full service catalog with real SKU data, plan comparison with pricing, how-it-works, trust signals, conversion CTAs — DONE
 265. Password reset flow — actual Supabase resetPasswordForEmail instead of "Coming soon" toast — DONE
 266. Subscription verification timeout — 15-second timeout with error message instead of infinite spinner — DONE
+267. Provider browse-first experience at /providers — earnings calculator, 6 key benefits, BYOC bonus math, how-it-works, service categories, lead capture (email + ZIP), conversion CTAs. No zone status shown pre-application. — DONE
 
 ---
 
