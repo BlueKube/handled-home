@@ -224,6 +224,9 @@ export default function ProviderApply() {
           <CategoryGapsCard zipCodes={appZips} />
         )}
 
+        {/* Referral progress + incentive */}
+        {showRecruitment && <ReferralProgressCard />}
+
         {/* Know someone? Referral form */}
         {showRecruitment && (
           <ProviderReferralForm
@@ -617,6 +620,56 @@ export default function ProviderApply() {
         </div>
       )}
     </div>
+  );
+}
+
+function ReferralProgressCard() {
+  const { user } = useAuth();
+  const referralCount = useQuery({
+    queryKey: ["my-referral-count", user?.email],
+    queryFn: async () => {
+      if (!user?.email) return 0;
+      const { data, error } = await (supabase.from("provider_referrals") as any)
+        .select("id", { count: "exact", head: true })
+        .eq("referrer_email", user.email);
+      if (error) return 0;
+      return data?.length ?? 0;
+    },
+    enabled: !!user?.email,
+  });
+
+  const count = referralCount.data ?? 0;
+  const target = 3;
+  const hasReached = count >= target;
+
+  if (referralCount.isLoading) return null;
+
+  return (
+    <Card>
+      <CardContent className="py-4 space-y-2">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium">
+            {count > 0 ? `You've referred ${count} provider${count !== 1 ? "s" : ""}` : "Refer providers to get priority"}
+          </p>
+          {hasReached && (
+            <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 text-xs">
+              Priority eligible
+            </Badge>
+          )}
+        </div>
+        <div className="w-full bg-muted rounded-full h-2">
+          <div
+            className="bg-primary rounded-full h-2 transition-all"
+            style={{ width: `${Math.min((count / target) * 100, 100)}%` }}
+          />
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {hasReached
+            ? "You've earned priority review status! We'll fast-track your application."
+            : `Refer ${target - count} more provider${target - count !== 1 ? "s" : ""} to unlock priority review.`}
+        </p>
+      </CardContent>
+    </Card>
   );
 }
 
