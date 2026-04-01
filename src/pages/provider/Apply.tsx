@@ -122,7 +122,7 @@ export default function ProviderApply() {
         );
         setBannerVariant(variant);
       } else {
-        setBannerVariant(result.status === "not_supported" ? "CLOSED" : "WAITLIST");
+        setBannerVariant(result.status === "not_supported" ? "HELP_LAUNCH" : "HELP_LAUNCH");
       }
     } catch (err: any) {
       toast.error(err?.message || "Could not check zone availability. Please try again.");
