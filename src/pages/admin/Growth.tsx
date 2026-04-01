@@ -656,16 +656,16 @@ function FunnelsTab() {
         <CardContent>
           {providerLeads.isLoading ? (
             <Skeleton className="h-12" />
+          ) : providerLeads.isError ? (
+            <p className="text-xs text-destructive">Failed to load provider leads data.</p>
           ) : (
             <FunnelBar steps={[
               { label: "Total Leads", count: providerLeads.data?.total ?? 0 },
               { label: "New", count: providerLeads.data?.new ?? 0 },
               { label: "Contacted", count: providerLeads.data?.contacted ?? 0 },
               { label: "Applied", count: providerLeads.data?.applied ?? 0 },
+              { label: "Declined", count: providerLeads.data?.declined ?? 0 },
             ]} />
-          )}
-          {(providerLeads.data?.declined ?? 0) > 0 && (
-            <p className="text-xs text-muted-foreground mt-2">{providerLeads.data!.declined} declined</p>
           )}
         </CardContent>
       </Card>

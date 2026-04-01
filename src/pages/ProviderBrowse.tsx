@@ -74,7 +74,10 @@ export default function ProviderBrowse() {
   };
 
   const handleNotify = async () => {
-    if (!email || zip.length < 5) return;
+    if (!email || zip.length < 5) {
+      if (zip.length < 5) toast.error("Please enter a valid 5-digit ZIP code");
+      return;
+    }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       toast.error("Please enter a valid email address");
