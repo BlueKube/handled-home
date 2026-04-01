@@ -61,10 +61,11 @@ export default function ProviderBrowse() {
   const navigate = useNavigate();
   const [zip, setZip] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [returningLead, setReturningLead] = useState<{ email: string; zip: string } | null>(() => {
+  const [returningLead, setReturningLead] = useState<{ email: string; zip: string; phone?: string } | null>(() => {
     try {
       const stored = localStorage.getItem(LEAD_STORAGE_KEY);
       return stored ? JSON.parse(stored) : null;
@@ -98,6 +99,7 @@ export default function ProviderBrowse() {
       const { error } = await (supabase.from("provider_leads") as any).upsert(
         {
           email,
+          phone: phone || null,
           zip_code: zip,
           categories: selectedCategories,
           source: "browse",
@@ -105,8 +107,8 @@ export default function ProviderBrowse() {
         { onConflict: "email" }
       );
       if (error) throw error;
-      try { localStorage.setItem(LEAD_STORAGE_KEY, JSON.stringify({ email, zip })); } catch {}
-      setReturningLead({ email, zip });
+      try { localStorage.setItem(LEAD_STORAGE_KEY, JSON.stringify({ email, zip, phone })); } catch {}
+      setReturningLead({ email, zip, phone });
       setSubmitted(true);
     } catch (err) {
       toast.error("Something went wrong. Please try again.");
@@ -298,6 +300,13 @@ export default function ProviderBrowse() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                className="text-center h-11"
+              />
+              <Input
+                placeholder="Phone number (optional)"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 className="text-center h-11"
               />
               <Input

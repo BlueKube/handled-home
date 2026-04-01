@@ -15,6 +15,7 @@ import { HelpTip } from "@/components/ui/help-tip";
 type Lead = {
   id: string;
   email: string;
+  phone: string | null;
   zip_code: string;
   categories: string[];
   source: string;
@@ -225,6 +226,7 @@ function LeadsTab({ leads, isLoading, isError, onUpdateStatus }: {
               <thead>
                 <tr className="border-b bg-muted/50">
                   <th className="text-left p-3 font-medium">Email</th>
+                  <th className="text-left p-3 font-medium">Phone</th>
                   <th className="text-left p-3 font-medium">ZIP</th>
                   <th className="text-left p-3 font-medium">Categories</th>
                   <th className="text-left p-3 font-medium">Source</th>
@@ -237,6 +239,7 @@ function LeadsTab({ leads, isLoading, isError, onUpdateStatus }: {
                 {filtered.map((lead) => (
                   <tr key={lead.id} className="border-b hover:bg-muted/30 transition-colors">
                     <td className="p-3 font-medium">{lead.email}</td>
+                    <td className="p-3 text-xs text-muted-foreground">{lead.phone || "—"}</td>
                     <td className="p-3">{lead.zip_code}</td>
                     <td className="p-3">
                       <div className="flex flex-wrap gap-1">
