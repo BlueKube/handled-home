@@ -288,6 +288,7 @@ export default function Browse() {
         <div className="max-w-3xl mx-auto flex items-center justify-between text-xs text-muted-foreground">
           <span>&copy; {new Date().getFullYear()} Handled Home</span>
           <div className="flex gap-4">
+            <a href="/providers" className="hover:text-foreground transition-colors">For Providers</a>
             <a href="/privacy" className="hover:text-foreground transition-colors">Privacy</a>
             <a href="/terms" className="hover:text-foreground transition-colors">Terms</a>
           </div>

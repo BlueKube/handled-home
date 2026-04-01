@@ -39,6 +39,7 @@ const CustomerPlans = lazy(() => import("@/pages/customer/Plans"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
 const Terms = lazy(() => import("@/pages/Terms"));
 const Browse = lazy(() => import("@/pages/Browse"));
+const ProviderBrowse = lazy(() => import("@/pages/ProviderBrowse"));
 const CustomerPlanDetail = lazy(() => import("@/pages/customer/PlanDetail"));
 const CustomerRoutine = lazy(() => import("@/pages/customer/Routine"));
 const CustomerSubscribe = lazy(() => import("@/pages/customer/Subscribe"));
@@ -198,6 +199,7 @@ const App = () => (
                 <Route path="/" element={<RootRedirect />} />
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/browse" element={<Browse />} />
+                <Route path="/providers" element={<ProviderBrowse />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/invite/:code" element={<InviteLanding />} />
