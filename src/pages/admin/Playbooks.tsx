@@ -1,11 +1,16 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useAdminMembership, type AdminRole } from "@/hooks/useAdminMembership";
+import { useActiveSopRun, useStartSopRun, useUpdateSopRun } from "@/hooks/useSopRuns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, CheckSquare, ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
+import { BookOpen, CheckSquare, ChevronDown, ChevronRight, ExternalLink, Play, Square, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 /* ── SOP metadata + content ── */
 interface Playbook {
@@ -333,12 +338,68 @@ const PLAYBOOKS: Playbook[] = [
   },
 ];
 
-/* ── Expandable playbook card ── */
+/* ── Expandable playbook card with interactive execution ── */
 function PlaybookCard({ playbook }: { playbook: Playbook }) {
   const [expanded, setExpanded] = useState(false);
+  const { data: activeRun } = useActiveSopRun(playbook.id);
+  const startRun = useStartSopRun();
+  const updateRun = useUpdateSopRun();
+
+  const isExecuting = !!activeRun;
+  const completedSteps: number[] = isExecuting ? (activeRun.steps_completed as number[] ?? []) : [];
+  const stepNotes: Record<string, string> = isExecuting ? (activeRun.step_notes as Record<string, string> ?? {}) : {};
+  const progress = isExecuting ? Math.round((completedSteps.length / playbook.steps.length) * 100) : 0;
+
+  const handleStart = async () => {
+    try {
+      await startRun.mutateAsync({ sopId: playbook.id, totalSteps: playbook.steps.length });
+      setExpanded(true);
+      toast.success(`Started: ${playbook.title}`);
+    } catch {
+      toast.error("Failed to start SOP");
+    }
+  };
+
+  const handleToggleStep = useCallback(async (stepIndex: number) => {
+    if (!activeRun) return;
+    const current = (activeRun.steps_completed as number[]) ?? [];
+    const updated = current.includes(stepIndex)
+      ? current.filter((s) => s !== stepIndex)
+      : [...current, stepIndex].sort((a, b) => a - b);
+
+    const isComplete = updated.length === playbook.steps.length;
+    try {
+      await updateRun.mutateAsync({
+        runId: activeRun.id,
+        sopId: playbook.id,
+        stepsCompleted: updated,
+        stepNotes: (activeRun.step_notes as Record<string, string>) ?? {},
+        status: isComplete ? "completed" : "in_progress",
+      });
+      if (isComplete) toast.success(`Completed: ${playbook.title}`);
+    } catch {
+      toast.error("Failed to update step");
+    }
+  }, [activeRun, playbook, updateRun]);
+
+  const handleAbandon = async () => {
+    if (!activeRun) return;
+    try {
+      await updateRun.mutateAsync({
+        runId: activeRun.id,
+        sopId: playbook.id,
+        stepsCompleted: completedSteps,
+        stepNotes,
+        status: "abandoned",
+      });
+      toast.success("SOP abandoned");
+    } catch {
+      toast.error("Failed to abandon SOP");
+    }
+  };
 
   return (
-    <Card className="overflow-hidden">
+    <Card className={cn("overflow-hidden", isExecuting && "border-primary/30")}>
       <CardHeader
         className="cursor-pointer hover:bg-muted/30 transition-colors py-4"
         onClick={() => setExpanded(!expanded)}
@@ -352,6 +413,11 @@ function PlaybookCard({ playbook }: { playbook: Playbook }) {
             )}
             <CardTitle className="text-base flex-1">{playbook.title}</CardTitle>
             <div className="flex gap-1.5 shrink-0">
+              {isExecuting && (
+                <Badge variant="default" className="text-[10px]">
+                  {progress}% complete
+                </Badge>
+              )}
               {playbook.allowedRoles.map((role) => (
                 <Badge key={role} variant="outline" className="text-[10px] px-1.5 py-0 capitalize">
                   {role}
@@ -367,43 +433,70 @@ function PlaybookCard({ playbook }: { playbook: Playbook }) {
       </CardHeader>
 
       {expanded && (
-        <CardContent className="pt-0 pb-4">
+        <CardContent className="pt-0 pb-4 space-y-3">
+          {/* Action bar */}
+          {!isExecuting ? (
+            <Button size="sm" onClick={(e) => { e.stopPropagation(); handleStart(); }} disabled={startRun.isPending}>
+              <Play className="h-3 w-3 mr-1" /> Execute SOP
+            </Button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Badge variant="default" className="text-xs">
+                {completedSteps.length} / {playbook.steps.length} steps
+              </Badge>
+              <Button size="sm" variant="ghost" className="text-xs text-muted-foreground" onClick={handleAbandon}>
+                <Square className="h-3 w-3 mr-1" /> Abandon
+              </Button>
+            </div>
+          )}
+
           <ol className="space-y-4">
-            {playbook.steps.map((step, i) => (
-              <li key={i} className="flex gap-3">
-                <span className="flex items-center justify-center h-6 w-6 rounded-full bg-primary/10 text-primary text-xs font-bold shrink-0 mt-0.5">
-                  {i + 1}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium">{step.title}</p>
-                  <p className="text-sm text-muted-foreground mt-0.5">{step.body}</p>
-                  {step.subSteps && (
-                    <ul className="mt-2 space-y-1 ml-3">
-                      {step.subSteps.map((sub, j) => (
-                        <li key={j} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                          <span className="mt-1.5 h-1 w-1 rounded-full bg-muted-foreground shrink-0" />
-                          {sub}
-                        </li>
-                      ))}
-                    </ul>
+            {playbook.steps.map((step, i) => {
+              const isDone = completedSteps.includes(i);
+              return (
+                <li key={i} className={cn("flex gap-3", isDone && "opacity-60")}>
+                  {isExecuting ? (
+                    <Checkbox
+                      checked={isDone}
+                      onCheckedChange={() => handleToggleStep(i)}
+                      className="mt-1 shrink-0"
+                    />
+                  ) : (
+                    <span className="flex items-center justify-center h-6 w-6 rounded-full bg-primary/10 text-primary text-xs font-bold shrink-0 mt-0.5">
+                      {isDone ? <Check className="h-3 w-3" /> : i + 1}
+                    </span>
                   )}
-                  {step.links && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {step.links.map((link) => (
-                        <Link
-                          key={link.url}
-                          to={link.url}
-                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                        >
-                          <ExternalLink className="h-3 w-3" />
-                          {link.label}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </li>
-            ))}
+                  <div className="flex-1 min-w-0">
+                    <p className={cn("text-sm font-medium", isDone && "line-through")}>{step.title}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">{step.body}</p>
+                    {step.subSteps && (
+                      <ul className="mt-2 space-y-1 ml-3">
+                        {step.subSteps.map((sub, j) => (
+                          <li key={j} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                            <span className="mt-1.5 h-1 w-1 rounded-full bg-muted-foreground shrink-0" />
+                            {sub}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {step.links && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {step.links.map((link) => (
+                          <Link
+                            key={link.url}
+                            to={link.url}
+                            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            {link.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
           </ol>
         </CardContent>
       )}
