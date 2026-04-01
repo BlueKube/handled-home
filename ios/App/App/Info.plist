@@ -35,8 +35,6 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
@@ -47,5 +45,22 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Take photos of completed service work for quality verification</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Select photos to upload as service proof</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Show your service area and nearby providers on the map</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>handledhome</string>
+			</array>
+			<key>CFBundleURLName</key>
+			<string>com.handledhome.app</string>
+		</dict>
+	</array>
 </dict>
 </plist>
