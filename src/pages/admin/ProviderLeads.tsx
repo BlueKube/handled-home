@@ -239,10 +239,10 @@ function LeadsTab({ leads, isLoading, isError, onUpdateStatus }: {
                     <td className="p-3">{lead.zip_code}</td>
                     <td className="p-3">
                       <div className="flex flex-wrap gap-1">
-                        {lead.categories.map((c) => (
+                        {(lead.categories ?? []).map((c) => (
                           <Badge key={c} variant="outline" className="text-xs">{c}</Badge>
                         ))}
-                        {lead.categories.length === 0 && <span className="text-xs text-muted-foreground">—</span>}
+                        {(lead.categories ?? []).length === 0 && <span className="text-xs text-muted-foreground">—</span>}
                       </div>
                     </td>
                     <td className="p-3">
