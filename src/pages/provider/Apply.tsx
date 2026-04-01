@@ -11,6 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { useProviderApplication, ByocEstimate } from "@/hooks/useProviderApplication";
 import { useZoneReadiness, ZoneReadinessResult } from "@/hooks/useZoneReadiness";
 import OpportunityBanner, {
@@ -246,7 +247,6 @@ export default function ProviderApply() {
         {showRecruitment && (
           <ProviderReferralForm
             defaultZip={(app as any).zip_codes?.[0] ?? ""}
-            referrerEmail={(app as any).email ?? ""}
           />
         )}
       </div>
@@ -639,7 +639,8 @@ export default function ProviderApply() {
   );
 }
 
-function ProviderReferralForm({ defaultZip, referrerEmail }: { defaultZip: string; referrerEmail: string }) {
+function ProviderReferralForm({ defaultZip }: { defaultZip: string }) {
+  const { user } = useAuth();
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
   const [category, setCategory] = useState("");
@@ -652,7 +653,7 @@ function ProviderReferralForm({ defaultZip, referrerEmail }: { defaultZip: strin
     setSubmitting(true);
     try {
       const { error } = await (supabase.from("provider_referrals") as any).insert({
-        referrer_email: referrerEmail,
+        referrer_email: user?.email ?? "",
         referred_name: name,
         referred_contact: contact,
         referred_category: category,
