@@ -249,6 +249,18 @@ Skipping Lane 3 (historical context) when there's no prior review history on cha
 
 _None yet._
 
+## Rounds 8-9 Lessons (2026-04-01)
+
+### [2026-04-01] Review agents catch real bugs even on migration-only batches
+**Source:** B7 review (Round 9 Phase 4)
+**Type:** Agent Signal
+The B7 reviewer caught that `select("id", { count: "exact", head: true })` returns `null` for `data` — the `count` is on a separate response field. `data?.length` silently returned 0 for all users. This would have shipped a referral progress bar permanently stuck at zero. Database-only batches still benefit from review when they include UI components.
+
+### [2026-04-01] Two rounds in one session is achievable at ~72% context
+**Source:** Rounds 8-9 execution
+**Type:** Agent Signal
+Completed Round 8 (10 batches, 5 phases) + Round 9 (9 batches, 6 phases) in a single session, reaching ~72% context. Total: 19 batches, 11 phases, 25 features added (454 total). Background review agents are effectively free — main context only grows from implementation work. The 60% threshold per-round is conservative; two small rounds fit comfortably.
+
 ### Dismissed
 
 _None yet._
