@@ -5,44 +5,22 @@
 
 ---
 
-## Phase 1: Privacy, Terms & Legal ✅
+## Phases
 
-| Batch | Title | Size | Status |
-|-------|-------|------|--------|
-| B1 | Privacy policy + terms of service pages | M | ✅ |
-| B2 | Customer account deletion flow | S | ✅ |
-| B3 | Link privacy/terms in Settings, Auth, Info.plist | S | ✅ |
-
-## Phase 2: Browse-First Experience ✅
-
-| Batch | Title | Size | Status |
-|-------|-------|------|--------|
-| B1 | Browse page with catalog, plans, ZIP check, CTAs | M | ✅ |
-
-## Phase 3: UI Cleanup ✅
-
-| Batch | Title | Size | Status |
-|-------|-------|------|--------|
-| B1 | Password reset, remove Coming Soon, fix TBD, add verification timeout | S | ✅ |
-
-## Phase 4: Apple Reviewer Preparation
-
-| Batch | Title | Size | Status |
-|-------|-------|------|--------|
-| B1 | Test account seed SQL + reviewer documentation | S | deferred (human action) |
-
-## Phase 5: Doc Sync
-
-| Batch | Title | Size | Status |
-|-------|-------|------|--------|
-| B1 | Feature-list update + plan update | Micro | ⬜ |
+| Phase | Title | Status |
+|-------|-------|--------|
+| Phase 1 | Privacy, Terms & Legal Compliance | ✅ |
+| Phase 2 | Browse-First Public Experience | ✅ |
+| Phase 3 | UI Cleanup | ✅ (items already resolved) |
+| Phase 4 | Apple Reviewer Preparation | ✅ |
+| Phase 5 | Doc Sync | ✅ |
 
 ---
 
 ## Session Handoff
 - **Branch:** claude/sku-calibration-validation-WFqgD
-- **Last completed:** Phase 3 (UI Cleanup)
-- **Next up:** Phase 5 doc sync, then Phase 4 requires human (seed data for test account)
+- **Last completed:** Phase 5 (Round 7 complete)
+- **Next up:** Human actions — create reviewer auth user, fill App Store Connect privacy labels, submit to App Store review
 - **Context at exit:** ~55%
-- **Blockers:** Phase 4 needs human to create test account in Supabase
-- **Round progress:** Phases 1-3 complete, Phase 4 deferred, Phase 5 pending
+- **Blockers:** Remaining steps require Apple Developer account (human-only)
+- **Round progress:** All 5 phases complete
