@@ -180,7 +180,7 @@ function LeadsTab({ leads, isLoading, isError, onUpdateStatus }: {
   const filtered = leads.filter((lead) => {
     if (statusFilter !== "all" && lead.status !== statusFilter) return false;
     if (zipFilter && !lead.zip_code.includes(zipFilter)) return false;
-    if (categoryFilter && !lead.categories.some((c) => c.toLowerCase().includes(categoryFilter.toLowerCase()))) return false;
+    if (categoryFilter && !(lead.categories ?? []).some((c) => c.toLowerCase().includes(categoryFilter.toLowerCase()))) return false;
     return true;
   });
 
