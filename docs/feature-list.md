@@ -508,7 +508,7 @@
 264. Browse-first public experience at /browse — hero, ZIP coverage check, full service catalog with real SKU data, plan comparison with pricing, how-it-works, trust signals, conversion CTAs — DONE
 265. Password reset flow — actual Supabase resetPasswordForEmail instead of "Coming soon" toast — DONE
 266. Subscription verification timeout — 15-second timeout with error message instead of infinite spinner — DONE
-267. Provider browse-first experience at /providers — earnings calculator, 6 key benefits, BYOC bonus math, how-it-works, service categories, lead capture (email + ZIP), conversion CTAs. No zone status shown pre-application. — DONE
+267. Provider browse-first experience at /providers — earnings calculator, 6 key benefits, BYOC bonus math, how-it-works, service categories, lead capture form (email + ZIP + category multi-select → saves to provider_leads table), conversion CTAs. No zone status shown pre-application. — DONE
 
 ---
 
@@ -747,4 +747,24 @@
 
 ---
 
-*Total features: 429 | Last updated: 2026-03-30 | Session 3 features added (Admin Academy training center with 16 modules)*
+## XLIV. Provider Conversion Funnel & Lead Pipeline `density-driver` `provider-value`
+
+411. `provider_leads` table with email, ZIP, categories, source, status tracking — anon insert + admin RLS — DONE
+412. Provider browse page lead capture form saves to database with category multi-select, email validation, loading state — DONE
+413. Admin Growth Console Funnels tab: Provider Leads Pipeline funnel card showing total/new/contacted/applied/declined counts — DONE
+414. `provider_referrals` table for provider-to-provider referrals — anon insert + admin RLS — DONE
+415. OpportunityBanner CLOSED variant replaced with HELP_LAUNCH — "Help us launch in your area" with recruitment messaging. No provider ever sees "closed" or "full" language — DONE
+416. WAITLIST banner updated to encouraging "building momentum" messaging — DONE
+417. Post-application status screen for waitlisted/submitted providers shows category gaps ("We need providers in these categories") and "Know someone?" referral form — DONE
+418. Provider referral form: name, contact, category, ZIP — saves to provider_referrals with auth email as referrer — DONE
+419. Zone status badges in application flow use friendly labels (CLOSED→"Building", SOFT_LAUNCH→"Launching soon", OPEN→"Active") — DONE
+420. Admin Provider Leads pipeline page at /admin/provider-leads with filterable table, status management, summary stat cards — DONE
+421. Provider Leads page: Leads tab with status/ZIP/category filters, inline status update dropdown, "Mark Contacted" quick action — DONE
+422. Provider Leads page: By ZIP tab with ZIP aggregation (count per ZIP, category breakdown, sorted by volume) — DONE
+423. Provider Leads page: Referrals tab showing provider_referrals with referrer, referred name/contact/category, status management — DONE
+424. `notify-zone-leads` edge function: marks matching leads as "notified" when zone launches — queries zone ZIP codes, updates lead status — DONE
+425. Admin zone notification trigger: zone selector + "Notify" button on By ZIP tab calls edge function, shows count of notified leads — DONE
+
+---
+
+*Total features: 444 | Last updated: 2026-04-01 | Round 8: Provider Conversion Funnel & Lead Pipeline (15 features)*

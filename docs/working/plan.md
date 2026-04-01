@@ -15,42 +15,36 @@
 | B4 | Post-application status: category gaps + referral form | M | ✅ | 24% |
 | B5 | Apply.tsx banner mapping cleanup + zone status labels | S | ✅ | 27% |
 
----
-
-## Current Phase: Phase 3 — Admin Provider Lead Pipeline
-
-### Phase Summary
-Build an admin page showing all provider leads with filtering, status management, ZIP aggregation, and referral tracking.
-
-### Batch Breakdown
+## Phase 3 — Admin Provider Lead Pipeline ✅
 
 | Batch | Title | Size | Status | Context |
 |-------|-------|------|--------|---------|
-| B6 | Admin ProviderLeads page + route + nav | M | ⬜ | |
-| B7 | ZIP aggregation view + referrals tab | S | ⬜ | |
+| B6 | Admin ProviderLeads page + route + nav | M | ✅ | 33% |
+| B7 | ZIP aggregation + referrals tab | S | ✅ | 37% |
 
-### Batch Details
+## Phase 4 — Zone Launch Notification Pipeline ✅
 
-**B6: Admin ProviderLeads page + route + nav**
-- Create `src/pages/admin/ProviderLeads.tsx` with leads table, filters (ZIP, category, status), status update actions
-- Add route at `/admin/provider-leads`
-- Add nav entry under Growth section in AdminShell
-- Lead status workflow: new → contacted → applied → declined
+| Batch | Title | Size | Status | Context |
+|-------|-------|------|--------|---------|
+| B8 | notify-zone-leads edge function | S | ✅ | 42% |
+| B9 | Admin notify trigger button | S | ✅ | 45% |
 
-**B7: ZIP aggregation view + referrals tab**
-- Add ZIP aggregation view: count of leads per ZIP code
-- Add referrals tab showing provider_referrals data
-- Lead-to-application conversion stat
+## Phase 5 — Doc Sync ✅
 
-### Dependencies
-- B7 depends on B6 (extends the page)
+| Batch | Title | Size | Status | Context |
+|-------|-------|------|--------|---------|
+| B10 | Feature-list update + plan finalization | Micro | ✅ | 48% |
 
 ---
 
 ## Session Handoff
 - **Branch:** claude/provider-conversion-funnel-N3IE5
-- **Last completed:** B5 (Phase 2 complete)
-- **Next up:** B6 — Admin ProviderLeads page
-- **Context at exit:** ~30%
+- **Last completed:** B10 (Round 8 complete — all 5 phases done)
+- **Next up:** Round 8 complete. Ready for Round Cleanup or next round.
+- **Context at exit:** ~48%
 - **Blockers:** None
-- **Round progress:** Phases 1-2 of 5 complete, starting Phase 3
+- **Round progress:** All 5 phases complete (10 batches)
+
+## TODO Items for Human
+- Email integration: notify-zone-leads edge function currently only marks leads as "notified" — actual email sending needs Resend/SendGrid/etc. API key configured
+- Apply Supabase migrations (provider_leads, provider_referrals) to production when ready

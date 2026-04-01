@@ -80,3 +80,13 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 - [ ] **Submit for App Store review** — After TestFlight testing is satisfactory
   - **Why:** Required for public App Store listing
   - **Blocked:** TestFlight testing complete
+
+## Round 8: Provider Conversion Funnel (2026-04-01)
+
+- [ ] **Apply provider_leads and provider_referrals migrations** — Two new tables need to be applied to production database
+  - **Why:** Browse page lead capture and referral form write to these tables
+  - **Blocked:** Lead capture on production
+
+- [ ] **Configure email sending for zone launch notifications** — The `notify-zone-leads` edge function marks leads as "notified" but doesn't send actual emails. Need to configure Resend/SendGrid/etc. and wire into the function.
+  - **Why:** Leads won't receive launch notification emails without email integration
+  - **Blocked:** Nothing — leads are still tracked even without email
