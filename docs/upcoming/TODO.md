@@ -49,9 +49,7 @@ Items that require API keys, backend changes, or design decisions beyond fronten
   - **Why:** Push notifications won't arrive on iOS without APNs configuration
   - **Blocked:** Push notifications on device
 
-- [ ] **Add `handledhome://auth/callback` to auth redirect URLs** — Lovable Cloud → Users → Auth Settings → Redirect URLs
-  - **Why:** Email confirmation links need this URL whitelisted to open in the app
-  - **Blocked:** Auth email confirmation on device
+- [x] **Add auth callback redirect URL** — Using universal link (`https://handled-home.lovable.app/auth/callback`) instead of custom scheme. Already in URI allow list via wildcard.
 
 - [ ] **Archive and upload build from Xcode** — Product → Archive → Distribute → TestFlight
   - **Why:** Requires macOS with Xcode — cannot be done by agent
