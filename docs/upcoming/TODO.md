@@ -16,7 +16,7 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 
 ## Backend / Schema Gaps
 
-- [ ] **Provider support ticket creation (F24)** — The UI for creating tickets will be added, but the Supabase `support_tickets` table may need an insert policy for provider role if one doesn't exist.
+- [x] **Provider support ticket creation (F24)** — ✅ UI fully implemented in SupportNew.tsx. Inserts into support_tickets with provider_org_id.
 - [ ] **Admin payout schedule (F29)** — UI will show a payout schedule view, but actual payout execution requires Stripe Connect integration on the backend.
 - [ ] **Provider earnings/payout data (F21, F26)** — "Set Up Payout Account" button and admin Provider Detail earnings section will link to appropriate pages, but actual Stripe Connect onboarding flow is a backend concern.
 
@@ -28,11 +28,11 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 - [ ] **SKU calibration values are still seed data** — The SKU Calibration admin page is built but no real provider interviews have been conducted. All duration/cost values remain "guessed" per the seed data audit.
   - **Why:** Requires human provider interviews using the launch playbook interview guide
   - **Blocked:** Accurate pricing and scheduling
-- [ ] **Simulation tool is standalone** — The market simulation lives in `tools/market-simulation/` and runs via `npx tsx simulate.ts` or the local HTML UI. It is not integrated into the admin console.
+- [x] **Simulation tool is standalone** — ✅ Now integrated into admin console at `/admin/simulator`. Standalone CLI tool remains in `tools/market-simulation/` for optimization runs.
   - **Why:** Designed as an offline planning tool, not a production feature
-  - **Blocked:** Nothing — intentional design choice
+  - **Blocked:** Nothing — resolved in Round 5 Phase 1
 
 ## Low-Priority Cosmetic (Optional)
 
-- [ ] **ArrowLeft → ChevronLeft icon swap** — Several provider pages use `ArrowLeft` where spec says `ChevronLeft`. Will be fixed in Phase 5 batch if touching those files, but verify after completion.
-- [ ] **F5 Onboarding back button** — Same ArrowLeft/ChevronLeft issue on customer onboarding.
+- [x] **ArrowLeft → ChevronLeft icon swap** — ✅ All pages now use ChevronLeft. Only ArrowLeft remaining is in carousel.tsx (intentional keyboard navigation).
+- [x] **F5 Onboarding back button** — ✅ OnboardingWizard and ByocOnboardingWizard both use ChevronLeft.
