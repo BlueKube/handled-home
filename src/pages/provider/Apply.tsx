@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, MapPin, CheckCircle, Clock, AlertCircle, Sparkles, Users, Loader2, Megaphone, Send } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -183,10 +184,7 @@ export default function ProviderApply() {
     const status = app.status as string;
     const msg = STATUS_MESSAGES[status] ?? STATUS_MESSAGES.submitted;
     const showRecruitment = status === "waitlisted" || status === "submitted" || status === "under_review";
-
-    // Categories we still need providers for (all categories minus what this provider applied for)
-    const appliedCats = (app.requested_categories ?? []) as string[];
-    const neededCategories = CATEGORIES.filter((c) => !appliedCats.includes(c.value));
+    const appZips = ((app as any).zip_codes ?? []) as string[];
 
     return (
       <div className="animate-fade-in p-4 pb-24 space-y-5">
@@ -221,26 +219,9 @@ export default function ProviderApply() {
           </CardContent>
         </Card>
 
-        {/* Category gaps — show for recruitment-eligible statuses */}
-        {showRecruitment && neededCategories.length > 0 && (
-          <Card>
-            <CardContent className="py-4 space-y-3">
-              <div className="flex items-center gap-2">
-                <Megaphone className="h-4 w-4 text-primary" />
-                <p className="text-sm font-medium">Help us launch faster</p>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                We need providers in these categories to launch in your area:
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {neededCategories.map((c) => (
-                  <Badge key={c.value} variant="outline" className="text-xs capitalize">
-                    {c.label}
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+        {/* Category gaps — real zone data */}
+        {showRecruitment && appZips.length > 0 && (
+          <CategoryGapsCard zipCodes={appZips} />
         )}
 
         {/* Know someone? Referral form */}
@@ -636,6 +617,47 @@ export default function ProviderApply() {
         </div>
       )}
     </div>
+  );
+}
+
+function CategoryGapsCard({ zipCodes }: { zipCodes: string[] }) {
+  const gaps = useQuery({
+    queryKey: ["category-gaps", zipCodes],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_category_gaps", {
+        p_zip_codes: zipCodes,
+      });
+      if (error) throw error;
+      return (data ?? []) as Array<{ category: string; status: string; zone_name: string }>;
+    },
+    enabled: zipCodes.length > 0,
+  });
+
+  // Fallback: if RPC fails or returns empty, show nothing (don't show naive list)
+  if (gaps.isLoading || gaps.isError || !gaps.data || gaps.data.length === 0) return null;
+
+  // Deduplicate categories (may appear in multiple zones)
+  const uniqueCategories = Array.from(new Set(gaps.data.map((g) => g.category)));
+
+  return (
+    <Card>
+      <CardContent className="py-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <Megaphone className="h-4 w-4 text-primary" />
+          <p className="text-sm font-medium">Help us launch faster</p>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          We need providers in these categories to launch in your area:
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {uniqueCategories.map((cat) => (
+            <Badge key={cat} variant="outline" className="text-xs capitalize">
+              {cat.replace(/_/g, " ")}
+            </Badge>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
