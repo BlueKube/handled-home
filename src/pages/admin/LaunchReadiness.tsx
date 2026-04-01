@@ -109,7 +109,7 @@ function useReadinessChecks() {
 
       // 8. BYOC invite templates exist
       const { count: byocTemplateCount } = await supabase
-        .from("byoc_invites")
+        .from("byoc_invite_links")
         .select("id", { count: "exact", head: true });
       checks.push({
         label: "BYOC Invites Available",

@@ -25,14 +25,11 @@ export function PayoutRolloverCard() {
       // Find providers with PENDING earnings that are below the $25 threshold
       const { data: earnings, error } = await supabase
         .from("provider_earnings")
-        .select(`
-          provider_org_id,
-          net_cents,
-          created_at,
-          provider_orgs:provider_org_id(name)
-        `)
+        .select(
+          "provider_org_id, net_cents, created_at, provider_orgs:provider_org_id(name)"
+        )
         .eq("payout_status", "PENDING")
-        .order("created_at", { ascending: true });
+        .order("created_at", { ascending: true }) as { data: any[] | null; error: any };
 
       if (error) throw error;
 

@@ -39,19 +39,17 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 
 ## TestFlight Deployment (2026-04-01)
 
-- [ ] **Register bundle ID in Apple Developer portal** — `com.handledhome.app`
+- [x] **Register bundle ID in Apple Developer portal** — `com.handledhome.app`
   - **Why:** Required for code signing and TestFlight upload
-  - **Blocked:** Cannot archive in Xcode without valid signing
 
-- [ ] **Create app in App Store Connect** — Set up the app listing for TestFlight
+- [x] **Create app in App Store Connect** — Set up the app listing for TestFlight
   - **Why:** TestFlight builds are uploaded to App Store Connect
-  - **Blocked:** Cannot distribute TestFlight builds
 
-- [ ] **Generate APNs key and upload to Supabase** — Settings → Push Notifications in Supabase dashboard
+- [ ] **Generate APNs key and upload to backend** — Lovable Cloud → Push Notifications config
   - **Why:** Push notifications won't arrive on iOS without APNs configuration
   - **Blocked:** Push notifications on device
 
-- [ ] **Add `handledhome://auth/callback` to Supabase redirect URLs** — Authentication → URL Configuration → Redirect URLs
+- [ ] **Add `handledhome://auth/callback` to auth redirect URLs** — Lovable Cloud → Users → Auth Settings → Redirect URLs
   - **Why:** Email confirmation links need this URL whitelisted to open in the app
   - **Blocked:** Auth email confirmation on device
 
