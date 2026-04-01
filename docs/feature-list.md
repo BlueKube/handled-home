@@ -402,7 +402,7 @@
 211. Billing health: past due, failed payments, credits, refunds, disputes — 8/10
 212. Support health: open tickets, SLA breach risk, self-resolve rate, median time-to-resolution — 8/10
 213. Growth health: referrals, provider invites, applications, fraud holds — 8/10
-214. KPI definitions page with formulas, time windows, data sources, and caveats — 5/10
+214. KPI definitions page with 18 KPIs across 5 categories, formula cards, search, category filter, green/yellow/red threshold badges from operating model — 8/10
 215. Daily snapshot rollup via `snapshot-rollup` edge function — 8/10
 216. Business Health gauges on Ops Cockpit: attach rate (global, 90-day cohort, 6-month cohort), household churn, provider churn, zone density bands — green/amber/red threshold indicators from operating model, flywheel alert when 6-month attach rate < 1.5 — 7/10
 216b. Gross Margin gauge on Ops Cockpit (MONEY column): percentage with target ≥25%, green/yellow/red status — 8/10

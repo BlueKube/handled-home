@@ -1,4 +1,4 @@
-# Plan: Phase 6 — Support & Dispute Polish
+# Plan: Phase 7 — Accessibility & Admin Polish
 
 > **Branch:** claude/sku-calibration-validation-WFqgD
 > **Mode:** Quality
@@ -10,17 +10,16 @@
 
 | Batch | Title | Size | Status | Context |
 |-------|-------|------|--------|---------|
-| B1 | Policy preview simulator page | M | ✅ | |
-| B2 | Evidence replay improvements + chargeback intercept | S | deferred to next session | |
-| B3 | Doc sync + feature-list update | Micro | ✅ | |
+| B1 | KPI definitions page improvements (12 → 18 KPIs, card layout, thresholds) | S | ✅ | |
+| B2 | Icon consistency pass — ArrowLeft → ChevronLeft already resolved | Micro | ✅ (no-op) | |
+| B3 | Doc sync + lessons learned + session handoff | Micro | ✅ | |
 
 ---
 
 ## Session Handoff
 - **Branch:** claude/sku-calibration-validation-WFqgD
-- **Last completed:** B3 (Phase 6 partial — B2 deferred)
-- **Next up:** Phase 7 — Accessibility & Admin Polish (or Phase 6 B2 if prioritized)
-- **Context at exit:** ~50%
+- **Last completed:** B3 (Phase 7 complete — Round 5 done)
+- **Next up:** Round 5 deferred items: Phase 6 B2 (evidence replay + chargeback intercept), WCAG AA audit
+- **Context at exit:** ~55%
 - **Blockers:** None
-- **Round progress:** Phase 6 of 7 (B1+B3 done, B2 deferred)
-- **Deferred:** Evidence replay + chargeback intercept — needs deeper investigation into ticket/dispute component architecture
+- **Round progress:** All 7 phases complete (Phase 6 B2 deferred)
