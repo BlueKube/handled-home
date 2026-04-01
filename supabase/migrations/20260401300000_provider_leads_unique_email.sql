@@ -9,7 +9,7 @@
 DELETE FROM public.provider_leads a
 USING public.provider_leads b
 WHERE a.email = b.email
-  AND a.created_at < b.created_at;
+  AND (a.created_at < b.created_at OR (a.created_at = b.created_at AND a.id < b.id));
 
 -- Add unique constraint
 CREATE UNIQUE INDEX IF NOT EXISTS idx_provider_leads_email_unique

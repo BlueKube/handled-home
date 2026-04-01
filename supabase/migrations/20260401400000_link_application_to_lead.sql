@@ -49,6 +49,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Trigger: fires before insert so we can modify NEW.provider_lead_id
+DROP TRIGGER IF EXISTS trg_link_application_to_lead ON public.provider_applications;
 CREATE TRIGGER trg_link_application_to_lead
   BEFORE INSERT ON public.provider_applications
   FOR EACH ROW
