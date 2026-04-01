@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Capacitor } from "@capacitor/core";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,22 +12,25 @@ import { supabase } from "@/integrations/supabase/client";
  */
 export function useDeepLinks() {
   const navigate = useNavigate();
+  const navigateRef = useRef(navigate);
+  useEffect(() => { navigateRef.current = navigate; }, [navigate]);
 
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
 
+    let cancelled = false;
     let cleanup: (() => void) | undefined;
 
     async function setup() {
       const { App } = await import("@capacitor/app");
+      if (cancelled) return;
 
       const listener = await App.addListener("appUrlOpen", async (event) => {
         const url = event.url;
 
         // Handle Supabase auth callback (email confirmation, password reset)
         // URL format: handledhome://auth/callback#access_token=...&refresh_token=...
-        if (url.includes("access_token") || url.includes("refresh_token")) {
-          // Extract the hash fragment and pass to Supabase
+        if (url.includes("auth/callback") && (url.includes("access_token") || url.includes("refresh_token"))) {
           const hashIndex = url.indexOf("#");
           if (hashIndex !== -1) {
             const hashParams = new URLSearchParams(url.substring(hashIndex + 1));
@@ -35,11 +38,15 @@ export function useDeepLinks() {
             const refreshToken = hashParams.get("refresh_token");
 
             if (accessToken && refreshToken) {
-              await supabase.auth.setSession({
+              const { error } = await supabase.auth.setSession({
                 access_token: accessToken,
                 refresh_token: refreshToken,
               });
-              navigate("/");
+              if (error) {
+                navigateRef.current("/auth?error=session_expired");
+                return;
+              }
+              navigateRef.current("/");
               return;
             }
           }
@@ -48,9 +55,9 @@ export function useDeepLinks() {
         // Handle other deep links (e.g., handledhome://provider/jobs/123)
         try {
           const parsed = new URL(url);
-          const path = parsed.pathname || parsed.host;
+          const path = parsed.host + (parsed.pathname || "");
           if (path && path !== "/") {
-            navigate(path);
+            navigateRef.current("/" + path);
           }
         } catch {
           // Invalid URL, ignore
@@ -63,7 +70,8 @@ export function useDeepLinks() {
     setup();
 
     return () => {
+      cancelled = true;
       cleanup?.();
     };
-  }, [navigate]);
+  }, []);
 }
