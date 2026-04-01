@@ -252,6 +252,75 @@ Add `handledhome://auth/callback` to the allowed redirect URLs in your Supabase 
 
 ---
 
+## 5b. Apple App Store Review Preparation
+
+### Test Account for Reviewers
+
+1. **Create the auth user** in Supabase Auth dashboard:
+   - Email: `reviewer@handledhome.com`
+   - Password: choose a strong password
+   - Auto-confirm the email (skip email verification)
+
+2. **Get the user's UUID** from the Supabase Auth → Users table
+
+3. **Run the seed script** (update the UUID in the file first):
+   ```bash
+   # Edit supabase/seed-apple-reviewer.sql — replace the placeholder UUID
+   supabase db execute --file supabase/seed-apple-reviewer.sql
+   ```
+
+4. **Enter credentials in App Store Connect:**
+   - TestFlight → App Information → App Review Information
+   - Sign-In Required: Yes
+   - Username: `reviewer@handledhome.com`
+   - Password: (the password you set)
+   - Notes: "This account has a pre-configured property in Austin, TX with an active Essential subscription. The app requires a service area with active zones — this test account is set up in a covered zone."
+
+### App Store Privacy Labels
+
+Declare these data types in App Store Connect → App Privacy:
+
+| Data Type | Usage | Linked to Identity |
+|-----------|-------|--------------------|
+| Email Address | App Functionality, Account Management | Yes |
+| Name | App Functionality | Yes |
+| Phone Number | App Functionality | Yes |
+| Physical Address | App Functionality | Yes |
+| Payment Info | App Functionality (via Stripe) | Yes |
+| Photos | App Functionality (service proof) | Yes |
+| Coarse Location | App Functionality (zone coverage) | Yes |
+| User ID | App Functionality | Yes |
+| Device ID | App Functionality (push notifications) | Yes |
+
+### Review Notes Template
+
+```
+Handled Home is a managed home maintenance platform that connects homeowners
+with vetted service providers for recurring services (lawn care, pest control,
+window cleaning, etc.).
+
+Test account credentials are provided above. The test account has:
+- A property in Austin, TX (covered service area)
+- An active Essential subscription ($99/mo)
+- Access to the full service catalog
+
+Key flows to test:
+1. Browse page (no login required): View services and plans at /browse
+2. Customer dashboard: View upcoming services, property health score
+3. Service catalog: Browse available services with handle costs
+4. Settings: Profile, notifications, privacy policy, terms, account deletion
+5. Provider view: Switch roles via Settings → Role Switcher (if multi-role)
+
+The app uses Stripe for subscription payments (physical services — exempt from
+IAP per Guideline 3.1.1). Payment processing uses Stripe's standard checkout flow.
+
+Privacy policy: Available at /privacy in the app
+Terms of service: Available at /terms in the app
+Account deletion: Available in Settings → Delete Account
+```
+
+---
+
 ## 6. CI/CD
 
 GitHub Actions workflow at `.github/workflows/playwright.yml` runs:
