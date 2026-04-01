@@ -1403,6 +1403,90 @@ Each menu item: icon + label + ChevronRight, tappable
 
 ---
 
+# FLOW 16A: Provider Browse (Public)
+
+**Route**: `/providers`
+**Who**: Any visitor (no auth required)
+**Purpose**: Provider acquisition landing page with lead capture
+
+### Screen 16A.1: Provider Browse Page
+
+**Layout**: Full-page marketing layout with multiple sections
+
+1. **Hero**: "More jobs. Less admin. Better routes." + "Apply Now" CTA
+2. **Earnings Calculator**: 3-tier earnings grid (4/6/8 stops per day) showing daily and weekly amounts
+3. **Benefits**: 6 benefit cards (recurring routes, weekly payouts, dense routes, BYOC, growth without selling, zero admin)
+4. **How It Works**: 4-step process (apply → get route → do work → grow)
+5. **Service Categories**: Badge display of all supported categories
+6. **BYOC Section**: Bring Your Own Customers bonus math ($10/wk, 12 weeks, $2,160 max)
+7. **Lead Capture Form**: Email + ZIP + category multi-select (optional) → saves to `provider_leads` table
+   - Success state: "You're on the list!" confirmation
+   - Email validation + ZIP length validation with toast errors
+8. **Final CTA**: "Ready to earn more with less hassle?" + "Apply Now"
+9. **Footer**: Copyright, Privacy, Terms, "For Homeowners" link
+
+**Two conversion paths**:
+- "Apply Now" → `/auth?tab=signup&role=provider` → application wizard
+- "Notify Me" → saves lead to database, no account required
+
+---
+
+# FLOW 16B: Provider Application
+
+**Route**: `/provider/apply`
+**Who**: Authenticated provider (redirects to auth if not logged in)
+**Purpose**: 5-step application wizard with zone-aware opportunity messaging
+
+### Screen 16B.1: Category Selection (Step 1)
+
+Multi-select grid of 10 service categories. Provider selects all that apply.
+
+### Screen 16B.2: Location & Coverage (Step 2)
+
+- Home base ZIP input
+- Additional service ZIPs (add/remove)
+- "See opportunities" button → calls `check_zone_readiness` RPC
+
+### Screen 16B.3: Opportunity Banner (Step 3)
+
+Zone-aware messaging that **never shows "closed" or "full"**:
+
+| Zone Status | Banner Variant | Headline |
+|---|---|---|
+| SOFT_LAUNCH (founding slots) | EARLY | "Good news — we're launching in your area" |
+| SOFT_LAUNCH (no slots) | EARLY_2 | "Good news — you're early in your area" |
+| OPEN (categories available) | EARLY_2 | "Good news — you're early in your area" |
+| OPEN (categories filled) | OPEN | "Good news — demand is growing fast near you" |
+| PROTECT_QUALITY | WAITLIST | "We're building momentum in your area" |
+| CLOSED | HELP_LAUNCH | "Help us launch in your area" |
+| Not supported / unknown | HELP_LAUNCH | "Help us launch in your area" |
+
+Zone status badges in matched zones use friendly labels: CLOSED→"Building", SOFT_LAUNCH→"Launching soon", OPEN→"Active", PROVIDER_RECRUITING→"Recruiting".
+
+### Screen 16B.4: BYOC Intake (Step 4)
+
+- Yes/No: "Do you have existing customers?"
+- If yes: estimated count (1-10/11-50/51-200/200+), willingness (low/medium/high), relationship type (recurring/mixed/one-time), willing to invite checkbox
+
+### Screen 16B.5: Review & Submit (Step 5)
+
+Summary of categories, home base, service ZIPs, BYOC estimate. Submit button.
+
+### Screen 16B.6: Post-Application Status
+
+After submission, shows status-appropriate messaging:
+
+- **Submitted/Under review**: "We're reviewing your application" + category gaps + referral form
+- **Waitlisted**: "We're building your zone" + category gaps + referral form
+- **Approved**: "You're approved!" + "Start Onboarding" button
+- **Approved conditional**: "Approved with conditions" + "Start Onboarding" button
+
+**Category Gaps Card**: "We need providers in these categories to launch faster:" + badge list of categories the provider didn't apply for.
+
+**"Know Someone?" Referral Form**: Name, phone/email, category dropdown, ZIP (pre-filled). Saves to `provider_referrals` table. Success state with "Refer another" option.
+
+---
+
 # FLOW 17: Provider Onboarding
 
 **Route**: `/provider/onboarding`
@@ -2079,6 +2163,46 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Empty State**: FileText icon + "Application details will appear here once the record is loaded."
 **Error State**: "Application details couldn't be loaded — go back to the queue and try again."
+
+---
+
+# FLOW 26A: Admin Provider Lead Pipeline
+
+**Route**: `/admin/provider-leads`
+**Who**: Admin
+**Purpose**: Track and manage provider leads from browse page, referrals, and manual entry
+
+### Screen 26A.1: Provider Leads Page
+
+**Layout**: Header + summary cards + tabbed content
+
+**Header**: "Provider Leads" with total leads + referrals count
+
+**Summary Cards**: 5 clickable stat cards (new, contacted, applied, declined, notified)
+
+**Three Tabs**:
+
+#### Leads Tab
+- Filters: status dropdown, ZIP text filter, category text filter
+- Table: email, ZIP, categories (badges), source (badge), status (inline dropdown), date, actions
+- Status dropdown: inline change (new → contacted → applied → declined → notified)
+- Quick action: "Mark Contacted" button for new leads
+- Empty state: Mail icon + "No leads yet"
+
+#### By ZIP Tab
+- **Notify Zone Leads** card: zone selector dropdown + "Notify" button
+  - Calls `notify-zone-leads` edge function
+  - Marks matching leads as "notified"
+  - Shows success toast with count
+- ZIP aggregation table: ZIP code, lead count (badge), categories interested (badges)
+- Sorted by lead count descending
+
+#### Referrals Tab
+- Table: referred by (email), name, contact, category, ZIP, status (dropdown), date
+- Status options: new, contacted, applied, declined
+- Empty state: Users icon + "No referrals yet"
+
+**Data Sources**: `provider_leads` table, `provider_referrals` table
 
 ---
 
