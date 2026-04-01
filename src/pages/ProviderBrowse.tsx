@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -55,6 +55,8 @@ const PROVIDER_BENEFITS = [
   },
 ];
 
+const LEAD_STORAGE_KEY = "hh_provider_lead";
+
 export default function ProviderBrowse() {
   const navigate = useNavigate();
   const [zip, setZip] = useState("");
@@ -62,6 +64,13 @@ export default function ProviderBrowse() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [returningLead, setReturningLead] = useState<{ email: string; zip: string } | null>(() => {
+    try {
+      const stored = localStorage.getItem(LEAD_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : null;
+    } catch { return null; }
+  });
+  const [showFormAnyway, setShowFormAnyway] = useState(false);
 
   const handleApply = () => {
     navigate("/auth?tab=signup&role=provider");
@@ -96,6 +105,8 @@ export default function ProviderBrowse() {
         { onConflict: "email" }
       );
       if (error) throw error;
+      try { localStorage.setItem(LEAD_STORAGE_KEY, JSON.stringify({ email, zip })); } catch {}
+      setReturningLead({ email, zip });
       setSubmitted(true);
     } catch (err) {
       toast.error("Something went wrong. Please try again.");
@@ -260,7 +271,21 @@ export default function ProviderBrowse() {
             Enter your email and ZIP code. We'll let you know when we're launching in your area
             — and if we need providers in your category, you'll be first in line.
           </p>
-          {submitted ? (
+          {returningLead && !submitted && !showFormAnyway ? (
+            <div className="p-4 bg-primary/10 rounded-lg space-y-3 animate-fade-in">
+              <CheckCircle2 className="h-6 w-6 text-primary mx-auto" />
+              <p className="text-sm font-medium">Welcome back!</p>
+              <p className="text-xs text-muted-foreground">
+                Your interest in ZIP {returningLead.zip} is saved. Ready to take the next step?
+              </p>
+              <Button className="w-full" onClick={handleApply}>
+                Apply Now <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+              <Button variant="ghost" size="sm" className="w-full text-xs" onClick={() => setShowFormAnyway(true)}>
+                Update my info
+              </Button>
+            </div>
+          ) : submitted ? (
             <div className="p-4 bg-primary/10 rounded-lg space-y-2 animate-fade-in">
               <CheckCircle2 className="h-6 w-6 text-primary mx-auto" />
               <p className="text-sm font-medium">You're on the list!</p>
