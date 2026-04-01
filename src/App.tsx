@@ -34,6 +34,7 @@ const CustomerSupportNew = lazy(() => import("@/pages/customer/SupportNew"));
 const CustomerSupportTickets = lazy(() => import("@/pages/customer/SupportTickets"));
 const CustomerSupportTicketDetail = lazy(() => import("@/pages/customer/SupportTicketDetail"));
 const CustomerSettings = lazy(() => import("@/pages/customer/Settings"));
+const CustomerMoving = lazy(() => import("@/pages/customer/Moving"));
 const CustomerServices = lazy(() => import("@/pages/customer/Services"));
 const CustomerPlans = lazy(() => import("@/pages/customer/Plans"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
@@ -247,6 +248,7 @@ const App = () => (
                   <Route path="/customer/support/tickets" element={<CustomerPropertyGate><CustomerSupportTickets /></CustomerPropertyGate>} />
                   <Route path="/customer/support/tickets/:ticketId" element={<CustomerPropertyGate><CustomerSupportTicketDetail /></CustomerPropertyGate>} />
                   <Route path="/customer/settings" element={<CustomerPropertyGate><CustomerSettings /></CustomerPropertyGate>} />
+                  <Route path="/customer/moving" element={<CustomerPropertyGate><CustomerMoving /></CustomerPropertyGate>} />
                   <Route path="/customer/services" element={<CustomerPropertyGate><CustomerServices /></CustomerPropertyGate>} />
                   <Route path="/customer/more" element={<CustomerPropertyGate><MoreMenuPage /></CustomerPropertyGate>} />
                   <Route path="/customer/notifications" element={<SharedNotifications />} />
