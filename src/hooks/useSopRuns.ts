@@ -1,16 +1,26 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/types";
 
-type SopRun = Database["public"]["Tables"]["sop_runs"]["Row"];
+interface SopRun {
+  id: string;
+  sop_id: string;
+  started_by_user_id: string;
+  total_steps: number;
+  steps_completed: number[];
+  step_notes: Record<string, string>;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  completed_at: string | null;
+}
 
 export function useSopRuns(sopId?: string) {
   return useQuery({
     queryKey: ["sop-runs", sopId],
     queryFn: async () => {
-      let query = supabase
-        .from("sop_runs")
-        .select("*")
+      let query = (supabase
+        .from("sop_runs" as any)
+        .select("*") as any)
         .order("created_at", { ascending: false })
         .limit(20);
 
@@ -32,9 +42,9 @@ export function useActiveSopRun(sopId: string) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
 
-      const { data, error } = await supabase
-        .from("sop_runs")
-        .select("*")
+      const { data, error } = await (supabase
+        .from("sop_runs" as any)
+        .select("*") as any)
         .eq("sop_id", sopId)
         .eq("started_by_user_id", user.id)
         .eq("status", "in_progress")
@@ -55,8 +65,8 @@ export function useStartSopRun() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const { data, error } = await supabase
-        .from("sop_runs")
+      const { data, error } = await (supabase
+        .from("sop_runs" as any) as any)
         .insert({
           sop_id: params.sopId,
           started_by_user_id: user.id,
@@ -100,8 +110,8 @@ export function useUpdateSopRun() {
         }
       }
 
-      const { error } = await supabase
-        .from("sop_runs")
+      const { error } = await (supabase
+        .from("sop_runs" as any) as any)
         .update(update)
         .eq("id", params.runId);
 

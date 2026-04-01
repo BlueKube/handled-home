@@ -1,16 +1,37 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/types";
 
-type ProviderIncident = Database["public"]["Tables"]["provider_incidents"]["Row"];
-type ProviderProbation = Database["public"]["Tables"]["provider_probation"]["Row"];
-
-export interface IncidentWithRelations extends ProviderIncident {
+export interface IncidentWithRelations {
+  id: string;
+  provider_org_id: string;
+  incident_type: string;
+  severity: string;
+  visit_id: string | null;
+  zone_id: string | null;
+  details: any;
+  is_excused: boolean;
+  excuse_reason: string | null;
+  classified_by_user_id: string | null;
+  created_at: string;
+  updated_at: string;
   provider_org_name?: string;
   zone_name?: string;
 }
 
-export interface ProbationWithRelations extends ProviderProbation {
+export interface ProbationWithRelations {
+  id: string;
+  provider_org_id: string;
+  entry_reason: string;
+  sla_level_at_entry: string | null;
+  targets: any;
+  deadline_at: string;
+  status: string;
+  outcome: string | null;
+  progress_notes: string | null;
+  resolved_at: string | null;
+  resolved_by_user_id: string | null;
+  created_at: string;
+  updated_at: string;
   provider_org_name?: string;
 }
 
@@ -20,9 +41,9 @@ export function useProviderIncidents(providerOrgId?: string) {
   return useQuery({
     queryKey: ["provider-incidents", providerOrgId],
     queryFn: async () => {
-      let query = supabase
-        .from("provider_incidents")
-        .select(`*, provider_orgs:provider_org_id(name), zones:zone_id(name)`)
+      let query = (supabase
+        .from("provider_incidents" as any)
+        .select(`*, provider_orgs:provider_org_id(name), zones:zone_id(name)`) as any)
         .order("created_at", { ascending: false })
         .limit(100);
 
@@ -49,9 +70,9 @@ export function useIncidentRollingCount(providerOrgId: string, days: number = 60
     queryKey: ["provider-incident-count", providerOrgId, days],
     queryFn: async () => {
       const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
-      const { count, error } = await supabase
-        .from("provider_incidents")
-        .select("id", { count: "exact", head: true })
+      const { count, error } = await (supabase
+        .from("provider_incidents" as any)
+        .select("id", { count: "exact", head: true }) as any)
         .eq("provider_org_id", providerOrgId)
         .eq("is_excused", false)
         .gte("created_at", cutoff);
@@ -75,8 +96,8 @@ export function useCreateIncident() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (params: CreateIncidentParams) => {
-      const { error } = await supabase
-        .from("provider_incidents")
+      const { error } = await (supabase
+        .from("provider_incidents" as any) as any)
         .insert({
           provider_org_id: params.providerOrgId,
           incident_type: params.incidentType,
@@ -107,8 +128,8 @@ export function useClassifyIncident() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const { error } = await supabase
-        .from("provider_incidents")
+      const { error } = await (supabase
+        .from("provider_incidents" as any) as any)
         .update({
           is_excused: params.isExcused,
           excuse_reason: params.excuseReason ?? null,
@@ -130,9 +151,9 @@ export function useProviderProbation(providerOrgId?: string) {
   return useQuery({
     queryKey: ["provider-probation", providerOrgId],
     queryFn: async () => {
-      let query = supabase
-        .from("provider_probation")
-        .select(`*, provider_orgs:provider_org_id(name)`)
+      let query = (supabase
+        .from("provider_probation" as any)
+        .select(`*, provider_orgs:provider_org_id(name)`) as any)
         .order("created_at", { ascending: false });
 
       if (providerOrgId) {
@@ -155,14 +176,14 @@ export function useActiveProbation(providerOrgId: string) {
   return useQuery({
     queryKey: ["provider-probation-active", providerOrgId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("provider_probation")
-        .select("*")
+      const { data, error } = await (supabase
+        .from("provider_probation" as any)
+        .select("*") as any)
         .eq("provider_org_id", providerOrgId)
         .eq("status", "active")
         .maybeSingle();
       if (error) throw error;
-      return data as ProviderProbation | null;
+      return data as ProbationWithRelations | null;
     },
     enabled: !!providerOrgId,
   });
@@ -181,8 +202,8 @@ export function useCreateProbation() {
   return useMutation({
     mutationFn: async (params: CreateProbationParams) => {
       const deadline = new Date(Date.now() + params.deadlineDays * 24 * 60 * 60 * 1000).toISOString();
-      const { error } = await supabase
-        .from("provider_probation")
+      const { error } = await (supabase
+        .from("provider_probation" as any) as any)
         .insert({
           provider_org_id: params.providerOrgId,
           entry_reason: params.entryReason,
@@ -213,8 +234,8 @@ export function useResolveProbation() {
 
       const status = params.outcome === "extended" ? "active" : params.outcome === "improved" ? "completed" : "failed";
 
-      const { error } = await supabase
-        .from("provider_probation")
+      const { error } = await (supabase
+        .from("provider_probation" as any) as any)
         .update({
           status,
           outcome: params.outcome,

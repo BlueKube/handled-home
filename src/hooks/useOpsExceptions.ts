@@ -18,7 +18,7 @@ export interface OpsExceptionWithRelations extends OpsException {
 
 export type ExceptionDomain = "all" | "ops" | "billing";
 
-const BILLING_TYPES: OpsExceptionType[] = [
+const BILLING_TYPES: string[] = [
   "payment_failed", "payment_past_due", "payout_failed",
   "dispute_opened", "earnings_held", "reconciliation_mismatch",
 ];
@@ -74,7 +74,7 @@ export function useOpsExceptions(filters: OpsExceptionFilters = {}) {
       if (filters.domain === "ops") {
         query = query.in("exception_type", OPS_TYPES);
       } else if (filters.domain === "billing") {
-        query = query.in("exception_type", BILLING_TYPES);
+        query = query.in("exception_type", BILLING_TYPES as any);
       }
 
       const { data, error } = await query;
