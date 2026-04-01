@@ -90,3 +90,13 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 - [ ] **Configure email sending for zone launch notifications** — The `notify-zone-leads` edge function marks leads as "notified" but doesn't send actual emails. Need to configure Resend/SendGrid/etc. and wire into the function.
   - **Why:** Leads won't receive launch notification emails without email integration
   - **Blocked:** Nothing — leads are still tracked even without email
+
+## Round 9: Provider Funnel Hardening (2026-04-01)
+
+- [ ] **Apply Round 9 migrations** — 5 new migrations: unique email constraint, lead-application linking trigger, get_category_gaps RPC, auto-notify trigger, referral attribution trigger
+  - **Why:** All provider funnel automation depends on these triggers and functions
+  - **Blocked:** Full funnel automation on production
+
+- [ ] **Decide referral incentive structure** — The "Refer 3 providers → priority review" messaging is implemented but the actual priority review logic is not enforced. Decide: should 3+ referrals flag the application for faster admin review, or is the messaging aspirational?
+  - **Why:** Provider expectation set by UI needs to be backed by a real workflow
+  - **Blocked:** Nothing — UI works regardless, but trust erodes if promise isn't kept
