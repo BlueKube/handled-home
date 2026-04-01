@@ -622,8 +622,15 @@ async function attemptPushDelivery(
   supabase: ReturnType<typeof createClient>
 ) {
   const fcmKey = Deno.env.get("FCM_SERVER_KEY");
-  if (!fcmKey) {
-    console.log("FCM_SERVER_KEY not configured, skipping push delivery");
+  const apnsKey = Deno.env.get("APNS_KEY");
+  const apnsKeyId = Deno.env.get("APNS_KEY_ID");
+  const apnsTeamId = Deno.env.get("APNS_TEAM_ID");
+
+  const hasFcm = !!fcmKey;
+  const hasApns = !!(apnsKey && apnsKeyId && apnsTeamId);
+
+  if (!hasFcm && !hasApns) {
+    console.log("No push provider configured (FCM_SERVER_KEY or APNS_KEY), skipping push delivery");
     return;
   }
 
@@ -660,7 +667,6 @@ async function attemptPushDelivery(
     .eq("status", "ACTIVE");
 
   if (!tokens || tokens.length === 0) {
-    // No active tokens, mark as FAILED
     const deliveryIds = queued.map((q: { id: string }) => q.id);
     await supabase
       .from("notification_delivery")
@@ -677,6 +683,16 @@ async function attemptPushDelivery(
   for (const t of tokens) {
     if (!tokensByUser.has(t.user_id)) tokensByUser.set(t.user_id, []);
     tokensByUser.get(t.user_id)!.push(t);
+  }
+
+  // Generate APNs JWT if configured
+  let apnsJwt: string | null = null;
+  if (hasApns) {
+    try {
+      apnsJwt = await generateApnsJwt(apnsKey!, apnsKeyId!, apnsTeamId!);
+    } catch (err) {
+      console.error("Failed to generate APNs JWT:", err);
+    }
   }
 
   // Send push for each delivery
@@ -697,57 +713,200 @@ async function attemptPushDelivery(
       continue;
     }
 
-    // Send to first active token (FCM legacy HTTP API)
-    const token = userTokens[0];
-    try {
-      const fcmResponse = await fetch("https://fcm.googleapis.com/fcm/send", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `key=${fcmKey}`,
-        },
-        body: JSON.stringify({
-          to: token.token,
-          notification: {
-            title: notif.title,
-            body: notif.body,
-          },
-          data: notif.data ?? {},
-        }),
-      });
+    // Try all tokens for the user (iOS via APNs, Android via FCM)
+    let sent = false;
+    for (const tokenEntry of userTokens) {
+      if (sent) break;
 
-      const result = await fcmResponse.text();
+      try {
+        if (tokenEntry.platform === "IOS" && apnsJwt) {
+          // APNs HTTP/2 delivery
+          const apnsHost = "https://api.push.apple.com";
+          const apnsResponse = await fetch(
+            `${apnsHost}/3/device/${tokenEntry.token}`,
+            {
+              method: "POST",
+              headers: {
+                "authorization": `bearer ${apnsJwt}`,
+                "apns-topic": "com.handledhome.app",
+                "apns-push-type": "alert",
+                "apns-priority": "10",
+                "content-type": "application/json",
+              },
+              body: JSON.stringify({
+                aps: {
+                  alert: {
+                    title: notif.title,
+                    body: notif.body,
+                  },
+                  sound: "default",
+                  badge: 1,
+                },
+                ...(notif.data ? { custom: notif.data } : {}),
+              }),
+            }
+          );
 
-      if (fcmResponse.ok) {
-        await supabase
-          .from("notification_delivery")
-          .update({
-            status: "SENT",
-            provider_message_id: result,
-            attempted_at: new Date().toISOString(),
-          })
-          .eq("id", delivery.id);
-      } else {
-        await supabase
-          .from("notification_delivery")
-          .update({
-            status: "FAILED",
-            error_code: String(fcmResponse.status),
-            error_message: result.slice(0, 500),
-            attempted_at: new Date().toISOString(),
-          })
-          .eq("id", delivery.id);
+          if (apnsResponse.ok || apnsResponse.status === 200) {
+            const apnsId = apnsResponse.headers.get("apns-id") ?? "";
+            await supabase
+              .from("notification_delivery")
+              .update({
+                status: "SENT",
+                provider_message_id: apnsId,
+                attempted_at: new Date().toISOString(),
+              })
+              .eq("id", delivery.id);
+            sent = true;
+          } else {
+            const errBody = await apnsResponse.text();
+            console.error(`APNs error ${apnsResponse.status}: ${errBody}`);
+            // If token is invalid, disable it
+            if (apnsResponse.status === 410) {
+              await supabase
+                .from("user_device_tokens")
+                .update({ status: "DISABLED" })
+                .eq("token", tokenEntry.token);
+            }
+          }
+        } else if (tokenEntry.platform !== "IOS" && hasFcm) {
+          // FCM legacy HTTP API
+          const fcmResponse = await fetch("https://fcm.googleapis.com/fcm/send", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `key=${fcmKey}`,
+            },
+            body: JSON.stringify({
+              to: tokenEntry.token,
+              notification: {
+                title: notif.title,
+                body: notif.body,
+              },
+              data: notif.data ?? {},
+            }),
+          });
+
+          const result = await fcmResponse.text();
+          if (fcmResponse.ok) {
+            await supabase
+              .from("notification_delivery")
+              .update({
+                status: "SENT",
+                provider_message_id: result,
+                attempted_at: new Date().toISOString(),
+              })
+              .eq("id", delivery.id);
+            sent = true;
+          } else {
+            console.error(`FCM error ${fcmResponse.status}: ${result}`);
+          }
+        }
+      } catch (pushErr) {
+        const errMsg = pushErr instanceof Error ? pushErr.message : String(pushErr);
+        console.error(`Push delivery error for ${tokenEntry.platform}:`, errMsg);
       }
-    } catch (pushErr) {
-      const errMsg = pushErr instanceof Error ? pushErr.message : String(pushErr);
+    }
+
+    if (!sent) {
       await supabase
         .from("notification_delivery")
         .update({
           status: "FAILED",
-          error_message: errMsg.slice(0, 500),
+          error_message: "All push attempts failed",
           attempted_at: new Date().toISOString(),
         })
         .eq("id", delivery.id);
     }
   }
+}
+
+/**
+ * Generate a JWT for APNs authentication using the ES256 algorithm.
+ * Uses the Web Crypto API available in Deno.
+ */
+async function generateApnsJwt(
+  privateKeyPem: string,
+  keyId: string,
+  teamId: string
+): Promise<string> {
+  // Encode header and claims
+  const header = { alg: "ES256", kid: keyId };
+  const now = Math.floor(Date.now() / 1000);
+  const claims = { iss: teamId, iat: now };
+
+  const encodedHeader = base64UrlEncode(JSON.stringify(header));
+  const encodedClaims = base64UrlEncode(JSON.stringify(claims));
+  const signingInput = `${encodedHeader}.${encodedClaims}`;
+
+  // Parse PEM to raw key bytes
+  const pemBody = privateKeyPem
+    .replace(/-----BEGIN PRIVATE KEY-----/, "")
+    .replace(/-----END PRIVATE KEY-----/, "")
+    .replace(/\s/g, "");
+  const keyBytes = Uint8Array.from(atob(pemBody), (c) => c.charCodeAt(0));
+
+  // Import the key
+  const cryptoKey = await crypto.subtle.importKey(
+    "pkcs8",
+    keyBytes.buffer,
+    { name: "ECDSA", namedCurve: "P-256" },
+    false,
+    ["sign"]
+  );
+
+  // Sign
+  const signature = await crypto.subtle.sign(
+    { name: "ECDSA", hash: "SHA-256" },
+    cryptoKey,
+    new TextEncoder().encode(signingInput)
+  );
+
+  // Convert DER signature to raw r||s format for JWT
+  const rawSig = derToRaw(new Uint8Array(signature));
+  const encodedSig = base64UrlEncode(String.fromCharCode(...rawSig));
+
+  return `${signingInput}.${encodedSig}`;
+}
+
+function base64UrlEncode(str: string): string {
+  return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+/**
+ * Convert a DER-encoded ECDSA signature to raw r||s (64 bytes for P-256).
+ * Web Crypto may return either format depending on runtime.
+ */
+function derToRaw(der: Uint8Array): Uint8Array {
+  // If already 64 bytes, it's raw format
+  if (der.length === 64) return der;
+
+  // DER format: 0x30 <len> 0x02 <rlen> <r> 0x02 <slen> <s>
+  if (der[0] !== 0x30) return der; // Not DER, return as-is
+
+  let offset = 2; // skip 0x30 and total length
+
+  // Read r
+  if (der[offset] !== 0x02) return der;
+  offset++;
+  const rLen = der[offset];
+  offset++;
+  let r = der.slice(offset, offset + rLen);
+  offset += rLen;
+
+  // Read s
+  if (der[offset] !== 0x02) return der;
+  offset++;
+  const sLen = der[offset];
+  offset++;
+  let s = der.slice(offset, offset + sLen);
+
+  // Pad or trim to 32 bytes each
+  if (r.length > 32) r = r.slice(r.length - 32);
+  if (s.length > 32) s = s.slice(s.length - 32);
+
+  const raw = new Uint8Array(64);
+  raw.set(r, 32 - r.length);
+  raw.set(s, 64 - s.length);
+  return raw;
 }
