@@ -29,7 +29,7 @@ import {
   Megaphone, TrendingUp,
   HelpCircle, FileText, BookOpen,
   Activity, Bell, MessageSquare, ToggleLeft,
-  Settings, Rocket, GraduationCap, Calculator,
+  Settings, Rocket, GraduationCap, Calculator, FlaskConical,
 } from "lucide-react";
 import type { AdminRole } from "@/hooks/useAdminMembership";
 
@@ -117,6 +117,7 @@ const navGroups: NavGroup[] = [
       { title: "Tickets", url: "/admin/support", icon: HelpCircle },
       { title: "Policies", url: "/admin/support/policies", icon: FileText },
       { title: "Macros", url: "/admin/support/macros", icon: MessageSquare },
+      { title: "Policy Simulator", url: "/admin/support/simulator", icon: FlaskConical },
     ],
   },
   {

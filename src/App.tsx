@@ -151,6 +151,7 @@ const AdminPlaybooks = lazy(() => import("@/pages/admin/Playbooks"));
 const AdminSkuCalibration = lazy(() => import("@/pages/admin/SkuCalibration"));
 const AdminSimulator = lazy(() => import("@/pages/admin/Simulator"));
 const AdminProviderAccountability = lazy(() => import("@/pages/admin/ProviderAccountability"));
+const AdminPolicySimulator = lazy(() => import("@/pages/admin/PolicySimulator"));
 const AdminCronHealth = lazy(() => import("@/pages/admin/CronHealth"));
 const AdminSchedulingPolicy = lazy(() => import("@/pages/admin/SchedulingPolicy"));
 const AdminPlannerDashboard = lazy(() => import("@/pages/admin/PlannerDashboard"));
@@ -313,6 +314,7 @@ const App = () => (
                   <Route path="/admin/support/tickets/:ticketId" element={<AdminSupportTicketDetail />} />
                   <Route path="/admin/support/policies" element={<AdminSupportPolicies />} />
                   <Route path="/admin/support/macros" element={<AdminSupportMacros />} />
+                  <Route path="/admin/support/simulator" element={<AdminPolicySimulator />} />
                   <Route path="/admin/incentives" element={<AdminIncentives />} />
                   <Route path="/admin/growth" element={<AdminGrowth />} />
                   <Route path="/admin/notification-health" element={<AdminNotificationHealth />} />
