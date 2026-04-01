@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -229,9 +229,9 @@ export default function AuthPage() {
       )}
       {/* Legal footer */}
       <div className="flex justify-center gap-4 mt-6 text-xs text-muted-foreground">
-        <a href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</a>
+        <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
         <span>·</span>
-        <a href="/terms" className="hover:text-foreground transition-colors">Terms of Service</a>
+        <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
       </div>
     </div>
   );

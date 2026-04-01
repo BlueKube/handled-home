@@ -20,7 +20,7 @@ export function DeleteAccountSection() {
   const navigate = useNavigate();
 
   const handleDelete = async () => {
-    if (confirmation !== "DELETE") return;
+    if (confirmation !== "DELETE" || !user?.id) return;
     setDeleting(true);
     try {
       // Call the account deletion RPC which anonymizes user data

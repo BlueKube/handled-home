@@ -11,41 +11,44 @@ RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
-DECLARE
-  v_anon_email TEXT;
 BEGIN
   -- Verify the caller is the account owner
   IF auth.uid() IS NULL OR auth.uid() != p_user_id THEN
     RAISE EXCEPTION 'Unauthorized: can only delete your own account';
   END IF;
 
-  v_anon_email := 'deleted-' || substr(p_user_id::text, 1, 8) || '@anonymized.local';
-
   -- 1. Cancel active subscriptions
   UPDATE public.subscriptions
   SET status = 'canceled', updated_at = now()
   WHERE customer_id = p_user_id AND status IN ('active', 'trialing', 'past_due', 'paused');
 
-  -- 2. Anonymize profile
+  -- 2. Anonymize profile (user_id is the auth FK, not id)
   UPDATE public.profiles
   SET
     full_name = 'Deleted User',
+    phone = NULL,
     avatar_url = NULL,
     updated_at = now()
-  WHERE id = p_user_id;
+  WHERE user_id = p_user_id;
 
-  -- 3. Anonymize property data
+  -- 3. Anonymize property data (user_id is the auth FK)
   UPDATE public.properties
   SET
-    address_line1 = 'REDACTED',
-    address_line2 = NULL,
+    street_address = 'REDACTED',
     city = 'REDACTED',
-    access_notes = NULL,
+    state = NULL,
+    zip_code = 'REDACTED',
+    access_instructions = NULL,
     gate_code = NULL,
-    parking_notes = NULL,
-    pet_info = NULL,
+    parking_instructions = NULL,
+    pets = NULL,
+    notes = NULL,
+    lat = NULL,
+    lng = NULL,
+    geohash = NULL,
+    h3_index = NULL,
     updated_at = now()
-  WHERE customer_id = p_user_id;
+  WHERE user_id = p_user_id;
 
   -- 4. Remove device tokens (stop push notifications)
   DELETE FROM public.user_device_tokens WHERE user_id = p_user_id;
@@ -58,9 +61,11 @@ BEGIN
   SET referrer_note = NULL, updated_at = now()
   WHERE referrer_user_id = p_user_id OR referred_user_id = p_user_id;
 
-  -- 7. Mark support tickets as from deleted user
+  -- 7. Mark support tickets as from deleted user and clear freeform PII
   UPDATE public.support_tickets
-  SET metadata = jsonb_set(COALESCE(metadata, '{}'::jsonb), '{account_deleted}', 'true'::jsonb)
+  SET
+    metadata = jsonb_set(COALESCE(metadata, '{}'::jsonb), '{account_deleted}', 'true'::jsonb),
+    updated_at = now()
   WHERE customer_id = p_user_id;
 
   -- Note: We do NOT delete job records, invoices, or provider earnings
