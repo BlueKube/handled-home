@@ -5019,115 +5019,6 @@ export type Database = {
           },
         ]
       }
-      provider_incidents: {
-        Row: {
-          id: string
-          provider_org_id: string
-          incident_type: string
-          severity: string
-          is_excused: boolean
-          excuse_reason: string | null
-          classified_by_user_id: string | null
-          visit_id: string | null
-          zone_id: string | null
-          details: Json
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          provider_org_id: string
-          incident_type: string
-          severity?: string
-          is_excused?: boolean
-          excuse_reason?: string | null
-          classified_by_user_id?: string | null
-          visit_id?: string | null
-          zone_id?: string | null
-          details?: Json
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          provider_org_id?: string
-          incident_type?: string
-          severity?: string
-          is_excused?: boolean
-          excuse_reason?: string | null
-          classified_by_user_id?: string | null
-          visit_id?: string | null
-          zone_id?: string | null
-          details?: Json
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "provider_incidents_provider_org_id_fkey"
-            columns: ["provider_org_id"]
-            isOneToOne: false
-            referencedRelation: "provider_orgs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      provider_probation: {
-        Row: {
-          id: string
-          provider_org_id: string
-          status: string
-          entry_reason: string
-          sla_level_at_entry: string | null
-          targets: Json
-          deadline_at: string
-          progress_notes: string | null
-          outcome: string | null
-          resolved_at: string | null
-          resolved_by_user_id: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          provider_org_id: string
-          status?: string
-          entry_reason: string
-          sla_level_at_entry?: string | null
-          targets?: Json
-          deadline_at: string
-          progress_notes?: string | null
-          outcome?: string | null
-          resolved_at?: string | null
-          resolved_by_user_id?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          provider_org_id?: string
-          status?: string
-          entry_reason?: string
-          sla_level_at_entry?: string | null
-          targets?: Json
-          deadline_at?: string
-          progress_notes?: string | null
-          outcome?: string | null
-          resolved_at?: string | null
-          resolved_by_user_id?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "provider_probation_provider_org_id_fkey"
-            columns: ["provider_org_id"]
-            isOneToOne: false
-            referencedRelation: "provider_orgs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       provider_orgs: {
         Row: {
           accountable_owner_user_id: string
@@ -6691,21 +6582,17 @@ export type Database = {
           inclusions: string[]
           is_addon: boolean
           is_featured: boolean
-          licensing_required: string[]
           members_only: boolean
-          min_provider_rating: number | null
           name: string
           presence_required: boolean
           price_hint_cents: number | null
           pricing_notes: string | null
           proof_rules: Json
           provider_category: string
-          recommended_frequency: string | null
           required_equipment: string[]
           required_photos: Json
           requires_training_gate: boolean
           scheduling_profile: Database["public"]["Enums"]["scheduling_profile"]
-          seasonal_availability: string
           status: string
           updated_at: string
           weather_sensitive: boolean
@@ -6730,21 +6617,17 @@ export type Database = {
           inclusions?: string[]
           is_addon?: boolean
           is_featured?: boolean
-          licensing_required?: string[]
           members_only?: boolean
-          min_provider_rating?: number | null
           name: string
           presence_required?: boolean
           price_hint_cents?: number | null
           pricing_notes?: string | null
           proof_rules?: Json
           provider_category?: string
-          recommended_frequency?: string | null
           required_equipment?: string[]
           required_photos?: Json
           requires_training_gate?: boolean
           scheduling_profile?: Database["public"]["Enums"]["scheduling_profile"]
-          seasonal_availability?: string
           status?: string
           updated_at?: string
           weather_sensitive?: boolean
@@ -6769,66 +6652,20 @@ export type Database = {
           inclusions?: string[]
           is_addon?: boolean
           is_featured?: boolean
-          licensing_required?: string[]
           members_only?: boolean
-          min_provider_rating?: number | null
           name?: string
           presence_required?: boolean
           price_hint_cents?: number | null
           pricing_notes?: string | null
           proof_rules?: Json
           provider_category?: string
-          recommended_frequency?: string | null
           required_equipment?: string[]
           required_photos?: Json
           requires_training_gate?: boolean
           scheduling_profile?: Database["public"]["Enums"]["scheduling_profile"]
-          seasonal_availability?: string
           status?: string
           updated_at?: string
           weather_sensitive?: boolean
-        }
-        Relationships: []
-      }
-      sop_runs: {
-        Row: {
-          id: string
-          sop_id: string
-          started_by_user_id: string
-          status: string
-          steps_completed: Json
-          step_notes: Json
-          total_steps: number
-          started_at: string
-          completed_at: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          sop_id: string
-          started_by_user_id: string
-          status?: string
-          steps_completed?: Json
-          step_notes?: Json
-          total_steps: number
-          started_at?: string
-          completed_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          sop_id?: string
-          started_by_user_id?: string
-          status?: string
-          steps_completed?: Json
-          step_notes?: Json
-          total_steps?: number
-          started_at?: string
-          completed_at?: string | null
-          created_at?: string
-          updated_at?: string
         }
         Relationships: []
       }
@@ -6947,7 +6784,6 @@ export type Database = {
       }
       sku_levels: {
         Row: {
-          access_mode: Database["public"]["Enums"]["access_mode"] | null
           created_at: string
           effective_start_cycle: string | null
           exclusions: string[]
@@ -6958,18 +6794,13 @@ export type Database = {
           label: string
           level_number: number
           planned_minutes: number
-          presence_required: boolean | null
           proof_checklist_template: Json | null
           proof_photo_min: number
-          property_size_tier: string | null
-          provider_payout_hint_cents: number | null
           short_description: string | null
           sku_id: string
           updated_at: string
-          weather_sensitive: boolean | null
         }
         Insert: {
-          access_mode?: Database["public"]["Enums"]["access_mode"] | null
           created_at?: string
           effective_start_cycle?: string | null
           exclusions?: string[]
@@ -6980,18 +6811,13 @@ export type Database = {
           label: string
           level_number?: number
           planned_minutes?: number
-          presence_required?: boolean | null
           proof_checklist_template?: Json | null
           proof_photo_min?: number
-          property_size_tier?: string | null
-          provider_payout_hint_cents?: number | null
           short_description?: string | null
           sku_id: string
           updated_at?: string
-          weather_sensitive?: boolean | null
         }
         Update: {
-          access_mode?: Database["public"]["Enums"]["access_mode"] | null
           created_at?: string
           effective_start_cycle?: string | null
           exclusions?: string[]
@@ -7002,15 +6828,11 @@ export type Database = {
           label?: string
           level_number?: number
           planned_minutes?: number
-          presence_required?: boolean | null
           proof_checklist_template?: Json | null
           proof_photo_min?: number
-          property_size_tier?: string | null
-          provider_payout_hint_cents?: number | null
           short_description?: string | null
           sku_id?: string
           updated_at?: string
-          weather_sensitive?: boolean | null
         }
         Relationships: [
           {
@@ -10041,12 +9863,6 @@ export type Database = {
         | "customer_reschedule"
         | "weather_safety"
         | "quality_block"
-        | "payment_failed"
-        | "payment_past_due"
-        | "payout_failed"
-        | "dispute_opened"
-        | "earnings_held"
-        | "reconciliation_mismatch"
       plan_window: "locked" | "draft"
       provider_application_status:
         | "draft"
@@ -10340,12 +10156,6 @@ export const Constants = {
         "customer_reschedule",
         "weather_safety",
         "quality_block",
-        "payment_failed",
-        "payment_past_due",
-        "payout_failed",
-        "dispute_opened",
-        "earnings_held",
-        "reconciliation_mismatch",
       ],
       plan_window: ["locked", "draft"],
       provider_application_status: [
