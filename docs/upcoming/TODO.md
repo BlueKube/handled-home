@@ -36,3 +36,29 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 
 - [x] **ArrowLeft → ChevronLeft icon swap** — ✅ All pages now use ChevronLeft. Only ArrowLeft remaining is in carousel.tsx (intentional keyboard navigation).
 - [x] **F5 Onboarding back button** — ✅ OnboardingWizard and ByocOnboardingWizard both use ChevronLeft.
+
+## TestFlight Deployment (2026-04-01)
+
+- [ ] **Register bundle ID in Apple Developer portal** — `com.handledhome.app`
+  - **Why:** Required for code signing and TestFlight upload
+  - **Blocked:** Cannot archive in Xcode without valid signing
+
+- [ ] **Create app in App Store Connect** — Set up the app listing for TestFlight
+  - **Why:** TestFlight builds are uploaded to App Store Connect
+  - **Blocked:** Cannot distribute TestFlight builds
+
+- [ ] **Generate APNs key and upload to Supabase** — Settings → Push Notifications in Supabase dashboard
+  - **Why:** Push notifications won't arrive on iOS without APNs configuration
+  - **Blocked:** Push notifications on device
+
+- [ ] **Add `handledhome://auth/callback` to Supabase redirect URLs** — Authentication → URL Configuration → Redirect URLs
+  - **Why:** Email confirmation links need this URL whitelisted to open in the app
+  - **Blocked:** Auth email confirmation on device
+
+- [ ] **Archive and upload build from Xcode** — Product → Archive → Distribute → TestFlight
+  - **Why:** Requires macOS with Xcode — cannot be done by agent
+  - **Blocked:** TestFlight availability
+
+- [ ] **Add TestFlight testers** — App Store Connect → TestFlight → add by email
+  - **Why:** Only invited testers can install
+  - **Blocked:** Nothing — do after upload

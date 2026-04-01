@@ -177,17 +177,65 @@ The built files are in `dist/`. Deploy to your hosting provider (Vercel, Netlify
 ### Mobile Builds (Capacitor)
 
 ```bash
-# Sync web assets to native projects
-npx cap sync
+# Build web assets and sync to native projects
+npm run build
+npx cap sync ios
 
-# Open in Xcode (iOS)
+# Open in Xcode
 npx cap open ios
-
-# Open in Android Studio (Android)
-npx cap open android
 ```
 
-Push notifications require FCM (Android) and APNs (iOS) configuration in the respective consoles.
+### TestFlight Deployment (iOS)
+
+**Prerequisites:**
+- Apple Developer account with the app registered (bundle ID: `com.handledhome.app`)
+- APNs certificate uploaded to Supabase project settings (for push notifications)
+- Xcode installed on macOS
+
+**Steps:**
+
+1. **Build and sync:**
+   ```bash
+   npm run build
+   npx cap sync ios
+   ```
+
+2. **Open in Xcode:**
+   ```bash
+   npx cap open ios
+   ```
+
+3. **Configure signing in Xcode:**
+   - Select the "App" target → Signing & Capabilities
+   - Choose your Team (Apple Developer account)
+   - Verify bundle ID: `com.handledhome.app`
+   - Add "Push Notifications" capability if not already added
+
+4. **Archive and upload:**
+   - Product → Archive
+   - Window → Organizer → Distribute App → TestFlight & App Store
+   - Upload
+
+5. **Add testers in App Store Connect:**
+   - Go to App Store Connect → TestFlight
+   - Add internal or external testers by email
+
+**Configuration already in place:**
+- App icon: branded "H" lettermark (iOS Assets.xcassets)
+- Info.plist: camera, photo library, location privacy descriptions
+- Custom URL scheme: `handledhome://` for auth deep links
+- Push notifications: `@capacitor/push-notifications` plugin configured
+- Deep link handler: `useDeepLinks` hook handles `handledhome://auth/callback`
+- Orientation: portrait only on iPhone
+- Safe areas: `.safe-top` / `.safe-bottom` CSS utilities applied to headers and tab bars
+- Viewport: `viewport-fit=cover`, `user-scalable=no`, 16px input font size
+
+**Supabase auth redirect URL:**
+Add `handledhome://auth/callback` to the allowed redirect URLs in your Supabase project settings (Authentication → URL Configuration → Redirect URLs).
+
+**Push notifications:**
+- APNs certificate or key must be uploaded to Supabase (Settings → Push Notifications)
+- The app requests permission on first launch and registers the device token automatically
 
 ---
 
