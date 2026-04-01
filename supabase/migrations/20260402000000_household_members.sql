@@ -35,40 +35,45 @@ CREATE INDEX IF NOT EXISTS idx_household_members_invite_email_lookup
 
 COMMENT ON TABLE public.household_members IS 'Links multiple auth users to one property. Owner manages billing, members can view services and schedule.';
 
+-- Helper function to get property IDs for a user (bypasses RLS)
+CREATE OR REPLACE FUNCTION public.get_user_household_property_ids(p_user_id UUID)
+RETURNS UUID[] AS $$
+  SELECT COALESCE(array_agg(property_id), '{}')
+  FROM public.household_members
+  WHERE user_id = p_user_id AND status = 'active';
+$$ LANGUAGE sql STABLE SECURITY DEFINER;
+
+-- Helper function to check if user is owner of a property (bypasses RLS)
+CREATE OR REPLACE FUNCTION public.is_household_owner(p_user_id UUID, p_property_id UUID)
+RETURNS BOOLEAN AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.household_members
+    WHERE user_id = p_user_id
+      AND property_id = p_property_id
+      AND role = 'owner'
+      AND status = 'active'
+  );
+$$ LANGUAGE sql STABLE SECURITY DEFINER;
+
 -- RLS
 ALTER TABLE public.household_members ENABLE ROW LEVEL SECURITY;
 
 -- Users can read memberships for properties they belong to
 CREATE POLICY household_members_read ON public.household_members
   FOR SELECT USING (
-    property_id IN (
-      SELECT property_id FROM public.household_members
-      WHERE user_id = auth.uid() AND status = 'active'
-    )
+    property_id = ANY(public.get_user_household_property_ids(auth.uid()))
   );
 
 -- Property owners can insert new members (invites)
 CREATE POLICY household_members_owner_insert ON public.household_members
   FOR INSERT WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM public.household_members
-      WHERE property_id = household_members.property_id
-        AND user_id = auth.uid()
-        AND role = 'owner'
-        AND status = 'active'
-    )
+    public.is_household_owner(auth.uid(), property_id)
   );
 
 -- Property owners can update members (accept, remove)
 CREATE POLICY household_members_owner_update ON public.household_members
   FOR UPDATE USING (
-    EXISTS (
-      SELECT 1 FROM public.household_members hm
-      WHERE hm.property_id = household_members.property_id
-        AND hm.user_id = auth.uid()
-        AND hm.role = 'owner'
-        AND hm.status = 'active'
-    )
+    public.is_household_owner(auth.uid(), property_id)
   );
 
 -- Admin full access
