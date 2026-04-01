@@ -29,7 +29,7 @@ import {
   Megaphone, TrendingUp,
   HelpCircle, FileText, BookOpen,
   Activity, Bell, MessageSquare, ToggleLeft,
-  Settings, Rocket, GraduationCap, Calculator, FlaskConical,
+  Settings, Rocket, GraduationCap, Calculator, FlaskConical, Mail,
 } from "lucide-react";
 import type { AdminRole } from "@/hooks/useAdminMembership";
 
@@ -108,6 +108,7 @@ const navGroups: NavGroup[] = [
     items: [
       { title: "Incentives", url: "/admin/incentives", icon: Megaphone },
       { title: "Growth", url: "/admin/growth", icon: TrendingUp },
+      { title: "Provider Leads", url: "/admin/provider-leads", icon: Mail },
       { title: "Reports", url: "/admin/reports", icon: BarChart3 },
     ],
   },

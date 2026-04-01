@@ -142,6 +142,7 @@ const AdminProviderLedger = lazy(() => import("@/pages/admin/ProviderLedger"));
 const AdminSupportPolicies = lazy(() => import("@/pages/admin/SupportPolicies"));
 const AdminSupportMacros = lazy(() => import("@/pages/admin/SupportMacros"));
 const AdminGrowth = lazy(() => import("@/pages/admin/Growth"));
+const AdminProviderLeads = lazy(() => import("@/pages/admin/ProviderLeads"));
 const AdminTestToggles = lazy(() => import("@/pages/admin/TestToggles"));
 const AdminNotificationHealth = lazy(() => import("@/pages/admin/NotificationHealth"));
 const AdminFeedback = lazy(() => import("@/pages/admin/Feedback"));
@@ -325,6 +326,7 @@ const App = () => (
                   <Route path="/admin/support/simulator" element={<AdminPolicySimulator />} />
                   <Route path="/admin/incentives" element={<AdminIncentives />} />
                   <Route path="/admin/growth" element={<AdminGrowth />} />
+                  <Route path="/admin/provider-leads" element={<AdminProviderLeads />} />
                   <Route path="/admin/notification-health" element={<AdminNotificationHealth />} />
                   <Route path="/admin/feedback" element={<AdminFeedback />} />
                   <Route path="/admin/test-toggles" element={<AdminTestToggles />} />
