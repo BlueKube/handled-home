@@ -74,7 +74,7 @@ export function useOpsExceptions(filters: OpsExceptionFilters = {}) {
       if (filters.domain === "ops") {
         query = query.in("exception_type", OPS_TYPES);
       } else if (filters.domain === "billing") {
-        query = query.in("exception_type", BILLING_TYPES);
+        query = query.in("exception_type", BILLING_TYPES as any);
       }
 
       const { data, error } = await query;

@@ -23,13 +23,13 @@ export function PayoutRolloverCard() {
     queryKey: ["admin-payout-rollovers"],
     queryFn: async () => {
       // Find providers with PENDING earnings that are below the $25 threshold
-      const { data: earnings, error } = await (supabase
+      const { data: earnings, error }: { data: any[] | null; error: any } = await (supabase as any)
         .from("provider_earnings")
         .select(
           "provider_org_id, net_cents, created_at, provider_orgs:provider_org_id(name)"
         )
         .eq("payout_status", "PENDING")
-        .order("created_at", { ascending: true }) as any) as { data: any[] | null; error: any };
+        .order("created_at", { ascending: true });
 
       if (error) throw error;
 
