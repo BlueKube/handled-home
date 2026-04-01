@@ -485,6 +485,7 @@
 247. No-show escalation SOP — 3/10
 248. Provider probation ladder SOP — 3/10
 249. Zone pause workflow SOP — 3/10
+249b. Interactive SOP execution system — "Execute SOP" mode converts static playbook cards into per-step checklists with checkboxes, progress tracking (% complete badge), completion detection, abandon support, and persistent sop_runs table for audit trail — 7/10
 
 ---
 
