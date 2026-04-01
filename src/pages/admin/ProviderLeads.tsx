@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Mail, Filter, Users, MapPin } from "lucide-react";
+import { Mail, Filter, Users, MapPin, Bell, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -151,7 +151,7 @@ export default function AdminProviderLeads() {
         </TabsContent>
 
         <TabsContent value="zips">
-          <ZipAggregationTab leads={leads.data ?? []} isLoading={leads.isLoading} />
+          <ZipAggregationTab leads={leads.data ?? []} isLoading={leads.isLoading} queryClient={queryClient} />
         </TabsContent>
 
         <TabsContent value="referrals">
@@ -279,13 +279,28 @@ function LeadsTab({ leads, isLoading, isError, onUpdateStatus }: {
   );
 }
 
-function ZipAggregationTab({ leads, isLoading }: { leads: Lead[]; isLoading: boolean }) {
+function ZipAggregationTab({ leads, isLoading, queryClient }: { leads: Lead[]; isLoading: boolean; queryClient: ReturnType<typeof useQueryClient> }) {
+  const [selectedZone, setSelectedZone] = useState("");
+  const [notifying, setNotifying] = useState(false);
+
+  const zones = useQuery({
+    queryKey: ["admin-zones-for-notify"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("zones")
+        .select("id, name, zip_codes, status")
+        .order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   const zipData = useMemo(() => {
     const map = new Map<string, { count: number; categories: Set<string> }>();
     for (const lead of leads) {
       const entry = map.get(lead.zip_code) ?? { count: 0, categories: new Set<string>() };
       entry.count++;
-      for (const c of lead.categories) entry.categories.add(c);
+      for (const c of lead.categories ?? []) entry.categories.add(c);
       map.set(lead.zip_code, entry);
     }
     return Array.from(map.entries())
@@ -293,49 +308,100 @@ function ZipAggregationTab({ leads, isLoading }: { leads: Lead[]; isLoading: boo
       .sort((a, b) => b.count - a.count);
   }, [leads]);
 
+  const handleNotify = async () => {
+    if (!selectedZone) return;
+    setNotifying(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("notify-zone-leads", {
+        body: { zone_id: selectedZone },
+      });
+      if (error) throw error;
+      const result = data as { notified_count: number; message: string };
+      toast.success(result.message || `Notified ${result.notified_count} leads`);
+      queryClient.invalidateQueries({ queryKey: ["admin-provider-leads"] });
+      queryClient.invalidateQueries({ queryKey: ["provider-leads-funnel"] });
+    } catch (err) {
+      toast.error("Failed to notify leads");
+    } finally {
+      setNotifying(false);
+    }
+  };
+
   if (isLoading) return <div className="space-y-2 mt-4"><Skeleton className="h-12" /><Skeleton className="h-12" /></div>;
 
-  if (zipData.length === 0) {
-    return (
-      <Card className="mt-4">
-        <CardContent className="py-12 text-center">
-          <MapPin className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-          <p className="text-sm font-medium">No ZIP data yet</p>
+  return (
+    <div className="space-y-4 mt-4">
+      {/* Zone notification trigger */}
+      <Card>
+        <CardContent className="py-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Bell className="h-4 w-4 text-primary" />
+            <p className="text-sm font-medium">Notify Zone Leads</p>
+          </div>
+          <p className="text-xs text-muted-foreground mb-3">
+            Mark all new leads in a zone's ZIP codes as "notified". Use when a zone transitions to launch.
+          </p>
+          <div className="flex gap-2">
+            <Select value={selectedZone} onValueChange={setSelectedZone}>
+              <SelectTrigger className="flex-1">
+                <SelectValue placeholder="Select zone..." />
+              </SelectTrigger>
+              <SelectContent>
+                {(zones.data ?? []).map((z: any) => (
+                  <SelectItem key={z.id} value={z.id}>
+                    {z.name} ({(z.zip_codes ?? []).length} ZIPs)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={handleNotify} disabled={!selectedZone || notifying}>
+              {notifying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4 mr-1.5" />}
+              {notifying ? "Notifying..." : "Notify"}
+            </Button>
+          </div>
         </CardContent>
       </Card>
-    );
-  }
 
-  return (
-    <div className="mt-4 border rounded-lg overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b bg-muted/50">
-              <th className="text-left p-3 font-medium">ZIP Code</th>
-              <th className="text-left p-3 font-medium">Leads</th>
-              <th className="text-left p-3 font-medium">Categories Interested</th>
-            </tr>
-          </thead>
-          <tbody>
-            {zipData.map((row) => (
-              <tr key={row.zip} className="border-b hover:bg-muted/30 transition-colors">
-                <td className="p-3 font-medium">{row.zip}</td>
-                <td className="p-3">
-                  <Badge variant="secondary">{row.count}</Badge>
-                </td>
-                <td className="p-3">
-                  <div className="flex flex-wrap gap-1">
-                    {row.categories.map((c) => (
-                      <Badge key={c} variant="outline" className="text-xs">{c}</Badge>
-                    ))}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {/* ZIP aggregation table */}
+      {zipData.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <MapPin className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+            <p className="text-sm font-medium">No ZIP data yet</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="border rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-muted/50">
+                  <th className="text-left p-3 font-medium">ZIP Code</th>
+                  <th className="text-left p-3 font-medium">Leads</th>
+                  <th className="text-left p-3 font-medium">Categories Interested</th>
+                </tr>
+              </thead>
+              <tbody>
+                {zipData.map((row) => (
+                  <tr key={row.zip} className="border-b hover:bg-muted/30 transition-colors">
+                    <td className="p-3 font-medium">{row.zip}</td>
+                    <td className="p-3">
+                      <Badge variant="secondary">{row.count}</Badge>
+                    </td>
+                    <td className="p-3">
+                      <div className="flex flex-wrap gap-1">
+                        {row.categories.map((c) => (
+                          <Badge key={c} variant="outline" className="text-xs">{c}</Badge>
+                        ))}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
