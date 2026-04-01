@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, MapPin, CheckCircle, Clock, AlertCircle, Sparkles, Users, Loader2 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { ChevronLeft, MapPin, CheckCircle, Clock, AlertCircle, Sparkles, Users, Loader2, Megaphone, Send } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
 import { useProviderApplication, ByocEstimate } from "@/hooks/useProviderApplication";
 import { useZoneReadiness, ZoneReadinessResult } from "@/hooks/useZoneReadiness";
 import OpportunityBanner, {
@@ -47,7 +49,7 @@ const STATUS_MESSAGES: Record<string, { title: string; desc: string }> = {
   under_review: { title: "Under review", desc: "Our team is reviewing your application. Hang tight!" },
   approved: { title: "You're approved!", desc: "Complete onboarding to start earning." },
   approved_conditional: { title: "Approved with conditions", desc: "Complete onboarding. Check your notifications for details." },
-  waitlisted: { title: "On the waitlist", desc: "We'll notify you when your zone opens. Invite customers to accelerate." },
+  waitlisted: { title: "We're building your zone", desc: "We're working on launching in your area. Help us get there faster — refer providers you trust in the categories below." },
   rejected: { title: "Not approved", desc: "Check notifications for details. You may reapply later." },
   draft: { title: "Draft application", desc: "Continue your application below." },
 };
@@ -170,6 +172,12 @@ export default function ProviderApply() {
     const app = application.data;
     const status = app.status as string;
     const msg = STATUS_MESSAGES[status] ?? STATUS_MESSAGES.submitted;
+    const showRecruitment = status === "waitlisted" || status === "submitted" || status === "under_review";
+
+    // Categories we still need providers for (all categories minus what this provider applied for)
+    const appliedCats = (app.requested_categories ?? []) as string[];
+    const neededCategories = CATEGORIES.filter((c) => !appliedCats.includes(c.value));
+
     return (
       <div className="animate-fade-in p-4 pb-24 space-y-5">
         <div className="flex items-center gap-3">
@@ -183,9 +191,6 @@ export default function ProviderApply() {
             {STATUS_ICONS[status] ?? STATUS_ICONS.submitted}
             <h2 className="text-lg font-semibold">{msg.title}</h2>
             <p className="text-sm text-muted-foreground">{msg.desc}</p>
-            <Badge variant="outline" className="capitalize">
-              {status.replace(/_/g, " ")}
-            </Badge>
             {app.requested_categories && app.requested_categories.length > 0 && (
               <div className="flex flex-wrap gap-1 justify-center pt-2">
                 {app.requested_categories.map((c: string) => (
@@ -203,17 +208,38 @@ export default function ProviderApply() {
                 Start Onboarding
               </Button>
             )}
-            {status === "waitlisted" && (
-              <Button
-                onClick={() => navigate("/provider/referrals")}
-                variant="outline"
-                className="w-full mt-4"
-              >
-                Invite Customers to Unlock
-              </Button>
-            )}
           </CardContent>
         </Card>
+
+        {/* Category gaps — show for recruitment-eligible statuses */}
+        {showRecruitment && neededCategories.length > 0 && (
+          <Card>
+            <CardContent className="py-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <Megaphone className="h-4 w-4 text-primary" />
+                <p className="text-sm font-medium">Help us launch faster</p>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                We need providers in these categories to launch in your area:
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {neededCategories.map((c) => (
+                  <Badge key={c.value} variant="outline" className="text-xs capitalize">
+                    {c.label}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Know someone? Referral form */}
+        {showRecruitment && (
+          <ProviderReferralForm
+            defaultZip={(app as any).zip_codes?.[0] ?? ""}
+            referrerEmail={(app as any).email ?? ""}
+          />
+        )}
       </div>
     );
   }
@@ -601,5 +627,121 @@ export default function ProviderApply() {
         </div>
       )}
     </div>
+  );
+}
+
+function ProviderReferralForm({ defaultZip, referrerEmail }: { defaultZip: string; referrerEmail: string }) {
+  const [name, setName] = useState("");
+  const [contact, setContact] = useState("");
+  const [category, setCategory] = useState("");
+  const [zip, setZip] = useState(defaultZip);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!name || !contact || !category) return;
+    setSubmitting(true);
+    try {
+      const { error } = await (supabase.from("provider_referrals") as any).insert({
+        referrer_email: referrerEmail,
+        referred_name: name,
+        referred_contact: contact,
+        referred_category: category,
+        zip_code: zip || "00000",
+      });
+      if (error) throw error;
+      setName("");
+      setContact("");
+      setCategory("");
+      setSubmitted(true);
+      toast.success("Referral submitted — thank you!");
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base flex items-center gap-2">
+          <Users className="h-4 w-4 text-primary" />
+          Know someone?
+        </CardTitle>
+        <p className="text-xs text-muted-foreground">
+          Refer a provider you trust. The faster we fill categories, the sooner we launch.
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {submitted ? (
+          <div className="text-center py-3 space-y-2 animate-fade-in">
+            <CheckCircle className="h-6 w-6 text-success mx-auto" />
+            <p className="text-sm font-medium">Thanks for the referral!</p>
+            <Button variant="outline" size="sm" onClick={() => setSubmitted(false)}>
+              Refer another
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Their name</Label>
+              <Input
+                placeholder="Provider name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="h-9"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Phone or email</Label>
+              <Input
+                placeholder="Phone number or email"
+                value={contact}
+                onChange={(e) => setContact(e.target.value)}
+                className="h-9"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Service category</Label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map((c) => (
+                    <SelectItem key={c.value} value={c.value}>
+                      {c.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">ZIP code</Label>
+              <Input
+                placeholder="ZIP code"
+                value={zip}
+                onChange={(e) => setZip(e.target.value)}
+                maxLength={5}
+                className="h-9"
+              />
+            </div>
+            <Button
+              className="w-full"
+              onClick={handleSubmit}
+              disabled={!name || !contact || !category || submitting}
+            >
+              {submitting ? "Submitting..." : (
+                <>
+                  <Send className="h-3.5 w-3.5 mr-1.5" />
+                  Submit Referral
+                </>
+              )}
+            </Button>
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 }
