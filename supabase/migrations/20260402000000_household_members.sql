@@ -41,7 +41,7 @@ RETURNS UUID[] AS $$
   SELECT COALESCE(array_agg(property_id), '{}')
   FROM public.household_members
   WHERE user_id = p_user_id AND status = 'active';
-$$ LANGUAGE sql STABLE SECURITY DEFINER;
+$$ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public;
 
 -- Helper function to check if user is owner of a property (bypasses RLS)
 CREATE OR REPLACE FUNCTION public.is_household_owner(p_user_id UUID, p_property_id UUID)
@@ -53,7 +53,7 @@ RETURNS BOOLEAN AS $$
       AND role = 'owner'
       AND status = 'active'
   );
-$$ LANGUAGE sql STABLE SECURITY DEFINER;
+$$ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public;
 
 -- RLS
 ALTER TABLE public.household_members ENABLE ROW LEVEL SECURITY;
