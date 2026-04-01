@@ -35,12 +35,13 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  -- Update matching leads: new → notified
+  -- Update matching leads: new → notified (only leads interested in this category)
   UPDATE public.provider_leads
   SET status = 'notified',
       notified_at = now()
   WHERE zip_code = ANY(v_zone_zips)
-    AND status = 'new';
+    AND status = 'new'
+    AND (categories && ARRAY[NEW.category] OR categories = '{}');
 
   GET DIAGNOSTICS v_notified_count = ROW_COUNT;
 
