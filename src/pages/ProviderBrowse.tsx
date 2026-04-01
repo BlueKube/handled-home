@@ -86,12 +86,15 @@ export default function ProviderBrowse() {
 
     setSubmitting(true);
     try {
-      const { error } = await (supabase.from("provider_leads") as any).insert({
-        email,
-        zip_code: zip,
-        categories: selectedCategories,
-        source: "browse",
-      });
+      const { error } = await (supabase.from("provider_leads") as any).upsert(
+        {
+          email,
+          zip_code: zip,
+          categories: selectedCategories,
+          source: "browse",
+        },
+        { onConflict: "email" }
+      );
       if (error) throw error;
       setSubmitted(true);
     } catch (err) {

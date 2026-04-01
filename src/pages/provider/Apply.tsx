@@ -653,7 +653,7 @@ function ProviderReferralForm({ defaultZip }: { defaultZip: string }) {
     setSubmitting(true);
     try {
       const { error } = await (supabase.from("provider_referrals") as any).insert({
-        referrer_email: user?.email ?? "",
+        referrer_email: user?.email || "unknown",
         referred_name: name,
         referred_contact: contact,
         referred_category: category,
