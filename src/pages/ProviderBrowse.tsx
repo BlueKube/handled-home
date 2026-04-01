@@ -8,6 +8,8 @@ import {
   Truck, DollarSign, ArrowRight, CheckCircle2, Shield, Clock,
   MapPin, Calendar, TrendingUp, Users, Zap, Star,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const EARNINGS_EXAMPLES = [
   { stops: 4, daily: "$220", weekly: "$1,100", desc: "Part-time (4 stops/day)" },
@@ -57,15 +59,43 @@ export default function ProviderBrowse() {
   const navigate = useNavigate();
   const [zip, setZip] = useState("");
   const [email, setEmail] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleApply = () => {
     navigate("/auth?tab=signup&role=provider");
   };
 
-  const handleNotify = () => {
-    // For now, just show success — in production this would save to a leads table
-    setSubmitted(true);
+  const toggleCategory = (cat: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
+    );
+  };
+
+  const handleNotify = async () => {
+    if (!email || zip.length < 5) return;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const { error } = await (supabase.from("provider_leads") as any).insert({
+        email,
+        zip_code: zip,
+        categories: selectedCategories,
+        source: "browse",
+      });
+      if (error) throw error;
+      setSubmitted(true);
+    } catch (err) {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -231,7 +261,7 @@ export default function ProviderBrowse() {
               <p className="text-xs text-muted-foreground">We'll reach out when we're ready to launch in your area.</p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Input
                 placeholder="Email address"
                 type="email"
@@ -246,8 +276,23 @@ export default function ProviderBrowse() {
                 className="text-center h-11"
                 maxLength={5}
               />
-              <Button className="w-full" onClick={handleNotify} disabled={!email || zip.length < 5}>
-                Notify Me When You Launch
+              <div>
+                <p className="text-xs text-muted-foreground mb-2">What services do you offer? (optional)</p>
+                <div className="flex flex-wrap justify-center gap-1.5">
+                  {CATEGORIES.map((cat) => (
+                    <Badge
+                      key={cat}
+                      variant={selectedCategories.includes(cat) ? "default" : "outline"}
+                      className="cursor-pointer text-xs px-2.5 py-1 transition-colors"
+                      onClick={() => toggleCategory(cat)}
+                    >
+                      {cat}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              <Button className="w-full" onClick={handleNotify} disabled={!email || zip.length < 5 || submitting}>
+                {submitting ? "Submitting..." : "Notify Me When You Launch"}
               </Button>
             </div>
           )}
