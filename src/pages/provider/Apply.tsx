@@ -72,6 +72,7 @@ export default function ProviderApply() {
   const [step, setStep] = useState(1);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [homeBaseZip, setHomeBaseZip] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [zipInput, setZipInput] = useState("");
   const [zipCodes, setZipCodes] = useState<string[]>([]);
   const [readiness, setReadiness] = useState<ZoneReadinessResult | null>(null);
@@ -332,6 +333,22 @@ export default function ProviderApply() {
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="phone" className="text-sm font-medium">
+              Phone number <span className="text-muted-foreground font-normal">(optional)</span>
+            </Label>
+            <Input
+              id="phone"
+              placeholder="Your phone number"
+              type="tel"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Helps us match your application if you were referred by phone.
+            </p>
+          </div>
+
+          <div className="space-y-2">
             <Label className="text-sm font-medium">Service ZIPs</Label>
             <div className="flex gap-2">
               <Input
@@ -372,6 +389,12 @@ export default function ProviderApply() {
                 !homeBaseZip || !/^\d{5}$/.test(homeBaseZip) || allZips.length === 0
               }
               onClick={async () => {
+                // Save phone to profile if provided
+                if (phoneNumber) {
+                  await (supabase.from("profiles") as any)
+                    .update({ phone: phoneNumber })
+                    .eq("user_id", (await supabase.auth.getUser()).data.user?.id);
+                }
                 await checkReadiness();
                 setStep(3);
               }}
