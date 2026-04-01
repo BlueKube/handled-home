@@ -51,6 +51,8 @@
 	<string>Select photos to upload as service proof</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Show your service area and nearby providers on the map</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

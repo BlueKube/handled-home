@@ -222,6 +222,12 @@ export default function AuthPage() {
           </Button>
         </form>
       )}
+      {/* Legal footer */}
+      <div className="flex justify-center gap-4 mt-6 text-xs text-muted-foreground">
+        <a href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</a>
+        <span>·</span>
+        <a href="/terms" className="hover:text-foreground transition-colors">Terms of Service</a>
+      </div>
     </div>
   );
 }
