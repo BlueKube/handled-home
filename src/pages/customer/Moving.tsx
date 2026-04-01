@@ -66,6 +66,11 @@ export default function CustomerMoving() {
         .eq("user_id", user.id)
         .limit(1);
       const propertyId = props?.[0]?.id;
+      if (!propertyId) {
+        toast.error("No property found. Please add your home first.");
+        setSubmitting(false);
+        return;
+      }
 
       // Save property transition
       await (supabase.from("property_transitions") as any).insert({
