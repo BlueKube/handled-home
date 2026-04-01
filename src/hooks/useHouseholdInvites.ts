@@ -23,6 +23,7 @@ export function useHouseholdInvites() {
         // Invites accepted — refresh property data
         queryClient.invalidateQueries({ queryKey: ["property"] });
         queryClient.invalidateQueries({ queryKey: ["household-members"] });
+        queryClient.invalidateQueries({ queryKey: ["isHouseholdMember"] });
       }
     });
   }, [user, queryClient]);
