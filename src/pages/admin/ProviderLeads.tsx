@@ -320,8 +320,8 @@ function ZipAggregationTab({ leads, isLoading, queryClient }: { leads: Lead[]; i
       toast.success(result.message || `Notified ${result.notified_count} leads`);
       queryClient.invalidateQueries({ queryKey: ["admin-provider-leads"] });
       queryClient.invalidateQueries({ queryKey: ["provider-leads-funnel"] });
-    } catch (err) {
-      toast.error("Failed to notify leads");
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to notify leads");
     } finally {
       setNotifying(false);
     }
@@ -355,7 +355,7 @@ function ZipAggregationTab({ leads, isLoading, queryClient }: { leads: Lead[]; i
               </SelectContent>
             </Select>
             <Button onClick={handleNotify} disabled={!selectedZone || notifying}>
-              {notifying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4 mr-1.5" />}
+              {notifying ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Bell className="h-4 w-4 mr-1.5" />}
               {notifying ? "Notifying..." : "Notify"}
             </Button>
           </div>

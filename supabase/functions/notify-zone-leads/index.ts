@@ -90,10 +90,14 @@ Deno.serve(async (req: Request) => {
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : "Internal server error";
-    const status = message.includes("required") || message.includes("access") ? 401 : 500;
+    // Auth errors from requireAdminOrCron contain these phrases
+    const isAuthError = message === "Authorization header required"
+      || message === "Cron secret or service role key required"
+      || message === "Invalid or expired token"
+      || message === "Admin access required";
     return new Response(
       JSON.stringify({ error: message }),
-      { status, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      { status: isAuthError ? 401 : 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 });
