@@ -502,6 +502,12 @@
 258. Glassmorphism bottom tab bar with active teal dot indicators — 8/10
 259. Shimmer skeleton loading states across all data-driven pages — 8/10
 260. Premium "calm concierge" copy voice throughout — 8/10
+261. Privacy policy page at /privacy — comprehensive data collection, usage, retention, rights, security disclosures — DONE
+262. Terms of service page at /terms — subscription terms, service delivery, provider relationships, liability, account deletion — DONE
+263. Customer account deletion from Settings — confirmation dialog, anonymization RPC, subscription cancellation — DONE
+264. Browse-first public experience at /browse — hero, ZIP coverage check, full service catalog with real SKU data, plan comparison with pricing, how-it-works, trust signals, conversion CTAs — DONE
+265. Password reset flow — actual Supabase resetPasswordForEmail instead of "Coming soon" toast — DONE
+266. Subscription verification timeout — 15-second timeout with error message instead of infinite spinner — DONE
 
 ---
 
