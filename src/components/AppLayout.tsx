@@ -2,9 +2,11 @@ import { Outlet } from "react-router-dom";
 import { BottomTabBar } from "@/components/BottomTabBar";
 import { AppHeader } from "@/components/AppHeader";
 import { useDeviceToken } from "@/hooks/useDeviceToken";
+import { useDeepLinks } from "@/hooks/useDeepLinks";
 
 export function AppLayout() {
   useDeviceToken();
+  useDeepLinks();
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

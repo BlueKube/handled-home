@@ -8,6 +8,7 @@ import { StatCard } from "@/components/StatCard";
 import { DollarSign, Clock, Calendar, Settings } from "lucide-react";
 import { PageSkeleton } from "@/components/PageSkeleton";
 import { DecisionTraceCard } from "@/components/admin/DecisionTraceCard";
+import { PayoutRolloverCard } from "@/components/admin/billing/PayoutRolloverCard";
 
 function formatCents(cents: number) { return `$${(cents / 100).toFixed(2)}`; }
 
@@ -55,6 +56,8 @@ export default function AdminPayoutsPage() {
           )}
         </CardContent>
       </Card>
+
+      <PayoutRolloverCard />
 
       <Card>
         <CardHeader className="pb-2">

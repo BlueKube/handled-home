@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertTriangle, Clock, Shield, Zap } from "lucide-react";
 import { formatDistanceToNow, differenceInHours } from "date-fns";
-import type { OpsExceptionFilters, OpsExceptionWithRelations } from "@/hooks/useOpsExceptions";
+import type { OpsExceptionFilters, OpsExceptionWithRelations, ExceptionDomain } from "@/hooks/useOpsExceptions";
 
 interface Props {
   exceptions: OpsExceptionWithRelations[];
@@ -28,6 +28,12 @@ const TYPE_LABELS: Record<string, string> = {
   customer_reschedule: "Customer Reschedule",
   weather_safety: "Weather Safety",
   quality_block: "Quality Block",
+  payment_failed: "Payment Failed",
+  payment_past_due: "Payment Past Due",
+  payout_failed: "Payout Failed",
+  dispute_opened: "Dispute Opened",
+  earnings_held: "Earnings Held",
+  reconciliation_mismatch: "Reconciliation Mismatch",
 };
 
 function SlaCountdown({ slaTargetAt }: { slaTargetAt: string | null }) {
@@ -56,6 +62,17 @@ export function OpsExceptionQueue({ exceptions, filters, onFilterChange, selecte
 
       {/* Filters */}
       <div className="flex gap-2 flex-wrap">
+        <Select value={filters.domain ?? "all"} onValueChange={(v) => onFilterChange({ ...filters, domain: v as ExceptionDomain, exception_type: "all" })}>
+          <SelectTrigger className="w-[120px] h-8 text-xs">
+            <SelectValue placeholder="Domain" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Domains</SelectItem>
+            <SelectItem value="ops">Ops</SelectItem>
+            <SelectItem value="billing">Billing</SelectItem>
+          </SelectContent>
+        </Select>
+
         <Select value={filters.severity ?? "all"} onValueChange={(v) => onFilterChange({ ...filters, severity: v as any })}>
           <SelectTrigger className="w-[130px] h-8 text-xs">
             <SelectValue placeholder="Severity" />
@@ -85,7 +102,7 @@ export function OpsExceptionQueue({ exceptions, filters, onFilterChange, selecte
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Active</SelectItem>
+            <SelectItem value="all">All Active</SelectItem>
             <SelectItem value="open">Open</SelectItem>
             <SelectItem value="acknowledged">Acknowledged</SelectItem>
             <SelectItem value="in_progress">In Progress</SelectItem>

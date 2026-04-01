@@ -191,6 +191,16 @@ Adding nullable override columns to sku_levels (presence_required, access_mode, 
 **Type:** Workflow
 Eliminated separate PRD files and the `docs/working/prd.md` layer. Each phase section in `FULL-IMPLEMENTATION-PLAN.md` is now a self-contained PRD — no separate file needed. Renamed "full pass" to "round" for clarity. Renamed workflow procedure headings from "Phase 0-7" to "Step 0-8" to avoid collision with implementation phases. Added glossary to both CLAUDE.md and WORKFLOW.md defining Round, Phase, Batch, and Step. Added "micro" review tier (1 agent) for mechanical batches and fact-checker lane for business-critical documents.
 
+### [2026-03-31] 7 phases in one session is achievable at ~50% context with small batches
+**Source:** Round 5 execution (Phases 1-7)
+**Type:** Agent Signal
+Completed 22 batches across 7 phases in a single session, reaching ~55% context. Small batches (S/Micro) with focused scope average ~2-3% context each. Reviews run as background agents and cost effectively zero main context. The 60% threshold is conservative — 55% is a safe stopping point with room for doc sync.
+
+### [2026-03-31] Porting tools/ code to src/ for admin UI is a clean pattern
+**Source:** Phase 1 (Market Simulator)
+**Type:** Architecture
+Copying the simulation engine from `tools/market-simulation/` to `src/lib/simulation/` with Node.js code stripped worked cleanly. The browser port runs identically to the CLI version. Key: strip CLI runners, use `Record<string,...>` instead of `Record<keyof,...>` for bounds (needed for slider iteration), and add seasonal presets inline.
+
 ---
 
 ## Suggestions

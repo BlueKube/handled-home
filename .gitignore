@@ -31,3 +31,4 @@ e2e/.auth/
 # Supabase CLI temp
 supabase/.temp/
 __pycache__/
+ios/App/Pods/

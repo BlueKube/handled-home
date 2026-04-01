@@ -29,7 +29,7 @@ import {
   Megaphone, TrendingUp,
   HelpCircle, FileText, BookOpen,
   Activity, Bell, MessageSquare, ToggleLeft,
-  Settings, Rocket, GraduationCap,
+  Settings, Rocket, GraduationCap, Calculator, FlaskConical,
 } from "lucide-react";
 import type { AdminRole } from "@/hooks/useAdminMembership";
 
@@ -76,6 +76,7 @@ const navGroups: NavGroup[] = [
     items: [
       { title: "Customer Billing", url: "/admin/billing", icon: Users },
       { title: "Providers", url: "/admin/providers", icon: Shield },
+      { title: "Accountability", url: "/admin/accountability", icon: AlertTriangle },
     ],
   },
   {
@@ -116,6 +117,7 @@ const navGroups: NavGroup[] = [
       { title: "Tickets", url: "/admin/support", icon: HelpCircle },
       { title: "Policies", url: "/admin/support/policies", icon: FileText },
       { title: "Macros", url: "/admin/support/macros", icon: MessageSquare },
+      { title: "Policy Simulator", url: "/admin/support/simulator", icon: FlaskConical },
     ],
   },
   {
@@ -149,6 +151,12 @@ const navGroups: NavGroup[] = [
     label: "Academy",
     items: [
       { title: "Training Center", url: "/admin/academy", icon: GraduationCap },
+    ],
+  },
+  {
+    label: "Tools",
+    items: [
+      { title: "Market Simulator", url: "/admin/simulator", icon: Calculator },
     ],
   },
 ];

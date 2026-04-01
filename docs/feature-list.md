@@ -86,6 +86,7 @@
 43c. Market simulator validation of handle economics — break-even at 72.2% utilization, 44.6% margin at 40% target utilization. All 54 SKU/levels verified consistent with 7-handle anchor model — DONE
 43d. Comprehensive SKU calibration reasoning report (docs/sku-calibration-report.md) — per-SKU pricing rationale, licensed service premium analysis, tier progression logic, deferred service documentation, and database field recommendations — DONE
 43e. Database schema enhancements — 9 new columns on sku_levels (presence_required, access_mode, weather_sensitive, provider_payout_hint_cents, property_size_tier) and service_skus (licensing_required, seasonal_availability, recommended_frequency, min_provider_rating). Level-specific overrides for Window Cleaning and Pest Control interior access. Licensing, seasonal, and frequency metadata seeded for all relevant SKUs — DONE
+43f. Admin Market Simulator — full 12-month simulation dashboard at /admin/simulator with real-time sliders (zone, pricing, provider, BYOC, retention, overhead), 6 KPI metric cards, 4 charts (revenue vs pay, margin/utilization, active customers, acquisition sources), monthly projection table, 3 scenario presets (baseline/optimistic/conservative), 4 seasonal market profiles, localStorage save/load — DONE
 
 ---
 
@@ -272,7 +273,7 @@
 145. Chargeback intercept: proof + cheaper off-ramps (credits, plan changes) before escalation — 6/10
 146. Duplicate ticket suppression: second attempt links to existing ticket — 7/10
 147. Response macros for admin one-click resolutions — 8/10
-148. Policy preview simulator: test scenario inputs and see what offers would be shown — 2/10
+148. Policy preview simulator: test scenario inputs (category, evidence score, risk score, customer history, job value) against active policy dials to see computed resolution offers — 7/10
 149. No chat threads anywhere — all disputes are structured, bounded, and auditable — 8/10
 
 ---
@@ -401,7 +402,7 @@
 211. Billing health: past due, failed payments, credits, refunds, disputes — 8/10
 212. Support health: open tickets, SLA breach risk, self-resolve rate, median time-to-resolution — 8/10
 213. Growth health: referrals, provider invites, applications, fraud holds — 8/10
-214. KPI definitions page with formulas, time windows, data sources, and caveats — 5/10
+214. KPI definitions page with 18 KPIs across 5 categories, formula cards, search, category filter, green/yellow/red threshold badges from operating model — 8/10
 215. Daily snapshot rollup via `snapshot-rollup` edge function — 8/10
 216. Business Health gauges on Ops Cockpit: attach rate (global, 90-day cohort, 6-month cohort), household churn, provider churn, zone density bands — green/amber/red threshold indicators from operating model, flywheel alert when 6-month attach rate < 1.5 — 7/10
 216b. Gross Margin gauge on Ops Cockpit (MONEY column): percentage with target ≥25%, green/yellow/red status — 8/10
@@ -435,8 +436,10 @@
 
 224. Auto-assign jobs to providers: Primary-first → Backup fallback with explainability — 7/10
 225. Provider no-show detection (hourly) with auto-reassign and calm customer notification — 7/10
+225b. Provider incident tracking system — no-show, quality issue, access failure, late arrival, proof missing incidents with severity, excused/unexcused classification, admin review queue, 60-day rolling window counts — 8/10
+225c. Provider probation system — 4-status lifecycle (active/completed/failed/revoked), improvement targets with deadlines, admin resolve actions (improved/extend/suspend), provider-facing dashboard banner — 8/10
 226. SLA enforcement automation: daily evaluation, 4-level threshold ladder, auto-generate actions — 7/10
-227. Auto-flag and suspend low-quality providers after sustained RED status — 6/10
+227. Auto-flag and suspend low-quality providers after sustained RED status — 7/10
 228. Auto-promote highest-performing backup when primary is suspended — 5/10
 229. Weather mode: auto-detection via WeatherAPI.com, admin approval, job rescheduling — 5/10
 230. Holiday calendar: pre-seeded US federal holidays 2026–2027, job skip support — 8/10
@@ -449,17 +452,19 @@
 
 233. Automated invoice generation with cycle-based idempotency — 7/10
 234. Automated dunning with 5-step escalation ladder — 6/10
+234b. Admin dunning step tracker — shows all subscriptions in dunning with step/stage, severity badges, timing, critical count for step 3+ — 8/10
 235. Auto-apply referral credits to invoices — 8/10
 236. Auto-release provider earning holds nightly — 8/10
 237. Weekly payout runs with threshold enforcement and rollover — 6/10
+237b. Admin payout rollover dashboard — shows providers below $25 threshold with accumulated earnings, count, and distance to threshold — 8/10
 
 ---
 
 ## XXXVI. Exception Management `trust-builder`
 
-238. Unified exception queue: failed payments, disputes, payout failures, held earnings, reconciliation mismatches — 4/10
-239. Per-exception "next best action" CTA with audit trail link — 4/10
-240. Severity-sorted display with one-tap resolution actions — 4/10
+238. Unified exception queue: ops + billing exceptions in one queue with domain filter (All/Ops/Billing), 15 exception types, SLA tracking, severity-sorted — 8/10
+239. Per-exception "next best action" CTA — structured repair actions per type with one-tap buttons that record actions with pre-filled type and reason codes — 8/10
+240. Severity-sorted display with one-tap resolution actions — acknowledge, start work, escalate, record action, resolve — 8/10
 
 ---
 
@@ -480,6 +485,7 @@
 247. No-show escalation SOP — 3/10
 248. Provider probation ladder SOP — 3/10
 249. Zone pause workflow SOP — 3/10
+249b. Interactive SOP execution system — "Execute SOP" mode converts static playbook cards into per-step checklists with checkboxes, progress tracking (% complete badge), completion detection, abandon support, and persistent sop_runs table for audit trail — 7/10
 
 ---
 

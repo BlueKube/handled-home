@@ -16,11 +16,25 @@ export interface OpsExceptionWithRelations extends OpsException {
   customer_name?: string;
 }
 
+export type ExceptionDomain = "all" | "ops" | "billing";
+
+const BILLING_TYPES: string[] = [
+  "payment_failed", "payment_past_due", "payout_failed",
+  "dispute_opened", "earnings_held", "reconciliation_mismatch",
+];
+
+const OPS_TYPES: OpsExceptionType[] = [
+  "window_at_risk", "service_week_at_risk", "provider_overload",
+  "coverage_break", "provider_unavailable", "access_failure",
+  "customer_reschedule", "weather_safety", "quality_block",
+];
+
 export interface OpsExceptionFilters {
   severity?: OpsExceptionSeverity | "all";
   status?: OpsExceptionStatus | "all";
   exception_type?: OpsExceptionType | "all";
   zone_id?: string | "all";
+  domain?: ExceptionDomain;
 }
 
 const ACTIVE_STATUSES: OpsExceptionStatus[] = ["open", "acknowledged", "in_progress", "escalated"];
@@ -56,6 +70,11 @@ export function useOpsExceptions(filters: OpsExceptionFilters = {}) {
       }
       if (filters.zone_id && filters.zone_id !== "all") {
         query = query.eq("zone_id", filters.zone_id);
+      }
+      if (filters.domain === "ops") {
+        query = query.in("exception_type", OPS_TYPES);
+      } else if (filters.domain === "billing") {
+        query = query.in("exception_type", BILLING_TYPES as any);
       }
 
       const { data, error } = await query;

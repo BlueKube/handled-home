@@ -12,6 +12,7 @@ import {
   Users, ChevronRight, CreditCard, Clock,
 } from "lucide-react";
 import { PageSkeleton } from "@/components/PageSkeleton";
+import { DunningTracker } from "@/components/admin/billing/DunningTracker";
 import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 function formatCents(cents: number) { return `$${(cents / 100).toFixed(2)}`; }
@@ -138,6 +139,9 @@ export default function AdminBillingPage() {
           </div>
         </Card>
       </div>
+
+      {/* Dunning Tracker */}
+      <DunningTracker />
 
       {/* Past Due Invoices */}
       {pastDueInvoices.length > 0 && (
