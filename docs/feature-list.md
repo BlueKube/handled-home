@@ -273,7 +273,7 @@
 145. Chargeback intercept: proof + cheaper off-ramps (credits, plan changes) before escalation — 6/10
 146. Duplicate ticket suppression: second attempt links to existing ticket — 7/10
 147. Response macros for admin one-click resolutions — 8/10
-148. Policy preview simulator: test scenario inputs and see what offers would be shown — 2/10
+148. Policy preview simulator: test scenario inputs (category, evidence score, risk score, customer history, job value) against active policy dials to see computed resolution offers — 7/10
 149. No chat threads anywhere — all disputes are structured, bounded, and auditable — 8/10
 
 ---
