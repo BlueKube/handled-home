@@ -5,9 +5,11 @@ import { ChangePasswordForm } from "@/components/settings/ChangePasswordForm";
 import { RoleSwitcher } from "@/components/settings/RoleSwitcher";
 import { PreviewAsCard } from "@/components/settings/PreviewAsCard";
 import { NotificationPreferences } from "@/components/settings/NotificationPreferences";
+import { DeleteAccountSection } from "@/components/settings/DeleteAccountDialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LogOut, Mail, ChevronLeft } from "lucide-react";
+import { LogOut, Mail, ChevronLeft, FileText, Shield } from "lucide-react";
+import { Link } from "react-router-dom";
 import { HelpTip } from "@/components/ui/help-tip";
 
 export default function CustomerSettings() {
@@ -52,6 +54,22 @@ export default function CustomerSettings() {
       <NotificationPreferences />
       <RoleSwitcher />
       <PreviewAsCard />
+
+      {/* Legal */}
+      <div className="flex gap-3">
+        <Link to="/privacy" className="flex-1">
+          <Button variant="outline" size="sm" className="w-full text-xs">
+            <Shield className="h-3 w-3 mr-1" /> Privacy Policy
+          </Button>
+        </Link>
+        <Link to="/terms" className="flex-1">
+          <Button variant="outline" size="sm" className="w-full text-xs">
+            <FileText className="h-3 w-3 mr-1" /> Terms of Service
+          </Button>
+        </Link>
+      </div>
+
+      <DeleteAccountSection />
 
       <Button variant="ghost" onClick={handleSignOut} className="w-full flex items-center gap-2 text-destructive hover:text-destructive hover:bg-destructive/5">
         <LogOut className="h-4 w-4" />

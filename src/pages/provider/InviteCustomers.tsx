@@ -256,16 +256,6 @@ export default function InviteCustomers() {
         </CardContent>
       </Card>
 
-      {/* QR Code - Coming soon */}
-      {inviteLink && (
-        <Card>
-          <CardContent className="py-4 flex items-center gap-3 text-muted-foreground">
-            <Info className="h-4 w-4 shrink-0" />
-            <p className="text-xs">QR code generation coming soon. Use the copy link above for now.</p>
-          </CardContent>
-        </Card>
-      )}
-
       {/* SMS Scripts */}
       <div className="space-y-3">
         <h2 className="text-lg font-semibold">SMS Scripts</h2>

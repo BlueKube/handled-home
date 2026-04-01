@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -159,7 +159,12 @@ export default function AuthPage() {
             Sign In
           </Button>
           <p className="text-center text-sm text-muted-foreground">
-            <button type="button" className="underline" onClick={() => toast({ title: "Coming soon", description: "Password reset is not yet available." })}>
+            <button type="button" className="underline" onClick={async () => {
+              if (!email) { toast({ title: "Enter your email", description: "Type your email address above, then click Forgot password.", variant: "destructive" }); return; }
+              const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth` });
+              if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+              toast({ title: "Check your email", description: "We sent a password reset link to " + email + "." });
+            }}>
               Forgot password?
             </button>
           </p>
@@ -222,6 +227,12 @@ export default function AuthPage() {
           </Button>
         </form>
       )}
+      {/* Legal footer */}
+      <div className="flex justify-center gap-4 mt-6 text-xs text-muted-foreground">
+        <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
+        <span>·</span>
+        <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
+      </div>
     </div>
   );
 }
