@@ -1,38 +1,49 @@
 # Round 9 — Provider Funnel Hardening & Automation
 
-## Current Phase: Phase 1 — Data Integrity & Lead-Application Linking
-
-### Phase Summary
-Fix duplicate leads, guard referral form auth, and auto-link leads to applications when providers apply.
-
-### Batch Breakdown
+## Phase 1 — Data Integrity & Lead-Application Linking ✅
 
 | Batch | Title | Size | Status | Context |
 |-------|-------|------|--------|---------|
-| B1 | Unique email constraint + upsert + auth guard | S | ⬜ | |
-| B2 | Lead-to-application linking trigger | S | ⬜ | |
+| B1 | Unique email constraint + upsert + auth guard | S | ✅ | 52% |
+| B2 | Lead-to-application linking trigger | S | ✅ | 55% |
 
-### Batch Details
+## Phase 2 — Real Category Gap Intelligence ✅
 
-**B1: Unique email constraint + upsert + auth guard**
-- Migration: unique index on provider_leads.email
-- ProviderBrowse.tsx: use upsert (ON CONFLICT UPDATE categories, zip_code, updated_at)
-- Apply.tsx ProviderReferralForm: guard against missing user with fallback
+| Batch | Title | Size | Status | Context |
+|-------|-------|------|--------|---------|
+| B3 | get_category_gaps RPC | S | ✅ | 58% |
+| B4 | Wire category gaps RPC into Apply.tsx | S | ✅ | 61% |
 
-**B2: Lead-to-application linking trigger**
-- Migration: add provider_lead_id FK column to provider_applications
-- Database trigger: on provider_applications insert, match user email against provider_leads and update status to 'applied', set provider_lead_id
-- Requires joining auth.users to get email from user_id
+## Phase 3 — Automated Zone Launch Notifications ✅
 
-### Dependencies
-- B2 depends on B1 (unique email needed for reliable matching)
+| Batch | Title | Size | Status | Context |
+|-------|-------|------|--------|---------|
+| B5+B6 | Auto-notify trigger + notified_at display | S | ✅ | 64% |
+
+## Phase 4 — Referral Attribution & Incentive Messaging ✅
+
+| Batch | Title | Size | Status | Context |
+|-------|-------|------|--------|---------|
+| B7 | Referral attribution trigger + progress card | S | ✅ | 67% |
+
+## Phase 5 — Progressive Lead Recognition ✅
+
+| Batch | Title | Size | Status | Context |
+|-------|-------|------|--------|---------|
+| B8 | localStorage-based returning lead recognition | S | ✅ | 70% |
+
+## Phase 6 — Doc Sync ✅
+
+| Batch | Title | Size | Status | Context |
+|-------|-------|------|--------|---------|
+| B9 | Feature-list update + plan finalization | Micro | ✅ | 72% |
 
 ---
 
 ## Session Handoff
 - **Branch:** claude/provider-conversion-funnel-N3IE5
-- **Last completed:** Round 8 complete, docs synced
-- **Next up:** B1 — Unique email constraint + upsert + auth guard
-- **Context at exit:** N/A
+- **Last completed:** B9 (Round 9 complete — all 6 phases done)
+- **Next up:** Round 9 complete. Ready for next round.
+- **Context at exit:** ~72%
 - **Blockers:** None
-- **Round progress:** Phase 1 of 6, batch 0 of 2 complete
+- **Round progress:** All 6 phases complete (9 batches)

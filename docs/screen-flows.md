@@ -1419,7 +1419,8 @@ Each menu item: icon + label + ChevronRight, tappable
 4. **How It Works**: 4-step process (apply → get route → do work → grow)
 5. **Service Categories**: Badge display of all supported categories
 6. **BYOC Section**: Bring Your Own Customers bonus math ($10/wk, 12 weeks, $2,160 max)
-7. **Lead Capture Form**: Email + ZIP + category multi-select (optional) → saves to `provider_leads` table
+7. **Lead Capture Form**: Email + ZIP + category multi-select (optional) → upserts to `provider_leads` table (unique on email)
+   - **Returning visitors**: "Welcome back!" card with Apply Now CTA + "Update my info" option (localStorage-based recognition)
    - Success state: "You're on the list!" confirmation
    - Email validation + ZIP length validation with toast errors
 8. **Final CTA**: "Ready to earn more with less hassle?" + "Apply Now"
@@ -1481,9 +1482,11 @@ After submission, shows status-appropriate messaging:
 - **Approved**: "You're approved!" + "Start Onboarding" button
 - **Approved conditional**: "Approved with conditions" + "Start Onboarding" button
 
-**Category Gaps Card**: "We need providers in these categories to launch faster:" + badge list of categories the provider didn't apply for.
+**Category Gaps Card**: Calls `get_category_gaps` RPC with applicant's ZIP codes. Shows categories genuinely needing providers (status CLOSED/WAITLIST_ONLY/PROVIDER_RECRUITING from `market_zone_category_state`). Falls back to showing nothing if RPC fails or no gaps exist.
 
-**"Know Someone?" Referral Form**: Name, phone/email, category dropdown, ZIP (pre-filled). Saves to `provider_referrals` table. Success state with "Refer another" option.
+**Referral Progress Card**: Shows referral count with progress bar toward 3-referral target. "Priority eligible" badge when reached. "Refer X more providers to unlock priority review."
+
+**"Know Someone?" Referral Form**: Name, phone/email, category dropdown, ZIP (pre-filled). Saves to `provider_referrals` table. Success state with "Refer another" option. Referrer email from auth context.
 
 ---
 

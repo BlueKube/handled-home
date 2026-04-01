@@ -765,6 +765,19 @@
 424. `notify-zone-leads` edge function: marks matching leads as "notified" when zone launches — queries zone ZIP codes, updates lead status — DONE
 425. Admin zone notification trigger: zone selector + "Notify" button on By ZIP tab calls edge function, shows count of notified leads — DONE
 
+## XLV. Provider Funnel Hardening & Automation `density-driver` `provider-value`
+
+426. Unique email constraint on provider_leads with upsert — returning leads update categories/ZIP instead of duplicating — DONE
+427. Lead-to-application linking: database trigger auto-matches applicant email to provider_leads, updates lead status to 'applied', sets provider_lead_id FK on application — DONE
+428. `get_category_gaps` RPC: returns categories genuinely needing providers for given ZIP codes by querying market_zone_category_state (CLOSED/WAITLIST_ONLY/PROVIDER_RECRUITING) — DONE
+429. Real category gap display on post-application screen: shows genuinely needed categories from zone data instead of naive "everything you didn't pick" — DONE
+430. Automated zone launch notifications: database trigger on market_zone_category_state status change to SOFT_LAUNCH/OPEN auto-marks matching provider leads as notified with timestamp — DONE
+431. `notified_at` timestamp column on provider_leads for notification tracking — DONE
+432. Referral attribution trigger: on provider application insert, matches applicant email against provider_referrals.referred_contact and updates referral status to 'applied' — DONE
+433. Referral progress card on post-application screen: shows referral count with progress bar toward 3-referral target for priority review status — DONE
+434. Referral incentive messaging: "Refer X more providers to unlock priority review" with progress visualization — DONE
+435. Progressive lead recognition: returning visitors to /providers see "Welcome back!" card with Apply Now CTA instead of generic form — localStorage-based, no auth required — DONE
+
 ---
 
-*Total features: 444 | Last updated: 2026-04-01 | Round 8: Provider Conversion Funnel & Lead Pipeline (15 features)*
+*Total features: 454 | Last updated: 2026-04-01 | Round 9: Provider Funnel Hardening & Automation (10 features)*
