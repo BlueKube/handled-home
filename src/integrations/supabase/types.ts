@@ -6790,6 +6790,48 @@ export type Database = {
         }
         Relationships: []
       }
+      sop_runs: {
+        Row: {
+          id: string
+          sop_id: string
+          started_by_user_id: string
+          status: string
+          steps_completed: Json
+          step_notes: Json
+          total_steps: number
+          started_at: string
+          completed_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          sop_id: string
+          started_by_user_id: string
+          status?: string
+          steps_completed?: Json
+          step_notes?: Json
+          total_steps: number
+          started_at?: string
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          sop_id?: string
+          started_by_user_id?: string
+          status?: string
+          steps_completed?: Json
+          step_notes?: Json
+          total_steps?: number
+          started_at?: string
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       share_cards: {
         Row: {
           asset_mode: string
