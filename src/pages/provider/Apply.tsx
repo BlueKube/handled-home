@@ -629,11 +629,11 @@ function ReferralProgressCard() {
     queryKey: ["my-referral-count", user?.email],
     queryFn: async () => {
       if (!user?.email) return 0;
-      const { data, error } = await (supabase.from("provider_referrals") as any)
+      const { count, error } = await (supabase.from("provider_referrals") as any)
         .select("id", { count: "exact", head: true })
         .eq("referrer_email", user.email);
       if (error) return 0;
-      return data?.length ?? 0;
+      return count ?? 0;
     },
     enabled: !!user?.email,
   });
