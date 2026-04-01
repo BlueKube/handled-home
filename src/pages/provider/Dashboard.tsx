@@ -166,7 +166,7 @@ function UpcomingPreview() {
             <p className="text-xs text-muted-foreground">
               {job.scheduled_date
                 ? format(new Date(job.scheduled_date), "EEE, MMM d")
-                : "TBD"}
+                : "Not yet scheduled"}
             </p>
           </div>
           <span className="text-xs text-muted-foreground">

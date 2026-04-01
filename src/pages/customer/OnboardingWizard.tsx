@@ -115,6 +115,14 @@ export default function OnboardingWizard() {
     checkoutSuccess ? 2000 : undefined
   );
 
+  // Timeout for subscription verification — show error after 15 seconds
+  const [verifyTimedOut, setVerifyTimedOut] = useState(false);
+  useEffect(() => {
+    if (!checkoutSuccess) return;
+    const timer = setTimeout(() => setVerifyTimedOut(true), 15000);
+    return () => clearTimeout(timer);
+  }, [checkoutSuccess]);
+
   // D1-F2: Auto-advance after successful checkout when subscription appears
   useEffect(() => {
     if (checkoutSuccess && subscription && ["active", "trialing"].includes(subscription.status)) {
@@ -147,9 +155,22 @@ export default function OnboardingWizard() {
   if (checkoutSuccess && (!subscription || !["active", "trialing"].includes(subscription.status ?? ""))) {
     return (
       <div className="p-4 space-y-6 text-center animate-fade-in">
-        <Loader2 className="h-10 w-10 animate-spin text-accent mx-auto" />
-        <h1 className="text-h2">Verifying your subscription…</h1>
-        <p className="text-muted-foreground text-sm">This usually takes just a few seconds.</p>
+        {verifyTimedOut ? (
+          <>
+            <div className="h-10 w-10 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
+              <span className="text-destructive text-xl">!</span>
+            </div>
+            <h1 className="text-h2">Verification is taking longer than expected</h1>
+            <p className="text-muted-foreground text-sm">Your payment may still be processing. Please try refreshing, or contact support if the issue persists.</p>
+            <button onClick={() => window.location.reload()} className="text-sm text-accent underline">Refresh page</button>
+          </>
+        ) : (
+          <>
+            <Loader2 className="h-10 w-10 animate-spin text-accent mx-auto" />
+            <h1 className="text-h2">Verifying your subscription…</h1>
+            <p className="text-muted-foreground text-sm">This usually takes just a few seconds.</p>
+          </>
+        )}
       </div>
     );
   }
