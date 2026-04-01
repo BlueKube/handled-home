@@ -391,9 +391,12 @@ export default function ProviderApply() {
               onClick={async () => {
                 // Save phone to profile if provided
                 if (phoneNumber) {
-                  await (supabase.from("profiles") as any)
-                    .update({ phone: phoneNumber })
-                    .eq("user_id", (await supabase.auth.getUser()).data.user?.id);
+                  const { data: { user: authUser } } = await supabase.auth.getUser();
+                  if (authUser?.id) {
+                    await (supabase.from("profiles") as any)
+                      .update({ phone: phoneNumber })
+                      .eq("user_id", authUser.id);
+                  }
                 }
                 await checkReadiness();
                 setStep(3);
