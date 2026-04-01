@@ -36,6 +36,8 @@ const CustomerSupportTicketDetail = lazy(() => import("@/pages/customer/SupportT
 const CustomerSettings = lazy(() => import("@/pages/customer/Settings"));
 const CustomerServices = lazy(() => import("@/pages/customer/Services"));
 const CustomerPlans = lazy(() => import("@/pages/customer/Plans"));
+const Privacy = lazy(() => import("@/pages/Privacy"));
+const Terms = lazy(() => import("@/pages/Terms"));
 const CustomerPlanDetail = lazy(() => import("@/pages/customer/PlanDetail"));
 const CustomerRoutine = lazy(() => import("@/pages/customer/Routine"));
 const CustomerSubscribe = lazy(() => import("@/pages/customer/Subscribe"));
@@ -194,6 +196,8 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<RootRedirect />} />
                 <Route path="/auth" element={<AuthPage />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
                 <Route path="/invite/:code" element={<InviteLanding />} />
                 <Route path="/byoc/activate/:token" element={<ByocActivate />} />
                 <Route path="/share/:shareCode" element={<ShareLanding />} />
