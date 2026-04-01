@@ -5,6 +5,7 @@ import { ChangePasswordForm } from "@/components/settings/ChangePasswordForm";
 import { RoleSwitcher } from "@/components/settings/RoleSwitcher";
 import { PreviewAsCard } from "@/components/settings/PreviewAsCard";
 import { NotificationPreferences } from "@/components/settings/NotificationPreferences";
+import { DeleteAccountSection } from "@/components/settings/DeleteAccountDialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LogOut, Mail, ChevronLeft } from "lucide-react";
@@ -52,6 +53,8 @@ export default function CustomerSettings() {
       <NotificationPreferences />
       <RoleSwitcher />
       <PreviewAsCard />
+
+      <DeleteAccountSection />
 
       <Button variant="ghost" onClick={handleSignOut} className="w-full flex items-center gap-2 text-destructive hover:text-destructive hover:bg-destructive/5">
         <LogOut className="h-4 w-4" />
