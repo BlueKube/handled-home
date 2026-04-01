@@ -100,3 +100,21 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 - [ ] **Decide referral incentive structure** — The "Refer 3 providers → priority review" messaging is implemented but the actual priority review logic is not enforced. Decide: should 3+ referrals flag the application for faster admin review, or is the messaging aspirational?
   - **Why:** Provider expectation set by UI needs to be backed by a real workflow
   - **Blocked:** Nothing — UI works regardless, but trust erodes if promise isn't kept
+
+## Round 10: Phone Identity, Household Members & Moving Wizard (2026-04-01)
+
+- [ ] **Apply Round 10 migrations** — 5 new migrations: provider_leads phone column, trigger phone matching, household_members table, accept_household_invites RPC, moving wizard tables (property_transitions + customer_leads)
+  - **Why:** Household members, moving wizard, and phone matching depend on these
+  - **Blocked:** All Round 10 features on production
+
+- [ ] **Send actual household invite emails** — The invite flow creates a pending row in household_members but sends no email. Wire to an email service to send "You've been invited to manage [address] on Handled Home."
+  - **Why:** Invitees don't know they've been invited without an email
+  - **Blocked:** Nothing — invite still works if invitee logs in (auto-accepted)
+
+- [ ] **Wire moving wizard to subscription pause/cancel** — The "keep services until move date" toggle is saved but no automatic subscription action happens on the move date. Need a cron job or trigger to pause/cancel on move_date.
+  - **Why:** Customer expects services to stop on move date
+  - **Blocked:** Nothing immediate — manual admin action can bridge the gap
+
+- [ ] **Customer lead zone launch notifications** — customer_leads table exists but has no auto-notify trigger (like provider_leads has). When a zone launches, customer leads in that ZIP should be notified.
+  - **Why:** Moving customers who were saved as leads should be re-engaged
+  - **Blocked:** Nothing — leads are stored for manual outreach

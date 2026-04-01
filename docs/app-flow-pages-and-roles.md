@@ -58,7 +58,8 @@
 | `/customer/support/new` | New Ticket | PropertyGate |
 | `/customer/support/tickets` | Ticket List | PropertyGate |
 | `/customer/support/tickets/:ticketId` | Ticket Detail | PropertyGate |
-| `/customer/settings` | Account Settings | PropertyGate |
+| `/customer/settings` | Account Settings (+ Household section) | PropertyGate |
+| `/customer/moving` | "I'm Moving" Wizard — 4-step move + plan transfer | PropertyGate |
 | `/customer/more` | More Menu (tab) | PropertyGate |
 | `/customer/notifications` | Notification Inbox | — |
 
@@ -185,7 +186,7 @@
 | Role | Pages |
 |------|-------|
 | Public | 6 |
-| Customer | 42 |
+| Customer | 43 |
 | Provider | 36 |
 | Admin | 62 |
 | **Total** | **143** |

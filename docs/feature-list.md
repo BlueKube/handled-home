@@ -778,6 +778,36 @@
 434. Referral incentive messaging: "Refer X more providers to unlock priority review" with progress visualization — DONE
 435. Progressive lead recognition: returning visitors to /providers see "Welcome back!" card with Apply Now CTA instead of generic form — localStorage-based, no auth required — DONE
 
+## XLVI. Phone Identity Bridge `provider-value` `density-driver`
+
+436. Phone column on provider_leads table — optional phone capture for leads — DONE
+437. Provider browse page lead capture form includes optional phone field between email and ZIP — DONE
+438. Admin Provider Leads table displays phone column — DONE
+439. Lead-to-application linking trigger matches on phone OR email (from profiles table) — DONE
+440. Referral attribution trigger matches referred_contact against phone OR email (exact match) — DONE
+441. Provider application flow step 2 collects phone number and saves to profiles.phone — DONE
+
+## XLVII. Household Members `mental-load-reduction` `trust-builder`
+
+442. `household_members` table: links multiple auth users to one property with owner/member roles — DONE
+443. Auto-insert trigger: creates 'owner' row when property is created, with backfill for existing properties — DONE
+444. RLS with SECURITY DEFINER helper functions to prevent infinite recursion — DONE
+445. `accept_household_invites` RPC: auto-accepts pending invites matching current user's email — DONE
+446. `useHouseholdInvites` hook: runs once per session on customer page load to accept pending invites — DONE
+447. CustomerPropertyGate extended: household members can access customer pages without owning a property — DONE
+448. Settings page Household section: member list with role badges, email invite form, remove member action — DONE
+
+## XLVIII. "I'm Moving" Wizard `mental-load-reduction` `density-driver`
+
+449. `property_transitions` table: tracks moves with new address, ZIP coverage, new homeowner contact, keep-services toggle — DONE
+450. `customer_leads` table: mirrors provider_leads for customer-side lead capture in uncovered zones (unique email) — DONE
+451. 4-step moving wizard at /customer/moving: move date → new address + ZIP coverage check → coverage result → new homeowner referral — DONE
+452. Zone coverage check: queries zones table for active zones containing the new ZIP code — DONE
+453. Covered ZIP: "Great news — we'll transfer your plan!" messaging. Uncovered ZIP: saves customer_lead with notify_on_launch — DONE
+454. New homeowner referral form: captures name, email, phone for warm handoff to new property owner — DONE
+455. Cancel flow intercept: when customer selects "Moving" as cancel reason, redirects to moving wizard instead of cancellation — DONE
+456. Settings page "I'm moving" card: entry point to moving wizard with Truck icon — DONE
+
 ---
 
-*Total features: 454 | Last updated: 2026-04-01 | Round 9: Provider Funnel Hardening & Automation (10 features)*
+*Total features: 475 | Last updated: 2026-04-01 | Round 10: Phone Identity, Household Members & Moving Wizard (21 features)*

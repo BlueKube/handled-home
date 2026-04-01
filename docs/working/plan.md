@@ -1,80 +1,42 @@
 # Round 10 — Phone Identity, Household Members & Moving Wizard
 
-## Current Phase: Phase 1 — Phone as Provider Identity Bridge
-
-### Phase Summary
-Activate the phone number as a matching/dedup identifier across the provider funnel. Add phone collection to leads and application flow, update triggers to match on phone OR email.
-
-### Batch Breakdown
+## Phase 1 — Phone as Provider Identity Bridge ✅
 
 | Batch | Title | Size | Status | Context |
 |-------|-------|------|--------|---------|
-| B1 | phone column on provider_leads + browse form + admin display | S | ✅ | 26% |
-| B2 | Update triggers to match on phone OR email + apply flow phone collection | S | ✅ | 27% |
+| B1 | phone column + browse form + admin display | S | ✅ | 26% |
+| B2 | Trigger phone matching + apply flow phone collection | S | ✅ | 27% |
 
-### Batch Details
-
-**B1: phone column + browse form + admin display**
-- Migration: add `phone` column (text, nullable) to `provider_leads`
-- ProviderBrowse.tsx: add optional phone input to lead capture form, include in upsert
-- ProviderLeads.tsx (admin): add phone column to leads table + Lead type
-- localStorage lead data: include phone for returning visitor display
-
-**B2: Trigger updates + apply flow phone collection**
-- Update `link_application_to_lead` trigger: match on profiles.phone OR auth.users.email
-- Update `attribute_referral_on_application` trigger: match referred_contact against phone OR email
-- Apply.tsx step 2 (Location): add phone input, save to profiles.phone on submit
-- Size: Small (2 migrations + 1 page edit)
-
-### Dependencies
-- B2 depends on B1 (phone column must exist for trigger matching)
-
----
-
----
-
-## Current Phase: Phase 2 — Household Members
-
-### Phase Summary
-Enable multiple auth users per property with owner/member roles, invite flow, and shared access to services.
-
-### Batch Breakdown
+## Phase 2 — Household Members ✅
 
 | Batch | Title | Size | Status | Context |
 |-------|-------|------|--------|---------|
-| B3 | household_members table + RLS | S | ⬜ | |
-| B4 | Invite flow: owner invites member by email | M | ⬜ | |
-| B5 | Extend PropertyGate for household members | S | ⬜ | |
-| B6 | Settings page Household section + member list | S | ⬜ | |
+| B3 | household_members table + RLS + auto-owner trigger | S | ✅ | 28% |
+| B4 | Invite flow + accept RPC + Settings household section | M | ✅ | 30% |
+| B5 | Extend PropertyGate for household members | S | ✅ | 31% |
 
-### Batch Details
+[OVERRIDE: combined B6 into B4 — household Settings section was naturally part of invite flow]
 
-**B3: household_members table + RLS**
-- Migration: household_members table (property_id, user_id, role, invited_by, invite_email, status, created_at)
-- RLS: household members read own household, owner manages membership
-- Auto-insert owner row when property is created (trigger)
+## Phase 3 — "I'm Moving" Wizard ✅
 
-**B4: Invite flow**
-- Accept invite page/logic: invited user signs up or logs in → linked to property
-- Owner enters email → creates pending household_members row
-- Invite acceptance: match by email on signup/login
+| Batch | Title | Size | Status | Context |
+|-------|-------|------|--------|---------|
+| B7 | property_transitions + customer_leads tables | S | ✅ | 32% |
+| B8 | 4-step moving wizard page | M | ✅ | 34% |
+| B9 | Cancel flow intercept + Settings button | S | ✅ | 35% |
 
-**B5: Extend PropertyGate for household members**
-- Current PropertyGate checks: does user own a property?
-- New check: is user an owner OR member of any property?
-- Subscription queries also need household-aware access
+## Phase 4 — Doc Sync ✅
 
-**B6: Settings page Household section**
-- Customer Settings: "Household" card showing members + invite button
-- Inline invite form (email input + "Invite" button)
-- Member list with role badges and remove option (owner only)
+| Batch | Title | Size | Status | Context |
+|-------|-------|------|--------|---------|
+| B10 | Feature-list + app-flow + TODO updates + archive | Micro | ✅ | 36% |
 
 ---
 
 ## Session Handoff
 - **Branch:** claude/provider-conversion-funnel-N3IE5
-- **Last completed:** B2 (Phase 1 complete)
-- **Next up:** B3 — household_members table + RLS
-- **Context at exit:** 27%
+- **Last completed:** B10 (Round 10 complete — all 4 phases done)
+- **Next up:** Round 10 complete. Ready for next round.
+- **Context at exit:** ~36%
 - **Blockers:** None
-- **Round progress:** Phase 1 of 4 complete, starting Phase 2
+- **Round progress:** All 4 phases complete (10 batches)
