@@ -9,8 +9,8 @@ Activate the phone number as a matching/dedup identifier across the provider fun
 
 | Batch | Title | Size | Status | Context |
 |-------|-------|------|--------|---------|
-| B1 | phone column on provider_leads + browse form + admin display | S | ⬜ | |
-| B2 | Update triggers to match on phone OR email + apply flow phone collection | S | ⬜ | |
+| B1 | phone column on provider_leads + browse form + admin display | S | ✅ | 26% |
+| B2 | Update triggers to match on phone OR email + apply flow phone collection | S | ✅ | 27% |
 
 ### Batch Details
 
@@ -31,10 +31,50 @@ Activate the phone number as a matching/dedup identifier across the provider fun
 
 ---
 
+---
+
+## Current Phase: Phase 2 — Household Members
+
+### Phase Summary
+Enable multiple auth users per property with owner/member roles, invite flow, and shared access to services.
+
+### Batch Breakdown
+
+| Batch | Title | Size | Status | Context |
+|-------|-------|------|--------|---------|
+| B3 | household_members table + RLS | S | ⬜ | |
+| B4 | Invite flow: owner invites member by email | M | ⬜ | |
+| B5 | Extend PropertyGate for household members | S | ⬜ | |
+| B6 | Settings page Household section + member list | S | ⬜ | |
+
+### Batch Details
+
+**B3: household_members table + RLS**
+- Migration: household_members table (property_id, user_id, role, invited_by, invite_email, status, created_at)
+- RLS: household members read own household, owner manages membership
+- Auto-insert owner row when property is created (trigger)
+
+**B4: Invite flow**
+- Accept invite page/logic: invited user signs up or logs in → linked to property
+- Owner enters email → creates pending household_members row
+- Invite acceptance: match by email on signup/login
+
+**B5: Extend PropertyGate for household members**
+- Current PropertyGate checks: does user own a property?
+- New check: is user an owner OR member of any property?
+- Subscription queries also need household-aware access
+
+**B6: Settings page Household section**
+- Customer Settings: "Household" card showing members + invite button
+- Inline invite form (email input + "Invite" button)
+- Member list with role badges and remove option (owner only)
+
+---
+
 ## Session Handoff
 - **Branch:** claude/provider-conversion-funnel-N3IE5
-- **Last completed:** Round 9 complete, cleanup done
-- **Next up:** B1 — phone column + browse form + admin display
-- **Context at exit:** 26%
+- **Last completed:** B2 (Phase 1 complete)
+- **Next up:** B3 — household_members table + RLS
+- **Context at exit:** 27%
 - **Blockers:** None
-- **Round progress:** Phase 1 of 4, batch 0 of 2 complete
+- **Round progress:** Phase 1 of 4 complete, starting Phase 2
