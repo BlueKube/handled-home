@@ -45,9 +45,9 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 - [x] **Create app in App Store Connect** — Set up the app listing for TestFlight
   - **Why:** TestFlight builds are uploaded to App Store Connect
 
-- [ ] **Generate APNs key and upload to backend** — Lovable Cloud → Push Notifications config
+- [x] **Generate APNs key and upload to backend** — ✅ APNS_KEY, APNS_KEY_ID, and APNS_TEAM_ID stored as secrets. `process-notification-events` edge function updated to deliver push via APNs HTTP/2 for iOS tokens.
   - **Why:** Push notifications won't arrive on iOS without APNs configuration
-  - **Blocked:** Push notifications on device
+  - **Blocked:** Nothing — resolved
 
 - [x] **Add auth callback redirect URL** — Using universal link (`https://handled-home.lovable.app/auth/callback`) instead of custom scheme. Already in URI allow list via wildcard.
 
