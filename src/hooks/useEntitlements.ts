@@ -44,7 +44,7 @@ export interface EntitlementPayload {
   };
 }
 
-const MODEL_LABELS: Record<string, string> = {
+export const MODEL_LABELS: Record<string, string> = {
   credits_per_cycle: "credits",
   count_per_cycle: "services",
   minutes_per_cycle: "minutes",

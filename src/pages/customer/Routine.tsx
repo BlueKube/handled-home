@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProperty } from "@/hooks/useProperty";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
-import { useEntitlements } from "@/hooks/useEntitlements";
+import { useEntitlements, MODEL_LABELS } from "@/hooks/useEntitlements";
 import { useRoutine, useCreateRoutine } from "@/hooks/useRoutine";
 import { useAddRoutineItem, useRemoveRoutineItem, useUpdateRoutineItemCadence, useUpdateRoutineItemLevel, computeAutoFit, useAutoFitRoutine } from "@/hooks/useRoutineActions";
 import { useRoutinePreview, computeCycleDemand } from "@/hooks/useRoutinePreview";
@@ -12,23 +12,18 @@ import { useSkus } from "@/hooks/useSkus";
 import { TruthBanner } from "@/components/routine/TruthBanner";
 import { WeekPreviewTimeline } from "@/components/routine/WeekPreviewTimeline";
 import { AddServicesSheet } from "@/components/routine/AddServicesSheet";
+import { PopularServicesPreview } from "@/components/routine/PopularServicesPreview";
 import { RoutineItemCard } from "@/components/routine/RoutineItemCard";
 import { EntitlementGuardrails } from "@/components/routine/EntitlementGuardrails";
 import { SeasonalBoostsSection } from "@/components/routine/SeasonalBoostsSection";
 import { RoutineSuggestion } from "@/components/customer/RoutineSuggestion";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowRight, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { HelpTip } from "@/components/ui/help-tip";
 import type { CadenceType } from "@/hooks/useRoutine";
-
-const MODEL_LABELS: Record<string, string> = {
-  credits_per_cycle: "credits",
-  count_per_cycle: "services",
-  minutes_per_cycle: "minutes",
-};
 
 export default function CustomerRoutine() {
   const navigate = useNavigate();
@@ -41,7 +36,7 @@ export default function CustomerRoutine() {
   const zoneId = subscription?.zone_id ?? null;
   const { data: entitlements, isLoading: entLoading } = useEntitlements(planId, zoneId);
   const { data: browsableSkus } = useSkus({ status: "active" });
-  const { data: routineData, isLoading: routineLoading } = useRoutine(property?.id, planId);
+  const { data: routineData, isLoading: routineLoading, isError: routineError, refetch: refetchRoutine } = useRoutine(property?.id, planId);
   const createRoutine = useCreateRoutine();
   const addItem = useAddRoutineItem();
   const removeItem = useRemoveRoutineItem();
@@ -163,6 +158,14 @@ export default function CustomerRoutine() {
     );
   }
 
+  if (routineError) {
+    return (
+      <div className="p-4 pb-24 animate-fade-in">
+        <QueryErrorCard message="Couldn't load your routine" onRetry={refetchRoutine} />
+      </div>
+    );
+  }
+
   const existingSkuIds = new Set(items.map((i) => i.sku_id));
   const planName = "Your Plan";
 
@@ -221,29 +224,7 @@ export default function CustomerRoutine() {
 
             {/* Popular services preview for unsubscribed users */}
             {!hasSub && items.length === 0 && browsableSkus && browsableSkus.length > 0 && (
-              <div ref={servicesPreviewRef} className="w-full space-y-3 pt-2">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Popular services
-                </p>
-                <div className="space-y-2">
-                  {browsableSkus.slice(0, 3).map((service) => (
-                    <Card key={service.id} className="p-3 flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-                        <Sparkles className="h-4 w-4 text-accent" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{service.name}</p>
-                        <p className="text-xs text-muted-foreground">{service.category ?? "Home service"}</p>
-                      </div>
-                      {service.handle_cost != null && (
-                        <p className="text-xs font-semibold text-accent shrink-0">
-                          {service.handle_cost} handles
-                        </p>
-                      )}
-                    </Card>
-                  ))}
-                </div>
-              </div>
+              <PopularServicesPreview ref={servicesPreviewRef} skus={browsableSkus} />
             )}
           </div>
         )}
@@ -278,7 +259,7 @@ export default function CustomerRoutine() {
 
       {/* Bottom CTA */}
       {(items.length > 0 || !hasSub) && (
-        <div className="fixed bottom-16 left-0 right-0 z-40 p-4 bg-card/95 backdrop-blur border-t border-border">
+        <div className="fixed bottom-16 left-0 right-0 z-40 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] bg-card/95 backdrop-blur border-t border-border">
           {hasSub ? (
             <>
               <Button

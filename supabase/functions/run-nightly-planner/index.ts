@@ -112,11 +112,17 @@ function getOccurrenceIndex(anchorDate: Date, serviceDate: Date): number {
 }
 
 /** Check if a task is due based on cadence */
-function isTaskDue(cadenceType: string, occurrenceIndex: number): boolean {
+function isTaskDue(cadenceType: string, occurrenceIndex: number, cadenceDetail?: any): boolean {
   if (occurrenceIndex < 0) return false;
   switch (cadenceType) {
     case "weekly": return true;
-    case "biweekly": return occurrenceIndex % 2 === 0;
+    case "biweekly": {
+      const pattern = cadenceDetail?.pattern ?? "A";
+      // Pattern A = even weeks (0, 2, 4), Pattern B = odd weeks (1, 3, 5)
+      return pattern === "B"
+        ? occurrenceIndex % 2 === 1
+        : occurrenceIndex % 2 === 0;
+    }
     case "four_week": return occurrenceIndex % 4 === 0;
     case "monthly": return occurrenceIndex % 4 === 0; // approximate
     case "quarterly": return occurrenceIndex % 13 === 0; // approximate
@@ -231,7 +237,7 @@ Deno.serve(async (req) => {
           id, property_id, cadence_anchor_date, status,
           routine_versions!inner(
             id, status, version_number,
-            routine_items(sku_id, cadence_type, duration_minutes, level_id, sku_name)
+            routine_items(sku_id, cadence_type, cadence_detail, duration_minutes, level_id, sku_name)
           )
         `)
         .eq("status", "active")
@@ -289,6 +295,7 @@ Deno.serve(async (req) => {
         items: (activeVersion.routine_items ?? []).map((item: any) => ({
           sku_id: item.sku_id,
           cadence_type: item.cadence_type,
+          cadence_detail: item.cadence_detail,
           duration_minutes: item.duration_minutes,
           level_id: item.level_id,
           sku_name: item.sku_name,
@@ -420,7 +427,7 @@ Deno.serve(async (req) => {
 
           // Determine due tasks
           const dueTasks = routine.items.filter((item) => {
-            if (!isTaskDue(item.cadence_type, occurrenceIndex)) return false;
+            if (!isTaskDue(item.cadence_type, occurrenceIndex, item.cadence_detail)) return false;
             // Gating check
             if (item.category && zoneId) {
               const stateKey = `${zoneId}:${item.category}`;
@@ -461,7 +468,7 @@ Deno.serve(async (req) => {
 
           // Determine due tasks (with gating)
           const dueTasks = routine.items.filter((item) => {
-            if (!isTaskDue(item.cadence_type, occurrenceIndex)) return false;
+            if (!isTaskDue(item.cadence_type, occurrenceIndex, item.cadence_detail)) return false;
             if (item.category && zoneId) {
               const stateKey = `${zoneId}:${item.category}`;
               const state = stateGatingMap.get(stateKey);

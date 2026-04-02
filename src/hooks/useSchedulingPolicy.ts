@@ -110,6 +110,7 @@ export function useSchedulingPolicy() {
     values: resolved,
     rows,
     isLoading: query.isLoading,
+    isError: query.isError,
     updatePolicy,
   };
 }

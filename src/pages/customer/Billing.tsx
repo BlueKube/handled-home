@@ -10,10 +10,7 @@ import { PageSkeleton } from "@/components/PageSkeleton";
 import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HelpTip } from "@/components/ui/help-tip";
-
-function formatCents(cents: number) {
-  return `$${(cents / 100).toFixed(2)}`;
-}
+import { formatCents } from "@/utils/format";
 
 export default function CustomerBillingPage() {
   const navigate = useNavigate();

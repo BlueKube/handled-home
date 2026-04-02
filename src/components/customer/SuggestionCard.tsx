@@ -72,7 +72,7 @@ export function SuggestionCard({ suggestion, onAdd, onHide, onImpression }: Sugg
         <Popover open={hideOpen} onOpenChange={setHideOpen}>
           <PopoverTrigger asChild>
             <button
-              className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+              className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground opacity-60 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
               aria-label="Hide suggestion"
             >
               <X className="h-3.5 w-3.5" />

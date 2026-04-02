@@ -19,6 +19,9 @@ const GROUP_META = {
   availability: { label: "Availability", icon: Calendar, description: "Provider availability requirements and fragmentation limits" },
   anchored: { label: "Anchored Stops", icon: Anchor, description: "Constraints for blocked-window location stops" },
   late: { label: "Late Detection", icon: Timer, description: "Grace periods for provider lateness tracking" },
+  window_offering: { label: "Window Offering", icon: Calendar, description: "Appointment window generation — capacity caps, lead time, and default lengths" },
+  piggybacking: { label: "Piggybacking", icon: Package, description: "Mixed-profile bundle piggybacking — duration guardrails for flexible add-ons" },
+  service_week: { label: "Service Week", icon: Clock, description: "Service-week flexible scheduling — due-soon thresholds and daily flex limits" },
 } as const;
 
 function DialCard({
@@ -134,7 +137,7 @@ export default function AssignmentConfig() {
         <p className="text-sm text-muted-foreground">Adjust weights, thresholds, and capacity parameters for the assignment engine</p>
       </div>
 
-      {(["weights", "thresholds", "capacity", "bundling", "sequencing", "eta", "availability", "anchored", "late"] as const).map((group) => {
+      {(["weights", "thresholds", "capacity", "bundling", "sequencing", "eta", "availability", "anchored", "late", "window_offering", "piggybacking", "service_week"] as const).map((group) => {
         const meta = GROUP_META[group];
         const dials = DIAL_META.filter((d) => d.group === group);
 

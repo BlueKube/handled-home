@@ -20,6 +20,7 @@ export default function AuthPage() {
   const [fullName, setFullName] = useState("");
   const [signupRole, setSignupRole] = useState<SignupRole>("customer");
   const [loading, setLoading] = useState(false);
+  const [resettingPassword, setResettingPassword] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const refCode = searchParams.get("ref");
@@ -121,8 +122,8 @@ export default function AuthPage() {
       {/* Logo & tagline */}
       <div className="pt-16 pb-10 flex flex-col items-center">
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-          <span style={{ color: 'hsl(220 20% 10%)' }}>Your home, </span>
-          <span style={{ color: 'hsl(200 80% 50%)' }}>handled.</span>
+          <span className="text-foreground">Your home, </span>
+          <span className="text-primary">handled.</span>
         </h1>
       </div>
 
@@ -159,13 +160,18 @@ export default function AuthPage() {
             Sign In
           </Button>
           <p className="text-center text-sm text-muted-foreground">
-            <button type="button" className="underline" onClick={async () => {
+            <button type="button" className="underline disabled:opacity-50" disabled={resettingPassword} onClick={async () => {
               if (!email) { toast({ title: "Enter your email", description: "Type your email address above, then click Forgot password.", variant: "destructive" }); return; }
-              const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth` });
-              if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
-              toast({ title: "Check your email", description: "We sent a password reset link to " + email + "." });
+              setResettingPassword(true);
+              try {
+                const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth` });
+                if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+                toast({ title: "Check your email", description: "We sent a password reset link to " + email + "." });
+              } finally {
+                setResettingPassword(false);
+              }
             }}>
-              Forgot password?
+              {resettingPassword ? "Sending..." : "Forgot password?"}
             </button>
           </p>
         </form>

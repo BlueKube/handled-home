@@ -70,16 +70,13 @@ export default function RoutineConfirm() {
   }, [hasBlockedCategories, user, blockedCategories]);
 
   // Gate: need active subscription
-  if (!isLoading && !subscription) {
-    navigate("/customer/plans?gated=1", { replace: true });
-    return null;
-  }
-
-  // Gate: need routine with items
-  if (!isLoading && (!routineData || routineData.items.length === 0)) {
-    navigate("/customer/routine", { replace: true });
-    return null;
-  }
+  const needsSub = !isLoading && !subscription;
+  const needsItems = !isLoading && !needsSub && (!routineData || routineData.items.length === 0);
+  useEffect(() => {
+    if (needsSub) navigate("/customer/plans?gated=1", { replace: true });
+    else if (needsItems) navigate("/customer/routine", { replace: true });
+  }, [needsSub, needsItems, navigate]);
+  if (needsSub || needsItems) return null;
 
   if (confirmed) {
     return <RoutineSuccessScreen effectiveAt={effectiveAt} />;
@@ -93,10 +90,11 @@ export default function RoutineConfirm() {
       </div>
     );
   }
-  // Compute effective date = T0+7 (first DRAFT day)
-  const effectiveDateObj = new Date();
-  effectiveDateObj.setDate(effectiveDateObj.getDate() + 7);
-  const effectiveDateFormatted = effectiveDateObj.toLocaleDateString("en-US", { month: "long", day: "numeric" });
+  // Effective date = next billing cycle start (from subscription)
+  const effectiveDateRaw = subscription?.billing_cycle_end_at ?? subscription?.current_period_end;
+  const effectiveDateFormatted = effectiveDateRaw
+    ? new Date(effectiveDateRaw).toLocaleDateString("en-US", { month: "long", day: "numeric" })
+    : "your next billing cycle";
 
 
 
@@ -124,7 +122,7 @@ export default function RoutineConfirm() {
           <h1 className="text-h2">Lock in Your Routine</h1>
           <p className="text-sm text-muted-foreground max-w-xs mx-auto">
             Changes take effect on <span className="font-semibold text-foreground">{effectiveDateFormatted}</span>.
-            Your next 7 days are already scheduled and won't change.
+            Your current cycle's schedule won't change.
           </p>
         </div>
 

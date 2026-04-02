@@ -59,7 +59,7 @@ export function useCustomerBilling() {
     defaultMethod,
     latestInvoice,
     hasFailedPayment,
-    isLoading: invoicesQuery.isLoading || paymentMethodsQuery.isLoading,
+    isLoading: invoicesQuery.isLoading || paymentMethodsQuery.isLoading || creditsQuery.isLoading,
     isError: invoicesQuery.isError || paymentMethodsQuery.isError || creditsQuery.isError,
     refetch: async () => {
       await Promise.all([invoicesQuery.refetch(), paymentMethodsQuery.refetch(), creditsQuery.refetch()]);

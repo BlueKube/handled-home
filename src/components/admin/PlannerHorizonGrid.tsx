@@ -43,7 +43,7 @@ function useHorizonStats() {
 }
 
 export function PlannerHorizonGrid() {
-  const { data: days, isLoading } = useHorizonStats();
+  const { data: days, isLoading, isError } = useHorizonStats();
 
   if (isLoading) {
     return (
@@ -60,7 +60,12 @@ export function PlannerHorizonGrid() {
     );
   }
 
-  if (!days) return null;
+  if (isError || !days) return (
+    <Card>
+      <CardHeader><CardTitle className="text-base">14-Day Horizon</CardTitle></CardHeader>
+      <CardContent><p className="text-sm text-destructive">Failed to load horizon data.</p></CardContent>
+    </Card>
+  );
 
   const freezeBoundaryIdx = 6;
 

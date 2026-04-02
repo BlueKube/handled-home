@@ -28,6 +28,7 @@ export function ThresholdDials() {
   const [saving, setSaving] = useState<string | null>(null);
 
   if (thresholds.isLoading) return <Skeleton className="h-48 mt-4" />;
+  if (thresholds.isError) return <p className="text-sm text-destructive text-center py-8 mt-4">Failed to load threshold configurations.</p>;
 
   const configs = thresholds.data ?? [];
 

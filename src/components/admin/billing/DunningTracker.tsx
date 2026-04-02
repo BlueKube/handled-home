@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { AlertTriangle, Clock, CreditCard } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -11,9 +12,9 @@ const STEP_LABELS: Record<number, string> = {
   0: "Initial Failure",
   1: "Day 1 — Auto Retry",
   2: "Day 3 — Second Retry + Email",
-  3: "Day 5 — Third Retry + Warning",
-  4: "Day 7 — Final Retry + Suspension Warning",
-  5: "Day 10 — Account Paused",
+  3: "Day 7 — Third Retry + Warning",
+  4: "Day 10 — Final Retry + Suspension Warning",
+  5: "Day 14 — Account Paused",
 };
 
 const STEP_SEVERITY: Record<number, "secondary" | "default" | "destructive"> = {
@@ -36,7 +37,7 @@ interface DunningSubscription {
 }
 
 export function DunningTracker() {
-  const { data: dunningSubscriptions, isLoading } = useQuery({
+  const { data: dunningSubscriptions, isLoading, isError, refetch } = useQuery({
     queryKey: ["admin-dunning-subscriptions"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -51,6 +52,7 @@ export function DunningTracker() {
   });
 
   if (isLoading) return <Skeleton className="h-48 w-full" />;
+  if (isError) return <QueryErrorCard message="Failed to load dunning data." onRetry={() => refetch()} />;
 
   const subs = dunningSubscriptions ?? [];
 

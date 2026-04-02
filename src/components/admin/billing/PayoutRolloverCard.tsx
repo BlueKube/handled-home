@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { Wallet } from "lucide-react";
 
 function fmt$(cents: number) {
@@ -19,10 +20,10 @@ interface EarningsAggregate {
 }
 
 export function PayoutRolloverCard() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["admin-payout-rollovers"],
     queryFn: async () => {
-      // Find providers with PENDING earnings that are below the $25 threshold
+      // Find providers with PENDING earnings that are below the $50 threshold
       const { data: earnings, error }: { data: any[] | null; error: any } = await (supabase as any)
         .from("provider_earnings")
         .select(
@@ -52,15 +53,16 @@ export function PayoutRolloverCard() {
         }
       }
 
-      // Filter to sub-threshold providers (< $25 = 2500 cents)
+      // Filter to sub-threshold providers (< $50 = 5000 cents)
       return Array.from(byProvider.values())
-        .filter((agg) => agg.total_pending_cents < 2500 && agg.total_pending_cents > 0)
+        .filter((agg) => agg.total_pending_cents < 5000 && agg.total_pending_cents > 0)
         .sort((a, b) => a.total_pending_cents - b.total_pending_cents);
     },
     refetchInterval: 120_000,
   });
 
   if (isLoading) return <Skeleton className="h-32 w-full" />;
+  if (isError) return <QueryErrorCard message="Failed to load rollover data." onRetry={() => refetch()} />;
 
   const rollovers = data ?? [];
 
@@ -82,7 +84,7 @@ export function PayoutRolloverCard() {
       <CardContent>
         {rollovers.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">
-            All providers are above the $25 payout threshold.
+            All providers are above the $50 payout threshold.
           </p>
         ) : (
           <Table>
@@ -101,7 +103,7 @@ export function PayoutRolloverCard() {
                   <TableCell className="text-xs text-right">{fmt$(r.total_pending_cents)}</TableCell>
                   <TableCell className="text-xs text-right">{r.earnings_count}</TableCell>
                   <TableCell className="text-xs text-right text-muted-foreground">
-                    {fmt$(2500 - r.total_pending_cents)} more
+                    {fmt$(5000 - r.total_pending_cents)} more
                   </TableCell>
                 </TableRow>
               ))}

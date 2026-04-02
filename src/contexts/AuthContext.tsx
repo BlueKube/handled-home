@@ -22,6 +22,8 @@ interface AuthContextType {
   effectiveRole: AppRole;
   profile: Profile | null;
   loading: boolean;
+  bootstrapError: string | null;
+  retryBootstrap: () => void;
   signOut: () => Promise<void>;
 }
 
@@ -44,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [activeRole, setActiveRole] = useState<AppRole>("customer");
   const [previewRole, setPreviewRoleState] = useState<AppRole | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [bootstrapError, setBootstrapError] = useState<string | null>(null);
 
   const effectiveRole: AppRole = previewRole ?? activeRole;
 
@@ -65,21 +68,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Self-healing bootstrap: if no roles found, attempt bootstrap once
       if (userRoles.length === 0 && !bootstrapAttempted.current) {
         bootstrapAttempted.current = true;
+        setBootstrapError(null);
         const displayName = profileResult.data?.full_name || userEmail || "User";
         // Always bootstrap as customer — provider role requires admin approval
-        await supabase.rpc("bootstrap_new_user", {
+        const { error: bootstrapErr } = await supabase.rpc("bootstrap_new_user", {
           _full_name: displayName,
           _role: "customer",
         });
 
-        // Re-fetch after bootstrap
-        const [rolesRetry, profileRetry] = await Promise.all([
-          supabase.from("user_roles").select("role").eq("user_id", userId),
-          supabase.from("profiles").select("full_name, phone, avatar_url").eq("user_id", userId).single(),
-        ]);
-        userRoles = rolesRetry.data?.map((r) => r.role as AppRole) ?? [];
-        if (profileRetry.data) {
-          setProfile(profileRetry.data);
+        if (bootstrapErr) {
+          console.error("Bootstrap RPC failed:", bootstrapErr);
+          setBootstrapError("Account setup failed. Please try again or contact support.");
+        } else {
+          // Re-fetch after bootstrap
+          const [rolesRetry, profileRetry] = await Promise.all([
+            supabase.from("user_roles").select("role").eq("user_id", userId),
+            supabase.from("profiles").select("full_name, phone, avatar_url").eq("user_id", userId).single(),
+          ]);
+          userRoles = rolesRetry.data?.map((r) => r.role as AppRole) ?? [];
+          if (profileRetry.data) {
+            setProfile(profileRetry.data);
+          }
         }
       } else if (profileResult.data) {
         setProfile(profileResult.data);
@@ -96,9 +105,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (err) {
       console.error("fetchUserData error:", err);
+      setBootstrapError("Something went wrong loading your account. Please try again.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const retryBootstrap = () => {
+    if (!user) return;
+    bootstrapAttempted.current = false;
+    setBootstrapError(null);
+    setLoading(true);
+    fetchUserData(user.id, user.email ?? undefined, user.user_metadata);
   };
 
   useEffect(() => {
@@ -145,13 +163,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
     setActiveRole("customer");
     bootstrapAttempted.current = false;
+    setBootstrapError(null);
     localStorage.removeItem(STORAGE_KEYS.ACTIVE_ROLE);
     setPreviewRoleState(null);
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, session, roles, activeRole, setActiveRole: handleSetActiveRole, previewRole, setPreviewRole, effectiveRole, profile, loading, signOut }}
+      value={{ user, session, roles, activeRole, setActiveRole: handleSetActiveRole, previewRole, setPreviewRole, effectiveRole, profile, loading, bootstrapError, retryBootstrap, signOut }}
     >
       {children}
     </AuthContext.Provider>

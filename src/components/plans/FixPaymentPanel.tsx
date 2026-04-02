@@ -30,7 +30,6 @@ export function FixPaymentPanel({ subscriptionId }: FixPaymentPanelProps) {
       }
     } catch (err: any) {
       toast.error("Could not open payment portal");
-      console.error(err);
     } finally {
       setLoading(false);
     }

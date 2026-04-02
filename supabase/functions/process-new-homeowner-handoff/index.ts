@@ -67,16 +67,21 @@ Deno.serve(async (req: Request) => {
           );
 
         if (leadError) {
-          // Don't mark as processed if lead creation failed
+          console.error(`Handoff lead creation failed for transition ${t.id}:`, leadError.message);
           continue;
         }
       }
 
       // Mark transition as handoff processed only after successful lead creation
-      await supabase
+      const { error: updateError } = await supabase
         .from("property_transitions")
         .update({ handoff_processed: true })
         .eq("id", t.id);
+
+      if (updateError) {
+        console.error(`Failed to mark transition ${t.id} as processed:`, updateError.message);
+        continue;
+      }
 
       processedCount++;
 

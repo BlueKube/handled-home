@@ -9,9 +9,16 @@ import type { ProviderVisit } from "@/hooks/useProviderVisits";
 import { formatTime12 } from "@/lib/formatTime12";
 
 function getScheduleLabel(visit: ProviderVisit): string {
-  if (visit.schedule_state === "in_progress") return "In Progress";
-  if (visit.schedule_state === "dispatched") return "Today";
-  return "Scheduled";
+  switch (visit.schedule_state) {
+    case "in_progress": return "In Progress";
+    case "dispatched": return "Today";
+    case "planning": return "Planning";
+    case "exception_pending": return "Exception";
+    case "rescheduled": return "Rescheduled";
+    case "canceled": return "Canceled";
+    case "complete": return "Completed";
+    default: return "Scheduled";
+  }
 }
 
 interface VisitJobCardProps {

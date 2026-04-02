@@ -13,7 +13,7 @@ export function BiweeklyPatternToggle({ pattern, onChange, recommended }: Biweek
       <span className="text-xs text-muted-foreground">Pattern:</span>
       <div className="flex items-center gap-1 bg-secondary rounded-lg p-0.5">
         <button
-          className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1 ${
+          className={`px-2.5 py-2 min-h-[44px] rounded-md text-xs font-medium transition-colors flex items-center gap-1 ${
             pattern === "A" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
           }`}
           onClick={() => onChange("A")}
@@ -22,7 +22,7 @@ export function BiweeklyPatternToggle({ pattern, onChange, recommended }: Biweek
           {recommended === "A" && <Star className="h-2.5 w-2.5 fill-current" />}
         </button>
         <button
-          className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1 ${
+          className={`px-2.5 py-2 min-h-[44px] rounded-md text-xs font-medium transition-colors flex items-center gap-1 ${
             pattern === "B" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
           }`}
           onClick={() => onChange("B")}
@@ -31,7 +31,7 @@ export function BiweeklyPatternToggle({ pattern, onChange, recommended }: Biweek
           {recommended === "B" && <Star className="h-2.5 w-2.5 fill-current" />}
         </button>
       </div>
-      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onChange(pattern === "A" ? "B" : "A")}>
+      <Button variant="ghost" size="icon" className="h-11 w-11" onClick={() => onChange(pattern === "A" ? "B" : "A")}>
         <ArrowLeftRight className="h-3 w-3" />
       </Button>
     </div>

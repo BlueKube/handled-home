@@ -47,8 +47,8 @@ export function DeleteAccountSection() {
             <h2 className="text-sm font-semibold">Delete Account</h2>
           </div>
           <p className="text-xs text-muted-foreground">
-            Permanently delete your account and all associated data. Your subscription will be cancelled,
-            and your personal information will be anonymized within 30 days. This action cannot be undone.
+            Permanently delete your account and all associated data. Your subscription will be cancelled
+            and your personal information will be anonymized immediately. This action cannot be undone.
           </p>
           <Button
             variant="outline"

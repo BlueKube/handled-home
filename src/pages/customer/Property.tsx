@@ -3,25 +3,14 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useProperty, formatPetsForDisplay, type PropertyFormData } from "@/hooks/useProperty";
 import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { useZoneLookup } from "@/hooks/useZoneLookup";
-import { usePropertyCoverage } from "@/hooks/usePropertyCoverage";
-import { usePropertySignals } from "@/hooks/usePropertySignals";
+import { HomeSetupSection } from "@/components/customer/HomeSetupSection";
+import { ExpansionDialog } from "@/components/customer/ExpansionDialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, MapPin, AlertTriangle, CheckCircle2, X, Bell, ChevronRight, ChevronLeft, Map, Ruler, Info } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { toast } from "sonner";
+import { Loader2, MapPin, AlertTriangle, CheckCircle2, X, ChevronLeft } from "lucide-react";
 import { HelpTip } from "@/components/ui/help-tip";
 
 interface FieldErrors {
@@ -44,73 +33,6 @@ function validate(form: PropertyFormData): FieldErrors {
 
 function stripNonDigits(val: string): string {
   return val.replace(/\D/g, "").slice(0, 5);
-}
-
-function HomeSetupSection({ navigate }: { navigate: ReturnType<typeof useNavigate> }) {
-  const { hasData: hasCoverage } = usePropertyCoverage();
-  const { hasData: hasSizing } = usePropertySignals();
-
-  const items = [
-    {
-      label: "Coverage Map",
-      hint: "What's already handled at your home",
-      icon: Map,
-      done: hasCoverage,
-      path: "/customer/coverage-map?return=/customer/property",
-    },
-    {
-      label: "Home Size",
-      hint: "Quick estimate for better recommendations",
-      icon: Ruler,
-      done: hasSizing,
-      path: "/customer/property-sizing?return=/customer/property",
-    },
-  ];
-
-  return (
-    <div className="px-4 mt-6 space-y-4">
-      <div className="flex items-center gap-2">
-        <h2 className="text-h3 text-foreground">Home Setup</h2>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-[240px]">
-              <p className="text-xs">Helps us tailor recommendations and avoid irrelevant service suggestions.</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
-
-      <Card>
-        <CardContent className="p-0 divide-y divide-border">
-          {items.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.label}
-                onClick={() => navigate(item.path)}
-                className="flex items-center gap-3 w-full px-4 py-3.5 text-left hover:bg-secondary/50 active:bg-secondary transition-colors first:rounded-t-xl last:rounded-b-xl"
-              >
-                <div className="h-9 w-9 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-                  <Icon className="h-5 w-5 text-accent" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground text-sm">{item.label}</p>
-                  <p className="text-xs text-muted-foreground">{item.hint}</p>
-                </div>
-                {item.done && (
-                  <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
-                )}
-                <ChevronRight className="h-4 w-4 text-muted-foreground/50 shrink-0" />
-              </button>
-            );
-          })}
-        </CardContent>
-      </Card>
-    </div>
-  );
 }
 
 export default function CustomerProperty() {
@@ -417,40 +339,7 @@ export default function CustomerProperty() {
         </Button>
       </div>
 
-      {/* Non-serviced area dialog */}
-      <Dialog open={showExpansionDialog} onOpenChange={setShowExpansionDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>We're Not in Your Area Yet</DialogTitle>
-            <DialogDescription>
-              Handled Home is expanding. We'll notify you as soon as we launch in your neighborhood.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex flex-col gap-2 sm:flex-col">
-            <Button
-              onClick={() => {
-                toast.success("We'll let you know!");
-                setShowExpansionDialog(false);
-                navigate("/customer");
-              }}
-              className="w-full"
-            >
-              <Bell className="h-4 w-4 mr-2" />
-              Notify Me
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowExpansionDialog(false);
-                navigate("/customer");
-              }}
-              className="w-full"
-            >
-              Continue Exploring
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ExpansionDialog open={showExpansionDialog} onOpenChange={setShowExpansionDialog} />
     </div>
   );
 }

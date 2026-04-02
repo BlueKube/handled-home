@@ -3,6 +3,7 @@ import { Zap, Sparkles, Loader2, Check } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { useAddonSuggestions, usePurchaseAddon, type AddonSku } from "@/hooks/useAddonSuggestions";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
@@ -21,7 +22,20 @@ export function AddonSuggestionsCard() {
   const [selectedSku, setSelectedSku] = useState<AddonSku | null>(null);
   const [purchasing, setPurchasing] = useState(false);
 
-  if (isLoading || !data || data.gated || data.skus.length === 0) return null;
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader className="pb-2"><Skeleton className="h-4 w-32" /></CardHeader>
+        <CardContent className="space-y-2">
+          <Skeleton className="h-3 w-48" />
+          <div className="grid grid-cols-2 gap-2">
+            {[1, 2].map((i) => <Skeleton key={i} className="h-28 rounded-xl" />)}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  if (!data || data.gated || data.skus.length === 0) return null;
 
   const handlePurchase = async (paymentMethod: "handles" | "cash") => {
     if (!subscription || !property || !selectedSku) return;

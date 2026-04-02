@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useProperty } from "@/hooks/useProperty";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
-import { useEntitlements } from "@/hooks/useEntitlements";
+import { useEntitlements, MODEL_LABELS } from "@/hooks/useEntitlements";
 import { useRoutine } from "@/hooks/useRoutine";
 import { useRoutinePreview, computeCycleDemand } from "@/hooks/useRoutinePreview";
 import { ReviewServiceCard } from "@/components/routine/ReviewServiceCard";
@@ -17,12 +17,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, ArrowRight, CheckCircle2, AlertTriangle, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-
-const MODEL_LABELS: Record<string, string> = {
-  credits_per_cycle: "credits",
-  count_per_cycle: "services",
-  minutes_per_cycle: "minutes",
-};
 
 export default function RoutineReview() {
   const navigate = useNavigate();
@@ -39,7 +33,7 @@ export default function RoutineReview() {
 
   // L11: Fetch inclusions/exclusions for all SKUs in the routine
   const skuIds = items.map((i) => i.sku_id);
-  const { data: skuDetails } = useQuery({
+  const { data: skuDetails, isError: skuScopeError } = useQuery({
     queryKey: ["sku-scope", skuIds],
     enabled: skuIds.length > 0,
     queryFn: async () => {
@@ -75,10 +69,11 @@ export default function RoutineReview() {
   const fits = cycleDemand <= included + maxExtras;
 
   // Redirect if no items
-  if (!isLoading && items.length === 0) {
-    navigate("/customer/routine", { replace: true });
-    return null;
-  }
+  const shouldRedirect = !isLoading && items.length === 0;
+  useEffect(() => {
+    if (shouldRedirect) navigate("/customer/routine", { replace: true });
+  }, [shouldRedirect, navigate]);
+  if (shouldRedirect) return null;
 
   if (isLoading) {
     return (
@@ -122,6 +117,12 @@ export default function RoutineReview() {
         </div>
 
         {/* Service cards */}
+        {skuScopeError && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground px-3 py-2 rounded-lg bg-muted/50">
+            <Info className="h-3.5 w-3.5 shrink-0" />
+            <span>Scope details unavailable — you can still review and confirm.</span>
+          </div>
+        )}
         <div className="space-y-3">
           {items.map((item) => {
             const scope = skuDetails?.get(item.sku_id);
@@ -195,7 +196,7 @@ export default function RoutineReview() {
       </div>
 
       {/* Bottom CTA */}
-      <div className="fixed bottom-16 left-0 right-0 z-40 p-4 bg-card/95 backdrop-blur border-t border-border">
+      <div className="fixed bottom-16 left-0 right-0 z-40 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] bg-card/95 backdrop-blur border-t border-border">
         <Button
           className="w-full gap-2"
           size="lg"

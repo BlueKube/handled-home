@@ -22,28 +22,30 @@ export function useBiweeklyOptimizer(zoneId: string | null) {
       if (!zoneId) return null;
 
       // Fetch all active routine items in this zone that are biweekly
-      const { data: routines } = await supabase
+      const { data: routines, error: routinesErr } = await supabase
         .from("routines")
         .select("id")
         .eq("zone_id", zoneId)
         .eq("status", "active");
+      if (routinesErr) throw routinesErr;
 
       if (!routines || routines.length === 0) {
-        return { recommended: "A", reason: "No existing routines — defaulting to Pattern A", aCount: 0, bCount: 0 };
+        return null;
       }
 
       const routineIds = routines.map((r) => r.id);
 
       // Get all versions for these routines (latest locked or draft)
-      const { data: versions } = await supabase
+      const { data: versions, error: versionsErr } = await supabase
         .from("routine_versions")
         .select("id, routine_id, status")
         .in("routine_id", routineIds)
         .in("status", ["locked", "draft"])
         .order("version_number", { ascending: false });
+      if (versionsErr) throw versionsErr;
 
       if (!versions || versions.length === 0) {
-        return { recommended: "A", reason: "No routine versions found", aCount: 0, bCount: 0 };
+        return null;
       }
 
       // Take latest version per routine
@@ -57,11 +59,12 @@ export function useBiweeklyOptimizer(zoneId: string | null) {
       }
 
       // Fetch biweekly items
-      const { data: items } = await supabase
+      const { data: items, error: itemsErr } = await supabase
         .from("routine_items")
         .select("cadence_type, cadence_detail")
         .in("routine_version_id", Array.from(latestVersionIds))
         .eq("cadence_type", "biweekly");
+      if (itemsErr) throw itemsErr;
 
       let aCount = 0;
       let bCount = 0;
@@ -74,7 +77,7 @@ export function useBiweeklyOptimizer(zoneId: string | null) {
       const recommended: "A" | "B" = aCount <= bCount ? "A" : "B";
       const reason = aCount === bCount
         ? "Even split — Pattern A recommended by default"
-        : `Pattern ${recommended} has fewer stops (${recommended === "A" ? aCount : bCount} vs ${recommended === "A" ? bCount : aCount})`;
+        : `Pattern ${recommended} is underloaded (A: ${aCount}, B: ${bCount}) — adding here balances the zone`;
 
       return { recommended, reason, aCount, bCount };
     },

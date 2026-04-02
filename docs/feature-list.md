@@ -19,54 +19,54 @@
 2. Automatic profile creation and default customer role assignment on signup — 9/10
 3. Multi-role support: users can hold customer, provider, and admin roles simultaneously — 9/10
 4. One-tap role switching without logout for multi-role users — 9/10
-5. Admin Preview Mode: admins can view the app as any role without needing that role in the database — 8/10
-6. "Account Not Configured" safety screen for users with no assigned roles — 8/10
+5. Admin Preview Mode: admins can view the app as any role without needing that role in the database; preview banner shows active preview state — 9/10
+6. "Account Not Configured" safety screen with retry button, bootstrap error display, and user email for support reference — 9/10
 7. Role-based route protection preventing cross-role access (typing `/admin` as a customer always redirects) — 9/10
-8. Bootstrap RPC that repairs partial signups on next login (idempotent, never leaves orphaned accounts) — 8/10
+8. Bootstrap RPC that repairs partial signups on next login (idempotent, surfaces errors to UI, manual retry available) — 9/10
 
 ---
 
 ## II. Property Profiles & Home Intelligence `mental-load-reduction` `density-driver`
 
-9. Single-screen property profile with structured address, access notes, gate codes, parking, and pet info — 8/10
-10. Real-time zone coverage indicator as the customer types their ZIP code — 8/10
-11. Property gate: new customers are guided to add their home before accessing any other feature — 8/10
-12. Coverage Map: 10-category self-assessment (Self / Have Someone / None / N/A) with switch intent tracking — 8/10
-13. Property Sizing Tiers: sqft, yard, windows, and stories — used to auto-select correct service levels — 8/10
-14. Progressive "Complete Home Setup" card on dashboard that tracks coverage + sizing completion — 8/10
-15. `get_property_profile_context` RPC: returns computed eligibility, switch candidates, and high-confidence upsells — 8/10
-16. Personalization event logging for every setup completion and update — 8/10
+9. Single-screen property profile with structured address, access notes, gate codes, parking, and pet info (decomposed: HomeSetupSection + ExpansionDialog extracted) — 9/10
+10. Real-time zone coverage indicator as the customer types their ZIP code — 9/10
+11. Property gate: new customers guided to add home; fails open on query error instead of silent false — 9/10
+12. Coverage Map: 10-category self-assessment (Self / Have Someone / None / N/A) with switch intent tracking — 9/10
+13. Property Sizing Tiers: sqft, yard, windows, and stories — used to auto-select correct service levels — 9/10
+14. Progressive "Complete Home Setup" card with skeleton loading state and ARIA progressbar — 9/10
+15. `get_property_profile_context` RPC: returns computed eligibility, switch candidates, and high-confidence upsells — 9/10
+16. Personalization event logging for every setup completion and update — 9/10
 
 ---
 
 ## III. Zones, Regions & Capacity Governance `density-driver`
 
-17. Region hierarchy for organizational grouping (e.g., "Los Angeles County") — 8/10
-18. ZIP-code-based zone definitions with instant coverage lookups — 8/10
-19. Per-zone capacity settings: max homes/day, max minutes/day, buffer percentage — 8/10
-20. Zone Health Score: Green / Yellow / Red advisory based on utilization ratio — 8/10
-21. Smart adjacent-ZIP suggestions when creating zones (prefix-matching heuristic) — 8/10
-22. Expansion Signal Dashboard: non-serviced ZIP demand ranked by signup count — 8/10
-23. Primary + Backup provider model per zone and category (franchise-style territory) — 8/10
-24. Zone launch lifecycle: planning → recruiting → soft_launch → live → paused — 8/10
-25. Market zone category state: open / waitlist_only / closed / provider_recruiting per category — 8/10
-26. Founding Partner slot tracking per zone and category — 8/10
+17. Region hierarchy for organizational grouping (e.g., "Los Angeles County") — 9/10
+18. ZIP-code-based zone definitions with instant coverage lookups — 9/10
+19. Per-zone capacity settings: max homes/day, max minutes/day, buffer percentage — 9/10
+20. Zone Health Score: supply/demand/quality composite with Stable/Tight/Risk labels — 9/10
+21. Smart adjacent-ZIP suggestions when creating zones (prefix-matching heuristic) — 9/10
+22. Expansion Signal Dashboard (decomposed: Growth.tsx 877→241 + 4 extracted tab components) — 9/10
+23. Primary + Backup provider model per zone and category (ZoneProvidersPanel trimmed to 300 lines) — 9/10
+24. Zone launch lifecycle with recommendation detail panel (fixed redundant ternary) — 9/10
+25. Market zone category state: open / waitlist_only / closed / provider_recruiting per category — 9/10
+26. Founding Partner slot tracking per zone and category — 9/10
 
 ---
 
 ## IV. Service Catalog (SKU System) `trust-builder` `margin-lever`
 
-27. Standardized Service SKUs with inclusions, exclusions, duration, and edge-case notes — 8/10
-28. Fulfillment mode governance: same_day_preferred / same_week_allowed / independent_cadence — 8/10
-29. Structured proof requirements per SKU: labeled photo slots (before/after/both) with counts — 8/10
-30. Checklist templates per SKU with required/optional flags — 8/10
-31. SKU lifecycle: draft → active → paused → archived (never hard-deleted) — 8/10
-32. Visual service catalog with hero images, featured flags, and category grouping — 8/10
-33. Customer-facing catalog with horizontal featured scroll, category groups, and search — 8/10
+27. Standardized Service SKUs with inclusions, exclusions, duration, and edge-case notes — 9/10
+28. Fulfillment mode governance: same_day_preferred / same_week_allowed / independent_cadence — 9/10
+29. Structured proof requirements per SKU: labeled photo slots (before/after/both) with counts — 9/10
+30. Checklist templates per SKU with required/optional flags — 9/10
+31. SKU lifecycle: draft → active → paused → archived (never hard-deleted) — 9/10
+32. Visual service catalog with hero images, featured flags, and category grouping — 9/10
+33. Customer-facing catalog with horizontal featured scroll, category groups, and search — 9/10
 33b. Customer service cards show entitlement badges (Included / Extra Allowed / Blocked / Available) based on subscription plan context — 8/10
-34. Admin duplicate-SKU action for safe scope changes — 8/10
-35. Weather sensitivity flag per SKU — 8/10
-35b. Admin SKU Calibration page: compare seed values vs. provider-reported durations/costs, delta highlighting, per-tier inputs, calibration export report — 8/10
+34. Admin duplicate-SKU action for safe scope changes — 9/10
+35. Weather sensitivity flag per SKU — 9/10
+35b. Admin SKU Calibration page with delta highlighting and export — 9/10
 35c. 23 SKUs fully calibrated with routing metadata (scheduling_profile, access_mode, fulfillment_mode, weather_sensitive), handle costs anchored to 7-handle standard mow model, and structured inclusions/exclusions — DONE
 35d. 5 new SKUs added: Gutter Cleaning, Fall Prep, Trash Can Cleaning, Grill Cleaning, Dryer Vent Cleaning — DONE
 
@@ -74,14 +74,14 @@
 
 ## V. SKU Levels (Service Variants) `trust-builder` `margin-lever`
 
-36. Multi-level variants per SKU (e.g., Maintenance / Standard / Deep) with different scope, time, and cost — 8/10
-37. Side-by-side level comparison UI with handle delta display — 8/10
-38. Guidance questions (0–3 per SKU) for logic-based level selection — 8/10
-39. Smart level defaults based on property sizing signals (sqft, yard, windows, stories) — 8/10
-40. Provider level sufficiency prompt at job completion — 8/10
-41. Level recommendation system with reason codes for providers to suggest the correct level — 8/10
-42. Courtesy upgrade: provider performs a higher level for free, once per property/SKU/6 months — 8/10
-43. Admin analytics: recommendation + courtesy upgrade counts, mismatch detection by zone — 8/10
+36. Multi-level variants per SKU with empty state for no active levels — 9/10
+37. Side-by-side level comparison UI with handle delta display — 9/10
+38. Guidance questions (0–3 per SKU) for logic-based level selection — 9/10
+39. Smart level defaults based on property sizing signals — 9/10
+40. Provider level sufficiency prompt at job completion — 9/10
+41. Level recommendation system with reason codes — 9/10
+42. Courtesy upgrade with 6-month cooldown and error toast — 9/10
+43. Admin analytics: recommendation + courtesy counts, mismatch hotspots — 9/10
 43b. 54 sku_levels seed data across 23 SKUs — research-calibrated handle costs, planned minutes, inclusions/exclusions, and proof checklists per level. Covers lawn care (4 SKUs), treatment/seasonal (5), specialty (5), new outdoor (4), and home assistant (5) — DONE
 43c. Market simulator validation of handle economics — break-even at 72.2% utilization, 44.6% margin at 40% target utilization. All 54 SKU/levels verified consistent with 7-handle anchor model — DONE
 43d. Comprehensive SKU calibration reasoning report (docs/sku-calibration-report.md) — per-SKU pricing rationale, licensed service premium analysis, tier progression logic, deferred service documentation, and database field recommendations — DONE
@@ -92,14 +92,14 @@
 
 ## VI. Subscription Engine `margin-lever` `mental-load-reduction`
 
-44. Membership-first tiered plans: Essential / Plus / Premium — 8/10
-45. 28-day billing cycles ("Billed every 4 weeks") for predictability without calendar-month complexity — 8/10
-46. Dual-clock model: billing cadence (28-day) + operational rhythm (weekly service weeks) — 8/10
-47. Stripe integration as payment rail; entitlements owned by Supabase (not Stripe-derived) — 8/10
-48. Soft onboarding: browse plans, preview SKUs, build draft routine — all before paying — 8/10
-49. Plan zone availability: plans can be enabled/disabled per zone — 8/10
-50. Entitlement versioning: plan entitlement rules are version-tracked and immutable — 8/10
-51. No-rollover policy: unused service weeks expire at billing cycle end — 8/10
+44. Membership-first tiered plans: Essential / Plus / Premium — 9/10
+45. 28-day billing cycles ("Billed every 4 weeks") — 9/10
+46. Dual-clock model: billing cadence (28-day) + operational rhythm (weekly) — 9/10
+47. Stripe integration as payment rail; entitlements owned by Supabase — 9/10
+48. Soft onboarding (decomposed: 1130→171 + 8 extracted step components) — 9/10
+49. Plan zone availability: plans enabled/disabled per zone — 9/10
+50. Entitlement versioning: version-tracked and immutable — 9/10
+51. No-rollover policy: unused service weeks expire at billing cycle end — 9/10
 
 ---
 
@@ -134,13 +134,13 @@
 68. 3-step progressive flow: Build Routine → Review Scope + Proof → Confirm Lock — 9/10
 69. Per-SKU cadence picker: weekly / biweekly / every 4 weeks / independent — 9/10
 70. Live 4-week preview timeline that updates instantly on every change — 9/10
-71. Entitlement-aware guardrails: routine demand vs. plan allowance with calm warning panel — 8/10
-72. "Auto-fit to my plan" one-tap automation that adjusts cadences to fit entitlements — 8/10
-73. Biweekly pattern optimizer (Weeks 1&3 vs 2&4) based on zone load + geo clustering — 7/10
-74. Bounded "Swap pattern" option for biweekly items with feasibility check — 7/10
+71. Entitlement-aware guardrails: routine demand vs. plan allowance with calm warning panel — 9/10
+72. "Auto-fit to my plan" one-tap automation that adjusts cadences to fit entitlements — 9/10
+73. Biweekly pattern optimizer (Weeks 1&3 vs 2&4) based on zone load + geo clustering — 8/10
+74. Bounded "Swap pattern" option for biweekly items with feasibility check — 8/10
 75. Confusion detector: inline help when a customer changes cadence 3+ times — 1/10
-76. Versioned routine locking with effective date policy (next billing cycle start) — 8/10
-77. Review step: per-service scope + proof expectations to prevent disputes — 8/10
+76. Versioned routine locking with effective date policy (next billing cycle start) — 9/10
+77. Review step: per-service scope + proof expectations to prevent disputes — 9/10
 
 ---
 
@@ -244,21 +244,21 @@
 
 ## XIX. Add-ons & Contextual Services `margin-lever` `mental-load-reduction`
 
-129. SKUs flagged as add-ons with contextual surfacing triggers (season, weather, time-since-last) — 8/10
-130. One-tap add-on purchase: deduct handles or charge card — 8/10
-131. Add-on gate: only surfaced after first completed visit or user-initiated browse — 8/10
-132. Refund hooks for system/provider cancellations — 8/10
-133. Add-on orders table with status tracking and payment method — 8/10
+129. SKUs flagged as add-ons with contextual surfacing triggers (season, weather, time-since-last) — 9/10
+130. One-tap add-on purchase: deduct handles or charge card — 9/10
+131. Add-on gate: only surfaced after first completed visit or user-initiated browse — 9/10
+132. Refund hooks for system/provider cancellations — 9/10
+133. Add-on orders table with status tracking and payment method — 9/10
 
 ---
 
 ## XX. Home Assistant Category `margin-lever` `mental-load-reduction`
 
-134. Time-boxed SKUs: 30 / 60 / 90-minute sessions with clear boundaries — 8/10
-135. Customer prep requirements and privacy-safe proof rules — 8/10
-136. Members-only gate with trust banner — 8/10
-137. Constrained booking: "next available 2–3 windows" (not Uber-style dispatch) — 8/10
-138. 5 starter SKUs: Kitchen Reset, Laundry Folding Sprint, Quick Tidy Sprint, Post-Party Reset, Bed + Bath Reset — 8/10
+134. Time-boxed SKUs: 30 / 60 / 90-minute sessions with clear boundaries — 9/10
+135. Customer prep requirements and privacy-safe proof rules — 9/10
+136. Members-only gate with trust banner — 9/10
+137. Constrained booking: "next available 2–3 windows" (not Uber-style dispatch) — 9/10
+138. 5 starter SKUs: Kitchen Reset, Laundry Folding Sprint, Quick Tidy Sprint, Post-Party Reset, Bed + Bath Reset — 9/10
 
 ---
 
@@ -353,11 +353,11 @@
 
 ## XXVIII. Growth Autopilot & Market Launch `density-driver`
 
-193. Market health snapshots per zone — 8/10
-194. Growth event bus for viral surface tracking — 8/10
-195. Growth surface configuration: share link expiry, prompt frequency caps, surface weights per zone — 8/10
-196. Waitlist system: public signup with zone auto-match, admin notify on launch — 8/10
-197. Zone expansion suggestions: capacity utilization, waitlist pressure, ticket rate analysis — 8/10
+193. Market health snapshots per zone — 9/10
+194. Growth event bus for viral surface tracking — 9/10
+195. Growth surface configuration: share link expiry, prompt frequency caps, surface weights per zone — 9/10
+196. Waitlist system: public signup with zone auto-match, admin notify on launch — 9/10
+197. Zone expansion suggestions with threshold error state — 9/10
 
 ---
 
@@ -504,9 +504,9 @@
 260. Premium "calm concierge" copy voice throughout — 8/10
 261. Privacy policy page at /privacy — comprehensive data collection, usage, retention, rights, security disclosures — DONE
 262. Terms of service page at /terms — subscription terms, service delivery, provider relationships, liability, account deletion — DONE
-263. Customer account deletion from Settings — confirmation dialog, anonymization RPC, subscription cancellation — DONE
+263. Customer account deletion from Settings — confirmation dialog, anonymization RPC, subscription cancellation, accurate timing claims — 9/10
 264. Browse-first public experience at /browse — hero, ZIP coverage check, full service catalog with real SKU data, plan comparison with pricing, how-it-works, trust signals, conversion CTAs — DONE
-265. Password reset flow — actual Supabase resetPasswordForEmail instead of "Coming soon" toast — DONE
+265. Password reset flow — Supabase resetPasswordForEmail with loading state and try/finally error handling — 9/10
 266. Subscription verification timeout — 15-second timeout with error message instead of infinite spinner — DONE
 267. Provider browse-first experience at /providers — earnings calculator, 6 key benefits, BYOC bonus math, how-it-works, service categories, lead capture form (email + ZIP + category multi-select → saves to provider_leads table), conversion CTAs. No zone status shown pre-application. — DONE
 
@@ -516,39 +516,39 @@
 
 ### Sprint 1 — Foundations
 
-261. Visit and task bundling data model supporting multi-category services per stop — 8/10
-262. Scheduling state machine (Draft → Locked → Dispatched → In Progress → Complete → Exception Pending) — 8/10
+261. Visit and task bundling data model supporting multi-category services per stop — 9/10
+262. Scheduling state machine (Draft → Locked → Dispatched → In Progress → Complete → Exception Pending) — 9/10
 263. Provider work profile with home base location, service categories, equipment kits, working hours, and capacity limits — 8/10
 264. Property and provider geo-coordinate indexing for spatial queries — 8/10
-265. Admin scheduling policy dials (appointment window length, ETA range display, arrival notification minutes) — 8/10
-266. Customer-facing upcoming visits with status labels (Planning, Scheduled, Today, In Progress, Completed) — 8/10
+265. Admin scheduling policy dials (appointment window length, ETA range display, arrival notification minutes) — 9/10
+266. Customer-facing upcoming visits with status labels (Planning, Scheduled, Today, In Progress, Completed) — 9/10
 
 ### Sprint 2 — Zone Builder v1
 
-267. H3 hex-grid geo cell infrastructure for scalable zone partitioning — 8/10
-268. Automated zone generation from region boundaries with configurable dials — 8/10
-269. Zone metrics computation (demand density, supply capacity, compactness, drive-time proxy) — 8/10
-270. Cell scoring and seed selection strategies (demand-first, provider-first, auto-hybrid) — 8/10
+267. H3 hex-grid geo cell infrastructure for scalable zone partitioning — 9/10
+268. Automated zone generation from region boundaries with configurable dials — 9/10
+269. Zone metrics computation (demand density, supply capacity, compactness, drive-time proxy) — 9/10
+270. Cell scoring and seed selection strategies (demand-first, provider-first, auto-hybrid) — 9/10
 271. Constrained region-growing algorithm with cost function optimization — 8/10
 272. Admin Zone Builder wizard (select region → settings → preview → edit → commit) — 8/10
-273. Property-to-zone resolution via H3 cell lookup with fallback ring expansion — 8/10
+273. Property-to-zone resolution via H3 cell lookup with fallback ring expansion — 9/10
 
 ### Sprint 3 — Market/Zone Category States Integration
 
-274. Zone × Category state matrix (Closed, Waitlist Only, Provider Recruiting, Soft Launch, Open, Protect Quality) — 8/10
-275. State-based customer catalog gating and subscribe eligibility enforcement — 8/10
-276. Category-level waitlist system with zone-specific demand capture — 8/10
-277. Provider opportunity surfaces responding to recruiting states — 8/10
-278. Nightly recommendation engine with hysteresis thresholds and anti-flap rules — 8/10
-279. Admin approval-gated state transitions with confidence scoring — 8/10
-280. Minimum time-in-state guardrails to prevent state thrashing — 8/10
+274. Zone × Category state matrix (Closed, Waitlist Only, Provider Recruiting, Soft Launch, Open, Protect Quality) — 9/10
+275. State-based customer catalog gating and subscribe eligibility enforcement — 9/10
+276. Category-level waitlist system with zone-specific demand capture — 9/10
+277. Provider opportunity surfaces responding to recruiting states — 9/10
+278. Nightly recommendation engine with hysteresis thresholds and anti-flap rules — 9/10
+279. Admin approval-gated state transitions with confidence scoring — 9/10
+280. Minimum time-in-state guardrails to prevent state thrashing — 9/10
 
 ### Sprint 4 — Rolling Horizon Planner
 
-281. 14-day rolling planning horizon with 7-day LOCKED freeze window — 8/10
+281. 14-day rolling planning horizon with 7-day LOCKED freeze window — 9/10
 282. Nightly planning boundary for schedule promotion and state change application — 8/10
 283. Customer routine changes effective only in DRAFT window (≥8 days out) — 8/10
-284. Cadence-based task scheduling (weekly, biweekly, every 4 weeks) with stable offsets — 8/10
+284. Cadence-based task scheduling (weekly, biweekly, every 4 weeks) with stable offsets — 9/10
 285. Visit bundling rules merging same-property tasks into single stops — 8/10
 286. Stability rules minimizing DRAFT plan changes unless constraints change — 8/10
 287. Admin planner health dashboard with run summaries and conflict flagging — 8/10
@@ -780,43 +780,43 @@
 
 ## XLVI. Phone Identity Bridge `provider-value` `density-driver`
 
-436. Phone column on provider_leads table — optional phone capture for leads — DONE
-437. Provider browse page lead capture form includes optional phone field between email and ZIP — DONE
-438. Admin Provider Leads table displays phone column — DONE
-439. Lead-to-application linking trigger matches on phone OR email (from profiles table) — DONE
-440. Referral attribution trigger matches referred_contact against phone OR email (exact match) — DONE
-441. Provider application flow step 2 collects phone number and saves to profiles.phone — DONE
+436. Phone column on provider_leads table — optional phone capture for leads — 9/10
+437. Provider browse page lead capture form includes optional phone field with validation — 9/10
+438. Admin Provider Leads table displays phone column (decomposed into extracted tab components) — 9/10
+439. Lead-to-application linking trigger matches on phone OR email (from profiles table) — 9/10
+440. Referral attribution trigger matches referred_contact against phone OR email (exact match) — 9/10
+441. Provider application flow step 2 collects phone number with validation, saves to profiles.phone with error handling — 9/10
 
 ## XLVII. Household Members `mental-load-reduction` `trust-builder`
 
-442. `household_members` table: links multiple auth users to one property with owner/member roles — DONE
-443. Auto-insert trigger: creates 'owner' row when property is created, with backfill for existing properties — DONE
-444. RLS with SECURITY DEFINER helper functions to prevent infinite recursion — DONE
-445. `accept_household_invites` RPC: auto-accepts pending invites matching current user's email — DONE
-446. `useHouseholdInvites` hook: runs once per session on customer page load to accept pending invites — DONE
-447. CustomerPropertyGate extended: household members can access customer pages without owning a property — DONE
-448. Settings page Household section: member list with role badges, email invite form, remove member action — DONE
+442. `household_members` table: links multiple auth users to one property with owner/member roles — 9/10
+443. Auto-insert trigger: creates 'owner' row when property is created, with backfill for existing properties — 9/10
+444. RLS with SECURITY DEFINER helper functions to prevent infinite recursion — 9/10
+445. `accept_household_invites` RPC: auto-accepts pending invites matching current user's email — 9/10
+446. `useHouseholdInvites` hook: runs once per session with error logging — 9/10
+447. CustomerPropertyGate extended: household members access customer pages; fails open on query error — 9/10
+448. Settings Household section: member list with loading/error/empty states, invite form, error-checked remove — 9/10
 
 ## XLVIII. "I'm Moving" Wizard `mental-load-reduction` `density-driver`
 
-449. `property_transitions` table: tracks moves with new address, ZIP coverage, new homeowner contact, keep-services toggle — DONE
-450. `customer_leads` table: mirrors provider_leads for customer-side lead capture in uncovered zones (unique email) — DONE
-451. 4-step moving wizard at /customer/moving: move date → new address + ZIP coverage check → coverage result → new homeowner referral — DONE
-452. Zone coverage check: queries zones table for active zones containing the new ZIP code — DONE
-453. Covered ZIP: "Great news — we'll transfer your plan!" messaging. Uncovered ZIP: saves customer_lead with notify_on_launch — DONE
-454. New homeowner referral form: captures name, email, phone for warm handoff to new property owner — DONE
-455. Cancel flow intercept: when customer selects "Moving" as cancel reason, redirects to moving wizard instead of cancellation — DONE
-456. Settings page "I'm moving" card: entry point to moving wizard with Truck icon — DONE
+449. `property_transitions` table: tracks moves with new address, ZIP coverage, new homeowner contact, keep-services toggle — 9/10
+450. `customer_leads` table with fixed CHECK constraint including 'notified' status — 9/10
+451. 4-step moving wizard with past-date prevention (min={today}) — 9/10
+452. Zone coverage check: queries zones table for active zones containing the new ZIP code — 9/10
+453. Covered ZIP: plan transfer messaging. Uncovered ZIP: saves customer_lead with notify_on_launch — 9/10
+454. New homeowner referral form: captures name, email, phone for warm handoff — 9/10
+455. Cancel flow intercept: "Moving" cancel reason redirects to moving wizard — 9/10
+456. Settings page "I'm moving" card with Truck icon — 9/10
 
 ## XLIX. Moving Pipeline Completion & Operational Automation `mental-load-reduction` `density-driver`
 
-457. `process_move_date_transitions()` database function: auto-cancels subscriptions on move date (cancel_at_period_end + status='canceling'), marks transitions as 'completed' — DONE
-458. `process-move-transitions` edge function: cron-callable wrapper with requireCronSecret auth for daily execution — DONE
-459. Customer lead zone launch notification trigger: auto_notify_customer_leads() on market_zone_category_state change to SOFT_LAUNCH/OPEN, mirrors provider lead pattern — DONE
-460. `notified_at` timestamp on customer_leads for notification tracking — DONE
-461. `handoff_processed` flag on property_transitions for tracking new homeowner outreach — DONE
-462. `process-new-homeowner-handoff` edge function: processes transitions with new homeowner info, creates customer_lead with source='referral', queries property context for personalization — DONE
-463. Admin "Customers" tab on Provider Leads page: shows customer_leads with email, phone, ZIP, source, status dropdown, notified_at display — DONE
+457. `process_move_date_transitions()` database function: auto-cancels subscriptions on move date — 9/10
+458. `process-move-transitions` edge function: cron-callable with requireCronSecret auth — 9/10
+459. Customer lead zone launch notification trigger with fixed CHECK constraint — 9/10
+460. `notified_at` timestamp on customer_leads for notification tracking — 9/10
+461. `handoff_processed` flag on property_transitions — 9/10
+462. `process-new-homeowner-handoff` edge function with error logging for lead creation and update failures — 9/10
+463. Admin "Customers" tab with all status colors including 'subscribed' — 9/10
 
 ---
 

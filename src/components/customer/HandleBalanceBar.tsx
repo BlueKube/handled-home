@@ -11,7 +11,7 @@ interface HandleBalanceBarProps {
 
 export function HandleBalanceBar({ balance, perCycle, rollover, className = "" }: HandleBalanceBarProps) {
   const used = Math.max(0, perCycle - balance);
-  const pct = perCycle > 0 ? Math.round((balance / perCycle) * 100) : 0;
+  const pct = perCycle > 0 ? Math.min(100, Math.round((balance / perCycle) * 100)) : 0;
   const rolloverCount = rollover ?? Math.max(0, balance - perCycle);
 
   return (

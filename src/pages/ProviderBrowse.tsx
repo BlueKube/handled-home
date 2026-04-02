@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { isValidPhone } from "@/utils/phone";
 
 const EARNINGS_EXAMPLES = [
   { stops: 4, daily: "$220", weekly: "$1,100", desc: "Part-time (4 stops/day)" },
@@ -91,6 +92,10 @@ export default function ProviderBrowse() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       toast.error("Please enter a valid email address");
+      return;
+    }
+    if (!isValidPhone(phone)) {
+      toast.error("Please enter a valid phone number (e.g., 555-123-4567)");
       return;
     }
 

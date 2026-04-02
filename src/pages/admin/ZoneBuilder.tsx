@@ -514,7 +514,7 @@ export default function ZoneBuilder() {
               </div>
               <div>
                 <span className="text-muted-foreground">Warnings</span>
-                <p className={`font-semibold ${warningCount > 0 ? "text-amber-600" : "text-green-600"}`}>
+                <p className={`font-semibold ${warningCount > 0 ? "text-amber-600 dark:text-amber-400" : "text-green-600 dark:text-green-400"}`}>
                   {warningCount > 0 ? `${warningCount} warnings` : "None"}
                 </p>
               </div>
@@ -535,7 +535,7 @@ export default function ZoneBuilder() {
                     <span className="text-muted-foreground">{m.customer_count ?? 0} cust</span>
                     <Badge variant="secondary" className="text-xs">{days[dayIdx]}</Badge>
                     {zone.warnings.length > 0 && (
-                      <Badge variant="outline" className="text-xs text-amber-600">
+                      <Badge variant="outline" className="text-xs text-amber-600 dark:text-amber-400">
                         <AlertTriangle className="h-3 w-3 mr-0.5" /> {zone.warnings.length}
                       </Badge>
                     )}

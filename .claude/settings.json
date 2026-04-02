@@ -1,5 +1,18 @@
 {
   "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_response.filePath // .tool_input.file_path' | { read -r f; echo \"$f\" | grep -qE '\\.(ts|tsx)$' && { ERRORS=$(npx tsc --noEmit 2>&1 | head -10); if [ -n \"$ERRORS\" ]; then echo \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"PostToolUse\\\",\\\"additionalContext\\\":\\\"TypeScript errors after editing $f:\\n$ERRORS\\\"}}\"; fi; }; } 2>/dev/null || true",
+            "timeout": 30,
+            "statusMessage": "Type-checking..."
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "matcher": "",

@@ -6,15 +6,13 @@ import { StatCard } from "@/components/StatCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChevronLeft, UserX, XCircle, CreditCard, RotateCcw, Receipt, ShieldAlert, AlertOctagon, Undo2 } from "lucide-react";
 import { format } from "date-fns";
-
-function formatCents(c: number) {
-  return "$" + (c / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-}
+import { formatCents } from "@/utils/format";
 
 export default function OpsBilling() {
   const nav = useNavigate();
@@ -22,7 +20,7 @@ export default function OpsBilling() {
   const defaultTab = searchParams.get("tab") || "overview";
   const [tab, setTab] = useState(defaultTab);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["ops-billing-health-full"],
     queryFn: async () => {
       const sevenDaysAgo = new Date();
@@ -71,6 +69,15 @@ export default function OpsBilling() {
       };
     },
   });
+
+  if (isError) {
+    return (
+      <div className="p-6 space-y-4">
+        <h1 className="text-h2">Billing Health</h1>
+        <QueryErrorCard message="Failed to load billing data." onRetry={() => refetch()} />
+      </div>
+    );
+  }
 
   if (isLoading || !data) {
     return (
@@ -184,7 +191,7 @@ export default function OpsBilling() {
                     <TableRow key={inv.id} className="cursor-pointer" onClick={() => nav(`/admin/billing/customers/${inv.customer_id}`)}>
                       <TableCell className="font-mono text-xs">{inv.customer_id?.slice(0, 8)}…</TableCell>
                       <TableCell>{formatCents(inv.total_cents)}</TableCell>
-                      <TableCell className="text-xs">{format(new Date(inv.updated_at), "MMM d HH:mm")}</TableCell>
+                      <TableCell className="text-xs">{inv.updated_at ? format(new Date(inv.updated_at), "MMM d HH:mm") : "—"}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
