@@ -623,17 +623,20 @@ Use these to automate repetitive workflow steps. They work in both terminal and 
 | Command | When to use |
 |---------|-------------|
 | `/start-round` | **Entry point for every polish session.** Reads context, sets up branch, creates plan, begins feature audits. |
-| `/polish-feature` | **Core inner loop.** Audits one feature against 10-point checklist, fixes issues, commits. |
+| `/polish-round` | **Preferred batch command.** Groups all features into parallel audit agents, processes results, batches fixes by theme. Use instead of calling `/polish-feature` individually. |
+| `/polish-feature` | **Individual feature audit.** Audits one feature against 10-point checklist, fixes issues, commits. Use for debugging or re-auditing a single feature. |
 | `/new-batch` | Creates a batch spec from template for the next incomplete batch. |
 | `/review-batch` | Runs the standard code review on the last commit per Section 5. |
 | `/commit-push` | Pre-computes git context, stages, commits with proper message, pushes. |
 
 **Usage pattern for polish rounds:**
 1. Start session → `/start-round`
-2. For each feature → `/polish-feature <number> "<description>"`
+2. Audit all features → `/polish-round` (launches parallel agents, processes results)
 3. After fixes → `/commit-push`
 4. After commit → `/review-batch`
 5. Repeat until context reaches 60%
+
+For individual feature debugging: `/polish-feature <number> "<description>"`
 
 ### Sub-Agents (`.claude/agents/`)
 
