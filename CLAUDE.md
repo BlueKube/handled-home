@@ -616,6 +616,36 @@ npm test
 
 Both `npm run build` and `npx tsc --noEmit` must pass before a batch is considered complete.
 
+### Slash Commands (`.claude/commands/`)
+
+Use these to automate repetitive workflow steps. They work in both terminal and web sessions.
+
+| Command | When to use |
+|---------|-------------|
+| `/start-round` | **Entry point for every polish session.** Reads context, sets up branch, creates plan, begins feature audits. |
+| `/polish-feature` | **Core inner loop.** Audits one feature against 10-point checklist, fixes issues, commits. |
+| `/new-batch` | Creates a batch spec from template for the next incomplete batch. |
+| `/review-batch` | Runs the standard code review on the last commit per Section 5. |
+| `/commit-push` | Pre-computes git context, stages, commits with proper message, pushes. |
+
+**Usage pattern for polish rounds:**
+1. Start session → `/start-round`
+2. For each feature → `/polish-feature <number> "<description>"`
+3. After fixes → `/commit-push`
+4. After commit → `/review-batch`
+5. Repeat until context reaches 60%
+
+### Sub-Agents (`.claude/agents/`)
+
+Reusable agent definitions that can be spawned automatically or manually. Prefer these over writing ad-hoc review prompts.
+
+| Agent | Purpose |
+|-------|---------|
+| `batch-reviewer` | Standardized review (spec + bugs). Has **known-patterns section** to reduce false positives on `as any` casts, cancel pattern, SECURITY DEFINER. |
+| `build-validator` | Runs `tsc --noEmit` + `npm run build`, reports errors. |
+| `code-simplifier` | Post-implementation sweep for dead code, over-engineering, extraction opportunities. |
+| `polish-auditor` | Full 10-point feature maturity checklist audit. |
+
 ---
 
 ## 13. Conventions

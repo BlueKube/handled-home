@@ -88,7 +88,9 @@ At the **start of each phase** (i.e., the first batch of a new phase):
 
 ### 2.2: Write the batch spec
 
-Every batch gets a spec in `docs/working/batch-specs/` before coding starts:
+Every batch gets a spec in `docs/working/batch-specs/` before coding starts.
+
+**Shortcut:** Use `/new-batch` to auto-generate the spec template from the plan.
 
 ```markdown
 # Batch N: [Title]
@@ -132,6 +134,7 @@ Every batch gets a spec in `docs/working/batch-specs/` before coding starts:
 
 - Code only what the spec says. If you discover something out of scope, add it to a deferred items list — don't sneak it in.
 - Commit with clear messages: `feat(<scope>): Batch N — {Description}`
+- **Shortcut:** Use `/commit-push` to stage, commit, and push in one step.
 - **If the batch creates database migrations**, apply them immediately or document them as blocked in `docs/upcoming/TODO.md`. Never leave migrations unapplied — downstream tools (Lovable) will stub all database-dependent code if tables don't exist.
 - **If the batch changes UI**, take a screenshot after the commit to verify visually. Use the raw Chromium binary with `--virtual-time-budget=8000` if Playwright CLI fails.
 - **If a component exceeds 300 lines** after your changes, extract sections into separate files in the same batch.
@@ -139,6 +142,8 @@ Every batch gets a spec in `docs/working/batch-specs/` before coding starts:
 ### 2.4: Tiered code review
 
 After each commit, run a multi-agent review. This is the quality gate that prevents bugs, drift, and regressions from compounding across batches.
+
+**Shortcut:** Use `/review-batch` to run the standard review. It reads the batch spec, determines size, and launches the appropriate agents. Prefer the `batch-reviewer` sub-agent (`.claude/agents/batch-reviewer.md`) over ad-hoc prompts — it includes a known-patterns section that reduces false positives.
 
 **Review intensity scales with batch risk.** Running 8 agents on a config-only change wastes context; running 2 agents on a new integration misses bugs. Size the review to the batch.
 
@@ -277,6 +282,31 @@ When all phases in a round are `✅`, perform the **Round Cleanup** (see CLAUDE.
 - Archive `docs/working/` to `docs/archive/[name]-[YYYY-MM-DD]/`
 - Final doc sync across all north star documents
 - Report context level
+
+---
+
+## Polish Round Workflow (Feature Maturity)
+
+Polish rounds follow a simplified version of the standard workflow, optimized for auditing and fixing existing features rather than building new ones.
+
+### Entry point
+Use `/start-round` to begin. It handles context reading, branch setup, plan creation, and starts the audit loop.
+
+### Inner loop (per feature)
+Use `/polish-feature <number> "<description>"` for each feature. It:
+1. Finds the implementation files
+2. Reads every line of code
+3. Runs the 10-point checklist (implementation, error/loading/empty states, dark mode, dead code, component size, math, patterns, mobile)
+4. Reports PASS or FIX for each item
+5. If fixes needed: implements them, commits, runs review
+
+### Optional agents
+- After fixing: run `code-simplifier` agent to catch over-engineering
+- After all features in a round: run `build-validator` agent to confirm clean build
+- For deep audits: run `polish-auditor` agent for a formal scored report
+
+### Context management
+After each feature (not each batch), check context with `/context`. Continue if under 60% actual. Exit if over.
 
 ---
 
