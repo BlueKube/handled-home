@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LogOut, Mail, ChevronLeft, FileText, Shield, Users, Send, X, Truck } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -173,9 +174,13 @@ function HouseholdSection() {
 
   const handleRemove = async (memberId: string) => {
     if (!window.confirm("Remove this household member?")) return;
-    await (supabase.from("household_members") as any)
+    const { error } = await (supabase.from("household_members") as any)
       .update({ status: "removed" })
       .eq("id", memberId);
+    if (error) {
+      toast.error("Failed to remove member");
+      return;
+    }
     queryClient.invalidateQueries({ queryKey: ["household-members"] });
     toast.success("Member removed");
   };
@@ -196,6 +201,18 @@ function HouseholdSection() {
         </p>
 
         {/* Member list */}
+        {members.isLoading && (
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-full" />
+          </div>
+        )}
+        {members.isError && (
+          <p className="text-xs text-destructive">Failed to load household members.</p>
+        )}
+        {!members.isLoading && !members.isError && memberList.length === 0 && (
+          <p className="text-xs text-muted-foreground">No household members yet. Invite someone below.</p>
+        )}
         {memberList.length > 0 && (
           <div className="space-y-2">
             {memberList.map((m: any) => (

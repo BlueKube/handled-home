@@ -1,54 +1,51 @@
-# Round 14: Property Profiles Polish
+# Round 15: Household Members Polish
 
-> **Round:** 14 of 61
-> **Branch:** `claude/polish-round-12-auth-nlfDe` (continuing on same branch)
-> **Phase:** Single phase — Property Profiles (Features 9–16)
+> **Round:** 15 of 61
+> **Branch:** `claude/polish-round-12-auth-nlfDe`
+> **Phase:** Single phase — Household Members (Features 442–448)
 > **Execution mode:** Quality
 
 ---
 
 ## Features in Scope
 
-9. Property profile (address, access notes, gate codes, pets, parking)
-10. Real-time zone coverage indicator
-11. Property gate for new customers
-12. Coverage Map (10-category self-assessment)
-13. Property Sizing Tiers (sqft, yard, windows, stories)
-14. Progressive "Complete Home Setup" card
-15. `get_property_profile_context` RPC
-16. Personalization event logging
+442. household_members table
+443. Auto-insert owner trigger
+444. RLS with SECURITY DEFINER helpers
+445. accept_household_invites RPC
+446. useHouseholdInvites hook
+447. PropertyGate household extension
+448. Settings Household section
 
 ---
 
 ## Audit Findings
 
-### Issues Found (Actionable in Polish Round)
+### Issues Found (Actionable)
 
 | # | Issue | Severity | File | Feature |
 |---|-------|----------|------|---------|
-| 1 | Property.tsx is 456 lines — over 300 threshold | MUST-FIX | Property.tsx | F9 |
-| 2 | HomeSetupCard returns null when complete — no success state | SHOULD-FIX | HomeSetupCard.tsx | F14 |
-| 3 | HomeSetupCard returns null while loading — should show skeleton | SHOULD-FIX | HomeSetupCard.tsx | F14 |
-| 4 | CustomerPropertyGate silently catches errors — no error state | SHOULD-FIX | CustomerPropertyGate.tsx | F11 |
-| 5 | SVG progress ring in HomeSetupCard missing aria progressbar role | SHOULD-FIX | HomeSetupCard.tsx | F14 |
+| 1 | Settings HouseholdSection missing loading state for members query | SHOULD-FIX | Settings.tsx | F448 |
+| 2 | Settings HouseholdSection missing error state for members query | SHOULD-FIX | Settings.tsx | F448 |
+| 3 | handleRemove silent on failure — shows success toast even on error | SHOULD-FIX | Settings.tsx | F448 |
+| 4 | No empty state message for household members | SHOULD-FIX | Settings.tsx | F448 |
+| 5 | useHouseholdInvites silent on error — no logging | MINOR | useHouseholdInvites.ts | F446 |
 
-### Out of Scope (Per Polish Round Rules)
+### Out of Scope
 
-- Semantic HTML refactoring (radio buttons instead of divs) — working pattern
-- Adding retry logic to hooks — new feature
-- Event logging improvements — new feature
-- ARIA roles on all form elements — too broad, working pattern refactor
-- Return URL validation — already validated with startsWith("/")
+- DB constraints for owner removal protection — schema change
+- Multi-property owner support — new feature
+- Type safety refactors (as any casts) — working pattern
+- Email validation regex improvement — existing works fine
 
 ### Already Solid
 
-- Property form validation with touched state ✓
-- Zone coverage debounced lookup ✓
-- Coverage Map save/load with upsert ✓
-- Property Sizing save/load ✓
-- RPC with VOLATILE flag fix ✓
-- Personalization event logging on save ✓
-- Dark mode colors across all components ✓
+- Table schema with proper constraints ✓
+- Auto-insert owner trigger ✓
+- RLS policies with SECURITY DEFINER ✓
+- accept_household_invites RPC with null safety ✓
+- PropertyGate fail-open error handling (polished in R14) ✓
+- Query key invalidation in hook ✓
 
 ---
 
@@ -56,19 +53,14 @@
 
 | Batch | Title | Size | Files | Status | Context |
 |-------|-------|------|-------|--------|---------|
-| B1 | Property.tsx decomposition (456→345 + 2 extracted) | M | 3 files | ✅ | ~22% |
-| B2 | HomeSetupCard + CustomerPropertyGate polish | S | 2 files | ✅ | ~24% |
-
-### Review Results
-- **B1:** Pending background review
-- **B2:** Pending background review
+| B1 | Settings HouseholdSection + useHouseholdInvites polish | S | 2 files | ⬜ | |
 
 ---
 
 ## Session Handoff
 - **Branch:** `claude/polish-round-12-auth-nlfDe`
-- **Last completed:** B2 (Round 14 complete)
-- **Next up:** Round 14 complete — ready for Round 15
-- **Context at exit:** ~24%
+- **Last completed:** Round 14 complete. Starting Round 15.
+- **Next up:** B1 — Settings HouseholdSection polish
+- **Context at exit:** N/A
 - **Blockers:** None
-- **Round progress:** Phase 1 of 1 complete ✅
+- **Round progress:** Phase 1 of 1 in progress

@@ -18,7 +18,10 @@ export function useHouseholdInvites() {
     hasRun.current = true;
 
     supabase.rpc("accept_household_invites").then(({ data, error }) => {
-      if (error) return;
+      if (error) {
+        console.warn("accept_household_invites failed:", error.message);
+        return;
+      }
       if (data && data > 0) {
         // Invites accepted — refresh property data
         queryClient.invalidateQueries({ queryKey: ["property"] });
