@@ -19,10 +19,10 @@
 2. Automatic profile creation and default customer role assignment on signup — 9/10
 3. Multi-role support: users can hold customer, provider, and admin roles simultaneously — 9/10
 4. One-tap role switching without logout for multi-role users — 9/10
-5. Admin Preview Mode: admins can view the app as any role without needing that role in the database — 8/10
-6. "Account Not Configured" safety screen for users with no assigned roles — 8/10
+5. Admin Preview Mode: admins can view the app as any role without needing that role in the database; preview banner shows active preview state — 9/10
+6. "Account Not Configured" safety screen with retry button, bootstrap error display, and user email for support reference — 9/10
 7. Role-based route protection preventing cross-role access (typing `/admin` as a customer always redirects) — 9/10
-8. Bootstrap RPC that repairs partial signups on next login (idempotent, never leaves orphaned accounts) — 8/10
+8. Bootstrap RPC that repairs partial signups on next login (idempotent, surfaces errors to UI, manual retry available) — 9/10
 
 ---
 

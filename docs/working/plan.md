@@ -50,16 +50,21 @@
 
 | Batch | Title | Size | Files | Status | Context |
 |-------|-------|------|-------|--------|---------|
-| B1 | AuthPage polish — dark mode + error UX | S | AuthPage.tsx | ⬜ | |
-| B2 | AuthContext + Bootstrap — error UX, retry | S | AuthContext.tsx | ⬜ | |
-| B3 | AccountNotConfigured + PreviewAsCard + RoleSwitcher | S | 3 files | ⬜ | |
+| B1 | AuthPage polish — dark mode + error UX | S | AuthPage.tsx | ✅ | ~15% |
+| B2 | AuthContext + Bootstrap — error UX, retry | S | AuthContext.tsx | ✅ | ~18% |
+| B3 | AccountNotConfigured + PreviewAsCard + RoleSwitcher | S | 3 files | ✅ | ~22% |
+
+### Review Results
+- **B1:** Clean — no issues. Dark mode HSL→Tailwind swap verified against CSS vars.
+- **B2:** Clean — 1 low SHOULD-FIX (bootstrapError name slightly overloaded for general fetch errors; acceptable since user message is generic). No action needed.
+- **B3:** Clean — all acceptance criteria verified. No issues found.
 
 ---
 
 ## Session Handoff
 - **Branch:** `claude/polish-round-12-auth-nlfDe`
-- **Last completed:** None — round just started
-- **Next up:** B1 — AuthPage polish
-- **Context at exit:** N/A
+- **Last completed:** B3 (Round 12 complete)
+- **Next up:** Round 12 complete — ready for Round 13 or PR
+- **Context at exit:** ~22%
 - **Blockers:** None
-- **Round progress:** Phase 1 of 1 in progress
+- **Round progress:** Phase 1 of 1 complete ✅
