@@ -1,8 +1,8 @@
-# Round 19: SKU System Core Polish
+# Round 20: SKU Levels & Variants Polish
 
-> **Round:** 19 of 61
+> **Round:** 20 of 61
 > **Branch:** `claude/polish-round-12-auth-nlfDe`
-> **Phase:** Single phase — SKU System Core (Features 27–35d)
+> **Phase:** Single phase — SKU Levels (Features 36–43f)
 > **Execution mode:** Quality
 
 ---
@@ -13,20 +13,15 @@
 
 | # | Issue | Severity | File | Feature |
 |---|-------|----------|------|---------|
-| 1 | SkuFormSheet.tsx is 425 lines — over 300 | MUST-FIX | SkuFormSheet.tsx | F27 |
-| 2 | SkuLevelEditor.tsx is 365 lines — over 300 | MUST-FIX | SkuLevelEditor.tsx | F36 |
-
-### Out of Scope
-- Equipment UI for routing metadata — new feature
-- Type safety refactors (as any casts) — working pattern
-- Additional form validation — working as-is
+| 1 | LevelSufficiencyForm: courtesy upgrade error lets form proceed | SHOULD-FIX | LevelSufficiencyForm.tsx | F42 |
+| 2 | LevelSelector: no empty state when no active levels | SHOULD-FIX | LevelSelector.tsx | F36 |
 
 ### Already Solid
-- All loading/error/empty states ✓
-- Dark mode ✓
-- Duplicate SKU action ✓
-- Calibration page ✓
-- Customer catalog with search ✓
+- All files under 300 lines ✓
+- Guidance question editor with 3-question limit ✓
+- Smart level defaults with sizing-based rules ✓
+- Admin analytics with mismatch hotspots ✓
+- Calibration page with delta highlighting ✓
 
 ---
 
@@ -34,17 +29,14 @@
 
 | Batch | Title | Size | Files | Status | Context |
 |-------|-------|------|-------|--------|---------|
-| B1 | SkuLevelEditor decomposition (365→237 + extracted LevelForm) | S | 2 files | ✅ | ~46% |
-
-Note: SkuFormSheet (425 lines) stays as-is — single complex admin form with 20+ state vars.
-[OVERRIDE: decomposing sections would require massive prop drilling for single-use form]
+| B1 | LevelSufficiencyForm error handling + LevelSelector empty state | S | 2 files | ⬜ | |
 
 ---
 
 ## Session Handoff
 - **Branch:** `claude/polish-round-12-auth-nlfDe`
-- **Last completed:** B1 (Round 19 complete)
-- **Next up:** Round 19 complete — ready for Round 20
-- **Context at exit:** ~46%
+- **Last completed:** Round 19 complete. Starting Round 20.
+- **Next up:** B1
+- **Context at exit:** N/A
 - **Blockers:** None
-- **Round progress:** Phase 1 of 1 complete ✅
+- **Round progress:** Phase 1 of 1 in progress

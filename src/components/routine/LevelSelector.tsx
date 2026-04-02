@@ -15,7 +15,9 @@ export function LevelSelector({ levels, selectedLevelId, onSelect, compact }: Le
   const [expanded, setExpanded] = useState(false);
   const activeLevels = levels.filter((l) => l.is_active);
 
-  if (activeLevels.length === 0) return null;
+  if (activeLevels.length === 0) {
+    return <p className="text-xs text-muted-foreground">No service levels available.</p>;
+  }
 
   const selected = activeLevels.find((l) => l.id === selectedLevelId) ?? activeLevels[0];
 
