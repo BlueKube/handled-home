@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { ServiceDayZoneDetail } from "@/components/admin/ServiceDayZoneDetail";
 import { useServiceDayCapacity } from "@/hooks/useServiceDayCapacity";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 const DAY_ABBR = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const DAY_KEYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
@@ -60,7 +61,7 @@ function ZoneCard({ zone, onClick }: { zone: any; onClick: () => void }) {
 }
 
 export default function AdminServiceDays() {
-  const { data: zones, isLoading } = useZones();
+  const { data: zones, isLoading, isError, refetch } = useZones();
   const [selectedZone, setSelectedZone] = useState<{ id: string; name: string } | null>(null);
 
   return (
@@ -70,7 +71,9 @@ export default function AdminServiceDays() {
         <p className="text-caption">Zone utilization, assignments, and overrides.</p>
       </div>
 
-      {isLoading ? (
+      {isError ? (
+        <QueryErrorCard message="Failed to load zones." onRetry={() => refetch()} />
+      ) : isLoading ? (
         <div className="space-y-3">
           <Skeleton className="h-16 w-full" />
           <Skeleton className="h-16 w-full" />
