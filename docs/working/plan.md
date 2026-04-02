@@ -1,31 +1,34 @@
-# Rounds 32-35 Progress
+# Rounds 30-38 Progress
 
 > **Branch:** `claude/polish-round-12-auth-nlfDe`
-> **Execution mode:** Quality
 
 ---
 
-## Round 32: Route Optimization (F95–98) ✅
-All 4 features verified at 9/10 — no fixes needed.
+## Completed Rounds
 
-## Round 33: Automation Engine (F224–232) — IN PROGRESS
-Agent audit running. 9 features.
+| Round | Features | Fixes | Status |
+|-------|----------|-------|--------|
+| 30 | F286–305 (20) | 14 | ✅ |
+| 31 | F306–325 (20) | 6 | ✅ |
+| 32 | F95–98 (4) | 0 | ✅ audit-only |
+| 33 | F224–232 (9) | 2 | ✅ (5 features remain 5-7/10 — need new features) |
+| 34 | F83–90 (8) | 3 | ✅ |
+| 35 | F91–94 (4) | 0 | ✅ audit-only |
+| 36 | F99–104 (6) | 5 | ✅ (MUST-FIX: upload_status case bug) |
+| 37 | F163–173, F216–218 (14) | 5 | ✅ (removed orphaned VisitRatingCard) |
+| 38 | F78–82 (5) | 3 | ✅ |
 
-## Round 34: Job Execution (F83–90) ✅
-3 error state fixes applied (JobChecklist, JobPhotos, AdminJobDetail). All 8 features at 9/10.
-
-## Round 35: Provider Day & Route (F91–94) ✅
-All 4 features verified at 9/10 — no fixes needed.
+**Totals: 90 features audited, 38 fixes applied, 9 rounds complete**
 
 ---
 
 ## Session Handoff
 - **Branch:** `claude/polish-round-12-auth-nlfDe`
-- **Last completed:** Round 35 (Rounds 30-32, 34-35 all complete)
-- **Next up:** Round 33 agent results, then Round 36+
-- **Context at exit:** ~30%
+- **Last completed:** Round 38
+- **Next up:** Round 39 — Provider Onboarding & BYOC (F326–342)
+- **Context at exit:** ~40%
 - **Blockers:** None
-- **Round progress:** 5 rounds complete (30-32, 34-35), Round 33 pending agent results
+- **Round progress:** 9 of 61 rounds complete in this session
 
 ### Branch chaining note
 Continue on this same branch (`claude/polish-round-12-auth-nlfDe`). All rounds chain on this single branch.

@@ -146,11 +146,11 @@
 
 ## X. Guided Customer Onboarding `mental-load-reduction`
 
-78. 6-step onboarding wizard: Property → ZIP/Zone Check → Plan Selection → Subscribe → Service Day → Build Routine — 8/10
-79. Zone availability check with automatic waitlist signup if no zone covers the ZIP — 8/10
-80. Onboarding progress persistence: auto-resumes at the exact step on return — 8/10
-81. Checkout success polling with auto-advance when subscription appears — 8/10
-82. Property gate distinguishes truly new users from churned customers returning — 8/10
+78. 6-step onboarding wizard: Property → ZIP/Zone Check → Plan Selection → Subscribe → Service Day → Build Routine — 9/10
+79. Zone availability check with automatic waitlist signup if no zone covers the ZIP — 9/10
+80. Onboarding progress persistence: auto-resumes at the exact step on return — 9/10
+81. Checkout success polling with auto-advance when subscription appears — 9/10
+82. Property gate distinguishes truly new users from churned customers returning — 9/10
 
 ---
 
