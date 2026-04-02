@@ -156,13 +156,11 @@ function simulateRoute(
     const travel = driveMinutes(curLat, curLng, stop.lat, stop.lng);
     currentTime += travel;
 
-    // Advance past blocked segments
-    if (segments.length > 0 && segIdx < segments.length) {
-      if (currentTime >= segments[segIdx].endMinutes) {
-        segIdx++;
-        if (segIdx < segments.length) {
-          currentTime = Math.max(currentTime, segments[segIdx].startMinutes);
-        }
+    // Advance past blocked segments (loop handles multiple consecutive blocks)
+    while (segments.length > 0 && segIdx < segments.length && currentTime >= segments[segIdx].endMinutes) {
+      segIdx++;
+      if (segIdx < segments.length) {
+        currentTime = Math.max(currentTime, segments[segIdx].startMinutes);
       }
     }
 
@@ -296,13 +294,11 @@ function computeRouteCost(
     totalTravel += travel;
     currentTime += travel;
 
-    // Segment transitions
-    if (segments.length > 0 && segIdx < segments.length) {
-      if (currentTime >= segments[segIdx].endMinutes) {
-        segIdx++;
-        if (segIdx < segments.length) {
-          currentTime = Math.max(currentTime, segments[segIdx].startMinutes);
-        }
+    // Segment transitions (loop handles multiple consecutive blocks)
+    while (segments.length > 0 && segIdx < segments.length && currentTime >= segments[segIdx].endMinutes) {
+      segIdx++;
+      if (segIdx < segments.length) {
+        currentTime = Math.max(currentTime, segments[segIdx].startMinutes);
       }
     }
 
@@ -501,13 +497,11 @@ function computeEtaRanges(
     const travel = driveMinutes(curLat, curLng, stop.lat, stop.lng);
     currentTime += travel;
 
-    // Segment transitions
-    if (segments.length > 0 && segIdx < segments.length) {
-      if (currentTime >= segments[segIdx].endMinutes) {
-        segIdx++;
-        if (segIdx < segments.length) {
-          currentTime = Math.max(currentTime, segments[segIdx].startMinutes);
-        }
+    // Segment transitions (loop handles multiple consecutive blocks)
+    while (segments.length > 0 && segIdx < segments.length && currentTime >= segments[segIdx].endMinutes) {
+      segIdx++;
+      if (segIdx < segments.length) {
+        currentTime = Math.max(currentTime, segments[segIdx].startMinutes);
       }
     }
 
