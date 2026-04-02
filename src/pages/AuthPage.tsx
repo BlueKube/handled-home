@@ -163,10 +163,13 @@ export default function AuthPage() {
             <button type="button" className="underline disabled:opacity-50" disabled={resettingPassword} onClick={async () => {
               if (!email) { toast({ title: "Enter your email", description: "Type your email address above, then click Forgot password.", variant: "destructive" }); return; }
               setResettingPassword(true);
-              const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth` });
-              setResettingPassword(false);
-              if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
-              toast({ title: "Check your email", description: "We sent a password reset link to " + email + "." });
+              try {
+                const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth` });
+                if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+                toast({ title: "Check your email", description: "We sent a password reset link to " + email + "." });
+              } finally {
+                setResettingPassword(false);
+              }
             }}>
               {resettingPassword ? "Sending..." : "Forgot password?"}
             </button>
