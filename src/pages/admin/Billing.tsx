@@ -14,7 +14,7 @@ import {
 import { PageSkeleton } from "@/components/PageSkeleton";
 import { DunningTracker } from "@/components/admin/billing/DunningTracker";
 import { QueryErrorCard } from "@/components/QueryErrorCard";
-import { formatCents } from "@/lib/formatCents";
+import { formatCents } from "@/utils/format";
 
 const subStatusConfig: Record<string, { label: string; color: string }> = {
   active: { label: "Active", color: "bg-success" },

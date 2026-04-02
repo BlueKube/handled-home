@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, AlertTriangle, Shield } from "lucide-react";
 import { PageSkeleton } from "@/components/PageSkeleton";
 import { QueryErrorCard } from "@/components/QueryErrorCard";
-import { formatCents } from "@/lib/formatCents";
+import { formatCents } from "@/utils/format";
 
 export default function CustomerBillingReceipt() {
   const { invoiceId } = useParams();

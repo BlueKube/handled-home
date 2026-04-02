@@ -6,7 +6,7 @@ import { ChevronLeft, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageSkeleton } from "@/components/PageSkeleton";
 import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
-import { formatCents } from "@/lib/formatCents";
+import { formatCents } from "@/utils/format";
 
 const statusColors: Record<string, string> = {
   PAID: "default",

@@ -10,7 +10,7 @@ import { PageSkeleton } from "@/components/PageSkeleton";
 import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HelpTip } from "@/components/ui/help-tip";
-import { formatCents } from "@/lib/formatCents";
+import { formatCents } from "@/utils/format";
 
 export default function CustomerBillingPage() {
   const navigate = useNavigate();
