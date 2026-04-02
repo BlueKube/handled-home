@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-> **Last updated:** 2026-03-31
+> **Last updated:** 2026-04-02
 
 Universal instructions for AI agents working in this repo. No project-specific content lives here — all project context lives in the canonical documents below.
 
@@ -461,6 +461,55 @@ If batches remain ⬜:
 
 Before exiting: push all commits and update the Session Handoff section of plan.md.
 ```
+
+---
+
+## 8b. Active Multi-Session Plan: Feature Polish (Rounds 12–61)
+
+> **Status:** ACTIVE — 50 rounds of feature polish, 10 features per round.
+> **Plan:** `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md`
+> **Goal:** Bring all 482 features from 8/10 to 9/10 or 10/10 maturity.
+
+### Branch Naming & Chaining
+Branches are numbered sequentially and **chain off each other** (not main):
+```
+polish/round-12-auth-identity       ← from current HEAD
+polish/round-13-phone-identity      ← from round-12 branch
+polish/round-14-property-profiles   ← from round-13 branch
+...
+polish/round-61-final-sweep         ← from round-60 branch
+```
+
+**At session start:**
+1. Read `docs/working/plan.md` → Session Handoff section
+2. Find the branch for the current or most recently completed round
+3. `git fetch origin && git checkout <branch> && git pull`
+4. If starting a new round: `git checkout -b polish/round-<N>-<name>`
+
+### Context Management — CRITICAL
+The Claude Code agent consistently **overestimates** its context usage by ~2×. A reported "72%" is actually ~36%.
+- **Always use `/context` command** to check actual context — do NOT estimate.
+- Continue working until `/context` reports **actual usage over 60%** (which may correspond to a reported ~80-90% estimate).
+- When actual context hits 60%: finish current batch, push, update Session Handoff, exit.
+
+### What This Plan Does NOT Do
+- Does NOT add new features
+- Does NOT refactor working patterns into different patterns
+- Does NOT change database schema unless fixing a real bug
+- Does NOT touch files outside the current round's scope
+
+### Per-Feature Polish Checklist
+For each feature in the round, verify:
+- [ ] Implementation matches feature description
+- [ ] Error states (network failure, empty data, auth failure)
+- [ ] Loading states (skeleton or spinner)
+- [ ] Empty states (icon + message)
+- [ ] Dark-mode colors correct
+- [ ] No dead code, unused imports, stale comments
+- [ ] Component under 300 lines
+- [ ] Math/calculations verified
+- [ ] Consistent with similar patterns
+- [ ] Mobile-responsive
 
 ---
 
