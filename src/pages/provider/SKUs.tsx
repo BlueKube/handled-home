@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Search, Clock, CloudRain, Package } from "lucide-react";
+import { Search, Clock, CloudRain, Package, AlertTriangle } from "lucide-react";
 import { useSkus, FULFILLMENT_MODE_LABELS } from "@/hooks/useSkus";
 import type { ServiceSku } from "@/hooks/useSkus";
 import { SkuDetailView } from "@/components/SkuDetailView";
@@ -16,7 +16,7 @@ export default function ProviderSKUs() {
   const [search, setSearch] = useState("");
   const [selectedSku, setSelectedSku] = useState<ServiceSku | null>(null);
 
-  const { data: skus = [], isLoading } = useSkus({ search: search || undefined });
+  const { data: skus = [], isLoading, isError } = useSkus({ search: search || undefined });
 
   return (
     <div className="animate-fade-in p-4 pb-24 space-y-4">
@@ -42,6 +42,11 @@ export default function ProviderSKUs() {
               </div>
             </div>
           ))}
+        </div>
+      ) : isError ? (
+        <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-4">
+          <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
+          <p className="text-sm text-destructive">Failed to load Available Services data. Please try again.</p>
         </div>
       ) : skus.length === 0 ? (
         <EmptyState

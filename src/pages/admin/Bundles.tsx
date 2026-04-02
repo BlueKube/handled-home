@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Users, CalendarDays, Package } from "lucide-react";
+import { Users, CalendarDays, Package, AlertTriangle } from "lucide-react";
 import { CADENCE_LABELS } from "@/hooks/useRoutinePreview";
 
 interface RoutineItem {
@@ -34,7 +34,7 @@ interface RoutineSummary {
 export default function AdminBundles() {
   const [selectedRoutine, setSelectedRoutine] = useState<RoutineSummary | null>(null);
 
-  const { data: routines, isLoading } = useQuery({
+  const { data: routines, isLoading, isError } = useQuery({
     queryKey: ["admin-routines"],
     queryFn: async () => {
       // M8: Single-pass query approach instead of N+1
@@ -141,6 +141,11 @@ export default function AdminBundles() {
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 w-full" />)}
+        </div>
+      ) : isError ? (
+        <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-4">
+          <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
+          <p className="text-sm text-destructive">Failed to load Bundles data. Please try again.</p>
         </div>
       ) : (routines ?? []).length === 0 ? (
         <p className="text-sm text-muted-foreground py-8 text-center">No routines yet.</p>

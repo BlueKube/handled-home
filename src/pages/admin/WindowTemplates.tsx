@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useWindowTemplates, useCreateWindowTemplate, useUpdateWindowTemplate, useDeleteWindowTemplate, type WindowTemplate } from "@/hooks/useWindowTemplates";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, Clock, CalendarClock, Edit2 } from "lucide-react";
+import { Plus, Trash2, Clock, CalendarClock, Edit2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
 const DAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -157,7 +157,7 @@ function TemplateFormSheet({
 
 export default function WindowTemplates() {
   const [selectedZone, setSelectedZone] = useState<string>("all");
-  const { data: templates, isLoading } = useWindowTemplates(selectedZone === "all" ? undefined : selectedZone);
+  const { data: templates, isLoading, isError } = useWindowTemplates(selectedZone === "all" ? undefined : selectedZone);
   const deleteTemplate = useDeleteWindowTemplate();
 
   const { data: zones = [] } = useQuery({
@@ -222,6 +222,11 @@ export default function WindowTemplates() {
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 w-full" />)}
+        </div>
+      ) : isError ? (
+        <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-4">
+          <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
+          <p className="text-sm text-destructive">Failed to load Window Templates data. Please try again.</p>
         </div>
       ) : byCategory.size === 0 ? (
         <div className="text-center py-12 text-muted-foreground">

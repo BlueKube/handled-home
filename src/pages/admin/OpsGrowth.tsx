@@ -9,13 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronLeft, Users, Send, Briefcase, Zap, ShieldAlert } from "lucide-react";
+import { ChevronLeft, Users, Send, Briefcase, Zap, ShieldAlert, AlertTriangle } from "lucide-react";
 
 export default function OpsGrowth() {
   const nav = useNavigate();
   const [tab, setTab] = useState("overview");
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["ops-growth-health-full"],
     queryFn: async () => {
       const sevenDaysAgo = new Date();
@@ -92,6 +92,18 @@ export default function OpsGrowth() {
         <Skeleton className="h-8 w-48" />
         <div className="grid gap-3 grid-cols-2">
           {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-6 space-y-4">
+        <h1 className="text-h2">Growth</h1>
+        <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-4">
+          <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
+          <p className="text-sm text-destructive">Failed to load Growth data. Please try again.</p>
         </div>
       </div>
     );

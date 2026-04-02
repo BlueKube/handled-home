@@ -246,9 +246,15 @@ export default function AdminReports() {
 }
 
 function LossLeadersTab() {
-  const { data, isLoading } = useLossLeaderMetrics();
+  const { data, isLoading, isError } = useLossLeaderMetrics();
 
   if (isLoading) return <div className="space-y-4 mt-4"><Skeleton className="h-48" /><Skeleton className="h-32" /><Skeleton className="h-24" /></div>;
+  if (isError) return (
+    <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-4 mt-4">
+      <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
+      <p className="text-sm text-destructive">Failed to load Reports data. Please try again.</p>
+    </div>
+  );
   if (!data) return null;
 
   return (

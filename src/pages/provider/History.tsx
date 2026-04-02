@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useProviderJobs } from "@/hooks/useProviderJobs";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Clock, ChevronRight, ChevronLeft } from "lucide-react";
+import { Clock, ChevronRight, ChevronLeft, AlertTriangle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 
 export default function ProviderHistory() {
   const navigate = useNavigate();
-  const { data: jobs, isLoading } = useProviderJobs("history");
+  const { data: jobs, isLoading, isError } = useProviderJobs("history");
 
   // Group by date
   const grouped = (jobs ?? []).reduce<Record<string, typeof jobs>>((acc, job) => {
@@ -43,6 +43,11 @@ export default function ProviderHistory() {
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-20 w-full rounded-2xl" />
           ))}
+        </div>
+      ) : isError ? (
+        <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-4">
+          <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
+          <p className="text-sm text-destructive">Failed to load Job History data. Please try again.</p>
         </div>
       ) : Object.keys(grouped).length === 0 ? (
         <EmptyState
