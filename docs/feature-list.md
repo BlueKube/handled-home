@@ -117,15 +117,15 @@
 
 ## VIII. Service Day System `density-driver` `mental-load-reduction`
 
-59. System-assigned recurring Service Day based on zone, capacity, and route optimization — 8/10
-60. Customer confirm/reject flow with exactly one rejection token — 8/10
-61. 2–3 controlled alternative day offers on rejection (never infinite cycling) — 8/10
-62. Atomic capacity reservation: capacity is reserved when an offer is created, moved on alternative selection — 8/10
-63. "System Recommended" badge with efficiency-framed reason text — 8/10
-64. "Must be home" toggle with time window selector (morning/afternoon) — 8/10
-65. "Try to align days" preference toggle with tradeoff messaging — 8/10
-66. Admin utilization view: Mon–Sun assignment counts per zone with stability indicators — 8/10
-67. Admin override with mandatory reason, capacity warnings, and full audit logging — 8/10
+59. System-assigned recurring Service Day based on zone, capacity, and route optimization — 9/10
+60. Customer confirm/reject flow with exactly one rejection token — 9/10
+61. 2–3 controlled alternative day offers on rejection (never infinite cycling) — 9/10
+62. Atomic capacity reservation: capacity is reserved when an offer is created, moved on alternative selection — 9/10
+63. "System Recommended" badge with efficiency-framed reason text — 9/10
+64. "Must be home" toggle with time window selector (morning/afternoon) — 9/10
+65. "Try to align days" preference toggle with tradeoff messaging — 9/10
+66. Admin utilization view: Mon–Sun assignment counts per zone with stability indicators — 9/10
+67. Admin override with mandatory reason, capacity warnings, and full audit logging — 9/10
 
 ---
 
