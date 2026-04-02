@@ -298,6 +298,21 @@ The single most common finding across all 22+ rounds was missing `isError` handl
 **Type:** Agent Signal
 Customer-facing pages consistently use semantic tokens (`text-success`, `text-destructive`). Admin pages more often use raw Tailwind (`text-green-600`, `text-amber-600`, `bg-green-100`) because they were built faster with less design review. Future polish should grep for `text-green-|text-red-|text-amber-|bg-green-|bg-red-` in `src/pages/admin/`.
 
+### [2026-04-02] Parallel audit agents + targeted error-state fixes are the most efficient polish pattern
+**Source:** Rounds 51-60 polish session (38 fixes, 34 files, 12 batches)
+**Type:** Agent Signal
+Launching 4-5 audit agents in parallel (edge functions, platform infra, testing/legal, design/UX) while processing earlier results produced maximum throughput. The single most common finding across all audits was missing `isError` handling — 22 pages fixed in this session alone. A codebase-wide grep `grep -rl "isLoading" src/pages/ | while read f; do if ! grep -q "isError" "$f"; then echo "$f"; fi; done` is the fastest way to find remaining gaps.
+
+### [2026-04-02] Browse page ZIP check was fake — always showed "expanding to new areas"
+**Source:** Round 55 audit (testing & legal)
+**Type:** Workflow
+The Browse page's ZIP coverage check (`handleCheckZip`) was a no-op that always set `zipChecked = true` with no actual zone lookup. In-market users entering valid ZIPs were told "we're expanding" — potentially deterring signups. Fixed by querying `zone_zips` table. Lesson: public-facing pages need functional verification, not just visual audits.
+
+### [2026-04-02] BundleSavingsCard parsed "$149/4 weeks" as $1494
+**Source:** Round 57 audit (UX value proposition)
+**Type:** Agent Signal
+`parseInt(planDisplayPrice.replace(/[^0-9]/g, ""), 10)` strips ALL non-digits, so "$149/4 weeks" becomes "1494". Fixed with `/\$(\d+)/` regex match. Any price-parsing code should be reviewed for multi-digit format strings.
+
 ### Dismissed
 
 _None yet._

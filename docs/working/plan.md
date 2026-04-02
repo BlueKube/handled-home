@@ -20,8 +20,10 @@
 | B8 | Browse: real ZIP check, SKU error state, SPA footer links | S | ✅ | — |
 | B9 | Billing error states: BillingHistory, BillingMethods, Subscribe | S | ✅ | — |
 | B10 | Error states: ServiceDay, PlanDetail, Earnings, Payouts, Reschedule | S | ✅ | — |
+| B11 | Admin error states batch 1: Plans, SKUs, OpsZones, SupportDashboard, LevelAnalytics, Subscriptions | S | ✅ | — |
+| B12 | Admin error states batch 2: ExceptionAnalytics, ChangeLog, OpsZoneDetail, OpsSupport, AssignmentConfig, SkuCalibration | S | ✅ | — |
 
-**Total: 10 batches, 26 code fixes across 28 files**
+**Total: 12 batches, 38 code fixes across 34 files**
 
 ---
 
@@ -71,8 +73,8 @@
 
 ## Session Handoff
 - **Branch:** `claude/polish-planned-features-l9XIY`
-- **Last completed:** B10 (Error states — ServiceDay, PlanDetail, Earnings, Payouts, Reschedule)
-- **Next up:** Round 61 — Final Verification & Doc Sync, or additional polish on remaining 8/10 features
+- **Last completed:** B12 (Admin error states batch 2)
+- **Next up:** Continue with remaining isError coverage or start Round 61 Final Verification
 - **Context at exit:** —
 - **Blockers:** None
 - **Round progress:** Rounds 51–60 complete (10 rounds in one session)
