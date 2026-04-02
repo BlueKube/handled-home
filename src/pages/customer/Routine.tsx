@@ -17,6 +17,7 @@ import { RoutineItemCard } from "@/components/routine/RoutineItemCard";
 import { EntitlementGuardrails } from "@/components/routine/EntitlementGuardrails";
 import { SeasonalBoostsSection } from "@/components/routine/SeasonalBoostsSection";
 import { RoutineSuggestion } from "@/components/customer/RoutineSuggestion";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowRight, Sparkles, Loader2 } from "lucide-react";
@@ -35,7 +36,7 @@ export default function CustomerRoutine() {
   const zoneId = subscription?.zone_id ?? null;
   const { data: entitlements, isLoading: entLoading } = useEntitlements(planId, zoneId);
   const { data: browsableSkus } = useSkus({ status: "active" });
-  const { data: routineData, isLoading: routineLoading } = useRoutine(property?.id, planId);
+  const { data: routineData, isLoading: routineLoading, isError: routineError, refetch: refetchRoutine } = useRoutine(property?.id, planId);
   const createRoutine = useCreateRoutine();
   const addItem = useAddRoutineItem();
   const removeItem = useRemoveRoutineItem();
@@ -153,6 +154,14 @@ export default function CustomerRoutine() {
         <Skeleton className="h-32 w-full" />
         <Skeleton className="h-20 w-full" />
         <Skeleton className="h-20 w-full" />
+      </div>
+    );
+  }
+
+  if (routineError) {
+    return (
+      <div className="p-4 pb-24 animate-fade-in">
+        <QueryErrorCard message="Couldn't load your routine" onRetry={refetchRoutine} />
       </div>
     );
   }
