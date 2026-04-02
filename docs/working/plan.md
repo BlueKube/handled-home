@@ -17,8 +17,9 @@
 | B5 | Dark-mode: text-amber-600/text-green-600 → 400 variants | S | ✅ | — |
 | B6 | Customer error states: HomeTimeline, History, Subscription, Services | S | ✅ | — |
 | B7 | UX: BundleSavingsCard parser, dead HomeTimeline, tab bar dot | S | ✅ | — |
+| B8 | Browse: real ZIP check, SKU error state, SPA footer links | S | ✅ | — |
 
-**Total: 7 batches, 15 code fixes across 18 files**
+**Total: 8 batches, 18 code fixes across 19 files**
 
 ---
 
@@ -55,6 +56,11 @@
 - Added `isError` handling to 4 customer pages: HomeTimeline (deleted — dead code), History, Subscription, Services
 - Deleted dead `HomeTimeline.tsx` (no route registered, Activity page covers same functionality)
 
+### Round 55 — App Store & Legal (Browse Page)
+- `Browse.tsx`: ZIP coverage check now queries `zone_zips` table instead of always showing "expanding" message — in-market users see correct coverage status
+- `Browse.tsx`: Added SKU catalog error state with AlertTriangle icon
+- `Browse.tsx`: Footer links converted from `<a>` to React Router `<Link>` to prevent full page reloads
+
 ### Round 60 — Cross-Cutting Polish
 - No console.log/debug statements found in production code (all console.warn calls are intentional error logging in catch blocks)
 - No unused imports found beyond those already fixed
@@ -63,7 +69,7 @@
 
 ## Session Handoff
 - **Branch:** `claude/polish-planned-features-l9XIY`
-- **Last completed:** B7 (UX fixes — BundleSavingsCard, HomeTimeline, BottomTabBar)
+- **Last completed:** B8 (Browse page — real ZIP check, SKU error state, SPA links)
 - **Next up:** Round 61 — Final Verification & Doc Sync, or additional polish on remaining 8/10 features
 - **Context at exit:** —
 - **Blockers:** None
