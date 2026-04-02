@@ -13,9 +13,9 @@ export const DUNNING_STEPS = [
 export type DunningStep = typeof DUNNING_STEPS[number];
 
 export const DUNNING_TIMELINE: Record<DunningStep, { dayOffset: number; label: string }> = {
-  retry_1: { dayOffset: 3, label: "First retry" },
-  retry_2: { dayOffset: 7, label: "Second retry" },
-  retry_3: { dayOffset: 10, label: "Third retry" },
+  retry_1: { dayOffset: 1, label: "First retry" },
+  retry_2: { dayOffset: 3, label: "Second retry" },
+  retry_3: { dayOffset: 7, label: "Third retry" },
   grace_start: { dayOffset: 0, label: "Grace period starts" },
   grace_end: { dayOffset: 14, label: "Grace period ends / Service suspended" },
   canceled: { dayOffset: 30, label: "Auto-canceled" },
