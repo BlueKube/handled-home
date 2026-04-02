@@ -37,6 +37,10 @@ The agent prompt must also include the known-patterns list so it doesn't flag fa
 - `as any` casts on Supabase queries — intentional
 - `cancel_at_period_end + status='canceling'` — standard cancel pattern
 - SECURITY DEFINER on trigger functions — required for auth.users access
+- **Error handling at page level counts**: If a hook throws and the calling page has try/catch + toast.error, that IS handled. Only flag error states as FAIL if NEITHER the hook NOR any caller handles the error.
+- **shadcn default button sizes are acceptable**: `size="sm"` (h-9/36px) and `size="icon"` with `h-8 w-8` (32px) are standard shadcn patterns and should NOT be flagged as touch target violations for non-primary actions (delete icons, secondary buttons). Only flag touch targets on PRIMARY CTAs that are the main action on a screen.
+- **Backend/edge functions have no line limit**: The 300-line component limit applies to React components only, not Supabase Edge Functions or utility libraries.
+- **Pure computation hooks need no error/loading/empty states**: Hooks that compute derived data (useMemo, pure functions) without fetching data do not need error, loading, or empty state handling.
 
 The agent must return a structured report:
 ```

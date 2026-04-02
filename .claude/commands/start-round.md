@@ -25,6 +25,7 @@ git checkout <branch-from-handoff>
 git pull origin <branch-from-handoff>
 
 # If starting a new round:
+# IMPORTANT: Chain off the PREVIOUS round's branch, not main
 git checkout -b polish/round-<N>-<name>
 ```
 
@@ -32,7 +33,7 @@ Branch naming follows the chaining protocol from CLAUDE.md Section 8b.
 
 ### Step 3: Identify features for this round
 
-Read the round's section from `FULL-IMPLEMENTATION-PLAN.md`. Extract the feature list with numbers and descriptions.
+Read the round's section from `FULL-IMPLEMENTATION-PLAN.md`. Extract the feature list with numbers and descriptions from `docs/feature-list.md`.
 
 ### Step 4: Create plan.md
 
@@ -41,46 +42,51 @@ Use the Write tool to create `docs/working/plan.md` with:
 ```markdown
 # Round <N>: <Round Name>
 
-## Features
-1. Feature <num> — <description>
-2. Feature <num> — <description>
-...
+> **Round:** <N> of 61
+> **Branch:** `<branch-name>`
+> **Phase:** Single phase — Features <range>
+> **Execution mode:** Quality
 
-## Batches
+---
 
-| Batch | Features | Size | Status | Context |
-|-------|----------|------|--------|---------|
-| B1 | <feat nums> | S/M | ⬜ | |
-| B2 | <feat nums> | S/M | ⬜ | |
-...
+## Batch Breakdown
+
+| Batch | Title | Size | Files | Status | Context |
+|-------|-------|------|-------|--------|---------|
+| B1 | <title> | S/M | | ⬜ | |
+
+---
 
 ## Session Handoff
-- **Branch:** polish/round-<N>-<name>
+- **Branch:** <branch-name>
 - **Last completed:** None
 - **Next up:** B1 — <title>
 - **Context at exit:** N/A
 - **Blockers:** None
+- **Round progress:** Starting
 ```
 
-Group 2-3 related features per batch. Most polish batches are Small or Medium.
+### Step 5: Run the round
 
-### Step 5: Create batch spec for B1
+Use `/polish-round` to audit and fix all features in the round in parallel.
 
-Create `docs/working/batch-specs/b1-<kebab-title>.md` with the standard template (see `/new-batch`).
+This is the preferred approach for efficiency. It:
+- Groups features into 5-7 feature batches
+- Launches parallel audit agents (one per batch)
+- Processes results as agents complete
+- Batches fix commits by theme
 
-### Step 6: Begin feature audits
+For individual feature debugging, `/polish-feature <num> "<desc>"` is still available.
 
-For each feature in B1, run `/polish-feature <number> "<description>"`.
+### Step 6: After all features are audited and fixed
 
-This spawns a sub-agent per feature that audits and returns a scored report. Fixes happen in main context based on the report.
+1. Update `docs/feature-list.md` with new scores
+2. Update `docs/working/plan.md` — mark batches ✅, update Session Handoff
+3. Check context with `/context` — if under 60%, continue to next round. If over 60%, push and exit.
 
-### Step 7: After all B1 features are audited and fixed
+### Context management
 
-1. Run `/commit-push` (which pre-validates with tsc + build)
-2. Run `/review-batch` (which auto-gathers diff/spec and spawns review lanes)
-3. Update the progress table in `plan.md`: B1 status → ✅, record context %
-4. Check context with `/context` — if under 60%, continue to B2. If over 60%, update Session Handoff and exit.
-
-### Ongoing: Repeat for each batch
-
-Continue the loop: audit features → fix → commit-push → review-batch → update progress → check context.
+- Use `/context` after each round (not after each feature)
+- The 200k context window is the effective limit, not the model's 1M capacity
+- Exit at 60% of the 200k window (~120k tokens)
+- Always push and update Session Handoff before exiting

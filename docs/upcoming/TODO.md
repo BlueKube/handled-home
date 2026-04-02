@@ -122,3 +122,21 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 - [ ] **Send actual warm handoff emails to new homeowners** — process-new-homeowner-handoff creates the customer_lead but doesn't send emails. Need email service integration.
   - **Why:** New homeowners won't know about Handled Home without outreach
   - **Blocked:** Email service (Resend/SendGrid) not configured
+
+## Polish Rounds 28-29 Deferred Items (2026-04-02)
+
+- [ ] **Feature 75: Confusion detector unimplemented** — Rated 1/10. "Inline help when a customer changes cadence 3+ times" — needs a per-session cadence change counter in Routine.tsx and a help banner. Not implemented at all.
+  - **Why:** Not a polish fix — this is a new feature build
+  - **Blocked:** Nothing — just needs implementation
+
+- [ ] **Feature 263: WorkSetup.tsx 469 lines needs decomposition** — Over the 300-line limit. Extract LocationStep, ServicesStep, ScheduleStep into sub-components.
+  - **Why:** Decomposition requires careful state management across extracted steps
+  - **Blocked:** Nothing — can be done in a future polish round
+
+- [ ] **Feature 263/264: Provider geo-indexes not computed on save** — WorkSetup.handleSave doesn't compute h3_index/home_geohash when lat/lng are provided. The h3-js library is available client-side.
+  - **Why:** Provider spatial assignment queries return no results without geo-indexes
+  - **Blocked:** Nothing — straightforward fix
+
+- [ ] **Feature 272: ZoneBuilder.tsx 579 lines needs decomposition** — Extract StepRegion, StepSettings, StepPreview, StepEdit, StepCommit into sub-components.
+  - **Why:** Major refactor, risk of introducing bugs in 5-step wizard
+  - **Blocked:** Nothing — can be done in a future round
