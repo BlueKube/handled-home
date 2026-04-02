@@ -22,8 +22,9 @@
 | B10 | Error states: ServiceDay, PlanDetail, Earnings, Payouts, Reschedule | S | ✅ | — |
 | B11 | Admin error states batch 1: Plans, SKUs, OpsZones, SupportDashboard, LevelAnalytics, Subscriptions | S | ✅ | — |
 | B12 | Admin error states batch 2: ExceptionAnalytics, ChangeLog, OpsZoneDetail, OpsSupport, AssignmentConfig, SkuCalibration | S | ✅ | — |
+| B13 | Feature polish: FixPaymentPanel dunning error, QualityScore tier error + unused import | S | ✅ | — |
 
-**Total: 12 batches, 38 code fixes across 34 files**
+**Total: 13 batches, 41 code fixes across 37 files**
 
 ---
 
@@ -73,8 +74,8 @@
 
 ## Session Handoff
 - **Branch:** `claude/polish-planned-features-l9XIY`
-- **Last completed:** B12 (Admin error states batch 2)
-- **Next up:** Continue with remaining isError coverage or start Round 61 Final Verification
+- **Last completed:** B13 (FixPaymentPanel dunning error, QualityScore tier error)
+- **Next up:** Round 61 Final Verification & Doc Sync
 - **Context at exit:** —
 - **Blockers:** None
 - **Round progress:** Rounds 51–60 complete (10 rounds in one session)
