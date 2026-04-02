@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getCategoryLabel, getCategoryIcon } from "@/lib/serviceCategories";
 import { CalendarDays, Users } from "lucide-react";
 import { format, parseISO } from "date-fns";
@@ -21,7 +22,7 @@ interface HomeTeamCardProps {
 export function HomeTeamCard({ serviceDayConfirmed = false }: HomeTeamCardProps) {
   const { user } = useAuth();
 
-  const { data: providers, isLoading } = useQuery({
+  const { data: providers, isLoading, isError } = useQuery({
     queryKey: ["home_team", user?.id],
     enabled: !!user,
     queryFn: async () => {
@@ -74,7 +75,16 @@ export function HomeTeamCard({ serviceDayConfirmed = false }: HomeTeamCardProps)
     },
   });
 
-  if (isLoading || !providers || providers.length === 0) return null;
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-16 rounded-xl" />
+      </div>
+    );
+  }
+
+  if (isError || !providers || providers.length === 0) return null;
 
   return (
     <div className="space-y-2">

@@ -31,7 +31,11 @@ function ByocDashboard() {
   const [expanded, setExpanded] = useState<string | null>(null);
 
   if (isLoading) return <Skeleton className="h-40 rounded-xl" />;
-  if (isError) return null;
+  if (isError) return (
+    <Card className="p-4">
+      <p className="text-xs text-destructive text-center">Failed to load attribution data.</p>
+    </Card>
+  );
   if (attributions.length === 0) return null;
 
   const now = new Date();
