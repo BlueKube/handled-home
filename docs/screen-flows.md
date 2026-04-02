@@ -1401,6 +1401,49 @@ Each menu item: icon + label + ChevronRight, tappable
 **Empty State**: Bell icon + "No notifications yet — we'll let you know when there's activity on your home."
 **Error State**: "Notifications couldn't be loaded — you'll still receive push alerts. Pull down to refresh."
 
+### Screen 16.4: Household Section (in Settings)
+
+Household card in Account Settings showing:
+- **Member list**: name + role badge (owner/member) + remove button (owner only)
+- **Invite form**: email input + "Invite" button → creates pending household_members row
+- Auto-acceptance: when invitee logs in, `accept_household_invites` RPC matches by email
+
+### Screen 16.5: "I'm Moving" Entry Points
+
+Two entry points to the moving wizard:
+1. **Settings page**: "I'm moving" card with Truck icon → `/customer/moving`
+2. **Cancel flow intercept**: selecting "Moving to a new area" as cancel reason → redirects to `/customer/moving`
+
+---
+
+# FLOW 16C: "I'm Moving" Wizard
+
+**Route**: `/customer/moving`
+**Who**: Authenticated customer with PropertyGate
+**Purpose**: 4-step wizard that converts churn into retention + referral
+
+### Screen 16C.1: Move Date (Step 1)
+- Date picker: "When are you moving?"
+- "Keep services until move date" toggle (default: on)
+- `process_move_date_transitions` cron auto-cancels subscription on move date
+
+### Screen 16C.2: New Address (Step 2)
+- New address input (optional)
+- New ZIP code input → zone coverage check against active zones
+- "I don't know my new ZIP yet" skip option
+
+### Screen 16C.3: Coverage Result (Step 3)
+- **Covered ZIP**: "Great news — we serve your new area! We'll transfer your plan."
+- **Uncovered ZIP**: "We're not in your new area yet — we'll notify you when we launch." Saves customer_lead with source='moving', notify_on_launch=true.
+- **No ZIP provided**: "When you know your new address, come back and we'll check."
+
+### Screen 16C.4: New Homeowner Referral (Step 4)
+- "Know who's buying your home?" — name, email, phone inputs
+- Saves to property_transitions new_owner fields
+- `process-new-homeowner-handoff` edge function creates customer_lead for new homeowner
+- "Skip — I don't know yet" option
+- Completion screen: confirmation with next steps
+
 ---
 
 # FLOW 16A: Provider Browse (Public)
@@ -2205,7 +2248,13 @@ After submission, shows status-appropriate messaging:
 - Status options: new, contacted, applied, declined
 - Empty state: Users icon + "No referrals yet"
 
-**Data Sources**: `provider_leads` table, `provider_referrals` table
+#### Customers Tab
+- Table: email, phone, ZIP, source (moving/waitlist/referral badge), status (dropdown), date
+- Status options: new, contacted, notified, subscribed, declined
+- Notified leads show notification timestamp
+- Empty state: UserCircle icon + "No customer leads yet"
+
+**Data Sources**: `provider_leads` table, `provider_referrals` table, `customer_leads` table
 
 ---
 

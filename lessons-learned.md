@@ -261,6 +261,21 @@ The B7 reviewer caught that `select("id", { count: "exact", head: true })` retur
 **Type:** Agent Signal
 Completed Round 8 (10 batches, 5 phases) + Round 9 (9 batches, 6 phases) in a single session, reaching ~72% context. Total: 19 batches, 11 phases, 25 features added (454 total). Background review agents are effectively free — main context only grows from implementation work. The 60% threshold per-round is conservative; two small rounds fit comfortably.
 
+### [2026-04-02] RLS self-referencing policies cause infinite recursion in Postgres
+**Source:** B3 review (Round 10 Phase 2 — household_members)
+**Type:** Architecture
+A SELECT policy on `household_members` that queries `household_members` to check membership causes `ERROR: infinite recursion detected in policy`. Fix: use SECURITY DEFINER helper functions (`get_user_household_property_ids`, `is_household_owner`) that bypass RLS. This is a known Supabase multi-tenant pattern. Any table where RLS needs to self-reference requires a helper function.
+
+### [2026-04-02] Four rounds in one session at ~41% context (reported) / actual lower
+**Source:** Rounds 8-11 execution
+**Type:** Agent Signal
+Completed 4 rounds (34 batches, 53 features, 482 total) in a single session. `/context` showed 41% at the reported estimate but actual was lower (~36%). Small batches (S/Micro) with background review agents remain extremely context-efficient. The session covered: provider funnel build → hardening → phone/household/moving → pipeline automation. Product-design conversations between rounds don't consume meaningful context.
+
+### [2026-04-02] Review agents catch query key mismatches that cause stale UI
+**Source:** B4+B5 review (Round 10 Phase 2)
+**Type:** Agent Signal
+The reviewer caught that `useHouseholdInvites` invalidated `["household-members"]` but PropertyGate's query key was `["isHouseholdMember"]`. New household members would pass the RPC acceptance but still be redirected to onboarding until a manual refresh. Query key alignment across hooks that affect the same state is a recurring review-surface area.
+
 ### Dismissed
 
 _None yet._
