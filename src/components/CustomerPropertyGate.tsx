@@ -33,7 +33,7 @@ export function CustomerPropertyGate({ children }: CustomerPropertyGateProps) {
   });
 
   // Check if user is a household member of any property
-  const { data: isHouseholdMember, isLoading: memberLoading } = useQuery({
+  const { data: isHouseholdMember, isLoading: memberLoading, isError: memberError } = useQuery({
     queryKey: ["isHouseholdMember", user?.id],
     queryFn: async () => {
       if (!user) return false;
@@ -41,10 +41,11 @@ export function CustomerPropertyGate({ children }: CustomerPropertyGateProps) {
         .select("id", { count: "exact", head: true })
         .eq("user_id", user.id)
         .eq("status", "active");
-      if (error) return false;
+      if (error) throw error;
       return (count ?? 0) > 0;
     },
     enabled: !!user,
+    retry: 1,
   });
 
   const { data: subscription, isLoading: subLoading } = useCustomerSubscription();
@@ -58,7 +59,12 @@ export function CustomerPropertyGate({ children }: CustomerPropertyGateProps) {
     );
   }
 
-  // D1-F3 FIX: Only redirect truly new users (no property AND no subscription history AND not a household member).
+  // If household membership check failed, allow access rather than wrongly redirecting to onboarding
+  if (memberError) {
+    return <>{children}</>;
+  }
+
+  // Only redirect truly new users — users with no property, no subscription, and no household membership.
   const hasAnySub = subscription != null;
 
   if (!hasProperty && !hasAnySub && !isHouseholdMember) {

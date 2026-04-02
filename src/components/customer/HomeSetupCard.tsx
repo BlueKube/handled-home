@@ -3,6 +3,7 @@ import { usePropertyCoverage } from "@/hooks/usePropertyCoverage";
 import { usePropertySignals } from "@/hooks/usePropertySignals";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CheckCircle2, CircleDashed, ChevronRight, Sparkles } from "lucide-react";
 
 /**
@@ -14,7 +15,20 @@ export function HomeSetupCard() {
   const { hasData: hasCoverage, isLoading: covLoading } = usePropertyCoverage();
   const { hasData: hasSignals, isLoading: sigLoading } = usePropertySignals();
 
-  if (covLoading || sigLoading) return null;
+  if (covLoading || sigLoading) {
+    return (
+      <Card className="p-4 space-y-3 border-accent/20 bg-accent/5">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-5 w-5 rounded" />
+          <div className="flex-1 space-y-1.5">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-3 w-48" />
+          </div>
+        </div>
+        <Skeleton className="h-1.5 w-full rounded-full" />
+      </Card>
+    );
+  }
   if (hasCoverage && hasSignals) return null; // fully complete
 
   const steps = [
