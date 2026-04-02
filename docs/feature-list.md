@@ -134,13 +134,13 @@
 68. 3-step progressive flow: Build Routine → Review Scope + Proof → Confirm Lock — 9/10
 69. Per-SKU cadence picker: weekly / biweekly / every 4 weeks / independent — 9/10
 70. Live 4-week preview timeline that updates instantly on every change — 9/10
-71. Entitlement-aware guardrails: routine demand vs. plan allowance with calm warning panel — 8/10
-72. "Auto-fit to my plan" one-tap automation that adjusts cadences to fit entitlements — 8/10
-73. Biweekly pattern optimizer (Weeks 1&3 vs 2&4) based on zone load + geo clustering — 7/10
-74. Bounded "Swap pattern" option for biweekly items with feasibility check — 7/10
+71. Entitlement-aware guardrails: routine demand vs. plan allowance with calm warning panel — 9/10
+72. "Auto-fit to my plan" one-tap automation that adjusts cadences to fit entitlements — 9/10
+73. Biweekly pattern optimizer (Weeks 1&3 vs 2&4) based on zone load + geo clustering — 8/10
+74. Bounded "Swap pattern" option for biweekly items with feasibility check — 8/10
 75. Confusion detector: inline help when a customer changes cadence 3+ times — 1/10
-76. Versioned routine locking with effective date policy (next billing cycle start) — 8/10
-77. Review step: per-service scope + proof expectations to prevent disputes — 8/10
+76. Versioned routine locking with effective date policy (next billing cycle start) — 9/10
+77. Review step: per-service scope + proof expectations to prevent disputes — 9/10
 
 ---
 
