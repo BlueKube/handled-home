@@ -36,7 +36,7 @@ export default function HomeTimeline() {
     if (!completedJobs) return null;
     const totalServices = completedJobs.length;
     const photosCount = completedJobs.reduce(
-      (sum, j: any) => sum + (j.job_photos?.length ?? 0),
+      (sum, j: any) => sum + (j.photo_count ?? j.photos?.length ?? 0),
       0
     );
     const memberSince = subscription?.created_at
@@ -153,7 +153,7 @@ export default function HomeTimeline() {
                       <CheckCircle className="h-4 w-4 text-accent shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">
-                          {job.job_skus
+                          {(job.skus ?? job.job_skus)
                             ?.map((s: any) => s.sku_name_snapshot)
                             .filter(Boolean)
                             .join(", ") || "Service visit"}
@@ -162,9 +162,9 @@ export default function HomeTimeline() {
                           {job.scheduled_date
                             ? format(new Date(job.scheduled_date), "EEE, MMM d")
                             : "Completed"}
-                          {job.job_photos?.length > 0 && (
+                          {(job.photo_count ?? job.photos?.length ?? 0) > 0 && (
                             <span className="ml-2">
-                              <Camera className="h-3 w-3 inline" /> {job.job_photos.length}
+                              <Camera className="h-3 w-3 inline" /> {job.photo_count ?? job.photos?.length ?? 0}
                             </span>
                           )}
                         </p>
