@@ -550,35 +550,35 @@
 283. Customer routine changes effective only in DRAFT window (≥8 days out) — 8/10
 284. Cadence-based task scheduling (weekly, biweekly, every 4 weeks) with stable offsets — 9/10
 285. Visit bundling rules merging same-property tasks into single stops — 8/10
-286. Stability rules minimizing DRAFT plan changes unless constraints change — 8/10
-287. Admin planner health dashboard with run summaries and conflict flagging — 8/10
+286. Stability rules minimizing DRAFT plan changes unless constraints change — 9/10
+287. Admin planner health dashboard with run summaries and conflict flagging — 9/10
 
 ### Sprint 5 — Provider Assignment v1
 
-288. Candidate selection with feasibility filters (skills, equipment, working hours, capacity, proximity) — 8/10
-289. Assignment solver with objective function (minimize travel, balance workload, reward familiarity) — 8/10
-290. Primary + Backup provider assignment per visit — 8/10
-291. Familiarity scoring with configurable cap to balance relationship vs efficiency — 8/10
-292. Assignment stability rules with freeze-window extra protection — 8/10
-293. Explainability with confidence levels and top reasons per assignment — 8/10
-294. Admin exceptions inbox with unassigned/fragile visit prioritization and manual override tools — 8/10
+288. Candidate selection with feasibility filters (skills, equipment, working hours, capacity, proximity) — 9/10
+289. Assignment solver with objective function (minimize travel, balance workload, reward familiarity) — 9/10
+290. Primary + Backup provider assignment per visit — 9/10
+291. Familiarity scoring with configurable cap to balance relationship vs efficiency — 9/10
+292. Assignment stability rules with freeze-window extra protection — 9/10
+293. Explainability with confidence levels and top reasons per assignment — 9/10
+294. Admin exceptions inbox with unassigned/fragile visit prioritization and manual override tools — 9/10
 
 ### Sprint 6 — Route Sequencing v1 + Equipment Manifest
 
-295. Ordered daily route per provider using nearest-neighbor + 2-opt optimization — 8/10
-296. Coarse customer-facing ETA ranges derived from stop sequence — 8/10
-297. Daily equipment manifest generation per provider route — 8/10
-298. Same-property task bundling with setup discount calculation — 8/10
-299. Provider blocked windows and legacy commitment support with segment-based planning — 8/10
-300. Provider pre-Start-Day route reorder with feasibility guardrails — 8/10
-301. Running-late notification when predicted arrival exceeds ETA window end — 8/10
+295. Ordered daily route per provider using nearest-neighbor + 2-opt optimization — 9/10
+296. Coarse customer-facing ETA ranges derived from stop sequence — 9/10
+297. Daily equipment manifest generation per provider route — 9/10
+298. Same-property task bundling with setup discount calculation — 9/10
+299. Provider blocked windows and legacy commitment support with segment-based planning — 9/10
+300. Provider pre-Start-Day route reorder with feasibility guardrails — 9/10
+301. Running-late notification when predicted arrival exceeds ETA window end — 9/10
 
 ### Sprint 7 — Appointment Windows v1 (Home-Required Services)
 
-302. Scheduling profiles per SKU (Appointment Window, Day Commit, Service Week) — 8/10
-303. Customer availability capture with 3–6 feasible window offers — 8/10
-304. Time-window constraint enforcement in route sequencing (VRPTW feasibility) — 8/10
-305. Mixed-profile bundle piggybacking with duration guardrails — 8/10
+302. Scheduling profiles per SKU (Appointment Window, Day Commit, Service Week) — 9/10
+303. Customer availability capture with 3–6 feasible window offers — 9/10
+304. Time-window constraint enforcement in route sequencing (VRPTW feasibility) — 9/10
+305. Mixed-profile bundle piggybacking with duration guardrails — 9/10
 306. Service-week flexible work with due-soon/overdue queue and week-end deadlines — 8/10
 307. Provider-placed flexible work via drag/drop with feasibility checks — 8/10
 308. Window-at-risk exception flagging with local repair attempts — 8/10
