@@ -9,13 +9,24 @@
 
 ## Audit Findings
 
-Manual audit of all 20 features found them already at 9/10 maturity:
+### Issues Fixed
 
-- **F306-308 (Sprint 7):** WeekDueQueue has proper empty state, ProviderSelfHealingSheet is clean, exception flagging flows through the unified exceptions system
-- **F309-317 (Sprint 8):** OpsExceptionQueue/DetailPanel are polished (dark-mode fixed in Round 30), OpsActionDialog has proper validation, AuditReasonModal enforces reason codes, Reschedule page has full loading/empty/error states, reschedule hooks are clean
-- **F318-325 (Sprint 9):** AutopilotBanner has proper dark-mode variants (emerald/amber/destructive), AutopilotThresholdsDialog is well-structured, Playbooks page is complete with 5+ playbooks, academy modules cover SKU discovery and launch templates
+| # | Feature | Issue | Status |
+|---|---------|-------|--------|
+| 1 | F308/F309 | text-amber-600 dark-mode violation in OpsExceptionQueue (severity + SLA countdown) | ✅ Fixed |
+| 2 | F309 | text-amber-600 in OpsExceptionDetailPanel severity colors | ✅ Fixed |
+| 3 | F306 | WeekView in Jobs.tsx missing isError handling | ✅ Fixed |
+| 4 | F311 | ProviderReportIssueSheet handleSubmit advances to step 3 on throw | ✅ Fixed |
 
-No MUST-FIX issues found. All features have loading states, error handling, dark-mode compatible colors, and good component sizes.
+### Already Solid (9/10+)
+- F308 (window-at-risk detection), F310 (predictive exceptions), F314-325 (all ops manual features)
+
+### Deferred (not polish scope — new features or migrations)
+- F307: Drag/drop not implemented (push_stop via self-healing sheet exists, no DnD library)
+- F312: Ops repair actions are intent-only (no server-side feasibility execution)
+- F313: SQL column mismatch in analytics migration (`break_freeze_override` vs `is_freeze_override`) — needs new migration
+- F313: Customer notification on freeze override (new backend feature)
+- F299/F300/F302: Component decomposition (>300 lines) — refactoring, not polish
 
 ---
 
@@ -23,14 +34,14 @@ No MUST-FIX issues found. All features have loading states, error handling, dark
 
 | Batch | Title | Size | Files | Status | Context |
 |-------|-------|------|-------|--------|---------|
-| — | No fixes needed | — | — | ✅ Audit-only | |
+| B1 | Dark-mode + error state fixes | S | 4 files | ✅ | |
 
 ---
 
 ## Session Handoff
 - **Branch:** `claude/polish-round-12-auth-nlfDe`
-- **Last completed:** Round 31 — all 20 features verified at 9/10
-- **Next up:** Round 32 — Route Optimization & Scheduling Exceptions (Features 95–98 + scheduling exceptions)
+- **Last completed:** Round 31 — all 20 features verified, 4 fixes applied
+- **Next up:** Round 32 — Route Optimization & Scheduling Exceptions
 - **Context at exit:** Moderate
 - **Blockers:** None
 - **Round progress:** Round 31 complete ✅
