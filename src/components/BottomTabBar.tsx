@@ -88,7 +88,7 @@ export function BottomTabBar() {
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
-              className={`flex flex-col items-center justify-center flex-1 gap-0.5 transition-all duration-150 active:scale-90 ${
+              className={`relative flex flex-col items-center justify-center flex-1 gap-0.5 transition-all duration-150 active:scale-90 ${
                 active ? "text-accent" : "text-muted-foreground"
               }`}
             >
