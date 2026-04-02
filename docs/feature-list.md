@@ -92,14 +92,14 @@
 
 ## VI. Subscription Engine `margin-lever` `mental-load-reduction`
 
-44. Membership-first tiered plans: Essential / Plus / Premium — 8/10
-45. 28-day billing cycles ("Billed every 4 weeks") for predictability without calendar-month complexity — 8/10
-46. Dual-clock model: billing cadence (28-day) + operational rhythm (weekly service weeks) — 8/10
-47. Stripe integration as payment rail; entitlements owned by Supabase (not Stripe-derived) — 8/10
-48. Soft onboarding: browse plans, preview SKUs, build draft routine — all before paying — 8/10
-49. Plan zone availability: plans can be enabled/disabled per zone — 8/10
-50. Entitlement versioning: plan entitlement rules are version-tracked and immutable — 8/10
-51. No-rollover policy: unused service weeks expire at billing cycle end — 8/10
+44. Membership-first tiered plans: Essential / Plus / Premium — 9/10
+45. 28-day billing cycles ("Billed every 4 weeks") — 9/10
+46. Dual-clock model: billing cadence (28-day) + operational rhythm (weekly) — 9/10
+47. Stripe integration as payment rail; entitlements owned by Supabase — 9/10
+48. Soft onboarding (decomposed: 1130→171 + 8 extracted step components) — 9/10
+49. Plan zone availability: plans enabled/disabled per zone — 9/10
+50. Entitlement versioning: version-tracked and immutable — 9/10
+51. No-rollover policy: unused service weeks expire at billing cycle end — 9/10
 
 ---
 

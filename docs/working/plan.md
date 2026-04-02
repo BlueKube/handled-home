@@ -29,15 +29,15 @@
 
 | Batch | Title | Size | Files | Status | Context |
 |-------|-------|------|-------|--------|---------|
-| B1 | OnboardingWizard decomposition (1130→<300) | L | 9 files | ⬜ | |
-| B2 | ByocOnboardingWizard + Plans decomposition | L | 5+ files | ⬜ | |
+| B1 | OnboardingWizard decomposition (1130→171 + 8 extracted steps) | L | 10 files | ✅ | ~55% |
+| B2 | ByocOnboardingWizard + Plans decomposition | L | 5+ files | ⬜ | deferred to next session |
 
 ---
 
 ## Session Handoff
 - **Branch:** `claude/polish-round-12-auth-nlfDe`
-- **Last completed:** Round 21 complete. Starting Round 22.
-- **Next up:** B1 — OnboardingWizard decomposition
-- **Context at exit:** N/A
+- **Last completed:** B1 (OnboardingWizard decomposed). B2 deferred.
+- **Next up:** B2 — ByocOnboardingWizard (675 lines) + Plans (640 lines) decomposition
+- **Context at exit:** ~55%
 - **Blockers:** None
-- **Round progress:** Phase 1 of 1 in progress
+- **Round progress:** Phase 1 of 1 — B1 done, B2 deferred
