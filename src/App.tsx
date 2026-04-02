@@ -11,9 +11,8 @@ import { AppLayout } from "@/components/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { CustomerPropertyGate } from "@/components/CustomerPropertyGate";
 import { AdminShell } from "@/components/admin/AdminShell";
-import MoreMenuPage from "@/components/MoreMenu";
-
 // Pages (lazy-loaded)
+const MoreMenuPage = lazy(() => import("@/components/MoreMenu"));
 const AuthPage = lazy(() => import("@/pages/AuthPage"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 

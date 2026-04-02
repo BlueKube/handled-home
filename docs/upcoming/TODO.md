@@ -140,3 +140,16 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 - [ ] **Feature 272: ZoneBuilder.tsx 579 lines needs decomposition** — Extract StepRegion, StepSettings, StepPreview, StepEdit, StepCommit into sub-components.
   - **Why:** Major refactor, risk of introducing bugs in 5-step wizard
   - **Blocked:** Nothing — can be done in a future round
+
+## Round 51–55 Polish (2026-04-02)
+
+### Edge Function Auth Gaps (SECURITY)
+- [ ] **`offer-appointment-windows` has NO auth** — Accepts any POST with no Authorization check. Exposes scheduling availability data. Needs `requireUserJwt` or `requireAdminJwt`.
+  - **Why:** Security vulnerability — unauthenticated access to provider capacity data
+  - **Blocked:** Nothing — straightforward fix
+- [ ] **`backfill-property-zones`, `commit-zones`, `generate-zones` missing admin role check** — JWT validated but admin role never verified. These are superuser operations that any authenticated user can call.
+  - **Why:** Authorization bypass — any logged-in user can trigger zone operations
+  - **Blocked:** Nothing — add `requireAdminJwt` from `_shared/auth.ts`
+- [ ] **34 of 39 edge functions duplicate CORS headers inline** — Only 5 use the shared `_shared/cors.ts` module. Maintenance risk.
+  - **Why:** Consistency — future CORS policy changes need updating in 34 places
+  - **Blocked:** Nothing — mechanical find-and-replace

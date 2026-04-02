@@ -52,17 +52,32 @@ export function useDeepLinks() {
           }
         }
 
-        // Handle other deep links (e.g., handledhome://provider/jobs/123)
+        // Handle other deep links (e.g., handledhome://provider/jobs/123?ref=abc)
         try {
           const parsed = new URL(url);
           const path = parsed.host + (parsed.pathname || "");
           if (path && path !== "/") {
-            navigateRef.current("/" + path);
+            navigateRef.current("/" + path + (parsed.search || ""));
           }
         } catch {
           // Invalid URL, ignore
         }
       });
+
+      // Handle cold-start deep link (app launched from dead state by a deep link)
+      const launchUrl = await App.getLaunchUrl();
+      if (launchUrl?.url) {
+        // Re-dispatch through the same listener logic by firing the event handler
+        try {
+          const parsed = new URL(launchUrl.url);
+          const path = parsed.host + (parsed.pathname || "");
+          if (path && path !== "/") {
+            navigateRef.current("/" + path + (parsed.search || ""));
+          }
+        } catch {
+          // Invalid launch URL, ignore
+        }
+      }
 
       cleanup = () => listener.remove();
     }
