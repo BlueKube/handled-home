@@ -56,17 +56,17 @@
 
 ## IV. Service Catalog (SKU System) `trust-builder` `margin-lever`
 
-27. Standardized Service SKUs with inclusions, exclusions, duration, and edge-case notes — 8/10
-28. Fulfillment mode governance: same_day_preferred / same_week_allowed / independent_cadence — 8/10
-29. Structured proof requirements per SKU: labeled photo slots (before/after/both) with counts — 8/10
-30. Checklist templates per SKU with required/optional flags — 8/10
-31. SKU lifecycle: draft → active → paused → archived (never hard-deleted) — 8/10
-32. Visual service catalog with hero images, featured flags, and category grouping — 8/10
-33. Customer-facing catalog with horizontal featured scroll, category groups, and search — 8/10
+27. Standardized Service SKUs with inclusions, exclusions, duration, and edge-case notes — 9/10
+28. Fulfillment mode governance: same_day_preferred / same_week_allowed / independent_cadence — 9/10
+29. Structured proof requirements per SKU: labeled photo slots (before/after/both) with counts — 9/10
+30. Checklist templates per SKU with required/optional flags — 9/10
+31. SKU lifecycle: draft → active → paused → archived (never hard-deleted) — 9/10
+32. Visual service catalog with hero images, featured flags, and category grouping — 9/10
+33. Customer-facing catalog with horizontal featured scroll, category groups, and search — 9/10
 33b. Customer service cards show entitlement badges (Included / Extra Allowed / Blocked / Available) based on subscription plan context — 8/10
-34. Admin duplicate-SKU action for safe scope changes — 8/10
-35. Weather sensitivity flag per SKU — 8/10
-35b. Admin SKU Calibration page: compare seed values vs. provider-reported durations/costs, delta highlighting, per-tier inputs, calibration export report — 8/10
+34. Admin duplicate-SKU action for safe scope changes — 9/10
+35. Weather sensitivity flag per SKU — 9/10
+35b. Admin SKU Calibration page with delta highlighting and export — 9/10
 35c. 23 SKUs fully calibrated with routing metadata (scheduling_profile, access_mode, fulfillment_mode, weather_sensitive), handle costs anchored to 7-handle standard mow model, and structured inclusions/exclusions — DONE
 35d. 5 new SKUs added: Gutter Cleaning, Fall Prep, Trash Can Cleaning, Grill Cleaning, Dryer Vent Cleaning — DONE
 
