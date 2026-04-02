@@ -1,6 +1,7 @@
 import { useSkus } from "@/hooks/useSkus";
 import { useZones } from "@/hooks/useZones";
 import { useAdminMembership } from "@/hooks/useAdminMembership";
+import { usePayoutBase } from "@/hooks/useProviderPayoutAdmin";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,8 +12,9 @@ export default function ControlPayouts() {
   const { isSuperuser } = useAdminMembership();
   const { data: skus, isLoading: skusLoading } = useSkus();
   const { data: zones, isLoading: zonesLoading } = useZones();
+  const { isLoading: baseLoading } = usePayoutBase();
 
-  if (skusLoading || zonesLoading) return <div className="p-6 space-y-4"><Skeleton className="h-8 w-64" /><Skeleton className="h-96 w-full" /></div>;
+  if (skusLoading || zonesLoading || baseLoading) return <div className="p-6 space-y-4"><Skeleton className="h-8 w-64" /><Skeleton className="h-96 w-full" /></div>;
 
   return (
     <div className="animate-fade-in p-6 space-y-6 max-w-6xl">
