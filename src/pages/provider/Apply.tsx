@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProviderApplication, ByocEstimate } from "@/hooks/useProviderApplication";
+import { isValidPhone } from "@/utils/phone";
 import { useZoneReadiness, ZoneReadinessResult } from "@/hooks/useZoneReadiness";
 import OpportunityBanner, {
   mapStateToBannerVariant,
@@ -389,13 +390,23 @@ export default function ProviderApply() {
                 !homeBaseZip || !/^\d{5}$/.test(homeBaseZip) || allZips.length === 0
               }
               onClick={async () => {
+                // Validate phone if provided
+                if (phoneNumber && !isValidPhone(phoneNumber)) {
+                  toast.error("Please enter a valid phone number (e.g., 555-123-4567)");
+                  return;
+                }
                 // Save phone to profile if provided
                 if (phoneNumber) {
-                  const { data: { user: authUser } } = await supabase.auth.getUser();
-                  if (authUser?.id) {
-                    await (supabase.from("profiles") as any)
-                      .update({ phone: phoneNumber })
-                      .eq("user_id", authUser.id);
+                  try {
+                    const { data: { user: authUser } } = await supabase.auth.getUser();
+                    if (authUser?.id) {
+                      const { error } = await (supabase.from("profiles") as any)
+                        .update({ phone: phoneNumber })
+                        .eq("user_id", authUser.id);
+                      if (error) throw error;
+                    }
+                  } catch {
+                    toast.error("Failed to save phone number. You can update it later in Settings.");
                   }
                 }
                 await checkReadiness();

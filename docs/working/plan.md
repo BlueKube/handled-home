@@ -1,22 +1,22 @@
-# Round 12: Authentication & Identity Polish
+# Round 13: Phone Identity & Account Management Polish
 
-> **Round:** 12 of 61
-> **Branch:** `claude/polish-round-12-auth-nlfDe`
-> **Phase:** Single phase — Auth & Identity (Features 1–8)
+> **Round:** 13 of 61
+> **Branch:** `claude/polish-round-12-auth-nlfDe` (continuing on same branch per task instructions)
+> **Phase:** Single phase — Phone Identity & Account Management (Features 436–441 + account deletion + password reset)
 > **Execution mode:** Quality
 
 ---
 
 ## Features in Scope
 
-1. Email/password signup and login with session persistence
-2. Automatic profile creation and default customer role assignment
-3. Multi-role support (customer, provider, admin simultaneously)
-4. One-tap role switching without logout
-5. Admin Preview Mode (view as any role)
-6. "Account Not Configured" safety screen
-7. Role-based route protection
-8. Bootstrap RPC that repairs partial signups
+436. Phone column on provider_leads
+437. Browse page phone field
+438. Admin phone display
+439. Lead-to-application phone matching trigger
+440. Referral attribution phone matching
+441. Application flow phone collection
++ Account deletion flow
++ Password reset flow
 
 ---
 
@@ -26,23 +26,25 @@
 
 | # | Issue | Severity | File | Feature |
 |---|-------|----------|------|---------|
-| 1 | Hardcoded inline HSL colors bypass dark mode | MUST-FIX | AuthPage.tsx:124-125 | F1 |
-| 2 | Bootstrap errors only console.logged, no user-facing message | SHOULD-FIX | AuthContext.tsx:98 | F8 |
-| 3 | After bootstrap failure, user stuck at AccountNotConfigured with no retry | SHOULD-FIX | AuthContext.tsx + AccountNotConfigured.tsx | F6/F8 |
-| 4 | AccountNotConfigured shows no user email for support | SHOULD-FIX | AccountNotConfigured.tsx | F6 |
-| 5 | No visual indicator for admin preview mode | SHOULD-FIX | PreviewAsCard.tsx / layout | F5 |
-| 6 | No loading feedback on role switch click | MINOR | RoleSwitcher.tsx | F4 |
+| 1 | No phone validation on Browse page lead capture | SHOULD-FIX | ProviderBrowse.tsx:307-310 | F437 |
+| 2 | No phone validation on Apply page | SHOULD-FIX | Apply.tsx:339-344 | F441 |
+| 3 | Profile phone update has no error handling | SHOULD-FIX | Apply.tsx:392-399 | F441 |
+| 4 | Inconsistent phone regex across codebase (3 patterns) | SHOULD-FIX | ProfileForm, Organization, none on Browse/Apply | All |
+| 5 | ProviderLeads.tsx is 604 lines — over 300 threshold | SHOULD-FIX | ProviderLeads.tsx | F438 |
+| 6 | DeleteAccountDialog says "within 30 days" but RPC executes immediately | SHOULD-FIX | DeleteAccountDialog.tsx:51 | Deletion |
+| 7 | Forgot password button has no loading state | MINOR | AuthPage.tsx:162-169 | Reset |
 
 ### Already Solid (No Changes Needed)
 
-- Session persistence via Supabase `onAuthStateChange` ✓
-- Open redirect prevention on login redirect ✓
-- Profile creation trigger with COALESCE fallback ✓
-- RLS policies on auth tables ✓
-- ProtectedRoute loading/auth/role checks ✓
-- Bootstrap idempotency (ON CONFLICT DO NOTHING) ✓
-- `bootstrapAttempted` useRef prevents retry loops ✓
-- Preview mode clears on logout ✓
+- Phone column migration on provider_leads ✓
+- Phone properly optional on lead capture with null fallback ✓ 
+- Admin phone display with "—" for null ✓
+- Lead-to-application trigger matches email first, then phone ✓
+- Referral attribution trigger handles null/empty phone ✓
+- Delete account RPC properly anonymizes all fields ✓
+- Delete confirmation requires "DELETE" typed ✓
+- Password reset uses Supabase native flow ✓
+- Dark mode colors on all admin tables ✓
 
 ---
 
@@ -50,21 +52,16 @@
 
 | Batch | Title | Size | Files | Status | Context |
 |-------|-------|------|-------|--------|---------|
-| B1 | AuthPage polish — dark mode + error UX | S | AuthPage.tsx | ✅ | ~15% |
-| B2 | AuthContext + Bootstrap — error UX, retry | S | AuthContext.tsx | ✅ | ~18% |
-| B3 | AccountNotConfigured + PreviewAsCard + RoleSwitcher | S | 3 files | ✅ | ~22% |
-
-### Review Results
-- **B1:** Clean — no issues. Dark mode HSL→Tailwind swap verified against CSS vars.
-- **B2:** Clean — 1 low SHOULD-FIX (bootstrapError name slightly overloaded for general fetch errors; acceptable since user message is generic). No action needed.
-- **B3:** Clean — all acceptance criteria verified. No issues found.
+| B1 | Phone validation utility + Browse/Apply fixes | S | 3 files | ⬜ | |
+| B2 | ProviderLeads decomposition (604→<300 per file) | M | 4 files | ⬜ | |
+| B3 | DeleteAccountDialog + AuthPage password reset polish | S | 2 files | ⬜ | |
 
 ---
 
 ## Session Handoff
 - **Branch:** `claude/polish-round-12-auth-nlfDe`
-- **Last completed:** B3 (Round 12 complete)
-- **Next up:** Round 12 complete — ready for Round 13 or PR
-- **Context at exit:** ~22%
+- **Last completed:** Round 12 complete. Starting Round 13.
+- **Next up:** B1 — Phone validation utility
+- **Context at exit:** N/A
 - **Blockers:** None
-- **Round progress:** Phase 1 of 1 complete ✅
+- **Round progress:** Phase 1 of 1 in progress
