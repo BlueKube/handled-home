@@ -171,7 +171,7 @@ function simulateRoute(
       currentTime = Math.max(currentTime, stop.windowStartMinutes);
     }
 
-    // VRPTW: check if arrival is past window end (with late grace) → infeasible
+    // VRPTW: check if arrival is past window end → infeasible (no grace here; grace is only in cost function)
     if (stop.isWindowed && stop.windowEndMinutes !== null) {
       if (currentTime > stop.windowEndMinutes) {
         return {
@@ -584,7 +584,7 @@ Deno.serve(async (req) => {
   } catch { /* defaults */ }
 
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  today.setUTCHours(0, 0, 0, 0);
   const todayStr = today.toISOString().split("T")[0];
   const idempotencyKey = `route-sequence:${todayStr}`;
 

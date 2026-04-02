@@ -121,7 +121,7 @@ function JobCard({ job, index, total, onMoveUp, onMoveDown, showReorder, isSelec
 
 function TodayJobList() {
   const navigate = useNavigate();
-  const { data: jobs, isLoading } = useProviderJobs("today");
+  const { data: jobs, isLoading, isError } = useProviderJobs("today");
   const { org } = useProviderOrg();
   const { isLocked } = useProviderRoutePlan();
   const optimizeRoute = useOptimizeRoute();
@@ -179,6 +179,17 @@ function TodayJobList() {
           <Skeleton key={i} className="h-24 w-full rounded-xl" />
         ))}
       </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <EmptyState
+        compact
+        icon={MapPin}
+        title="Couldn't load jobs"
+        body="Something went wrong loading your route. Pull down to retry."
+      />
     );
   }
 
@@ -271,7 +282,7 @@ function TodayJobList() {
 
 function UpcomingJobList() {
   const navigate = useNavigate();
-  const { data: jobs, isLoading } = useProviderJobs("upcoming");
+  const { data: jobs, isLoading, isError } = useProviderJobs("upcoming");
 
   if (isLoading) {
     return (
@@ -280,6 +291,17 @@ function UpcomingJobList() {
           <Skeleton key={i} className="h-24 w-full rounded-xl" />
         ))}
       </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <EmptyState
+        compact
+        icon={MapPin}
+        title="Couldn't load upcoming jobs"
+        body="Something went wrong. Please try again later."
+      />
     );
   }
 

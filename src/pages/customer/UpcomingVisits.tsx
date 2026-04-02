@@ -42,7 +42,10 @@ function formatTimeWindow(start: string | null, end: string | null): string | nu
 function getCoarseBlock(etaStart: string | null): string {
   if (!etaStart) return "AM";
   try {
-    const hour = parseInt(etaStart.split(":")[0]);
+    // eta_range_start may be a time string ("09:30:00") or ISO timestamp
+    const hour = etaStart.includes("T")
+      ? new Date(etaStart).getUTCHours()
+      : parseInt(etaStart.split(":")[0], 10);
     return hour >= 12 ? "PM" : "AM";
   } catch {
     return "AM";

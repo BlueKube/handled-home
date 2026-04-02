@@ -15,7 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { usePlanRuns, usePlanRunDetail, useTriggerPlanRun, type PlanRun } from "@/hooks/usePlanRuns";
+import { usePlanRuns, useTriggerPlanRun, type PlanRun } from "@/hooks/usePlanRuns";
 import { formatDistanceToNow, format, parseISO } from "date-fns";
 import { Play, RefreshCw, CheckCircle2, XCircle, Clock, AlertTriangle, Loader2, ChevronRight } from "lucide-react";
 import { toast } from "sonner";

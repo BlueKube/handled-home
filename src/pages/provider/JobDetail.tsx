@@ -440,16 +440,21 @@ export default function ProviderJobDetail() {
           onOpenChange={setSelfHealOpen}
           onSubmit={async ({ actionType, payload }) => {
             if (!visitId) return { decision: "DENIED" as const, reason: "No visit found", customer_notified: false };
-            const result = await proposeAction.mutateAsync({
-              visitId,  
-              actionType,
-              payload,
-            });
-            return {
-              decision: result.decision,
-              reason: result.reason,
-              customer_notified: result.customer_notified,
-            };
+            try {
+              const result = await proposeAction.mutateAsync({
+                visitId,
+                actionType,
+                payload,
+              });
+              return {
+                decision: result.decision,
+                reason: result.reason,
+                customer_notified: result.customer_notified,
+              };
+            } catch {
+              toast({ title: "Error", description: "Network error — couldn't submit action", variant: "destructive" });
+              return { decision: "DENIED" as const, reason: "Network error", customer_notified: false };
+            }
           }}
           isPending={proposeAction.isPending}
         />

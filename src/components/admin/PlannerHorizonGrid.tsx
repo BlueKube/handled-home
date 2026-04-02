@@ -85,7 +85,8 @@ export function PlannerHorizonGrid() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-7 gap-2">
+        <div className="overflow-x-auto">
+        <div className="grid grid-cols-7 gap-2 min-w-[600px]">
           {days.map((day, i) => {
             const d = new Date(day.date + "T00:00:00");
             const today = isToday(d);
@@ -135,6 +136,7 @@ export function PlannerHorizonGrid() {
               </div>
             );
           })}
+        </div>
         </div>
 
         {/* Freeze boundary label */}
