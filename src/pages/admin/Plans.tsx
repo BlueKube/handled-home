@@ -8,7 +8,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Plus, Copy, Archive, Search } from "lucide-react";
+import { Plus, Copy, Archive, Search, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { PlanForm } from "@/components/admin/plans/PlanForm";
 
@@ -17,7 +17,7 @@ const STATUSES = ["all", "active", "draft", "hidden", "retired"];
 export default function AdminPlans() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [search, setSearch] = useState("");
-  const { data: plans, isLoading } = usePlans(statusFilter);
+  const { data: plans, isLoading, isError } = usePlans(statusFilter);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<Partial<Plan> | null>(null);
@@ -29,6 +29,20 @@ export default function AdminPlans() {
   const filteredPlans = plans?.filter((p) =>
     !search || p.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  if (isError) {
+    return (
+      <div className="p-6 space-y-3 animate-fade-in">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-destructive" />
+          <h1 className="text-2xl font-bold">Plans</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Failed to load data. Check your connection and try again.
+        </p>
+      </div>
+    );
+  }
 
   const openCreate = () => {
     setEditingPlan({ name: "", status: "draft", tagline: "", display_price_text: "", recommended_rank: 0 });
