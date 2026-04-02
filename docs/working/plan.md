@@ -46,8 +46,19 @@
 
 ## Session Handoff
 - **Branch:** `claude/polish-round-12-auth-nlfDe`
-- **Last completed:** Round 29 B1 (all batches complete)
+- **Last completed:** Round 29 (all features audited and fixed)
 - **Next up:** Round 30 — Routing Engine Sprint 4–6 (Features 286–305)
-- **Context at exit:** 86% (172.6k / 200k)
+- **Context at exit:** 86% (172.6k / 200k) — new session required
 - **Blockers:** None
-- **Round progress:** Phase 1 of 1 complete — round done
+- **Round progress:** Rounds 28-29 complete in this session
+
+### Branch chaining note
+The next session should **continue on this same branch** (`claude/polish-round-12-auth-nlfDe`). All rounds chain on this single branch — do NOT create a new branch per round.
+
+### Tooling available
+- `/start-round` — Entry point, reads context and sets up round
+- `/polish-round` — **NEW** batch audit command (preferred over per-feature calls)
+- `/polish-feature <num> "<desc>"` — Individual feature audit (for debugging)
+- `/commit-push` — Pre-validates tsc+build, commits, pushes
+- `/review-batch` — Code review per CLAUDE.md Section 5
+- PostToolUse hook auto-runs `tsc --noEmit` on .ts/.tsx edits
