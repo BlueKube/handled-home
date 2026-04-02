@@ -19,8 +19,9 @@
 | B7 | UX: BundleSavingsCard parser, dead HomeTimeline, tab bar dot | S | ✅ | — |
 | B8 | Browse: real ZIP check, SKU error state, SPA footer links | S | ✅ | — |
 | B9 | Billing error states: BillingHistory, BillingMethods, Subscribe | S | ✅ | — |
+| B10 | Error states: ServiceDay, PlanDetail, Earnings, Payouts, Reschedule | S | ✅ | — |
 
-**Total: 9 batches, 21 code fixes across 22 files**
+**Total: 10 batches, 26 code fixes across 28 files**
 
 ---
 
@@ -70,7 +71,7 @@
 
 ## Session Handoff
 - **Branch:** `claude/polish-planned-features-l9XIY`
-- **Last completed:** B9 (Billing error states — BillingHistory, BillingMethods, Subscribe)
+- **Last completed:** B10 (Error states — ServiceDay, PlanDetail, Earnings, Payouts, Reschedule)
 - **Next up:** Round 61 — Final Verification & Doc Sync, or additional polish on remaining 8/10 features
 - **Context at exit:** —
 - **Blockers:** None
