@@ -17,6 +17,17 @@ export function FixPaymentPanel({ subscriptionId }: FixPaymentPanelProps) {
   const [loading, setLoading] = useState(false);
   const dunningEvents = useDunningEventsCustomer();
 
+  if (dunningEvents.isError) {
+    return (
+      <Card className="border-destructive/50 bg-destructive/5 p-4">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4 text-destructive" />
+          <p className="text-sm text-muted-foreground">Unable to load payment status. Please refresh.</p>
+        </div>
+      </Card>
+    );
+  }
+
   const handleFixPayment = async () => {
     if (!user) return;
     setLoading(true);

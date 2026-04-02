@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Progress } from "@/components/ui/progress";
 import { HelpTip } from "@/components/ui/help-tip";
 import {
   ShieldCheck, TrendingUp, TrendingDown, Minus, Star, Camera, Clock,
@@ -27,9 +26,9 @@ export default function ProviderQualityScore() {
   const navigate = useNavigate();
   const { org } = useProviderOrg();
   const { score, rollups, scoreEvents, isLoading, isError, refetch } = useProviderQualityScore(org?.id);
-  const { currentTier, tierConfig, tierEntry, tierHistory, pendingGates, completedGates, isLoading: tierLoading } = useProviderTier(org?.id);
+  const { currentTier, tierConfig, tierEntry, tierHistory, pendingGates, completedGates, isLoading: tierLoading, isError: tierError } = useProviderTier(org?.id);
 
-  if (isError) {
+  if (isError || tierError) {
     return (
       <div className="animate-fade-in p-4 pb-24">
         <QueryErrorCard message="Failed to load quality score." onRetry={() => refetch()} />
