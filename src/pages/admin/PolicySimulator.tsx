@@ -142,7 +142,7 @@ export default function PolicySimulator() {
 
   if (isError) {
     return (
-      <div className="p-6 space-y-4 max-w-4xl">
+      <div className="p-6 space-y-4 max-w-4xl animate-fade-in">
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-6 w-6 text-destructive" />
           <h1 className="text-2xl font-bold">Policy Simulator</h1>
@@ -150,6 +150,10 @@ export default function PolicySimulator() {
         <p className="text-sm text-muted-foreground">
           Failed to load support policies. Check your connection and try again.
         </p>
+        <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+          <RotateCcw className="h-4 w-4 mr-2" />
+          Retry
+        </Button>
       </div>
     );
   }
