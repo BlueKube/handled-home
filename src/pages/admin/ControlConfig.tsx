@@ -114,7 +114,7 @@ function ConfigEditor({ entry, isSuperuser }: { entry: ConfigEntry; isSuperuser:
 export default function ControlConfig() {
   const { isSuperuser } = useAdminMembership();
 
-  const { data: configs, isLoading } = useQuery({
+  const { data: configs, isLoading, isError } = useQuery({
     queryKey: ["admin-system-config"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -145,6 +145,14 @@ export default function ControlConfig() {
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-32" />
         <Skeleton className="h-32" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="animate-fade-in p-6 text-center">
+        <p className="text-sm text-destructive">Failed to load system config. Please refresh.</p>
       </div>
     );
   }

@@ -19,7 +19,7 @@ import { Send, CheckCircle, XCircle } from "lucide-react";
 export default function ControlChangeRequests() {
   const { isSuperuser } = useAdminMembership();
   const [tab, setTab] = useState("pending");
-  const { data: requests, isLoading } = useChangeRequests(tab === "all" ? undefined : tab);
+  const { data: requests, isLoading, isError } = useChangeRequests(tab === "all" ? undefined : tab);
   const submitMut = useSubmitChangeRequest();
   const reviewMut = useReviewChangeRequest();
 
@@ -49,6 +49,8 @@ export default function ControlChangeRequests() {
   };
 
   if (isLoading) return <div className="p-6 space-y-4"><Skeleton className="h-8 w-64" /><Skeleton className="h-96 w-full" /></div>;
+
+  if (isError) return <div className="p-6 text-center"><p className="text-sm text-destructive">Failed to load change requests. Please refresh.</p></div>;
 
   const statusColor = (s: string) => s === "pending" ? "secondary" : s === "approved" ? "default" : "destructive";
 
