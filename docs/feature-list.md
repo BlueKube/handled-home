@@ -198,47 +198,47 @@
 
 ## XV. Billing & Payments `margin-lever`
 
-105. Tokenized payment method management with add/remove/default — 8/10
-106. Subscription autopay with 28-day cycle invoicing — 8/10
-107. Invoice line items: plan, add-ons, credits, taxes/fees — 8/10
-108. Receipt view with cycle period, payment status, and method (masked) — 8/10
-109. Billing health states: Healthy / Action Required / Past Due / Service Paused — 8/10
+105. Tokenized payment method management with add/remove/default — 9/10
+106. Subscription autopay with 28-day cycle invoicing — 9/10
+107. Invoice line items: plan, add-ons, credits, taxes/fees — 9/10
+108. Receipt view with cycle period, payment status, and method (masked) — 9/10
+109. Billing health states: Healthy / Action Required / Past Due / Service Paused — 9/10
 110. Customer credits with fixed tiers ($10/$25/$50/custom) and auto-application to next invoice — 7/10
-111. Idempotent invoice generation via idempotency keys — 8/10
+111. Idempotent invoice generation via idempotency keys — 9/10
 
 ---
 
 ## XVI. Provider Payouts `provider-value` `margin-lever`
 
-112. Provider payout onboarding via Stripe Connect Express — 8/10
-113. Weekly automated payout runs with minimum threshold enforcement — 8/10
-114. Per-job earnings detail: base pay + modifiers + hold status + net — 8/10
-115. "At current pace" monthly earnings projection — 8/10
-116. Hold reasons with explicit explanations and expected release countdown — 8/10
-117. Severity-based earning holds: LOW (no hold), MED (24–48h soft), HIGH (hard hold + exception) — 8/10
-118. Payout webhook confirmation: earnings only marked PAID on processor confirmation — 8/10
+112. Provider payout onboarding via Stripe Connect Express — 9/10
+113. Weekly automated payout runs with minimum threshold enforcement — 9/10
+114. Per-job earnings detail: base pay + modifiers + hold status + net — 9/10
+115. "At current pace" monthly earnings projection — 9/10
+116. Hold reasons with explicit explanations and expected release countdown — 9/10
+117. Severity-based earning holds: LOW (no hold), MED (24–48h soft), HIGH (hard hold + exception) — 9/10
+118. Payout webhook confirmation: earnings only marked PAID on processor confirmation — 9/10
 
 ---
 
 ## XVII. Dunning & Payment Recovery `margin-lever`
 
-119. 5-step automated dunning sequence: +1d, +3d, +5d retry with escalating notifications — 8/10
-120. Calm in-app banner: "We couldn't process your payment. Update your card." — 8/10
-121. Auto-pause subscription scheduling after N failures (preserves receipt/history access) — 8/10
-122. Auto-apply earned referral credits to offset failed payments — 8/10
+119. 5-step automated dunning sequence: +1d, +3d, +5d retry with escalating notifications — 9/10
+120. Calm in-app banner: "We couldn't process your payment. Update your card." — 9/10
+121. Auto-pause subscription scheduling after N failures (preserves receipt/history access) — 9/10
+122. Auto-apply earned referral credits to offset failed payments — 9/10
 122b. Dunning timeline UI: retry schedule visualization (day 3/7/10), grace period countdown, suspension warning — 8/10
 122c. Fix Payment panel: failure reason display, retry history, Stripe portal integration — 8/10
-123. Auto-release provider earning holds on schedule — 8/10
+123. Auto-release provider earning holds on schedule — 9/10
 
 ---
 
 ## XVIII. Plan Self-Service `mental-load-reduction` `margin-lever`
 
-124. Plan upgrade/downgrade with next-cycle default and direction detection — 8/10
-125. Pending plan change banner with effective date — 8/10
-126. Cancel pending plan change — 8/10
-127. Cancellation flow: reason survey → 5-handle retention offer → confirm — 8/10
-128. Subscription pause (up to 8 weeks / 60 days) with visual timeline, auto-cancel warnings, and frozen handles messaging — 8/10
+124. Plan upgrade/downgrade with next-cycle default and direction detection — 9/10
+125. Pending plan change banner with effective date — 9/10
+126. Cancel pending plan change — 9/10
+127. Cancellation flow: reason survey → 5-handle retention offer → confirm — 9/10
+128. Subscription pause (up to 8 weeks / 60 days) with visual timeline, auto-cancel warnings, and frozen handles messaging — 9/10
 
 ---
 
