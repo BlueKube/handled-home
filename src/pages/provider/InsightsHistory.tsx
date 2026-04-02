@@ -23,7 +23,7 @@ export default function ProviderInsightsHistory() {
   const { org } = useProviderOrg();
   const navigate = useNavigate();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["provider-insights-history", org?.id],
     enabled: !!org?.id,
     queryFn: async () => {
@@ -88,6 +88,8 @@ export default function ProviderInsightsHistory() {
         <div className="space-y-3">
           {[1, 2].map((i) => <Skeleton key={i} className="h-48 rounded-2xl" />)}
         </div>
+      ) : isError ? (
+        <p className="text-sm text-destructive text-center py-8">Failed to load trend data. Please try again.</p>
       ) : !data?.weeks.length ? (
         <EmptyState
           compact

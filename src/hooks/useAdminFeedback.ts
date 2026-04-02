@@ -62,5 +62,6 @@ export function useAdminFeedback() {
     privateRatings: privateRatingsQuery.data ?? [],
     issueCount,
     isLoading: quickFeedbackQuery.isLoading || privateRatingsQuery.isLoading,
+    isError: quickFeedbackQuery.isError || privateRatingsQuery.isError,
   };
 }
