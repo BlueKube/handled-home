@@ -471,7 +471,7 @@
 ## XXXVII. Edge Functions & Scheduled Automation `density-driver` `margin-lever`
 
 241. 20+ deployed edge functions covering assignment, billing, weather, payouts, notifications, AI — 8/10
-242. Cron-based orchestrator (`run-scheduled-jobs`) with per-sub-job idempotency keys — 8/10
+242. Cron-based orchestrator (`run-scheduled-jobs`) with per-sub-job idempotency keys — 9/10
 243. `cron_run_log` for full observability of every automated run — 8/10
 243b. Deno integration tests for billing edge functions: run-billing-automation, process-payout, run-dunning, create-checkout-session — CORS, auth guard, error shape coverage — 7/10
 
