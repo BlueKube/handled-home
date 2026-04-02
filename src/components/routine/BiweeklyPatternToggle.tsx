@@ -31,7 +31,7 @@ export function BiweeklyPatternToggle({ pattern, onChange, recommended }: Biweek
           {recommended === "B" && <Star className="h-2.5 w-2.5 fill-current" />}
         </button>
       </div>
-      <Button variant="ghost" size="icon" className="h-10 w-10" onClick={() => onChange(pattern === "A" ? "B" : "A")}>
+      <Button variant="ghost" size="icon" className="h-11 w-11" onClick={() => onChange(pattern === "A" ? "B" : "A")}>
         <ArrowLeftRight className="h-3 w-3" />
       </Button>
     </div>

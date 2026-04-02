@@ -26,7 +26,7 @@ export function ReviewServiceCard({ item, entitlementStatus, inclusions, exclusi
         </Badge>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+      <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
         {item.duration_minutes && (
           <span>⏱ {item.duration_minutes} min</span>
         )}
