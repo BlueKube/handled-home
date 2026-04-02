@@ -287,11 +287,11 @@
 154. 19 seeded notification templates with premium concierge copy — 9/10
 155. In-app notification center with unread badge, priority tabs, and CTA deep links — 9/10
 156. Push notification pipeline via Capacitor + FCM/APNs — 7/10
-157. Email delivery via Resend integration — 8/10
-158. Device token registration with automatic cleanup on logout — 8/10
-159. User notification preferences: per-tier toggles + quiet hours + timezone — 8/10
+157. Email delivery via Resend integration — 9/10
+158. Device token registration with automatic cleanup on logout — 9/10
+159. User notification preferences: per-tier toggles + quiet hours + timezone — 9/10
 160. Digest infrastructure for batching non-critical notifications — 8/10
-161. PII scrubber utility: regex-based phone/email/URL detection + replacement — 8/10
+161. PII scrubber utility: regex-based phone/email/URL detection + replacement — 9/10
 162. Admin notification health dashboard: delivery stats, deadletters, processing latency — 9/10
 
 ---
