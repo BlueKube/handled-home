@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, ZoomIn } from "lucide-react";
+import { ZoomIn } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import type { VisitPhoto } from "@/hooks/useCustomerVisitDetail";
 

@@ -9,7 +9,7 @@ import { ChevronLeft } from "lucide-react";
 export default function CustomerPhotoTimeline() {
   const navigate = useNavigate();
   const { property } = useProperty();
-  const { data: photos, isLoading } = usePropertyPhotoTimeline(property?.id);
+  const { data: photos, isLoading, isError } = usePropertyPhotoTimeline(property?.id);
 
   return (
     <div className="p-4 pb-24 space-y-4 animate-fade-in">
@@ -26,6 +26,8 @@ export default function CustomerPhotoTimeline() {
             <Skeleton key={i} className="h-32 w-full rounded-xl" />
           ))}
         </div>
+      ) : isError ? (
+        <p className="text-sm text-destructive text-center py-8">Failed to load photos. Please try again.</p>
       ) : (
         <PhotoTimeline photos={photos ?? []} />
       )}

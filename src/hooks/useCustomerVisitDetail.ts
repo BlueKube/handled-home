@@ -104,25 +104,26 @@ export function useCustomerVisitDetail(jobId: string | undefined) {
       if (jobRes.error) throw jobRes.error;
       if (!jobRes.data) return null;
 
-      // Generate signed URLs for photos
-      const photos: VisitPhoto[] = [];
-      for (const p of photoRes.data ?? []) {
-        let signedUrl: string | null = null;
-        if (p.storage_path) {
-          const { data: urlData } = await supabase.storage
-            .from("job-photos")
-            .createSignedUrl(p.storage_path, 3600);
-          signedUrl = urlData?.signedUrl ?? null;
-        }
-        photos.push({
-          id: p.id,
-          slot_key: p.slot_key,
-          upload_status: p.upload_status,
-          captured_at: p.captured_at,
-          sku_id: p.sku_id,
-          signedUrl,
-        });
-      }
+      // Generate signed URLs for photos (parallel for performance)
+      const photos: VisitPhoto[] = await Promise.all(
+        (photoRes.data ?? []).map(async (p) => {
+          let signedUrl: string | null = null;
+          if (p.storage_path) {
+            const { data: urlData } = await supabase.storage
+              .from("job-photos")
+              .createSignedUrl(p.storage_path, 3600);
+            signedUrl = urlData?.signedUrl ?? null;
+          }
+          return {
+            id: p.id,
+            slot_key: p.slot_key,
+            upload_status: p.upload_status,
+            captured_at: p.captured_at,
+            sku_id: p.sku_id,
+            signedUrl,
+          };
+        })
+      );
 
       // Filter checklist to highlights: completed items + exceptions (not-done with reason)
       const allItems = checklistRes.data ?? [];
