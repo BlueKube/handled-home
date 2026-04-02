@@ -1,4 +1,4 @@
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -42,10 +42,10 @@ export function EntitlementGuardrails({
         </div>
       </div>
       <div className="flex flex-wrap gap-2">
-        <Button variant="outline" size="sm" className="text-xs" onClick={onAutoFit} disabled={isAutoFitting}>
-          Auto-fit to plan
+        <Button variant="outline" size="sm" className="text-xs min-h-[44px]" onClick={onAutoFit} disabled={isAutoFitting}>
+          {isAutoFitting ? <><Loader2 className="h-3 w-3 animate-spin mr-1" />Fitting...</> : "Auto-fit to plan"}
         </Button>
-        <Button variant="outline" size="sm" className="text-xs" onClick={() => navigate("/customer/plans")}>
+        <Button variant="outline" size="sm" className="text-xs min-h-[44px]" onClick={() => navigate("/customer/plans")}>
           Change plan
         </Button>
       </div>
