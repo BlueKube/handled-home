@@ -6,13 +6,14 @@ import { EntitlementBadge } from "@/components/plans/EntitlementBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, Check, X, Info, Sparkles, Calendar, Shield } from "lucide-react";
+import { ChevronLeft, Check, X, Info, Sparkles, Calendar, Shield, AlertTriangle } from "lucide-react";
 
 export default function CustomerPlanDetail() {
   const { planId } = useParams<{ planId: string }>();
   const navigate = useNavigate();
-  const { data: plan, isLoading: planLoading } = usePlanDetail(planId ?? null);
+  const { data: plan, isLoading: planLoading, isError: planError } = usePlanDetail(planId ?? null);
   const { data: entitlements, isLoading: entLoading } = useEntitlements(planId ?? null, null);
+  const isError = planError;
   const { data: planHandles } = usePlanHandlesConfig(planId ?? null);
 
   const isLoading = planLoading || entLoading;
@@ -22,6 +23,21 @@ export default function CustomerPlanDetail() {
       <div className="p-4 space-y-4">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-4 space-y-3 animate-fade-in">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-destructive" />
+          <h1 className="text-h2">Plan Details</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          We couldn't load plan details. Check your connection and try again.
+        </p>
+        <Button variant="ghost" onClick={() => navigate("/customer/plans")}>Back to Plans</Button>
       </div>
     );
   }

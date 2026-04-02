@@ -10,12 +10,13 @@ import { ServiceDayAlternatives } from "@/components/customer/ServiceDayAlternat
 import { ServiceDayConfirmed } from "@/components/customer/ServiceDayConfirmed";
 import { SchedulingPreferences, type SchedulingPrefs } from "@/components/customer/SchedulingPreferences";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info, Loader2 } from "lucide-react";
+import { Info, Loader2, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { HelpTip } from "@/components/ui/help-tip";
 
 export default function CustomerServiceDay() {
-  const { property, isLoading: propLoading } = useProperty();
-  const { assignment, offers, isLoading: assignLoading, expiredPrevious, refetch } = useServiceDayAssignment(property?.id);
+  const { property, isLoading: propLoading, isError: propError } = useProperty();
+  const { assignment, offers, isLoading: assignLoading, isError: assignError, expiredPrevious, refetch } = useServiceDayAssignment(property?.id);
   const {
     createOrRefreshOffer,
     confirmServiceDay,
@@ -92,6 +93,7 @@ export default function CustomerServiceDay() {
       }
       createOrRefreshOffer.mutate(property.id, {
         onSuccess: () => refetch(),
+        onError: () => { offerCreated.current = false; },
       });
     }
   }, [propLoading, assignLoading, property?.id, assignment, expiredPrevious]);
@@ -102,6 +104,23 @@ export default function CustomerServiceDay() {
       setShowAlternatives(true);
     }
   }, [assignment?.rejection_used]);
+
+  if (propError || assignError || createOrRefreshOffer.isError) {
+    return (
+      <div className="p-4 pb-24 space-y-4 animate-fade-in">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-destructive" />
+          <h1 className="text-h2">Service Day</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          We couldn't load your service day. Check your connection and try again.
+        </p>
+        <Button variant="outline" size="sm" onClick={() => { offerCreated.current = false; refetch(); }}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
 
   if (propLoading || assignLoading || createOrRefreshOffer.isPending) {
     return (
