@@ -1,8 +1,8 @@
-# Round 22: Subscription Engine Polish
+# Round 23: Handles Currency Polish
 
-> **Round:** 22 of 61
+> **Round:** 23 of 61
 > **Branch:** `claude/polish-round-12-auth-nlfDe`
-> **Phase:** Single phase — Subscription Engine (Features 44–51)
+> **Phase:** Single phase — Handles Currency (Features 52–58)
 > **Execution mode:** Quality
 
 ---
@@ -13,15 +13,24 @@
 
 | # | Issue | Severity | File | Feature |
 |---|-------|----------|------|---------|
-| 1 | OnboardingWizard.tsx is 1130 lines | MUST-FIX | OnboardingWizard.tsx | F48 |
-| 2 | ByocOnboardingWizard.tsx is 675 lines | MUST-FIX | ByocOnboardingWizard.tsx | F48 |
-| 3 | Admin Plans.tsx is 640 lines | MUST-FIX | Plans.tsx | F44 |
+| 1 | `useHandleTransactions` defined but never used anywhere | SHOULD-FIX | useHandles.ts | F53 |
+| 2 | HandleBalanceBar `pct` can exceed 100% when balance > perCycle (rollover) | MUST-FIX | HandleBalanceBar.tsx | F52 |
+| 3 | HomeAssistant loading shows plain text instead of skeleton | SHOULD-FIX | HomeAssistant.tsx | F52 |
+| 4 | AddonSuggestionsCard returns null during loading (no skeleton) | SHOULD-FIX | AddonSuggestionsCard.tsx | F55 |
+| 5 | SuggestionCard hide button uses hover-only opacity (invisible on mobile) | SHOULD-FIX | SuggestionCard.tsx | F55 |
 
 ### Already Solid
-- Stripe integration complete ✓
-- Plan tiers with zone availability ✓
-- Entitlement versioning ✓
-- Dark mode ✓
+- Handle balance RPC and caching ✓
+- Plan handles config per plan ✓
+- Rollover cap and expiry days configurable ✓
+- PlanCard handles per cycle display ✓
+- HandlesExplainer collapsible card ✓
+- ThisCycleSummary rollover display ✓
+- CycleStatsRow handles stat pill ✓
+- Addon purchase flow with handle/cash dual payment ✓
+- Home Assistant booking with handle/cash payment ✓
+- Idempotency key indexing on transactions ✓
+- Refund with original expiry preservation ✓
 
 ---
 
@@ -29,15 +38,14 @@
 
 | Batch | Title | Size | Files | Status | Context |
 |-------|-------|------|-------|--------|---------|
-| B1 | OnboardingWizard decomposition (1130→171 + 8 extracted steps) | L | 10 files | ✅ | ~55% |
-| B2 | ByocOnboardingWizard + Plans decomposition | L | 5+ files | ⬜ | deferred to next session |
+| B1 | Handle balance overflow + dead code + loading/mobile fixes | S | 5 files | ⬜ | |
 
 ---
 
 ## Session Handoff
 - **Branch:** `claude/polish-round-12-auth-nlfDe`
-- **Last completed:** B1 (OnboardingWizard decomposed). B2 deferred.
-- **Next up:** B2 — ByocOnboardingWizard (675 lines) + Plans (640 lines) decomposition
-- **Context at exit:** ~55%
+- **Last completed:** Round 22 B2 (all batches complete)
+- **Next up:** Round 23 B1 — handle balance overflow + polish fixes
+- **Context at exit:** ~15%
 - **Blockers:** None
-- **Round progress:** Phase 1 of 1 — B1 done, B2 deferred
+- **Round progress:** Phase 1 of 1 — B1 pending

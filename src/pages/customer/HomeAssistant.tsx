@@ -3,6 +3,7 @@ import { Home, Clock, Calendar, Sparkles, Loader2, Check, Shield, AlertTriangle 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { useHomeAssistantSkus, useHomeAssistantWindows, useBookHomeAssistant, type HomeAssistantSku, type BookingWindow } from "@/hooks/useHomeAssistant";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
@@ -97,7 +98,11 @@ export default function HomeAssistantBooking() {
       </Card>
 
       {skusLoading ? (
-        <p className="text-center text-muted-foreground py-8">Loading services…</p>
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}><CardContent className="py-4 space-y-2"><Skeleton className="h-4 w-32" /><Skeleton className="h-3 w-full" /><Skeleton className="h-3 w-20" /></CardContent></Card>
+          ))}
+        </div>
       ) : skus.length === 0 ? (
         <p className="text-center text-muted-foreground py-8">Home Assistant services coming soon to your area.</p>
       ) : (
