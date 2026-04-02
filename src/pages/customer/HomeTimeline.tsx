@@ -14,6 +14,7 @@ import {
   Calendar,
   TrendingUp,
   Shield,
+  AlertTriangle,
 } from "lucide-react";
 import { format, differenceInMonths } from "date-fns";
 
@@ -29,7 +30,7 @@ function StatPill({ icon: Icon, label, value }: { icon: React.ElementType; label
 
 export default function HomeTimeline() {
   const navigate = useNavigate();
-  const { data: completedJobs, isLoading } = useCustomerJobs("completed");
+  const { data: completedJobs, isLoading, isError } = useCustomerJobs("completed");
   const { data: subscription } = useCustomerSubscription();
 
   const stats = useMemo(() => {
@@ -68,6 +69,20 @@ export default function HomeTimeline() {
           {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
         </div>
         <Skeleton className="h-48 w-full" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-4 space-y-4 animate-fade-in">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-destructive" />
+          <h1 className="text-h2">Home Timeline</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          We couldn't load your service history. Check your connection and try again.
+        </p>
       </div>
     );
   }

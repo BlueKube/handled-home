@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Search, Star } from "lucide-react";
+import { Search, Star, AlertTriangle } from "lucide-react";
 import { useSkus } from "@/hooks/useSkus";
 import type { ServiceSku } from "@/hooks/useSkus";
 import { SkuDetailView } from "@/components/SkuDetailView";
@@ -16,7 +16,7 @@ export default function CustomerServices() {
   const [search, setSearch] = useState("");
   const [selectedSku, setSelectedSku] = useState<ServiceSku | null>(null);
 
-  const { data: skus = [], isLoading } = useSkus({
+  const { data: skus = [], isLoading, isError } = useSkus({
     search: search || undefined,
   });
 
@@ -82,7 +82,12 @@ export default function CustomerServices() {
         />
       </div>
 
-      {isLoading ? (
+      {isError ? (
+        <div className="flex flex-col items-center gap-2 py-8">
+          <AlertTriangle className="h-5 w-5 text-destructive" />
+          <p className="text-sm text-muted-foreground">Failed to load services. Check your connection and try again.</p>
+        </div>
+      ) : isLoading ? (
         <p className="text-center text-muted-foreground py-8">Loading…</p>
       ) : skus.length === 0 ? (
         <p className="text-center text-muted-foreground py-8">No services available.</p>
