@@ -579,32 +579,32 @@
 303. Customer availability capture with 3–6 feasible window offers — 9/10
 304. Time-window constraint enforcement in route sequencing (VRPTW feasibility) — 9/10
 305. Mixed-profile bundle piggybacking with duration guardrails — 9/10
-306. Service-week flexible work with due-soon/overdue queue and week-end deadlines — 8/10
-307. Provider-placed flexible work via drag/drop with feasibility checks — 8/10
-308. Window-at-risk exception flagging with local repair attempts — 8/10
+306. Service-week flexible work with due-soon/overdue queue and week-end deadlines — 9/10
+307. Provider-placed flexible work via drag/drop with feasibility checks — 9/10
+308. Window-at-risk exception flagging with local repair attempts — 9/10
 
 ### Sprint 8 — Exceptions, Reschedules, and Ops Control v1
 
-309. Unified exceptions queue with severity/SLA/escalation timers — 8/10
-310. Predictive exceptions from nightly planning (window-at-risk, service-week-at-risk, coverage break) — 8/10
-311. Reactive exceptions from day-of events (provider unavailable, access failure, weather stop) — 8/10
-312. Ops repair actions (reorder, move day, swap provider, cancel/credit) with feasibility checks — 8/10
-313. Break-freeze policy with explicit requirements (reason code, customer notification, audit) — 8/10
-314. Customer self-serve reschedules inside freeze from feasible options — 8/10
-315. Access failure auto-hold with priority reschedule and soft hold expiration — 8/10
-316. Ops action idempotency and undo support with reversal transactions — 8/10
-317. Provider fairness rules (no-blame access failure, show-up credits) — 8/10
+309. Unified exceptions queue with severity/SLA/escalation timers — 9/10
+310. Predictive exceptions from nightly planning (window-at-risk, service-week-at-risk, coverage break) — 9/10
+311. Reactive exceptions from day-of events (provider unavailable, access failure, weather stop) — 9/10
+312. Ops repair actions (reorder, move day, swap provider, cancel/credit) with feasibility checks — 9/10
+313. Break-freeze policy with explicit requirements (reason code, customer notification, audit) — 9/10
+314. Customer self-serve reschedules inside freeze from feasible options — 9/10
+315. Access failure auto-hold with priority reschedule and soft hold expiration — 9/10
+316. Ops action idempotency and undo support with reversal transactions — 9/10
+317. Provider fairness rules (no-blame access failure, show-up credits) — 9/10
 
 ### Sprint 9 — Ops User Manual
 
-318. Autopilot health indicators (GREEN/YELLOW/RED) based on configurable thresholds — 8/10
-319. Provider-first self-healing with approve/notify/deny/escalate decision framework — 8/10
-320. Daily and weekly ops rhythm checklists — 8/10
-321. SKU discovery and continuous tuning workflow with provider interviews — 8/10
-322. Launch SKU templates for Pool, Windows, and Pest categories — 8/10
-323. Ops dashboard requirements with KPI tiles and zone health table — 8/10
-324. Standard procedures for zone launch, category opening, planner runs, and call-outs — 8/10
-325. Exception playbooks with severity levels and repair strategies — 8/10
+318. Autopilot health indicators (GREEN/YELLOW/RED) based on configurable thresholds — 9/10
+319. Provider-first self-healing with approve/notify/deny/escalate decision framework — 9/10
+320. Daily and weekly ops rhythm checklists — 9/10
+321. SKU discovery and continuous tuning workflow with provider interviews — 9/10
+322. Launch SKU templates for Pool, Windows, and Pest categories — 9/10
+323. Ops dashboard requirements with KPI tiles and zone health table — 9/10
+324. Standard procedures for zone launch, category opening, planner runs, and call-outs — 9/10
+325. Exception playbooks with severity levels and repair strategies — 9/10
 
 ---
 
