@@ -66,6 +66,9 @@ export default function AdminAudit() {
           <SelectItem value="growth_config">Growth Config</SelectItem>
           <SelectItem value="pricing">Pricing</SelectItem>
           <SelectItem value="payout">Payout</SelectItem>
+          <SelectItem value="referral">Referral</SelectItem>
+          <SelectItem value="referral_reward">Referral Reward</SelectItem>
+          <SelectItem value="admin_system_config">System Config</SelectItem>
         </SelectContent>
       </Select>
 
