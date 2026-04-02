@@ -2,7 +2,7 @@ import { useCustomerBilling } from "@/hooks/useCustomerBilling";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, Receipt } from "lucide-react";
+import { ChevronLeft, Receipt, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageSkeleton } from "@/components/PageSkeleton";
 import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
@@ -18,9 +18,23 @@ const statusColors: Record<string, string> = {
 
 export default function CustomerBillingHistory() {
   const navigate = useNavigate();
-  const { invoices, isLoading } = useCustomerBilling();
+  const { invoices, isLoading, isError } = useCustomerBilling();
 
   if (isLoading) return <PageSkeleton />;
+
+  if (isError) {
+    return (
+      <div className="p-4 space-y-3 animate-fade-in">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-destructive" />
+          <h1 className="text-h2">Billing History</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          We couldn't load your billing history. Check your connection and try again.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 space-y-4 animate-fade-in pb-24">

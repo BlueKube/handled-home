@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, CreditCard, Plus, Star } from "lucide-react";
+import { ChevronLeft, CreditCard, Plus, Star, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -12,7 +12,7 @@ import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
 
 export default function CustomerBillingMethods() {
   const navigate = useNavigate();
-  const { paymentMethods, isLoading } = useCustomerBilling();
+  const { paymentMethods, isLoading, isError } = useCustomerBilling();
   const [adding, setAdding] = useState(false);
 
   const handleAddMethod = async () => {
@@ -30,6 +30,20 @@ export default function CustomerBillingMethods() {
   };
 
   if (isLoading) return <PageSkeleton />;
+
+  if (isError) {
+    return (
+      <div className="p-4 space-y-3 animate-fade-in">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-destructive" />
+          <h1 className="text-h2">Payment Methods</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          We couldn't load your payment methods. Check your connection and try again.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 space-y-4 animate-fade-in pb-24">
