@@ -38,9 +38,9 @@ export function PropertyHealthWidget({ propertyId }: PropertyHealthWidgetProps) 
   // Auto-compute on first load if no score exists or stale (>24h)
   useEffect(() => {
     if (!propertyId || !user?.id) return;
-    if (compute.isPending) return;
+    if (compute.isPending || compute.isError) return;
 
-    const shouldCompute = !health || 
+    const shouldCompute = !health ||
       (new Date().getTime() - new Date(health.computed_at).getTime() > 24 * 60 * 60 * 1000);
 
     if (shouldCompute) {
@@ -53,6 +53,14 @@ export function PropertyHealthWidget({ propertyId }: PropertyHealthWidgetProps) 
     return (
       <Card className="p-4">
         <div className="h-16 bg-muted/50 rounded animate-pulse" />
+      </Card>
+    );
+  }
+
+  if (compute.isError) {
+    return (
+      <Card className="p-4 text-center">
+        <p className="text-xs text-destructive">Couldn't compute health score</p>
       </Card>
     );
   }
