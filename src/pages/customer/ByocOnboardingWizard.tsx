@@ -127,7 +127,9 @@ export default function ByocOnboardingWizard() {
 
   const visibleSteps: ByocStep[] = ["confirm", "plan"];
   const visibleIndex = visibleSteps.indexOf(step as ByocStep);
-  const progressPercent = step === "success" ? 100 : Math.round(((visibleIndex >= 0 ? visibleIndex + 1 : 1) / visibleSteps.length) * 100);
+  const progressPercent = step === "success" ? 100 : visibleSteps.length > 1
+    ? Math.round((Math.max(0, visibleIndex) / (visibleSteps.length - 1)) * 100)
+    : 100;
 
   const canGoBack = step === "plan";
   const handleBack = () => setStep("confirm");
@@ -159,6 +161,11 @@ export default function ByocOnboardingWizard() {
 
       {/* Step content */}
       <div className="px-4 mt-4">
+        {step === "confirm" && !byocContext && (
+          <div className="py-8 text-center">
+            <Skeleton className="h-32 w-full rounded-xl" />
+          </div>
+        )}
         {step === "confirm" && byocContext && (
           <ConfirmServiceStep
             providerName={byocContext.providerName}

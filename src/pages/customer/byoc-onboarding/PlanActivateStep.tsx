@@ -65,6 +65,16 @@ export function PlanActivateStep({
     );
   }
 
+  if (!plans || plans.length === 0) {
+    return (
+      <div className="space-y-6 text-center py-8">
+        <h1 className="text-h2">No Plans Available</h1>
+        <p className="text-muted-foreground text-sm">Plans aren't available in your area yet. You can still connect with your provider.</p>
+        <Button onClick={onSkip} className="w-full">Continue Without a Plan</Button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="text-center">
