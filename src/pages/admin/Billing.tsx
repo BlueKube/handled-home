@@ -14,8 +14,7 @@ import {
 import { PageSkeleton } from "@/components/PageSkeleton";
 import { DunningTracker } from "@/components/admin/billing/DunningTracker";
 import { QueryErrorCard } from "@/components/QueryErrorCard";
-
-function formatCents(cents: number) { return `$${(cents / 100).toFixed(2)}`; }
+import { formatCents } from "@/lib/formatCents";
 
 const subStatusConfig: Record<string, { label: string; color: string }> = {
   active: { label: "Active", color: "bg-success" },

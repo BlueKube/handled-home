@@ -6,14 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, AlertTriangle, Shield } from "lucide-react";
 import { PageSkeleton } from "@/components/PageSkeleton";
-
-function formatCents(cents: number) { return `$${(cents / 100).toFixed(2)}`; }
+import { QueryErrorCard } from "@/components/QueryErrorCard";
+import { formatCents } from "@/lib/formatCents";
 
 export default function CustomerBillingReceipt() {
   const { invoiceId } = useParams();
   const navigate = useNavigate();
 
-  const { data: invoice, isLoading } = useQuery({
+  const { data: invoice, isLoading, isError, refetch } = useQuery({
     queryKey: ["invoice-detail", invoiceId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -42,9 +42,22 @@ export default function CustomerBillingReceipt() {
   });
 
   if (isLoading) return <PageSkeleton />;
+  if (isError) {
+    return (
+      <div className="p-4 animate-fade-in pb-24">
+        <div className="flex items-center gap-2 mb-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate("/customer/billing/history")}>
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-h2">Receipt</h1>
+        </div>
+        <QueryErrorCard message="Failed to load receipt." onRetry={() => refetch()} />
+      </div>
+    );
+  }
   if (!invoice) return <p className="p-4 text-muted-foreground">Invoice not found.</p>;
 
-  const typeGroups = { PLAN: [] as any[], ADD_ON: [] as any[], CREDIT: [] as any[], TAX: [] as any[] };
+  const typeGroups = { PLAN: [] as any[], ADD_ON: [] as any[], CREDIT: [] as any[], REFERRAL_CREDIT: [] as any[], TAX: [] as any[] };
   (lineItems ?? []).forEach(li => {
     const key = li.type as keyof typeof typeGroups;
     if (typeGroups[key]) typeGroups[key].push(li);
