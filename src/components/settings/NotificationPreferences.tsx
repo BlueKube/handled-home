@@ -13,8 +13,6 @@ const HOURS = Array.from({ length: 24 }, (_, i) => {
   return { value: `${h}:00:00`, label: `${h}:00` };
 });
 
-let toggleIdCounter = 0;
-
 function ToggleRow({
   label,
   helper,
