@@ -38,15 +38,18 @@
 
 | Batch | Title | Size | Files | Status | Context |
 |-------|-------|------|-------|--------|---------|
-| B1 | Moving.tsx date validation + customer_leads constraint fix + STATUS_COLORS | S | 3 files | ⬜ | |
-| B2 | Handoff function error logging | S | 1 file | ⬜ | |
+| B1 | Moving.tsx date validation + customer_leads constraint + STATUS_COLORS | S | 3 files | ✅ | ~30% |
+| B2 | Handoff function error logging | S | 1 file | ✅ | ~31% |
+
+### Review Results
+- **B1+B2:** Pending background review (combined)
 
 ---
 
 ## Session Handoff
 - **Branch:** `claude/polish-round-12-auth-nlfDe`
-- **Last completed:** Round 15 complete. Starting Round 16.
-- **Next up:** B1 — Moving.tsx + migration + types
-- **Context at exit:** N/A
+- **Last completed:** B2 (Round 16 complete)
+- **Next up:** Round 16 complete — ready for Round 17
+- **Context at exit:** ~31%
 - **Blockers:** None
-- **Round progress:** Phase 1 of 1 in progress
+- **Round progress:** Phase 1 of 1 complete ✅

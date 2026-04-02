@@ -799,24 +799,24 @@
 
 ## XLVIII. "I'm Moving" Wizard `mental-load-reduction` `density-driver`
 
-449. `property_transitions` table: tracks moves with new address, ZIP coverage, new homeowner contact, keep-services toggle — DONE
-450. `customer_leads` table: mirrors provider_leads for customer-side lead capture in uncovered zones (unique email) — DONE
-451. 4-step moving wizard at /customer/moving: move date → new address + ZIP coverage check → coverage result → new homeowner referral — DONE
-452. Zone coverage check: queries zones table for active zones containing the new ZIP code — DONE
-453. Covered ZIP: "Great news — we'll transfer your plan!" messaging. Uncovered ZIP: saves customer_lead with notify_on_launch — DONE
-454. New homeowner referral form: captures name, email, phone for warm handoff to new property owner — DONE
-455. Cancel flow intercept: when customer selects "Moving" as cancel reason, redirects to moving wizard instead of cancellation — DONE
-456. Settings page "I'm moving" card: entry point to moving wizard with Truck icon — DONE
+449. `property_transitions` table: tracks moves with new address, ZIP coverage, new homeowner contact, keep-services toggle — 9/10
+450. `customer_leads` table with fixed CHECK constraint including 'notified' status — 9/10
+451. 4-step moving wizard with past-date prevention (min={today}) — 9/10
+452. Zone coverage check: queries zones table for active zones containing the new ZIP code — 9/10
+453. Covered ZIP: plan transfer messaging. Uncovered ZIP: saves customer_lead with notify_on_launch — 9/10
+454. New homeowner referral form: captures name, email, phone for warm handoff — 9/10
+455. Cancel flow intercept: "Moving" cancel reason redirects to moving wizard — 9/10
+456. Settings page "I'm moving" card with Truck icon — 9/10
 
 ## XLIX. Moving Pipeline Completion & Operational Automation `mental-load-reduction` `density-driver`
 
-457. `process_move_date_transitions()` database function: auto-cancels subscriptions on move date (cancel_at_period_end + status='canceling'), marks transitions as 'completed' — DONE
-458. `process-move-transitions` edge function: cron-callable wrapper with requireCronSecret auth for daily execution — DONE
-459. Customer lead zone launch notification trigger: auto_notify_customer_leads() on market_zone_category_state change to SOFT_LAUNCH/OPEN, mirrors provider lead pattern — DONE
-460. `notified_at` timestamp on customer_leads for notification tracking — DONE
-461. `handoff_processed` flag on property_transitions for tracking new homeowner outreach — DONE
-462. `process-new-homeowner-handoff` edge function: processes transitions with new homeowner info, creates customer_lead with source='referral', queries property context for personalization — DONE
-463. Admin "Customers" tab on Provider Leads page: shows customer_leads with email, phone, ZIP, source, status dropdown, notified_at display — DONE
+457. `process_move_date_transitions()` database function: auto-cancels subscriptions on move date — 9/10
+458. `process-move-transitions` edge function: cron-callable with requireCronSecret auth — 9/10
+459. Customer lead zone launch notification trigger with fixed CHECK constraint — 9/10
+460. `notified_at` timestamp on customer_leads for notification tracking — 9/10
+461. `handoff_processed` flag on property_transitions — 9/10
+462. `process-new-homeowner-handoff` edge function with error logging for lead creation and update failures — 9/10
+463. Admin "Customers" tab with all status colors including 'subscribed' — 9/10
 
 ---
 
