@@ -19,7 +19,7 @@ import { AdminPropertyProfileCard } from "@/components/admin/AdminPropertyProfil
 export default function AdminJobDetail() {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
-  const { data, isLoading } = useJobDetail(jobId);
+  const { data, isLoading, isError } = useJobDetail(jobId);
   const { overrideComplete, resolveIssue } = useAdminJobs();
   const [overrideOpen, setOverrideOpen] = useState(false);
   const [overrideReason, setOverrideReason] = useState("");
@@ -48,6 +48,15 @@ export default function AdminJobDetail() {
     };
     fetchSignedUrls();
   }, [data?.photos]);
+
+  if (isError) {
+    return (
+      <div className="animate-fade-in p-6 text-center space-y-3">
+        <p className="text-sm text-destructive">Failed to load job details. Please try again.</p>
+        <Button variant="link" onClick={() => navigate(-1)}>← Go back</Button>
+      </div>
+    );
+  }
 
   if (isLoading || !data) {
     return <div className="animate-fade-in p-6 space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-40 w-full rounded-xl" /></div>;

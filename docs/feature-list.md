@@ -156,14 +156,14 @@
 
 ## XI. Job Execution & Provider Workflow `provider-value` `trust-builder`
 
-83. Provider daily job list optimized for "today → next" with route-ordered stops — 8/10
-84. Job detail with Level, scope bullets, access notes, proof requirements, and planned minutes — 8/10
-85. Guided checklist completion: required items must end in Done or Not-Done-With-Reason — 8/10
-86. Photo proof capture with offline/poor-signal resilience: queue uploads automatically — 8/10
-87. Server-validated atomic job completion: `complete_job` RPC validates all proof before marking done — 8/10
-88. Structured issue reporting with type, severity, and evidence — no chat threads — 8/10
-89. Admin override completion with mandatory reason and audit logging — 8/10
-90. Job event timeline: append-only log of every state change (started, arrived, departed, completed) — 8/10
+83. Provider daily job list optimized for "today → next" with route-ordered stops — 9/10
+84. Job detail with Level, scope bullets, access notes, proof requirements, and planned minutes — 9/10
+85. Guided checklist completion: required items must end in Done or Not-Done-With-Reason — 9/10
+86. Photo proof capture with offline/poor-signal resilience: queue uploads automatically — 9/10
+87. Server-validated atomic job completion: `complete_job` RPC validates all proof before marking done — 9/10
+88. Structured issue reporting with type, severity, and evidence — no chat threads — 9/10
+89. Admin override completion with mandatory reason and audit logging — 9/10
+90. Job event timeline: append-only log of every state change (started, arrived, departed, completed) — 9/10
 
 ---
 
