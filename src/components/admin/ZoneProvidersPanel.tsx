@@ -11,23 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { CATEGORY_ORDER, getCategoryLabel, getCategoryIcon } from "@/lib/serviceCategories";
 import { AlertTriangle, Crown, Shield, Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
@@ -60,7 +45,6 @@ export function ZoneProvidersPanel({ zoneId }: ZoneProvidersPanelProps) {
     }
     return grouped;
   }, [assignments]);
-
   const currentAssignments = categoryAssignments[selectedCategory] ?? [];
   const hasPrimary = currentAssignments.some((a) => a.role === "PRIMARY");
   const assignedOrgIds = new Set(currentAssignments.map((a) => a.provider_org_id));
@@ -86,7 +70,6 @@ export function ZoneProvidersPanel({ zoneId }: ZoneProvidersPanelProps) {
     if (!assignments) return new Set<string>();
     return new Set(assignments.map((a) => a.category));
   }, [assignments]);
-
   const getProviderName = (orgId: string) => {
     const p = providers?.find((p) => p.provider_org_id === orgId);
     return p?.org_name ?? p?.full_name ?? "Unknown";
