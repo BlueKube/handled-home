@@ -43,14 +43,14 @@
 
 | Batch | Title | Size | Files | Status | Context |
 |-------|-------|------|-------|--------|---------|
-| B1 | ZoneCategoryDetailPanel fix + ThresholdDials/AutopilotBanner states | S | 3 files | ⬜ | |
+| B1 | ZoneCategoryDetailPanel fix + ThresholdDials error state | S | 2 files | ✅ | ~42% |
 
 ---
 
 ## Session Handoff
 - **Branch:** `claude/polish-round-12-auth-nlfDe`
-- **Last completed:** Round 17 complete. Starting Round 18.
-- **Next up:** B1
-- **Context at exit:** N/A
+- **Last completed:** B1 (Round 18 complete)
+- **Next up:** Round 18 complete — ready for Round 19
+- **Context at exit:** ~42%
 - **Blockers:** None
-- **Round progress:** Phase 1 of 1 in progress
+- **Round progress:** Phase 1 of 1 complete ✅

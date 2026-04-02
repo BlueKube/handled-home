@@ -48,9 +48,9 @@
 21. Smart adjacent-ZIP suggestions when creating zones (prefix-matching heuristic) — 9/10
 22. Expansion Signal Dashboard (decomposed: Growth.tsx 877→241 + 4 extracted tab components) — 9/10
 23. Primary + Backup provider model per zone and category (ZoneProvidersPanel trimmed to 300 lines) — 9/10
-24. Zone launch lifecycle: planning → recruiting → soft_launch → live → paused — 8/10
-25. Market zone category state: open / waitlist_only / closed / provider_recruiting per category — 8/10
-26. Founding Partner slot tracking per zone and category — 8/10
+24. Zone launch lifecycle with recommendation detail panel (fixed redundant ternary) — 9/10
+25. Market zone category state: open / waitlist_only / closed / provider_recruiting per category — 9/10
+26. Founding Partner slot tracking per zone and category — 9/10
 
 ---
 
@@ -353,11 +353,11 @@
 
 ## XXVIII. Growth Autopilot & Market Launch `density-driver`
 
-193. Market health snapshots per zone — 8/10
-194. Growth event bus for viral surface tracking — 8/10
-195. Growth surface configuration: share link expiry, prompt frequency caps, surface weights per zone — 8/10
-196. Waitlist system: public signup with zone auto-match, admin notify on launch — 8/10
-197. Zone expansion suggestions: capacity utilization, waitlist pressure, ticket rate analysis — 8/10
+193. Market health snapshots per zone — 9/10
+194. Growth event bus for viral surface tracking — 9/10
+195. Growth surface configuration: share link expiry, prompt frequency caps, surface weights per zone — 9/10
+196. Waitlist system: public signup with zone auto-match, admin notify on launch — 9/10
+197. Zone expansion suggestions with threshold error state — 9/10
 
 ---
 
