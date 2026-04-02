@@ -672,14 +672,14 @@
 
 ## XLIV. UX Value Proposition & Conversion `margin-lever` `trust-builder`
 
-359. Bundle Savings Calculator on Plans page and onboarding: compares monthly subscription cost vs. hiring separate vendors with per-service breakdown — 8/10
+359. Bundle Savings Calculator on Plans page and onboarding: compares monthly subscription cost vs. hiring separate vendors with per-service breakdown — 9/10
 360. First Service Celebration: full-screen animated overlay after first completed service with share CTA and receipt link — 8/10
 361. Provider Profile Sheet: bottom drawer showing provider name, avatar, rating, trust badges (Verified, Insured), and specialties — 8/10
 362. Provider Earnings Projection Card: two variants (onboarding zone estimate + dashboard capacity growth meter) showing income potential — 8/10
-363. Home Timeline page (`/customer/timeline`): chronological service history grouped by month with stats (total services, photos, membership duration) — 8/10
-364. Trust Bar: compact social proof strip (insured providers, satisfaction guarantee, cancel anytime) shown in onboarding zone check and plan selection — 8/10
+363. Home Timeline page (`/customer/timeline`): chronological service history grouped by month with stats (total services, photos, membership duration) — 9/10
+364. Trust Bar: compact social proof strip (insured providers, satisfaction guarantee, cancel anytime) shown in onboarding zone check and plan selection — 9/10
 365. BYOC Banner on provider dashboard: prominent call-to-action for bringing own customers with activation count — 8/10
-366. Referral Milestones: tiered reward system (Starter $30 credit at 3 referrals, Ambassador free month at 5, Champion VIP at 10) with progress bars — 8/10
+366. Referral Milestones: tiered reward system (Starter $30 credit at 3 referrals, Ambassador free month at 5, Champion VIP at 10) with progress bars — 9/10
 
 ---
 
