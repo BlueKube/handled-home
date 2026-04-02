@@ -276,6 +276,28 @@ Completed 4 rounds (34 batches, 53 features, 482 total) in a single session. `/c
 **Type:** Agent Signal
 The reviewer caught that `useHouseholdInvites` invalidated `["household-members"]` but PropertyGate's query key was `["isHouseholdMember"]`. New household members would pass the RPC acceptance but still be redirected to onboarding until a manual refresh. Query key alignment across hooks that affect the same state is a recurring review-surface area.
 
+## Polish Session Lessons (2026-04-02)
+
+### [2026-04-02] Parallel audit agents are the most efficient polish pattern
+**Source:** Rounds 30-48 execution (22+ rounds, 72 fixes)
+**Type:** Agent Signal
+Launching 2-3 Sonnet audit agents in parallel per batch of features, then processing results sequentially, achieved ~220 features audited in one session at 55% context. Each agent costs ~0.5-1% main context (result notification only). The key efficiency: agents find the bugs, main thread just applies fixes and pushes.
+
+### [2026-04-02] Silent data bugs are the highest-value finds in polish rounds
+**Source:** Photo validation case mismatch, OpsJobs sentinel filters, PayoutRolloverCard wrong columns, HomeTimeline field names
+**Type:** Workflow
+4 of the top 10 bugs this session were silent data issues — queries returning 0 rows or wrong fields with no error, making UI appear empty/broken. These are invisible without reading the actual code and cross-referencing DB schema. Pattern: any Supabase query with `as any` cast should be verified against the types file.
+
+### [2026-04-02] `isError` is the most common missing state across the codebase
+**Source:** 25+ pages fixed
+**Type:** Agent Signal
+The single most common finding across all 22+ rounds was missing `isError` handling on `useQuery` results. Pages showed infinite loading skeletons or misleading empty states on network failure. A codebase-wide grep for `const { data, isLoading }` (without `isError`) would catch most remaining instances.
+
+### [2026-04-02] Dark-mode violations cluster in admin pages and status badges
+**Source:** 8 dark-mode fixes across CronHealth, OpsJobs, AiInsightsCard, ProviderAccountability, Apply, ApplicationDetail, OpsExceptionQueue, OpsExceptionDetailPanel
+**Type:** Agent Signal
+Customer-facing pages consistently use semantic tokens (`text-success`, `text-destructive`). Admin pages more often use raw Tailwind (`text-green-600`, `text-amber-600`, `bg-green-100`) because they were built faster with less design review. Future polish should grep for `text-green-|text-red-|text-amber-|bg-green-|bg-red-` in `src/pages/admin/`.
+
 ### Dismissed
 
 _None yet._

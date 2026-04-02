@@ -27,9 +27,9 @@ export function PayoutRolloverCard() {
       const { data: earnings, error }: { data: any[] | null; error: any } = await (supabase as any)
         .from("provider_earnings")
         .select(
-          "provider_org_id, net_cents, created_at, provider_orgs:provider_org_id(name)"
+          "provider_org_id, total_cents, created_at, provider_orgs:provider_org_id(name)"
         )
-        .eq("payout_status", "PENDING")
+        .eq("status", "ELIGIBLE")
         .order("created_at", { ascending: true });
 
       if (error) throw error;
@@ -40,13 +40,13 @@ export function PayoutRolloverCard() {
         const orgId = e.provider_org_id;
         const existing = byProvider.get(orgId);
         if (existing) {
-          existing.total_pending_cents += e.net_cents;
+          existing.total_pending_cents += e.total_cents;
           existing.earnings_count += 1;
         } else {
           byProvider.set(orgId, {
             provider_org_id: orgId,
             provider_name: e.provider_orgs?.name ?? "Unknown",
-            total_pending_cents: e.net_cents,
+            total_pending_cents: e.total_cents,
             earnings_count: 1,
             oldest_earning: e.created_at,
           });

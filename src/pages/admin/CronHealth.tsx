@@ -10,9 +10,9 @@ import { RefreshCw, CheckCircle, XCircle, Clock, Play, AlertTriangle } from "luc
 import { formatDistanceToNow, format, differenceInSeconds, addMinutes, addHours, addDays, isAfter } from "date-fns";
 
 const statusConfig: Record<string, { icon: React.ElementType; color: string }> = {
-  success: { icon: CheckCircle, color: "text-green-600" },
+  success: { icon: CheckCircle, color: "text-success" },
   failed: { icon: XCircle, color: "text-destructive" },
-  running: { icon: Clock, color: "text-yellow-600" },
+  running: { icon: Clock, color: "text-warning" },
 };
 
 /* ── Schedule map: function → cron expression + human label ── */

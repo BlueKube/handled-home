@@ -27,7 +27,7 @@ export function CycleStatsRow({ upcomingCount, completedCount, handlesUsed, hand
     <div className="grid grid-cols-3 gap-3 animate-fade-in" role="group" aria-label="Cycle statistics">
       <StatPill icon={CalendarDays} label="Upcoming" value={upcomingCount} />
       <StatPill icon={CheckCircle} label="Completed" value={completedCount} />
-      <StatPill icon={Sparkles} label="Handles" value={handlesValue} />
+      <StatPill icon={Sparkles} label="Handles Left" value={handlesValue} />
     </div>
   );
 }

@@ -26,7 +26,7 @@ export default function AdminAudit() {
   const [entityType, setEntityType] = useState<string>("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const { data: logs, isLoading } = useQuery({
+  const { data: logs, isLoading, isError } = useQuery({
     queryKey: ["admin-audit-log", entityType],
     queryFn: async () => {
       let query = supabase
@@ -76,6 +76,8 @@ export default function AdminAudit() {
         <div className="space-y-2">
           {[1, 2, 3].map((i) => <Skeleton key={i} className="h-12 rounded" />)}
         </div>
+      ) : isError ? (
+        <p className="text-sm text-destructive text-center py-12">Failed to load audit logs. Please refresh.</p>
       ) : !logs?.length ? (
         <p className="text-muted-foreground text-center py-12">No audit logs found.</p>
       ) : (

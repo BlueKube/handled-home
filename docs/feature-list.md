@@ -105,27 +105,27 @@
 
 ## VII. Handles Currency System `margin-lever`
 
-52. Handles as the internal unit of value — simple "Used / Remaining" bar for customers — 8/10
+52. Handles as the internal unit of value — simple "Used / Remaining" bar for customers — 9/10
 53. Handle transaction ledger: grant / spend / expire / rollover / refund — append-only, reconcilable — 8/10
-54. Cached balance on subscription with `recalc_handles_balance()` RPC for reconciliation — 8/10
-55. Per-SKU handle cost display ("Costs 3 handles") at point of selection — 8/10
+54. Cached balance on subscription with `recalc_handles_balance()` RPC for reconciliation — 9/10
+55. Per-SKU handle cost display ("Costs 3 handles") at point of selection — 9/10
 56. Rollover with configurable cap and expiry days per plan — 8/10
-57. Refund handles preserving original expiry date on system/provider cancellations — 8/10
-58. Idempotency key indexing on handle transactions to prevent duplicate grants — 8/10
+57. Refund handles preserving original expiry date on system/provider cancellations — 9/10
+58. Idempotency key indexing on handle transactions to prevent duplicate grants — 9/10
 
 ---
 
 ## VIII. Service Day System `density-driver` `mental-load-reduction`
 
-59. System-assigned recurring Service Day based on zone, capacity, and route optimization — 8/10
-60. Customer confirm/reject flow with exactly one rejection token — 8/10
-61. 2–3 controlled alternative day offers on rejection (never infinite cycling) — 8/10
-62. Atomic capacity reservation: capacity is reserved when an offer is created, moved on alternative selection — 8/10
-63. "System Recommended" badge with efficiency-framed reason text — 8/10
-64. "Must be home" toggle with time window selector (morning/afternoon) — 8/10
-65. "Try to align days" preference toggle with tradeoff messaging — 8/10
-66. Admin utilization view: Mon–Sun assignment counts per zone with stability indicators — 8/10
-67. Admin override with mandatory reason, capacity warnings, and full audit logging — 8/10
+59. System-assigned recurring Service Day based on zone, capacity, and route optimization — 9/10
+60. Customer confirm/reject flow with exactly one rejection token — 9/10
+61. 2–3 controlled alternative day offers on rejection (never infinite cycling) — 9/10
+62. Atomic capacity reservation: capacity is reserved when an offer is created, moved on alternative selection — 9/10
+63. "System Recommended" badge with efficiency-framed reason text — 9/10
+64. "Must be home" toggle with time window selector (morning/afternoon) — 9/10
+65. "Try to align days" preference toggle with tradeoff messaging — 9/10
+66. Admin utilization view: Mon–Sun assignment counts per zone with stability indicators — 9/10
+67. Admin override with mandatory reason, capacity warnings, and full audit logging — 9/10
 
 ---
 
@@ -198,47 +198,47 @@
 
 ## XV. Billing & Payments `margin-lever`
 
-105. Tokenized payment method management with add/remove/default — 8/10
-106. Subscription autopay with 28-day cycle invoicing — 8/10
-107. Invoice line items: plan, add-ons, credits, taxes/fees — 8/10
-108. Receipt view with cycle period, payment status, and method (masked) — 8/10
-109. Billing health states: Healthy / Action Required / Past Due / Service Paused — 8/10
+105. Tokenized payment method management with add/remove/default — 9/10
+106. Subscription autopay with 28-day cycle invoicing — 9/10
+107. Invoice line items: plan, add-ons, credits, taxes/fees — 9/10
+108. Receipt view with cycle period, payment status, and method (masked) — 9/10
+109. Billing health states: Healthy / Action Required / Past Due / Service Paused — 9/10
 110. Customer credits with fixed tiers ($10/$25/$50/custom) and auto-application to next invoice — 7/10
-111. Idempotent invoice generation via idempotency keys — 8/10
+111. Idempotent invoice generation via idempotency keys — 9/10
 
 ---
 
 ## XVI. Provider Payouts `provider-value` `margin-lever`
 
-112. Provider payout onboarding via Stripe Connect Express — 8/10
-113. Weekly automated payout runs with minimum threshold enforcement — 8/10
-114. Per-job earnings detail: base pay + modifiers + hold status + net — 8/10
-115. "At current pace" monthly earnings projection — 8/10
-116. Hold reasons with explicit explanations and expected release countdown — 8/10
-117. Severity-based earning holds: LOW (no hold), MED (24–48h soft), HIGH (hard hold + exception) — 8/10
-118. Payout webhook confirmation: earnings only marked PAID on processor confirmation — 8/10
+112. Provider payout onboarding via Stripe Connect Express — 9/10
+113. Weekly automated payout runs with minimum threshold enforcement — 9/10
+114. Per-job earnings detail: base pay + modifiers + hold status + net — 9/10
+115. "At current pace" monthly earnings projection — 9/10
+116. Hold reasons with explicit explanations and expected release countdown — 9/10
+117. Severity-based earning holds: LOW (no hold), MED (24–48h soft), HIGH (hard hold + exception) — 9/10
+118. Payout webhook confirmation: earnings only marked PAID on processor confirmation — 9/10
 
 ---
 
 ## XVII. Dunning & Payment Recovery `margin-lever`
 
-119. 5-step automated dunning sequence: +1d, +3d, +5d retry with escalating notifications — 8/10
-120. Calm in-app banner: "We couldn't process your payment. Update your card." — 8/10
-121. Auto-pause subscription scheduling after N failures (preserves receipt/history access) — 8/10
-122. Auto-apply earned referral credits to offset failed payments — 8/10
+119. 5-step automated dunning sequence: +1d, +3d, +5d retry with escalating notifications — 9/10
+120. Calm in-app banner: "We couldn't process your payment. Update your card." — 9/10
+121. Auto-pause subscription scheduling after N failures (preserves receipt/history access) — 9/10
+122. Auto-apply earned referral credits to offset failed payments — 9/10
 122b. Dunning timeline UI: retry schedule visualization (day 3/7/10), grace period countdown, suspension warning — 8/10
 122c. Fix Payment panel: failure reason display, retry history, Stripe portal integration — 8/10
-123. Auto-release provider earning holds on schedule — 8/10
+123. Auto-release provider earning holds on schedule — 9/10
 
 ---
 
 ## XVIII. Plan Self-Service `mental-load-reduction` `margin-lever`
 
-124. Plan upgrade/downgrade with next-cycle default and direction detection — 8/10
-125. Pending plan change banner with effective date — 8/10
-126. Cancel pending plan change — 8/10
-127. Cancellation flow: reason survey → 5-handle retention offer → confirm — 8/10
-128. Subscription pause (up to 8 weeks / 60 days) with visual timeline, auto-cancel warnings, and frozen handles messaging — 8/10
+124. Plan upgrade/downgrade with next-cycle default and direction detection — 9/10
+125. Pending plan change banner with effective date — 9/10
+126. Cancel pending plan change — 9/10
+127. Cancellation flow: reason survey → 5-handle retention offer → confirm — 9/10
+128. Subscription pause (up to 8 weeks / 60 days) with visual timeline, auto-cancel warnings, and frozen handles messaging — 9/10
 
 ---
 
@@ -319,9 +319,9 @@
 
 ## XXV. Property Health Score `mental-load-reduction` `trust-builder`
 
-174. Composite health score (0–100): regularity 40%, coverage 25%, seasonal 15%, issues 20% — 8/10
+174. Composite health score (0–100): regularity 40%, coverage 25%, seasonal 15%, issues 20% — 9/10
 175. Dashboard widget with SVG score ring, color-coded labels, and trend arrow — 9/10
-176. Auto-compute on load if stale >24 hours — 8/10
+176. Auto-compute on load if stale >24 hours — 9/10
 177. Health score drop notification nudge via event bus — 8/10
 
 ---
@@ -396,14 +396,14 @@
 ## XXXI. Ops Cockpit & Admin Analytics `density-driver` `trust-builder`
 
 207. Real-time ops dashboard: today's jobs, capacity pressure, quality metrics, revenue, growth — 9/10
-208. Zone health drilldowns: capacity, demand, quality, provider coverage, actions — 8/10
-209. Service Day health: offer backlog, rejection rate, overrides, capacity exceptions — 8/10
-210. Jobs & proof health: search + filter by status, missing proof, zone, provider, date range — 8/10
-211. Billing health: past due, failed payments, credits, refunds, disputes — 8/10
-212. Support health: open tickets, SLA breach risk, self-resolve rate, median time-to-resolution — 8/10
-213. Growth health: referrals, provider invites, applications, fraud holds — 8/10
-214. KPI definitions page with 18 KPIs across 5 categories, formula cards, search, category filter, green/yellow/red threshold badges from operating model — 8/10
-215. Daily snapshot rollup via `snapshot-rollup` edge function — 8/10
+208. Zone health drilldowns: capacity, demand, quality, provider coverage, actions — 9/10
+209. Service Day health: offer backlog, rejection rate, overrides, capacity exceptions — 9/10
+210. Jobs & proof health: search + filter by status, missing proof, zone, provider, date range — 9/10
+211. Billing health: past due, failed payments, credits, refunds, disputes — 9/10
+212. Support health: open tickets, SLA breach risk, self-resolve rate, median time-to-resolution — 9/10
+213. Growth health: referrals, provider invites, applications, fraud holds — 9/10
+214. KPI definitions page with 18 KPIs across 5 categories, formula cards, search, category filter, green/yellow/red threshold badges from operating model — 9/10
+215. Daily snapshot rollup via `snapshot-rollup` edge function — 9/10
 216. Business Health gauges on Ops Cockpit: attach rate (global, 90-day cohort, 6-month cohort), household churn, provider churn, zone density bands — green/amber/red threshold indicators from operating model, flywheel alert when 6-month attach rate < 1.5 — 7/10
 216b. Gross Margin gauge on Ops Cockpit (MONEY column): percentage with target ≥25%, green/yellow/red status — 8/10
 216c. Provider Utilization gauge on Ops Cockpit (NOW column): percentage with target ≥80%, green/yellow/red status — 8/10
@@ -423,11 +423,11 @@
 
 ## XXXIII. Admin Controls & Governance `margin-lever` `trust-builder`
 
-219. Pricing & payout engine with zone multipliers and SKU-specific overrides — 8/10
-220. Governance audit trail: every money, access, scheduling, and policy change is logged — 8/10
-221. Admin system config table with 18+ configurable parameters (dunning steps, bonus caps, thresholds) — 8/10
+219. Pricing & payout engine with zone multipliers and SKU-specific overrides — 9/10
+220. Governance audit trail: every money, access, scheduling, and policy change is logged — 9/10
+221. Admin system config table with 18+ configurable parameters (dunning steps, bonus caps, thresholds) — 9/10
 222. Admin change request system with requester/reviewer workflow — 5/10
-223. Admin adjustment records for manual financial corrections — 8/10
+223. Admin adjustment records for manual financial corrections — 9/10
 223b. Launch Readiness dashboard: 9 automated pre-launch checks (zones, SKUs, plans, Stripe pricing, providers, payouts, cron health, BYOC invites, entitlements) with green/red/amber status badges — 8/10
 
 ---
@@ -462,9 +462,9 @@
 
 ## XXXVI. Exception Management `trust-builder`
 
-238. Unified exception queue: ops + billing exceptions in one queue with domain filter (All/Ops/Billing), 15 exception types, SLA tracking, severity-sorted — 8/10
-239. Per-exception "next best action" CTA — structured repair actions per type with one-tap buttons that record actions with pre-filled type and reason codes — 8/10
-240. Severity-sorted display with one-tap resolution actions — acknowledge, start work, escalate, record action, resolve — 8/10
+238. Unified exception queue: ops + billing exceptions in one queue with domain filter (All/Ops/Billing), 15 exception types, SLA tracking, severity-sorted — 9/10
+239. Per-exception "next best action" CTA — structured repair actions per type with one-tap buttons that record actions with pre-filled type and reason codes — 9/10
+240. Severity-sorted display with one-tap resolution actions — acknowledge, start work, escalate, record action, resolve — 9/10
 
 ---
 
@@ -672,14 +672,14 @@
 
 ## XLIV. UX Value Proposition & Conversion `margin-lever` `trust-builder`
 
-359. Bundle Savings Calculator on Plans page and onboarding: compares monthly subscription cost vs. hiring separate vendors with per-service breakdown — 8/10
+359. Bundle Savings Calculator on Plans page and onboarding: compares monthly subscription cost vs. hiring separate vendors with per-service breakdown — 9/10
 360. First Service Celebration: full-screen animated overlay after first completed service with share CTA and receipt link — 8/10
 361. Provider Profile Sheet: bottom drawer showing provider name, avatar, rating, trust badges (Verified, Insured), and specialties — 8/10
 362. Provider Earnings Projection Card: two variants (onboarding zone estimate + dashboard capacity growth meter) showing income potential — 8/10
-363. Home Timeline page (`/customer/timeline`): chronological service history grouped by month with stats (total services, photos, membership duration) — 8/10
-364. Trust Bar: compact social proof strip (insured providers, satisfaction guarantee, cancel anytime) shown in onboarding zone check and plan selection — 8/10
+363. Home Timeline page (`/customer/timeline`): chronological service history grouped by month with stats (total services, photos, membership duration) — 9/10
+364. Trust Bar: compact social proof strip (insured providers, satisfaction guarantee, cancel anytime) shown in onboarding zone check and plan selection — 9/10
 365. BYOC Banner on provider dashboard: prominent call-to-action for bringing own customers with activation count — 8/10
-366. Referral Milestones: tiered reward system (Starter $30 credit at 3 referrals, Ambassador free month at 5, Champion VIP at 10) with progress bars — 8/10
+366. Referral Milestones: tiered reward system (Starter $30 credit at 3 referrals, Ambassador free month at 5, Champion VIP at 10) with progress bars — 9/10
 
 ---
 

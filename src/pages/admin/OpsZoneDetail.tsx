@@ -109,7 +109,8 @@ export default function OpsZoneDetail() {
         {capacities.length > 0 && (
           <div className="space-y-2 mt-3">
             {capacities.map((c: any) => {
-              const pct = c.max_homes > 0 ? Math.round((c.assigned_count / c.max_homes) * 100) : 0;
+              const effectiveMax = c.max_homes + Math.floor(c.max_homes * (c.buffer_percent ?? 0) / 100);
+              const pct = effectiveMax > 0 ? Math.round((c.assigned_count / effectiveMax) * 100) : 0;
               return (
                 <div key={c.id} className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground capitalize">{c.day_of_week} {c.service_window}</span>

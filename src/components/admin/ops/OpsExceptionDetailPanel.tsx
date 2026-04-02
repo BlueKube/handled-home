@@ -45,8 +45,6 @@ const TYPE_LABELS: Record<string, string> = {
   reconciliation_mismatch: "Reconciliation Mismatch",
 };
 
-// Repair suggestions now come from src/lib/exception-actions.ts
-
 export function OpsExceptionDetailPanel({ exceptionId, onClose }: Props) {
   const { data: exception, isLoading } = useOpsExceptionDetail(exceptionId);
   const { data: actions } = useOpsExceptionActions(exceptionId);

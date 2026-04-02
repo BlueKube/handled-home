@@ -73,11 +73,6 @@ function BoxOverlay({ a }: { a: BoxAnnotation }) {
 
 function ArrowOverlay({ a }: { a: ArrowAnnotation }) {
   const c = colorMap[a.color ?? "blue"];
-  const dx = a.to.x - a.from.x;
-  const dy = a.to.y - a.from.y;
-  const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-  const len = Math.sqrt(dx * dx + dy * dy);
-
   return (
     <div className="absolute inset-0 pointer-events-none">
       <svg className="absolute inset-0 w-full h-full overflow-visible">

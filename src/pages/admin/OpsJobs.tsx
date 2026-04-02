@@ -55,16 +55,16 @@ export default function OpsJobs() {
   }, [skuData]);
 
   const skuIdsByCategory = useMemo(() => {
-    if (!categoryFilter) return null;
+    if (!categoryFilter || categoryFilter.startsWith("all")) return null;
     const ids = new Set<string>();
     (skuData ?? []).forEach((s: any) => { if (s.category === categoryFilter) ids.add(s.id); });
     return ids;
   }, [categoryFilter, skuData]);
 
   const { jobs, totalCount, loading } = useAdminJobs({
-    status: status || undefined,
-    zone_id: zoneId || undefined,
-    provider_org_id: providerOrgId || undefined,
+    status: status && !status.startsWith("all") ? status : undefined,
+    zone_id: zoneId && !zoneId.startsWith("all") ? zoneId : undefined,
+    provider_org_id: providerOrgId && !providerOrgId.startsWith("all") ? providerOrgId : undefined,
     date_from: dateFrom || undefined,
     date_to: dateTo || undefined,
     page,
@@ -272,7 +272,7 @@ export default function OpsJobs() {
                         </Badge>
                       )}
                       {proof === "complete" && (
-                        <Badge variant="outline" className="text-xs gap-1 border-green-500 text-green-600">
+                        <Badge variant="outline" className="text-xs gap-1 border-success/50 text-success">
                           <Camera className="h-3 w-3" /> ✓
                         </Badge>
                       )}
