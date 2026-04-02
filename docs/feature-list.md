@@ -339,15 +339,15 @@
 
 ## XXVII. Founding Partner & BYOC (Bring Your Own Customers) `density-driver` `provider-value`
 
-184. Provider application funnel with category/ZIP intake and opportunity banners (5 variants) — 8/10
-185. 12-clause legal agreement with per-clause acceptance tracking and timestamps — 8/10
-186. Compliance document upload system (GL insurance, COI, background checks, licenses) — 8/10
-187. Category requirements config: risk tiers 0–3 with per-category compliance rules — 8/10
-188. BYOC invite link generation with token-based customer activation — 8/10
-189. BYOC attribution tracking: invited → installed → subscribed → first visit → bonus window — 8/10
-190. BYOC bonus ledger: weekly batch computation with per-attribution progress tracking — 8/10
-191. Admin provider application review queue with approve/reject/conditional RPC — 8/10
-192. Automatic `provider_orgs` + `provider_members` bootstrap on application approval — 8/10
+184. Provider application funnel with category/ZIP intake and opportunity banners (5 variants) — 9/10
+185. 12-clause legal agreement with per-clause acceptance tracking and timestamps — 9/10
+186. Compliance document upload system (GL insurance, COI, background checks, licenses) — 9/10
+187. Category requirements config: risk tiers 0–3 with per-category compliance rules — 9/10
+188. BYOC invite link generation with token-based customer activation — 9/10
+189. BYOC attribution tracking: invited → installed → subscribed → first visit → bonus window — 9/10
+190. BYOC bonus ledger: weekly batch computation with per-attribution progress tracking — 9/10
+191. Admin provider application review queue with approve/reject/conditional RPC — 9/10
+192. Automatic `provider_orgs` + `provider_members` bootstrap on application approval — 9/10
 
 ---
 
