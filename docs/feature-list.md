@@ -265,16 +265,16 @@
 ## XXI. Support & Disputes `trust-builder` `mental-load-reduction`
 
 139. Self-resolution target: ≥80% of issues resolved without human involvement — 7/10
-140. Receipt-anchored issue reporting: every receipt has "Report an issue" — 8/10
+140. Receipt-anchored issue reporting: every receipt has "Report an issue" — 9/10
 141. Guided Resolver: structured category → evidence → instant resolution offer → accept → done — 7/10
 142. Policy engine with 5-level precedence: provider → SKU → category → zone → global — 7/10
 143. AI-powered ticket classification with severity, evidence scoring, and risk scoring — 9/10
 144. Evidence replay: before/after photos + checklist + time-on-site presented to customer — 7/10
 145. Chargeback intercept: proof + cheaper off-ramps (credits, plan changes) before escalation — 6/10
 146. Duplicate ticket suppression: second attempt links to existing ticket — 7/10
-147. Response macros for admin one-click resolutions — 8/10
+147. Response macros for admin one-click resolutions — 9/10
 148. Policy preview simulator: test scenario inputs (category, evidence score, risk score, customer history, job value) against active policy dials to see computed resolution offers — 7/10
-149. No chat threads anywhere — all disputes are structured, bounded, and auditable — 8/10
+149. No chat threads anywhere — all disputes are structured, bounded, and auditable — 9/10
 
 ---
 
