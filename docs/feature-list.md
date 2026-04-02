@@ -319,9 +319,9 @@
 
 ## XXV. Property Health Score `mental-load-reduction` `trust-builder`
 
-174. Composite health score (0–100): regularity 40%, coverage 25%, seasonal 15%, issues 20% — 8/10
+174. Composite health score (0–100): regularity 40%, coverage 25%, seasonal 15%, issues 20% — 9/10
 175. Dashboard widget with SVG score ring, color-coded labels, and trend arrow — 9/10
-176. Auto-compute on load if stale >24 hours — 8/10
+176. Auto-compute on load if stale >24 hours — 9/10
 177. Health score drop notification nudge via event bus — 8/10
 
 ---
@@ -396,14 +396,14 @@
 ## XXXI. Ops Cockpit & Admin Analytics `density-driver` `trust-builder`
 
 207. Real-time ops dashboard: today's jobs, capacity pressure, quality metrics, revenue, growth — 9/10
-208. Zone health drilldowns: capacity, demand, quality, provider coverage, actions — 8/10
-209. Service Day health: offer backlog, rejection rate, overrides, capacity exceptions — 8/10
-210. Jobs & proof health: search + filter by status, missing proof, zone, provider, date range — 8/10
-211. Billing health: past due, failed payments, credits, refunds, disputes — 8/10
-212. Support health: open tickets, SLA breach risk, self-resolve rate, median time-to-resolution — 8/10
-213. Growth health: referrals, provider invites, applications, fraud holds — 8/10
-214. KPI definitions page with 18 KPIs across 5 categories, formula cards, search, category filter, green/yellow/red threshold badges from operating model — 8/10
-215. Daily snapshot rollup via `snapshot-rollup` edge function — 8/10
+208. Zone health drilldowns: capacity, demand, quality, provider coverage, actions — 9/10
+209. Service Day health: offer backlog, rejection rate, overrides, capacity exceptions — 9/10
+210. Jobs & proof health: search + filter by status, missing proof, zone, provider, date range — 9/10
+211. Billing health: past due, failed payments, credits, refunds, disputes — 9/10
+212. Support health: open tickets, SLA breach risk, self-resolve rate, median time-to-resolution — 9/10
+213. Growth health: referrals, provider invites, applications, fraud holds — 9/10
+214. KPI definitions page with 18 KPIs across 5 categories, formula cards, search, category filter, green/yellow/red threshold badges from operating model — 9/10
+215. Daily snapshot rollup via `snapshot-rollup` edge function — 9/10
 216. Business Health gauges on Ops Cockpit: attach rate (global, 90-day cohort, 6-month cohort), household churn, provider churn, zone density bands — green/amber/red threshold indicators from operating model, flywheel alert when 6-month attach rate < 1.5 — 7/10
 216b. Gross Margin gauge on Ops Cockpit (MONEY column): percentage with target ≥25%, green/yellow/red status — 8/10
 216c. Provider Utilization gauge on Ops Cockpit (NOW column): percentage with target ≥80%, green/yellow/red status — 8/10
@@ -423,11 +423,11 @@
 
 ## XXXIII. Admin Controls & Governance `margin-lever` `trust-builder`
 
-219. Pricing & payout engine with zone multipliers and SKU-specific overrides — 8/10
-220. Governance audit trail: every money, access, scheduling, and policy change is logged — 8/10
-221. Admin system config table with 18+ configurable parameters (dunning steps, bonus caps, thresholds) — 8/10
+219. Pricing & payout engine with zone multipliers and SKU-specific overrides — 9/10
+220. Governance audit trail: every money, access, scheduling, and policy change is logged — 9/10
+221. Admin system config table with 18+ configurable parameters (dunning steps, bonus caps, thresholds) — 9/10
 222. Admin change request system with requester/reviewer workflow — 5/10
-223. Admin adjustment records for manual financial corrections — 8/10
+223. Admin adjustment records for manual financial corrections — 9/10
 223b. Launch Readiness dashboard: 9 automated pre-launch checks (zones, SKUs, plans, Stripe pricing, providers, payouts, cron health, BYOC invites, entitlements) with green/red/amber status badges — 8/10
 
 ---
@@ -462,9 +462,9 @@
 
 ## XXXVI. Exception Management `trust-builder`
 
-238. Unified exception queue: ops + billing exceptions in one queue with domain filter (All/Ops/Billing), 15 exception types, SLA tracking, severity-sorted — 8/10
-239. Per-exception "next best action" CTA — structured repair actions per type with one-tap buttons that record actions with pre-filled type and reason codes — 8/10
-240. Severity-sorted display with one-tap resolution actions — acknowledge, start work, escalate, record action, resolve — 8/10
+238. Unified exception queue: ops + billing exceptions in one queue with domain filter (All/Ops/Billing), 15 exception types, SLA tracking, severity-sorted — 9/10
+239. Per-exception "next best action" CTA — structured repair actions per type with one-tap buttons that record actions with pre-filled type and reason codes — 9/10
+240. Severity-sorted display with one-tap resolution actions — acknowledge, start work, escalate, record action, resolve — 9/10
 
 ---
 
