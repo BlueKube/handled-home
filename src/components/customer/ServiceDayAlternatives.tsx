@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CalendarDays, HelpCircle } from "lucide-react";
@@ -25,6 +26,7 @@ export function ServiceDayAlternatives({
   isSelecting,
   onSavePreferences,
 }: ServiceDayAlternativesProps) {
+  const navigate = useNavigate();
   const [prefDays, setPrefDays] = useState<string[]>([]);
 
   if (alternatives.length === 0) {
@@ -67,7 +69,7 @@ export function ServiceDayAlternatives({
           </div>
         )}
 
-        <Button variant="outline" className="w-full" onClick={() => window.location.href = "/customer/support"}>
+        <Button variant="outline" className="w-full" onClick={() => navigate("/customer/support")}>
           Contact Support
         </Button>
       </Card>
