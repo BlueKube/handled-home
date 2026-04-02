@@ -52,16 +52,21 @@
 
 | Batch | Title | Size | Files | Status | Context |
 |-------|-------|------|-------|--------|---------|
-| B1 | Phone validation utility + Browse/Apply fixes | S | 3 files | ⬜ | |
-| B2 | ProviderLeads decomposition (604→<300 per file) | M | 4 files | ⬜ | |
-| B3 | DeleteAccountDialog + AuthPage password reset polish | S | 2 files | ⬜ | |
+| B1 | Phone validation utility + Browse/Apply fixes | S | 3 files | ✅ | ~14% |
+| B2 | ProviderLeads decomposition (604→300 + 3 extracted) | M | 6 files | ✅ | ~16% |
+| B3 | DeleteAccountDialog + AuthPage password reset polish | S | 2 files | ✅ | ~18% |
+
+### Review Results
+- **B1:** Clean — all spec items verified, no issues.
+- **B2:** 1 SHOULD-FIX (302 lines, 2 over threshold) — fixed in follow-up commit.
+- **B3:** 1 SHOULD-FIX (missing try/finally on password reset) — fixed in follow-up commit.
 
 ---
 
 ## Session Handoff
 - **Branch:** `claude/polish-round-12-auth-nlfDe`
-- **Last completed:** Round 12 complete. Starting Round 13.
-- **Next up:** B1 — Phone validation utility
-- **Context at exit:** N/A
+- **Last completed:** B3 (Round 13 complete)
+- **Next up:** Round 13 complete — ready for Round 14 or PR
+- **Context at exit:** ~18%
 - **Blockers:** None
-- **Round progress:** Phase 1 of 1 in progress
+- **Round progress:** Phase 1 of 1 complete ✅

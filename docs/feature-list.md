@@ -504,9 +504,9 @@
 260. Premium "calm concierge" copy voice throughout — 8/10
 261. Privacy policy page at /privacy — comprehensive data collection, usage, retention, rights, security disclosures — DONE
 262. Terms of service page at /terms — subscription terms, service delivery, provider relationships, liability, account deletion — DONE
-263. Customer account deletion from Settings — confirmation dialog, anonymization RPC, subscription cancellation — DONE
+263. Customer account deletion from Settings — confirmation dialog, anonymization RPC, subscription cancellation, accurate timing claims — 9/10
 264. Browse-first public experience at /browse — hero, ZIP coverage check, full service catalog with real SKU data, plan comparison with pricing, how-it-works, trust signals, conversion CTAs — DONE
-265. Password reset flow — actual Supabase resetPasswordForEmail instead of "Coming soon" toast — DONE
+265. Password reset flow — Supabase resetPasswordForEmail with loading state and try/finally error handling — 9/10
 266. Subscription verification timeout — 15-second timeout with error message instead of infinite spinner — DONE
 267. Provider browse-first experience at /providers — earnings calculator, 6 key benefits, BYOC bonus math, how-it-works, service categories, lead capture form (email + ZIP + category multi-select → saves to provider_leads table), conversion CTAs. No zone status shown pre-application. — DONE
 
@@ -780,12 +780,12 @@
 
 ## XLVI. Phone Identity Bridge `provider-value` `density-driver`
 
-436. Phone column on provider_leads table — optional phone capture for leads — DONE
-437. Provider browse page lead capture form includes optional phone field between email and ZIP — DONE
-438. Admin Provider Leads table displays phone column — DONE
-439. Lead-to-application linking trigger matches on phone OR email (from profiles table) — DONE
-440. Referral attribution trigger matches referred_contact against phone OR email (exact match) — DONE
-441. Provider application flow step 2 collects phone number and saves to profiles.phone — DONE
+436. Phone column on provider_leads table — optional phone capture for leads — 9/10
+437. Provider browse page lead capture form includes optional phone field with validation — 9/10
+438. Admin Provider Leads table displays phone column (decomposed into extracted tab components) — 9/10
+439. Lead-to-application linking trigger matches on phone OR email (from profiles table) — 9/10
+440. Referral attribution trigger matches referred_contact against phone OR email (exact match) — 9/10
+441. Provider application flow step 2 collects phone number with validation, saves to profiles.phone with error handling — 9/10
 
 ## XLVII. Household Members `mental-load-reduction` `trust-builder`
 
