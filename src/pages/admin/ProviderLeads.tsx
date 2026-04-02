@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Mail, Filter, Users, MapPin, Bell, Loader2 } from "lucide-react";
+import { Mail, Filter, Users, MapPin, Bell, Loader2, UserCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -72,6 +72,35 @@ export default function AdminProviderLeads() {
     },
   });
 
+  const customerLeads = useQuery({
+    queryKey: ["admin-customer-leads"],
+    queryFn: async () => {
+      const { data, error } = await (supabase.from("customer_leads") as any)
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as Array<{
+        id: string; email: string; phone: string | null;
+        zip_code: string; source: string; status: string;
+        notify_on_launch: boolean; notified_at: string | null; created_at: string;
+      }>;
+    },
+  });
+
+  const updateCustomerLeadStatus = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const { error } = await (supabase.from("customer_leads") as any)
+        .update({ status })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-customer-leads"] });
+      toast.success("Status updated");
+    },
+    onError: () => toast.error("Failed to update status"),
+  });
+
   const updateLeadStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const { error } = await (supabase.from("provider_leads") as any)
@@ -141,6 +170,9 @@ export default function AdminProviderLeads() {
           <TabsTrigger value="referrals" className="flex items-center gap-1.5">
             <Users className="h-3.5 w-3.5" /> Referrals
           </TabsTrigger>
+          <TabsTrigger value="customers" className="flex items-center gap-1.5">
+            <UserCircle className="h-3.5 w-3.5" /> Customers
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="leads">
@@ -162,6 +194,15 @@ export default function AdminProviderLeads() {
             isLoading={referrals.isLoading}
             isError={referrals.isError}
             onUpdateStatus={(id, status) => updateReferralStatus.mutate({ id, status })}
+          />
+        </TabsContent>
+
+        <TabsContent value="customers">
+          <CustomerLeadsTab
+            leads={customerLeads.data ?? []}
+            isLoading={customerLeads.isLoading}
+            isError={customerLeads.isError}
+            onUpdateStatus={(id, status) => updateCustomerLeadStatus.mutate({ id, status })}
           />
         </TabsContent>
       </Tabs>
@@ -478,6 +519,81 @@ function ReferralsTab({ referrals, isLoading, isError, onUpdateStatus }: {
                   </Select>
                 </td>
                 <td className="p-3 text-xs text-muted-foreground">{new Date(ref.created_at).toLocaleDateString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+const CUSTOMER_STATUS_OPTIONS = ["all", "new", "contacted", "subscribed", "declined"] as const;
+
+function CustomerLeadsTab({ leads, isLoading, isError, onUpdateStatus }: {
+  leads: Array<{ id: string; email: string; phone: string | null; zip_code: string; source: string; status: string; notified_at: string | null; created_at: string }>;
+  isLoading: boolean;
+  isError: boolean;
+  onUpdateStatus: (id: string, status: string) => void;
+}) {
+  if (isLoading) return <div className="space-y-2 mt-4"><Skeleton className="h-12" /><Skeleton className="h-12" /></div>;
+  if (isError) return <Card className="mt-4"><CardContent className="py-8 text-center"><p className="text-sm text-destructive">Failed to load customer leads.</p></CardContent></Card>;
+
+  if (leads.length === 0) {
+    return (
+      <Card className="mt-4">
+        <CardContent className="py-12 text-center">
+          <UserCircle className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+          <p className="text-sm font-medium">No customer leads yet</p>
+          <p className="text-xs text-muted-foreground mt-1">Customer leads from the moving wizard and waitlist will appear here.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="mt-4 border rounded-lg overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b bg-muted/50">
+              <th className="text-left p-3 font-medium">Email</th>
+              <th className="text-left p-3 font-medium">Phone</th>
+              <th className="text-left p-3 font-medium">ZIP</th>
+              <th className="text-left p-3 font-medium">Source</th>
+              <th className="text-left p-3 font-medium">Status</th>
+              <th className="text-left p-3 font-medium">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {leads.map((lead) => (
+              <tr key={lead.id} className="border-b hover:bg-muted/30 transition-colors">
+                <td className="p-3 font-medium">{lead.email}</td>
+                <td className="p-3 text-xs text-muted-foreground">{lead.phone || "—"}</td>
+                <td className="p-3">{lead.zip_code}</td>
+                <td className="p-3">
+                  <Badge variant="outline" className="text-xs capitalize">{lead.source}</Badge>
+                </td>
+                <td className="p-3">
+                  <Select value={lead.status} onValueChange={(s) => onUpdateStatus(lead.id, s)}>
+                    <SelectTrigger className="h-7 w-28">
+                      <Badge className={`text-xs ${STATUS_COLORS[lead.status] ?? ""}`}>{lead.status}</Badge>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CUSTOMER_STATUS_OPTIONS.filter((s) => s !== "all").map((s) => (
+                        <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </td>
+                <td className="p-3 text-xs text-muted-foreground">
+                  {new Date(lead.created_at).toLocaleDateString()}
+                  {lead.notified_at && (
+                    <span className="block text-[10px] text-violet-500">
+                      Notified {new Date(lead.notified_at).toLocaleDateString()}
+                    </span>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
