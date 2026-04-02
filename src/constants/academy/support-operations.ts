@@ -163,6 +163,31 @@ The temptation is to deprioritize provider tickets when the customer queue is fu
     ],
   },
   {
+    id: "household-support",
+    title: "Household Members & Moving Customers",
+    type: "text",
+    content: `Two features affect how you handle customer support interactions:
+
+HOUSEHOLD MEMBERS
+Multiple users can be linked to one property. When a household member contacts support:
+• Check which property they're linked to via household_members (visible in the customer's account)
+• Members can view services but can't modify billing — if they request billing changes, direct them to the property owner
+• The owner is the primary contact for billing disputes and cancellations
+• Membership roles: owner (full access) and member (view only)
+
+MOVING CUSTOMERS
+When a customer moves, they go through a 4-step moving wizard that captures:
+• Move date and whether to keep services until then
+• New ZIP code (checked against zone coverage)
+• New homeowner contact info (for warm handoff)
+
+Support scenarios you may encounter:
+• "I'm moving and want to cancel" → Direct them to Settings → "I'm moving" instead of cancellation. The wizard handles plan transfer or lead capture.
+• "I moved but I'm still being charged" → Check property_transitions for their move date. If move_date has passed and status is still 'planned,' the daily cron may not have run. Manually cancel or escalate.
+• "The new homeowner at my old address wants to sign up" → Check property_transitions for a new_owner_email. If present, the handoff function may have already created a customer_lead for them.
+• "I moved to a new area — do you serve there?" → Check their property_transition for new_zip_covered. If true, their plan should transfer. If false, they're saved as a customer_lead and will be notified on zone launch.`,
+  },
+  {
     id: "automation",
     title: "What's Automated vs. What Needs Your Eyes",
     type: "automation",
@@ -178,6 +203,14 @@ The temptation is to deprioritize provider tickets when the customer queue is fu
       {
         text: "Support policy SLA thresholds are configured once and enforce automatically. Review them quarterly to ensure they still match your team's capacity.",
         type: "weekly-check",
+      },
+      {
+        text: "Household invite acceptance is automatic on login — when a user signs in, pending invites matching their email are auto-accepted. No support action needed unless the invite isn't appearing.",
+        type: "set-and-forget",
+      },
+      {
+        text: "Subscription auto-cancel on move date runs daily via cron. If a customer reports post-move billing, check if the cron processed their transition. Manual cancel is the fallback.",
+        type: "daily-check",
       },
     ],
   },

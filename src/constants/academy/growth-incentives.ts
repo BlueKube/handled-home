@@ -128,6 +128,51 @@ The K-factor measures viral growth: average referrals per customer × referral c
     ],
   },
   {
+    id: "provider-leads",
+    title: "Provider Lead Pipeline",
+    type: "text",
+    content: `Beyond the three customer-facing growth engines, there is a dedicated provider lead pipeline that captures interest from providers who aren't ready to apply yet.
+
+LEAD SOURCES
+• Browse page (/providers) — Providers enter their email, phone (optional), ZIP, and service categories. Saved to the provider_leads table.
+• Provider referrals — The "Know someone?" form on the post-application screen lets applicants refer other providers. Saved to provider_referrals.
+• Manual entry — Admins can add leads manually.
+
+ADMIN PIPELINE (Growth → Provider Leads)
+The Provider Leads page at /admin/provider-leads has four tabs:
+• Leads — Filterable table with status workflow: new → contacted → applied → declined → notified
+• By ZIP — Lead counts per ZIP code. Includes a "Notify Zone Leads" button for manual zone launch notifications.
+• Referrals — Provider-to-provider referrals with referrer email and status tracking
+• Customers — Customer leads from the moving wizard and waitlist (source: moving/waitlist/referral)
+
+IMPORTANT: Providers never see "closed" or "full" zone status. The messaging always frames the situation as an opportunity:
+• Active zones → "Demand is growing fast near you"
+• Launching zones → "We're launching in your area — Founding Partner status available"
+• Pre-launch zones → "Help us launch in your area — refer providers you trust"
+• Waitlisted → "We're building momentum in your area"
+
+PHONE AS IDENTITY BRIDGE
+Leads can include a phone number. The matching triggers use both email and phone, so a provider referred by phone number who signs up with their email will still be attributed correctly. Phone is collected on both the browse page lead form and the application flow (Step 2: Location).`,
+  },
+  {
+    id: "referral-incentive",
+    title: "Provider Referral Incentive",
+    type: "text",
+    content: `After applying, providers see a referral progress card: "Refer 3 providers to unlock priority review." This creates a viral loop where every applicant becomes a recruiter.
+
+HOW IT WORKS
+• Progress bar shows referral count toward the 3-referral target
+• "Priority eligible" badge appears when target is reached
+• The "Know someone?" form captures: name, contact (phone/email), service category, ZIP code
+• Each referral is tracked in the provider_referrals table with the referrer's email
+
+AUTOMATED ATTRIBUTION
+When a referred provider eventually applies, the system automatically matches their email or phone against provider_referrals and updates the referral status to "applied." This happens via a database trigger — no manual linking needed.
+
+WHAT ADMINS SEE
+The Referrals tab on the Provider Leads page shows all referrals with their current status. You can see which referrers are most effective and which referrals have converted to applications.`,
+  },
+  {
     id: "automation",
     title: "What's Automated vs. What Needs Your Eyes",
     type: "automation",
@@ -143,6 +188,14 @@ The K-factor measures viral growth: average referrals per customer × referral c
       {
         text: "BYOC invite link generation and tracking is automatic. Providers create links from their dashboard. You see activity in the Growth console. Monitor weekly for any provider generating unusual link volume.",
         type: "weekly-check",
+      },
+      {
+        text: "Provider lead-to-application linking is automatic. When a provider applies, matching leads are linked via email or phone and lead status updates to 'applied.' Check the Provider Leads page weekly for conversion rates.",
+        type: "weekly-check",
+      },
+      {
+        text: "Zone launch notifications are automatic. When a zone category transitions to SOFT_LAUNCH or OPEN, all matching provider leads AND customer leads in those ZIPs are auto-notified. Verify on the Provider Leads page that notifications went out after any zone launch.",
+        type: "set-and-forget",
       },
     ],
   },

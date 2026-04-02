@@ -175,6 +175,30 @@ Is the subscription spread positive per zone? Revenue minus provider payouts min
     ],
   },
   {
+    id: "provider-browse-funnel",
+    title: "Provider Browse Page & Lead Capture",
+    type: "text",
+    content: `The provider browse page at /providers is a public landing page for provider acquisition. No login required. Providers see earnings estimates, benefits, BYOC bonus math, and a lead capture form.
+
+THE LEAD CAPTURE FORM
+Providers enter email, phone (optional), ZIP code, and select service categories. This creates a lead in the provider_leads table. If they return to the page, they see a "Welcome back!" message instead of the form, with an "Apply Now" CTA.
+
+KEY MESSAGING PRINCIPLE
+Providers never see "closed" or "full" zone status. Every touchpoint frames the situation as opportunity:
+• Active zones → "Demand is growing fast"
+• Pre-launch → "Help us launch in your area"
+• All zones → "Apply now" or "Notify me"
+
+POST-APPLICATION EXPERIENCE
+After applying, providers see:
+• Real category gaps from zone data (not generic categories) — "We need Pest Control and Pool Service providers in your area"
+• A "Know someone?" referral form for recruiting other providers
+• A referral progress card toward the 3-referral priority review threshold
+
+ZONE LAUNCH NOTIFICATIONS
+When you transition a zone category to SOFT_LAUNCH or OPEN, all matching provider leads in those ZIPs are automatically notified. You can also manually trigger notifications from the Provider Leads page (By ZIP tab → select zone → Notify).`,
+  },
+  {
     id: "automation",
     title: "What's Automated vs. What Needs Your Hands",
     type: "automation",
@@ -184,7 +208,11 @@ Is the subscription spread positive per zone? Revenue minus provider payouts min
         type: "set-and-forget",
       },
       {
-        text: "Provider recruitment is entirely manual at launch. There is no automated provider acquisition channel yet. Build a spreadsheet of 20-30 Archetype A candidates before you make your first call. Track status: contacted → interested → interviewing → onboarding → active.",
+        text: "Provider lead capture from the browse page is automatic. Leads are deduplicated by email (upsert). Returning visitors see personalized messaging via localStorage. Review the Provider Leads page weekly.",
+        type: "weekly-check",
+      },
+      {
+        text: "Provider recruitment still benefits from manual outreach at launch. Use the Provider Leads page to track contacted leads. The system captures interest automatically — you convert it to applications through personal follow-up.",
         type: "daily-check",
       },
       {
