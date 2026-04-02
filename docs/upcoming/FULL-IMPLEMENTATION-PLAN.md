@@ -1,103 +1,81 @@
-# Full Implementation Plan: Round 8 — Provider Conversion Funnel & Lead Pipeline
+# Full Implementation Plan: Round 11 — Moving Pipeline Completion & Operational Automation
 
-> **Created:** 2026-04-01
-> **Purpose:** Build the full provider acquisition funnel from first touch through application. The browse page is built — this round adds the interactive investment layer, lead capture database, post-application zone messaging, and category gap recruitment.
+> **Created:** 2026-04-02
+> **Purpose:** Close the operational gaps from Round 10's moving wizard. Auto-pause subscriptions on move date, notify customer leads on zone launch, and send new homeowner warm handoff communications.
 
 ---
 
 ## Context
 
-Round 7 built the provider browse page (`/providers`) with earnings calculator, benefits, BYOC math, and a lead capture form. But the lead capture currently doesn't save anywhere — it's a UI placeholder. The provider application flow (`/provider/apply`) also reveals zone status before application, which can turn away providers from closed zones.
+Round 10 built the moving wizard, household members, and phone identity. But three critical operational gaps remain:
+1. Subscriptions aren't auto-paused on move date — customers get billed after moving
+2. Customer leads have no zone launch notification trigger (providers do)
+3. New homeowner contact info is captured but never acted on
 
 ### Strategy
-
-1. **Never show "closed"** — always show opportunity
-2. **Collect every lead** — email + ZIP + categories, even if the zone isn't open
-3. **Post-application messaging** — after they apply, tell them zone status + ask for help filling category gaps
-4. **Category gap recruitment** — "We need 2 more pest control providers in your area. Know someone?"
-5. **Notify pipeline** — when a zone is ready to launch, notify all leads in that ZIP
+- **Phase 1**: Auto-pause subscriptions on move date (highest urgency — billing impact)
+- **Phase 2**: Customer lead zone launch trigger (copy provider pattern)
+- **Phase 3**: New homeowner warm handoff edge function + admin visibility
+- **Phase 4**: Doc sync
 
 ---
 
-## Phase 1: Lead Capture Database + Provider Browse Integration
+## Phase 1: Subscription Pause on Move Date
 
-**Problem:** The lead capture form on `/providers` doesn't save data. We need a `provider_leads` table and an API to persist leads.
+**Problem:** The moving wizard saves `keep_services_until_move` and `move_date`, but nothing auto-cancels the subscription. Customers will be billed after they leave.
 
 **Goals:**
-1. Create `provider_leads` table (email, zip, categories, source, status, created_at)
-2. Wire the browse page form to save leads via Supabase insert
-3. Add admin visibility into the leads pipeline
+1. Database function that checks for property_transitions where move_date <= today AND status = 'planned'
+2. Auto-cancel matching subscriptions (set cancel_at_period_end)
+3. Update transition status to 'completed'
 
 **Scope:**
-- Migration: `provider_leads` table with columns: id, email, zip_code, categories (text[]), source (browse/referral/manual), status (new/contacted/applied/declined), notes, created_at
-- RLS: public insert (anon can submit), admin read/write
-- Update `ProviderBrowse.tsx` to save leads on form submit
-- Add lead count to admin Growth Console or a new "Provider Leads" section
+- Migration: `process_move_date_transitions()` function
+- pg_cron job or daily trigger: run the function daily
+- Edge function alternative if pg_cron isn't suitable
+
+**Estimated batches:** 1 (S)
+
+---
+
+## Phase 2: Customer Lead Zone Launch Notifications
+
+**Problem:** `customer_leads` table has no auto-notify trigger. When a zone launches, moving customers saved as leads should be notified — same pattern as `auto_notify_zone_leads` for providers.
+
+**Goals:**
+1. When market_zone_category_state transitions to SOFT_LAUNCH/OPEN, notify matching customer_leads
+2. Add notified_at column to customer_leads
+3. Reuse the same trigger pattern from provider leads
+
+**Scope:**
+- Migration: add notified_at to customer_leads
+- Migration: `auto_notify_customer_leads()` trigger on market_zone_category_state
+
+**Estimated batches:** 1 (S)
+
+---
+
+## Phase 3: New Homeowner Warm Handoff
+
+**Problem:** The moving wizard captures new homeowner contact info but nothing is done with it. This is the highest-value lead in the system.
+
+**Goals:**
+1. Edge function that processes property_transitions with new homeowner info
+2. Queries the property's service history to personalize the outreach
+3. Creates a customer_lead for the new homeowner
+4. Admin visibility: show pending handoffs on an admin page
+
+**Scope:**
+- Edge function: `process-new-homeowner-handoff`
+- Queries property's subscription + service categories for context
+- Inserts customer_lead with source='referral' for the new homeowner
+- Admin ProviderLeads page: add "Customer Leads" tab (or new page)
 
 **Estimated batches:** 2 (S)
 
 ---
 
-## Phase 2: Post-Application Zone Messaging
-
-**Problem:** After a provider applies, the current flow shows zone status immediately. If the zone is closed/waitlist, they see a dead end. Instead, we should always show encouragement and ask for help.
-
-**Goals:**
-1. Update post-application status messaging to never say "closed" or "not available"
-2. Add "Help us launch" messaging: "We're working on launching in your area. Help us get there faster — know other service providers who might be interested?"
-3. Add category gap display: "We need providers in these categories to launch: [Pest Control, Pool Service]"
-4. Add referral form: provider can submit names/contacts of other providers they know
-
-**Scope:**
-- Update `src/pages/provider/Apply.tsx` — replace closed/waitlist messaging with opportunity messaging
-- Create `provider_referrals` or reuse existing referral system for provider-to-provider referrals
-- Show category gaps from zone data (which categories have providers vs which don't)
-- "Know someone?" form: name, phone/email, category — saved to a referral/lead table
-
-**Estimated batches:** 3 (S-M)
-
----
-
-## Phase 3: Admin Provider Lead Pipeline
-
-**Problem:** Admins need to see and act on provider leads — contact them, track status, see which ZIPs have demand.
-
-**Goals:**
-1. Admin page showing all provider leads with filtering (ZIP, category, status)
-2. Lead-to-application conversion tracking
-3. ZIP heat map: which ZIPs have the most provider interest
-4. One-click "invite to apply" action (sends email)
-
-**Scope:**
-- `src/pages/admin/ProviderLeads.tsx` — lead pipeline page with table, filters, status management
-- Route at `/admin/provider-leads`, nav entry under Growth
-- Lead status workflow: new → contacted → applied → declined
-- ZIP aggregation view: count of leads per ZIP code
-
-**Estimated batches:** 2 (S-M)
-
----
-
-## Phase 4: Zone Launch Notification Pipeline
-
-**Problem:** When a zone is ready to launch, we need to notify all leads in that ZIP automatically.
-
-**Goals:**
-1. When a zone transitions to `soft_launch` or `live`, query provider_leads for matching ZIP codes
-2. Send notification email: "Great news — we're launching in [ZIP]! Apply now to be a Founding Partner."
-3. Track which leads were notified and their response
-
-**Scope:**
-- Edge function or cron trigger on zone status change
-- Email template for provider launch notification
-- Update lead status to "notified" after sending
-- Link in email goes to `/providers` → "Apply Now"
-
-**Estimated batches:** 2 (S)
-
----
-
-## Phase 5: Doc Sync & Feature List Update
+## Phase 4: Doc Sync
 
 **Estimated batches:** 1 (Micro)
 
@@ -105,20 +83,18 @@ Round 7 built the provider browse page (`/providers`) with earnings calculator, 
 
 ## Execution Order
 
-1. **Phase 1** — database + form wiring (foundation)
-2. **Phase 2** — post-application messaging (depends on knowing zone categories)
-3. **Phase 3** — admin pipeline (depends on leads table)
-4. **Phase 4** — launch notifications (depends on leads + zone status)
-5. **Phase 5** — doc sync
+1. **Phase 1** — Subscription pause (billing urgency)
+2. **Phase 2** — Customer lead notifications (completes the pipeline)
+3. **Phase 3** — New homeowner handoff (retention opportunity)
+4. **Phase 4** — Doc sync
 
-**Estimated total:** 10 batches across 5 phases
+**Estimated total:** 5 batches across 4 phases
 
 ---
 
 ## Success Criteria
 
-1. Provider leads saved to database with email, ZIP, and categories
-2. No "closed zone" messaging visible to providers at any point before or after application
-3. Post-application screen shows category gaps and "know someone?" referral form
-4. Admin can view, filter, and manage provider leads
-5. Zone launch triggers automatic notification to matching leads
+1. Subscriptions auto-cancel on move date (no post-move billing)
+2. Customer leads notified when their target zone launches
+3. New homeowner contact info creates a customer lead and is visible to admins
+4. Full pipeline: customer moves → services pause → new homeowner contacted → customer re-engaged at new address when zone launches

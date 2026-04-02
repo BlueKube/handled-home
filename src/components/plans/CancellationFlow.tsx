@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,6 +26,7 @@ const CANCEL_REASONS = [
 ];
 
 export function CancellationFlow({ subscription }: CancellationFlowProps) {
+  const navigate = useNavigate();
   const [step, setStep] = useState<"reason" | "offer" | "confirm">("reason");
   const [reason, setReason] = useState("");
   const [feedback, setFeedback] = useState("");
@@ -115,9 +117,16 @@ export function CancellationFlow({ subscription }: CancellationFlowProps) {
               <Button
                 variant="destructive"
                 disabled={!reason}
-                onClick={() => setStep("offer")}
+                onClick={() => {
+                  if (reason === "moving") {
+                    setDialogOpen(false);
+                    navigate("/customer/moving");
+                    return;
+                  }
+                  setStep("offer");
+                }}
               >
-                Continue
+                {reason === "moving" ? "Start Moving Wizard" : "Continue"}
               </Button>
             </AlertDialogFooter>
           </>

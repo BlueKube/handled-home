@@ -80,3 +80,45 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 - [ ] **Submit for App Store review** — After TestFlight testing is satisfactory
   - **Why:** Required for public App Store listing
   - **Blocked:** TestFlight testing complete
+
+## Round 8: Provider Conversion Funnel (2026-04-01)
+
+- [ ] **Apply provider_leads and provider_referrals migrations** — Two new tables need to be applied to production database
+  - **Why:** Browse page lead capture and referral form write to these tables
+  - **Blocked:** Lead capture on production
+
+- [ ] **Configure email sending for zone launch notifications** — The `notify-zone-leads` edge function marks leads as "notified" but doesn't send actual emails. Need to configure Resend/SendGrid/etc. and wire into the function.
+  - **Why:** Leads won't receive launch notification emails without email integration
+  - **Blocked:** Nothing — leads are still tracked even without email
+
+## Round 9: Provider Funnel Hardening (2026-04-01)
+
+- [ ] **Apply Round 9 migrations** — 5 new migrations: unique email constraint, lead-application linking trigger, get_category_gaps RPC, auto-notify trigger, referral attribution trigger
+  - **Why:** All provider funnel automation depends on these triggers and functions
+  - **Blocked:** Full funnel automation on production
+
+- [ ] **Decide referral incentive structure** — The "Refer 3 providers → priority review" messaging is implemented but the actual priority review logic is not enforced. Decide: should 3+ referrals flag the application for faster admin review, or is the messaging aspirational?
+  - **Why:** Provider expectation set by UI needs to be backed by a real workflow
+  - **Blocked:** Nothing — UI works regardless, but trust erodes if promise isn't kept
+
+## Round 10: Phone Identity, Household Members & Moving Wizard (2026-04-01)
+
+- [ ] **Apply Round 10 migrations** — 5 new migrations: provider_leads phone column, trigger phone matching, household_members table, accept_household_invites RPC, moving wizard tables (property_transitions + customer_leads)
+  - **Why:** Household members, moving wizard, and phone matching depend on these
+  - **Blocked:** All Round 10 features on production
+
+- [ ] **Send actual household invite emails** — The invite flow creates a pending row in household_members but sends no email. Wire to an email service to send "You've been invited to manage [address] on Handled Home."
+  - **Why:** Invitees don't know they've been invited without an email
+  - **Blocked:** Nothing — invite still works if invitee logs in (auto-accepted)
+
+- [x] **Wire moving wizard to subscription pause/cancel** — ✅ `process_move_date_transitions()` function + `process-move-transitions` edge function auto-cancels subscriptions on move date. Needs pg_cron scheduling.
+
+- [x] **Customer lead zone launch notifications** — ✅ `auto_notify_customer_leads()` trigger mirrors provider lead pattern. Fires on zone launch.
+
+- [ ] **Schedule pg_cron job for process-move-transitions** — The edge function exists but needs to be added to pg_cron to run daily.
+  - **Why:** Without the cron job, move date transitions aren't processed automatically
+  - **Blocked:** Needs Supabase dashboard access to schedule the cron
+
+- [ ] **Send actual warm handoff emails to new homeowners** — process-new-homeowner-handoff creates the customer_lead but doesn't send emails. Need email service integration.
+  - **Why:** New homeowners won't know about Handled Home without outreach
+  - **Blocked:** Email service (Resend/SendGrid) not configured

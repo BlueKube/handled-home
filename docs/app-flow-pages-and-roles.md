@@ -1,12 +1,14 @@
 # app-flow-pages-and-roles.md
 
-> **Last updated:** 2026-03-15 — Full route audit against App.tsx. Added missing customer, provider, and admin routes. Corrected provider onboarding steps (6, not 5). Added admin control, scheduling, ops, and provider application routes.
+> **Last updated:** 2026-04-01 — Full route audit against App.tsx. Added missing customer, provider, and admin routes. Corrected provider onboarding steps (6, not 5). Added admin control, scheduling, ops, and provider application routes.
 
 ## Public Routes
 
 | Route | Page | Notes |
 |-------|------|-------|
 | `/auth` | AuthPage | Login / signup |
+| `/browse` | Browse | Customer browse-first experience |
+| `/providers` | ProviderBrowse | Provider acquisition landing page with lead capture |
 | `/invite/:code` | InviteLanding | Referral invite deep link |
 | `/share/:shareCode` | ShareLanding | Share card deep link |
 | `/byoc/activate/:token` | BYOC Invite Landing | Provider's invite link for existing customers |
@@ -56,7 +58,8 @@
 | `/customer/support/new` | New Ticket | PropertyGate |
 | `/customer/support/tickets` | Ticket List | PropertyGate |
 | `/customer/support/tickets/:ticketId` | Ticket Detail | PropertyGate |
-| `/customer/settings` | Account Settings | PropertyGate |
+| `/customer/settings` | Account Settings (+ Household section) | PropertyGate |
+| `/customer/moving` | "I'm Moving" Wizard — 4-step move + plan transfer | PropertyGate |
 | `/customer/more` | More Menu (tab) | PropertyGate |
 | `/customer/notifications` | Notification Inbox | — |
 
@@ -141,6 +144,7 @@
 | `/admin/support/macros` | Support Macros |
 | `/admin/incentives` | Incentives |
 | `/admin/growth` | Growth Console |
+| `/admin/provider-leads` | Provider Lead Pipeline — leads, ZIP aggregation, referrals |
 | `/admin/feedback` | Customer Feedback |
 | `/admin/playbooks` | Playbooks & SOPs |
 | `/admin/control/pricing` | Pricing & Margin |
@@ -181,10 +185,10 @@
 
 | Role | Pages |
 |------|-------|
-| Public | 4 |
-| Customer | 42 |
+| Public | 6 |
+| Customer | 43 |
 | Provider | 36 |
-| Admin | 61 |
+| Admin | 62 |
 | **Total** | **143** |
 
 ---

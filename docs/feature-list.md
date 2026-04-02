@@ -508,7 +508,7 @@
 264. Browse-first public experience at /browse — hero, ZIP coverage check, full service catalog with real SKU data, plan comparison with pricing, how-it-works, trust signals, conversion CTAs — DONE
 265. Password reset flow — actual Supabase resetPasswordForEmail instead of "Coming soon" toast — DONE
 266. Subscription verification timeout — 15-second timeout with error message instead of infinite spinner — DONE
-267. Provider browse-first experience at /providers — earnings calculator, 6 key benefits, BYOC bonus math, how-it-works, service categories, lead capture (email + ZIP), conversion CTAs. No zone status shown pre-application. — DONE
+267. Provider browse-first experience at /providers — earnings calculator, 6 key benefits, BYOC bonus math, how-it-works, service categories, lead capture form (email + ZIP + category multi-select → saves to provider_leads table), conversion CTAs. No zone status shown pre-application. — DONE
 
 ---
 
@@ -747,4 +747,77 @@
 
 ---
 
-*Total features: 429 | Last updated: 2026-03-30 | Session 3 features added (Admin Academy training center with 16 modules)*
+## XLIV. Provider Conversion Funnel & Lead Pipeline `density-driver` `provider-value`
+
+411. `provider_leads` table with email, ZIP, categories, source, status tracking — anon insert + admin RLS — DONE
+412. Provider browse page lead capture form saves to database with category multi-select, email validation, loading state — DONE
+413. Admin Growth Console Funnels tab: Provider Leads Pipeline funnel card showing total/new/contacted/applied/declined counts — DONE
+414. `provider_referrals` table for provider-to-provider referrals — anon insert + admin RLS — DONE
+415. OpportunityBanner CLOSED variant replaced with HELP_LAUNCH — "Help us launch in your area" with recruitment messaging. No provider ever sees "closed" or "full" language — DONE
+416. WAITLIST banner updated to encouraging "building momentum" messaging — DONE
+417. Post-application status screen for waitlisted/submitted providers shows category gaps ("We need providers in these categories") and "Know someone?" referral form — DONE
+418. Provider referral form: name, contact, category, ZIP — saves to provider_referrals with auth email as referrer — DONE
+419. Zone status badges in application flow use friendly labels (CLOSED→"Building", SOFT_LAUNCH→"Launching soon", OPEN→"Active") — DONE
+420. Admin Provider Leads pipeline page at /admin/provider-leads with filterable table, status management, summary stat cards — DONE
+421. Provider Leads page: Leads tab with status/ZIP/category filters, inline status update dropdown, "Mark Contacted" quick action — DONE
+422. Provider Leads page: By ZIP tab with ZIP aggregation (count per ZIP, category breakdown, sorted by volume) — DONE
+423. Provider Leads page: Referrals tab showing provider_referrals with referrer, referred name/contact/category, status management — DONE
+424. `notify-zone-leads` edge function: marks matching leads as "notified" when zone launches — queries zone ZIP codes, updates lead status — DONE
+425. Admin zone notification trigger: zone selector + "Notify" button on By ZIP tab calls edge function, shows count of notified leads — DONE
+
+## XLV. Provider Funnel Hardening & Automation `density-driver` `provider-value`
+
+426. Unique email constraint on provider_leads with upsert — returning leads update categories/ZIP instead of duplicating — DONE
+427. Lead-to-application linking: database trigger auto-matches applicant email to provider_leads, updates lead status to 'applied', sets provider_lead_id FK on application — DONE
+428. `get_category_gaps` RPC: returns categories genuinely needing providers for given ZIP codes by querying market_zone_category_state (CLOSED/WAITLIST_ONLY/PROVIDER_RECRUITING) — DONE
+429. Real category gap display on post-application screen: shows genuinely needed categories from zone data instead of naive "everything you didn't pick" — DONE
+430. Automated zone launch notifications: database trigger on market_zone_category_state status change to SOFT_LAUNCH/OPEN auto-marks matching provider leads as notified with timestamp — DONE
+431. `notified_at` timestamp column on provider_leads for notification tracking — DONE
+432. Referral attribution trigger: on provider application insert, matches applicant email against provider_referrals.referred_contact and updates referral status to 'applied' — DONE
+433. Referral progress card on post-application screen: shows referral count with progress bar toward 3-referral target for priority review status — DONE
+434. Referral incentive messaging: "Refer X more providers to unlock priority review" with progress visualization — DONE
+435. Progressive lead recognition: returning visitors to /providers see "Welcome back!" card with Apply Now CTA instead of generic form — localStorage-based, no auth required — DONE
+
+## XLVI. Phone Identity Bridge `provider-value` `density-driver`
+
+436. Phone column on provider_leads table — optional phone capture for leads — DONE
+437. Provider browse page lead capture form includes optional phone field between email and ZIP — DONE
+438. Admin Provider Leads table displays phone column — DONE
+439. Lead-to-application linking trigger matches on phone OR email (from profiles table) — DONE
+440. Referral attribution trigger matches referred_contact against phone OR email (exact match) — DONE
+441. Provider application flow step 2 collects phone number and saves to profiles.phone — DONE
+
+## XLVII. Household Members `mental-load-reduction` `trust-builder`
+
+442. `household_members` table: links multiple auth users to one property with owner/member roles — DONE
+443. Auto-insert trigger: creates 'owner' row when property is created, with backfill for existing properties — DONE
+444. RLS with SECURITY DEFINER helper functions to prevent infinite recursion — DONE
+445. `accept_household_invites` RPC: auto-accepts pending invites matching current user's email — DONE
+446. `useHouseholdInvites` hook: runs once per session on customer page load to accept pending invites — DONE
+447. CustomerPropertyGate extended: household members can access customer pages without owning a property — DONE
+448. Settings page Household section: member list with role badges, email invite form, remove member action — DONE
+
+## XLVIII. "I'm Moving" Wizard `mental-load-reduction` `density-driver`
+
+449. `property_transitions` table: tracks moves with new address, ZIP coverage, new homeowner contact, keep-services toggle — DONE
+450. `customer_leads` table: mirrors provider_leads for customer-side lead capture in uncovered zones (unique email) — DONE
+451. 4-step moving wizard at /customer/moving: move date → new address + ZIP coverage check → coverage result → new homeowner referral — DONE
+452. Zone coverage check: queries zones table for active zones containing the new ZIP code — DONE
+453. Covered ZIP: "Great news — we'll transfer your plan!" messaging. Uncovered ZIP: saves customer_lead with notify_on_launch — DONE
+454. New homeowner referral form: captures name, email, phone for warm handoff to new property owner — DONE
+455. Cancel flow intercept: when customer selects "Moving" as cancel reason, redirects to moving wizard instead of cancellation — DONE
+456. Settings page "I'm moving" card: entry point to moving wizard with Truck icon — DONE
+
+## XLIX. Moving Pipeline Completion & Operational Automation `mental-load-reduction` `density-driver`
+
+457. `process_move_date_transitions()` database function: auto-cancels subscriptions on move date (cancel_at_period_end + status='canceling'), marks transitions as 'completed' — DONE
+458. `process-move-transitions` edge function: cron-callable wrapper with requireCronSecret auth for daily execution — DONE
+459. Customer lead zone launch notification trigger: auto_notify_customer_leads() on market_zone_category_state change to SOFT_LAUNCH/OPEN, mirrors provider lead pattern — DONE
+460. `notified_at` timestamp on customer_leads for notification tracking — DONE
+461. `handoff_processed` flag on property_transitions for tracking new homeowner outreach — DONE
+462. `process-new-homeowner-handoff` edge function: processes transitions with new homeowner info, creates customer_lead with source='referral', queries property context for personalization — DONE
+463. Admin "Customers" tab on Provider Leads page: shows customer_leads with email, phone, ZIP, source, status dropdown, notified_at display — DONE
+
+---
+
+*Total features: 482 | Last updated: 2026-04-02 | Round 11: Moving Pipeline Completion & Operational Automation (7 features)*

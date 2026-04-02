@@ -1401,6 +1401,136 @@ Each menu item: icon + label + ChevronRight, tappable
 **Empty State**: Bell icon + "No notifications yet — we'll let you know when there's activity on your home."
 **Error State**: "Notifications couldn't be loaded — you'll still receive push alerts. Pull down to refresh."
 
+### Screen 16.4: Household Section (in Settings)
+
+Household card in Account Settings showing:
+- **Member list**: name + role badge (owner/member) + remove button (owner only)
+- **Invite form**: email input + "Invite" button → creates pending household_members row
+- Auto-acceptance: when invitee logs in, `accept_household_invites` RPC matches by email
+
+### Screen 16.5: "I'm Moving" Entry Points
+
+Two entry points to the moving wizard:
+1. **Settings page**: "I'm moving" card with Truck icon → `/customer/moving`
+2. **Cancel flow intercept**: selecting "Moving to a new area" as cancel reason → redirects to `/customer/moving`
+
+---
+
+# FLOW 16C: "I'm Moving" Wizard
+
+**Route**: `/customer/moving`
+**Who**: Authenticated customer with PropertyGate
+**Purpose**: 4-step wizard that converts churn into retention + referral
+
+### Screen 16C.1: Move Date (Step 1)
+- Date picker: "When are you moving?"
+- "Keep services until move date" toggle (default: on)
+- `process_move_date_transitions` cron auto-cancels subscription on move date
+
+### Screen 16C.2: New Address (Step 2)
+- New address input (optional)
+- New ZIP code input → zone coverage check against active zones
+- "I don't know my new ZIP yet" skip option
+
+### Screen 16C.3: Coverage Result (Step 3)
+- **Covered ZIP**: "Great news — we serve your new area! We'll transfer your plan."
+- **Uncovered ZIP**: "We're not in your new area yet — we'll notify you when we launch." Saves customer_lead with source='moving', notify_on_launch=true.
+- **No ZIP provided**: "When you know your new address, come back and we'll check."
+
+### Screen 16C.4: New Homeowner Referral (Step 4)
+- "Know who's buying your home?" — name, email, phone inputs
+- Saves to property_transitions new_owner fields
+- `process-new-homeowner-handoff` edge function creates customer_lead for new homeowner
+- "Skip — I don't know yet" option
+- Completion screen: confirmation with next steps
+
+---
+
+# FLOW 16A: Provider Browse (Public)
+
+**Route**: `/providers`
+**Who**: Any visitor (no auth required)
+**Purpose**: Provider acquisition landing page with lead capture
+
+### Screen 16A.1: Provider Browse Page
+
+**Layout**: Full-page marketing layout with multiple sections
+
+1. **Hero**: "More jobs. Less admin. Better routes." + "Apply Now" CTA
+2. **Earnings Calculator**: 3-tier earnings grid (4/6/8 stops per day) showing daily and weekly amounts
+3. **Benefits**: 6 benefit cards (recurring routes, weekly payouts, dense routes, BYOC, growth without selling, zero admin)
+4. **How It Works**: 4-step process (apply → get route → do work → grow)
+5. **Service Categories**: Badge display of all supported categories
+6. **BYOC Section**: Bring Your Own Customers bonus math ($10/wk, 12 weeks, $2,160 max)
+7. **Lead Capture Form**: Email + ZIP + category multi-select (optional) → upserts to `provider_leads` table (unique on email)
+   - **Returning visitors**: "Welcome back!" card with Apply Now CTA + "Update my info" option (localStorage-based recognition)
+   - Success state: "You're on the list!" confirmation
+   - Email validation + ZIP length validation with toast errors
+8. **Final CTA**: "Ready to earn more with less hassle?" + "Apply Now"
+9. **Footer**: Copyright, Privacy, Terms, "For Homeowners" link
+
+**Two conversion paths**:
+- "Apply Now" → `/auth?tab=signup&role=provider` → application wizard
+- "Notify Me" → saves lead to database, no account required
+
+---
+
+# FLOW 16B: Provider Application
+
+**Route**: `/provider/apply`
+**Who**: Authenticated provider (redirects to auth if not logged in)
+**Purpose**: 5-step application wizard with zone-aware opportunity messaging
+
+### Screen 16B.1: Category Selection (Step 1)
+
+Multi-select grid of 10 service categories. Provider selects all that apply.
+
+### Screen 16B.2: Location & Coverage (Step 2)
+
+- Home base ZIP input
+- Additional service ZIPs (add/remove)
+- "See opportunities" button → calls `check_zone_readiness` RPC
+
+### Screen 16B.3: Opportunity Banner (Step 3)
+
+Zone-aware messaging that **never shows "closed" or "full"**:
+
+| Zone Status | Banner Variant | Headline |
+|---|---|---|
+| SOFT_LAUNCH (founding slots) | EARLY | "Good news — we're launching in your area" |
+| SOFT_LAUNCH (no slots) | EARLY_2 | "Good news — you're early in your area" |
+| OPEN (categories available) | EARLY_2 | "Good news — you're early in your area" |
+| OPEN (categories filled) | OPEN | "Good news — demand is growing fast near you" |
+| PROTECT_QUALITY | WAITLIST | "We're building momentum in your area" |
+| CLOSED | HELP_LAUNCH | "Help us launch in your area" |
+| Not supported / unknown | HELP_LAUNCH | "Help us launch in your area" |
+
+Zone status badges in matched zones use friendly labels: CLOSED→"Building", SOFT_LAUNCH→"Launching soon", OPEN→"Active", PROVIDER_RECRUITING→"Recruiting".
+
+### Screen 16B.4: BYOC Intake (Step 4)
+
+- Yes/No: "Do you have existing customers?"
+- If yes: estimated count (1-10/11-50/51-200/200+), willingness (low/medium/high), relationship type (recurring/mixed/one-time), willing to invite checkbox
+
+### Screen 16B.5: Review & Submit (Step 5)
+
+Summary of categories, home base, service ZIPs, BYOC estimate. Submit button.
+
+### Screen 16B.6: Post-Application Status
+
+After submission, shows status-appropriate messaging:
+
+- **Submitted/Under review**: "We're reviewing your application" + category gaps + referral form
+- **Waitlisted**: "We're building your zone" + category gaps + referral form
+- **Approved**: "You're approved!" + "Start Onboarding" button
+- **Approved conditional**: "Approved with conditions" + "Start Onboarding" button
+
+**Category Gaps Card**: Calls `get_category_gaps` RPC with applicant's ZIP codes. Shows categories genuinely needing providers (status CLOSED/WAITLIST_ONLY/PROVIDER_RECRUITING from `market_zone_category_state`). Falls back to showing nothing if RPC fails or no gaps exist.
+
+**Referral Progress Card**: Shows referral count with progress bar toward 3-referral target. "Priority eligible" badge when reached. "Refer X more providers to unlock priority review."
+
+**"Know Someone?" Referral Form**: Name, phone/email, category dropdown, ZIP (pre-filled). Saves to `provider_referrals` table. Success state with "Refer another" option. Referrer email from auth context.
+
 ---
 
 # FLOW 17: Provider Onboarding
@@ -2079,6 +2209,52 @@ Each menu item: icon + label + ChevronRight, tappable
 
 **Empty State**: FileText icon + "Application details will appear here once the record is loaded."
 **Error State**: "Application details couldn't be loaded — go back to the queue and try again."
+
+---
+
+# FLOW 26A: Admin Provider Lead Pipeline
+
+**Route**: `/admin/provider-leads`
+**Who**: Admin
+**Purpose**: Track and manage provider leads from browse page, referrals, and manual entry
+
+### Screen 26A.1: Provider Leads Page
+
+**Layout**: Header + summary cards + tabbed content
+
+**Header**: "Provider Leads" with total leads + referrals count
+
+**Summary Cards**: 5 clickable stat cards (new, contacted, applied, declined, notified)
+
+**Three Tabs**:
+
+#### Leads Tab
+- Filters: status dropdown, ZIP text filter, category text filter
+- Table: email, ZIP, categories (badges), source (badge), status (inline dropdown), date, actions
+- Status dropdown: inline change (new → contacted → applied → declined → notified)
+- Quick action: "Mark Contacted" button for new leads
+- Empty state: Mail icon + "No leads yet"
+
+#### By ZIP Tab
+- **Notify Zone Leads** card: zone selector dropdown + "Notify" button
+  - Calls `notify-zone-leads` edge function
+  - Marks matching leads as "notified"
+  - Shows success toast with count
+- ZIP aggregation table: ZIP code, lead count (badge), categories interested (badges)
+- Sorted by lead count descending
+
+#### Referrals Tab
+- Table: referred by (email), name, contact, category, ZIP, status (dropdown), date
+- Status options: new, contacted, applied, declined
+- Empty state: Users icon + "No referrals yet"
+
+#### Customers Tab
+- Table: email, phone, ZIP, source (moving/waitlist/referral badge), status (dropdown), date
+- Status options: new, contacted, notified, subscribed, declined
+- Notified leads show notification timestamp
+- Empty state: UserCircle icon + "No customer leads yet"
+
+**Data Sources**: `provider_leads` table, `provider_referrals` table, `customer_leads` table
 
 ---
 

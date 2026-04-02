@@ -1,8 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Sparkles, TrendingUp, Clock, Ban, Users } from "lucide-react";
+import { Sparkles, TrendingUp, Clock, Megaphone, Users } from "lucide-react";
 
-export type BannerVariant = "EARLY" | "OPEN" | "EARLY_2" | "WAITLIST" | "CLOSED";
+export type BannerVariant = "EARLY" | "OPEN" | "EARLY_2" | "WAITLIST" | "HELP_LAUNCH";
 
 interface OpportunityBannerProps {
   variant: BannerVariant;
@@ -65,31 +65,36 @@ const VARIANTS: Record<
   },
   WAITLIST: {
     icon: Clock,
-    headline: "We're not fully open in your area yet.",
+    headline: "We're building momentum in your area.",
     body: (z) =>
-      `Apply now and we'll review your application. We'll notify you when ${z} opens for your category.`,
+      `We're growing our network in ${z}. Apply now to get in line — we'll fast-track your review when your category opens.`,
     bullets: [
-      "Your application is saved",
-      "We'll notify you when ready",
-      "Invite customers to move up the list",
+      "Your application is saved and reviewed",
+      "You'll be notified as soon as we're ready",
+      "Invite customers to help us launch faster",
     ],
-    cta: "Join waitlist",
+    cta: "Apply now",
     accent: "border-warning/40 bg-warning/5",
   },
-  CLOSED: {
-    icon: Ban,
-    headline: "We're currently full in your area.",
-    body: () =>
-      "Join the provider waitlist. We'll notify you when openings appear.",
-    bullets: [],
-    cta: "Join waitlist",
-    accent: "border-muted bg-muted/30",
+  HELP_LAUNCH: {
+    icon: Megaphone,
+    headline: "Help us launch in your area.",
+    body: (z) =>
+      `We're building our provider network in ${z}. Apply now and refer other providers you trust — the faster we fill categories, the sooner we launch.`,
+    bullets: [
+      "Be first in line when we launch",
+      "Refer providers you trust to speed things up",
+      "Early providers get Founding Partner priority",
+    ],
+    cta: "Apply & help us launch",
+    accent: "border-primary/40 bg-primary/5",
   },
 };
 
 /**
  * Maps market_zone_category_state status to banner variant.
- * SOFT_LAUNCH → EARLY, OPEN → OPEN, PROTECT_QUALITY → WAITLIST, CLOSED → CLOSED
+ * Never returns a negative/discouraging variant — always show opportunity.
+ * SOFT_LAUNCH → EARLY, OPEN → OPEN, PROTECT_QUALITY → WAITLIST, CLOSED → HELP_LAUNCH
  */
 export function mapStateToBannerVariant(
   status: string,
@@ -104,9 +109,9 @@ export function mapStateToBannerVariant(
     case "PROTECT_QUALITY":
       return "WAITLIST";
     case "CLOSED":
-      return "CLOSED";
+      return "HELP_LAUNCH";
     default:
-      return "WAITLIST";
+      return "HELP_LAUNCH";
   }
 }
 

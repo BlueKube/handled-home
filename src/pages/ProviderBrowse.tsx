@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,8 @@ import {
   Truck, DollarSign, ArrowRight, CheckCircle2, Shield, Clock,
   MapPin, Calendar, TrendingUp, Users, Zap, Star,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const EARNINGS_EXAMPLES = [
   { stops: 4, daily: "$220", weekly: "$1,100", desc: "Part-time (4 stops/day)" },
@@ -53,19 +55,66 @@ const PROVIDER_BENEFITS = [
   },
 ];
 
+const LEAD_STORAGE_KEY = "hh_provider_lead";
+
 export default function ProviderBrowse() {
   const navigate = useNavigate();
   const [zip, setZip] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [returningLead, setReturningLead] = useState<{ email: string; zip: string; phone?: string } | null>(() => {
+    try {
+      const stored = localStorage.getItem(LEAD_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : null;
+    } catch { return null; }
+  });
+  const [showFormAnyway, setShowFormAnyway] = useState(false);
 
   const handleApply = () => {
     navigate("/auth?tab=signup&role=provider");
   };
 
-  const handleNotify = () => {
-    // For now, just show success — in production this would save to a leads table
-    setSubmitted(true);
+  const toggleCategory = (cat: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
+    );
+  };
+
+  const handleNotify = async () => {
+    if (!email || zip.length < 5) {
+      if (zip.length < 5) toast.error("Please enter a valid 5-digit ZIP code");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const { error } = await (supabase.from("provider_leads") as any).upsert(
+        {
+          email,
+          phone: phone || null,
+          zip_code: zip,
+          categories: selectedCategories,
+          source: "browse",
+        },
+        { onConflict: "email" }
+      );
+      if (error) throw error;
+      try { localStorage.setItem(LEAD_STORAGE_KEY, JSON.stringify({ email, zip, phone })); } catch {}
+      setReturningLead({ email, zip, phone });
+      setSubmitted(true);
+    } catch (err) {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -224,19 +273,40 @@ export default function ProviderBrowse() {
             Enter your email and ZIP code. We'll let you know when we're launching in your area
             — and if we need providers in your category, you'll be first in line.
           </p>
-          {submitted ? (
+          {returningLead && !submitted && !showFormAnyway ? (
+            <div className="p-4 bg-primary/10 rounded-lg space-y-3 animate-fade-in">
+              <CheckCircle2 className="h-6 w-6 text-primary mx-auto" />
+              <p className="text-sm font-medium">Welcome back!</p>
+              <p className="text-xs text-muted-foreground">
+                Your interest in ZIP {returningLead.zip} is saved. Ready to take the next step?
+              </p>
+              <Button className="w-full" onClick={handleApply}>
+                Apply Now <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+              <Button variant="ghost" size="sm" className="w-full text-xs" onClick={() => setShowFormAnyway(true)}>
+                Update my info
+              </Button>
+            </div>
+          ) : submitted ? (
             <div className="p-4 bg-primary/10 rounded-lg space-y-2 animate-fade-in">
               <CheckCircle2 className="h-6 w-6 text-primary mx-auto" />
               <p className="text-sm font-medium">You're on the list!</p>
               <p className="text-xs text-muted-foreground">We'll reach out when we're ready to launch in your area.</p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Input
                 placeholder="Email address"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                className="text-center h-11"
+              />
+              <Input
+                placeholder="Phone number (optional)"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 className="text-center h-11"
               />
               <Input
@@ -246,8 +316,23 @@ export default function ProviderBrowse() {
                 className="text-center h-11"
                 maxLength={5}
               />
-              <Button className="w-full" onClick={handleNotify} disabled={!email || zip.length < 5}>
-                Notify Me When You Launch
+              <div>
+                <p className="text-xs text-muted-foreground mb-2">What services do you offer? (optional)</p>
+                <div className="flex flex-wrap justify-center gap-1.5">
+                  {CATEGORIES.map((cat) => (
+                    <Badge
+                      key={cat}
+                      variant={selectedCategories.includes(cat) ? "default" : "outline"}
+                      className="cursor-pointer text-xs px-2.5 py-1 transition-colors"
+                      onClick={() => toggleCategory(cat)}
+                    >
+                      {cat}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              <Button className="w-full" onClick={handleNotify} disabled={!email || zip.length < 5 || submitting}>
+                {submitting ? "Submitting..." : "Notify Me When You Launch"}
               </Button>
             </div>
           )}

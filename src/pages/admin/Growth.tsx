@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Activity, Shield, TrendingUp, AlertTriangle, Lock, RefreshCw, ChevronRight, Sliders, BarChart3, Inbox, Settings2, Rocket, UserPlus, Users, GitBranch, UserX } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Activity, Shield, TrendingUp, AlertTriangle, Lock, RefreshCw, ChevronRight, Sliders, BarChart3, Inbox, Settings2, Rocket, UserPlus, Users, GitBranch, UserX, Mail } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -528,6 +530,21 @@ function FunnelsTab() {
   const referral = useReferralFunnelStats(dateFilter);
   const byop = useByopFunnelStats(dateFilter);
 
+  const providerLeads = useQuery({
+    queryKey: ["provider-leads-funnel"],
+    queryFn: async () => {
+      const { data, error } = await (supabase.from("provider_leads") as any)
+        .select("status");
+      if (error) throw error;
+      const counts = { total: 0, new: 0, contacted: 0, applied: 0, declined: 0, notified: 0 };
+      for (const row of data ?? []) {
+        counts.total++;
+        if (row.status in counts) counts[row.status as keyof typeof counts]++;
+      }
+      return counts;
+    },
+  });
+
   const isLoading = byoc.isLoading || referral.isLoading || byop.isLoading;
   if (isLoading) return <div className="space-y-4 mt-4"><Skeleton className="h-48" /><Skeleton className="h-48" /><Skeleton className="h-48" /></div>;
 
@@ -625,6 +642,31 @@ function FunnelsTab() {
               <p className="text-xs text-warning">{byopData.providerUnavailable} provider declined</p>
             )}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Provider Leads Pipeline */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Mail className="h-4 w-4" />
+            Provider Leads Pipeline
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {providerLeads.isLoading ? (
+            <Skeleton className="h-12" />
+          ) : providerLeads.isError ? (
+            <p className="text-xs text-destructive">Failed to load provider leads data.</p>
+          ) : (
+            <FunnelBar steps={[
+              { label: "Total Leads", count: providerLeads.data?.total ?? 0 },
+              { label: "New", count: providerLeads.data?.new ?? 0 },
+              { label: "Contacted", count: providerLeads.data?.contacted ?? 0 },
+              { label: "Applied", count: providerLeads.data?.applied ?? 0 },
+              { label: "Declined", count: providerLeads.data?.declined ?? 0 },
+            ]} />
+          )}
         </CardContent>
       </Card>
 
