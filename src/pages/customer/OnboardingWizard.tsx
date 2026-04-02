@@ -34,7 +34,7 @@ export default function OnboardingWizard() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
-  const { progress, isLoading, currentStep, completedSteps, selectedPlanId, completeStep, goToStep, isSaving } =
+  const { progress, isLoading, isError: progressError, currentStep, completedSteps, selectedPlanId, completeStep, goToStep, isSaving } =
     useOnboardingProgress();
   const { property, isLoading: propLoading } = useProperty();
 
@@ -75,7 +75,15 @@ export default function OnboardingWizard() {
     );
   }
 
-  if (checkoutSuccess && (!subscription || !["active", "trialing"].includes(subscription.status ?? ""))) {
+  if (progressError) {
+    return (
+      <div className="p-4 text-center space-y-3 animate-fade-in">
+        <p className="text-sm text-destructive">Couldn't load your progress. Please refresh the page.</p>
+      </div>
+    );
+  }
+
+  if (checkoutSuccess && (subLoading || !subscription || !["active", "trialing"].includes(subscription.status ?? ""))) {
     return (
       <div className="p-4 space-y-6 text-center animate-fade-in">
         {verifyTimedOut ? (

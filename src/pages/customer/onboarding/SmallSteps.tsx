@@ -9,14 +9,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MapPin, CheckCircle, AlertTriangle, Loader2, Bell, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { useJoinWaitlist } from "@/hooks/useWaitlist";
 
 export function ZoneCheckStep({ onComplete, onWaitlist }: { onComplete: () => Promise<void>; onWaitlist: () => void }) {
   const { property } = useProperty();
   const zipCode = property?.zip_code ?? "";
   const { zoneName, isLoading, isCovered, isNotCovered } = useZoneLookup(zipCode);
   const { user } = useAuth();
-  const [joining, setJoining] = useState(false);
+  const joinWaitlist = useJoinWaitlist();
 
   useEffect(() => {
     if (isCovered) {
@@ -26,18 +26,17 @@ export function ZoneCheckStep({ onComplete, onWaitlist }: { onComplete: () => Pr
   }, [isCovered, onComplete]);
 
   const handleJoinWaitlist = async () => {
-    setJoining(true);
     try {
-      const { error } = await supabase.functions.invoke("join-waitlist", {
-        body: { email: user?.email ?? "", full_name: user?.user_metadata?.full_name ?? "", zip_code: zipCode, source: "onboarding" },
+      await joinWaitlist.mutateAsync({
+        email: user?.email ?? "",
+        full_name: user?.user_metadata?.full_name ?? "",
+        zip_code: zipCode,
+        source: "onboarding",
       });
-      if (error) throw error;
       toast.success("You're on the list! We'll notify you when we launch in your area.");
       onWaitlist();
     } catch {
       toast.error("Couldn't join waitlist. Try again.");
-    } finally {
-      setJoining(false);
     }
   };
 
@@ -69,8 +68,8 @@ export function ZoneCheckStep({ onComplete, onWaitlist }: { onComplete: () => Pr
             <AlertTriangle className="h-10 w-10 text-warning mx-auto" />
             <p className="font-semibold text-foreground">We're not in your area yet</p>
             <p className="text-sm text-muted-foreground">Handled Home is expanding quickly. Join the waitlist and we'll let you know the moment we launch near you.</p>
-            <Button onClick={handleJoinWaitlist} disabled={joining} className="w-full">
-              {joining ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Bell className="h-4 w-4 mr-2" />}
+            <Button onClick={handleJoinWaitlist} disabled={joinWaitlist.isPending} className="w-full">
+              {joinWaitlist.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Bell className="h-4 w-4 mr-2" />}
               Join Waitlist
             </Button>
             <Button variant="ghost" onClick={onWaitlist} className="w-full text-sm">Continue exploring</Button>
