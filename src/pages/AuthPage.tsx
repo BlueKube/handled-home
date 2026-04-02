@@ -121,8 +121,8 @@ export default function AuthPage() {
       {/* Logo & tagline */}
       <div className="pt-16 pb-10 flex flex-col items-center">
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-          <span style={{ color: 'hsl(220 20% 10%)' }}>Your home, </span>
-          <span style={{ color: 'hsl(200 80% 50%)' }}>handled.</span>
+          <span className="text-foreground">Your home, </span>
+          <span className="text-primary">handled.</span>
         </h1>
       </div>
 
