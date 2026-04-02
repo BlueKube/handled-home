@@ -16,7 +16,7 @@ export const DUNNING_TIMELINE: Record<DunningStep, { dayOffset: number; label: s
   retry_1: { dayOffset: 1, label: "First retry" },
   retry_2: { dayOffset: 3, label: "Second retry" },
   retry_3: { dayOffset: 7, label: "Third retry" },
-  grace_start: { dayOffset: 0, label: "Grace period starts" },
+  grace_start: { dayOffset: 7, label: "Grace period starts" },
   grace_end: { dayOffset: 14, label: "Grace period ends / Service suspended" },
   canceled: { dayOffset: 30, label: "Auto-canceled" },
 };

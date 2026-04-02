@@ -191,7 +191,7 @@ export default function OpsBilling() {
                     <TableRow key={inv.id} className="cursor-pointer" onClick={() => nav(`/admin/billing/customers/${inv.customer_id}`)}>
                       <TableCell className="font-mono text-xs">{inv.customer_id?.slice(0, 8)}…</TableCell>
                       <TableCell>{formatCents(inv.total_cents)}</TableCell>
-                      <TableCell className="text-xs">{format(new Date(inv.updated_at), "MMM d HH:mm")}</TableCell>
+                      <TableCell className="text-xs">{inv.updated_at ? format(new Date(inv.updated_at), "MMM d HH:mm") : "—"}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
