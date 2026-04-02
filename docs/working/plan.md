@@ -1,21 +1,16 @@
-# Round 15: Household Members Polish
+# Round 16: Moving Wizard & Customer Leads Polish
 
-> **Round:** 15 of 61
+> **Round:** 16 of 61
 > **Branch:** `claude/polish-round-12-auth-nlfDe`
-> **Phase:** Single phase — Household Members (Features 442–448)
+> **Phase:** Single phase — Moving Wizard & Customer Leads (Features 449–463)
 > **Execution mode:** Quality
 
 ---
 
 ## Features in Scope
 
-442. household_members table
-443. Auto-insert owner trigger
-444. RLS with SECURITY DEFINER helpers
-445. accept_household_invites RPC
-446. useHouseholdInvites hook
-447. PropertyGate household extension
-448. Settings Household section
+449-456: Moving wizard (transitions table, customer_leads, 4-step wizard, zone check, cancel intercept, Settings button)
+457-463: Pipeline completion (auto-cancel cron, customer lead notify, handoff function, admin tab)
 
 ---
 
@@ -25,27 +20,17 @@
 
 | # | Issue | Severity | File | Feature |
 |---|-------|----------|------|---------|
-| 1 | Settings HouseholdSection missing loading state for members query | SHOULD-FIX | Settings.tsx | F448 |
-| 2 | Settings HouseholdSection missing error state for members query | SHOULD-FIX | Settings.tsx | F448 |
-| 3 | handleRemove silent on failure — shows success toast even on error | SHOULD-FIX | Settings.tsx | F448 |
-| 4 | No empty state message for household members | SHOULD-FIX | Settings.tsx | F448 |
-| 5 | useHouseholdInvites silent on error — no logging | MINOR | useHouseholdInvites.ts | F446 |
+| 1 | Move date input allows past dates | MUST-FIX | Moving.tsx | F449 |
+| 2 | customer_leads CHECK constraint missing 'notified' — trigger will fail | MUST-FIX | migration | F458 |
+| 3 | Missing STATUS_COLORS for 'subscribed' status | SHOULD-FIX | types.ts | F461 |
+| 4 | Handoff function skips failures silently — no logging | SHOULD-FIX | edge function | F459 |
 
 ### Out of Scope
 
-- DB constraints for owner removal protection — schema change
-- Multi-property owner support — new feature
+- Cancel move UI — new feature
+- Email sending in handoff function — new feature  
 - Type safety refactors (as any casts) — working pattern
-- Email validation regex improvement — existing works fine
-
-### Already Solid
-
-- Table schema with proper constraints ✓
-- Auto-insert owner trigger ✓
-- RLS policies with SECURITY DEFINER ✓
-- accept_household_invites RPC with null safety ✓
-- PropertyGate fail-open error handling (polished in R14) ✓
-- Query key invalidation in hook ✓
+- Moving.tsx decomposition (336 lines) — single wizard flow, close to threshold
 
 ---
 
@@ -53,17 +38,15 @@
 
 | Batch | Title | Size | Files | Status | Context |
 |-------|-------|------|-------|--------|---------|
-| B1 | Settings HouseholdSection + useHouseholdInvites polish | S | 2 files | ✅ | ~28% |
-
-### Review Results
-- **B1:** Pending background review
+| B1 | Moving.tsx date validation + customer_leads constraint fix + STATUS_COLORS | S | 3 files | ⬜ | |
+| B2 | Handoff function error logging | S | 1 file | ⬜ | |
 
 ---
 
 ## Session Handoff
 - **Branch:** `claude/polish-round-12-auth-nlfDe`
-- **Last completed:** B1 (Round 15 complete)
-- **Next up:** Round 15 complete — ready for Round 16
-- **Context at exit:** ~28%
+- **Last completed:** Round 15 complete. Starting Round 16.
+- **Next up:** B1 — Moving.tsx + migration + types
+- **Context at exit:** N/A
 - **Blockers:** None
-- **Round progress:** Phase 1 of 1 complete ✅
+- **Round progress:** Phase 1 of 1 in progress

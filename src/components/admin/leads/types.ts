@@ -44,4 +44,5 @@ export const STATUS_COLORS: Record<string, string> = {
   applied: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
   declined: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
   notified: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300",
+  subscribed: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300",
 };
