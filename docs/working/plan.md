@@ -1,32 +1,21 @@
-# Round 31: Routing Engine Sprint 7–9 (Features 306–325)
+# Round 32: Route Optimization (Features 95–98)
 
-> **Round:** 31 of 61
+> **Round:** 32 of 61
 > **Branch:** `claude/polish-round-12-auth-nlfDe`
-> **Phase:** Single phase — Features 306–325
+> **Phase:** Single phase — Features 95–98
 > **Execution mode:** Quality
 
 ---
 
 ## Audit Findings
 
-### Issues Fixed
+All 4 features verified at 9/10 via direct code review:
+- F95: Nearest-neighbor with haversine + geohash fallback — correct algorithm, proper error handling
+- F96: Manual reorder with up/down controls, toast feedback, local state rollback on error
+- F97: < 3 stops guard in edge function AND disabled button in UI — correct
+- F98: IN_PROGRESS jobs filtered from reorder array, pinned in display
 
-| # | Feature | Issue | Status |
-|---|---------|-------|--------|
-| 1 | F308/F309 | text-amber-600 dark-mode violation in OpsExceptionQueue (severity + SLA countdown) | ✅ Fixed |
-| 2 | F309 | text-amber-600 in OpsExceptionDetailPanel severity colors | ✅ Fixed |
-| 3 | F306 | WeekView in Jobs.tsx missing isError handling | ✅ Fixed |
-| 4 | F311 | ProviderReportIssueSheet handleSubmit advances to step 3 on throw | ✅ Fixed |
-
-### Already Solid (9/10+)
-- F308 (window-at-risk detection), F310 (predictive exceptions), F314-325 (all ops manual features)
-
-### Deferred (not polish scope — new features or migrations)
-- F307: Drag/drop not implemented (push_stop via self-healing sheet exists, no DnD library)
-- F312: Ops repair actions are intent-only (no server-side feasibility execution)
-- F313: SQL column mismatch in analytics migration (`break_freeze_override` vs `is_freeze_override`) — needs new migration
-- F313: Customer notification on freeze override (new backend feature)
-- F299/F300/F302: Component decomposition (>300 lines) — refactoring, not polish
+No issues found. All features have loading states, error handling, and correct implementation.
 
 ---
 
@@ -34,17 +23,14 @@
 
 | Batch | Title | Size | Files | Status | Context |
 |-------|-------|------|-------|--------|---------|
-| B1 | Dark-mode + error state fixes | S | 4 files | ✅ | |
+| — | No fixes needed | — | — | ✅ Audit-only | |
 
 ---
 
 ## Session Handoff
 - **Branch:** `claude/polish-round-12-auth-nlfDe`
-- **Last completed:** Round 31 — all 20 features verified, 4 fixes applied
-- **Next up:** Round 32 — Route Optimization & Scheduling Exceptions
-- **Context at exit:** Moderate
+- **Last completed:** Round 32 — 4 features verified at 9/10
+- **Next up:** Round 33 — Automation Engine (F224–232)
+- **Context at exit:** ~25%
 - **Blockers:** None
-- **Round progress:** Round 31 complete ✅
-
-### Branch chaining note
-Continue on this same branch (`claude/polish-round-12-auth-nlfDe`). All rounds chain on this single branch — do NOT create a new branch per round.
+- **Round progress:** Round 32 complete ✅

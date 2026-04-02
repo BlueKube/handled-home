@@ -178,10 +178,10 @@
 
 ## XIII. Route Optimization `density-driver` `provider-value`
 
-95. Nearest-neighbor route optimization using geohash/lat-lng from properties — 8/10
-96. Provider manual reorder with up/down controls and audit logging — 8/10
-97. Minimum-jobs guard: skip optimization for routes with < 3 stops — 8/10
-98. IN_PROGRESS freeze: in-progress jobs are pinned and excluded from reorder — 8/10
+95. Nearest-neighbor route optimization using geohash/lat-lng from properties — 9/10
+96. Provider manual reorder with up/down controls and audit logging — 9/10
+97. Minimum-jobs guard: skip optimization for routes with < 3 stops — 9/10
+98. IN_PROGRESS freeze: in-progress jobs are pinned and excluded from reorder — 9/10
 
 ---
 
