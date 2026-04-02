@@ -198,6 +198,28 @@ The lifecycle is a pipeline. Your job is to keep quality providers moving throug
     ],
   },
   {
+    id: "provider-acquisition-funnel",
+    title: "Provider Acquisition Funnel",
+    type: "text",
+    content: `Before a provider enters the application pipeline, they may interact with Handled Home through the provider browse page or a referral. Understanding the pre-application funnel helps you interpret where applicants come from.
+
+THE BROWSE PAGE (/providers)
+A public landing page with earnings calculator, benefits, BYOC math, and a lead capture form. Providers enter email, phone, ZIP, and service categories. This creates a lead in provider_leads — even if they never apply, you have their contact info for future outreach.
+
+APPLICATION FLOW (/provider/apply)
+A 5-step wizard: category selection → location + phone → opportunity banner → BYOC intake → review & submit. Key features:
+• The opportunity banner NEVER shows "closed" or "full" — always frames as opportunity
+• Phone number is collected in step 2 and saved to the provider's profile for matching
+• After submission, providers see real category gaps from zone data (not generic categories)
+• A "Know someone?" referral form turns every applicant into a recruiter
+
+LEAD-TO-APPLICATION LINKING
+When a provider applies, the system auto-matches their email or phone to existing provider_leads and sets the lead status to "applied." This lets admins see the full funnel: browse → lead → application → approval.
+
+REFERRAL ATTRIBUTION
+When a referred provider applies, the system checks provider_referrals for matching contact info and updates the referral status. This happens automatically via database triggers.`,
+  },
+  {
     id: "automation",
     title: "What's Automated vs. What Needs Your Eyes",
     type: "automation",

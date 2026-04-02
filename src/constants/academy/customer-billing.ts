@@ -238,6 +238,49 @@ Do not manually intervene at Steps 1-2. The automation is handling it. Interrupt
     ],
   },
   {
+    id: "household-members",
+    title: "Household Members",
+    type: "text",
+    content: `Customers can invite household members (spouses, partners, family) to share access to their property's services.
+
+HOW IT WORKS
+• The property owner invites members by email via Settings → Household
+• A pending row is created in the household_members table
+• When the invitee logs in or signs up, the system auto-accepts the invite (matching by email)
+• Members can view services, schedule, and service history
+• Only the owner can manage billing, cancel subscriptions, or manage other members
+
+WHAT ADMINS SHOULD KNOW
+• Household membership doesn't create a separate subscription — members share the owner's subscription
+• If a household member contacts support, check which property they're linked to via household_members
+• Removing a member only soft-deletes (status → 'removed') — the history is preserved
+• The owner row is auto-created when a property is added and cannot be removed`,
+  },
+  {
+    id: "moving-wizard",
+    title: "Customer Moving & Address Transfers",
+    type: "text",
+    content: `When a customer moves, the system guides them through a 4-step moving wizard instead of a simple cancellation. This is designed to retain customers and capture new homeowner leads.
+
+THE MOVING WIZARD (/customer/moving)
+• Step 1: Move date + "Keep services until move date?" toggle
+• Step 2: New address + ZIP → automatic zone coverage check
+• Step 3: Coverage result — if covered, "We'll transfer your plan!" If not, "We'll notify you when we launch"
+• Step 4: "Know who's buying your home?" — captures new homeowner contact info
+
+CANCEL FLOW INTERCEPT
+When a customer selects "Moving to a new area" as their cancel reason, they're redirected to the moving wizard instead of the cancellation flow. There's also an "I'm moving" card in Settings.
+
+AUTO-CANCEL ON MOVE DATE
+A daily cron function (process_move_date_transitions) checks for transitions where move_date has arrived and automatically sets the subscription to cancel_at_period_end. The customer isn't billed after their move date.
+
+NEW HOMEOWNER HANDOFF
+When a customer provides the new homeowner's contact info, the system creates a customer_lead with source='referral' for the new homeowner. The process-new-homeowner-handoff edge function processes these. This is the highest-value lead type — it's a specific person at a known address with an existing service history.
+
+CUSTOMER LEADS FOR UNCOVERED ZONES
+If the customer's new ZIP isn't in an active zone, they're saved as a customer_lead with notify_on_launch=true. When that zone eventually launches, they're auto-notified — same trigger pattern as provider leads.`,
+  },
+  {
     id: "real-world",
     title: "Real-World Context",
     type: "real-world",

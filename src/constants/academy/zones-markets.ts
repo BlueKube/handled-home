@@ -291,12 +291,42 @@ For the full pilot launch playbook — including the 12-week timeline, provider 
     ],
   },
   {
+    id: "zone-launch-notifications",
+    title: "Zone Launch Notifications",
+    type: "text",
+    content: `When a zone category transitions to SOFT_LAUNCH or OPEN, the system automatically notifies all matching leads.
+
+TWO NOTIFICATION TRIGGERS
+1. Provider leads — provider_leads where zip_code matches the zone's ZIPs and status is 'new'. Only leads whose categories include the launched category (or leads with no category preference) are notified.
+2. Customer leads — customer_leads where zip_code matches and notify_on_launch is true. These are customers from the moving wizard who moved to an uncovered zone.
+
+Both triggers fire automatically via database triggers on market_zone_category_state status changes. No manual action needed.
+
+MANUAL OVERRIDE
+Admins can also manually trigger provider lead notifications from the Provider Leads page → By ZIP tab → select zone → click "Notify." This is useful for re-notifying or targeting specific zones.
+
+ZONE STATUS LABELS FOR PROVIDERS
+Providers never see internal zone statuses. The mapping is:
+• CLOSED → "Building"
+• WAITLIST_ONLY → "Building"
+• PROVIDER_RECRUITING → "Recruiting"
+• SOFT_LAUNCH → "Launching soon"
+• OPEN → "Active"
+• PROTECT_QUALITY → "Building"
+
+This means providers always see opportunity, never rejection.`,
+  },
+  {
     id: "automation",
     title: "What the System Does For You (and What It Doesn't)",
     type: "automation",
     automationNotes: [
       {
         text: "Zone health scores recalculate automatically every 6 hours using the latest utilization, issue rate, response time, provider count, and NPS data. You do not need to trigger this manually. If a zone crosses a threshold into Yellow or Red, a Risk Alert is automatically created in the Ops Cockpit and an email notification is sent to the assigned admin. You just need to check the cockpit — the system will tell you when something needs attention.",
+        type: "set-and-forget",
+      },
+      {
+        text: "Zone launch lead notifications are automatic. When a zone category goes to SOFT_LAUNCH or OPEN, provider and customer leads in matching ZIPs are notified. Verify on the Provider Leads page after any zone launch.",
         type: "set-and-forget",
       },
       {
