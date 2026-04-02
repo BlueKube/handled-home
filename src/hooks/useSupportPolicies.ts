@@ -113,6 +113,7 @@ export function useSupportPolicies() {
     policies: policiesQuery.data ?? [],
     scopes: scopesQuery.data ?? [],
     isLoading: policiesQuery.isLoading,
+    isError: policiesQuery.isError,
     createPolicy,
     publishPolicy,
     rollbackPolicy,

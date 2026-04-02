@@ -200,9 +200,8 @@ export function simulate(input?: ModelAssumptions): SimulationResult {
   const peakCustomers = Math.max(...months.map(m => m.active_customers));
   const finalCustomers = months[11]?.active_customers ?? 0;
 
-  const month1Customers = months[0]?.active_customers ?? 0;
-  const month2Customers = months[1]?.active_customers ?? 0;
-  const retention60d = month1Customers > 0 ? Math.min(100, (month2Customers / month1Customers) * 100) : 0;
+  // Cohort retention: probability a month-1 customer survives to month 2
+  const retention60d = (1 - m.month_1_churn_rate) * (1 - m.month_2_churn_rate) * 100;
 
   const attachRate90d = months[2]?.attach_rate ?? 0;
 
