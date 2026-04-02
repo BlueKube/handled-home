@@ -156,6 +156,14 @@ export default function SkuCalibration() {
             </TableRow>
           </TableHeader>
           <TableBody>
+            {skus.length === 0 && (
+              <TableRow>
+                <td colSpan={10} className="py-8 text-center text-sm text-muted-foreground">
+                  <Scale className="h-8 w-8 mx-auto mb-2 opacity-40" />
+                  No active SKUs to calibrate. Activate SKUs in the catalog first.
+                </td>
+              </TableRow>
+            )}
             {skus.map((sku) => (
               <CalibrationRow
                 key={sku.id}

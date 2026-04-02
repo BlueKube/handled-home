@@ -157,10 +157,10 @@ export default function ProviderAccountability() {
                       {!incident.classified_by_user_id && (
                         <div className="flex gap-1">
                           <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => handleClassify(incident.id, true)}>
-                            <Check className="h-3 w-3 text-green-500" />
+                            <Check className="h-3 w-3 text-success" />
                           </Button>
                           <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => handleClassify(incident.id, false)}>
-                            <X className="h-3 w-3 text-red-500" />
+                            <X className="h-3 w-3 text-destructive" />
                           </Button>
                         </div>
                       )}
