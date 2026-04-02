@@ -26,7 +26,7 @@ function deriveDisplayStatus(issue: { status: string; ticket_status?: string | n
 }
 
 export default function CustomerIssues() {
-  const { data: issues, isLoading } = useCustomerIssues();
+  const { data: issues, isLoading, isError } = useCustomerIssues();
   const navigate = useNavigate();
 
   if (isLoading) {
@@ -38,6 +38,15 @@ export default function CustomerIssues() {
             <div key={i} className="h-16 bg-muted/50 rounded-lg animate-pulse" />
           ))}
         </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-4 pb-24 text-center">
+        <h1 className="text-h2 mb-4">My Issues</h1>
+        <p className="text-sm text-destructive">Couldn't load your issues. Please try again.</p>
       </div>
     );
   }
