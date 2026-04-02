@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { format } from "date-fns";
-import { RotateCcw, ChevronDown } from "lucide-react";
+import { RotateCcw, ChevronDown, AlertTriangle } from "lucide-react";
 
 const ENTITY_TYPES = [
   { value: "__all__", label: "All" },
@@ -27,10 +27,23 @@ const ENTITY_TYPES = [
 export default function ControlChangeLog() {
   const { isSuperuser } = useAdminMembership();
   const [entityType, setEntityType] = useState("__all__");
-  const { data: logs, isLoading } = useAuditLog(entityType === "__all__" ? undefined : entityType, 200);
+  const { data: logs, isLoading, isError } = useAuditLog(entityType === "__all__" ? undefined : entityType, 200);
   const rollbackMut = useRollbackPricingMutation();
 
   if (isLoading) return <div className="p-6 space-y-4"><Skeleton className="h-8 w-64" /><Skeleton className="h-96 w-full" /></div>;
+  if (isError) {
+    return (
+      <div className="p-6 space-y-3 animate-fade-in">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-destructive" />
+          <h1 className="text-2xl font-bold">Change Log</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Failed to load data. Check your connection and try again.
+        </p>
+      </div>
+    );
+  }
 
   // D2-F2: Only pricing overrides have a rollback RPC; payout rollback not yet implemented
   const isRollbackable = (action: string) =>
