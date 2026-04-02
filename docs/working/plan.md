@@ -1,21 +1,16 @@
-# Round 17: Zone Management Polish
+# Round 18: Zone State Machine & Market Launch Polish
 
-> **Round:** 17 of 61
+> **Round:** 18 of 61
 > **Branch:** `claude/polish-round-12-auth-nlfDe`
-> **Phase:** Single phase — Zone Management (Features 17–23)
+> **Phase:** Single phase — Zone State Machine (Features 24–26 + 193–197)
 > **Execution mode:** Quality
 
 ---
 
 ## Features in Scope
 
-17. Region hierarchy
-18. ZIP-code-based zone definitions
-19. Per-zone capacity settings
-20. Zone Health Score (Green/Yellow/Red)
-21. Smart adjacent-ZIP suggestions
-22. Expansion Signal Dashboard
-23. Primary + Backup provider model
+24–26: Zone state transitions, capacity governance
+193–197: Growth autopilot, surface configuration, zone launch readiness
 
 ---
 
@@ -25,24 +20,22 @@
 
 | # | Issue | Severity | File | Feature |
 |---|-------|----------|------|---------|
-| 1 | Growth.tsx is 877 lines — over 300 threshold | MUST-FIX | Growth.tsx | F22 |
-| 2 | ZoneProvidersPanel is 317 lines — slightly over | SHOULD-FIX | ZoneProvidersPanel.tsx | F23 |
+| 1 | Redundant ternary (both branches same value) | SHOULD-FIX | ZoneCategoryDetailPanel.tsx:189 | F24 |
+| 2 | ThresholdDials missing error state | SHOULD-FIX | ThresholdDials.tsx | F197 |
+| 3 | AutopilotBanner missing loading state | SHOULD-FIX | AutopilotBanner.tsx | F193 |
 
 ### Out of Scope
 
-- Adjacent-ZIP algorithm improvement — new feature
-- Composite health score — new feature
-- Query optimization for non-serviced ZIPs — refactoring
-- Region hierarchy nesting — new feature
-- Capacity validation improvements — new feature
+- `as any` type safety refactors — working pattern
+- Threshold contradiction validation — new feature
+- Zone launch readiness implementation — new feature (F195 docs-only)
 
 ### Already Solid
 
-- Loading/error/empty states across all zone components ✓
-- Dark mode colors with proper dark: classes ✓
-- Primary/backup provider guards ✓
-- ZIP normalization and dedup ✓
-- Health metrics with threshold-based alerts ✓
+- All files under 300 lines ✓
+- Dark mode properly implemented ✓
+- State machine transitions with CHECK constraints ✓
+- RecommendationsInbox loading + empty states ✓
 
 ---
 
@@ -50,15 +43,14 @@
 
 | Batch | Title | Size | Files | Status | Context |
 |-------|-------|------|-------|--------|---------|
-| B1 | Growth.tsx decomposition (877→241 + 4 extracted) | L | 6 files | ✅ | ~38% |
-| B2 | ZoneProvidersPanel trim (317→300) | S | 1 file | ✅ | ~39% |
+| B1 | ZoneCategoryDetailPanel fix + ThresholdDials/AutopilotBanner states | S | 3 files | ⬜ | |
 
 ---
 
 ## Session Handoff
 - **Branch:** `claude/polish-round-12-auth-nlfDe`
-- **Last completed:** B2 (Round 17 complete)
-- **Next up:** Round 17 complete — ready for Round 18
-- **Context at exit:** ~39%
+- **Last completed:** Round 17 complete. Starting Round 18.
+- **Next up:** B1
+- **Context at exit:** N/A
 - **Blockers:** None
-- **Round progress:** Phase 1 of 1 complete ✅
+- **Round progress:** Phase 1 of 1 in progress

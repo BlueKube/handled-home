@@ -186,7 +186,7 @@ export function ZoneCategoryDetailPanel({ zoneId, category, zoneName, onClose }:
                     <Textarea
                       className="text-xs h-16"
                       placeholder="Rejection reason…"
-                      value={actioningId === rec.id ? rejectNote : rejectNote}
+                      value={rejectNote}
                       onChange={(e) => setRejectNote(e.target.value)}
                     />
                     <Button size="sm" variant="destructive" className="h-7 text-xs self-end" onClick={() => handleReject(rec)} disabled={actioningId === rec.id}>
