@@ -528,7 +528,7 @@ function ReferralsTab({ referrals, isLoading, isError, onUpdateStatus }: {
   );
 }
 
-const CUSTOMER_STATUS_OPTIONS = ["all", "new", "contacted", "subscribed", "declined"] as const;
+const CUSTOMER_STATUS_OPTIONS = ["all", "new", "contacted", "notified", "subscribed", "declined"] as const;
 
 function CustomerLeadsTab({ leads, isLoading, isError, onUpdateStatus }: {
   leads: Array<{ id: string; email: string; phone: string | null; zip_code: string; source: string; status: string; notified_at: string | null; created_at: string }>;

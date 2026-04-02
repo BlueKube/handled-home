@@ -53,7 +53,7 @@ Deno.serve(async (req: Request) => {
 
       // Create customer lead for the new homeowner
       if (t.new_owner_email) {
-        await supabase
+        const { error: leadError } = await supabase
           .from("customer_leads")
           .upsert(
             {
@@ -65,9 +65,14 @@ Deno.serve(async (req: Request) => {
             },
             { onConflict: "email" }
           );
+
+        if (leadError) {
+          // Don't mark as processed if lead creation failed
+          continue;
+        }
       }
 
-      // Mark transition as handoff processed
+      // Mark transition as handoff processed only after successful lead creation
       await supabase
         .from("property_transitions")
         .update({ handoff_processed: true })
