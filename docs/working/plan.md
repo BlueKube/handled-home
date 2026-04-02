@@ -50,15 +50,15 @@
 
 | Batch | Title | Size | Files | Status | Context |
 |-------|-------|------|-------|--------|---------|
-| B1 | Growth.tsx decomposition (877→<300 per file) | L | 4+ files | ⬜ | |
-| B2 | ZoneProvidersPanel trim (317→<300) | S | 1 file | ⬜ | |
+| B1 | Growth.tsx decomposition (877→241 + 4 extracted) | L | 6 files | ✅ | ~38% |
+| B2 | ZoneProvidersPanel trim (317→300) | S | 1 file | ✅ | ~39% |
 
 ---
 
 ## Session Handoff
 - **Branch:** `claude/polish-round-12-auth-nlfDe`
-- **Last completed:** Round 16 complete. Starting Round 17.
-- **Next up:** B1 — Growth.tsx decomposition
-- **Context at exit:** N/A
+- **Last completed:** B2 (Round 17 complete)
+- **Next up:** Round 17 complete — ready for Round 18
+- **Context at exit:** ~39%
 - **Blockers:** None
-- **Round progress:** Phase 1 of 1 in progress
+- **Round progress:** Phase 1 of 1 complete ✅

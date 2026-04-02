@@ -41,13 +41,13 @@
 
 ## III. Zones, Regions & Capacity Governance `density-driver`
 
-17. Region hierarchy for organizational grouping (e.g., "Los Angeles County") — 8/10
-18. ZIP-code-based zone definitions with instant coverage lookups — 8/10
-19. Per-zone capacity settings: max homes/day, max minutes/day, buffer percentage — 8/10
-20. Zone Health Score: Green / Yellow / Red advisory based on utilization ratio — 8/10
-21. Smart adjacent-ZIP suggestions when creating zones (prefix-matching heuristic) — 8/10
-22. Expansion Signal Dashboard: non-serviced ZIP demand ranked by signup count — 8/10
-23. Primary + Backup provider model per zone and category (franchise-style territory) — 8/10
+17. Region hierarchy for organizational grouping (e.g., "Los Angeles County") — 9/10
+18. ZIP-code-based zone definitions with instant coverage lookups — 9/10
+19. Per-zone capacity settings: max homes/day, max minutes/day, buffer percentage — 9/10
+20. Zone Health Score: supply/demand/quality composite with Stable/Tight/Risk labels — 9/10
+21. Smart adjacent-ZIP suggestions when creating zones (prefix-matching heuristic) — 9/10
+22. Expansion Signal Dashboard (decomposed: Growth.tsx 877→241 + 4 extracted tab components) — 9/10
+23. Primary + Backup provider model per zone and category (ZoneProvidersPanel trimmed to 300 lines) — 9/10
 24. Zone launch lifecycle: planning → recruiting → soft_launch → live → paused — 8/10
 25. Market zone category state: open / waitlist_only / closed / provider_recruiting per category — 8/10
 26. Founding Partner slot tracking per zone and category — 8/10
