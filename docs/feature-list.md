@@ -436,15 +436,15 @@
 
 224. Auto-assign jobs to providers: Primary-first → Backup fallback with explainability — 7/10
 225. Provider no-show detection (hourly) with auto-reassign and calm customer notification — 7/10
-225b. Provider incident tracking system — no-show, quality issue, access failure, late arrival, proof missing incidents with severity, excused/unexcused classification, admin review queue, 60-day rolling window counts — 8/10
-225c. Provider probation system — 4-status lifecycle (active/completed/failed/revoked), improvement targets with deadlines, admin resolve actions (improved/extend/suspend), provider-facing dashboard banner — 8/10
+225b. Provider incident tracking system — no-show, quality issue, access failure, late arrival, proof missing incidents with severity, excused/unexcused classification, admin review queue, 60-day rolling window counts — 9/10
+225c. Provider probation system — 4-status lifecycle (active/completed/failed/revoked), improvement targets with deadlines, admin resolve actions (improved/extend/suspend), provider-facing dashboard banner — 9/10
 226. SLA enforcement automation: daily evaluation, 4-level threshold ladder, auto-generate actions — 7/10
 227. Auto-flag and suspend low-quality providers after sustained RED status — 7/10
 228. Auto-promote highest-performing backup when primary is suspended — 5/10
 229. Weather mode: auto-detection via WeatherAPI.com, admin approval, job rescheduling — 5/10
 230. Holiday calendar: pre-seeded US federal holidays 2026–2027, job skip support — 8/10
-231. Provider availability blocks: day-off/vacation with auto-skip in job assignment — 8/10
-232. Lead-time warnings for availability blocks starting within 48 hours — 8/10
+231. Provider availability blocks: day-off/vacation with auto-skip in job assignment — 9/10
+232. Lead-time warnings for availability blocks starting within 48 hours — 9/10
 
 ---
 

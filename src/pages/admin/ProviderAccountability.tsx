@@ -116,7 +116,10 @@ export default function ProviderAccountability() {
           </div>
 
           {filteredIncidents.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-12">No incidents found.</p>
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Shield className="h-8 w-8 text-muted-foreground/40 mb-2" />
+              <p className="text-sm text-muted-foreground">No incidents found.</p>
+            </div>
           ) : (
             <Table>
               <TableHeader>
@@ -174,7 +177,10 @@ export default function ProviderAccountability() {
 
         <TabsContent value="probation" className="space-y-4">
           {(probations ?? []).length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-12">No probation records.</p>
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Shield className="h-8 w-8 text-muted-foreground/40 mb-2" />
+              <p className="text-sm text-muted-foreground">No probation records.</p>
+            </div>
           ) : (
             <div className="space-y-3">
               {(probations ?? []).map((prob) => {
