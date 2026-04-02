@@ -298,22 +298,22 @@
 
 ## XXIII. Customer Feedback & Provider Quality `trust-builder`
 
-163. Immediate satisfaction check on receipt view: "How did today's visit go?" (< 5 seconds) — 8/10
+163. Immediate satisfaction check on receipt view: "How did today's visit go?" (< 5 seconds) — 9/10
 164. Delayed private provider review: 7–21 day randomized delay, "Providers won't know it's you" — 8/10
-165. Confidential notes: admin-only field never shared with providers — 8/10
-166. Weekly provider feedback rollups with minimum aggregation threshold (N_min=5) to prevent source deduction — 8/10
-167. Provider Quality Score: rolling 28-day composite (rating 35%, issues 25%, photos 20%, on-time 20%) — 7/10
+165. Confidential notes: admin-only field never shared with providers — 9/10
+166. Weekly provider feedback rollups with minimum aggregation threshold (N_min=5) to prevent source deduction — 9/10
+167. Provider Quality Score: rolling 28-day composite (rating 35%, issues 25%, photos 20%, on-time 20%) — 9/10
 168. Quality Score bands: GREEN (85–100), YELLOW (70–84), ORANGE (55–69), RED (<55) — 8/10
-169. Provider Quality Score page with coaching themes and "improve next week" targets — 8/10
-170. Admin feedback transparency page with full quick feedback + private ratings + confidential notes — 8/10
+169. Provider Quality Score page with coaching themes and "improve next week" targets — 9/10
+170. Admin feedback transparency page with full quick feedback + private ratings + confidential notes — 9/10
 
 ---
 
 ## XXIV. Ratings & Reviews `trust-builder`
 
-171. Post-visit 1–5 star rating anchored to receipt view (not immediate post-job) — 8/10
-172. Smart rating suppression: first visit or if issue already reported — 8/10
-173. Provider rating summary view for admin with avg rating, total reviews, positive/negative counts — 8/10
+171. Post-visit 1–5 star rating anchored to receipt view (not immediate post-job) — 9/10
+172. Smart rating suppression: first visit or if issue already reported — 9/10
+173. Provider rating summary view for admin with avg rating, total reviews, positive/negative counts — 9/10
 
 ---
 
@@ -415,9 +415,9 @@
 
 ## XXXII. Provider Insights `provider-value` `trust-builder`
 
-216. Provider performance page: jobs completed, proof compliance %, issue rate, avg time on site — 8/10
-217. Template-based coaching cues: "Add more after photos to improve proof score" — 8/10
-218. Weekly trend history — 8/10
+216. Provider performance page: jobs completed, proof compliance %, issue rate, avg time on site — 9/10
+217. Template-based coaching cues: "Add more after photos to improve proof score" — 9/10
+218. Weekly trend history — 9/10
 
 ---
 
