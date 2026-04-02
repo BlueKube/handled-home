@@ -44,16 +44,24 @@ export function ProviderReportIssueSheet({
     setIssueType(null);
     setReasonCode("");
     setNote("");
+    setSubmitFailed(false);
   };
+
+  const [submitFailed, setSubmitFailed] = useState(false);
 
   const handleSubmit = async () => {
     if (!issueType || !reasonCode) return;
-    await onSubmit({
-      issueType,
-      reasonCode,
-      note: note.trim() || undefined,
-    });
-    setStep(3);
+    try {
+      setSubmitFailed(false);
+      await onSubmit({
+        issueType,
+        reasonCode,
+        note: note.trim() || undefined,
+      });
+      setStep(3);
+    } catch {
+      setSubmitFailed(true);
+    }
   };
 
   return (
@@ -149,6 +157,11 @@ export function ProviderReportIssueSheet({
                   {isPending ? "Submitting…" : "Submit"}
                 </Button>
               </div>
+              {submitFailed && (
+                <p className="text-xs text-destructive text-center mt-2">
+                  Couldn't submit — please try again.
+                </p>
+              )}
             </>
           )}
 

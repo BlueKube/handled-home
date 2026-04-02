@@ -329,7 +329,7 @@ function UpcomingJobList() {
 }
 
 function WeekView() {
-  const { data: visits, isLoading } = useProviderVisits("week");
+  const { data: visits, isLoading, isError } = useProviderVisits("week");
 
   if (isLoading) {
     return (
@@ -338,6 +338,17 @@ function WeekView() {
           <Skeleton key={i} className="h-24 w-full rounded-xl" />
         ))}
       </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <EmptyState
+        compact
+        icon={MapPin}
+        title="Couldn't load this week's schedule"
+        body="Something went wrong. Please try again later."
+      />
     );
   }
 

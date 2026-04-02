@@ -14,7 +14,7 @@ interface Props {
 
 const SEVERITY_CONFIG = {
   urgent: { label: "Urgent", icon: Zap, variant: "destructive" as const, color: "text-destructive" },
-  soon: { label: "Soon", icon: AlertTriangle, variant: "default" as const, color: "text-amber-600" },
+  soon: { label: "Soon", icon: AlertTriangle, variant: "default" as const, color: "text-amber-500 dark:text-amber-400" },
   watch: { label: "Watch", icon: Clock, variant: "secondary" as const, color: "text-muted-foreground" },
 };
 
@@ -43,7 +43,7 @@ function SlaCountdown({ slaTargetAt }: { slaTargetAt: string | null }) {
   const isCritical = hoursLeft >= 0 && hoursLeft <= 2;
 
   return (
-    <span className={`text-xs font-mono ${isBreached ? "text-destructive font-bold" : isCritical ? "text-amber-600 font-semibold" : "text-muted-foreground"}`}>
+    <span className={`text-xs font-mono ${isBreached ? "text-destructive font-bold" : isCritical ? "text-amber-500 dark:text-amber-400 font-semibold" : "text-muted-foreground"}`}>
       {isBreached ? `SLA breached ${Math.abs(hoursLeft)}h ago` : `${hoursLeft}h left`}
     </span>
   );
