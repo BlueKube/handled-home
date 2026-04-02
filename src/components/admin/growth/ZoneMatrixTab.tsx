@@ -67,6 +67,7 @@ export function ZoneMatrixTab({ selectedZone, setSelectedZone }: ZoneTabProps) {
   };
 
   if (states.isLoading) return <Skeleton className="h-48 mt-4" />;
+  if (states.isError) return <p className="text-sm text-destructive mt-4">Failed to load zone states. Please try refreshing.</p>;
 
   const displayZones = zones?.filter((z: any) => selectedZone === "__all__" || z.id === selectedZone) ?? [];
 

@@ -124,5 +124,6 @@ export function useZoneCategoryGating() {
     isHidden,
     getRawState,
     isLoading: zoneQuery.isLoading || statesQuery.isLoading,
+    isError: zoneQuery.isError || statesQuery.isError,
   };
 }
