@@ -151,7 +151,7 @@ function RunDetailPanel({ run }: { run: PlanRun }) {
 }
 
 export default function PlannerDashboard() {
-  const { data: runs, isLoading } = usePlanRuns(30);
+  const { data: runs, isLoading, isError } = usePlanRuns(30);
   const triggerRun = useTriggerPlanRun();
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<"full" | "draft_only" | null>(null);
@@ -205,6 +205,10 @@ export default function PlannerDashboard() {
           <div className="space-y-3">
             {[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 w-full" />)}
           </div>
+        ) : isError ? (
+          <Alert variant="destructive">
+            <AlertDescription>Failed to load planner runs. Please refresh the page.</AlertDescription>
+          </Alert>
         ) : !runs || runs.length === 0 ? (
           <Alert>
             <AlertDescription>No plan runs yet. Click "Run Planner" to execute the first nightly planning cycle.</AlertDescription>
