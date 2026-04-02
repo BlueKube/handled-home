@@ -223,10 +223,8 @@ function ZipAggregationTab({ leads, isLoading, queryClient }: { leads: Lead[]; i
   };
 
   if (isLoading) return <div className="space-y-2 mt-4"><Skeleton className="h-12" /><Skeleton className="h-12" /></div>;
-
   return (
     <div className="space-y-4 mt-4">
-      {/* Zone notification trigger */}
       <Card>
         <CardContent className="py-4">
           <div className="flex items-center gap-2 mb-2">
