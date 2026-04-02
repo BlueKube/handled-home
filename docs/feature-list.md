@@ -187,11 +187,11 @@
 
 ## XIV. Photo Proof & Visit Receipts `trust-builder`
 
-99. Before/after comparison slider with pointer-drag interaction — 8/10
+99. Before/after comparison slider with pointer-drag interaction — 9/10
 100. Photo timeline: chronological gallery of all visit photos per property — 9/10
-101. Photo quality validation edge function: sharpness, brightness, duplicate hash, orientation — 7/10
-102. Canvas-based image compression for upload performance — 8/10
-103. Signed URL display for secure photo viewing — 8/10
+101. Photo quality validation edge function: sharpness, brightness, duplicate hash, orientation — 8/10
+102. Canvas-based image compression for upload performance — 9/10
+103. Signed URL display for secure photo viewing — 9/10
 104. "Handled Receipt" per visit: photos + timestamps + checklist + provider summary — 9/10
 
 ---
