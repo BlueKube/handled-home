@@ -14,7 +14,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
   TooltipContent,
@@ -27,7 +26,6 @@ import {
   Bell,
   DollarSign,
   Info,
-  Pencil,
   CalendarClock,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -59,7 +57,7 @@ const PRICING_MODE_OPTIONS = [
 ];
 
 export default function SchedulingPolicySettings() {
-  const { values, isLoading, updatePolicy } = useSchedulingPolicy();
+  const { values, isLoading, isError, updatePolicy } = useSchedulingPolicy();
   const { isSuperuser, isOps } = useAdminMembership();
   const canEdit = isSuperuser || isOps;
 
@@ -84,6 +82,17 @@ export default function SchedulingPolicySettings() {
       }
     );
   };
+
+  if (isError) {
+    return (
+      <div className="p-6 space-y-4 animate-fade-in">
+        <h1 className="text-h2 flex items-center gap-2">
+          <CalendarClock className="h-5 w-5" /> Scheduling Policy
+        </h1>
+        <p className="text-sm text-destructive">Failed to load scheduling policy. Please refresh the page.</p>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
