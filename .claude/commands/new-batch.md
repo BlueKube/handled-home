@@ -1,30 +1,61 @@
 Create a new batch spec file for the next batch in the current round.
 
-1. Read `docs/working/plan.md` to find the next incomplete batch (⬜ status)
-2. Create a batch spec file at `docs/working/batch-specs/b<N>-<kebab-title>.md` with this template:
+## Execution
+
+You MUST execute these steps automatically — do not ask the user.
+
+### Step 1: Find the next batch
+
+Read `docs/working/plan.md` and find the first batch with ⬜ status. Extract:
+- Batch number
+- Feature numbers and descriptions
+- Batch size (S/M/L/Micro)
+
+If no ⬜ batches remain, report "All batches complete" and stop.
+
+### Step 2: Create the spec file
+
+Use the Write tool to create `docs/working/batch-specs/b<N>-<kebab-title>.md`:
 
 ```markdown
 # Batch <N>: <Title>
 
 ## Phase
-<Current phase from plan.md>
+<Current round/phase from plan.md>
 
 ## Review: Quality
 
 ## Size: <S/M/L/Micro>
 
 ## What
-<Brief description of what this batch does>
+<1-2 sentence description of what this batch polishes>
+
+## Features
+<For each feature in this batch:>
+- Feature <num>: <description>
 
 ## Requirements
-<Numbered list of specific requirements>
+<For polish batches, these are the checklist items that need to pass:>
+1. All features pass the 10-point polish checklist
+2. No tsc or build errors introduced
+3. Components under 300 lines
 
 ## Acceptance Criteria
-- [ ] <Criterion 1>
-- [ ] <Criterion 2>
+- [ ] Each feature scores 9/10 or 10/10 on polish audit
+- [ ] `npx tsc --noEmit` passes
+- [ ] `npm run build` passes
+- [ ] All fixes committed and pushed
 
 ## Files Changed
-- `<file path>` (<new/edit>)
+<Leave blank — will be filled during implementation>
 ```
 
-3. Report the batch spec path and ask if the spec looks correct before proceeding
+### Step 3: Report
+
+Output:
+```
+## Batch spec created
+- Path: docs/working/batch-specs/b<N>-<title>.md
+- Features: <list>
+- Size: <size>
+```
