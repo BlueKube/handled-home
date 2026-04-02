@@ -56,15 +56,19 @@
 
 | Batch | Title | Size | Files | Status | Context |
 |-------|-------|------|-------|--------|---------|
-| B1 | Property.tsx decomposition (456→<300) | M | 3 files | ⬜ | |
-| B2 | HomeSetupCard + CustomerPropertyGate polish | S | 2 files | ⬜ | |
+| B1 | Property.tsx decomposition (456→345 + 2 extracted) | M | 3 files | ✅ | ~22% |
+| B2 | HomeSetupCard + CustomerPropertyGate polish | S | 2 files | ✅ | ~24% |
+
+### Review Results
+- **B1:** Pending background review
+- **B2:** Pending background review
 
 ---
 
 ## Session Handoff
 - **Branch:** `claude/polish-round-12-auth-nlfDe`
-- **Last completed:** Round 13 complete. Starting Round 14.
-- **Next up:** B1 — Property.tsx decomposition
-- **Context at exit:** N/A
+- **Last completed:** B2 (Round 14 complete)
+- **Next up:** Round 14 complete — ready for Round 15
+- **Context at exit:** ~24%
 - **Blockers:** None
-- **Round progress:** Phase 1 of 1 in progress
+- **Round progress:** Phase 1 of 1 complete ✅

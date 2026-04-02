@@ -28,14 +28,14 @@
 
 ## II. Property Profiles & Home Intelligence `mental-load-reduction` `density-driver`
 
-9. Single-screen property profile with structured address, access notes, gate codes, parking, and pet info — 8/10
-10. Real-time zone coverage indicator as the customer types their ZIP code — 8/10
-11. Property gate: new customers are guided to add their home before accessing any other feature — 8/10
-12. Coverage Map: 10-category self-assessment (Self / Have Someone / None / N/A) with switch intent tracking — 8/10
-13. Property Sizing Tiers: sqft, yard, windows, and stories — used to auto-select correct service levels — 8/10
-14. Progressive "Complete Home Setup" card on dashboard that tracks coverage + sizing completion — 8/10
-15. `get_property_profile_context` RPC: returns computed eligibility, switch candidates, and high-confidence upsells — 8/10
-16. Personalization event logging for every setup completion and update — 8/10
+9. Single-screen property profile with structured address, access notes, gate codes, parking, and pet info (decomposed: HomeSetupSection + ExpansionDialog extracted) — 9/10
+10. Real-time zone coverage indicator as the customer types their ZIP code — 9/10
+11. Property gate: new customers guided to add home; fails open on query error instead of silent false — 9/10
+12. Coverage Map: 10-category self-assessment (Self / Have Someone / None / N/A) with switch intent tracking — 9/10
+13. Property Sizing Tiers: sqft, yard, windows, and stories — used to auto-select correct service levels — 9/10
+14. Progressive "Complete Home Setup" card with skeleton loading state and ARIA progressbar — 9/10
+15. `get_property_profile_context` RPC: returns computed eligibility, switch candidates, and high-confidence upsells — 9/10
+16. Personalization event logging for every setup completion and update — 9/10
 
 ---
 
