@@ -1,16 +1,21 @@
-# Round 16: Moving Wizard & Customer Leads Polish
+# Round 17: Zone Management Polish
 
-> **Round:** 16 of 61
+> **Round:** 17 of 61
 > **Branch:** `claude/polish-round-12-auth-nlfDe`
-> **Phase:** Single phase — Moving Wizard & Customer Leads (Features 449–463)
+> **Phase:** Single phase — Zone Management (Features 17–23)
 > **Execution mode:** Quality
 
 ---
 
 ## Features in Scope
 
-449-456: Moving wizard (transitions table, customer_leads, 4-step wizard, zone check, cancel intercept, Settings button)
-457-463: Pipeline completion (auto-cancel cron, customer lead notify, handoff function, admin tab)
+17. Region hierarchy
+18. ZIP-code-based zone definitions
+19. Per-zone capacity settings
+20. Zone Health Score (Green/Yellow/Red)
+21. Smart adjacent-ZIP suggestions
+22. Expansion Signal Dashboard
+23. Primary + Backup provider model
 
 ---
 
@@ -20,17 +25,24 @@
 
 | # | Issue | Severity | File | Feature |
 |---|-------|----------|------|---------|
-| 1 | Move date input allows past dates | MUST-FIX | Moving.tsx | F449 |
-| 2 | customer_leads CHECK constraint missing 'notified' — trigger will fail | MUST-FIX | migration | F458 |
-| 3 | Missing STATUS_COLORS for 'subscribed' status | SHOULD-FIX | types.ts | F461 |
-| 4 | Handoff function skips failures silently — no logging | SHOULD-FIX | edge function | F459 |
+| 1 | Growth.tsx is 877 lines — over 300 threshold | MUST-FIX | Growth.tsx | F22 |
+| 2 | ZoneProvidersPanel is 317 lines — slightly over | SHOULD-FIX | ZoneProvidersPanel.tsx | F23 |
 
 ### Out of Scope
 
-- Cancel move UI — new feature
-- Email sending in handoff function — new feature  
-- Type safety refactors (as any casts) — working pattern
-- Moving.tsx decomposition (336 lines) — single wizard flow, close to threshold
+- Adjacent-ZIP algorithm improvement — new feature
+- Composite health score — new feature
+- Query optimization for non-serviced ZIPs — refactoring
+- Region hierarchy nesting — new feature
+- Capacity validation improvements — new feature
+
+### Already Solid
+
+- Loading/error/empty states across all zone components ✓
+- Dark mode colors with proper dark: classes ✓
+- Primary/backup provider guards ✓
+- ZIP normalization and dedup ✓
+- Health metrics with threshold-based alerts ✓
 
 ---
 
@@ -38,18 +50,15 @@
 
 | Batch | Title | Size | Files | Status | Context |
 |-------|-------|------|-------|--------|---------|
-| B1 | Moving.tsx date validation + customer_leads constraint + STATUS_COLORS | S | 3 files | ✅ | ~30% |
-| B2 | Handoff function error logging | S | 1 file | ✅ | ~31% |
-
-### Review Results
-- **B1+B2:** Pending background review (combined)
+| B1 | Growth.tsx decomposition (877→<300 per file) | L | 4+ files | ⬜ | |
+| B2 | ZoneProvidersPanel trim (317→<300) | S | 1 file | ⬜ | |
 
 ---
 
 ## Session Handoff
 - **Branch:** `claude/polish-round-12-auth-nlfDe`
-- **Last completed:** B2 (Round 16 complete)
-- **Next up:** Round 16 complete — ready for Round 17
-- **Context at exit:** ~31%
+- **Last completed:** Round 16 complete. Starting Round 17.
+- **Next up:** B1 — Growth.tsx decomposition
+- **Context at exit:** N/A
 - **Blockers:** None
-- **Round progress:** Phase 1 of 1 complete ✅
+- **Round progress:** Phase 1 of 1 in progress
