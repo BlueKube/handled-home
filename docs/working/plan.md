@@ -1,36 +1,31 @@
-# Round 32: Route Optimization (Features 95–98)
+# Rounds 32-35 Progress
 
-> **Round:** 32 of 61
 > **Branch:** `claude/polish-round-12-auth-nlfDe`
-> **Phase:** Single phase — Features 95–98
 > **Execution mode:** Quality
 
 ---
 
-## Audit Findings
+## Round 32: Route Optimization (F95–98) ✅
+All 4 features verified at 9/10 — no fixes needed.
 
-All 4 features verified at 9/10 via direct code review:
-- F95: Nearest-neighbor with haversine + geohash fallback — correct algorithm, proper error handling
-- F96: Manual reorder with up/down controls, toast feedback, local state rollback on error
-- F97: < 3 stops guard in edge function AND disabled button in UI — correct
-- F98: IN_PROGRESS jobs filtered from reorder array, pinned in display
+## Round 33: Automation Engine (F224–232) — IN PROGRESS
+Agent audit running. 9 features.
 
-No issues found. All features have loading states, error handling, and correct implementation.
+## Round 34: Job Execution (F83–90) ✅
+3 error state fixes applied (JobChecklist, JobPhotos, AdminJobDetail). All 8 features at 9/10.
 
----
-
-## Batch Breakdown
-
-| Batch | Title | Size | Files | Status | Context |
-|-------|-------|------|-------|--------|---------|
-| — | No fixes needed | — | — | ✅ Audit-only | |
+## Round 35: Provider Day & Route (F91–94) ✅
+All 4 features verified at 9/10 — no fixes needed.
 
 ---
 
 ## Session Handoff
 - **Branch:** `claude/polish-round-12-auth-nlfDe`
-- **Last completed:** Round 32 — 4 features verified at 9/10
-- **Next up:** Round 33 — Automation Engine (F224–232)
-- **Context at exit:** ~25%
+- **Last completed:** Round 35 (Rounds 30-32, 34-35 all complete)
+- **Next up:** Round 33 agent results, then Round 36+
+- **Context at exit:** ~30%
 - **Blockers:** None
-- **Round progress:** Round 32 complete ✅
+- **Round progress:** 5 rounds complete (30-32, 34-35), Round 33 pending agent results
+
+### Branch chaining note
+Continue on this same branch (`claude/polish-round-12-auth-nlfDe`). All rounds chain on this single branch.

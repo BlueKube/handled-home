@@ -169,10 +169,10 @@
 
 ## XII. Provider Day Command Center `provider-value` `density-driver`
 
-91. Route plan locking: "Start Route" freezes route order and computes projected earnings — 8/10
-92. Projected earnings banner based on completed + (historical avg × remaining stops) — 8/10
-93. Estimated drive and work time stats on provider dashboard — 8/10
-94. Route reorder controls disabled when route is locked — 8/10
+91. Route plan locking: "Start Route" freezes route order and computes projected earnings — 9/10
+92. Projected earnings banner based on completed + (historical avg × remaining stops) — 9/10
+93. Estimated drive and work time stats on provider dashboard — 9/10
+94. Route reorder controls disabled when route is locked — 9/10
 
 ---
 
