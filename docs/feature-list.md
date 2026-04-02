@@ -516,39 +516,39 @@
 
 ### Sprint 1 — Foundations
 
-261. Visit and task bundling data model supporting multi-category services per stop — 8/10
-262. Scheduling state machine (Draft → Locked → Dispatched → In Progress → Complete → Exception Pending) — 8/10
+261. Visit and task bundling data model supporting multi-category services per stop — 9/10
+262. Scheduling state machine (Draft → Locked → Dispatched → In Progress → Complete → Exception Pending) — 9/10
 263. Provider work profile with home base location, service categories, equipment kits, working hours, and capacity limits — 8/10
 264. Property and provider geo-coordinate indexing for spatial queries — 8/10
-265. Admin scheduling policy dials (appointment window length, ETA range display, arrival notification minutes) — 8/10
-266. Customer-facing upcoming visits with status labels (Planning, Scheduled, Today, In Progress, Completed) — 8/10
+265. Admin scheduling policy dials (appointment window length, ETA range display, arrival notification minutes) — 9/10
+266. Customer-facing upcoming visits with status labels (Planning, Scheduled, Today, In Progress, Completed) — 9/10
 
 ### Sprint 2 — Zone Builder v1
 
-267. H3 hex-grid geo cell infrastructure for scalable zone partitioning — 8/10
-268. Automated zone generation from region boundaries with configurable dials — 8/10
-269. Zone metrics computation (demand density, supply capacity, compactness, drive-time proxy) — 8/10
-270. Cell scoring and seed selection strategies (demand-first, provider-first, auto-hybrid) — 8/10
+267. H3 hex-grid geo cell infrastructure for scalable zone partitioning — 9/10
+268. Automated zone generation from region boundaries with configurable dials — 9/10
+269. Zone metrics computation (demand density, supply capacity, compactness, drive-time proxy) — 9/10
+270. Cell scoring and seed selection strategies (demand-first, provider-first, auto-hybrid) — 9/10
 271. Constrained region-growing algorithm with cost function optimization — 8/10
 272. Admin Zone Builder wizard (select region → settings → preview → edit → commit) — 8/10
-273. Property-to-zone resolution via H3 cell lookup with fallback ring expansion — 8/10
+273. Property-to-zone resolution via H3 cell lookup with fallback ring expansion — 9/10
 
 ### Sprint 3 — Market/Zone Category States Integration
 
-274. Zone × Category state matrix (Closed, Waitlist Only, Provider Recruiting, Soft Launch, Open, Protect Quality) — 8/10
-275. State-based customer catalog gating and subscribe eligibility enforcement — 8/10
-276. Category-level waitlist system with zone-specific demand capture — 8/10
-277. Provider opportunity surfaces responding to recruiting states — 8/10
-278. Nightly recommendation engine with hysteresis thresholds and anti-flap rules — 8/10
-279. Admin approval-gated state transitions with confidence scoring — 8/10
-280. Minimum time-in-state guardrails to prevent state thrashing — 8/10
+274. Zone × Category state matrix (Closed, Waitlist Only, Provider Recruiting, Soft Launch, Open, Protect Quality) — 9/10
+275. State-based customer catalog gating and subscribe eligibility enforcement — 9/10
+276. Category-level waitlist system with zone-specific demand capture — 9/10
+277. Provider opportunity surfaces responding to recruiting states — 9/10
+278. Nightly recommendation engine with hysteresis thresholds and anti-flap rules — 9/10
+279. Admin approval-gated state transitions with confidence scoring — 9/10
+280. Minimum time-in-state guardrails to prevent state thrashing — 9/10
 
 ### Sprint 4 — Rolling Horizon Planner
 
-281. 14-day rolling planning horizon with 7-day LOCKED freeze window — 8/10
+281. 14-day rolling planning horizon with 7-day LOCKED freeze window — 9/10
 282. Nightly planning boundary for schedule promotion and state change application — 8/10
 283. Customer routine changes effective only in DRAFT window (≥8 days out) — 8/10
-284. Cadence-based task scheduling (weekly, biweekly, every 4 weeks) with stable offsets — 8/10
+284. Cadence-based task scheduling (weekly, biweekly, every 4 weeks) with stable offsets — 9/10
 285. Visit bundling rules merging same-property tasks into single stops — 8/10
 286. Stability rules minimizing DRAFT plan changes unless constraints change — 8/10
 287. Admin planner health dashboard with run summaries and conflict flagging — 8/10

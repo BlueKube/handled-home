@@ -1,8 +1,8 @@
-# Round 28: Routine & Bundle Builder
+# Round 29: Routing Engine Sprint 1–3 (Features 261–285)
 
-> **Round:** 28 of 61
+> **Round:** 29 of 61
 > **Branch:** `claude/polish-round-12-auth-nlfDe`
-> **Phase:** Single phase — Features 68–77
+> **Phase:** Single phase — Features 261–285
 > **Execution mode:** Quality
 
 ---
@@ -13,31 +13,26 @@
 
 | # | Feature | Issue | Fix |
 |---|---------|-------|-----|
-| 1 | F68 | RoutineReview skuDetails query silently fails | Added isError + inline "scope unavailable" message |
-| 2 | F68 | navigate() called during render (anti-pattern) | Moved to useEffect in RoutineReview + RoutineConfirm |
-| 3 | F69 | Touch targets below 44px on cadence controls | Increased remove button h-8→h-10, pattern buttons min-h-[44px] |
-| 4 | F70 | No error state when routine data fails to load | Added QueryErrorCard with retry |
-| 5 | F71 | Duplicate MODEL_LABELS across 3 files | Exported from useEntitlements, removed duplicates |
-| 6 | F71 | Routine.tsx over 300 lines | Extracted PopularServicesPreview component (283 lines now) |
-| 7 | F71 | Fixed bottom bars missing safe-area insets | Added pb-[max(1rem,env(safe-area-inset-bottom))] |
-| 8 | F72 | Auto-fit button has no loading spinner | Added Loader2 + "Fitting..." label |
-| 9 | F72 | Auto-fit button touch target too small | Added min-h-[44px] |
-| 10 | F73 | Supabase errors silently swallowed | Added error capture + throw on all 3 queries |
-| 11 | F73 | Fake "A" recommendation when no zone data | Return null instead |
-| 12 | F74 | Swap button 40px, below 44px minimum | Bumped to h-11 w-11 (44px) |
-| 13 | F76 | Effective date hardcoded T0+7 | Use subscription.billing_cycle_end_at |
-| 14 | F76 | Copy says "7 days" but varies by cycle | Changed to "current cycle's schedule" |
-| 15 | F77 | grid-cols-2 overflow on narrow screens | Changed to flex flex-wrap |
+| 1 | F262 | getScheduleLabel misses 5 schedule states | Added all 7 states to switch |
+| 2 | F265 | No error state for scheduling policy query | Exposed isError from hook, added error branch |
+| 3 | F265 | Dead imports (Pencil, Switch) | Removed |
+| 4 | F272 | Dark-mode color violations (text-amber-600, text-green-600) | Added dark: variants |
+| 5 | F274 | Missing isError branch in ZoneMatrixTab | Added error message |
+| 6 | F275 | useZoneCategoryGating silently defaults to purchasable on error | Exposed isError from hook |
+| 7 | F281 | PlannerHorizonGrid returns null on RPC error | Added error card |
+| 8 | F284 | Biweekly pattern A/B ignored by nightly planner | Added cadence_detail to query + isTaskDue |
 
-### Already Solid (9/10+)
-- F68: 3-step flow — all 3 pages, routing, navigation ✓
-- F69: Cadence picker — all options, CadencePicker component ✓
-- F70: 4-week preview — WeekPreviewTimeline, useRoutinePreview ✓
+### Already Solid (9/10)
+- F261, F266, F267-270, F273, F274, F276-280: No fixes needed
 
-### Unchanged (not polishable)
-- F73: geo clustering part unimplemented (deferred, not polish scope)
-- F74: feasibility check unimplemented (new feature, not polish scope)
-- F75: rated 1/10 — entire feature unimplemented, skip
+### Deferred (not polish scope)
+- F263: WorkSetup.tsx 469 lines (major decomposition)
+- F263/F264: geo-index computation on save (new feature)
+- F271: Dead variable in edge function (minor)
+- F272: Component 579 lines (major decomposition)
+- F282: state_changes_applied counter unused (backend counter)
+- F283: Effective date billing vs planning horizon mismatch (architectural)
+- F285: Setup discount dials not applied (new feature)
 
 ---
 
@@ -45,14 +40,14 @@
 
 | Batch | Title | Size | Files | Status | Context |
 |-------|-------|------|-------|--------|---------|
-| B1 | Routine polish — all features | S | 10 files | ✅ | |
+| B1 | Routing/scheduling polish — all features | M | 8 files | ✅ | |
 
 ---
 
 ## Session Handoff
 - **Branch:** `claude/polish-round-12-auth-nlfDe`
-- **Last completed:** Round 28 B1 (all batches complete)
-- **Next up:** Round 29
-- **Context at exit:** ~50%
+- **Last completed:** Round 29 B1 (all batches complete)
+- **Next up:** Round 30 — Routing Engine Sprint 4–6 (Features 286–305)
+- **Context at exit:** ~65%
 - **Blockers:** None
 - **Round progress:** Phase 1 of 1 complete — round done
