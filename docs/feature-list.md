@@ -74,14 +74,14 @@
 
 ## V. SKU Levels (Service Variants) `trust-builder` `margin-lever`
 
-36. Multi-level variants per SKU (e.g., Maintenance / Standard / Deep) with different scope, time, and cost — 8/10
-37. Side-by-side level comparison UI with handle delta display — 8/10
-38. Guidance questions (0–3 per SKU) for logic-based level selection — 8/10
-39. Smart level defaults based on property sizing signals (sqft, yard, windows, stories) — 8/10
-40. Provider level sufficiency prompt at job completion — 8/10
-41. Level recommendation system with reason codes for providers to suggest the correct level — 8/10
-42. Courtesy upgrade: provider performs a higher level for free, once per property/SKU/6 months — 8/10
-43. Admin analytics: recommendation + courtesy upgrade counts, mismatch detection by zone — 8/10
+36. Multi-level variants per SKU with empty state for no active levels — 9/10
+37. Side-by-side level comparison UI with handle delta display — 9/10
+38. Guidance questions (0–3 per SKU) for logic-based level selection — 9/10
+39. Smart level defaults based on property sizing signals — 9/10
+40. Provider level sufficiency prompt at job completion — 9/10
+41. Level recommendation system with reason codes — 9/10
+42. Courtesy upgrade with 6-month cooldown and error toast — 9/10
+43. Admin analytics: recommendation + courtesy counts, mismatch hotspots — 9/10
 43b. 54 sku_levels seed data across 23 SKUs — research-calibrated handle costs, planned minutes, inclusions/exclusions, and proof checklists per level. Covers lawn care (4 SKUs), treatment/seasonal (5), specialty (5), new outdoor (4), and home assistant (5) — DONE
 43c. Market simulator validation of handle economics — break-even at 72.2% utilization, 44.6% margin at 40% target utilization. All 54 SKU/levels verified consistent with 7-handle anchor model — DONE
 43d. Comprehensive SKU calibration reasoning report (docs/sku-calibration-report.md) — per-SKU pricing rationale, licensed service premium analysis, tier progression logic, deferred service documentation, and database field recommendations — DONE

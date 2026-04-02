@@ -29,14 +29,16 @@
 
 | Batch | Title | Size | Files | Status | Context |
 |-------|-------|------|-------|--------|---------|
-| B1 | LevelSufficiencyForm error handling + LevelSelector empty state | S | 2 files | ⬜ | |
+| B1 | LevelSelector empty state | S | 1 file | ✅ | ~48% |
+
+Note: LevelSufficiencyForm courtesy error handling confirmed as intentional (P5-F4).
 
 ---
 
 ## Session Handoff
 - **Branch:** `claude/polish-round-12-auth-nlfDe`
-- **Last completed:** Round 19 complete. Starting Round 20.
-- **Next up:** B1
-- **Context at exit:** N/A
+- **Last completed:** B1 (Round 20 complete)
+- **Next up:** Round 20 complete — ready for Round 21
+- **Context at exit:** ~48%
 - **Blockers:** None
-- **Round progress:** Phase 1 of 1 in progress
+- **Round progress:** Phase 1 of 1 complete ✅
