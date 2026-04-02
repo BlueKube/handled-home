@@ -18,8 +18,8 @@ export function ProbationBanner() {
     <Card className="border-amber-500/50 bg-amber-500/5 p-4 space-y-2">
       <div className="flex items-center gap-2">
         <AlertTriangle className="h-4 w-4 text-amber-500" />
-        <span className="text-sm font-semibold text-amber-600">Performance Improvement Period</span>
-        <Badge variant="outline" className="text-[10px] text-amber-600 border-amber-500/30">Active</Badge>
+        <span className="text-sm font-semibold text-amber-400">Performance Improvement Period</span>
+        <Badge variant="outline" className="text-[10px] text-amber-400 border-amber-500/30">Active</Badge>
       </div>
       <p className="text-xs text-muted-foreground">
         Your account is under review due to recent service quality metrics.

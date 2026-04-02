@@ -272,7 +272,7 @@ export default function ProviderReferrals() {
               {launchProgress} / {launchTarget} customers — Invite {Math.max(0, launchTarget - launchProgress)} more to unlock priority activation
             </p>
             {app?.waitlist_reason && (
-              <p className="text-xs text-amber-600">{app.waitlist_reason}</p>
+              <p className="text-xs text-amber-400">{app.waitlist_reason}</p>
             )}
           </CardContent>
         </Card>
@@ -296,7 +296,7 @@ export default function ProviderReferrals() {
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
-            <DollarSign className="h-5 w-5 text-green-600 mx-auto mb-1" />
+            <DollarSign className="h-5 w-5 text-green-400 mx-auto mb-1" />
             <p className="text-xl font-bold">${(paidCents / 100).toFixed(0)}</p>
             <p className="text-xs text-muted-foreground">Paid</p>
           </CardContent>
@@ -320,7 +320,7 @@ export default function ProviderReferrals() {
                       {r.referral_programs?.name} · {r.milestone}
                     </p>
                     {r.status === "on_hold" && r.hold_reason && (
-                      <p className="text-xs text-amber-600 flex items-center gap-1 mt-1">
+                      <p className="text-xs text-amber-400 flex items-center gap-1 mt-1">
                         <AlertTriangle className="h-3 w-3" /> {r.hold_reason}
                       </p>
                     )}
