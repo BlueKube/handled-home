@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useProperty } from "@/hooks/useProperty";
@@ -33,7 +33,7 @@ export default function RoutineReview() {
 
   // L11: Fetch inclusions/exclusions for all SKUs in the routine
   const skuIds = items.map((i) => i.sku_id);
-  const { data: skuDetails } = useQuery({
+  const { data: skuDetails, isError: skuScopeError } = useQuery({
     queryKey: ["sku-scope", skuIds],
     enabled: skuIds.length > 0,
     queryFn: async () => {
@@ -69,10 +69,11 @@ export default function RoutineReview() {
   const fits = cycleDemand <= included + maxExtras;
 
   // Redirect if no items
-  if (!isLoading && items.length === 0) {
-    navigate("/customer/routine", { replace: true });
-    return null;
-  }
+  const shouldRedirect = !isLoading && items.length === 0;
+  useEffect(() => {
+    if (shouldRedirect) navigate("/customer/routine", { replace: true });
+  }, [shouldRedirect, navigate]);
+  if (shouldRedirect) return null;
 
   if (isLoading) {
     return (
@@ -116,6 +117,12 @@ export default function RoutineReview() {
         </div>
 
         {/* Service cards */}
+        {skuScopeError && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground px-3 py-2 rounded-lg bg-muted/50">
+            <Info className="h-3.5 w-3.5 shrink-0" />
+            <span>Scope details unavailable — you can still review and confirm.</span>
+          </div>
+        )}
         <div className="space-y-3">
           {items.map((item) => {
             const scope = skuDetails?.get(item.sku_id);

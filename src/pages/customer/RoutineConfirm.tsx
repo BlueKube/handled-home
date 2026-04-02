@@ -70,16 +70,13 @@ export default function RoutineConfirm() {
   }, [hasBlockedCategories, user, blockedCategories]);
 
   // Gate: need active subscription
-  if (!isLoading && !subscription) {
-    navigate("/customer/plans?gated=1", { replace: true });
-    return null;
-  }
-
-  // Gate: need routine with items
-  if (!isLoading && (!routineData || routineData.items.length === 0)) {
-    navigate("/customer/routine", { replace: true });
-    return null;
-  }
+  const needsSub = !isLoading && !subscription;
+  const needsItems = !isLoading && !needsSub && (!routineData || routineData.items.length === 0);
+  useEffect(() => {
+    if (needsSub) navigate("/customer/plans?gated=1", { replace: true });
+    else if (needsItems) navigate("/customer/routine", { replace: true });
+  }, [needsSub, needsItems, navigate]);
+  if (needsSub || needsItems) return null;
 
   if (confirmed) {
     return <RoutineSuccessScreen effectiveAt={effectiveAt} />;
