@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useProperty } from "@/hooks/useProperty";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
-import { useEntitlements } from "@/hooks/useEntitlements";
+import { useEntitlements, MODEL_LABELS } from "@/hooks/useEntitlements";
 import { useRoutine } from "@/hooks/useRoutine";
 import { useRoutinePreview, computeCycleDemand } from "@/hooks/useRoutinePreview";
 import { ReviewServiceCard } from "@/components/routine/ReviewServiceCard";
@@ -17,12 +17,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, ArrowRight, CheckCircle2, AlertTriangle, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-
-const MODEL_LABELS: Record<string, string> = {
-  credits_per_cycle: "credits",
-  count_per_cycle: "services",
-  minutes_per_cycle: "minutes",
-};
 
 export default function RoutineReview() {
   const navigate = useNavigate();
@@ -195,7 +189,7 @@ export default function RoutineReview() {
       </div>
 
       {/* Bottom CTA */}
-      <div className="fixed bottom-16 left-0 right-0 z-40 p-4 bg-card/95 backdrop-blur border-t border-border">
+      <div className="fixed bottom-16 left-0 right-0 z-40 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] bg-card/95 backdrop-blur border-t border-border">
         <Button
           className="w-full gap-2"
           size="lg"
