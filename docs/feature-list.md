@@ -789,13 +789,13 @@
 
 ## XLVII. Household Members `mental-load-reduction` `trust-builder`
 
-442. `household_members` table: links multiple auth users to one property with owner/member roles — DONE
-443. Auto-insert trigger: creates 'owner' row when property is created, with backfill for existing properties — DONE
-444. RLS with SECURITY DEFINER helper functions to prevent infinite recursion — DONE
-445. `accept_household_invites` RPC: auto-accepts pending invites matching current user's email — DONE
-446. `useHouseholdInvites` hook: runs once per session on customer page load to accept pending invites — DONE
-447. CustomerPropertyGate extended: household members can access customer pages without owning a property — DONE
-448. Settings page Household section: member list with role badges, email invite form, remove member action — DONE
+442. `household_members` table: links multiple auth users to one property with owner/member roles — 9/10
+443. Auto-insert trigger: creates 'owner' row when property is created, with backfill for existing properties — 9/10
+444. RLS with SECURITY DEFINER helper functions to prevent infinite recursion — 9/10
+445. `accept_household_invites` RPC: auto-accepts pending invites matching current user's email — 9/10
+446. `useHouseholdInvites` hook: runs once per session with error logging — 9/10
+447. CustomerPropertyGate extended: household members access customer pages; fails open on query error — 9/10
+448. Settings Household section: member list with loading/error/empty states, invite form, error-checked remove — 9/10
 
 ## XLVIII. "I'm Moving" Wizard `mental-load-reduction` `density-driver`
 
