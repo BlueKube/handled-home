@@ -111,10 +111,14 @@ Items that require API keys, backend changes, or design decisions beyond fronten
   - **Why:** Invitees don't know they've been invited without an email
   - **Blocked:** Nothing — invite still works if invitee logs in (auto-accepted)
 
-- [ ] **Wire moving wizard to subscription pause/cancel** — The "keep services until move date" toggle is saved but no automatic subscription action happens on the move date. Need a cron job or trigger to pause/cancel on move_date.
-  - **Why:** Customer expects services to stop on move date
-  - **Blocked:** Nothing immediate — manual admin action can bridge the gap
+- [x] **Wire moving wizard to subscription pause/cancel** — ✅ `process_move_date_transitions()` function + `process-move-transitions` edge function auto-cancels subscriptions on move date. Needs pg_cron scheduling.
 
-- [ ] **Customer lead zone launch notifications** — customer_leads table exists but has no auto-notify trigger (like provider_leads has). When a zone launches, customer leads in that ZIP should be notified.
-  - **Why:** Moving customers who were saved as leads should be re-engaged
-  - **Blocked:** Nothing — leads are stored for manual outreach
+- [x] **Customer lead zone launch notifications** — ✅ `auto_notify_customer_leads()` trigger mirrors provider lead pattern. Fires on zone launch.
+
+- [ ] **Schedule pg_cron job for process-move-transitions** — The edge function exists but needs to be added to pg_cron to run daily.
+  - **Why:** Without the cron job, move date transitions aren't processed automatically
+  - **Blocked:** Needs Supabase dashboard access to schedule the cron
+
+- [ ] **Send actual warm handoff emails to new homeowners** — process-new-homeowner-handoff creates the customer_lead but doesn't send emails. Need email service integration.
+  - **Why:** New homeowners won't know about Handled Home without outreach
+  - **Blocked:** Email service (Resend/SendGrid) not configured

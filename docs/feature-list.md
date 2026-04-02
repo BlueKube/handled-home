@@ -808,6 +808,16 @@
 455. Cancel flow intercept: when customer selects "Moving" as cancel reason, redirects to moving wizard instead of cancellation — DONE
 456. Settings page "I'm moving" card: entry point to moving wizard with Truck icon — DONE
 
+## XLIX. Moving Pipeline Completion & Operational Automation `mental-load-reduction` `density-driver`
+
+457. `process_move_date_transitions()` database function: auto-cancels subscriptions on move date (cancel_at_period_end + status='canceling'), marks transitions as 'completed' — DONE
+458. `process-move-transitions` edge function: cron-callable wrapper with requireCronSecret auth for daily execution — DONE
+459. Customer lead zone launch notification trigger: auto_notify_customer_leads() on market_zone_category_state change to SOFT_LAUNCH/OPEN, mirrors provider lead pattern — DONE
+460. `notified_at` timestamp on customer_leads for notification tracking — DONE
+461. `handoff_processed` flag on property_transitions for tracking new homeowner outreach — DONE
+462. `process-new-homeowner-handoff` edge function: processes transitions with new homeowner info, creates customer_lead with source='referral', queries property context for personalization — DONE
+463. Admin "Customers" tab on Provider Leads page: shows customer_leads with email, phone, ZIP, source, status dropdown, notified_at display — DONE
+
 ---
 
-*Total features: 475 | Last updated: 2026-04-01 | Round 10: Phone Identity, Household Members & Moving Wizard (21 features)*
+*Total features: 482 | Last updated: 2026-04-02 | Round 11: Moving Pipeline Completion & Operational Automation (7 features)*
