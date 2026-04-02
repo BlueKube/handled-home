@@ -18,8 +18,9 @@
 | B6 | Customer error states: HomeTimeline, History, Subscription, Services | S | ✅ | — |
 | B7 | UX: BundleSavingsCard parser, dead HomeTimeline, tab bar dot | S | ✅ | — |
 | B8 | Browse: real ZIP check, SKU error state, SPA footer links | S | ✅ | — |
+| B9 | Billing error states: BillingHistory, BillingMethods, Subscribe | S | ✅ | — |
 
-**Total: 8 batches, 18 code fixes across 19 files**
+**Total: 9 batches, 21 code fixes across 22 files**
 
 ---
 
@@ -69,7 +70,7 @@
 
 ## Session Handoff
 - **Branch:** `claude/polish-planned-features-l9XIY`
-- **Last completed:** B8 (Browse page — real ZIP check, SKU error state, SPA links)
+- **Last completed:** B9 (Billing error states — BillingHistory, BillingMethods, Subscribe)
 - **Next up:** Round 61 — Final Verification & Doc Sync, or additional polish on remaining 8/10 features
 - **Context at exit:** —
 - **Blockers:** None
