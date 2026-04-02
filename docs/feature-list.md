@@ -612,23 +612,23 @@
 
 > **Note:** Wizard was simplified from a 7-screen flow to a streamlined 2-step flow (Batch 2 rewrite). Core functionality preserved; steps consolidated for faster onboarding.
 
-326. Streamlined 2-step provider-referred customer onboarding flow (under 60 seconds) — 8/10
+326. Streamlined 2-step provider-referred customer onboarding flow (under 60 seconds) — 9/10
 327. Provider recognition screen preserving existing relationship trust — 8/10
 328. Confirm existing service screen with editable cadence — 8/10
 329. Property creation with address and home type — 8/10
 330. Home setup with property signals (pool, trees, pets, garden, windows) — 8/10
-331. Connecting provider spinner with activate-byoc-invite call — 8/10
+331. Connecting provider spinner with activate-byoc-invite call — 9/10
 332. Other services screen with zone-available categories (skip-friendly) — 8/10
-333. Conditional Home Plan screen for bundled service pricing — 8/10
-334. Success screen with provider connection summary — 8/10
-335. Dashboard "Your Home Team" card showing connected providers and next visits — 8/10
-336. Referral state handling (Existing Provider First Touch, future: Not First Touch, Cold Referral) — 8/10
-337. Invite validation with fallback screen for expired/revoked/inactive tokens — 8/10
-338. Already-activated 409 handling with dashboard redirect — 8/10
-339. BYOC attribution tracking preserved separate from provider-customer relationship — 8/10
-340. BYOC rate limits: max 10 active links per provider, max 10 new links per day — 8/10
-341. Referral one-code-per-customer enforcement with DB re-check — 8/10
-342. Cryptographically secure token generation (crypto.getRandomValues) — 8/10
+333. Conditional Home Plan screen for bundled service pricing — 9/10
+334. Success screen with provider connection summary — 9/10
+335. Dashboard "Your Home Team" card showing connected providers and next visits — 9/10
+336. Referral state handling (Existing Provider First Touch, future: Not First Touch, Cold Referral) — 9/10
+337. Invite validation with fallback screen for expired/revoked/inactive tokens — 9/10
+338. Already-activated 409 handling with dashboard redirect — 9/10
+339. BYOC attribution tracking preserved separate from provider-customer relationship — 9/10
+340. BYOC rate limits: max 10 active links per provider, max 10 new links per day — 9/10
+341. Referral one-code-per-customer enforcement with DB re-check — 9/10
+342. Cryptographically secure token generation (crypto.getRandomValues) — 9/10
 
 ---
 
