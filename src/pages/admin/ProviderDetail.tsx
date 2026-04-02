@@ -174,7 +174,7 @@ export default function AdminProviderDetail() {
               {ratingSummary ? (
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
-                    <span className="text-3xl font-bold">{ratingSummary.avg_rating}</span>
+                    <span className="text-3xl font-bold">{Number(ratingSummary.avg_rating).toFixed(1)}</span>
                     <div className="flex items-center gap-0.5">
                       {[1, 2, 3, 4, 5].map((s) => (
                         <Star

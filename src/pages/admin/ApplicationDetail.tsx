@@ -143,7 +143,7 @@ export default function AdminApplicationDetail() {
                 return (
                   <div key={key} className="flex items-center gap-2 text-sm">
                     {accepted ? (
-                      <CheckCircle className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                      <CheckCircle className="h-3.5 w-3.5 text-success shrink-0" />
                     ) : (
                       <XCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                     )}

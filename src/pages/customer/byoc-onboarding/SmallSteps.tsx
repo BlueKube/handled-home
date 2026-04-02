@@ -19,6 +19,7 @@ export function ActivatingScreen({
 
   useEffect(() => {
     if (error) return;
+    setTimedOut(false);
     const timer = setTimeout(() => setTimedOut(true), 15000);
     return () => clearTimeout(timer);
   }, [error]);

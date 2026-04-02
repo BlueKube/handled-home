@@ -169,7 +169,7 @@ function RunDetailPanel({ run }: { run: AssignmentRun }) {
 }
 
 export default function AssignmentDashboard() {
-  const { data: runs, isLoading } = useAssignmentRuns(30);
+  const { data: runs, isLoading, isError } = useAssignmentRuns(30);
   const triggerRun = useTriggerAssignmentRun();
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -208,6 +208,10 @@ export default function AssignmentDashboard() {
           <div className="space-y-3">
             {[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 w-full" />)}
           </div>
+        ) : isError ? (
+          <Alert variant="destructive">
+            <AlertDescription>Failed to load assignment runs. Please refresh the page.</AlertDescription>
+          </Alert>
         ) : !runs || runs.length === 0 ? (
           <Alert>
             <AlertDescription>No assignment runs yet. Click "Run Assignments" to execute the first assignment cycle.</AlertDescription>

@@ -128,6 +128,7 @@ export function useOnboardingProgress() {
   return {
     progress: query.data,
     isLoading: query.isLoading,
+    isError: query.isError,
     currentStep: (query.data?.current_step ?? "property") as OnboardingStep,
     completedSteps: (query.data?.completed_steps ?? []) as OnboardingStep[],
     selectedPlanId: query.data?.selected_plan_id ?? null,

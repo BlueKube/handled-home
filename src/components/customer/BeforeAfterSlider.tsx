@@ -46,6 +46,7 @@ export function BeforeAfterSlider({
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
     >
       {/* After (full background) */}
       <img

@@ -32,12 +32,20 @@ function getEquipmentLabel(key: string): string {
 
 /** Today's Loadout — aggregated equipment checklist */
 export function TodayLoadout() {
-  const { data: plan, isLoading } = useProviderDayPlan();
+  const { data: plan, isLoading, isError } = useProviderDayPlan();
   const [packed, setPacked] = useState<Set<string>>(new Set());
   const [open, setOpen] = useState(true);
 
   if (isLoading) {
     return <Skeleton className="h-24 rounded-xl" />;
+  }
+
+  if (isError) {
+    return (
+      <Card className="p-4">
+        <p className="text-xs text-destructive text-center">Couldn't load equipment list</p>
+      </Card>
+    );
   }
 
   if (!plan || plan.allEquipment.length === 0) return null;

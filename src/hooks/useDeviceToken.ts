@@ -49,7 +49,7 @@ export function useDeviceToken() {
                 user_id: user!.id,
                 token,
                 platform,
-                push_provider: "FCM",
+                push_provider: platform === "IOS" ? "APNS" : "FCM",
                 status: "ACTIVE",
                 last_seen_at: new Date().toISOString(),
               },

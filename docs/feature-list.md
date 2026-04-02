@@ -146,52 +146,52 @@
 
 ## X. Guided Customer Onboarding `mental-load-reduction`
 
-78. 6-step onboarding wizard: Property → ZIP/Zone Check → Plan Selection → Subscribe → Service Day → Build Routine — 8/10
-79. Zone availability check with automatic waitlist signup if no zone covers the ZIP — 8/10
-80. Onboarding progress persistence: auto-resumes at the exact step on return — 8/10
-81. Checkout success polling with auto-advance when subscription appears — 8/10
-82. Property gate distinguishes truly new users from churned customers returning — 8/10
+78. 6-step onboarding wizard: Property → ZIP/Zone Check → Plan Selection → Subscribe → Service Day → Build Routine — 9/10
+79. Zone availability check with automatic waitlist signup if no zone covers the ZIP — 9/10
+80. Onboarding progress persistence: auto-resumes at the exact step on return — 9/10
+81. Checkout success polling with auto-advance when subscription appears — 9/10
+82. Property gate distinguishes truly new users from churned customers returning — 9/10
 
 ---
 
 ## XI. Job Execution & Provider Workflow `provider-value` `trust-builder`
 
-83. Provider daily job list optimized for "today → next" with route-ordered stops — 8/10
-84. Job detail with Level, scope bullets, access notes, proof requirements, and planned minutes — 8/10
-85. Guided checklist completion: required items must end in Done or Not-Done-With-Reason — 8/10
-86. Photo proof capture with offline/poor-signal resilience: queue uploads automatically — 8/10
-87. Server-validated atomic job completion: `complete_job` RPC validates all proof before marking done — 8/10
-88. Structured issue reporting with type, severity, and evidence — no chat threads — 8/10
-89. Admin override completion with mandatory reason and audit logging — 8/10
-90. Job event timeline: append-only log of every state change (started, arrived, departed, completed) — 8/10
+83. Provider daily job list optimized for "today → next" with route-ordered stops — 9/10
+84. Job detail with Level, scope bullets, access notes, proof requirements, and planned minutes — 9/10
+85. Guided checklist completion: required items must end in Done or Not-Done-With-Reason — 9/10
+86. Photo proof capture with offline/poor-signal resilience: queue uploads automatically — 9/10
+87. Server-validated atomic job completion: `complete_job` RPC validates all proof before marking done — 9/10
+88. Structured issue reporting with type, severity, and evidence — no chat threads — 9/10
+89. Admin override completion with mandatory reason and audit logging — 9/10
+90. Job event timeline: append-only log of every state change (started, arrived, departed, completed) — 9/10
 
 ---
 
 ## XII. Provider Day Command Center `provider-value` `density-driver`
 
-91. Route plan locking: "Start Route" freezes route order and computes projected earnings — 8/10
-92. Projected earnings banner based on completed + (historical avg × remaining stops) — 8/10
-93. Estimated drive and work time stats on provider dashboard — 8/10
-94. Route reorder controls disabled when route is locked — 8/10
+91. Route plan locking: "Start Route" freezes route order and computes projected earnings — 9/10
+92. Projected earnings banner based on completed + (historical avg × remaining stops) — 9/10
+93. Estimated drive and work time stats on provider dashboard — 9/10
+94. Route reorder controls disabled when route is locked — 9/10
 
 ---
 
 ## XIII. Route Optimization `density-driver` `provider-value`
 
-95. Nearest-neighbor route optimization using geohash/lat-lng from properties — 8/10
-96. Provider manual reorder with up/down controls and audit logging — 8/10
-97. Minimum-jobs guard: skip optimization for routes with < 3 stops — 8/10
-98. IN_PROGRESS freeze: in-progress jobs are pinned and excluded from reorder — 8/10
+95. Nearest-neighbor route optimization using geohash/lat-lng from properties — 9/10
+96. Provider manual reorder with up/down controls and audit logging — 9/10
+97. Minimum-jobs guard: skip optimization for routes with < 3 stops — 9/10
+98. IN_PROGRESS freeze: in-progress jobs are pinned and excluded from reorder — 9/10
 
 ---
 
 ## XIV. Photo Proof & Visit Receipts `trust-builder`
 
-99. Before/after comparison slider with pointer-drag interaction — 8/10
+99. Before/after comparison slider with pointer-drag interaction — 9/10
 100. Photo timeline: chronological gallery of all visit photos per property — 9/10
-101. Photo quality validation edge function: sharpness, brightness, duplicate hash, orientation — 7/10
-102. Canvas-based image compression for upload performance — 8/10
-103. Signed URL display for secure photo viewing — 8/10
+101. Photo quality validation edge function: sharpness, brightness, duplicate hash, orientation — 8/10
+102. Canvas-based image compression for upload performance — 9/10
+103. Signed URL display for secure photo viewing — 9/10
 104. "Handled Receipt" per visit: photos + timestamps + checklist + provider summary — 9/10
 
 ---
@@ -265,16 +265,16 @@
 ## XXI. Support & Disputes `trust-builder` `mental-load-reduction`
 
 139. Self-resolution target: ≥80% of issues resolved without human involvement — 7/10
-140. Receipt-anchored issue reporting: every receipt has "Report an issue" — 8/10
+140. Receipt-anchored issue reporting: every receipt has "Report an issue" — 9/10
 141. Guided Resolver: structured category → evidence → instant resolution offer → accept → done — 7/10
 142. Policy engine with 5-level precedence: provider → SKU → category → zone → global — 7/10
 143. AI-powered ticket classification with severity, evidence scoring, and risk scoring — 9/10
 144. Evidence replay: before/after photos + checklist + time-on-site presented to customer — 7/10
 145. Chargeback intercept: proof + cheaper off-ramps (credits, plan changes) before escalation — 6/10
 146. Duplicate ticket suppression: second attempt links to existing ticket — 7/10
-147. Response macros for admin one-click resolutions — 8/10
+147. Response macros for admin one-click resolutions — 9/10
 148. Policy preview simulator: test scenario inputs (category, evidence score, risk score, customer history, job value) against active policy dials to see computed resolution offers — 7/10
-149. No chat threads anywhere — all disputes are structured, bounded, and auditable — 8/10
+149. No chat threads anywhere — all disputes are structured, bounded, and auditable — 9/10
 
 ---
 
@@ -287,33 +287,33 @@
 154. 19 seeded notification templates with premium concierge copy — 9/10
 155. In-app notification center with unread badge, priority tabs, and CTA deep links — 9/10
 156. Push notification pipeline via Capacitor + FCM/APNs — 7/10
-157. Email delivery via Resend integration — 8/10
-158. Device token registration with automatic cleanup on logout — 8/10
-159. User notification preferences: per-tier toggles + quiet hours + timezone — 8/10
+157. Email delivery via Resend integration — 9/10
+158. Device token registration with automatic cleanup on logout — 9/10
+159. User notification preferences: per-tier toggles + quiet hours + timezone — 9/10
 160. Digest infrastructure for batching non-critical notifications — 8/10
-161. PII scrubber utility: regex-based phone/email/URL detection + replacement — 8/10
+161. PII scrubber utility: regex-based phone/email/URL detection + replacement — 9/10
 162. Admin notification health dashboard: delivery stats, deadletters, processing latency — 9/10
 
 ---
 
 ## XXIII. Customer Feedback & Provider Quality `trust-builder`
 
-163. Immediate satisfaction check on receipt view: "How did today's visit go?" (< 5 seconds) — 8/10
+163. Immediate satisfaction check on receipt view: "How did today's visit go?" (< 5 seconds) — 9/10
 164. Delayed private provider review: 7–21 day randomized delay, "Providers won't know it's you" — 8/10
-165. Confidential notes: admin-only field never shared with providers — 8/10
-166. Weekly provider feedback rollups with minimum aggregation threshold (N_min=5) to prevent source deduction — 8/10
-167. Provider Quality Score: rolling 28-day composite (rating 35%, issues 25%, photos 20%, on-time 20%) — 7/10
+165. Confidential notes: admin-only field never shared with providers — 9/10
+166. Weekly provider feedback rollups with minimum aggregation threshold (N_min=5) to prevent source deduction — 9/10
+167. Provider Quality Score: rolling 28-day composite (rating 35%, issues 25%, photos 20%, on-time 20%) — 9/10
 168. Quality Score bands: GREEN (85–100), YELLOW (70–84), ORANGE (55–69), RED (<55) — 8/10
-169. Provider Quality Score page with coaching themes and "improve next week" targets — 8/10
-170. Admin feedback transparency page with full quick feedback + private ratings + confidential notes — 8/10
+169. Provider Quality Score page with coaching themes and "improve next week" targets — 9/10
+170. Admin feedback transparency page with full quick feedback + private ratings + confidential notes — 9/10
 
 ---
 
 ## XXIV. Ratings & Reviews `trust-builder`
 
-171. Post-visit 1–5 star rating anchored to receipt view (not immediate post-job) — 8/10
-172. Smart rating suppression: first visit or if issue already reported — 8/10
-173. Provider rating summary view for admin with avg rating, total reviews, positive/negative counts — 8/10
+171. Post-visit 1–5 star rating anchored to receipt view (not immediate post-job) — 9/10
+172. Smart rating suppression: first visit or if issue already reported — 9/10
+173. Provider rating summary view for admin with avg rating, total reviews, positive/negative counts — 9/10
 
 ---
 
@@ -339,15 +339,15 @@
 
 ## XXVII. Founding Partner & BYOC (Bring Your Own Customers) `density-driver` `provider-value`
 
-184. Provider application funnel with category/ZIP intake and opportunity banners (5 variants) — 8/10
-185. 12-clause legal agreement with per-clause acceptance tracking and timestamps — 8/10
-186. Compliance document upload system (GL insurance, COI, background checks, licenses) — 8/10
-187. Category requirements config: risk tiers 0–3 with per-category compliance rules — 8/10
-188. BYOC invite link generation with token-based customer activation — 8/10
-189. BYOC attribution tracking: invited → installed → subscribed → first visit → bonus window — 8/10
-190. BYOC bonus ledger: weekly batch computation with per-attribution progress tracking — 8/10
-191. Admin provider application review queue with approve/reject/conditional RPC — 8/10
-192. Automatic `provider_orgs` + `provider_members` bootstrap on application approval — 8/10
+184. Provider application funnel with category/ZIP intake and opportunity banners (5 variants) — 9/10
+185. 12-clause legal agreement with per-clause acceptance tracking and timestamps — 9/10
+186. Compliance document upload system (GL insurance, COI, background checks, licenses) — 9/10
+187. Category requirements config: risk tiers 0–3 with per-category compliance rules — 9/10
+188. BYOC invite link generation with token-based customer activation — 9/10
+189. BYOC attribution tracking: invited → installed → subscribed → first visit → bonus window — 9/10
+190. BYOC bonus ledger: weekly batch computation with per-attribution progress tracking — 9/10
+191. Admin provider application review queue with approve/reject/conditional RPC — 9/10
+192. Automatic `provider_orgs` + `provider_members` bootstrap on application approval — 9/10
 
 ---
 
@@ -415,9 +415,9 @@
 
 ## XXXII. Provider Insights `provider-value` `trust-builder`
 
-216. Provider performance page: jobs completed, proof compliance %, issue rate, avg time on site — 8/10
-217. Template-based coaching cues: "Add more after photos to improve proof score" — 8/10
-218. Weekly trend history — 8/10
+216. Provider performance page: jobs completed, proof compliance %, issue rate, avg time on site — 9/10
+217. Template-based coaching cues: "Add more after photos to improve proof score" — 9/10
+218. Weekly trend history — 9/10
 
 ---
 
@@ -436,15 +436,15 @@
 
 224. Auto-assign jobs to providers: Primary-first → Backup fallback with explainability — 7/10
 225. Provider no-show detection (hourly) with auto-reassign and calm customer notification — 7/10
-225b. Provider incident tracking system — no-show, quality issue, access failure, late arrival, proof missing incidents with severity, excused/unexcused classification, admin review queue, 60-day rolling window counts — 8/10
-225c. Provider probation system — 4-status lifecycle (active/completed/failed/revoked), improvement targets with deadlines, admin resolve actions (improved/extend/suspend), provider-facing dashboard banner — 8/10
+225b. Provider incident tracking system — no-show, quality issue, access failure, late arrival, proof missing incidents with severity, excused/unexcused classification, admin review queue, 60-day rolling window counts — 9/10
+225c. Provider probation system — 4-status lifecycle (active/completed/failed/revoked), improvement targets with deadlines, admin resolve actions (improved/extend/suspend), provider-facing dashboard banner — 9/10
 226. SLA enforcement automation: daily evaluation, 4-level threshold ladder, auto-generate actions — 7/10
 227. Auto-flag and suspend low-quality providers after sustained RED status — 7/10
 228. Auto-promote highest-performing backup when primary is suspended — 5/10
 229. Weather mode: auto-detection via WeatherAPI.com, admin approval, job rescheduling — 5/10
 230. Holiday calendar: pre-seeded US federal holidays 2026–2027, job skip support — 8/10
-231. Provider availability blocks: day-off/vacation with auto-skip in job assignment — 8/10
-232. Lead-time warnings for availability blocks starting within 48 hours — 8/10
+231. Provider availability blocks: day-off/vacation with auto-skip in job assignment — 9/10
+232. Lead-time warnings for availability blocks starting within 48 hours — 9/10
 
 ---
 
@@ -550,61 +550,61 @@
 283. Customer routine changes effective only in DRAFT window (≥8 days out) — 8/10
 284. Cadence-based task scheduling (weekly, biweekly, every 4 weeks) with stable offsets — 9/10
 285. Visit bundling rules merging same-property tasks into single stops — 8/10
-286. Stability rules minimizing DRAFT plan changes unless constraints change — 8/10
-287. Admin planner health dashboard with run summaries and conflict flagging — 8/10
+286. Stability rules minimizing DRAFT plan changes unless constraints change — 9/10
+287. Admin planner health dashboard with run summaries and conflict flagging — 9/10
 
 ### Sprint 5 — Provider Assignment v1
 
-288. Candidate selection with feasibility filters (skills, equipment, working hours, capacity, proximity) — 8/10
-289. Assignment solver with objective function (minimize travel, balance workload, reward familiarity) — 8/10
-290. Primary + Backup provider assignment per visit — 8/10
-291. Familiarity scoring with configurable cap to balance relationship vs efficiency — 8/10
-292. Assignment stability rules with freeze-window extra protection — 8/10
-293. Explainability with confidence levels and top reasons per assignment — 8/10
-294. Admin exceptions inbox with unassigned/fragile visit prioritization and manual override tools — 8/10
+288. Candidate selection with feasibility filters (skills, equipment, working hours, capacity, proximity) — 9/10
+289. Assignment solver with objective function (minimize travel, balance workload, reward familiarity) — 9/10
+290. Primary + Backup provider assignment per visit — 9/10
+291. Familiarity scoring with configurable cap to balance relationship vs efficiency — 9/10
+292. Assignment stability rules with freeze-window extra protection — 9/10
+293. Explainability with confidence levels and top reasons per assignment — 9/10
+294. Admin exceptions inbox with unassigned/fragile visit prioritization and manual override tools — 9/10
 
 ### Sprint 6 — Route Sequencing v1 + Equipment Manifest
 
-295. Ordered daily route per provider using nearest-neighbor + 2-opt optimization — 8/10
-296. Coarse customer-facing ETA ranges derived from stop sequence — 8/10
-297. Daily equipment manifest generation per provider route — 8/10
-298. Same-property task bundling with setup discount calculation — 8/10
-299. Provider blocked windows and legacy commitment support with segment-based planning — 8/10
-300. Provider pre-Start-Day route reorder with feasibility guardrails — 8/10
-301. Running-late notification when predicted arrival exceeds ETA window end — 8/10
+295. Ordered daily route per provider using nearest-neighbor + 2-opt optimization — 9/10
+296. Coarse customer-facing ETA ranges derived from stop sequence — 9/10
+297. Daily equipment manifest generation per provider route — 9/10
+298. Same-property task bundling with setup discount calculation — 9/10
+299. Provider blocked windows and legacy commitment support with segment-based planning — 9/10
+300. Provider pre-Start-Day route reorder with feasibility guardrails — 9/10
+301. Running-late notification when predicted arrival exceeds ETA window end — 9/10
 
 ### Sprint 7 — Appointment Windows v1 (Home-Required Services)
 
-302. Scheduling profiles per SKU (Appointment Window, Day Commit, Service Week) — 8/10
-303. Customer availability capture with 3–6 feasible window offers — 8/10
-304. Time-window constraint enforcement in route sequencing (VRPTW feasibility) — 8/10
-305. Mixed-profile bundle piggybacking with duration guardrails — 8/10
-306. Service-week flexible work with due-soon/overdue queue and week-end deadlines — 8/10
-307. Provider-placed flexible work via drag/drop with feasibility checks — 8/10
-308. Window-at-risk exception flagging with local repair attempts — 8/10
+302. Scheduling profiles per SKU (Appointment Window, Day Commit, Service Week) — 9/10
+303. Customer availability capture with 3–6 feasible window offers — 9/10
+304. Time-window constraint enforcement in route sequencing (VRPTW feasibility) — 9/10
+305. Mixed-profile bundle piggybacking with duration guardrails — 9/10
+306. Service-week flexible work with due-soon/overdue queue and week-end deadlines — 9/10
+307. Provider-placed flexible work via drag/drop with feasibility checks — 9/10
+308. Window-at-risk exception flagging with local repair attempts — 9/10
 
 ### Sprint 8 — Exceptions, Reschedules, and Ops Control v1
 
-309. Unified exceptions queue with severity/SLA/escalation timers — 8/10
-310. Predictive exceptions from nightly planning (window-at-risk, service-week-at-risk, coverage break) — 8/10
-311. Reactive exceptions from day-of events (provider unavailable, access failure, weather stop) — 8/10
-312. Ops repair actions (reorder, move day, swap provider, cancel/credit) with feasibility checks — 8/10
-313. Break-freeze policy with explicit requirements (reason code, customer notification, audit) — 8/10
-314. Customer self-serve reschedules inside freeze from feasible options — 8/10
-315. Access failure auto-hold with priority reschedule and soft hold expiration — 8/10
-316. Ops action idempotency and undo support with reversal transactions — 8/10
-317. Provider fairness rules (no-blame access failure, show-up credits) — 8/10
+309. Unified exceptions queue with severity/SLA/escalation timers — 9/10
+310. Predictive exceptions from nightly planning (window-at-risk, service-week-at-risk, coverage break) — 9/10
+311. Reactive exceptions from day-of events (provider unavailable, access failure, weather stop) — 9/10
+312. Ops repair actions (reorder, move day, swap provider, cancel/credit) with feasibility checks — 9/10
+313. Break-freeze policy with explicit requirements (reason code, customer notification, audit) — 9/10
+314. Customer self-serve reschedules inside freeze from feasible options — 9/10
+315. Access failure auto-hold with priority reschedule and soft hold expiration — 9/10
+316. Ops action idempotency and undo support with reversal transactions — 9/10
+317. Provider fairness rules (no-blame access failure, show-up credits) — 9/10
 
 ### Sprint 9 — Ops User Manual
 
-318. Autopilot health indicators (GREEN/YELLOW/RED) based on configurable thresholds — 8/10
-319. Provider-first self-healing with approve/notify/deny/escalate decision framework — 8/10
-320. Daily and weekly ops rhythm checklists — 8/10
-321. SKU discovery and continuous tuning workflow with provider interviews — 8/10
-322. Launch SKU templates for Pool, Windows, and Pest categories — 8/10
-323. Ops dashboard requirements with KPI tiles and zone health table — 8/10
-324. Standard procedures for zone launch, category opening, planner runs, and call-outs — 8/10
-325. Exception playbooks with severity levels and repair strategies — 8/10
+318. Autopilot health indicators (GREEN/YELLOW/RED) based on configurable thresholds — 9/10
+319. Provider-first self-healing with approve/notify/deny/escalate decision framework — 9/10
+320. Daily and weekly ops rhythm checklists — 9/10
+321. SKU discovery and continuous tuning workflow with provider interviews — 9/10
+322. Launch SKU templates for Pool, Windows, and Pest categories — 9/10
+323. Ops dashboard requirements with KPI tiles and zone health table — 9/10
+324. Standard procedures for zone launch, category opening, planner runs, and call-outs — 9/10
+325. Exception playbooks with severity levels and repair strategies — 9/10
 
 ---
 
@@ -612,23 +612,23 @@
 
 > **Note:** Wizard was simplified from a 7-screen flow to a streamlined 2-step flow (Batch 2 rewrite). Core functionality preserved; steps consolidated for faster onboarding.
 
-326. Streamlined 2-step provider-referred customer onboarding flow (under 60 seconds) — 8/10
+326. Streamlined 2-step provider-referred customer onboarding flow (under 60 seconds) — 9/10
 327. Provider recognition screen preserving existing relationship trust — 8/10
 328. Confirm existing service screen with editable cadence — 8/10
 329. Property creation with address and home type — 8/10
 330. Home setup with property signals (pool, trees, pets, garden, windows) — 8/10
-331. Connecting provider spinner with activate-byoc-invite call — 8/10
+331. Connecting provider spinner with activate-byoc-invite call — 9/10
 332. Other services screen with zone-available categories (skip-friendly) — 8/10
-333. Conditional Home Plan screen for bundled service pricing — 8/10
-334. Success screen with provider connection summary — 8/10
-335. Dashboard "Your Home Team" card showing connected providers and next visits — 8/10
-336. Referral state handling (Existing Provider First Touch, future: Not First Touch, Cold Referral) — 8/10
-337. Invite validation with fallback screen for expired/revoked/inactive tokens — 8/10
-338. Already-activated 409 handling with dashboard redirect — 8/10
-339. BYOC attribution tracking preserved separate from provider-customer relationship — 8/10
-340. BYOC rate limits: max 10 active links per provider, max 10 new links per day — 8/10
-341. Referral one-code-per-customer enforcement with DB re-check — 8/10
-342. Cryptographically secure token generation (crypto.getRandomValues) — 8/10
+333. Conditional Home Plan screen for bundled service pricing — 9/10
+334. Success screen with provider connection summary — 9/10
+335. Dashboard "Your Home Team" card showing connected providers and next visits — 9/10
+336. Referral state handling (Existing Provider First Touch, future: Not First Touch, Cold Referral) — 9/10
+337. Invite validation with fallback screen for expired/revoked/inactive tokens — 9/10
+338. Already-activated 409 handling with dashboard redirect — 9/10
+339. BYOC attribution tracking preserved separate from provider-customer relationship — 9/10
+340. BYOC rate limits: max 10 active links per provider, max 10 new links per day — 9/10
+341. Referral one-code-per-customer enforcement with DB re-check — 9/10
+342. Cryptographically secure token generation (crypto.getRandomValues) — 9/10
 
 ---
 

@@ -65,8 +65,8 @@ export function AiInsightsCard({ ticket }: AiInsightsCardProps) {
 
   const scoreColor = (score: number, invert = false) => {
     const effective = invert ? 100 - score : score;
-    if (effective >= 75) return "text-emerald-600";
-    if (effective >= 50) return "text-amber-600";
+    if (effective >= 75) return "text-emerald-400";
+    if (effective >= 50) return "text-amber-400";
     return "text-destructive";
   };
 
@@ -76,7 +76,7 @@ export function AiInsightsCard({ ticket }: AiInsightsCardProps) {
         <Brain className="h-4 w-4 text-primary" />
         <h3 className="text-xs font-semibold uppercase tracking-wider text-primary">AI Analysis</h3>
         {meetsAutoResolve && !isResolved && (
-          <span className="ml-auto text-[10px] font-medium bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+          <span className="ml-auto text-[10px] font-medium bg-emerald-900/40 text-emerald-400 px-2 py-0.5 rounded-full flex items-center gap-1">
             <Sparkles className="h-3 w-3" /> Auto-resolvable
           </span>
         )}

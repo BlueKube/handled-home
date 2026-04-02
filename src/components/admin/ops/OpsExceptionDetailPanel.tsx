@@ -23,7 +23,7 @@ interface Props {
 
 const SEVERITY_COLORS: Record<string, string> = {
   urgent: "text-destructive",
-  soon: "text-amber-600",
+  soon: "text-amber-500 dark:text-amber-400",
   watch: "text-muted-foreground",
 };
 

@@ -52,6 +52,15 @@ export default function CustomerReferrals() {
     return <div className="p-4 space-y-4"><Skeleton className="h-32" /><Skeleton className="h-48" /><Skeleton className="h-32" /></div>;
   }
 
+  if (codes.isError || referrals.isError) {
+    return (
+      <div className="p-4 text-center space-y-3">
+        <p className="text-sm text-destructive">Couldn't load referral data. Please try again.</p>
+        <Button variant="link" onClick={() => navigate("/customer/more")}>← Back</Button>
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 pb-24 space-y-6 animate-fade-in">
       <button onClick={() => navigate("/customer/more")} className="flex items-center gap-1 text-muted-foreground mb-2 hover:text-foreground transition-colors" aria-label="Back to More menu">

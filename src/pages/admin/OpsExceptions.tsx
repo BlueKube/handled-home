@@ -7,9 +7,17 @@ import { OpsExceptionDetailPanel } from "@/components/admin/ops/OpsExceptionDeta
 export default function OpsExceptions() {
   const [filters, setFilters] = useState<OpsExceptionFilters>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const { data: exceptions, isLoading } = useOpsExceptions(filters);
+  const { data: exceptions, isLoading, isError } = useOpsExceptions(filters);
 
   if (isLoading) return <PageSkeleton />;
+
+  if (isError) {
+    return (
+      <div className="p-6 text-center">
+        <p className="text-sm text-destructive">Failed to load exceptions. Please refresh the page.</p>
+      </div>
+    );
+  }
 
   const selected = exceptions?.find((e) => e.id === selectedId) ?? null;
 

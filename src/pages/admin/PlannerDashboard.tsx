@@ -15,7 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { usePlanRuns, usePlanRunDetail, useTriggerPlanRun, type PlanRun } from "@/hooks/usePlanRuns";
+import { usePlanRuns, useTriggerPlanRun, type PlanRun } from "@/hooks/usePlanRuns";
 import { formatDistanceToNow, format, parseISO } from "date-fns";
 import { Play, RefreshCw, CheckCircle2, XCircle, Clock, AlertTriangle, Loader2, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
@@ -151,7 +151,7 @@ function RunDetailPanel({ run }: { run: PlanRun }) {
 }
 
 export default function PlannerDashboard() {
-  const { data: runs, isLoading } = usePlanRuns(30);
+  const { data: runs, isLoading, isError } = usePlanRuns(30);
   const triggerRun = useTriggerPlanRun();
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<"full" | "draft_only" | null>(null);
@@ -205,6 +205,10 @@ export default function PlannerDashboard() {
           <div className="space-y-3">
             {[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 w-full" />)}
           </div>
+        ) : isError ? (
+          <Alert variant="destructive">
+            <AlertDescription>Failed to load planner runs. Please refresh the page.</AlertDescription>
+          </Alert>
         ) : !runs || runs.length === 0 ? (
           <Alert>
             <AlertDescription>No plan runs yet. Click "Run Planner" to execute the first nightly planning cycle.</AlertDescription>

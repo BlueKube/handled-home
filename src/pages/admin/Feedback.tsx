@@ -21,7 +21,7 @@ interface ActionTarget {
 }
 
 export default function AdminFeedback() {
-  const { quickFeedback, privateRatings, issueCount, isLoading } = useAdminFeedback();
+  const { quickFeedback, privateRatings, issueCount, isLoading, isError } = useAdminFeedback();
   const [actionTarget, setActionTarget] = useState<ActionTarget | null>(null);
   const [actionNote, setActionNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -74,6 +74,14 @@ export default function AdminFeedback() {
       <div className="animate-fade-in p-6 max-w-4xl space-y-4">
         <Skeleton className="h-8 w-48" />
         {[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 w-full" />)}
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="animate-fade-in p-6 max-w-4xl text-center">
+        <p className="text-sm text-destructive">Failed to load feedback. Please refresh the page.</p>
       </div>
     );
   }

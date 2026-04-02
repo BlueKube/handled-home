@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
       .from("job_photos")
       .select("id, storage_path, upload_status")
       .eq("job_id", job_id)
-      .eq("upload_status", "uploaded");
+      .eq("upload_status", "UPLOADED");
 
     if (photoErr) throw photoErr;
 

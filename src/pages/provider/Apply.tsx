@@ -689,7 +689,7 @@ function ReferralProgressCard() {
             {count > 0 ? `You've referred ${count} provider${count !== 1 ? "s" : ""}` : "Refer providers to get priority"}
           </p>
           {hasReached && (
-            <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 text-xs">
+            <Badge className="bg-green-900/30 text-green-300 text-xs">
               Priority eligible
             </Badge>
           )}

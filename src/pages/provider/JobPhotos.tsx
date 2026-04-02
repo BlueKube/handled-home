@@ -17,7 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 export default function ProviderJobPhotos() {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
-  const { data, isLoading } = useJobDetail(jobId);
+  const { data, isLoading, isError } = useJobDetail(jobId);
   const actions = useJobActions(jobId);
   const fileRef = useRef<HTMLInputElement>(null);
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
@@ -74,6 +74,15 @@ export default function ProviderJobPhotos() {
     }
     return Array.from(groups.values());
   }, [data]);
+
+  if (isError) {
+    return (
+      <div className="p-4 text-center space-y-3">
+        <p className="text-sm text-destructive">Failed to load photos. Please go back and try again.</p>
+        <Button variant="link" onClick={() => navigate(-1)}>← Go back</Button>
+      </div>
+    );
+  }
 
   if (isLoading || !data) {
     return (

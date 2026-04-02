@@ -72,7 +72,7 @@ export default function AppointmentPicker() {
       }
     : null;
 
-  const { data: windowData, isLoading: windowsLoading } = useAppointmentWindows(windowParams);
+  const { data: windowData, isLoading: windowsLoading, isError: windowsError } = useAppointmentWindows(windowParams);
   const confirmMutation = useConfirmAppointmentWindow();
 
   const handleSelect = (window: OfferedWindow) => {
@@ -116,6 +116,19 @@ export default function AppointmentPicker() {
       <div className="p-4 text-center space-y-3">
         <p className="text-sm text-muted-foreground">
           Your subscription isn't set up yet. Please contact support.
+        </p>
+        <Button variant="link" onClick={() => navigate("/customer/upcoming")}>
+          ← Back to upcoming
+        </Button>
+      </div>
+    );
+  }
+
+  if (windowsError) {
+    return (
+      <div className="p-4 text-center space-y-3">
+        <p className="text-sm text-destructive">
+          Couldn't load available windows. Please try again.
         </p>
         <Button variant="link" onClick={() => navigate("/customer/upcoming")}>
           ← Back to upcoming

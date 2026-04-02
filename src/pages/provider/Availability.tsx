@@ -14,7 +14,7 @@ import { useProviderOrg } from "@/hooks/useProviderOrg";
 import { useProviderWorkProfile, type WorkingHours } from "@/hooks/useProviderWorkProfile";
 import { useProviderBlockedWindows, type CreateBlockedWindowInput } from "@/hooks/useProviderBlockedWindows";
 import { useProviderAvailability } from "@/hooks/useProviderAvailability";
-import { useAssignmentConfig, DIAL_META } from "@/hooks/useAssignmentConfig";
+import { useAssignmentConfig } from "@/hooks/useAssignmentConfig";
 import { toast } from "sonner";
 import {
   Clock, Plus, Trash2, AlertTriangle, CheckCircle2, Calendar, MapPin, Shield, Activity, ChevronLeft,

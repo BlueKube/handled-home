@@ -156,13 +156,11 @@ function simulateRoute(
     const travel = driveMinutes(curLat, curLng, stop.lat, stop.lng);
     currentTime += travel;
 
-    // Advance past blocked segments
-    if (segments.length > 0 && segIdx < segments.length) {
-      if (currentTime >= segments[segIdx].endMinutes) {
-        segIdx++;
-        if (segIdx < segments.length) {
-          currentTime = Math.max(currentTime, segments[segIdx].startMinutes);
-        }
+    // Advance past blocked segments (loop handles multiple consecutive blocks)
+    while (segments.length > 0 && segIdx < segments.length && currentTime >= segments[segIdx].endMinutes) {
+      segIdx++;
+      if (segIdx < segments.length) {
+        currentTime = Math.max(currentTime, segments[segIdx].startMinutes);
       }
     }
 
@@ -171,7 +169,7 @@ function simulateRoute(
       currentTime = Math.max(currentTime, stop.windowStartMinutes);
     }
 
-    // VRPTW: check if arrival is past window end (with late grace) → infeasible
+    // VRPTW: check if arrival is past window end → infeasible (no grace here; grace is only in cost function)
     if (stop.isWindowed && stop.windowEndMinutes !== null) {
       if (currentTime > stop.windowEndMinutes) {
         return {
@@ -296,13 +294,11 @@ function computeRouteCost(
     totalTravel += travel;
     currentTime += travel;
 
-    // Segment transitions
-    if (segments.length > 0 && segIdx < segments.length) {
-      if (currentTime >= segments[segIdx].endMinutes) {
-        segIdx++;
-        if (segIdx < segments.length) {
-          currentTime = Math.max(currentTime, segments[segIdx].startMinutes);
-        }
+    // Segment transitions (loop handles multiple consecutive blocks)
+    while (segments.length > 0 && segIdx < segments.length && currentTime >= segments[segIdx].endMinutes) {
+      segIdx++;
+      if (segIdx < segments.length) {
+        currentTime = Math.max(currentTime, segments[segIdx].startMinutes);
       }
     }
 
@@ -501,13 +497,11 @@ function computeEtaRanges(
     const travel = driveMinutes(curLat, curLng, stop.lat, stop.lng);
     currentTime += travel;
 
-    // Segment transitions
-    if (segments.length > 0 && segIdx < segments.length) {
-      if (currentTime >= segments[segIdx].endMinutes) {
-        segIdx++;
-        if (segIdx < segments.length) {
-          currentTime = Math.max(currentTime, segments[segIdx].startMinutes);
-        }
+    // Segment transitions (loop handles multiple consecutive blocks)
+    while (segments.length > 0 && segIdx < segments.length && currentTime >= segments[segIdx].endMinutes) {
+      segIdx++;
+      if (segIdx < segments.length) {
+        currentTime = Math.max(currentTime, segments[segIdx].startMinutes);
       }
     }
 
@@ -584,7 +578,7 @@ Deno.serve(async (req) => {
   } catch { /* defaults */ }
 
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  today.setUTCHours(0, 0, 0, 0);
   const todayStr = today.toISOString().split("T")[0];
   const idempotencyKey = `route-sequence:${todayStr}`;
 
