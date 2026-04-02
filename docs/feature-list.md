@@ -244,21 +244,21 @@
 
 ## XIX. Add-ons & Contextual Services `margin-lever` `mental-load-reduction`
 
-129. SKUs flagged as add-ons with contextual surfacing triggers (season, weather, time-since-last) — 8/10
-130. One-tap add-on purchase: deduct handles or charge card — 8/10
-131. Add-on gate: only surfaced after first completed visit or user-initiated browse — 8/10
-132. Refund hooks for system/provider cancellations — 8/10
-133. Add-on orders table with status tracking and payment method — 8/10
+129. SKUs flagged as add-ons with contextual surfacing triggers (season, weather, time-since-last) — 9/10
+130. One-tap add-on purchase: deduct handles or charge card — 9/10
+131. Add-on gate: only surfaced after first completed visit or user-initiated browse — 9/10
+132. Refund hooks for system/provider cancellations — 9/10
+133. Add-on orders table with status tracking and payment method — 9/10
 
 ---
 
 ## XX. Home Assistant Category `margin-lever` `mental-load-reduction`
 
-134. Time-boxed SKUs: 30 / 60 / 90-minute sessions with clear boundaries — 8/10
-135. Customer prep requirements and privacy-safe proof rules — 8/10
-136. Members-only gate with trust banner — 8/10
-137. Constrained booking: "next available 2–3 windows" (not Uber-style dispatch) — 8/10
-138. 5 starter SKUs: Kitchen Reset, Laundry Folding Sprint, Quick Tidy Sprint, Post-Party Reset, Bed + Bath Reset — 8/10
+134. Time-boxed SKUs: 30 / 60 / 90-minute sessions with clear boundaries — 9/10
+135. Customer prep requirements and privacy-safe proof rules — 9/10
+136. Members-only gate with trust banner — 9/10
+137. Constrained booking: "next available 2–3 windows" (not Uber-style dispatch) — 9/10
+138. 5 starter SKUs: Kitchen Reset, Laundry Folding Sprint, Quick Tidy Sprint, Post-Party Reset, Bed + Bath Reset — 9/10
 
 ---
 
