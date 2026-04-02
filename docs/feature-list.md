@@ -105,13 +105,13 @@
 
 ## VII. Handles Currency System `margin-lever`
 
-52. Handles as the internal unit of value — simple "Used / Remaining" bar for customers — 8/10
+52. Handles as the internal unit of value — simple "Used / Remaining" bar for customers — 9/10
 53. Handle transaction ledger: grant / spend / expire / rollover / refund — append-only, reconcilable — 8/10
-54. Cached balance on subscription with `recalc_handles_balance()` RPC for reconciliation — 8/10
-55. Per-SKU handle cost display ("Costs 3 handles") at point of selection — 8/10
+54. Cached balance on subscription with `recalc_handles_balance()` RPC for reconciliation — 9/10
+55. Per-SKU handle cost display ("Costs 3 handles") at point of selection — 9/10
 56. Rollover with configurable cap and expiry days per plan — 8/10
-57. Refund handles preserving original expiry date on system/provider cancellations — 8/10
-58. Idempotency key indexing on handle transactions to prevent duplicate grants — 8/10
+57. Refund handles preserving original expiry date on system/provider cancellations — 9/10
+58. Idempotency key indexing on handle transactions to prevent duplicate grants — 9/10
 
 ---
 
