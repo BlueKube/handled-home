@@ -81,5 +81,6 @@ export function useAdminCustomerLedger(customerId: string | undefined) {
     credits: creditsQuery.data ?? [],
     payments: paymentsQuery.data ?? [],
     isLoading: profileQuery.isLoading || invoicesQuery.isLoading,
+    isError: profileQuery.isError || invoicesQuery.isError,
   };
 }

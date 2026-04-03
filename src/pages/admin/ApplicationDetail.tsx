@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 const CLAUSE_LABELS: Record<string, string> = {
   platform_role: "Platform Role",
@@ -45,6 +46,8 @@ export default function AdminApplicationDetail() {
       </div>
     );
   }
+
+  if (query.isError) return <div className="p-6"><QueryErrorCard /></div>;
 
   if (!query.data) {
     return (

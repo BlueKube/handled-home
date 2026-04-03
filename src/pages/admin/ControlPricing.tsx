@@ -16,12 +16,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DollarSign, Copy, RotateCcw, Layers } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 export default function ControlPricing() {
   const { isSuperuser } = useAdminMembership();
-  const { data: skus, isLoading: skusLoading } = useSkus();
-  const { data: zones, isLoading: zonesLoading } = useZones();
-  const { data: basePrices, isLoading: baseLoading } = useSkuPricingBase();
+  const { data: skus, isLoading: skusLoading, isError: skusError } = useSkus();
+  const { data: zones, isLoading: zonesLoading, isError: zonesError } = useZones();
+  const { data: basePrices, isLoading: baseLoading, isError: baseError } = useSkuPricingBase();
 
   const [selectedZoneId, setSelectedZoneId] = useState<string>("");
   const { data: overrides, isLoading: overridesLoading } = useZonePricingOverrides(selectedZoneId || undefined);
@@ -69,6 +70,7 @@ export default function ControlPricing() {
   }, [overrides]);
 
   const isLoading = skusLoading || zonesLoading || baseLoading;
+  const isError = skusError || zonesError || baseError;
 
   if (isLoading) {
     return (
@@ -78,6 +80,8 @@ export default function ControlPricing() {
       </div>
     );
   }
+
+  if (isError) return <div className="p-6"><QueryErrorCard /></div>;
 
   const handleSaveBase = () => {
     if (!editBaseSkuId || !editBasePrice) return;
