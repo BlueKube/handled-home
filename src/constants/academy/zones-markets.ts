@@ -62,23 +62,21 @@ The zone lifecycle has four stages:
     id: "zone-health",
     title: "Zone Health Monitoring",
     type: "text",
-    content: `The Zone Health table lives at the bottom of the Ops Cockpit. It's a real-time report card for every active zone. Check it as part of your morning routine — most days it's all green and takes 30 seconds. When a zone turns yellow or red, that's your signal to dig in before it becomes a customer or provider churn event.
+    content: `The Zone Health table lives at the bottom of the Ops Cockpit. It's a real-time operational view for every active zone. Check it as part of your morning routine — most days it's all green and takes 30 seconds. When numbers look off, that's your signal to dig in before it becomes a customer or provider churn event.
 
-Each zone row shows:
+Each zone row shows these columns:
 
-• Health Score (Green / Yellow / Red) — a composite of the five metrics below. Green = all thresholds met. Yellow = one metric below threshold. Red = two or more metrics below threshold or any critical metric in breach.
+• Zone — zone name and region
+• Jobs Today — total jobs scheduled for the current day in this zone
+• Unassigned (Locked) — jobs in the locked planning window that have no provider assigned. This should be 0 in healthy zones. Any unassigned locked jobs need immediate attention.
+• Reschedule % — percentage of jobs that were rescheduled in the rolling window. High rescheduling suggests capacity or reliability issues.
+• Proof Missing % — percentage of completed jobs without uploaded photo proof. Target: below 10%. Configurable via autopilot thresholds (default max_proof_missing_rate: 10%).
+• Issues (7d) — count of reported issues in the last 7 days for this zone.
+• Open Exceptions — count of unresolved operational exceptions (window_at_risk, coverage_break, etc.).
 
-• Utilization Rate — percentage of available provider hours that are booked. Target range: 65–85%. Below 65%: providers are underutilized and may churn. Above 85%: customers face scheduling delays, quality suffers, and providers burn out.
+When a zone shows high numbers in Unassigned or Proof Missing: read the specific metrics to diagnose the problem, then address that problem — don't try to "improve the zone" generically. High unassigned? You have a capacity or assignment problem. High proof missing? You have a compliance problem — contact providers directly.
 
-• Response Time (median, hours) — time from customer request to confirmed booking. Target: under 4 hours. Above 8 hours is a red flag; customers who wait more than 24 hours cancel at 3x the baseline rate.
-
-• Active Provider Count — providers with at least 1 completed job in the last 30 days. Must stay above your zone minimum (5 for standard zones, 8 for zones above 300 customers).
-
-• Issue Rate — jobs with a reported quality issue divided by total jobs in the zone, last 30 days. Target: below 8%. Above 12% triggers a zone health alert. Above 15% is a critical threshold — investigate immediately.
-
-• NPS (zone-level, last 90 days) — customer Net Promoter Score for jobs completed in this zone. Target: 40+. Below 20 is a serious signal. Below 0 means customers are actively detracting.
-
-When a zone goes yellow: read the metrics to diagnose the specific problem, then address that problem — don't try to "improve the zone" generically. Utilization low? You have a demand problem or a provider excess problem. Issue rate high? You have a quality problem — pull individual job reviews. Response time high? You have a capacity problem — recruit providers or reduce acceptance rate.`,
+Note: Business Health gauges (attach rate, churn, margin) are tracked separately in the Ops Cockpit's top-level gauge cards, not in the zone table.`,
   },
   {
     id: "capacity-planning",
@@ -322,7 +320,7 @@ This means providers always see opportunity, never rejection.`,
     type: "automation",
     automationNotes: [
       {
-        text: "Zone health scores recalculate automatically every 6 hours using the latest utilization, issue rate, response time, provider count, and NPS data. You do not need to trigger this manually. If a zone crosses a threshold into Yellow or Red, a Risk Alert is automatically created in the Ops Cockpit and an email notification is sent to the assigned admin. You just need to check the cockpit — the system will tell you when something needs attention.",
+        text: "Zone health data updates in real time via React Query (1-minute stale time). The Ops Cockpit zone table always shows current data when you load the page. If a zone's metrics cross configured thresholds (e.g., proof missing rate > 10%, open exceptions > 5), a Risk Alert is automatically surfaced in the Ops Cockpit. You just need to check the cockpit — the system will tell you when something needs attention.",
         type: "set-and-forget",
       },
       {
