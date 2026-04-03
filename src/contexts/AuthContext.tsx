@@ -21,6 +21,7 @@ interface AuthContextType {
   setPreviewRole: (role: AppRole | null) => void;
   effectiveRole: AppRole;
   profile: Profile | null;
+  refreshProfile: () => Promise<void>;
   loading: boolean;
   bootstrapError: string | null;
   retryBootstrap: () => void;
