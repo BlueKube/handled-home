@@ -90,13 +90,13 @@ function ProTipsSection({ section }: { section: TrainingSection }) {
   return (
     <div className="space-y-3">
       {section.proTips?.map((tip, i) => (
-        <Card key={i} className="p-4 border-amber-500/20 bg-amber-950/10">
+        <Card key={i} className="p-4 border-amber-500/30 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-950/10">
           <div className="flex items-start gap-3">
-            <Lightbulb className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
+            <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-amber-200">{tip.text}</p>
+              <p className="text-sm font-medium text-amber-900 dark:text-amber-200">{tip.text}</p>
               {tip.context && (
-                <p className="text-xs text-amber-400/70 mt-1">{tip.context}</p>
+                <p className="text-xs text-amber-700 dark:text-amber-400/70 mt-1">{tip.context}</p>
               )}
             </div>
           </div>
