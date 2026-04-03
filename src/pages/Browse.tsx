@@ -98,9 +98,9 @@ export default function Browse() {
     setZipChecked(false);
     setZipResult(null);
     const { data } = await supabase
-      .from("zone_zips")
-      .select("zone_id")
-      .eq("zip_code", zip.trim())
+      .from("zones")
+      .select("id")
+      .contains("zip_codes", [zip.trim()])
       .limit(1);
     setZipChecking(false);
     setZipChecked(true);

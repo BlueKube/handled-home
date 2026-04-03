@@ -83,9 +83,9 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 
 ## Round 8: Provider Conversion Funnel (2026-04-01)
 
-- [ ] **Apply provider_leads and provider_referrals migrations** — Two new tables need to be applied to production database
+- [x] **Apply provider_leads and provider_referrals migrations** — ✅ Applied as consolidated migration via Lovable Cloud
   - **Why:** Browse page lead capture and referral form write to these tables
-  - **Blocked:** Lead capture on production
+  - **Resolved:** Tables created with RLS policies
 
 - [ ] **Configure email sending for zone launch notifications** — The `notify-zone-leads` edge function marks leads as "notified" but doesn't send actual emails. Need to configure Resend/SendGrid/etc. and wire into the function.
   - **Why:** Leads won't receive launch notification emails without email integration
@@ -93,9 +93,9 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 
 ## Round 9: Provider Funnel Hardening (2026-04-01)
 
-- [ ] **Apply Round 9 migrations** — 5 new migrations: unique email constraint, lead-application linking trigger, get_category_gaps RPC, auto-notify trigger, referral attribution trigger
+- [x] **Apply Round 9 migrations** — ✅ Applied as consolidated migration via Lovable Cloud
   - **Why:** All provider funnel automation depends on these triggers and functions
-  - **Blocked:** Full funnel automation on production
+  - **Resolved:** Triggers and RPCs created
 
 - [ ] **Decide referral incentive structure** — The "Refer 3 providers → priority review" messaging is implemented but the actual priority review logic is not enforced. Decide: should 3+ referrals flag the application for faster admin review, or is the messaging aspirational?
   - **Why:** Provider expectation set by UI needs to be backed by a real workflow
@@ -103,9 +103,9 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 
 ## Round 10: Phone Identity, Household Members & Moving Wizard (2026-04-01)
 
-- [ ] **Apply Round 10 migrations** — 5 new migrations: provider_leads phone column, trigger phone matching, household_members table, accept_household_invites RPC, moving wizard tables (property_transitions + customer_leads)
+- [x] **Apply Round 10 migrations** — ✅ Applied as consolidated migration via Lovable Cloud
   - **Why:** Household members, moving wizard, and phone matching depend on these
-  - **Blocked:** All Round 10 features on production
+  - **Resolved:** All tables, triggers, and RPCs created
 
 - [ ] **Send actual household invite emails** — The invite flow creates a pending row in household_members but sends no email. Wire to an email service to send "You've been invited to manage [address] on Handled Home."
   - **Why:** Invitees don't know they've been invited without an email
