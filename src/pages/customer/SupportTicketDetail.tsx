@@ -11,11 +11,12 @@ import { ResolutionOfferCard } from "@/components/support/ResolutionOfferCard";
 import { ChevronLeft, Clock, MessageSquarePlus, Camera, CheckCircle2, Timer } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 export default function CustomerSupportTicketDetail() {
   const { ticketId } = useParams<{ ticketId: string }>();
   const navigate = useNavigate();
-  const { ticket, offers, events, isLoading } = useSupportTicketDetail(ticketId);
+  const { ticket, offers, events, isLoading, error } = useSupportTicketDetail(ticketId);
   const actions = useTicketActions(ticketId ?? "");
   const jobId = (ticket as any)?.job_id;
   const { data: visitEvidence } = useCustomerVisitDetail(jobId ?? undefined);
@@ -32,6 +33,14 @@ export default function CustomerSupportTicketDetail() {
             <div key={i} className="h-24 bg-muted/50 rounded-xl animate-pulse" />
           ))}
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4">
+        <QueryErrorCard message="Could not load ticket details." />
       </div>
     );
   }

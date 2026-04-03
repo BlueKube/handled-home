@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { TIER_HIGHLIGHTS, getTierKey } from "./shared";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 export function PlanActivateStep({
   providerName,
@@ -25,10 +26,10 @@ export function PlanActivateStep({
   onActivate: () => Promise<void>;
   onSkip: () => void;
 }) {
-  const { data: plans, isLoading: plansLoading } = usePlans("active");
+  const { data: plans, isLoading: plansLoading, isError: plansError } = usePlans("active");
   const [activating, setActivating] = useState(false);
 
-  const { data: allHandles } = useQuery({
+  const { data: allHandles, isError: handlesError } = useQuery({
     queryKey: ["plan_handles_all"],
     queryFn: async () => {
       const { data, error } = await supabase.from("plan_handles").select("plan_id, handles_per_cycle");
@@ -63,6 +64,10 @@ export function PlanActivateStep({
         <Skeleton className="h-48" />
       </div>
     );
+  }
+
+  if (plansError || handlesError) {
+    return <QueryErrorCard message="Could not load plans." />;
   }
 
   if (!plans || plans.length === 0) {

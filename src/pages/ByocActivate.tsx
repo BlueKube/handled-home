@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, ArrowRight, Clock, MapPin, Shield, Camera, Sparkles, BadgeCheck } from "lucide-react";
 import handledLogo from "@/assets/handled-home-logo.png";
 import CustomerByocOnboardingWizard from "@/pages/customer/ByocOnboardingWizard";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 const CADENCE_LABELS: Record<string, string> = {
   weekly: "Weekly",
@@ -43,7 +44,7 @@ export default function ByocActivate() {
 
   // Fetch invite preview for unauthenticated users.
   // Try public RPC first, fall back to direct table query (anon SELECT is allowed by RLS).
-  const { data: invite, isLoading } = useQuery({
+  const { data: invite, isLoading, isError } = useQuery({
     queryKey: ["byoc-invite-public", token],
     enabled: !!token && !user && !authLoading,
     queryFn: async () => {
@@ -75,6 +76,17 @@ export default function ByocActivate() {
   }
 
   // ── Unauthenticated: show landing page ──
+
+  // Error fetching invite
+  if (isError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-background">
+        <div className="max-w-md w-full">
+          <QueryErrorCard message="Could not load invitation details." />
+        </div>
+      </div>
+    );
+  }
 
   // Invalid/expired invite (or RPC not found)
   if (!isLoading && !invite) {

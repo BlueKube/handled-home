@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { CalendarDays, Sparkles, X, Settings2, Plus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProperty } from "@/hooks/useProperty";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { useServiceDayAssignment } from "@/hooks/useServiceDayAssignment";
 import { useRoutine } from "@/hooks/useRoutine";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
@@ -45,7 +46,7 @@ function isNudgeDismissed(): boolean {
 
 export default function CustomerDashboard() {
   const { user } = useAuth();
-  const { property } = useProperty();
+  const { property, isError: propertyError } = useProperty();
   const { assignment, isLoading } = useServiceDayAssignment(property?.id);
   const { data: subscription } = useCustomerSubscription();
   const { data: routineData } = useRoutine(property?.id, subscription?.plan_id);
@@ -112,6 +113,14 @@ export default function CustomerDashboard() {
     },
     [routineItems, removeItem]
   );
+
+  if (propertyError) {
+    return (
+      <div className="p-4">
+        <QueryErrorCard message="Could not load your property data." />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 pb-24 space-y-4 animate-fade-in">

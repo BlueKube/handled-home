@@ -8,10 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 export function SubscribeStep({ planId, onComplete, onSkip }: { planId: string | null; onComplete: () => Promise<void>; onSkip: () => Promise<void> }) {
   const { user } = useAuth();
-  const { data: plan, isLoading } = useQuery({
+  const { data: plan, isLoading, isError } = useQuery({
     queryKey: ["plans", planId],
     enabled: !!planId,
     queryFn: async () => {
@@ -45,6 +46,7 @@ export function SubscribeStep({ planId, onComplete, onSkip }: { planId: string |
   };
 
   if (isLoading) return <div className="space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-48 w-full" /></div>;
+  if (isError) return <QueryErrorCard message="Could not load plan details." />;
   if (!plan) return <p className="text-center text-muted-foreground py-8">Plan not found.</p>;
 
   return (
