@@ -73,10 +73,12 @@ Deno.serve(async (req) => {
 
     if (failedErr) throw failedErr;
 
-    // Combine: start dunning for failed invoices whose subscription hasn't started dunning
+    // Combine: start dunning for failed invoices whose subscription hasn't started dunning yet
+    // Bug fix: check dunning_started_at instead of dunning_step === 0
+    // (step 0 with dunning_started_at set means step 1 already ran once)
     const needsStart = (failedInvoices ?? []).filter(fi => {
       const existing = (dunningCandidates ?? []).find(dc => dc.id === fi.subscription_id);
-      return !existing || existing.dunning_step === 0;
+      return !existing || !existing.dunning_started_at;
     });
 
     let stepped = 0;

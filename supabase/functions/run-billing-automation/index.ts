@@ -75,6 +75,16 @@ serve(async (req) => {
               invoiceResults.push({ subscription_id: sub.id, credits_applied: creditResult });
             }
           }
+
+          // Advance billing cycle dates so next run picks up the next cycle
+          if (invoiceResult?.invoice_id) {
+            const { error: advanceErr } = await supabase.rpc("advance_billing_cycle", {
+              p_subscription_id: sub.id,
+            });
+            if (advanceErr) {
+              invoiceResults.push({ subscription_id: sub.id, cycle_advance_error: advanceErr.message });
+            }
+          }
         }
       }
       results.invoice_generation = { processed: invoiceResults.length, details: invoiceResults };
