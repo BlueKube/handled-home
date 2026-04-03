@@ -20,6 +20,22 @@ export function useCreateTicket() {
     mutationFn: async (input: CreateTicketInput) => {
       if (!user) throw new Error("Not authenticated");
 
+      // Pre-flight duplicate check: same customer + job within 7 days
+      if (input.job_id) {
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        const { data: existing } = await supabase
+          .from("support_tickets")
+          .select("id")
+          .eq("customer_id", user.id)
+          .eq("job_id", input.job_id)
+          .in("status", ["open", "ai_reviewing", "in_progress"])
+          .gte("created_at", sevenDaysAgo)
+          .limit(1);
+        if (existing && existing.length > 0) {
+          throw new Error(`DUPLICATE:${existing[0].id}`);
+        }
+      }
+
       // Look up job to get provider_org_id and zone_id if job_id provided
       let provider_org_id: string | null = null;
       let zone_id: string | null = null;

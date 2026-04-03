@@ -43,7 +43,21 @@ export function useAssignmentLog(filters: { zoneId?: string; limit?: number } = 
 
       const { data, error } = await query;
       if (error) throw error;
-      const logs = data as AssignmentLogEntry[];
+
+      // Also query visit_assignment_log (written by assign-visits edge function)
+      let visitQuery = supabase
+        .from("visit_assignment_log" as any)
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(filters.limit ?? 50);
+      const { data: visitData } = await visitQuery;
+
+      // Merge both sources, sort by created_at desc, take the limit
+      const combined = [...(data ?? []), ...(visitData ?? [])]
+        .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, filters.limit ?? 50);
+
+      const logs = combined as AssignmentLogEntry[];
 
       // Resolve provider org names
       const orgIds = [...new Set(logs.map((l) => l.provider_org_id).filter(Boolean))] as string[];
