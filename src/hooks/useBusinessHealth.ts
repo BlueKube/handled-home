@@ -99,10 +99,43 @@ export function useBusinessHealth() {
         : 0;
       const attachRateGlobal = attachRate;
 
-      // TODO: Replace with actual cohort query — need household activation date
-      // Mock: new households typically have lower attach rates
-      const attachRate90d = Math.round(attachRate * 0.7 * 100) / 100;
-      const attachRate180d = Math.round(attachRate * 0.85 * 100) / 100;
+      // Cohort attach rates — filter subscriptions by age
+      const now = new Date();
+      const d90 = new Date(now); d90.setDate(d90.getDate() - 90);
+      const d180 = new Date(now); d180.setDate(d180.getDate() - 180);
+      const subs90 = activeSubIds.filter((_, i) => {
+        const sub = (activeSubsRes.data ?? [])[i] as any;
+        return sub?.created_at && new Date(sub.created_at) >= d90;
+      });
+      const subs180 = activeSubIds.filter((_, i) => {
+        const sub = (activeSubsRes.data ?? [])[i] as any;
+        return sub?.created_at && new Date(sub.created_at) >= d180;
+      });
+
+      let cohortSKUs90 = 0, cohortSKUs180 = 0;
+      if (subs90.length > 0) {
+        const { count } = await (supabase
+          .from("subscription_items" as any)
+          .select("id", { count: "exact", head: true })
+          .in("subscription_id", subs90)
+          .eq("status", "active") as any);
+        cohortSKUs90 = count ?? 0;
+      }
+      if (subs180.length > 0) {
+        const { count } = await (supabase
+          .from("subscription_items" as any)
+          .select("id", { count: "exact", head: true })
+          .in("subscription_id", subs180)
+          .eq("status", "active") as any);
+        cohortSKUs180 = count ?? 0;
+      }
+
+      const attachRate90d = subs90.length > 0
+        ? Math.round((cohortSKUs90 / subs90.length) * 100) / 100
+        : attachRate;
+      const attachRate180d = subs180.length > 0
+        ? Math.round((cohortSKUs180 / subs180.length) * 100) / 100
+        : attachRate;
       const flywheelHealthy = attachRate180d >= 1.5;
 
       // Household churn
