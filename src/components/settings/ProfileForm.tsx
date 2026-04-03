@@ -40,6 +40,7 @@ export function ProfileForm() {
     if (error) {
       toast({ title: "Error", description: "Failed to update profile.", variant: "destructive" });
     } else {
+      await refreshProfile();
       toast({ title: "Saved", description: "Profile updated successfully." });
     }
   };
