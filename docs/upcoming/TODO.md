@@ -103,9 +103,9 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 
 ## Round 10: Phone Identity, Household Members & Moving Wizard (2026-04-01)
 
-- [ ] **Apply Round 10 migrations** — 5 new migrations: provider_leads phone column, trigger phone matching, household_members table, accept_household_invites RPC, moving wizard tables (property_transitions + customer_leads)
+- [x] **Apply Round 10 migrations** — ✅ Applied as consolidated migration via Lovable Cloud
   - **Why:** Household members, moving wizard, and phone matching depend on these
-  - **Blocked:** All Round 10 features on production
+  - **Resolved:** All tables, triggers, and RPCs created
 
 - [ ] **Send actual household invite emails** — The invite flow creates a pending row in household_members but sends no email. Wire to an email service to send "You've been invited to manage [address] on Handled Home."
   - **Why:** Invitees don't know they've been invited without an email
