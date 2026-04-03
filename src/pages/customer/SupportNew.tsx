@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SupportCategoryTile, getAllCategories, type SupportCategory } from "@/components/support/SupportCategoryTile";
-import { ChevronLeft, CheckCircle2, Camera, X, Sparkles, Loader2, DollarSign } from "lucide-react";
+import { ChevronLeft, CheckCircle2, Camera, X, Sparkles, Loader2, DollarSign, Shield, Clock, ImageIcon } from "lucide-react";
+import { useCustomerJobs } from "@/hooks/useCustomerJobs";
 import { toast } from "@/hooks/use-toast";
 
-type Step = "category" | "details" | "resolving" | "resolved" | "submitted";
+type Step = "category" | "billing_intercept" | "details" | "resolving" | "resolved" | "submitted";
 
 export default function CustomerSupportNew() {
   const navigate = useNavigate();
@@ -26,6 +27,8 @@ export default function CustomerSupportNew() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const createTicket = useCreateTicket();
+  const { data: completedJobs } = useCustomerJobs("completed");
+  const latestJob = completedJobs?.[0];
   const [resolvedCredit, setResolvedCredit] = useState<number | null>(null);
   const [resolutionExplanation, setResolutionExplanation] = useState<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -85,7 +88,8 @@ export default function CustomerSupportNew() {
 
   const handleCategorySelect = (cat: SupportCategory) => {
     setCategory(cat);
-    setStep("details");
+    // Billing disputes get an intercept step with evidence before filing
+    setStep(cat === "billing" ? "billing_intercept" : "details");
   };
 
   const handleSubmit = async () => {
@@ -148,7 +152,8 @@ export default function CustomerSupportNew() {
           size="sm"
           className="gap-1 -ml-2"
           onClick={() => {
-            if (step === "details") setStep("category");
+            if (step === "details") setStep(category === "billing" ? "billing_intercept" : "category");
+            else if (step === "billing_intercept") setStep("category");
             else navigate("/customer/support");
           }}
         >
@@ -173,6 +178,62 @@ export default function CustomerSupportNew() {
                 onClick={handleCategorySelect}
               />
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Step: Billing Intercept — show evidence before filing */}
+      {step === "billing_intercept" && (
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <h1 className="text-h2">Before you submit</h1>
+            <p className="text-caption">
+              Here's what we have on file from your recent service. If something doesn't look right, continue below.
+            </p>
+          </div>
+
+          {latestJob ? (
+            <Card className="p-4 space-y-3">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <Shield className="h-4 w-4 text-primary" />
+                Your most recent visit
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 bg-muted/50 rounded-lg text-center">
+                  <Clock className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
+                  <p className="text-xs text-muted-foreground">Date</p>
+                  <p className="text-sm font-medium">{latestJob.scheduled_date ?? "—"}</p>
+                </div>
+                <div className="p-3 bg-muted/50 rounded-lg text-center">
+                  <ImageIcon className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
+                  <p className="text-xs text-muted-foreground">Photos</p>
+                  <p className="text-sm font-medium">{latestJob.photo_count ?? 0} on file</p>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Every visit includes photo proof and checklist verification. If you'd like to review the full receipt, visit your Activity tab.
+              </p>
+            </Card>
+          ) : (
+            <Card className="p-4 text-center">
+              <p className="text-sm text-muted-foreground">No recent visits found to reference.</p>
+            </Card>
+          )}
+
+          <Card className="p-4 bg-accent/5 border-accent/20 space-y-2">
+            <p className="text-sm font-medium">Need a billing adjustment?</p>
+            <p className="text-xs text-muted-foreground">
+              If something was charged incorrectly, we can often resolve it with a credit to your account — no need to contact your bank.
+            </p>
+          </Card>
+
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => navigate("/customer/activity")}>
+              Review my receipts
+            </Button>
+            <Button className="flex-1" onClick={() => setStep("details")}>
+              Continue to submit
+            </Button>
           </div>
         </div>
       )}
