@@ -5,11 +5,12 @@ export const supportOperationsSections: TrainingSection[] = [
     id: "overview",
     title: "How Support Works in Handled Home",
     type: "overview",
-    content: `Support isn't a department — it's a feedback loop. Every ticket is data about what's working and what isn't. The three support pages work together:
+    content: `Support isn't a department — it's a feedback loop. Every ticket is data about what's working and what isn't. The four support pages work together:
 
 • Tickets — Your inbox. Browse, triage, and respond to customer and provider issues.
 • Policies — SLA definitions and escalation rules. How fast you must respond, and what happens when you don't.
 • Macros — Template responses for common situations. They save time and ensure consistency.
+• Policy Simulator — Test how a support policy applies to a hypothetical ticket before activating it.
 
 The most important thing to understand: support tickets and job exceptions are related but different. A job exception is system-detected ("provider didn't check in"). A support ticket is human-initiated ("I'd like to report a problem"). Sometimes a customer creates a ticket about an issue that's already in the exception queue. Check both before responding.`,
   },
@@ -20,7 +21,7 @@ The most important thing to understand: support tickets and job exceptions are r
     steps: [
       {
         title: "Check the SLA timer first",
-        description: "Every ticket has an SLA based on its priority. High priority: respond within 1 hour. Medium: 4 hours. Low: 24 hours. The timer starts when the customer submits. If you're near a breach, that ticket jumps the queue regardless of everything else. SLA breaches are tracked and affect operational metrics.",
+        description: "Every ticket has an SLA based on its priority. SLA targets are configurable via Support Policies. The default policy sets sla_hours: 48. Admins can create per-category or per-zone SLA overrides. The timer starts when the customer submits. If you're near a breach, that ticket jumps the queue regardless of everything else. SLA breaches are tracked and affect operational metrics.",
         screenshot: { alt: "Ticket list with SLA timers showing time remaining" },
       },
       {
@@ -44,21 +45,27 @@ The most important thing to understand: support tickets and job exceptions are r
     id: "common-tickets",
     title: "Common Ticket Types and How to Handle Them",
     type: "text",
-    content: `Not all tickets are created equal. The four types below account for the majority of your queue. Know the playbook for each cold — when a customer is upset is not the time to figure out the process.
+    content: `Not all tickets are created equal. The types below account for the majority of your queue. The system tracks each ticket's ticket_type value — know the playbook for each cold, because when a customer is upset is not the time to figure out the process.
 
-**Service Quality Dispute**
+**Service Quality Dispute** (ticket_type: service_quality)
 The customer says work wasn't done properly. Before you respond, pull up the proof photos from that job. This single step changes your entire response.
 
 If the photos show good work: share them directly with the customer. Walk through what was completed, reference the scope they purchased, and explain what was and wasn't included. Most complaints in this category are expectation gaps, not service failures — and photos close the gap instantly.
 
 If the photos show an actual problem: don't hedge. Apologize clearly, issue a credit for the affected service, and schedule a redo. Customers who get a genuine "we got this wrong, here's how we're making it right" response almost never escalate further.
 
-**Billing Complaint**
+**Missed Item** (ticket_type: missed_item)
+The customer says a specific item or task was skipped during the service. Pull the proof photos and scope of work. If the task was in scope and photos don't show it completed, treat it like a quality dispute and schedule a redo or issue a partial credit. If the task was never in scope, walk the customer through what was included and offer to add it via handles or a one-time booking.
+
+**Safety** (ticket_type: safety)
+A safety concern — property damage, injury, or hazardous situation. These tickets must be escalated immediately and must not sit in the general queue. Acknowledge receipt within the hour, loop in your operations lead, and do not make any financial commitments until you have a full picture of what happened. Document everything.
+
+**Billing Complaint** (ticket_type: billing)
 The customer is disputing a charge. Start by checking three things in order: the invoice details, their current subscription status, and whether a credit was already applied by a previous operator.
 
 The two most common scenarios: the customer didn't realize their plan auto-renewed (show them the renewal date and the confirmation email they would have received), or they were charged after requesting a cancellation (check the cancellation request date vs. the charge date — if a charge hit after a valid cancellation request, issue a refund, not a credit). Always verify before assuming either direction.
 
-**Cancellation Request**
+**Cancellation Request** (ticket_type: cancellation)
 The customer wants to cancel. Before you process anything, check their remaining contract terms — some plans have early-termination clauses that affect what you can offer.
 
 Offer to address the underlying issue first. Most cancellation requests have a stated reason, and if you can solve that reason — wrong provider, wrong service day, billing issue — many customers will stay. Don't be pushy, but one genuine offer to fix the problem is the right move.
@@ -67,7 +74,13 @@ If they still want to cancel after your offer, process it without friction. Cust
 
 One more thing: log the cancellation reason every time, not just when the system requires it. Cancellation reasons are your best product feedback. A pattern of "provider always late" is something the operations team needs to see — it won't surface unless you're recording it consistently.
 
-**Provider Complaint**
+**Routine Change** (ticket_type: routine_change)
+The customer wants to modify their scheduled services — change the day, swap a service, add or remove something from their routine. Check their current bundle and entitlements first. If the requested change is within their plan, it's a scheduling update. If it requires a different entitlement tier, walk them through the upgrade or handle options before making any changes.
+
+**Provider Promise Mismatch** (ticket_type: provider_promise_mismatch)
+The provider told the customer something that conflicts with what the platform delivers — a different price, a service not in their plan, or a timeline the platform can't honor. These tickets are both a customer service issue and a provider coaching issue. Resolve what the customer was promised if it's reasonable, and flag the provider for a policy conversation. Providers who make unauthorized commitments create trust debt that support has to repay.
+
+**Provider Complaint** (ticket_type: provider_complaint)
 The customer is unhappy with a specific provider. Before responding, pull the provider's recent quality scores and check whether other complaints have come in on the same provider.
 
 If this looks like an isolated incident: apologize to the customer, offer to assign a different provider for their next service, and make a note on the provider's record. One bad day doesn't make a bad provider, but it should be documented.

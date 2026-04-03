@@ -57,12 +57,12 @@ The K-factor measures viral growth: average referrals per customer × referral c
     steps: [
       {
         title: "Understand the referral tier system",
-        description: "Referral milestones are tiered: Starter ($30 credit at 3 referrals), Ambassador (free month at 5), Champion (VIP status at 10). Each tier is designed to reward progression. Don't change tier thresholds frequently — customers track their progress and feel cheated if the goalposts move.",
+        description: "Referral tiers are fully configurable via the Programs tab — admins set milestone triggers, reward types, and amounts. There are no hardcoded tier names or thresholds. When you set up a program, design tiers that reward progression (e.g., a small credit at an early milestone, a larger reward at a higher one). Once live, don't change tier thresholds frequently — customers track their progress and feel cheated if the goalposts move.",
         screenshot: { alt: "Referral program tiers configuration" },
       },
       {
         title: "Monitor fraud flags",
-        description: "The Flags tab shows suspicious referral activity. Common patterns: same IP address for multiple referrals, referrals that sign up but never book a service, referral codes shared on coupon sites. The system flags these automatically. Your job is to review and decide: dismiss (false alarm) or void (actual gaming).",
+        description: "The Flags tab shows suspicious referral activity. Common patterns: same IP address for multiple referrals, referrals that sign up but never book a service, referral codes shared on coupon sites. The system flags these automatically. Your job is to review and decide: dismiss (false alarm) or review (actual gaming — flag for further investigation before taking action).",
         screenshot: { alt: "Incentive fraud flags tab" },
       },
       {

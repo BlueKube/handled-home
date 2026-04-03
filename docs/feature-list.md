@@ -479,13 +479,13 @@
 
 ## XXXVIII. Standard Operating Procedures `trust-builder` `provider-value`
 
-275. Emergency pricing override SOP with rollback capability — 3/10
-276. End-of-day reconciliation SOP — 3/10
-277. Missing proof handling SOP — 3/10
-278. No-show escalation SOP — 3/10
-279. Provider probation ladder SOP — 3/10
-280. Zone pause workflow SOP — 3/10
-281. Interactive SOP execution system — "Execute SOP" mode converts static playbook cards into per-step checklists with checkboxes, progress tracking (% complete badge), completion detection, abandon support, and persistent sop_runs table for audit trail — 7/10
+275. Emergency pricing override SOP with rollback capability — 9/10
+276. End-of-day reconciliation SOP — 9/10
+277. Missing proof handling SOP — 9/10
+278. No-show escalation SOP — 9/10
+279. Provider probation ladder SOP — 9/10
+280. Zone pause workflow SOP — 9/10
+281. Interactive SOP execution system — "Execute SOP" mode converts static playbook cards into per-step checklists with checkboxes, progress tracking (% complete badge), completion detection, abandon support, and persistent sop_runs table for audit trail — 9/10
 
 ---
 

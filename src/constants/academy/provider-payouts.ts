@@ -83,19 +83,19 @@ The second most common source of friction: held earnings that don't release on s
     type: "text",
     content: `Providers with earnings below the minimum payout threshold don't receive a transfer on that Friday — their balance rolls over to the following week.
 
-The current minimum payout threshold is $25. A provider with $18 in releasable earnings on Thursday night doesn't get paid Friday. Their $18 carries forward to next week's batch.
+The current minimum payout threshold is $50 (5000 cents). A provider with $35 in releasable earnings on Thursday night doesn't get paid Friday. Their $35 carries forward to next week's batch.
 
 This matters for a few reasons:
 
-PROVIDER COMMUNICATION — New providers who just completed their first job often have earnings below threshold. They'll be confused when Friday comes and there's no transfer. Set expectations upfront during onboarding: minimum $25, rollovers accumulate, you'll always see it eventually.
+PROVIDER COMMUNICATION — New providers who just completed their first job often have earnings below threshold. They'll be confused when Friday comes and there's no transfer. Set expectations upfront during onboarding: minimum $50, rollovers accumulate, you'll always see it eventually.
 
 BALANCE MONITORING — A provider whose balance keeps rolling over week after week is a signal. Either they're doing very few jobs (low-volume provider), or their earnings are consistently being held (upstream issue). Check both before assuming it's normal.
 
-ROLLOVER LOGIC — Rolled-over earnings don't expire. They accumulate until the total exceeds the threshold, then they're included in the next eligible Friday batch. A provider with 3 weeks of sub-threshold earnings will see a single larger payout once the total clears $25.
+ROLLOVER LOGIC — Rolled-over earnings don't expire. They accumulate until the total exceeds the threshold, then they're included in the next eligible Friday batch. A provider with 3 weeks of sub-threshold earnings will see a single larger payout once the total clears $50.
 
 ONE EXCEPTION — When a provider requests account deactivation, any remaining balance (regardless of threshold) is paid out in the final settlement run. A provider shouldn't lose money because they're leaving the platform.
 
-The threshold exists to reduce Stripe transfer fees on micro-transactions. Below $25, the transfer fees represent a meaningful percentage of the payout amount, which reduces platform margin on already thin per-job economics.`,
+The threshold exists to reduce Stripe transfer fees on micro-transactions. Below $50, the transfer fees represent a meaningful percentage of the payout amount, which reduces platform margin on already thin per-job economics.`,
   },
   {
     id: "stripe-connect",
@@ -160,7 +160,7 @@ The threshold exists to reduce Stripe transfer fees on micro-transactions. Below
         context: "Most 'payment issues' are actually proof submission issues. Diagnosis before action.",
       },
       {
-        text: "New providers almost always have sub-threshold earnings in their first 1–2 weeks. Set this expectation during onboarding — explicitly. 'Your first payout may roll over if you're under $25 for the week.' Providers who are surprised by this become upset. Providers who know upfront don't mind.",
+        text: "New providers almost always have sub-threshold earnings in their first 1–2 weeks. Set this expectation during onboarding — explicitly. 'Your first payout may roll over if you're under $50 for the week.' Providers who are surprised by this become upset. Providers who know upfront don't mind.",
         context: "Expectation management in onboarding eliminates a significant percentage of first-week support tickets.",
       },
       {

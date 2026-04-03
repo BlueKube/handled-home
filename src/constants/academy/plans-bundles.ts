@@ -7,11 +7,11 @@ export const plansBundlesSections: TrainingSection[] = [
     type: "overview",
     content: `Plans are what customers subscribe to. Bundles (routines) are what customers actually receive. Entitlements define what's included. Understanding this three-layer system is essential because it's where pricing, delivery, and customer expectations intersect.
 
-PLANS → The subscription tier (e.g., "Essentials $129/mo", "Premium $179/mo", "Complete $279/mo")
+PLANS → The subscription tier (e.g., tier names like "Essential," "Plus," or "Premium" configured in the admin Plans page — actual names and prices are stored in the database, not hardcoded)
 ENTITLEMENTS → What each plan includes (e.g., "Premium includes: lawn weekly, pest quarterly, window cleaning 2x/year, plus 5 handles/month for add-ons")
 BUNDLES (ROUTINES) → The actual schedule of services for a specific customer (e.g., "John Smith's routine: lawn mowing every Tuesday, pest treatment quarterly starting March")
 
-The handle economy ties this together. Each plan includes a monthly handle budget. Some services are "included" (no handles consumed). Others cost handles. Handles are the internal currency that gives customers flexibility to add services beyond their plan's base inclusions.
+The handle economy ties this together. Each plan includes a monthly handle budget. Some services are "included" (no handles consumed). Others cost handles. Handles are the internal currency that gives customers flexibility to add services beyond their plan's base inclusions. Handles are a conceptual unit — the database tracks entitlements via included_credits, included_count, included_minutes, and included_service_weeks_per_billing_cycle. When you see "handles" in the UI, those fields are what's actually being configured and consumed under the hood.
 
 The admin pages:
 • Plans — Design and manage subscription plans, set entitlements, configure zone availability
@@ -105,7 +105,7 @@ Think of handles like cell phone data: you get an allocation, and overages cost 
         severity: "critical",
       },
       {
-        text: "Archiving a plan doesn't cancel existing subscriptions on that plan. Existing subscribers keep their service. But no new customers can subscribe to it. If you need to force-migrate subscribers to a new plan, that's a support + billing coordination effort — not just an archive click.",
+        text: "Retiring a plan doesn't cancel existing subscriptions on that plan. Existing subscribers keep their service. But no new customers can subscribe to it. If you need to force-migrate subscribers to a new plan, that's a support + billing coordination effort — not just a retire click.",
         severity: "caution",
       },
       {
@@ -128,7 +128,7 @@ Think of handles like cell phone data: you get an allocation, and overages cost 
         source: "Deep research report — Three Tier Bundles, Angi pricing data (2026)",
       },
       {
-        text: "Handled Home's current pricing ($129/$179/$279) uses a membership-plus-credits model, not all-inclusive bundles. At these price points, you can't include every service at full retail cadence — the math doesn't close. Instead, each tier includes a handle budget that covers a defined scope of services. Customers who need more can add services at member rates. Industry research suggests all-inclusive home maintenance bundles require $349–$499/month minimum to be viable, which is why our model uses managed entitlements rather than unlimited access.",
+        text: "Handled Home uses a membership-plus-credits model, not all-inclusive bundles. Actual plan prices are configured in the admin Plans page and vary by zone and operator. The core principle: at typical subscription price points, you can't include every service at full retail cadence — the math doesn't close. Instead, each tier includes a handle budget that covers a defined scope of services. Customers who need more can add services at member rates. Industry research suggests all-inclusive home maintenance bundles require $349–$499/month minimum to be viable, which is why our model uses managed entitlements rather than unlimited access.",
         source: "Handled Home simulation model; deep-research-report-2.md bundle analysis",
       },
     ],
