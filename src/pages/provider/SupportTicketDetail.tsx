@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSupportTicketDetail } from "@/hooks/useSupportTicketDetail";
 import { useTicketActions } from "@/hooks/useTicketActions";
@@ -25,6 +26,7 @@ const REVIEW_REASONS = [
 export default function ProviderSupportTicketDetail() {
   const { ticketId } = useParams<{ ticketId: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { ticket, events, isLoading, error } = useSupportTicketDetail(ticketId);
   const actions = useTicketActions(ticketId ?? "");
 
@@ -192,6 +194,7 @@ export default function ProviderSupportTicketDetail() {
                         });
                       }
                     }
+                    queryClient.invalidateQueries({ queryKey: ["support-ticket-attachments", ticketId] });
                     toast({ title: `${photoFiles.length} photo(s) uploaded` });
                     setPhotoFiles([]);
                   } catch (err: any) {

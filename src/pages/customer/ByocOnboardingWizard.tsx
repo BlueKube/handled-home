@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useByocOnboardingContext } from "@/hooks/useByocOnboardingContext";
@@ -21,6 +22,7 @@ import {
 export default function ByocOnboardingWizard() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user } = useAuth();
   const { invite, activate, byocContext, isLoading: contextLoading } = useByocOnboardingContext(token);
   const [step, setStepRaw] = useState<ByocStep>("confirm");
@@ -43,7 +45,8 @@ export default function ByocOnboardingWizard() {
       void supabase
         .from("customer_onboarding_progress")
         .update({ metadata: updated as any })
-        .eq("id", progress.id);
+        .eq("id", progress.id)
+        .then(() => queryClient.invalidateQueries({ queryKey: ["onboarding-progress"] }));
     }
   }, [progress]);
 
