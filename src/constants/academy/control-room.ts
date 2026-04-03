@@ -7,12 +7,13 @@ export const controlRoomSections: TrainingSection[] = [
     type: "overview",
     content: `The Control Room is restricted to superuser role for a reason: changes here have immediate, broad financial impact. A pricing change affects every customer in a zone within 24 hours. A payout rule change affects every provider's next paycheck. There are no undo buttons — only rollbacks via the change request system.
 
-Four pages make up the Control Room:
+Five pages make up the Control Room:
 
 • Pricing & Margin — Base SKU pricing, zone-specific overrides, multipliers
 • Payout Rules — Provider payout schedules, minimum thresholds, per-type rules
 • Change Requests — Review and approve/reject pending control room changes
 • Change Log — Immutable audit trail of every control room action
+• System Configuration — Incentive caps, algorithm parameters (quality score weights, assignment competition), and policy guardrails (dunning max steps, probation/suspension score thresholds)
 
 The change request workflow is the guardrail. Any pricing or payout change can require a second reviewer before it takes effect. This isn't bureaucracy — it's the only thing between you and a mass billing error.`,
   },
