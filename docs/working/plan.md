@@ -11,9 +11,10 @@
 
 | Batch | Title | Size | Review | Status | Context |
 |-------|-------|------|--------|--------|---------|
-| B1 | Admin mobile hamburger menu + logout | S→M | | ⬜ | |
-| B2 | Edge function auth hardening | S→M | | ⬜ | |
-| B3 | Guided Resolver + evidence replay | M→L | | ⬜ | |
+| B1 | Admin mobile hamburger menu + logout | S→M | 3L+S clean | ✅ | |
+| B2 | Edge function auth hardening (4 functions) | S→M | | ✅ | |
+| B3 | Wiring fixes: duplicate suppression, assignment log | S→M | | ✅ | |
+| B3b | Guided Resolver + evidence replay | M→L | | ⬜ | |
 | B4 | Policy engine + chargeback + dedup | M→L | | ⬜ | |
 | B5 | Auto-assign + no-show detection | S→M | | ⬜ | |
 | B6 | SLA enforcement + auto-flag/suspend | S→M | | ⬜ | |
@@ -30,8 +31,16 @@
 
 ## Session Handoff
 - **Branch:** `claude/polish-planned-features-l9XIY`
-- **Last completed:** Round 61 (Final Verification)
-- **Next up:** B1 — Admin mobile menu + logout
-- **Context at exit:** —
+- **Last completed:** B3 (Wiring fixes — duplicate suppression, assignment log union)
+- **Next up:** B3b — Guided Resolver component + evidence replay in ticket detail
+- **Context at exit:** ~27% (per user report)
 - **Blockers:** None
-- **Round progress:** Round 62 Phase 1
+- **Round progress:** Round 62 Phase 1-2 (3 batches done, audits complete for Phases 2-5)
+
+### Audit Findings Summary (for next session)
+Detailed audits completed for all remaining features. Key findings:
+- **Support (#150-157):** Auto-resolve chain works but GuidedResolver component doesn't exist. Policy engine schema exists but dials never consulted at runtime. Duplicate detection writes to wrong table (fixed B3).
+- **Automation (#250-257):** assign-visits and check-no-shows work but aren't scheduled in cron. Primary/backup role weighting not enforced in scoring.
+- **Billing (#261,262,266):** Edge functions exist with correct logic but need cron registration verification.
+- **Ops Cockpit (#235,239,240):** Business health uses fake cohort data. Loss leader tab is 100% mock data.
+- **All details in audit agent outputs — re-run audits or read plan for specifics.**
