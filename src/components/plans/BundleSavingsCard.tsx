@@ -59,7 +59,7 @@ export function BundleSavingsCard({ planPriceCents, planDisplayPrice, tierKey, l
   const planMonthly = planPriceCents
     ? Math.round(planPriceCents / 100)
     : planDisplayPrice
-      ? parseInt(planDisplayPrice.replace(/[^0-9]/g, ""), 10)
+      ? parseInt(planDisplayPrice.match(/\$(\d+)/)?.[1] ?? "0", 10)
       : 0;
 
   const savings = separateTotal - planMonthly;

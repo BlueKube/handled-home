@@ -5,10 +5,10 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Badge } from "@/components/ui/badge";
 import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
 import { format } from "date-fns";
-import { ImageIcon } from "lucide-react";
+import { ImageIcon, AlertTriangle } from "lucide-react";
 
 export default function CustomerHistory() {
-  const { data: jobs, isLoading } = useCustomerJobs("completed");
+  const { data: jobs, isLoading, isError } = useCustomerJobs("completed");
   const navigate = useNavigate();
 
   if (isLoading) {
@@ -20,6 +20,20 @@ export default function CustomerHistory() {
             <div key={i} className="h-20 bg-muted/50 rounded-lg animate-pulse" />
           ))}
         </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-4 pb-24 space-y-3 animate-fade-in">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-destructive" />
+          <h1 className="text-h2">Visits</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          We couldn't load your visits. Check your connection and try again.
+        </p>
       </div>
     );
   }

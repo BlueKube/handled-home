@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useSkus } from "@/hooks/useSkus";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Home, Sparkles, ArrowRight, CheckCircle2, Shield, Clock,
-  Leaf, Bug, Droplets, Scissors, Zap, Star,
+  Leaf, Bug, Droplets, Scissors, Zap, Star, AlertTriangle,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const CATEGORY_ICONS: Record<string, typeof Home> = {
   mowing: Scissors,
@@ -71,9 +72,11 @@ const PLANS = [
 
 export default function Browse() {
   const navigate = useNavigate();
-  const { data: skus } = useSkus({ status: "active" });
+  const { data: skus, isError: skuError } = useSkus({ status: "active" });
   const [zip, setZip] = useState("");
   const [zipChecked, setZipChecked] = useState(false);
+  const [zipResult, setZipResult] = useState<"covered" | "not_covered" | null>(null);
+  const [zipChecking, setZipChecking] = useState(false);
 
   const groupedSkus = useMemo(() => {
     if (!skus) return {};
@@ -90,8 +93,18 @@ export default function Browse() {
     return CATEGORY_ORDER.filter((cat) => groupedSkus[cat]?.length);
   }, [groupedSkus]);
 
-  const handleCheckZip = () => {
+  const handleCheckZip = async () => {
+    setZipChecking(true);
+    setZipChecked(false);
+    setZipResult(null);
+    const { data } = await supabase
+      .from("zone_zips")
+      .select("zone_id")
+      .eq("zip_code", zip.trim())
+      .limit(1);
+    setZipChecking(false);
     setZipChecked(true);
+    setZipResult(data && data.length > 0 ? "covered" : "not_covered");
   };
 
   const handleGetStarted = () => {
@@ -127,11 +140,16 @@ export default function Browse() {
               className="text-center text-lg h-12"
               maxLength={5}
             />
-            <Button size="lg" className="h-12 px-6" onClick={handleCheckZip} disabled={zip.length < 5}>
-              Check
+            <Button size="lg" className="h-12 px-6" onClick={handleCheckZip} disabled={zip.length < 5 || zipChecking}>
+              {zipChecking ? "Checking…" : "Check"}
             </Button>
           </div>
-          {zipChecked && (
+          {zipChecked && zipResult === "covered" && (
+            <p className="text-sm text-success animate-fade-in">
+              Great news — we serve your area! Sign up to get started.
+            </p>
+          )}
+          {zipChecked && zipResult === "not_covered" && (
             <p className="text-sm text-primary animate-fade-in">
               We're expanding to new areas. Sign up to be first in line when we launch near you.
             </p>
@@ -212,6 +230,12 @@ export default function Browse() {
       <section className="px-4 py-12 bg-muted/30">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-xl font-bold text-center mb-2">Services available</h2>
+          {skuError ? (
+            <div className="flex flex-col items-center gap-2 py-6">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              <p className="text-sm text-muted-foreground">Unable to load services. Check your connection.</p>
+            </div>
+          ) : <>
           <p className="text-sm text-muted-foreground text-center mb-8">
             {skus?.length ?? 0} services across {sortedCategories.length} categories. All included in your plan.
           </p>
@@ -245,6 +269,7 @@ export default function Browse() {
               );
             })}
           </div>
+          </>}
         </div>
       </section>
 
@@ -288,9 +313,9 @@ export default function Browse() {
         <div className="max-w-3xl mx-auto flex items-center justify-between text-xs text-muted-foreground">
           <span>&copy; {new Date().getFullYear()} Handled Home</span>
           <div className="flex gap-4">
-            <a href="/providers" className="hover:text-foreground transition-colors">For Service Providers</a>
-            <a href="/privacy" className="hover:text-foreground transition-colors">Privacy</a>
-            <a href="/terms" className="hover:text-foreground transition-colors">Terms</a>
+            <Link to="/providers" className="hover:text-foreground transition-colors">For Service Providers</Link>
+            <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+            <Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link>
           </div>
         </div>
       </footer>

@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Progress } from "@/components/ui/progress";
 import { HelpTip } from "@/components/ui/help-tip";
 import {
   ShieldCheck, TrendingUp, TrendingDown, Minus, Star, Camera, Clock,
@@ -27,9 +26,9 @@ export default function ProviderQualityScore() {
   const navigate = useNavigate();
   const { org } = useProviderOrg();
   const { score, rollups, scoreEvents, isLoading, isError, refetch } = useProviderQualityScore(org?.id);
-  const { currentTier, tierConfig, tierEntry, tierHistory, pendingGates, completedGates, isLoading: tierLoading } = useProviderTier(org?.id);
+  const { currentTier, tierConfig, tierEntry, tierHistory, pendingGates, completedGates, isLoading: tierLoading, isError: tierError } = useProviderTier(org?.id);
 
-  if (isError) {
+  if (isError || tierError) {
     return (
       <div className="animate-fade-in p-4 pb-24">
         <QueryErrorCard message="Failed to load quality score." onRetry={() => refetch()} />
@@ -192,7 +191,7 @@ export default function ProviderQualityScore() {
 
           {pendingGates.length > 0 && (
             <div className="space-y-2">
-              <p className="text-xs font-medium text-amber-600">Pending ({pendingGates.length})</p>
+              <p className="text-xs font-medium text-amber-400">Pending ({pendingGates.length})</p>
               {pendingGates.map((g) => (
                 <div key={g.id} className="flex items-center gap-3 p-2 rounded-lg bg-amber-500/5 border border-amber-500/20">
                   <Lock className="h-4 w-4 text-amber-500 shrink-0" />
@@ -202,7 +201,7 @@ export default function ProviderQualityScore() {
                       Min. score: {g.required_score_minimum} · {g.sku_category || "—"}
                     </p>
                   </div>
-                  <Badge variant="outline" className="text-xs text-amber-600">Locked</Badge>
+                  <Badge variant="outline" className="text-xs text-amber-400">Locked</Badge>
                 </div>
               ))}
             </div>

@@ -7,6 +7,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { latLngToCell, gridDisk } from "https://esm.sh/h3-js@4.2.1";
+import { requireAdminJwt } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -26,23 +27,12 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
   // ─── Auth guard ──────────────────────────────────────────
-  const authHeader = req.headers.get("authorization");
-  if (!authHeader) {
-    return jsonResponse({ error: "Authorization required" }, 401);
-  }
-
-  const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-  const userClient = createClient(supabaseUrl, anonKey, {
-    global: { headers: { Authorization: authHeader } },
-  });
-  const { data: { user }, error: authErr } = await userClient.auth.getUser();
-  if (authErr || !user) {
-    return jsonResponse({ error: "Invalid or expired token" }, 401);
+  let supabase;
+  try {
+    ({ supabase } = await requireAdminJwt(req));
+  } catch (authErr: any) {
+    return jsonResponse({ error: authErr.message || "Unauthorized" }, 401);
   }
 
   // ─── Idempotency check ───────────────────────────────────

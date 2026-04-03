@@ -302,13 +302,22 @@ Deno.serve(async (req) => {
     const skuCategoryMap = new Map(skus.map((s) => [s.id, s.category]));
     const providerMap = new Map(providers.map((p) => [p.provider_org_id, p]));
 
-    // ZCP lookup: zone:category → provider_org_ids
+    // ZCP lookup: zone:category → provider_org_ids + role map
     const zcpByZoneCategory = new Map<string, Set<string>>();
+    const zcpRoleMap = new Map<string, string>(); // "zone:category:provider_org_id" → role
     for (const zcp of zcps) {
       const key = `${zcp.zone_id}:${zcp.category}`;
       if (!zcpByZoneCategory.has(key)) zcpByZoneCategory.set(key, new Set());
       zcpByZoneCategory.get(key)!.add(zcp.provider_org_id);
+      zcpRoleMap.set(`${key}:${zcp.provider_org_id}`, zcp.role);
     }
+
+    // SLA status lookup: skip RED providers from assignment
+    const { data: slaRows } = await supabase
+      .from("provider_sla_status")
+      .select("provider_org_id, current_level")
+      .eq("current_level", "RED");
+    const redProviders = new Set((slaRows ?? []).map((r: any) => r.provider_org_id));
 
     // ── Step 4: Fetch visit tasks ──
     const visitIds = visits.map((v) => v.id);
@@ -439,6 +448,9 @@ Deno.serve(async (req) => {
       for (const provider of providers) {
         const reasons: string[] = [];
 
+        // Hard constraint 0: SLA status — skip RED providers entirely
+        if (redProviders.has(provider.provider_org_id)) continue;
+
         // Hard constraint 1: Skills — provider must cover all visit categories
         const missingCats = [...categories].filter(
           (c) => !provider.service_categories.includes(c)
@@ -526,13 +538,27 @@ Deno.serve(async (req) => {
         }
         if (zoneAffinity > 0) reasons.push("Zone provider");
 
+        // Primary role bonus: prefer PRIMARY over BACKUP providers
+        let primaryBonus = 0;
+        if (zoneId) {
+          for (const cat of categories) {
+            const roleKey = `${zoneId}:${cat}:${provider.provider_org_id}`;
+            if (zcpRoleMap.get(roleKey) === "PRIMARY") {
+              primaryBonus = 1;
+              reasons.push("Primary provider");
+              break;
+            }
+          }
+        }
+
         // Composite score (lower is better)
         const score =
           dials.w_distance * geoCost +
           dials.w_balance * balancePenalty * 100 +
           dials.w_spread * spreadPenalty * 100 -
           dials.w_familiarity * familiarityBonus -
-          dials.w_zone_affinity * zoneAffinity * 10;
+          dials.w_zone_affinity * zoneAffinity * 10 -
+          primaryBonus * 15; // Strong preference for PRIMARY role
 
         candidates.push({
           provider_org_id: provider.provider_org_id,

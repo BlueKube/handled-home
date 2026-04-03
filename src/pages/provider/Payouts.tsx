@@ -19,7 +19,7 @@ import { formatCents } from "@/utils/format";
 export default function ProviderPayouts() {
   const navigate = useNavigate();
   const { org } = useProviderOrg();
-  const { eligibleBalance, heldBalance, payoutAccount, isAccountReady, isLoading } = useProviderEarnings();
+  const { eligibleBalance, heldBalance, payoutAccount, isAccountReady, isLoading, isError } = useProviderEarnings();
   const [onboarding, setOnboarding] = useState(false);
 
   const nextPayoutDate = useMemo(() => {
@@ -48,6 +48,20 @@ export default function ProviderPayouts() {
   };
 
   if (isLoading) return <PageSkeleton />;
+
+  if (isError) {
+    return (
+      <div className="p-4 pb-24 space-y-3 animate-fade-in">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-destructive" />
+          <h1 className="text-h2">Payouts</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Failed to load payout data. Check your connection and try again.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-in p-4 pb-24 space-y-4">

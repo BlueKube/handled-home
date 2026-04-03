@@ -11,7 +11,7 @@ Every customer account moves through a lifecycle:
 
 TRIAL — New customers start here. No charge yet. They're evaluating whether the service is worth keeping. Your activation rate out of trial is a key metric.
 
-ACTIVE — Billing is running. Subscription renews on their cycle (monthly or annual). This is the healthy state.
+ACTIVE — Billing is running. Subscription renews on their cycle (28-day billing cycle or annual). This is the healthy state.
 
 PAST DUE — A payment attempt failed. The dunning ladder has started. The customer may or may not know yet. Every day in past-due increases churn risk.
 
@@ -67,7 +67,7 @@ Understanding the ledger is the other half. Every credit, refund, charge, and ad
       },
       {
         title: "Check the dunning step",
-        description: "The dunning ladder shows which step this account is on (1–5). Step 1 = first retry. Step 2 = second retry + email sent. Step 3 = third retry + email + SMS. Step 4 = fourth retry + escalation email. Step 5 = final notice before cancellation. If you're looking at a Step 3 or 4 account, the system has already been working on this — don't call the customer and ask them to 'check their card' if two emails and an SMS already went out.",
+        description: "The dunning ladder shows which step this account is on (0–4). Step 0 = first retry (day 1). Step 1 = second retry + email sent (day 3). Step 2 = third retry + email + SMS (day 7). Step 3 = fourth retry + escalation email (day 10). Step 4 = final retry before cancellation (day 14). If you're looking at a Step 2 or 3 account, the system has already been working on this — don't call the customer and ask them to 'check their card' if two emails and an SMS already went out.",
         screenshot: { alt: "Dunning step indicator on customer billing page" },
       },
       {
@@ -99,7 +99,7 @@ CREDITS — Apply against future charges. The money stays with the platform. Use
 • You're offering a goodwill gesture for an inconvenience (provider ran late, had to reschedule)
 • The customer has unused service they couldn't use due to a platform issue
 
-Credits are generally preferred for active customers because they keep the revenue cycle intact while resolving the immediate complaint.
+Credits are generally preferred for active customers because they keep the revenue cycle intact while resolving the immediate complaint. When a credit is applied, the system automatically applies it to the customer's next invoice in DUE status (not just PENDING) — so a credit issued today will offset an outstanding balance that is already due, not only future invoices.
 
 REFUNDS — Return cash to the customer's payment method. Use refunds when:
 • A job was charged but never completed (no-show, provider canceled)
@@ -120,26 +120,26 @@ One more thing: credits and refunds are irreversible once processed. Double-chec
     id: "dunning-ladder",
     title: "The Dunning Ladder — 5-Step Automatic Escalation",
     type: "text",
-    content: `The dunning ladder is the automated system that handles failed payments without human intervention for the first four steps. Here's exactly what happens and when.
+    content: `The dunning ladder is the automated system that handles failed payments without human intervention for the first several steps. Here's exactly what happens and when.
 
-STEP 1 — Immediate retry (Day 0)
-Payment fails → system retries within 24 hours using a different payment processor routing. No customer notification yet. Most recoverable failures (temporary bank holds, network issues) clear here.
+STEP 0 — First retry (Day 1)
+Payment fails → system retries on day 1. No customer notification yet. Most recoverable failures (temporary bank holds, network issues) clear here.
 
-STEP 2 — Second retry + email (Day 3)
+STEP 1 — Second retry + email (Day 3)
 Second retry attempt. If it fails, the system sends an automated email: "We had trouble processing your payment — please update your payment method." Friendly tone, no alarm. Includes a direct link to update the card.
 
-STEP 3 — Third retry + email + SMS (Day 7)
-Third retry. If failed, email + SMS go out. Tone escalates slightly: "Your account is past due — service may be paused." At this point the customer has been notified three times. If they haven't responded, they either don't want to pay or can't access their account.
+STEP 2 — Third retry + email + SMS (Day 7)
+Third retry. If failed, email + SMS go out. Tone escalates slightly: "Your account is past due — service may be paused." At this point the customer has been notified multiple times. If they haven't responded, they either don't want to pay or can't access their account.
 
-STEP 4 — Fourth retry + escalation email (Day 14)
-Fourth retry. Escalation email: "Final notice — your account will be canceled in 7 days without payment." This is the last automated escalation before termination. Some customers respond here because the cancellation threat is credible.
+STEP 3 — Fourth retry + escalation email (Day 10)
+Fourth retry. Escalation email: "Final notice — your account will be canceled without payment." This is the last automated escalation before termination. Some customers respond here because the cancellation threat is credible.
 
-STEP 5 — Final retry + cancellation trigger (Day 21)
+STEP 4 — Final retry + cancellation trigger (Day 14)
 Fifth and final retry. If it fails, the account transitions to CANCELED automatically. Service stops. The system logs the cancellation reason as "non-payment."
 
-Human involvement is appropriate starting at Step 3 — particularly for high-value accounts (annual plans, Premium tier, long-tenure customers). A single personal email or call at Step 3 recovers 30-40% of accounts that the automation alone would lose.
+Human involvement is appropriate starting at Step 2 — particularly for high-value accounts (annual plans, Premium tier, long-tenure customers). A single personal email or call at Step 2 recovers 30-40% of accounts that the automation alone would lose.
 
-Do not manually intervene at Steps 1-2. The automation is handling it. Interrupting the dunning flow with an uncoordinated manual outreach confuses customers and creates parallel communication threads.`,
+Do not manually intervene at Steps 0-1. The automation is handling it. Interrupting the dunning flow with an uncoordinated manual outreach confuses customers and creates parallel communication threads.`,
   },
   {
     id: "ledger-deep-dive",
@@ -182,7 +182,7 @@ Do not manually intervene at Steps 1-2. The automation is handling it. Interrupt
         context: "stripe.com/status — bookmark it. Takes 5 seconds to rule out a platform-wide issue.",
       },
       {
-        text: "The dunning ladder steps 1–2 are fully automated. Do not call customers about a payment failure until they're at Step 3 or higher. Uncoordinated early outreach confuses customers who are about to get an automated email and creates two parallel communication threads.",
+        text: "The dunning ladder steps 0–1 are fully automated. Do not call customers about a payment failure until they're at Step 2 or higher. Uncoordinated early outreach confuses customers who are about to get an automated email and creates two parallel communication threads.",
         context: "Let the system work. Human time is expensive. Reserve it for accounts that automation couldn't recover.",
       },
       {
@@ -220,15 +220,15 @@ Do not manually intervene at Steps 1-2. The automation is handling it. Interrupt
     type: "automation",
     automationNotes: [
       {
-        text: "Billing cycle runs nightly via cron — monthly and annual renewals are charged automatically. You don't trigger it. You verify it ran via Cron Health every morning.",
+        text: "Billing cycle runs nightly via cron — 28-day and annual renewals are charged automatically. You don't trigger it. You verify it ran via Cron Health every morning.",
         type: "daily-check",
       },
       {
-        text: "Dunning retries (Steps 1–4) run automatically on their scheduled cadence. Customer emails and SMS at each step are automated. You do not need to manually trigger retries — but you should monitor Step 3+ accounts for high-value customers who need personal outreach.",
+        text: "Dunning retries (Steps 0–4) run automatically on their scheduled cadence (days 1, 3, 7, 10, 14). Customer emails and SMS at each step are automated. You do not need to manually trigger retries — but you should monitor Step 2+ accounts for high-value customers who need personal outreach.",
         type: "set-and-forget",
       },
       {
-        text: "Subscription status transitions (active → past due → canceled) happen automatically based on dunning outcomes. A Step 5 failure automatically cancels the account. Review canceled accounts weekly to identify reactivation opportunities.",
+        text: "Subscription status transitions (active → past due → canceled) happen automatically based on dunning outcomes. A Step 4 failure (day 14) automatically cancels the account. Review canceled accounts weekly to identify reactivation opportunities.",
         type: "weekly-check",
       },
       {

@@ -118,7 +118,7 @@ function simulatePolicy(scenario: ScenarioInput, policy: SupportPolicy | null): 
 }
 
 export default function PolicySimulator() {
-  const { policies, isLoading } = useSupportPolicies();
+  const { policies, isLoading, isError } = useSupportPolicies();
   const [scenario, setScenario] = useState<ScenarioInput>({
     ticketCategory: "quality_issue",
     evidenceScore: 80,
@@ -139,6 +139,24 @@ export default function PolicySimulator() {
   );
 
   if (isLoading) return <PageSkeleton />;
+
+  if (isError) {
+    return (
+      <div className="p-6 space-y-4 max-w-4xl animate-fade-in">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-6 w-6 text-destructive" />
+          <h1 className="text-2xl font-bold">Policy Simulator</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Failed to load support policies. Check your connection and try again.
+        </p>
+        <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+          <RotateCcw className="h-4 w-4 mr-2" />
+          Retry
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6 animate-fade-in max-w-4xl">

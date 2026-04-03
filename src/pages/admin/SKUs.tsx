@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, AlertTriangle } from "lucide-react";
 import { useSkus } from "@/hooks/useSkus";
 import type { ServiceSku } from "@/hooks/useSkus";
 import { SkuListCard } from "@/components/admin/SkuListCard";
@@ -17,10 +17,24 @@ export default function AdminSKUs() {
   const [detailSku, setDetailSku] = useState<ServiceSku | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
 
-  const { data: skus = [], isLoading } = useSkus({
+  const { data: skus = [], isLoading, isError } = useSkus({
     status: statusTab,
     search: search || undefined,
   });
+
+  if (isError) {
+    return (
+      <div className="p-6 space-y-3 animate-fade-in">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-destructive" />
+          <h1 className="text-2xl font-bold">SKU Catalog</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Failed to load data. Check your connection and try again.
+        </p>
+      </div>
+    );
+  }
 
   const handleEdit = (sku: ServiceSku) => {
     setDetailOpen(false);

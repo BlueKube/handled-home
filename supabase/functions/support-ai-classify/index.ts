@@ -350,21 +350,25 @@ Customer note: "${ticket.customer_note || "none"}"${jobContext}${photoContext}${
 
     const result = JSON.parse(toolCall.function.arguments);
 
-    // Update ticket with AI results (includes new auto-resolution fields)
+    // Update ticket with AI results (includes new auto-resolution fields + duplicate link)
+    const ticketUpdate: Record<string, unknown> = {
+      ai_summary: result.ai_summary?.slice(0, 200),
+      ai_evidence_score: result.evidence_score,
+      ai_risk_score: result.risk_score,
+      ai_classification: {
+        ...(result.classification ?? {}),
+        auto_resolvable: result.auto_resolvable ?? false,
+        suggested_credit_cents: result.suggested_credit_cents ?? 0,
+        resolution_explanation: result.resolution_explanation ?? "",
+        photo_analysis: result.photo_analysis ?? null,
+      },
+    };
+    if (result.duplicate_ticket_id) {
+      ticketUpdate.duplicate_of_ticket_id = result.duplicate_ticket_id;
+    }
     await supabase
       .from("support_tickets")
-      .update({
-        ai_summary: result.ai_summary?.slice(0, 200),
-        ai_evidence_score: result.evidence_score,
-        ai_risk_score: result.risk_score,
-        ai_classification: {
-          ...(result.classification ?? {}),
-          auto_resolvable: result.auto_resolvable ?? false,
-          suggested_credit_cents: result.suggested_credit_cents ?? 0,
-          resolution_explanation: result.resolution_explanation ?? "",
-          photo_analysis: result.photo_analysis ?? null,
-        },
-      })
+      .update(ticketUpdate)
       .eq("id", ticket_id);
 
     // Log inference run

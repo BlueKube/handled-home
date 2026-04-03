@@ -78,7 +78,7 @@ After the planner runs, the assignment engine runs and assigns providers to visi
       },
       {
         title: "Watch for conflicts",
-        description: "The planner surfaces conflicts: no_service_day (property in a zone without a service day defined for that weekday), no_routine (customer has no active routine), capacity_exceeded (more visits than the zone can handle on that day). Each conflict tells you what to fix upstream.",
+        description: "The planner surfaces conflicts: no_service_day (property in a zone without a service day defined for that weekday) and no_routine (customer has no active routine). Each conflict tells you what to fix upstream.",
         screenshot: { alt: "Planner conflicts table" },
       },
     ],
@@ -90,7 +90,7 @@ After the planner runs, the assignment engine runs and assigns providers to visi
     steps: [
       {
         title: "Understanding what the engine optimizes",
-        description: "The assignment engine balances four objectives: minimize drive time between stops, balance workload across providers, reward familiarity (same provider returning to same home), and respect capacity limits. It runs after the planner and assigns a Primary + Backup provider to each visit.",
+        description: "The assignment engine balances five weighted objectives: minimize drive time between stops, balance workload across providers, spread work across the week, reward familiarity (same provider returning to same home), and prefer zone-assigned providers. It runs after the planner and assigns a Primary + Backup provider to each visit.",
         screenshot: { alt: "Assignment Dashboard with run stats" },
       },
       {
@@ -100,7 +100,7 @@ After the planner runs, the assignment engine runs and assigns providers to visi
       },
       {
         title: "Don't touch assignment dials without data",
-        description: "Assignment Config has ~30 dials (weights, thresholds, timing). The defaults are tuned based on typical zone density. Changing them without understanding the tradeoffs can cause wild swings — like over-weighting familiarity until a single provider gets assigned every job in a zone. If you think tuning is needed, discuss with a senior operator first.",
+        description: "Assignment Config has 13 configuration dials (weights, thresholds, timing). The defaults are tuned based on typical zone density. Changing them without understanding the tradeoffs can cause wild swings — like over-weighting familiarity until a single provider gets assigned every job in a zone. If you think tuning is needed, discuss with a senior operator first.",
         screenshot: { alt: "Assignment Config dial interface" },
       },
     ],

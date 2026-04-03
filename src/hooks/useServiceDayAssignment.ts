@@ -85,6 +85,7 @@ export function useServiceDayAssignment(propertyId: string | null | undefined) {
     assignment: assignmentQuery.data,
     offers: offersQuery.data ?? [],
     isLoading: assignmentQuery.isLoading,
+    isError: assignmentQuery.isError || offersQuery.isError,
     expiredPrevious: !!expiredQuery.data && !assignmentQuery.data,
     refetch: () => {
       assignmentQuery.refetch();

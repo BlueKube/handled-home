@@ -147,7 +147,7 @@ const statusBadge = {
 };
 
 export default function AdminLaunchReadiness() {
-  const { data: checks, isLoading } = useReadinessChecks();
+  const { data: checks, isLoading, isError } = useReadinessChecks();
 
   const passCount = checks?.filter((c) => c.status === "pass").length ?? 0;
   const failCount = checks?.filter((c) => c.status === "fail").length ?? 0;
@@ -162,6 +162,18 @@ export default function AdminLaunchReadiness() {
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <Skeleton key={i} className="h-16 rounded-xl" />
           ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="animate-fade-in p-6 space-y-6">
+        <h1 className="text-h2">Launch Readiness</h1>
+        <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-4">
+          <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
+          <p className="text-sm text-destructive">Failed to load Launch Readiness data. Please try again.</p>
         </div>
       </div>
     );

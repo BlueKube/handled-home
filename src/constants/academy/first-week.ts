@@ -34,7 +34,7 @@ Let's get started.`,
       {
         title: "Navigate the admin shell",
         description:
-          "Log in and spend ten minutes just clicking around. Don't change anything — just orient yourself. Notice the main nav sections: Dispatch, Providers, Zones, Reports, Settings. Every tool you'll use this week lives in one of those five buckets. When something feels unfamiliar later, ask yourself which bucket it belongs to.",
+          "Log in and spend ten minutes just clicking around. Don't change anything — just orient yourself. Notice the main nav sections: Cockpit, Execution, People, Markets, Catalog, Money, Growth, Support, Governance, Control Room, Academy, and Tools. The sidebar organizes every admin page into these groups. When something feels unfamiliar later, ask yourself which group it belongs to.",
         screenshot: { alt: "Admin shell main navigation overview" },
       },
       {

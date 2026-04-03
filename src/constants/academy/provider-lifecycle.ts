@@ -19,7 +19,7 @@ ACTIVE — The provider is on the schedule, completing jobs, submitting proof, g
 
 PERFORMANCE MANAGEMENT — Ongoing coaching and feedback loop. Weekly metrics review, quality flag triage, customer complaint response. Good operators don't wait for problems to escalate — they catch signals early and course-correct.
 
-PROBATION — Driven by the quality score system (visible in the Playbooks page). Score 50–70 triggers a written warning. Below 50 triggers formal probation. Below 30 triggers suspension review. The score is affected by no-shows (a third no-show triggers a probation review — see SOPs & Playbooks module for the full escalation ladder), proof compliance, and customer complaints. Probation is a formal intervention with a defined review window. It's not punitive — it's structured. Some providers turn it around. Some don't.
+PROBATION — Driven by the quality score system (visible in the Playbooks page). Score 50–70 triggers a written warning. Below 50 triggers formal probation. Below 30 triggers suspension review. The score is affected by no-shows (a 2nd no-show within 30 days triggers an automatic probation trigger; a 3rd within any 60-day window triggers a deactivation review — see SOPs & Playbooks module for the full escalation ladder), proof compliance, and customer complaints. Probation is a formal intervention with a defined review window. It's not punitive — it's structured. Some providers turn it around. Some don't.
 
 OFFBOARDING — Voluntary (provider leaves) or involuntary (deactivation). Voluntary exits get an exit interview and final payout settlement. Involuntary exits require documentation of the cause, admin deactivation of their account, and notification. Always document why. You will be asked.
 
@@ -173,7 +173,7 @@ The lifecycle is a pipeline. Your job is to keep quality providers moving throug
         severity: "critical",
       },
       {
-        text: "Be extremely careful about letting a provider accumulate no-shows without triggering the formal process. A third no-show triggers a probation review via the quality score system (see Playbooks page and SOPs module for the full escalation ladder). Don't override the system with 'we'll give it one more chance.' The probation trigger exists because informal warnings don't create accountability. Providers who've tested the system and found no real consequence will continue the behavior. Apply the thresholds consistently across your entire roster.",
+        text: "Be extremely careful about letting a provider accumulate no-shows without triggering the formal process. The escalation ladder is: 1st no-show = documented warning; 2nd no-show within 30 days = automatic probation trigger; 3rd no-show within any 60-day window = deactivation review (see Playbooks page and SOPs module for full details). Don't override the system with 'we'll give it one more chance.' The probation trigger exists because informal warnings don't create accountability. Providers who've tested the system and found no real consequence will continue the behavior. Apply the thresholds consistently across your entire roster.",
         severity: "critical",
       },
       {

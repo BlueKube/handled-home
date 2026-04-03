@@ -1,11 +1,55 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+const DEFAULT_DIALS = {
+  max_credit_cents: 5000,
+  credit_tiers: [500, 1000, 2500],
+  generosity: 0.5,
+  evidence_required: true,
+  redo_allowed: true,
+  outcomes_allowed: ["credit", "redo", "refund"],
+  sla_hours: 48,
+  abuse_controls: { max_tickets_per_month: 5, repeat_window_days: 30 },
+};
+
+/**
+ * Resolve the active policy dials for a ticket context.
+ * Precedence: provider → sku → category → zone → global (first match wins).
+ */
+async function resolveActivePolicyDials(
+  supabase: SupabaseClient,
+  context: { provider_org_id?: string; sku_id?: string; category?: string; zone_id?: string },
+): Promise<Record<string, any>> {
+  const precedence: Array<{ scope_type: string; ref_id: string | undefined }> = [
+    { scope_type: "provider", ref_id: context.provider_org_id },
+    { scope_type: "sku", ref_id: context.sku_id },
+    { scope_type: "category", ref_id: context.category },
+    { scope_type: "zone", ref_id: context.zone_id },
+    { scope_type: "global", ref_id: "global" },
+  ];
+
+  for (const { scope_type, ref_id } of precedence) {
+    if (!ref_id) continue;
+    const { data: scope } = await supabase
+      .from("support_policy_scopes")
+      .select("active_policy_id, support_policies(dials)")
+      .eq("scope_type", scope_type)
+      .eq("scope_ref_id", ref_id)
+      .maybeSingle();
+
+    if (scope?.support_policies?.dials) {
+      return { ...DEFAULT_DIALS, ...(scope.support_policies.dials as Record<string, any>) };
+    }
+  }
+
+  return DEFAULT_DIALS;
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -106,11 +150,18 @@ serve(async (req) => {
       });
     }
 
-    // H-1: Use admin override if provided, otherwise AI suggestion. Cap at $50 (5000 cents).
+    // Load policy dials for this ticket's context (falls back to defaults)
+    const dials = await resolveActivePolicyDials(supabase, {
+      provider_org_id: ticket.provider_org_id,
+      category: ticket.category,
+      zone_id: ticket.zone_id,
+    });
+
+    // Use admin override if provided, otherwise AI suggestion. Cap per policy dials.
     const baseCreditCents = (typeof credit_override_cents === "number" && !isNaN(credit_override_cents))
       ? credit_override_cents
       : suggestedCreditCents;
-    const creditCents = Math.min(Math.max(0, baseCreditCents), 5000);
+    const creditCents = Math.min(Math.max(0, baseCreditCents), dials.max_credit_cents ?? 5000);
 
     // Apply credit if suggested
     if (creditCents > 0) {

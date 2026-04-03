@@ -5,7 +5,9 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { ChevronLeft, CreditCard, RefreshCw, XCircle, Gift } from "lucide-react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -14,6 +16,7 @@ export default function AdminCustomerLedger() {
   const { customerId } = useParams<{ customerId: string }>();
   const navigate = useNavigate();
   const { profile, subscription, invoices, credits, payments, isLoading } = useAdminCustomerLedger(customerId);
+  const [customAmount, setCustomAmount] = useState("");
 
   if (isLoading) return <PageSkeleton />;
 
@@ -96,6 +99,28 @@ export default function AdminCustomerLedger() {
           <Button variant="outline" size="sm" onClick={() => handleApplyCredit(50)}>
             <CreditCard className="h-4 w-4 mr-1" /> Credit $50
           </Button>
+          <div className="flex gap-1 items-center">
+            <Input
+              type="number"
+              placeholder="Custom $"
+              className="h-8 w-24 text-xs"
+              min={1}
+              max={500}
+              value={customAmount}
+              onChange={(e) => setCustomAmount(e.target.value)}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!customAmount || Number(customAmount) <= 0}
+              onClick={() => {
+                handleApplyCredit(Number(customAmount));
+                setCustomAmount("");
+              }}
+            >
+              Apply
+            </Button>
+          </div>
         </CardContent>
       </Card>
 

@@ -25,6 +25,7 @@ import {
   CheckCircle2,
   Clock,
   ShieldAlert,
+  AlertTriangle,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
@@ -46,7 +47,7 @@ export default function CustomerReschedule() {
   const [step, setStep] = useState<"reason" | "picking" | "done">("reason");
 
   // Load visit metadata
-  const { data: visitMeta, isLoading: metaLoading } = useQuery({
+  const { data: visitMeta, isLoading: metaLoading, isError: metaError } = useQuery({
     queryKey: ["visit_meta_reschedule", visitId],
     enabled: !!visitId,
     queryFn: async () => {
@@ -156,13 +157,30 @@ export default function CustomerReschedule() {
     }
   };
 
-  // --- Loading states ---
+  // --- Loading & error states ---
   if (metaLoading || holdLoading) {
     return (
       <div className="p-4 space-y-4">
         <Skeleton className="h-6 w-40" />
         <Skeleton className="h-24 rounded-xl" />
         <Skeleton className="h-24 rounded-xl" />
+      </div>
+    );
+  }
+
+  if (metaError) {
+    return (
+      <div className="p-4 space-y-3 animate-fade-in">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-destructive" />
+          <h1 className="text-h2">Reschedule</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          We couldn't load visit details. Check your connection and try again.
+        </p>
+        <Button variant="link" onClick={() => navigate("/customer/upcoming")}>
+          ← Back to upcoming
+        </Button>
       </div>
     );
   }

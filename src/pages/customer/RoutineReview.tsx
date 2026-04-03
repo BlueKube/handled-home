@@ -25,7 +25,7 @@ export default function RoutineReview() {
   const planId = subscription?.plan_id ?? null;
   const zoneId = subscription?.zone_id ?? null;
   const { data: entitlements } = useEntitlements(planId, zoneId);
-  const { data: routineData, isLoading } = useRoutine(property?.id, planId);
+  const { data: routineData, isLoading, isError } = useRoutine(property?.id, planId);
   const [acknowledged, setAcknowledged] = useState(false);
 
   const items = routineData?.items ?? [];
@@ -81,6 +81,18 @@ export default function RoutineReview() {
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-32 w-full" />
         <Skeleton className="h-32 w-full" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-4 pb-24 space-y-4">
+        <h1 className="text-h2">Routine Review</h1>
+        <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-4">
+          <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
+          <p className="text-sm text-destructive">Failed to load Routine Review data. Please try again.</p>
+        </div>
       </div>
     );
   }

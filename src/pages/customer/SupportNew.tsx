@@ -1,15 +1,17 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCreateTicket } from "@/hooks/useCreateTicket";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import { SupportCategoryTile, getAllCategories, type SupportCategory } from "@/components/support/SupportCategoryTile";
-import { ChevronLeft, CheckCircle2, Camera, X } from "lucide-react";
+import { ChevronLeft, CheckCircle2, Camera, X, Sparkles, Loader2, DollarSign, Shield, Clock, ImageIcon } from "lucide-react";
+import { useCustomerJobs } from "@/hooks/useCustomerJobs";
 import { toast } from "@/hooks/use-toast";
 
-type Step = "category" | "details" | "submitted";
+type Step = "category" | "billing_intercept" | "details" | "resolving" | "resolved" | "submitted";
 
 export default function CustomerSupportNew() {
   const navigate = useNavigate();
@@ -25,6 +27,46 @@ export default function CustomerSupportNew() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const createTicket = useCreateTicket();
+  const { data: completedJobs } = useCustomerJobs("completed");
+  const latestJob = completedJobs?.[0];
+  const [resolvedCredit, setResolvedCredit] = useState<number | null>(null);
+  const [resolutionExplanation, setResolutionExplanation] = useState<string | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Poll for AI resolution after ticket is created
+  useEffect(() => {
+    if (step !== "resolving" || !createdTicketId) return;
+
+    let attempts = 0;
+    const maxAttempts = 10; // 5 seconds total
+
+    pollRef.current = setInterval(async () => {
+      attempts++;
+      const { data: ticket } = await supabase
+        .from("support_tickets")
+        .select("status, ai_classification")
+        .eq("id", createdTicketId)
+        .single();
+
+      if (ticket?.status === "resolved") {
+        // AI auto-resolved — show the resolution
+        const credit = (ticket.ai_classification as any)?.suggested_credit_cents ?? 0;
+        const explanation = (ticket.ai_classification as any)?.resolution_explanation ?? "";
+        setResolvedCredit(credit);
+        setResolutionExplanation(explanation);
+        setStep("resolved");
+        if (pollRef.current) clearInterval(pollRef.current);
+      } else if (ticket?.status === "open" || attempts >= maxAttempts) {
+        // AI didn't auto-resolve or timed out — show standard confirmation
+        setStep("submitted");
+        if (pollRef.current) clearInterval(pollRef.current);
+      }
+    }, 500);
+
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [step, createdTicketId]);
 
   const ticketTypeMap: Record<SupportCategory, string> = {
     quality: "quality",
@@ -46,7 +88,8 @@ export default function CustomerSupportNew() {
 
   const handleCategorySelect = (cat: SupportCategory) => {
     setCategory(cat);
-    setStep("details");
+    // Billing disputes get an intercept step with evidence before filing
+    setStep(cat === "billing" ? "billing_intercept" : "details");
   };
 
   const handleSubmit = async () => {
@@ -87,8 +130,15 @@ export default function CustomerSupportNew() {
         }
       }
 
-      setStep("submitted");
+      setStep("resolving");
     } catch (err: any) {
+      // Handle duplicate ticket redirect
+      if (err.message?.startsWith("DUPLICATE:")) {
+        const existingId = err.message.split(":")[1];
+        toast({ title: "Existing ticket found", description: "You already have an open ticket for this visit." });
+        navigate(`/customer/support/tickets/${existingId}`);
+        return;
+      }
       toast({ title: "Error", description: err.message, variant: "destructive" });
     }
   };
@@ -102,7 +152,8 @@ export default function CustomerSupportNew() {
           size="sm"
           className="gap-1 -ml-2"
           onClick={() => {
-            if (step === "details") setStep("category");
+            if (step === "details") setStep(category === "billing" ? "billing_intercept" : "category");
+            else if (step === "billing_intercept") setStep("category");
             else navigate("/customer/support");
           }}
         >
@@ -127,6 +178,62 @@ export default function CustomerSupportNew() {
                 onClick={handleCategorySelect}
               />
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Step: Billing Intercept — show evidence before filing */}
+      {step === "billing_intercept" && (
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <h1 className="text-h2">Before you submit</h1>
+            <p className="text-caption">
+              Here's what we have on file from your recent service. If something doesn't look right, continue below.
+            </p>
+          </div>
+
+          {latestJob ? (
+            <Card className="p-4 space-y-3">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <Shield className="h-4 w-4 text-primary" />
+                Your most recent visit
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 bg-muted/50 rounded-lg text-center">
+                  <Clock className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
+                  <p className="text-xs text-muted-foreground">Date</p>
+                  <p className="text-sm font-medium">{latestJob.scheduled_date ?? "—"}</p>
+                </div>
+                <div className="p-3 bg-muted/50 rounded-lg text-center">
+                  <ImageIcon className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
+                  <p className="text-xs text-muted-foreground">Photos</p>
+                  <p className="text-sm font-medium">{latestJob.photo_count ?? 0} on file</p>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Every visit includes photo proof and checklist verification. If you'd like to review the full receipt, visit your Activity tab.
+              </p>
+            </Card>
+          ) : (
+            <Card className="p-4 text-center">
+              <p className="text-sm text-muted-foreground">No recent visits found to reference.</p>
+            </Card>
+          )}
+
+          <Card className="p-4 bg-accent/5 border-accent/20 space-y-2">
+            <p className="text-sm font-medium">Need a billing adjustment?</p>
+            <p className="text-xs text-muted-foreground">
+              If something was charged incorrectly, we can often resolve it with a credit to your account — no need to contact your bank.
+            </p>
+          </Card>
+
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => navigate("/customer/activity")}>
+              Review my receipts
+            </Button>
+            <Button className="flex-1" onClick={() => setStep("details")}>
+              Continue to submit
+            </Button>
           </div>
         </div>
       )}
@@ -227,7 +334,59 @@ export default function CustomerSupportNew() {
         </div>
       )}
 
-      {/* Step: Submitted */}
+      {/* Step: Resolving (AI processing) */}
+      {step === "resolving" && (
+        <div className="text-center py-12 space-y-4">
+          <Loader2 className="h-10 w-10 text-primary mx-auto animate-spin" />
+          <div className="space-y-1">
+            <p className="text-lg font-semibold">Checking if we can resolve this instantly…</p>
+            <p className="text-sm text-muted-foreground">
+              Our system is reviewing your issue right now.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Step: Resolved (AI auto-resolved with credit) */}
+      {step === "resolved" && (
+        <div className="text-center py-8 space-y-4">
+          <div className="h-14 w-14 rounded-full bg-success/10 flex items-center justify-center mx-auto">
+            <Sparkles className="h-7 w-7 text-success" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-lg font-semibold">Resolved instantly</p>
+            <p className="text-sm text-muted-foreground">
+              {resolutionExplanation || "We've reviewed the evidence and resolved your issue."}
+            </p>
+          </div>
+          {resolvedCredit != null && resolvedCredit > 0 && (
+            <Card className="p-4 border-success/30 bg-success/5 inline-block mx-auto">
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-success" />
+                <span className="text-lg font-bold text-success">
+                  ${(resolvedCredit / 100).toFixed(2)} credit applied
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Applied to your account automatically</p>
+            </Card>
+          )}
+          <div className="flex gap-2 justify-center pt-2">
+            {createdTicketId && (
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/customer/support/tickets/${createdTicketId}`)}
+              >
+                View details
+              </Button>
+            )}
+            <Button onClick={() => navigate("/customer")}>
+              Back to Home
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Step: Submitted (manual review) */}
       {step === "submitted" && (
         <div className="text-center py-12 space-y-4">
           <CheckCircle2 className="h-14 w-14 text-success mx-auto" />

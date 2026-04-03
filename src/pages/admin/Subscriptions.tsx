@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { QueryErrorCard } from "@/components/QueryErrorCard";
-import { Search } from "lucide-react";
+import { Search, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -78,7 +78,7 @@ function SubscriptionRow({ subscription, onClick }: { subscription: AdminSubscri
 
 function SubscriptionDetailSheet({ subscriptionId, onClose }: { subscriptionId: string | null; onClose: () => void }) {
   const { user } = useAuth();
-  const { data, isLoading } = useAdminSubscriptionDetail(subscriptionId);
+  const { data, isLoading, isError } = useAdminSubscriptionDetail(subscriptionId);
   const { data: plan } = usePlanDetail(data?.subscription.plan_id ?? null);
   const forceCancel = useAdminForceCancel();
   const markComped = useAdminMarkComped();
@@ -92,6 +92,16 @@ function SubscriptionDetailSheet({ subscriptionId, onClose }: { subscriptionId: 
         </SheetHeader>
         {isLoading ? (
           <div className="space-y-3 py-4"><Skeleton className="h-8 w-full" /><Skeleton className="h-32 w-full" /></div>
+        ) : isError ? (
+          <div className="p-6 space-y-3 animate-fade-in">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              <h1 className="text-2xl font-bold">Subscription Detail</h1>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Failed to load data. Check your connection and try again.
+            </p>
+          </div>
         ) : data ? (
           <div className="space-y-4 py-4">
             <div className="flex items-center justify-between">

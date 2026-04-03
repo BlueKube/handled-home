@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { Plus, CheckCircle2, RotateCcw, FileText, ChevronRight } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, CheckCircle2, RotateCcw, FileText, ChevronRight, Trash2, Link2 } from "lucide-react";
 
 const DEFAULT_DIALS = {
   outcomes_allowed: ["credit", "redo", "refund"],
@@ -22,10 +23,13 @@ const DEFAULT_DIALS = {
 };
 
 export default function AdminSupportPolicies() {
-  const { policies, scopes, isLoading, createPolicy, publishPolicy, rollbackPolicy } = useSupportPolicies();
+  const { policies, scopes, isLoading, createPolicy, publishPolicy, rollbackPolicy, createScope, deleteScope } = useSupportPolicies();
   const [showCreate, setShowCreate] = useState(false);
   const [detailPolicy, setDetailPolicy] = useState<SupportPolicy | null>(null);
   const [form, setForm] = useState({ name: "", description: "", change_reason: "", dials: JSON.stringify(DEFAULT_DIALS, null, 2) });
+  const [scopeForm, setScopeForm] = useState({ scope_type: "global", scope_ref_id: "", policy_id: "" });
+
+  const publishedPolicies = policies.filter(p => p.status === "published");
 
   const handleCreate = () => {
     try {
@@ -90,6 +94,102 @@ export default function AdminSupportPolicies() {
           ))}
         </div>
       )}
+
+      {/* Scope Assignments */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <Link2 className="h-4 w-4 text-muted-foreground" />
+          <h2 className="text-sm font-semibold">Scope Assignments</h2>
+        </div>
+        <p className="text-xs text-muted-foreground mb-3">
+          Assign published policies to scopes. Precedence: provider &gt; sku &gt; category &gt; zone &gt; global.
+        </p>
+
+        {scopes.length > 0 && (
+          <div className="space-y-1 mb-3">
+            {scopes.map((s) => {
+              const policy = policies.find(p => p.id === s.active_policy_id);
+              return (
+                <div key={s.id} className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg text-xs">
+                  <Badge variant="outline" className="text-[10px]">{s.scope_type}</Badge>
+                  <span className="text-muted-foreground">{s.scope_ref_id ?? "—"}</span>
+                  <span className="text-muted-foreground">→</span>
+                  <span className="font-medium">{policy?.name ?? "Unknown"} v{policy?.version ?? "?"}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 ml-auto"
+                    onClick={() => deleteScope.mutate(s.id, {
+                      onSuccess: () => toast.success("Scope removed"),
+                      onError: (e) => toast.error(e.message),
+                    })}
+                  >
+                    <Trash2 className="h-3 w-3 text-muted-foreground" />
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {publishedPolicies.length > 0 && (
+          <div className="flex gap-2 items-end">
+            <div className="flex-1">
+              <Select value={scopeForm.scope_type} onValueChange={(v) => setScopeForm(f => ({ ...f, scope_type: v }))}>
+                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="global">Global</SelectItem>
+                  <SelectItem value="zone">Zone</SelectItem>
+                  <SelectItem value="category">Category</SelectItem>
+                  <SelectItem value="sku">SKU</SelectItem>
+                  <SelectItem value="provider">Provider</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {scopeForm.scope_type !== "global" && (
+              <Input
+                placeholder="Ref ID"
+                className="h-8 text-xs flex-1"
+                value={scopeForm.scope_ref_id}
+                onChange={(e) => setScopeForm(f => ({ ...f, scope_ref_id: e.target.value }))}
+              />
+            )}
+            <div className="flex-1">
+              <Select value={scopeForm.policy_id} onValueChange={(v) => setScopeForm(f => ({ ...f, policy_id: v }))}>
+                <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Policy" /></SelectTrigger>
+                <SelectContent>
+                  {publishedPolicies.map(p => (
+                    <SelectItem key={p.id} value={p.id}>v{p.version} {p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              size="sm"
+              className="h-8"
+              disabled={!scopeForm.policy_id || createScope.isPending}
+              onClick={() => {
+                createScope.mutate(
+                  {
+                    scope_type: scopeForm.scope_type,
+                    scope_ref_id: scopeForm.scope_type === "global" ? "global" : scopeForm.scope_ref_id,
+                    active_policy_id: scopeForm.policy_id,
+                  },
+                  {
+                    onSuccess: () => {
+                      toast.success("Scope assigned");
+                      setScopeForm({ scope_type: "global", scope_ref_id: "", policy_id: "" });
+                    },
+                    onError: (e) => toast.error(e.message),
+                  }
+                );
+              }}
+            >
+              Assign
+            </Button>
+          </div>
+        )}
+      </div>
 
       {/* Create Sheet */}
       <Sheet open={showCreate} onOpenChange={setShowCreate}>

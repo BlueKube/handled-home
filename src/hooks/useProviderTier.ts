@@ -100,5 +100,6 @@ export function useProviderTier(providerOrgId: string | undefined) {
     pendingGates: (gatesQuery.data ?? []).filter((g) => g.status === "pending"),
     completedGates: (gatesQuery.data ?? []).filter((g) => g.status === "completed"),
     isLoading: tierQuery.isLoading,
+    isError: tierQuery.isError || gatesQuery.isError,
   };
 }

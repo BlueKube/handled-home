@@ -167,7 +167,7 @@ function RewardsTab() {
                   <Badge variant="outline" className="text-xs">{r.reward_type.replace("_", " ")}</Badge>
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">{r.referral_programs?.name} · {r.milestone}</p>
-                {r.hold_reason && <p className="text-xs text-amber-600 mt-0.5">{r.hold_reason}</p>}
+                {r.hold_reason && <p className="text-xs text-amber-400 mt-0.5">{r.hold_reason}</p>}
               </div>
               <div className="flex gap-1">
                 {r.status === "on_hold" && <Button size="sm" variant="outline" onClick={() => setActionDialog({ type: "release", rewardId: r.id })}>Release</Button>}

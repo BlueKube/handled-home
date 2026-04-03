@@ -49,9 +49,22 @@ const PIE_COLORS = [
 
 export default function ExceptionAnalytics() {
   const [daysBack, setDaysBack] = useState(30);
-  const { data, isLoading } = useExceptionAnalytics(daysBack);
+  const { data, isLoading, isError } = useExceptionAnalytics(daysBack);
 
   if (isLoading) return <PageSkeleton />;
+  if (isError) {
+    return (
+      <div className="p-6 space-y-3 animate-fade-in">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-destructive" />
+          <h1 className="text-2xl font-bold">Exception Analytics</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Failed to load data. Check your connection and try again.
+        </p>
+      </div>
+    );
+  }
   if (!data) return <p className="text-center text-muted-foreground py-12">No data available.</p>;
 
   const typeChartData = (data.by_type ?? []).map((t) => ({

@@ -9,8 +9,22 @@ import { ChevronLeft, Calendar, Users, AlertTriangle, TrendingUp } from "lucide-
 import { SparklineChart } from "@/components/SparklineChart";
 
 export default function OpsZones() {
-  const { data: zones, isLoading } = useZoneHealth();
+  const { data: zones, isLoading, isError } = useZoneHealth();
   const nav = useNavigate();
+
+  if (isError) {
+    return (
+      <div className="p-6 space-y-3 animate-fade-in">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-destructive" />
+          <h1 className="text-2xl font-bold">Zone Health</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Failed to load data. Check your connection and try again.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-in p-6 space-y-4">

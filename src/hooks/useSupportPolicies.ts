@@ -18,7 +18,7 @@ export type SupportPolicy = {
 export type SupportPolicyScope = {
   id: string;
   scope_type: string;
-  scope_ref_id: string | null;
+  scope_ref_id: string;
   scope_ref_key: string | null;
   active_policy_id: string;
   created_at: string;
@@ -109,12 +109,46 @@ export function useSupportPolicies() {
     },
   });
 
+  const deleteScope = useMutation({
+    mutationFn: async (scopeId: string) => {
+      const { error } = await supabase
+        .from("support_policy_scopes")
+        .delete()
+        .eq("id", scopeId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["support-policy-scopes"] });
+    },
+  });
+
+  const createScope = useMutation({
+    mutationFn: async (input: { scope_type: string; scope_ref_id: string; active_policy_id: string }) => {
+      const { data, error } = await supabase
+        .from("support_policy_scopes")
+        .upsert(
+          { scope_type: input.scope_type, scope_ref_id: input.scope_ref_id, active_policy_id: input.active_policy_id },
+          { onConflict: "scope_type,scope_ref_id" }
+        )
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["support-policy-scopes"] });
+    },
+  });
+
   return {
     policies: policiesQuery.data ?? [],
     scopes: scopesQuery.data ?? [],
     isLoading: policiesQuery.isLoading,
+    isError: policiesQuery.isError,
     createPolicy,
     publishPolicy,
     rollbackPolicy,
+    createScope,
+    deleteScope,
   };
 }

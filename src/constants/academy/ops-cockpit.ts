@@ -10,7 +10,7 @@ export const opsCockpitSections: TrainingSection[] = [
 The cockpit is organized into four columns that mirror the four things that matter most in a home services operation:
 
 • NOW — Reliability. Are jobs happening? Are providers showing up? Is anything at risk today?
-• MONEY — Cash flow. Did billing run? Are there failed payments? How much revenue came in?
+• MONEY — Cash flow. Did billing run? How much revenue came in? Are there past-due accounts?
 • QUALITY — Service quality. What's the issue rate? Are providers submitting proof? Any disputes?
 • MARKETS — Growth. Are referrals converting? Are provider applications coming in? Is any zone struggling?
 
@@ -28,7 +28,7 @@ Think of it like the dashboard of a car. You don't stare at the RPM gauge all da
       },
       {
         title: "Scan the NOW column (left side)",
-        description: "Look at jobs at risk, missing proof, and provider utilization. If jobs at risk is above zero, click through to Dispatcher Queues immediately. These are today's fires. If provider utilization is below 60%, you might have idle providers — check if assignment ran successfully.",
+        description: "Look at jobs at risk, missing proof, and provider utilization. If jobs at risk is above zero, click through to Dispatcher Queues immediately. These are today's fires. If provider utilization is below 80%, that's a warning — check if assignment ran successfully. Below 60% is critical and means you likely have idle providers.",
         screenshot: {
           alt: "Ops Cockpit NOW column",
           annotations: [
@@ -39,7 +39,7 @@ Think of it like the dashboard of a car. You don't stare at the RPM gauge all da
       },
       {
         title: "Check the MONEY column",
-        description: "Revenue today, failed payments, and past due accounts. If failed payments is climbing, check if Stripe is having an outage before you start investigating individual accounts. A single Stripe incident can make 50 payments fail at once — that's not 50 customer problems, it's one infrastructure problem.",
+        description: "Revenue today and past due accounts. If failed payments are climbing, check if Stripe is having an outage before you start investigating individual accounts. A single Stripe incident can make 50 payments fail at once — that's not 50 customer problems, it's one infrastructure problem.",
         screenshot: { alt: "Ops Cockpit MONEY column" },
       },
       {
@@ -88,7 +88,7 @@ Think of it like the dashboard of a car. You don't stare at the RPM gauge all da
     content: `The cockpit shows several gauges with green/yellow/red thresholds. Here's what actually matters:
 
 PROVIDER UTILIZATION (target: ≥80%)
-This measures how much of your provider capacity is actually being used. Below 60% means you have idle providers — either assignment isn't running, or you don't have enough customers in the zone to fill routes. Above 95% means you're running hot — one sick day causes cascading missed jobs.
+This measures how much of your provider capacity is actually being used. Below 80% is a warning — either assignment isn't running optimally or you don't have enough customers in the zone to fill routes. Below 60% is critical: you have idle providers and something needs immediate attention. Above 95% means you're running hot — one sick day causes cascading missed jobs.
 
 The sweet spot is 80-90%. Enough slack to handle surprises, enough density to make routes efficient.
 

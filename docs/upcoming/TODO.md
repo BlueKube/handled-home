@@ -140,3 +140,26 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 - [ ] **Feature 272: ZoneBuilder.tsx 579 lines needs decomposition** — Extract StepRegion, StepSettings, StepPreview, StepEdit, StepCommit into sub-components.
   - **Why:** Major refactor, risk of introducing bugs in 5-step wizard
   - **Blocked:** Nothing — can be done in a future round
+
+## Round 62: Feature Completion (2026-04-03)
+
+### Push Notification Credentials (Feature #167)
+- [ ] **FCM_SERVER_KEY** — Add as Supabase Edge Function secret. Get from Firebase Console.
+  - **Why:** Without this, Android push notifications silently skip delivery
+  - **Blocked:** Android push notifications
+- [ ] **APNS_KEY, APNS_KEY_ID, APNS_TEAM_ID** — Add as Supabase Edge Function secrets
+  - **Why:** iOS push delivery requires APNs credentials
+  - **Blocked:** iOS push notifications (already noted in TestFlight section above)
+- [ ] **google-services.json** — Download from Firebase Console, place in `android/app/`
+  - **Why:** Capacitor needs this to generate device tokens on Android
+  - **Blocked:** Android push registration
+- [ ] **GoogleService-Info.plist** — Download from Firebase/Apple, place in `ios/App/App/`
+  - **Why:** Capacitor needs this to generate device tokens on iOS
+  - **Blocked:** iOS push registration
+
+## Round 51–55 Polish (2026-04-02)
+
+### Edge Function Auth Gaps (SECURITY)
+- [x] **`offer-appointment-windows` had NO auth** — ✅ Fixed: added `requireUserJwt` (commit e86eb9b)
+- [x] **`backfill-property-zones`, `commit-zones`, `generate-zones` missing admin role check** — ✅ Fixed: added `requireAdminJwt` (commit e86eb9b)
+- [ ] **34 of 39 edge functions duplicate CORS headers inline** — Only 5 use the shared `_shared/cors.ts` module. Maintenance risk.

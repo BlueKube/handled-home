@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -30,7 +31,9 @@ import {
   HelpCircle, FileText, BookOpen,
   Activity, Bell, MessageSquare, ToggleLeft,
   Settings, Rocket, GraduationCap, Calculator, FlaskConical, Mail,
+  LogOut, ArrowLeftRight,
 } from "lucide-react";
+
 import type { AdminRole } from "@/hooks/useAdminMembership";
 
 interface NavItem {
@@ -143,15 +146,10 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
-    label: "Playbooks",
-    items: [
-      { title: "SOPs", url: "/admin/playbooks", icon: BookOpen },
-    ],
-  },
-  {
     label: "Academy",
     items: [
       { title: "Training Center", url: "/admin/academy", icon: GraduationCap },
+      { title: "SOPs & Playbooks", url: "/admin/playbooks", icon: BookOpen },
     ],
   },
   {
@@ -183,7 +181,7 @@ function AdminSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
-      <SidebarHeader className="px-4 py-3 flex items-center justify-center bg-white">
+      <SidebarHeader className="px-4 py-3 flex items-center justify-center bg-sidebar">
         {!collapsed && (
           <span className="font-['Plus_Jakarta_Sans'] font-bold tracking-tight text-xl select-none">
             <span style={{ color: "hsl(220 20% 10%)" }}>Handled</span>
@@ -249,7 +247,45 @@ function AdminSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <AdminSidebarFooter collapsed={collapsed} />
     </Sidebar>
+  );
+}
+
+function AdminSidebarFooter({ collapsed }: { collapsed: boolean }) {
+  const { user, roles, signOut, setActiveRole } = useAuth();
+  const otherRoles = roles.filter((r) => r !== "admin");
+
+  return (
+    <SidebarFooter className="border-t border-sidebar-border p-2">
+      {!collapsed && user && (
+        <p className="text-[11px] text-sidebar-foreground/50 truncate px-2 mb-1">
+          {user.email}
+        </p>
+      )}
+      <SidebarMenu>
+        {otherRoles.length > 0 && (
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={() => setActiveRole(otherRoles[0])}
+              className="hover:bg-sidebar-accent/50 text-sm py-1.5"
+            >
+              <ArrowLeftRight className="mr-2 h-4 w-4 shrink-0" />
+              {!collapsed && <span>Switch to {otherRoles[0]}</span>}
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        )}
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            onClick={() => signOut()}
+            className="hover:bg-sidebar-accent/50 text-sm py-1.5 text-destructive"
+          >
+            <LogOut className="mr-2 h-4 w-4 shrink-0" />
+            {!collapsed && <span>Log Out</span>}
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </SidebarFooter>
   );
 }
 

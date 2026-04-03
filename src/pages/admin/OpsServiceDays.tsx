@@ -16,7 +16,7 @@ export default function OpsServiceDays() {
   const nav = useNavigate();
   const [tab, setTab] = useState("overview");
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["ops-service-day-health-full"],
     queryFn: async () => {
       const sevenDaysAgo = new Date();
@@ -83,6 +83,18 @@ export default function OpsServiceDays() {
         <Skeleton className="h-8 w-48" />
         <div className="grid gap-3 grid-cols-2">
           {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-6 space-y-4">
+        <h1 className="text-h2">Service Days</h1>
+        <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-4">
+          <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
+          <p className="text-sm text-destructive">Failed to load Service Days data. Please try again.</p>
         </div>
       </div>
     );

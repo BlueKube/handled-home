@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshCw, CheckCircle, XCircle, Clock, Play, AlertTriangle } from "lucide-react";
-import { formatDistanceToNow, format, differenceInSeconds, addMinutes, addHours, addDays, isAfter } from "date-fns";
+import { formatDistanceToNow, format, differenceInSeconds, addMinutes, isAfter } from "date-fns";
 
 const statusConfig: Record<string, { icon: React.ElementType; color: string }> = {
   success: { icon: CheckCircle, color: "text-success" },
@@ -84,6 +84,24 @@ export default function CronHealth() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => <Skeleton key={i} className="h-28" />)}
         </div>
+      </div>
+    );
+  }
+
+  if (runs.isError) {
+    return (
+      <div className="animate-fade-in p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-6 w-6 text-destructive" />
+          <h1 className="text-2xl font-bold">Cron Health</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Failed to load cron run data. Check your connection and try again.
+        </p>
+        <Button variant="outline" size="sm" onClick={() => runs.refetch()}>
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Retry
+        </Button>
       </div>
     );
   }

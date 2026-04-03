@@ -27,9 +27,23 @@ export default function AdminSupportDashboard() {
   const navigate = useNavigate();
   const [queue, setQueue] = useState<Queue>("all");
   const filters = queue === "all" ? undefined : { queue };
-  const { data: tickets = [], isLoading } = useSupportTickets(filters);
+  const { data: tickets = [], isLoading, isError } = useSupportTickets(filters);
 
   const openCount = tickets.filter((t) => !["resolved", "closed"].includes(t.status)).length;
+
+  if (isError) {
+    return (
+      <div className="p-6 space-y-3 animate-fade-in">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-destructive" />
+          <h1 className="text-2xl font-bold">Support Dashboard</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Failed to load data. Check your connection and try again.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-4xl space-y-6 animate-fade-in">
