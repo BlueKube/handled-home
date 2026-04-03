@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card } from "@/components/ui/card";
@@ -15,6 +15,7 @@ import { useState } from "react";
 export function CustomerNotificationBanners() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
 
   const { data: bannerNotifications } = useQuery({
@@ -45,6 +46,7 @@ export function CustomerNotificationBanners() {
       .from("notifications")
       .update({ read_at: new Date().toISOString() })
       .eq("id", id);
+    queryClient.invalidateQueries({ queryKey: ["customer_banner_notifications"] });
   };
 
   const visibleBanners = (bannerNotifications ?? []).filter(

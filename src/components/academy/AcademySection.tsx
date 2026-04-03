@@ -90,13 +90,13 @@ function ProTipsSection({ section }: { section: TrainingSection }) {
   return (
     <div className="space-y-3">
       {section.proTips?.map((tip, i) => (
-        <Card key={i} className="p-4 border-amber-500/20 bg-amber-950/10">
+        <Card key={i} className="p-4 border-amber-500/30 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-950/10">
           <div className="flex items-start gap-3">
-            <Lightbulb className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
+            <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-amber-200">{tip.text}</p>
+              <p className="text-sm font-medium text-amber-900 dark:text-amber-200">{tip.text}</p>
               {tip.context && (
-                <p className="text-xs text-amber-400/70 mt-1">{tip.context}</p>
+                <p className="text-xs text-amber-700 dark:text-amber-400/70 mt-1">{tip.context}</p>
               )}
             </div>
           </div>
@@ -115,21 +115,21 @@ function WatchOutsSection({ section }: { section: TrainingSection }) {
           className={cn(
             "p-4",
             wo.severity === "critical"
-              ? "border-red-500/30 bg-red-950/10"
-              : "border-orange-500/20 bg-orange-950/10",
+              ? "border-red-500/30 bg-red-50 dark:bg-red-950/10"
+              : "border-orange-500/30 dark:border-orange-500/20 bg-orange-50 dark:bg-orange-950/10",
           )}
         >
           <div className="flex items-start gap-3">
             <AlertTriangle
               className={cn(
                 "h-5 w-5 flex-shrink-0 mt-0.5",
-                wo.severity === "critical" ? "text-red-400" : "text-orange-400",
+                wo.severity === "critical" ? "text-red-600 dark:text-red-400" : "text-orange-600 dark:text-orange-400",
               )}
             />
             <p
               className={cn(
                 "text-sm font-medium",
-                wo.severity === "critical" ? "text-red-200" : "text-orange-200",
+                wo.severity === "critical" ? "text-red-900 dark:text-red-200" : "text-orange-900 dark:text-orange-200",
               )}
             >
               {wo.text}
@@ -143,9 +143,9 @@ function WatchOutsSection({ section }: { section: TrainingSection }) {
 
 function AutomationSection({ section }: { section: TrainingSection }) {
   const typeLabel = {
-    "set-and-forget": { label: "Set & Forget", color: "text-green-400 bg-green-900/40 border-green-500/20" },
-    "daily-check": { label: "Check Daily", color: "text-amber-400 bg-amber-900/40 border-amber-500/20" },
-    "weekly-check": { label: "Check Weekly", color: "text-blue-400 bg-blue-900/40 border-blue-500/20" },
+    "set-and-forget": { label: "Set & Forget", color: "text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/40 border-green-300 dark:border-green-500/20" },
+    "daily-check": { label: "Check Daily", color: "text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/40 border-amber-300 dark:border-amber-500/20" },
+    "weekly-check": { label: "Check Weekly", color: "text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/40 border-blue-300 dark:border-blue-500/20" },
   };
 
   return (
@@ -176,12 +176,12 @@ function RealWorldSection({ section }: { section: TrainingSection }) {
   return (
     <div className="space-y-3">
       {section.realWorldData?.map((data, i) => (
-        <Card key={i} className="p-4 border-purple-500/20 bg-purple-950/10">
+        <Card key={i} className="p-4 border-purple-500/30 dark:border-purple-500/20 bg-purple-50 dark:bg-purple-950/10">
           <div className="flex items-start gap-3">
-            <ChevronRight className="h-5 w-5 text-purple-400 flex-shrink-0 mt-0.5" />
+            <ChevronRight className="h-5 w-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm text-purple-200">{data.text}</p>
-              <p className="text-xs text-purple-400/60 mt-1">Source: {data.source}</p>
+              <p className="text-sm text-purple-900 dark:text-purple-200">{data.text}</p>
+              <p className="text-xs text-purple-600 dark:text-purple-400/60 mt-1">Source: {data.source}</p>
             </div>
           </div>
         </Card>

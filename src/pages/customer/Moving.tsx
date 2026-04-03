@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, MapPin, CheckCircle, Truck, Users, ArrowRight, Bell } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,6 +16,7 @@ const TOTAL_STEPS = 4;
 
 export default function CustomerMoving() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user } = useAuth();
   const [step, setStep] = useState(1);
 
@@ -101,6 +103,7 @@ export default function CustomerMoving() {
         );
       }
 
+      queryClient.invalidateQueries({ queryKey: ["property"] });
       setCompleted(true);
       toast.success("Your move has been recorded");
     } catch {

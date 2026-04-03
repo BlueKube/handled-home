@@ -11,14 +11,16 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 export default function AdminCustomerLedger() {
   const { customerId } = useParams<{ customerId: string }>();
   const navigate = useNavigate();
-  const { profile, subscription, invoices, credits, payments, isLoading } = useAdminCustomerLedger(customerId);
+  const { profile, subscription, invoices, credits, payments, isLoading, isError } = useAdminCustomerLedger(customerId);
   const [customAmount, setCustomAmount] = useState("");
 
   if (isLoading) return <PageSkeleton />;
+  if (isError) return <div className="p-6"><QueryErrorCard /></div>;
 
   const handleApplyCredit = async (tier: number) => {
     if (!customerId) return;

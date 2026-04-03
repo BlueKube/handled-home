@@ -126,7 +126,7 @@ export function OpsExceptionDetailPanel({ exceptionId, onClose }: Props) {
       {slaHoursLeft !== null && !isResolved && (
         <div className={`flex items-center gap-2 p-2 rounded-md text-sm ${
           slaHoursLeft < 0 ? "bg-destructive/10 text-destructive" :
-          slaHoursLeft <= 2 ? "bg-amber-950/20 text-amber-400" :
+          slaHoursLeft <= 2 ? "bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400" :
           "bg-muted text-muted-foreground"
         }`}>
           <Clock className="h-4 w-4" />

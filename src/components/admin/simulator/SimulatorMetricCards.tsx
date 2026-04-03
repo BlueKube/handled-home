@@ -9,9 +9,9 @@ interface MetricCardProps {
 
 function MetricCard({ label, value, color = "neutral" }: MetricCardProps) {
   const colorClass = color === "positive"
-    ? "text-green-400"
+    ? "text-green-700 dark:text-green-400"
     : color === "negative"
-      ? "text-red-400"
+      ? "text-red-700 dark:text-red-400"
       : "text-primary";
 
   return (

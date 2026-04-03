@@ -9,15 +9,17 @@ import { DollarSign, Clock, Calendar, Settings } from "lucide-react";
 import { PageSkeleton } from "@/components/PageSkeleton";
 import { DecisionTraceCard } from "@/components/admin/DecisionTraceCard";
 import { PayoutRolloverCard } from "@/components/admin/billing/PayoutRolloverCard";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 function formatCents(cents: number) { return `$${(cents / 100).toFixed(2)}`; }
 
 export default function AdminPayoutsPage() {
   const navigate = useNavigate();
   const [selectedPayoutId, setSelectedPayoutId] = useState<string | null>(null);
-  const { payouts, isLoading } = useAdminBilling();
+  const { payouts, isLoading, isError } = useAdminBilling();
 
   if (isLoading) return <PageSkeleton />;
+  if (isError) return <div className="p-6"><QueryErrorCard /></div>;
 
   const paidTotal = payouts.filter(p => p.status === "PAID").reduce((s, p) => s + p.total_cents, 0);
   const pendingCount = payouts.filter(p => p.status === "INITIATED").length;

@@ -184,8 +184,8 @@ function AdminSidebar() {
       <SidebarHeader className="px-4 py-3 flex items-center justify-center bg-sidebar">
         {!collapsed && (
           <span className="font-['Plus_Jakarta_Sans'] font-bold tracking-tight text-xl select-none">
-            <span style={{ color: "hsl(220 20% 10%)" }}>Handled</span>
-            <span style={{ color: "hsl(200 80% 50%)" }}>Home</span>
+            <span className="text-white">Handled</span>
+            <span className="text-sidebar-primary">Home</span>
           </span>
         )}
       </SidebarHeader>

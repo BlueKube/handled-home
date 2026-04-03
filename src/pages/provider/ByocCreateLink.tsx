@@ -8,6 +8,7 @@ import { useSkuLevels } from "@/hooks/useSkuLevels";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { ChevronLeft, Loader2, Link2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -20,9 +21,9 @@ const CADENCES = [
 
 export default function ByocCreateLink() {
   const navigate = useNavigate();
-  const { org } = useProviderOrg();
-  const { coverage } = useProviderCoverage(org?.id);
-  const { capabilities } = useProviderCapabilities(org?.id);
+  const { org, isError: orgError } = useProviderOrg();
+  const { coverage, isError: coverageError } = useProviderCoverage(org?.id);
+  const { capabilities, isError: capabilitiesError } = useProviderCapabilities(org?.id);
   const { createLink, canCreateLink, rateLimitReason } = useByocInviteLinks();
 
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -54,6 +55,8 @@ export default function ByocCreateLink() {
   // Get levels for selected SKU
   const levelsQuery = useSkuLevels(selectedSku || null);
   const levels = levelsQuery.data;
+
+  if (orgError || coverageError || capabilitiesError) return <QueryErrorCard />;
 
   const canCreate = selectedCategory && selectedZone;
 

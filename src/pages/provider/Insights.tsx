@@ -24,9 +24,9 @@ export default function ProviderInsights() {
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
       const [jobsWeekRes, jobs30dRes, issuesRes, earningsRes] = await Promise.all([
-        (supabase.from("jobs") as any).select("id, status, arrived_at, departed_at").eq("provider_org_id", org!.id).eq("status", "COMPLETED").gte("completed_at", weekAgo.toISOString()),
-        (supabase.from("jobs") as any).select("id, status").eq("provider_org_id", org!.id).eq("status", "COMPLETED").gte("completed_at", thirtyDaysAgo.toISOString()),
-        (supabase.from("job_issues") as any).select("id, jobs!inner(provider_org_id)").eq("jobs.provider_org_id", org!.id).gte("created_at", thirtyDaysAgo.toISOString()),
+        supabase.from("jobs").select("id, status, arrived_at, departed_at").eq("provider_org_id", org!.id).eq("status", "COMPLETED").gte("completed_at", weekAgo.toISOString()),
+        supabase.from("jobs").select("id, status").eq("provider_org_id", org!.id).eq("status", "COMPLETED").gte("completed_at", thirtyDaysAgo.toISOString()),
+        supabase.from("job_issues").select("id, jobs!inner(provider_org_id)").eq("jobs.provider_org_id", org!.id).gte("created_at", thirtyDaysAgo.toISOString()),
         supabase.from("provider_earnings").select("status, total_cents").eq("provider_org_id", org!.id),
       ]);
 

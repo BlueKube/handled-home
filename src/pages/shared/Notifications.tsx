@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import type { Database } from "@/integrations/supabase/types";
 
 type Notification = Database["public"]["Tables"]["notifications"]["Row"];
@@ -25,7 +26,7 @@ export default function Notifications() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<PriorityFilter>("ALL");
   const [limit, setLimit] = useState(PAGE_SIZE);
-  const { notifications, unreadCount, markRead, markAllRead, isMarkingAllRead, isLoading } =
+  const { notifications, unreadCount, markRead, markAllRead, isMarkingAllRead, isLoading, isError } =
     useNotifications(limit, filter);
 
   const handleClick = (n: Notification) => {
@@ -60,7 +61,9 @@ export default function Notifications() {
         </TabsList>
       </Tabs>
 
-      {isLoading ? (
+      {isError ? (
+        <QueryErrorCard />
+      ) : isLoading ? (
         <div className="space-y-1 rounded-lg border border-border overflow-hidden bg-card">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="flex gap-3 px-4 py-3.5">

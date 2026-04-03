@@ -47,7 +47,7 @@ serve(async (req) => {
       .from("subscriptions")
       .select("id")
       .eq("status", "active")
-      .lte("billing_cycle_end_at", threeDaysFromNow.toISOString())
+      .lt("billing_cycle_end_at", threeDaysFromNow.toISOString())
       .gte("billing_cycle_end_at", new Date().toISOString());
 
     if (subErr) {

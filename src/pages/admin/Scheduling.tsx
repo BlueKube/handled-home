@@ -13,11 +13,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertTriangle, CalendarClock, CloudRain, FileText, RefreshCw, Users } from "lucide-react";
 import { toast } from "sonner";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 
 export default function AdminScheduling() {
-  const { data: zones, isLoading: zonesLoading } = useZones();
+  const { data: zones, isLoading: zonesLoading, isError: zonesError } = useZones();
   const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null);
   const [overrideTarget, setOverrideTarget] = useState<any>(null);
   const [weatherMode, setWeatherMode] = useState(false);
@@ -53,6 +54,9 @@ export default function AdminScheduling() {
   });
 
   const isLoading = zonesLoading || assignLoading;
+  const isError = zonesError;
+
+  if (isError) return <div className="p-6"><QueryErrorCard /></div>;
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">

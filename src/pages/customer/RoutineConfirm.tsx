@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { getCategoryLabel } from "@/lib/serviceCategories";
 import { emitStateAnalyticsEvent } from "@/lib/analyticsEvents";
 import { useAuth } from "@/contexts/AuthContext";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 /** Resolve sku_id → category for a set of sku IDs */
 function useSkuCategories(skuIds: string[]) {
@@ -49,7 +50,7 @@ export default function RoutineConfirm() {
   const emittedBlockRef = useRef(false);
 
   const skuIds = routineData?.items.map((i) => i.sku_id) ?? [];
-  const { data: skuCategoryMap } = useSkuCategories(skuIds);
+  const { data: skuCategoryMap, isError: skuCategoriesError } = useSkuCategories(skuIds);
 
   const isLoading = subLoading || routineLoading || gatingLoading;
 
@@ -87,6 +88,14 @@ export default function RoutineConfirm() {
       <div className="p-4 space-y-4">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-32 w-full" />
+      </div>
+    );
+  }
+
+  if (skuCategoriesError) {
+    return (
+      <div className="p-4">
+        <QueryErrorCard message="Could not load service categories." />
       </div>
     );
   }

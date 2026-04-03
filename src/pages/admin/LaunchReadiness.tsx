@@ -189,20 +189,20 @@ export default function AdminLaunchReadiness() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Rocket className={`h-5 w-5 ${allGreen ? "text-green-400" : "text-muted-foreground"}`} />
-          <span className={`text-sm font-medium ${allGreen ? "text-green-400" : "text-muted-foreground"}`}>
+          <Rocket className={`h-5 w-5 ${allGreen ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}`} />
+          <span className={`text-sm font-medium ${allGreen ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}`}>
             {passCount}/{totalCount} passing
           </span>
         </div>
       </div>
 
       {allGreen && (
-        <Card className="p-4 border-green-500/30 bg-green-950/20">
+        <Card className="p-4 border-green-500/30 bg-green-50 dark:bg-green-950/20">
           <div className="flex items-center gap-3">
-            <CheckCircle2 className="h-6 w-6 text-green-400" />
+            <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
             <div>
-              <p className="font-medium text-green-400">Ready to Launch</p>
-              <p className="text-xs text-green-400/70">All prerequisite checks are passing.</p>
+              <p className="font-medium text-green-700 dark:text-green-400">Ready to Launch</p>
+              <p className="text-xs text-green-600 dark:text-green-400/70">All prerequisite checks are passing.</p>
             </div>
           </div>
         </Card>

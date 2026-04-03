@@ -16,6 +16,7 @@ import { ChevronLeft, Clock, CheckCircle2, AlertTriangle, Shield, Send, Wand2, R
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 const OFFER_TYPES = [
   { value: "credit", label: "Credit" },
@@ -39,7 +40,7 @@ export default function AdminSupportTicketDetail() {
   const { ticketId } = useParams<{ ticketId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { ticket, offers, events, attachments, isLoading } = useSupportTicketDetail(ticketId);
+  const { ticket, offers, events, attachments, isLoading, error } = useSupportTicketDetail(ticketId);
   const actions = useTicketActions(ticketId ?? "");
   const { macros } = useSupportMacros();
   const aiClassify = useSupportAiClassify();
@@ -67,6 +68,8 @@ export default function AdminSupportTicketDetail() {
       </div>
     );
   }
+
+  if (error) return <div className="p-6"><QueryErrorCard /></div>;
 
   if (!ticket) {
     return (

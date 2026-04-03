@@ -21,6 +21,7 @@ interface AuthContextType {
   setPreviewRole: (role: AppRole | null) => void;
   effectiveRole: AppRole;
   profile: Profile | null;
+  refreshProfile: () => Promise<void>;
   loading: boolean;
   bootstrapError: string | null;
   retryBootstrap: () => void;
@@ -155,6 +156,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEYS.ACTIVE_ROLE, role);
   };
 
+  const refreshProfile = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("profiles")
+      .select("full_name, phone, avatar_url")
+      .eq("user_id", user.id)
+      .single();
+    if (data) setProfile(data);
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -170,7 +181,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, roles, activeRole, setActiveRole: handleSetActiveRole, previewRole, setPreviewRole, effectiveRole, profile, loading, bootstrapError, retryBootstrap, signOut }}
+      value={{ user, session, roles, activeRole, setActiveRole: handleSetActiveRole, previewRole, setPreviewRole, effectiveRole, profile, refreshProfile, loading, bootstrapError, retryBootstrap, signOut }}
     >
       {children}
     </AuthContext.Provider>

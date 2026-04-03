@@ -13,6 +13,7 @@ import {
 import { AlertTriangle, Shield, Clock, Check, X } from "lucide-react";
 import { formatDistanceToNow, differenceInDays } from "date-fns";
 import { toast } from "sonner";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 const INCIDENT_LABELS: Record<string, string> = {
   no_show: "No-Show",
@@ -43,14 +44,16 @@ const REASON_LABELS: Record<string, string> = {
 };
 
 export default function ProviderAccountability() {
-  const { data: incidents, isLoading: incidentsLoading } = useProviderIncidents();
-  const { data: probations, isLoading: probationsLoading } = useProviderProbation();
+  const { data: incidents, isLoading: incidentsLoading, isError: incidentsError } = useProviderIncidents();
+  const { data: probations, isLoading: probationsLoading, isError: probationsError } = useProviderProbation();
   const classifyIncident = useClassifyIncident();
   const resolveProbation = useResolveProbation();
   const [typeFilter, setTypeFilter] = useState<string>("all");
 
   const isLoading = incidentsLoading || probationsLoading;
+  const isError = incidentsError || probationsError;
   if (isLoading) return <PageSkeleton />;
+  if (isError) return <div className="p-6"><QueryErrorCard /></div>;
 
   const filteredIncidents = typeFilter === "all"
     ? (incidents ?? [])

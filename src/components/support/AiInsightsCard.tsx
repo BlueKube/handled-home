@@ -65,8 +65,8 @@ export function AiInsightsCard({ ticket }: AiInsightsCardProps) {
 
   const scoreColor = (score: number, invert = false) => {
     const effective = invert ? 100 - score : score;
-    if (effective >= 75) return "text-emerald-400";
-    if (effective >= 50) return "text-amber-400";
+    if (effective >= 75) return "text-emerald-700 dark:text-emerald-400";
+    if (effective >= 50) return "text-amber-700 dark:text-amber-400";
     return "text-destructive";
   };
 

@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { AlertTriangle, CheckCircle2, Star, MessageSquare, Gift, ShieldAlert, ClipboardEdit } from "lucide-react";
 import { format } from "date-fns";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -21,6 +22,7 @@ interface ActionTarget {
 }
 
 export default function AdminFeedback() {
+  const queryClient = useQueryClient();
   const { quickFeedback, privateRatings, issueCount, isLoading, isError } = useAdminFeedback();
   const [actionTarget, setActionTarget] = useState<ActionTarget | null>(null);
   const [actionNote, setActionNote] = useState("");
@@ -60,6 +62,7 @@ export default function AdminFeedback() {
       setSubmitting(false);
       setActionTarget(null);
       setActionNote("");
+      queryClient.invalidateQueries({ queryKey: ["admin-feedback"] });
     }
   };
 

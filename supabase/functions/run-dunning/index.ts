@@ -131,7 +131,7 @@ Deno.serve(async (req) => {
       if (currentStep >= 5) continue; // Already completed dunning
 
       const daysSinceStart = sub.dunning_started_at
-        ? Math.floor((Date.now() - new Date(sub.dunning_started_at).getTime()) / (1000 * 60 * 60 * 24))
+        ? Math.floor((new Date(new Date().toISOString().split("T")[0]).getTime() - new Date(new Date(sub.dunning_started_at).toISOString().split("T")[0]).getTime()) / (1000 * 60 * 60 * 24))
         : 0;
 
       const nextStepDay = stepDayMap[currentStep];

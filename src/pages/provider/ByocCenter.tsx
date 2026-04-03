@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/StatusBadge";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -40,6 +41,8 @@ export default function ByocCenter() {
       </div>
     );
   }
+
+  if (links.isError) return <QueryErrorCard />;
 
   // Gate: must be approved provider org
   if (!org || (org.status !== "ACTIVE" && org.status !== "PROBATION")) {

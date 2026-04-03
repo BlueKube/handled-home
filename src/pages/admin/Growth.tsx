@@ -23,6 +23,7 @@ import { FunnelsTab } from "@/components/admin/growth/FunnelsTab";
 import { EventsTab } from "@/components/admin/growth/EventsTab";
 import { ZoneFilter } from "@/components/admin/growth/ZoneFilter";
 import { STATE_COLORS, HEALTH_COLORS, type ZoneTabProps } from "@/components/admin/growth/shared";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 const CATEGORIES = ["lawn_care", "cleaning", "landscaping", "pest_control", "pool_care"];
 
@@ -72,6 +73,7 @@ function HealthTab({ selectedZone, setSelectedZone }: ZoneTabProps) {
   const { snapshots } = useMarketHealth(selectedZone === "__all__" ? undefined : selectedZone);
 
   if (snapshots.isLoading) return <Skeleton className="h-48 mt-4" />;
+  if (snapshots.isError) return <div className="mt-4"><QueryErrorCard /></div>;
 
   const latestMap = new Map<string, HealthSnapshot>();
   snapshots.data?.forEach((s) => {
@@ -124,6 +126,7 @@ function ScoreBar({ label, score, detail }: { label: string; score: number; deta
 function ActionsTab({ selectedZone, setSelectedZone }: ZoneTabProps) {
   const actions = useAutopilotActions(selectedZone === "__all__" ? undefined : selectedZone);
   if (actions.isLoading) return <Skeleton className="h-48 mt-4" />;
+  if (actions.isError) return <div className="mt-4"><QueryErrorCard /></div>;
   return (
     <div className="space-y-4 mt-4">
       <ZoneFilter selectedZone={selectedZone} setSelectedZone={setSelectedZone} />
@@ -181,6 +184,7 @@ function SurfacesTab({ selectedZone, setSelectedZone }: ZoneTabProps) {
   };
 
   if (configs.isLoading) return <Skeleton className="h-48 mt-4" />;
+  if (configs.isError) return <div className="mt-4"><QueryErrorCard /></div>;
 
   return (
     <div className="space-y-4 mt-4">

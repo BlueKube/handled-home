@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, CheckCircle2, RotateCcw, FileText, ChevronRight, Trash2, Link2 } from "lucide-react";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 const DEFAULT_DIALS = {
   outcomes_allowed: ["credit", "redo", "refund"],
@@ -23,7 +24,7 @@ const DEFAULT_DIALS = {
 };
 
 export default function AdminSupportPolicies() {
-  const { policies, scopes, isLoading, createPolicy, publishPolicy, rollbackPolicy, createScope, deleteScope } = useSupportPolicies();
+  const { policies, scopes, isLoading, isError, createPolicy, publishPolicy, rollbackPolicy, createScope, deleteScope } = useSupportPolicies();
   const [showCreate, setShowCreate] = useState(false);
   const [detailPolicy, setDetailPolicy] = useState<SupportPolicy | null>(null);
   const [form, setForm] = useState({ name: "", description: "", change_reason: "", dials: JSON.stringify(DEFAULT_DIALS, null, 2) });
@@ -64,6 +65,8 @@ export default function AdminSupportPolicies() {
 
       {isLoading ? (
         <div className="space-y-3">{[1, 2, 3].map(i => <div key={i} className="h-16 bg-muted/50 rounded-xl animate-pulse" />)}</div>
+      ) : isError ? (
+        <QueryErrorCard />
       ) : policies.length === 0 ? (
         <Card className="p-8 text-center">
           <FileText className="h-10 w-10 text-muted-foreground/40 mx-auto mb-2" />

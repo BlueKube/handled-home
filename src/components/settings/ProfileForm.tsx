@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -11,11 +11,16 @@ import { User, Phone } from "lucide-react";
 const phoneRegex = /^\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})$/;
 
 export function ProfileForm() {
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const [fullName, setFullName] = useState(profile?.full_name ?? "");
   const [phone, setPhone] = useState(profile?.phone ?? "");
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    setFullName(profile?.full_name ?? "");
+    setPhone(profile?.phone ?? "");
+  }, [profile?.full_name, profile?.phone]);
 
   const handleSave = async () => {
     if (!user) return;
@@ -40,6 +45,7 @@ export function ProfileForm() {
     if (error) {
       toast({ title: "Error", description: "Failed to update profile.", variant: "destructive" });
     } else {
+      await refreshProfile();
       toast({ title: "Saved", description: "Profile updated successfully." });
     }
   };

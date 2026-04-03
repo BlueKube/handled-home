@@ -9,7 +9,6 @@ import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader,
 } from "@/components/ui/sidebar";
-import logo from "@/assets/handled-home-logo.png";
 
 const customerNav = [
   { title: "Dashboard", url: "/customer", icon: Home },
@@ -76,7 +75,10 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-r-0">
       <SidebarHeader className="px-4 py-4 flex items-center justify-center">
-        <img src={logo} alt="Handled Home" className="h-10 w-auto" />
+        <span className="font-['Plus_Jakarta_Sans'] font-bold tracking-tight text-xl select-none">
+          <span className="text-white">Handled</span>
+          <span className="text-sidebar-primary">Home</span>
+        </span>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

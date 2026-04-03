@@ -11,13 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Shield, Loader2 } from "lucide-react";
 import { TIER_HIGHLIGHTS, getTierKey } from "./shared";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 export function PlanStep({ onSelectPlan, onSkip }: { onSelectPlan: (planId: string) => Promise<void>; onSkip: () => Promise<void> }) {
-  const { data: plans, isLoading } = usePlans("active");
+  const { data: plans, isLoading, isError: plansError } = usePlans("active");
   const { property } = useProperty();
   const [selecting, setSelecting] = useState<string | null>(null);
 
-  const { data: allHandles } = useQuery({
+  const { data: allHandles, isError: handlesError } = useQuery({
     queryKey: ["plan_handles_all"],
     queryFn: async () => {
       const { data, error } = await supabase.from("plan_handles").select("plan_id, handles_per_cycle");
@@ -26,7 +27,7 @@ export function PlanStep({ onSelectPlan, onSkip }: { onSelectPlan: (planId: stri
     },
   });
 
-  const { data: customerZoneId } = useQuery({
+  const { data: customerZoneId, isError: zoneError } = useQuery({
     queryKey: ["zone_by_zip", property?.zip_code],
     enabled: !!property?.zip_code && /^\d{5}$/.test(property.zip_code),
     queryFn: async () => {
@@ -69,7 +70,9 @@ export function PlanStep({ onSelectPlan, onSkip }: { onSelectPlan: (planId: stri
         return <BundleSavingsCard planPriceCents={undefined} planDisplayPrice={recommended.display_price_text ?? undefined} tierKey={getTierKey(recommended.name)} />;
       })()}
       <TrustBar />
-      {isLoading ? (
+      {(plansError || handlesError || zoneError) ? (
+        <QueryErrorCard message="Could not load plans." />
+      ) : isLoading ? (
         <div className="space-y-4">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-56 w-full rounded-xl" />)}</div>
       ) : (
         <div className="space-y-4">

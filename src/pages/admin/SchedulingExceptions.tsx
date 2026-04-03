@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarClock, AlertTriangle, Clock, Home } from "lucide-react";
 import { format, parseISO, addDays } from "date-fns";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 interface SchedulingException {
   id: string;
@@ -27,7 +28,7 @@ export default function SchedulingExceptions() {
   const todayStr = format(today, "yyyy-MM-dd");
 
   // Unbooked home-required: appointment_window profile with no time_window_start
-  const { data: unbooked, isLoading: loadingUnbooked } = useQuery({
+  const { data: unbooked, isLoading: loadingUnbooked, isError: errorUnbooked } = useQuery({
     queryKey: ["sched_exceptions_unbooked", todayStr],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -46,7 +47,7 @@ export default function SchedulingExceptions() {
   });
 
   // Window infeasible: visits with time windows that have exception_pending state
-  const { data: infeasible, isLoading: loadingInfeasible } = useQuery({
+  const { data: infeasible, isLoading: loadingInfeasible, isError: errorInfeasible } = useQuery({
     queryKey: ["sched_exceptions_infeasible", todayStr],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -64,7 +65,7 @@ export default function SchedulingExceptions() {
   });
 
   // Overdue service-week visits
-  const { data: overdue, isLoading: loadingOverdue } = useQuery({
+  const { data: overdue, isLoading: loadingOverdue, isError: errorOverdue } = useQuery({
     queryKey: ["sched_exceptions_overdue", todayStr],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -80,6 +81,9 @@ export default function SchedulingExceptions() {
   });
 
   const isLoading = loadingUnbooked || loadingInfeasible || loadingOverdue;
+  const isError = errorUnbooked || errorInfeasible || errorOverdue;
+
+  if (isError) return <div className="p-6"><QueryErrorCard /></div>;
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">

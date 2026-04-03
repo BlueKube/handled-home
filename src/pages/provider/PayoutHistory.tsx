@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ChevronLeft, DollarSign, Banknote, Clock } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageSkeleton } from "@/components/PageSkeleton";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { formatCents } from "@/utils/format";
 import { format } from "date-fns";
 import { useMemo } from "react";
@@ -29,7 +30,7 @@ const earningStatusLabel: Record<string, string> = {
 
 export default function ProviderPayoutHistory() {
   const navigate = useNavigate();
-  const { earnings, payouts, isLoading } = useProviderEarnings();
+  const { earnings, payouts, isLoading, isError } = useProviderEarnings();
 
   // Group earnings by date
   const earningsByDate = useMemo(() => {
@@ -43,6 +44,7 @@ export default function ProviderPayoutHistory() {
   }, [earnings]);
 
   if (isLoading) return <PageSkeleton />;
+  if (isError) return <QueryErrorCard />;
 
   return (
     <div className="animate-fade-in p-4 pb-24 space-y-4">

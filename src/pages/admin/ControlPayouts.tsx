@@ -7,14 +7,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Banknote, Clock, FileText } from "lucide-react";
 import { PayoutsTab, ContractsTab, OvertimeTab } from "@/components/admin/payouts";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 export default function ControlPayouts() {
   const { isSuperuser } = useAdminMembership();
-  const { data: skus, isLoading: skusLoading } = useSkus();
-  const { data: zones, isLoading: zonesLoading } = useZones();
-  const { isLoading: baseLoading } = usePayoutBase();
+  const { data: skus, isLoading: skusLoading, isError: skusError } = useSkus();
+  const { data: zones, isLoading: zonesLoading, isError: zonesError } = useZones();
+  const { isLoading: baseLoading, isError: baseError } = usePayoutBase();
 
   if (skusLoading || zonesLoading || baseLoading) return <div className="p-6 space-y-4"><Skeleton className="h-8 w-64" /><Skeleton className="h-96 w-full" /></div>;
+  if (skusError || zonesError || baseError) return <div className="p-6"><QueryErrorCard /></div>;
 
   return (
     <div className="animate-fade-in p-6 space-y-6 max-w-6xl">
