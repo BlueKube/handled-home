@@ -1,30 +1,30 @@
 
 
-## TestFlight Readiness — Lovable Actions
+## Plan: Apply Unapplied Migrations + Fix Remaining Build Errors
 
-### What you need to do manually (Lovable Cloud UI)
+### Context from lessons-learned.md
+The #1 lesson from this project is: **apply migrations before touching code**. Unapplied migrations cause Lovable to stub working code, and the generated types.ts won't include the missing tables/RPCs. These migrations were written by Claude Code across Rounds 8-11 and flagged in TODO.md as human action items.
 
-**Add `handledhome://auth/callback` to auth redirect URLs:**
-1. Open the backend settings (Cloud → Users → Auth Settings)
-2. Add `handledhome://auth/callback` to the list of allowed redirect URLs
-3. This allows email confirmation links to open correctly in the native app
+### Step 1: Apply all 19 missing migrations via the database migration tool
+These already exist as SQL files in `supabase/migrations/` but were never run against the database. I'll apply them as a consolidated migration. This creates:
+- `provider_leads`, `provider_referrals`, `customer_leads`, `property_transitions`, `household_members` tables
+- `accept_household_invites`, `get_category_gaps`, `delete_user_account` RPCs
+- Various triggers (lead-application linking, zone notifications, referral attribution, phone matching)
+- RLS policies for all new tables
 
-### What I will do
+After applying, the generated types auto-refresh → most build errors resolve automatically.
 
-**1. Fix build errors (required for TestFlight)**
+### Step 2: Fix 2 code-level errors that won't resolve from migrations alone
 
-Two TypeScript errors need fixing:
+1. **`create-setup-intent/index.ts`** — Change `npm:@supabase/supabase-js@2.57.2` to `https://esm.sh/@supabase/supabase-js@2.57.2` (matches all other edge functions)
 
-- `src/components/admin/billing/PayoutRolloverCard.tsx` line 26 — "Type instantiation is excessively deep" — likely a Supabase query type issue, fix with explicit type casting
-- `src/pages/admin/LaunchReadiness.tsx` line 112 — `"byoc_invites"` not in allowed table union — the table name may have changed or needs to be added to a type
+2. **`useCreateTicket.ts` line 31** — Replace `"ai_reviewing"` and `"in_progress"` with valid enum values (`"in_review"` and `"open"`)
 
-**2. Update TODO.md**
-- Mark "Create app in App Store Connect" as `[x]` (done)
-- Mark "Register bundle ID" as `[x]` if you've done that too
-- Update the redirect URL item to note it should be configured via Lovable Cloud UI
+### Step 3: Update TODO.md
+Mark the Round 8, 9, and 10 migration items as complete.
 
-### Remaining human-only items (cannot be done by Lovable)
-- Generate APNs key and upload for push notifications
-- Xcode archive and TestFlight upload
-- Add TestFlight testers
+### What this does NOT do
+- No new features added
+- No schema changes beyond what Claude Code already designed
+- Email sending, pg_cron scheduling, Stripe Connect — all remain on TODO.md as before
 
