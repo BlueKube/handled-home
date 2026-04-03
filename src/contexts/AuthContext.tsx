@@ -156,6 +156,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEYS.ACTIVE_ROLE, role);
   };
 
+  const refreshProfile = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("profiles")
+      .select("full_name, phone, avatar_url")
+      .eq("user_id", user.id)
+      .single();
+    if (data) setProfile(data);
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
