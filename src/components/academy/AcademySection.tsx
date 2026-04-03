@@ -176,12 +176,12 @@ function RealWorldSection({ section }: { section: TrainingSection }) {
   return (
     <div className="space-y-3">
       {section.realWorldData?.map((data, i) => (
-        <Card key={i} className="p-4 border-purple-500/20 bg-purple-950/10">
+        <Card key={i} className="p-4 border-purple-500/30 dark:border-purple-500/20 bg-purple-50 dark:bg-purple-950/10">
           <div className="flex items-start gap-3">
-            <ChevronRight className="h-5 w-5 text-purple-400 flex-shrink-0 mt-0.5" />
+            <ChevronRight className="h-5 w-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm text-purple-200">{data.text}</p>
-              <p className="text-xs text-purple-400/60 mt-1">Source: {data.source}</p>
+              <p className="text-sm text-purple-900 dark:text-purple-200">{data.text}</p>
+              <p className="text-xs text-purple-600 dark:text-purple-400/60 mt-1">Source: {data.source}</p>
             </div>
           </div>
         </Card>
