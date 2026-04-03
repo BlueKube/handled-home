@@ -18,7 +18,7 @@ export type SupportPolicy = {
 export type SupportPolicyScope = {
   id: string;
   scope_type: string;
-  scope_ref_id: string | null;
+  scope_ref_id: string;
   scope_ref_key: string | null;
   active_policy_id: string;
   created_at: string;
