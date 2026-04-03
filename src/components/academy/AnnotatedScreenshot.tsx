@@ -46,11 +46,11 @@ export type Annotation =
   | StepAnnotation;
 
 const colorMap = {
-  blue: { border: "border-blue-400", bg: "bg-blue-500", text: "text-blue-300", fill: "#60a5fa" },
-  red: { border: "border-red-400", bg: "bg-red-500", text: "text-red-300", fill: "#f87171" },
-  green: { border: "border-green-400", bg: "bg-green-500", text: "text-green-300", fill: "#4ade80" },
-  amber: { border: "border-amber-400", bg: "bg-amber-500", text: "text-amber-300", fill: "#fbbf24" },
-  purple: { border: "border-purple-400", bg: "bg-purple-500", text: "text-purple-300", fill: "#c084fc" },
+  blue: { border: "border-blue-400", bg: "bg-blue-500", text: "text-blue-700 dark:text-blue-300", fill: "#60a5fa" },
+  red: { border: "border-red-400", bg: "bg-red-500", text: "text-red-700 dark:text-red-300", fill: "#f87171" },
+  green: { border: "border-green-400", bg: "bg-green-500", text: "text-green-700 dark:text-green-300", fill: "#4ade80" },
+  amber: { border: "border-amber-400", bg: "bg-amber-500", text: "text-amber-700 dark:text-amber-300", fill: "#fbbf24" },
+  purple: { border: "border-purple-400", bg: "bg-purple-500", text: "text-purple-700 dark:text-purple-300", fill: "#c084fc" },
 } as const;
 
 function BoxOverlay({ a }: { a: BoxAnnotation }) {

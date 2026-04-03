@@ -38,10 +38,10 @@ export default function SimulatorProjectionTable({ result }: SimulatorProjection
                 <TableCell className="text-xs text-right">{m.total_jobs}</TableCell>
                 <TableCell className="text-xs text-right">{fmt$(m.revenue_cents)}</TableCell>
                 <TableCell className="text-xs text-right">{fmt$(m.provider_payout_cents)}</TableCell>
-                <TableCell className={`text-xs text-right ${m.gross_margin_cents >= 0 ? "text-green-400" : "text-red-400"}`}>
+                <TableCell className={`text-xs text-right ${m.gross_margin_cents >= 0 ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}`}>
                   {fmt$(m.gross_margin_cents)}
                 </TableCell>
-                <TableCell className={`text-xs text-right ${m.gross_margin_pct >= 0 ? "text-green-400" : "text-red-400"}`}>
+                <TableCell className={`text-xs text-right ${m.gross_margin_pct >= 0 ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}`}>
                   {m.gross_margin_pct.toFixed(1)}%
                 </TableCell>
                 <TableCell className="text-xs text-right">{m.provider_utilization_pct.toFixed(1)}%</TableCell>

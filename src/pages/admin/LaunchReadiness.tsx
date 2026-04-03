@@ -189,8 +189,8 @@ export default function AdminLaunchReadiness() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Rocket className={`h-5 w-5 ${allGreen ? "text-green-400" : "text-muted-foreground"}`} />
-          <span className={`text-sm font-medium ${allGreen ? "text-green-400" : "text-muted-foreground"}`}>
+          <Rocket className={`h-5 w-5 ${allGreen ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}`} />
+          <span className={`text-sm font-medium ${allGreen ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}`}>
             {passCount}/{totalCount} passing
           </span>
         </div>
