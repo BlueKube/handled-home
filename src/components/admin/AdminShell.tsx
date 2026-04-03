@@ -146,15 +146,10 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
-    label: "Playbooks",
-    items: [
-      { title: "SOPs", url: "/admin/playbooks", icon: BookOpen },
-    ],
-  },
-  {
     label: "Academy",
     items: [
       { title: "Training Center", url: "/admin/academy", icon: GraduationCap },
+      { title: "SOPs & Playbooks", url: "/admin/playbooks", icon: BookOpen },
     ],
   },
   {
