@@ -313,6 +313,21 @@ The Browse page's ZIP coverage check (`handleCheckZip`) was a no-op that always 
 **Type:** Agent Signal
 `parseInt(planDisplayPrice.replace(/[^0-9]/g, ""), 10)` strips ALL non-digits, so "$149/4 weeks" becomes "1494". Fixed with `/\$(\d+)/` regex match. Any price-parsing code should be reviewed for multi-digit format strings.
 
+### [2026-04-03] Cross-referencing academy content against code catches operator-misleading errors
+**Source:** Round 62 academy audit (12 modules fixed, 16 audited)
+**Type:** Workflow
+The most impactful errors found: dunning ladder had wrong day numbers (operators would tell customers "day 21" when the actual final step is day 14), zone health table described 5 columns that don't exist in the code (operators looking for NPS and Response Time columns that aren't there), payout threshold was $25 in training but $50 in code, and the first-week module described a navigation structure ("Dispatch, Providers, Zones, Reports, Settings") that bears no resemblance to the actual sidebar. Rule: always cross-reference training content against the actual codebase — errors in training are higher-cost than errors in code because operators internalize them as truth.
+
+### [2026-04-03] The single biggest billing bug was a status enum mismatch
+**Source:** Round 62 Batch 8 — apply_referral_credits_to_invoice
+**Type:** Architecture
+`apply_referral_credits_to_invoice` checked for `status = 'PENDING'` but `generate_subscription_invoice` creates invoices as `'DUE'`. Credits were NEVER auto-applied — the entire credit system was silently broken. One SQL change (accept `DUE` invoices) unblocked both customer credits and referral reward application. Lesson: any function that filters by status enum should be verified against every caller that sets that status.
+
+### [2026-04-03] Cron registration is the most commonly forgotten infrastructure step
+**Source:** Round 62 Batch 5-7 — 7 edge functions deployed but never scheduled
+**Type:** Architecture
+All 7 automation engine functions (assign-visits, check-no-shows, check-weather, evaluate-provider-sla, run-billing-automation, run-dunning, weekly-payout) were fully implemented and deployed but had zero `cron.schedule()` calls. None of them would ever run autonomously. This is a pattern: deploying a function is not the same as scheduling it. Future edge functions should have cron registration as part of the deployment checklist.
+
 ### Dismissed
 
 _None yet._
