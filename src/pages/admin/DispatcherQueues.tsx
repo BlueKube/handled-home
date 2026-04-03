@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import {
   Tooltip,
   TooltipContent,
@@ -170,7 +171,7 @@ function CoverageRow({
 }
 
 export default function DispatcherQueues() {
-  const { data, isLoading, refetch, isFetching } = useDispatcherQueues();
+  const { data, isLoading, isError, refetch, isFetching } = useDispatcherQueues();
   const nav = useNavigate();
   const [activeTab, setActiveTab] = useState<QueueKey>(loadSavedTab);
   const [actionJobId, setActionJobId] = useState<string | null>(null);
@@ -294,6 +295,8 @@ export default function DispatcherQueues() {
   };
 
   const totalAlerts = counts.atRisk + counts.missingProof + counts.unassigned + counts.customerIssues + counts.providerIncidents;
+
+  if (isError) return <div className="p-6"><QueryErrorCard /></div>;
 
   return (
     <div className="animate-fade-in p-6 space-y-4">

@@ -16,7 +16,7 @@ export function useNotifications(limit = PAGE_SIZE, priorityFilter: PriorityFilt
   const queryClient = useQueryClient();
   const userId = user?.id;
 
-  const { data: notifications = [], isLoading } = useQuery({
+  const { data: notifications = [], isLoading, isError } = useQuery({
     queryKey: [QUERY_KEY, userId, limit, priorityFilter],
     queryFn: async () => {
       if (!userId) return [];
@@ -103,6 +103,7 @@ export function useNotifications(limit = PAGE_SIZE, priorityFilter: PriorityFilt
     notifications,
     unreadCount,
     isLoading,
+    isError,
     markRead: markRead.mutate,
     markAllRead: markAllRead.mutate,
     isMarkingRead: markRead.isPending,

@@ -21,6 +21,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { HelpTip } from "@/components/ui/help-tip";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 function formatCents(cents: number) {
   return "$" + (cents / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -113,9 +114,11 @@ function ListTile({ title, items, emptyLabel, href }: {
 }
 
 export default function OpsCockpit() {
-  const { data: m, isLoading, dataUpdatedAt } = useOpsMetrics();
+  const { data: m, isLoading, isError, dataUpdatedAt } = useOpsMetrics();
   const autopilot = useAutopilotHealth();
   const nav = useNavigate();
+
+  if (isError) return <div className="p-6"><QueryErrorCard /></div>;
 
   if (isLoading || !m) {
     return (

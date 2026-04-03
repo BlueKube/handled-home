@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 const MILESTONES = ["installed", "subscribed", "first_visit", "paid_cycle", "provider_ready", "provider_first_job"];
 const STATUSES = ["draft", "active", "paused", "archived"];
@@ -77,6 +78,7 @@ function ProgramsTab() {
   };
 
   if (programs.isLoading) return <Skeleton className="h-48 mt-4" />;
+  if (programs.isError) return <div className="mt-4"><QueryErrorCard /></div>;
 
   return (
     <div className="space-y-4 mt-4">
@@ -204,6 +206,7 @@ function FlagsTab() {
   };
 
   if (riskFlags.isLoading) return <Skeleton className="h-48 mt-4" />;
+  if (riskFlags.isError) return <div className="mt-4"><QueryErrorCard /></div>;
 
   return (
     <div className="space-y-4 mt-4">
@@ -264,6 +267,7 @@ function PartnersTab() {
   });
 
   if (apps.isLoading) return <Skeleton className="h-48 mt-4" />;
+  if (apps.isError) return <div className="mt-4"><QueryErrorCard /></div>;
 
   return (
     <div className="space-y-4 mt-4">
@@ -325,6 +329,7 @@ function ScriptsTab() {
   };
 
   if (scripts.isLoading) return <Skeleton className="h-48 mt-4" />;
+  if (scripts.isError) return <div className="mt-4"><QueryErrorCard /></div>;
 
   return (
     <div className="space-y-4 mt-4">

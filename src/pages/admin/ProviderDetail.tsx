@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { DecisionTraceCard } from "@/components/admin/DecisionTraceCard";
 import { AdminReadOnlyMap } from "@/components/admin/AdminReadOnlyMap";
 import { format } from "date-fns";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 const STATUS_COLORS: Record<string, string> = {
   DRAFT: "bg-muted text-muted-foreground",
@@ -33,7 +34,7 @@ export default function AdminProviderDetail() {
   const queryClient = useQueryClient();
   const { orgDetailQuery, performAction, updateCoverageStatus } = useProviderAdmin();
   const { data: ratingSummary } = useProviderRatingSummary(id);
-  const { data: org, isLoading } = orgDetailQuery(id);
+  const { data: org, isLoading, isError } = orgDetailQuery(id);
   const ledger = useAdminProviderLedger(id);
   const [actionDialog, setActionDialog] = useState<string | null>(null);
   const [reason, setReason] = useState("");
@@ -70,6 +71,8 @@ export default function AdminProviderDetail() {
   if (isLoading) {
     return <div className="p-6 flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>;
   }
+
+  if (isError) return <div className="p-6"><QueryErrorCard /></div>;
 
   if (!org) {
     return <div className="p-6 text-center py-12 text-muted-foreground">Provider not found.</div>;

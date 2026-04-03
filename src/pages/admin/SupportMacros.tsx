@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { Plus, Zap, Trash2, ChevronRight } from "lucide-react";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 const DEFAULT_PATCH = {
   credit_cents: 1000,
@@ -16,7 +17,7 @@ const DEFAULT_PATCH = {
 };
 
 export default function AdminSupportMacros() {
-  const { macros, isLoading, createMacro, updateMacro, deleteMacro } = useSupportMacros();
+  const { macros, isLoading, isError, createMacro, updateMacro, deleteMacro } = useSupportMacros();
   const [showCreate, setShowCreate] = useState(false);
   const [detailMacro, setDetailMacro] = useState<SupportMacro | null>(null);
   const [form, setForm] = useState({ name: "", description: "", patch: JSON.stringify(DEFAULT_PATCH, null, 2) });
@@ -71,6 +72,8 @@ export default function AdminSupportMacros() {
 
       {isLoading ? (
         <div className="space-y-3">{[1, 2, 3].map(i => <div key={i} className="h-16 bg-muted/50 rounded-xl animate-pulse" />)}</div>
+      ) : isError ? (
+        <QueryErrorCard />
       ) : macros.length === 0 ? (
         <Card className="p-8 text-center">
           <Zap className="h-10 w-10 text-muted-foreground/40 mx-auto mb-2" />

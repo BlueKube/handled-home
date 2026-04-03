@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HelpTip } from "@/components/ui/help-tip";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 function formatCents(cents: number) {
   return "$" + (cents / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -38,9 +39,9 @@ const quickLinks: QuickLink[] = [
 
 export default function AdminDashboard() {
   const nav = useNavigate();
-  const { data: ops, isLoading: opsLoading } = useOpsMetrics();
+  const { data: ops, isLoading: opsLoading, isError: opsError } = useOpsMetrics();
 
-  const { data: counts, isLoading: countsLoading } = useQuery({
+  const { data: counts, isLoading: countsLoading, isError: countsError } = useQuery({
     queryKey: ["admin-dashboard-counts"],
     queryFn: async () => {
       const [custRes, zonesRes, subsRes, provRes, appsRes] = await Promise.all([
@@ -61,6 +62,9 @@ export default function AdminDashboard() {
   });
 
   const isLoading = opsLoading || countsLoading;
+  const isError = opsError || countsError;
+
+  if (isError) return <div className="p-6"><QueryErrorCard /></div>;
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">

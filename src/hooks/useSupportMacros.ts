@@ -85,6 +85,7 @@ export function useSupportMacros() {
   return {
     macros: macrosQuery.data ?? [],
     isLoading: macrosQuery.isLoading,
+    isError: macrosQuery.isError,
     createMacro,
     updateMacro,
     deleteMacro,

@@ -9,6 +9,7 @@ import { ChevronLeft, Unlock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 export default function AdminProviderLedger() {
   const { providerOrgId } = useParams<{ providerOrgId: string }>();
@@ -16,6 +17,7 @@ export default function AdminProviderLedger() {
   const { org, payoutAccount, earnings, holds, payouts, isLoading } = useAdminProviderLedger(providerOrgId);
 
   if (isLoading) return <PageSkeleton />;
+  if (!isLoading && !org) return <div className="p-6"><QueryErrorCard /></div>;
 
   const handleReleaseHold = async (holdId: string) => {
     const { error } = await supabase.rpc("admin_release_hold", {
