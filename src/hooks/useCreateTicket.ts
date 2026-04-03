@@ -28,7 +28,7 @@ export function useCreateTicket() {
           .select("id")
           .eq("customer_id", user.id)
           .eq("job_id", input.job_id)
-          .in("status", ["open", "ai_reviewing", "in_progress"])
+          .in("status", ["open", "in_review", "awaiting_customer", "awaiting_provider"])
           .gte("created_at", sevenDaysAgo)
           .limit(1);
         if (existing && existing.length > 0) {

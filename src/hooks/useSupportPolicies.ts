@@ -127,7 +127,7 @@ export function useSupportPolicies() {
       const { data, error } = await supabase
         .from("support_policy_scopes")
         .upsert(
-          { scope_type: input.scope_type, scope_ref_id: input.scope_ref_id, active_policy_id: input.active_policy_id },
+          { scope_type: input.scope_type as any, scope_ref_id: input.scope_ref_id, active_policy_id: input.active_policy_id },
           { onConflict: "scope_type,scope_ref_id" }
         )
         .select()
