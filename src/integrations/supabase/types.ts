@@ -1205,6 +1205,42 @@ export type Database = {
           },
         ]
       }
+      customer_leads: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          notified_at: string | null
+          notify_on_launch: boolean
+          phone: string | null
+          source: string
+          status: string
+          zip_code: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          notified_at?: string | null
+          notify_on_launch?: boolean
+          phone?: string | null
+          source: string
+          status?: string
+          zip_code: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          notified_at?: string | null
+          notify_on_launch?: boolean
+          phone?: string | null
+          source?: string
+          status?: string
+          zip_code?: string
+        }
+        Relationships: []
+      }
       customer_ledger_events: {
         Row: {
           amount_cents: number
@@ -2008,6 +2044,47 @@ export type Database = {
             columns: ["zone_id"]
             isOneToOne: false
             referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      household_members: {
+        Row: {
+          created_at: string
+          id: string
+          invite_email: string | null
+          invited_by: string | null
+          property_id: string
+          role: string
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invite_email?: string | null
+          invited_by?: string | null
+          property_id: string
+          role: string
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invite_email?: string | null
+          invited_by?: string | null
+          property_id?: string
+          role?: string
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "household_members_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
             referencedColumns: ["id"]
           },
         ]
@@ -3991,6 +4068,68 @@ export type Database = {
           },
         ]
       }
+      property_transitions: {
+        Row: {
+          created_at: string
+          handoff_processed: boolean
+          id: string
+          keep_services_until_move: boolean
+          move_date: string
+          new_address: string | null
+          new_owner_email: string | null
+          new_owner_name: string | null
+          new_owner_phone: string | null
+          new_zip: string | null
+          new_zip_covered: boolean | null
+          notify_on_launch: boolean
+          old_owner_user_id: string
+          property_id: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          handoff_processed?: boolean
+          id?: string
+          keep_services_until_move?: boolean
+          move_date: string
+          new_address?: string | null
+          new_owner_email?: string | null
+          new_owner_name?: string | null
+          new_owner_phone?: string | null
+          new_zip?: string | null
+          new_zip_covered?: boolean | null
+          notify_on_launch?: boolean
+          old_owner_user_id: string
+          property_id?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          handoff_processed?: boolean
+          id?: string
+          keep_services_until_move?: boolean
+          move_date?: string
+          new_address?: string | null
+          new_owner_email?: string | null
+          new_owner_name?: string | null
+          new_owner_phone?: string | null
+          new_zip?: string | null
+          new_zip_covered?: boolean | null
+          notify_on_launch?: boolean
+          old_owner_user_id?: string
+          property_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_transitions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       provider_action_proposals: {
         Row: {
           action_type: string
@@ -4097,6 +4236,7 @@ export type Database = {
           metadata: Json | null
           pitch_variant_seen: string | null
           program_id: string | null
+          provider_lead_id: string | null
           provider_org_id: string | null
           requested_categories: string[] | null
           requested_zone_ids: string[] | null
@@ -4121,6 +4261,7 @@ export type Database = {
           metadata?: Json | null
           pitch_variant_seen?: string | null
           program_id?: string | null
+          provider_lead_id?: string | null
           provider_org_id?: string | null
           requested_categories?: string[] | null
           requested_zone_ids?: string[] | null
@@ -4145,6 +4286,7 @@ export type Database = {
           metadata?: Json | null
           pitch_variant_seen?: string | null
           program_id?: string | null
+          provider_lead_id?: string | null
           provider_org_id?: string | null
           requested_categories?: string[] | null
           requested_zone_ids?: string[] | null
@@ -4169,6 +4311,13 @@ export type Database = {
             columns: ["program_id"]
             isOneToOne: false
             referencedRelation: "referral_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_applications_provider_lead_id_fkey"
+            columns: ["provider_lead_id"]
+            isOneToOne: false
+            referencedRelation: "provider_leads"
             referencedColumns: ["id"]
           },
           {
@@ -4870,6 +5019,48 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_leads: {
+        Row: {
+          categories: string[]
+          created_at: string
+          email: string
+          id: string
+          notes: string | null
+          notified_at: string | null
+          phone: string | null
+          source: string
+          status: string
+          updated_at: string
+          zip_code: string
+        }
+        Insert: {
+          categories?: string[]
+          created_at?: string
+          email: string
+          id?: string
+          notes?: string | null
+          notified_at?: string | null
+          phone?: string | null
+          source: string
+          status?: string
+          updated_at?: string
+          zip_code: string
+        }
+        Update: {
+          categories?: string[]
+          created_at?: string
+          email?: string
+          id?: string
+          notes?: string | null
+          notified_at?: string | null
+          phone?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          zip_code?: string
+        }
+        Relationships: []
+      }
       provider_ledger_events: {
         Row: {
           amount_cents: number
@@ -5379,6 +5570,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      provider_referrals: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          referred_category: string
+          referred_contact: string
+          referred_name: string
+          referrer_email: string
+          status: string
+          zip_code: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          referred_category: string
+          referred_contact: string
+          referred_name: string
+          referrer_email: string
+          status?: string
+          zip_code: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          referred_category?: string
+          referred_contact?: string
+          referred_name?: string
+          referrer_email?: string
+          status?: string
+          zip_code?: string
+        }
+        Relationships: []
       }
       provider_risk_flags: {
         Row: {
@@ -9087,6 +9314,7 @@ export type Database = {
       }
     }
     Functions: {
+      accept_household_invites: { Args: never; Returns: number }
       accept_support_offer: { Args: { p_offer_id: string }; Returns: Json }
       activate_byoc_attribution: {
         Args: { p_customer_id: string }
@@ -9292,6 +9520,7 @@ export type Database = {
       }
       create_provider_earning: { Args: { p_job_id: string }; Returns: Json }
       create_share_card: { Args: { p_job_id: string }; Returns: Json }
+      delete_user_account: { Args: { p_user_id: string }; Returns: undefined }
       emit_notification: {
         Args: {
           p_body: string
@@ -9349,6 +9578,7 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: Database["public"]["Enums"]["admin_role"]
       }
+      get_category_gaps: { Args: { p_zip_codes: string[] }; Returns: Json }
       get_day_order: {
         Args: { p_default_day: string; p_strategy: string }
         Returns: string[]
@@ -9400,6 +9630,10 @@ export type Database = {
         Returns: Json
       }
       get_share_card_public: { Args: { p_share_code: string }; Returns: Json }
+      get_user_household_property_ids: {
+        Args: { p_user_id: string }
+        Returns: string[]
+      }
       get_waitlist_summary: {
         Args: never
         Returns: {
@@ -9451,6 +9685,10 @@ export type Database = {
       }
       is_admin_member: { Args: { p_user_id: string }; Returns: boolean }
       is_holiday: { Args: { p_date: string }; Returns: boolean }
+      is_household_owner: {
+        Args: { p_property_id: string; p_user_id: string }
+        Returns: boolean
+      }
       is_provider_org_member: { Args: { p_org_id: string }; Returns: boolean }
       is_superuser: { Args: { p_user_id: string }; Returns: boolean }
       is_weather_affected: {
@@ -9498,6 +9736,7 @@ export type Database = {
         Args: { p_subscription_id: string; p_weeks: number }
         Returns: Json
       }
+      process_move_date_transitions: { Args: never; Returns: number }
       propose_provider_action: {
         Args: { p_action_type: string; p_payload?: Json; p_visit_id: string }
         Returns: Json
