@@ -5,6 +5,7 @@ import { useProviderApplication } from "@/hooks/useProviderApplication";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { CheckCircle, Shield, Loader2, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import OnboardingProgressHeader from "@/components/provider/OnboardingProgressHeader";
@@ -70,6 +71,8 @@ export default function OnboardingAgreement() {
       </div>
     );
   }
+
+  if (application.isError) return <QueryErrorCard />;
 
   if (!applicationId) {
     return (

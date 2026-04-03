@@ -6,6 +6,7 @@ import { useProviderApplication } from "@/hooks/useProviderApplication";
 import { useCategoryRequirements } from "@/hooks/useCategoryRequirements";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import OnboardingProgressHeader from "@/components/provider/OnboardingProgressHeader";
@@ -194,6 +195,8 @@ export default function OnboardingCompliance() {
       </div>
     );
   }
+
+  if (application.isError) return <QueryErrorCard />;
 
   // Fallback if no category requirements found (e.g. no application yet)
   const fallbackMerged = merged ?? {
