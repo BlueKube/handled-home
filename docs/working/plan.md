@@ -1,51 +1,71 @@
-# Current State — Rounds 51–62 Complete
+# Round 63: Systematic Bug Scan — Phase 1: Missing Error States
 
-> **Last updated:** 2026-04-03
-> **Branch:** `claude/polish-planned-features-l9XIY`
+> **Branch:** `claude/review-recent-changes-IU5G3`
+> **Phase:** 1 of 10 — Missing Error States
+> **Review mode:** Micro (1 reviewer per batch)
 
-## Feature Maturity Summary
-- **9/10 or higher:** 381 features (74%)
-- **8/10:** 117 features (22%)
-- **7/10 or below:** 11 features (2%)
-- **Total:** 509 features
+## Batch Breakdown
 
-## What Was Done This Session (Rounds 51–62)
+40 pages are missing `isError` handling. Grouped into 3 batches by role:
 
-### Round 51–60 (Polish)
-- 41 code fixes across 37 files
-- 22 pages got missing isError error handling
-- 3 real bugs fixed (retention metric, savings parser, fake ZIP check)
-- 4 dark-mode violations cleaned up
-- 4 platform improvements (lazy-load, deep links, iOS config, dead code)
-- Feature list renumbered sequentially (1–509)
+| Batch | Title | Size | Files | Status | Context |
+|-------|-------|------|-------|--------|---------|
+| B1 | Customer pages error states | S | 14 | ⬜ | |
+| B2 | Provider pages error states | S | 6 | ⬜ | |
+| B3 | Admin pages error states | S | 20 | ⬜ | |
 
-### Round 62 (Feature Completion & Hardening)
-- Admin mobile menu: hamburger sidebar + logout + role switcher
-- Edge function security: auth guards on 4 unauthenticated functions
-- Support engine: guided resolver flow, evidence replay, duplicate suppression, policy engine runtime wiring with 5-level precedence, scope assignment UI, billing chargeback intercept
-- Billing P0: credits never applied (PENDING vs DUE status mismatch), billing cycle advance, dunning needsStart filter bug
-- Automation: PRIMARY role scoring in assign-visits, RED SLA skip, pg_cron registration for all 7 engines
-- Ops Cockpit: real cohort attach rates, real Loss Leader plan data (replaced 100% mocks)
-- Academy: 16 modules audited against codebase, 12 modules corrected, 6 SOP procedures enriched, SOPs consolidated under Academy nav
+## Files by Batch
 
-## Remaining 11 Features at 7/10 or Below
-| # | Rating | Feature | Status |
-|---|--------|---------|--------|
-| 84 | 1/10 | Confusion detector | DEFERRED |
-| 247 | 5/10 | Admin change request system | DEFERRED |
-| 251 | 7/10 | No-show detection hourly | Code exists, needs SLA escalation wiring |
-| 256 | 5/10 | Auto-promote backup | Code exists, needs perf_score tiebreaker |
-| 257 | 5/10 | Weather mode admin UI | Hooks exist, needs admin page |
-| 274 | 7/10 | Deno integration tests | Tests exist, need staging credentials |
-| 287 | 6/10 | WCAG AA accessibility | Needs focus state + contrast audit |
-| 395 | 7/10 | No calendar browsing | Design principle, not code |
-| 399 | 7/10 | One primary CTA per screen | Design principle, not code |
-| 402 | 6/10 | Admin city launch <10 min | Needs Launch Readiness → zone creation flow timing |
-| 422 | 7/10 | Provider Experience Auto-Evaluator | Scoring harness, defer to quality round |
+### B1 — Customer pages (14 files)
+- src/pages/ByocActivate.tsx
+- src/pages/customer/ByocOnboardingWizard.tsx
+- src/pages/customer/CoverageMap.tsx
+- src/pages/customer/Dashboard.tsx
+- src/pages/customer/HomeAssistant.tsx
+- src/pages/customer/PropertySizing.tsx
+- src/pages/customer/RecommendProviderStatus.tsx
+- src/pages/customer/RoutineConfirm.tsx
+- src/pages/customer/SupportHome.tsx
+- src/pages/customer/SupportTicketDetail.tsx
+- src/pages/customer/byoc-onboarding/PlanActivateStep.tsx
+- src/pages/customer/onboarding/PlanStep.tsx
+- src/pages/customer/onboarding/ServiceDayStep.tsx
+- src/pages/customer/onboarding/SmallSteps.tsx
+- src/pages/customer/onboarding/SubscribeStep.tsx
+
+### B2 — Provider pages (6 files)
+- src/pages/provider/ByocCenter.tsx
+- src/pages/provider/ByocCreateLink.tsx
+- src/pages/provider/OnboardingAgreement.tsx
+- src/pages/provider/OnboardingCompliance.tsx
+- src/pages/provider/PayoutHistory.tsx
+- src/pages/provider/SupportTicketDetail.tsx
+
+### B3 — Admin pages (20 files)
+- src/pages/admin/ApplicationDetail.tsx
+- src/pages/admin/ControlPayouts.tsx
+- src/pages/admin/ControlPricing.tsx
+- src/pages/admin/CustomerLedger.tsx
+- src/pages/admin/Dashboard.tsx
+- src/pages/admin/DispatcherQueues.tsx
+- src/pages/admin/Growth.tsx
+- src/pages/admin/Incentives.tsx
+- src/pages/admin/OpsCockpit.tsx
+- src/pages/admin/Payouts.tsx
+- src/pages/admin/ProviderAccountability.tsx
+- src/pages/admin/ProviderDetail.tsx
+- src/pages/admin/ProviderLedger.tsx
+- src/pages/admin/Scheduling.tsx
+- src/pages/admin/SchedulingExceptions.tsx
+- src/pages/admin/SupportMacros.tsx
+- src/pages/admin/SupportPolicies.tsx
+- src/pages/admin/SupportTicketDetail.tsx
+- src/pages/shared/Notifications.tsx
 
 ## Session Handoff
-- **Branch:** `claude/polish-planned-features-l9XIY`
-- **Last completed:** Academy content audit + doc sync
-- **Next session:** Create PR for review, then move to deployment
+- **Branch:** claude/review-recent-changes-IU5G3
+- **Last completed:** Setup (plan created)
+- **Next up:** B1 — Customer pages error states
+- **Context at exit:** —
 - **Blockers:** None
-- **Commits this session:** 30+
+- **Round progress:** Phase 1 of 10, 0/3 batches complete

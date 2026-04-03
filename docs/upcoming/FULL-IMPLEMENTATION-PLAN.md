@@ -1,172 +1,230 @@
-# Full Implementation Plan: Round 62 — Feature Completion & Hardening
+# Round 63: Systematic Bug Scan & Fix
 
-> **Created:** 2026-04-02
-> **Purpose:** Bring all remaining 7/10-and-below features to 9/10. Fold SOPs into Academy. Fix admin mobile menu. Harden edge function security. Defer confusion detector (feature #84).
-> **Review tier:** Bumped up one level from default (Medium→Large for multi-file, Small→Medium for single-file). New features need more redundant review.
-
----
-
-## Execution Protocol
-
-### Branch Strategy
-Single branch for this round: `claude/polish-planned-features-l9XIY` (continuing current branch).
-
-### Review Tier Override
-Per user instruction, all batches bump up one review tier:
-- **Micro → Small** (1 combined reviewer + 1 synthesis)
-- **Small → Medium** (3 parallel lanes + 1 synthesis)
-- **Medium → Large** (3 parallel lanes + 1 synthesis + 1 Haiku second opinion)
-
-### What This Round Does
-- Implements missing functionality for features at 5-7/10
-- Folds 6 SOP features into existing Academy training modules
-- Fixes admin mobile menu/logout bug
-- Fixes edge function auth gaps (security)
-- Removes standalone SOP section from feature list
-
-### What This Round Does NOT Do
-- Feature #84 (confusion detector) — DEFERRED per human decision
-- Feature #247 (admin change requests at 5/10) — complex workflow, defer unless simple
-- New features not already in the feature list
+> **Created:** 2026-04-03
+> **Goal:** Systematically scan the entire codebase for 15 known bug patterns, fix all confirmed issues, and push clean code.
+> **Approach:** Each phase targets one bug category. Sub-agents perform the scan, main thread applies fixes.
+> **Review mode:** Micro (1 reviewer) for mechanical fixes, Small (2 agents) for logic-heavy fixes. Bug-scan batches are low-risk because each fix is small and isolated.
 
 ---
 
-## Phase 1: Admin Mobile Menu & Security (Quick Wins)
+## Phase 1: Missing Error States
 
-### Batch 1: Admin mobile hamburger menu + logout
-**Size:** Small → Medium review
-**Problem:** On mobile, admin has no way to open sidebar or log out. The `SidebarProvider` + `SidebarTrigger` works on desktop but the sidebar slides off-screen on mobile with no visible hamburger trigger.
-**Fix:**
-- Add mobile-visible hamburger trigger in `AdminCommandBar`
-- Add logout button + role switcher to bottom of `AdminSidebar`
-- Ensure sidebar overlays on mobile (Sheet pattern) vs persistent on desktop
-**Files:** `src/components/admin/AdminShell.tsx`
+**Problem:** Pages that use `useQuery` but destructure only `{ data, isLoading }` without `isError` show infinite spinners or misleading empty states on network failure.
 
-### Batch 2: Edge function auth hardening
-**Size:** Small → Medium review
-**Problem:** 4 edge functions have auth gaps logged in TODO.md:
-- `offer-appointment-windows`: NO auth at all
-- `backfill-property-zones`, `commit-zones`, `generate-zones`: JWT validated but no admin role check
-**Fix:** Add `requireUserJwt`/`requireAdminJwt` from `_shared/auth.ts`
-**Files:** 4 files in `supabase/functions/`
+**Goals:**
+- Find every page missing `isError` handling
+- Add error UI (typically a centered error card with retry)
 
----
+**Scope:**
+- Grep: `const { data, isLoading }` (without `isError`) in src/pages/ and src/components/
+- Fix: Add `isError` destructuring + `<QueryErrorCard />` or inline error state
 
-## Phase 2: Support & Dispute Resolution Engine
+**Deliverables:** All pages handle query errors gracefully.
 
-### Batch 3: Guided Resolver flow (#150, #152, #155)
-**Size:** Medium → Large review
-**Problem:** Self-resolution, guided resolver, and evidence replay are at 7/10 — the flows exist but have gaps in category-specific resolution logic and evidence presentation.
-**Audit first, then fix:**
-- #150: Self-resolution target — check if the auto-resolve path is wired end-to-end
-- #152: Guided Resolver — verify category → evidence → offer → accept flow completeness
-- #155: Evidence replay — ensure photos + checklist + time-on-site render correctly
-**Files:** `src/pages/customer/SupportNew.tsx`, `src/components/customer/GuidedResolver.tsx`, evidence components
+**Review:** Micro — mechanical pattern, same fix everywhere.
 
-### Batch 4: Policy engine + duplicate suppression + chargeback (#153, #156, #157)
-**Size:** Medium → Large review
-- #153: Policy engine 5-level precedence — verify cascade logic
-- #156: Chargeback intercept at 6/10 — add proof display + credit off-ramps
-- #157: Duplicate ticket suppression — verify second-attempt linking
-**Files:** Support hooks, policy components, ticket creation flow
+**Batch estimate:** 2-3 batches (Large file count, Small fix per file)
 
 ---
 
-## Phase 3: Automation Engine Gaps
+## Phase 2: `as any` Cast Audit
 
-### Batch 5: Auto-assign + no-show detection (#250, #251)
-**Size:** Small → Medium review
-- #250: Auto-assign jobs — verify primary→backup fallback + explainability
-- #251: No-show detection — verify hourly check + auto-reassign + notification
-**Files:** Edge functions or hooks in `src/hooks/useAssignment*`
+**Problem:** `as any` casts hide real type bugs. Some are intentional (Lovable regenerates types.ts), but others paper over genuine mismatches.
 
-### Batch 6: SLA enforcement + auto-flag/suspend (#254, #255)
-**Size:** Small → Medium review
-- #254: SLA enforcement — verify 4-level ladder + action generation
-- #255: Auto-flag/suspend — verify RED status detection + suspension trigger
-**Files:** Automation hooks, admin provider pages
+**Goals:**
+- Catalog every `as any` in the codebase
+- Classify: intentional (Lovable types workaround) vs hiding a real bug
+- Fix the real bugs, document the intentional ones
 
-### Batch 7: Auto-promote backup + weather mode (#256, #257)
-**Size:** Small → Medium review
-- #256: Auto-promote at 5/10 — may need new implementation
-- #257: Weather mode at 5/10 — verify WeatherAPI integration + admin approval flow
-**Files:** Edge functions, admin controls
+**Scope:**
+- Grep: `as any` in src/
+- For each: check if the underlying type actually exists in types.ts now
+- Fix casts that are no longer needed (tables were added in consolidated migration)
 
----
+**Deliverables:** Reduced `as any` count, real type bugs fixed.
 
-## Phase 4: Billing Automation Gaps
+**Review:** Small — type changes can have ripple effects.
 
-### Batch 8: Invoice generation + dunning + payout runs (#261, #262, #266)
-**Size:** Medium → Large review
-- #261: Automated invoice generation at 7/10 — verify cycle-based idempotency
-- #262: Automated dunning at 6/10 — verify 5-step escalation
-- #266: Weekly payout runs at 6/10 — verify threshold + rollover
-**Files:** Edge functions in `supabase/functions/`, admin billing pages
-
-### Batch 9: Customer credits (#119)
-**Size:** Small → Medium review
-- #119: Customer credits at 7/10 — verify tier system + auto-application
-**Files:** Credit components, billing hooks
+**Batch estimate:** 2-3 batches
 
 ---
 
-## Phase 5: Ops Cockpit & Analytics Gaps
+## Phase 3: Invalid Enum Values & Wrong Table/Column Names
 
-### Batch 10: Business health gauges + risk alerts (#235, #239, #240)
-**Size:** Medium → Large review
-- #235: Business Health gauges at 7/10 — verify threshold indicators
-- #239: Risk Alerts at 7/10 — verify severity + deep links
-- #240: Loss Leader review at 6/10 — verify profitability table + cohort cards
-**Files:** `src/pages/admin/OpsCockpit.tsx`, `src/pages/admin/Reports.tsx`
+**Problem:** Code references status enums, table names, or column names that don't exist in the DB. These queries silently return 0 rows.
 
----
+**Goals:**
+- Cross-reference all `.from("table")` calls against types.ts table list
+- Cross-reference all status string literals against DB enum definitions
+- Fix mismatches
 
-## Phase 6: SOPs → Academy Consolidation
+**Scope:**
+- Grep: `.from("` in src/ — compare table names against types.ts
+- Grep: status string literals in `.eq("status", "...")` and `.in("status", [...])`
+- Cross-reference against migration CHECK constraints and enum types
 
-### Batch 11: Fold SOPs into Academy + remove standalone section
-**Size:** Small → Medium review
-**Problem:** 6 SOP features (#275-#280) at 3/10 are stub playbooks. The Academy already has an "SOPs & Playbooks" training module. Fold the SOP content into enriched Academy modules and remove the standalone Playbooks page.
-**Fix:**
-- Enrich `src/constants/academy/sops-playbooks.ts` with the 6 SOP procedures as interactive training content
-- Remove or redirect `/admin/playbooks` route
-- Remove Playbooks nav item from AdminShell
-- Update feature list: mark SOPs as consolidated into Academy
-**Files:** `sops-playbooks.ts`, `AdminShell.tsx`, `App.tsx`
+**Deliverables:** All queries target real tables/columns/enums.
+
+**Review:** Small — wrong table names cause silent failures, need careful verification.
+
+**Batch estimate:** 1-2 batches
 
 ---
 
-## Phase 7: Remaining Polish
+## Phase 4: Silent Query Failures
 
-### Batch 12: Push notifications (#167)
-**Size:** Small → Medium review
-- #167: Push notification pipeline at 7/10 — verify Capacitor + FCM/APNs integration
-**Files:** `src/hooks/useDeviceToken.ts`, notification edge functions
+**Problem:** Supabase `.select()` calls that don't check the `error` return silently show empty UI instead of error states.
 
-### Batch 13: WCAG AA accessibility + admin city launch (#287, #402)
-**Size:** Small → Medium review
-- #287: WCAG AA at 6/10 — audit focus states, contrast ratios, semantic headings
-- #402: Admin city launch at 6/10 — verify Launch Readiness → zone creation flow timing
-**Files:** Global CSS, launch readiness components
+**Goals:**
+- Find queries that ignore the `error` field
+- Add error handling where missing
 
-### Batch 14: Deno integration tests (#274)
-**Size:** Micro → Small review
-- #274: Billing edge function tests at 7/10 — expand test coverage
-**Files:** `supabase/functions/**/test*`
+**Scope:**
+- Grep: `.from(` + `.select(` patterns where `error` is not destructured or checked
+- Focus on user-facing pages (customer/, provider/) over admin/
 
----
+**Deliverables:** All critical queries surface errors to the user.
 
-## Deferred Features (Not in Scope)
-- **#84**: Confusion detector (1/10) — deferred per human decision
-- **#247**: Admin change request system (5/10) — complex workflow, defer to future round
-- **#395, #399**: No calendar browsing / One CTA per screen (7/10) — design principles, not code features
-- **#422**: Provider Experience Auto-Evaluator (7/10) — scoring harness, defer to quality round
+**Review:** Micro — mechanical pattern.
+
+**Batch estimate:** 1-2 batches
 
 ---
 
-## Success Criteria
-1. All features at 7/10 or below (except deferred) reach 9/10
-2. SOPs folded into Academy; standalone Playbooks page removed
-3. Admin mobile menu works (hamburger + logout)
-4. Edge function auth gaps closed
-5. `npm run build` zero warnings from application code
-6. `npx tsc --noEmit` zero errors
+## Phase 5: Stale useState from Props/Context
+
+**Problem:** `useState(someAsyncValue)` captures a snapshot. If the async source updates, the state is stale. Forms pre-filled from fetched data are the typical victim.
+
+**Goals:**
+- Find all `useState` initialized from query data, context, or props
+- Check if a syncing `useEffect` exists
+- Add sync where missing
+
+**Scope:**
+- Grep: `useState(data?.`, `useState(profile?.`, `useState(props.`, `useState(org?.` in src/
+- For each: check if there's a `useEffect([dep])` that calls the setter
+
+**Deliverables:** No stale form fields after data refresh.
+
+**Review:** Micro — mechanical fix.
+
+**Batch estimate:** 1 batch
+
+---
+
+## Phase 6: Wrong Query Key Invalidation
+
+**Problem:** Code invalidates a query key that doesn't match the actual query's key, so the cache never refreshes.
+
+**Goals:**
+- Cross-reference every `invalidateQueries({ queryKey: [...] })` against the actual `useQuery({ queryKey: [...] })` definitions
+- Fix mismatches
+
+**Scope:**
+- Grep: `invalidateQueries` in src/ — list all keys being invalidated
+- Grep: `queryKey:` in src/hooks/ — list all keys being queried
+- Compare
+
+**Deliverables:** Every invalidation targets a real query key.
+
+**Review:** Micro — string comparison.
+
+**Batch estimate:** 1 batch
+
+---
+
+## Phase 7: Price Parsing Errors
+
+**Problem:** `parseInt` or `parseFloat` on formatted price strings can produce wrong values (e.g., "$149/4 weeks" → 1494).
+
+**Goals:**
+- Find all price/currency parsing in the codebase
+- Verify each handles format strings correctly
+
+**Scope:**
+- Grep: `parseInt`, `parseFloat` near price/cost/amount variables
+- Grep: `.replace(/[^0-9]/g` — the dangerous "strip everything" pattern
+
+**Deliverables:** All price parsing is safe.
+
+**Review:** Micro — math verification.
+
+**Batch estimate:** 1 batch
+
+---
+
+## Phase 8: Count Bugs on Head Queries
+
+**Problem:** `{ count: "exact", head: true }` returns count on a separate field, but `data` is null. Code using `data?.length` always gets 0.
+
+**Goals:**
+- Find all queries using `count: "exact"` or `head: true`
+- Verify they read `count` from the response, not `data.length`
+
+**Scope:**
+- Grep: `count: "exact"` and `head: true` in src/
+
+**Deliverables:** All count queries read from the correct response field.
+
+**Review:** Micro — verified by inspection.
+
+**Batch estimate:** 1 batch
+
+---
+
+## Phase 9: Orphaned Links & Routes
+
+**Problem:** Navigation links or `navigate()` calls that point to routes that were renamed or removed.
+
+**Goals:**
+- Cross-reference all `to="/..."` and `navigate("/...")` against the Route tree in App.tsx
+- Find dead links
+
+**Scope:**
+- Extract all routes from App.tsx
+- Grep: `to="/"`, `navigate("/"`, `href="/"` in src/
+- Compare
+
+**Deliverables:** No dead links in the app.
+
+**Review:** Micro — string comparison.
+
+**Batch estimate:** 1 batch
+
+---
+
+## Phase 10: Date/Timezone Logic Bugs
+
+**Problem:** Off-by-one errors in date comparisons, missing timezone handling, or `new Date()` without UTC awareness.
+
+**Goals:**
+- Audit date logic in billing, scheduling, and dunning code
+- Verify timezone handling in edge functions vs client code
+
+**Scope:**
+- Grep: `new Date()`, `toISOString`, `>= CURRENT_DATE`, date comparisons in migrations and edge functions
+- Focus on billing cycle boundaries and move-date transitions
+
+**Deliverables:** Date logic is timezone-safe and boundary-correct.
+
+**Review:** Small — date bugs are subtle and high-impact.
+
+**Batch estimate:** 1-2 batches
+
+---
+
+## Summary
+
+| Phase | Bug Type | Est. Batches | Review |
+|-------|----------|-------------|--------|
+| 1 | Missing error states | 2-3 | Micro |
+| 2 | `as any` cast audit | 2-3 | Small |
+| 3 | Invalid enums/tables | 1-2 | Small |
+| 4 | Silent query failures | 1-2 | Micro |
+| 5 | Stale useState | 1 | Micro |
+| 6 | Wrong query keys | 1 | Micro |
+| 7 | Price parsing | 1 | Micro |
+| 8 | Count bugs | 1 | Micro |
+| 9 | Orphaned links | 1 | Micro |
+| 10 | Date/timezone | 1-2 | Small |
+| **Total** | | **12-18** | |
