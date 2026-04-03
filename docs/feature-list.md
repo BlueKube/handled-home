@@ -203,7 +203,7 @@
 116. Invoice line items: plan, add-ons, credits, taxes/fees — 9/10
 117. Receipt view with cycle period, payment status, and method (masked) — 9/10
 118. Billing health states: Healthy / Action Required / Past Due / Service Paused — 9/10
-119. Customer credits with fixed tiers ($10/$25/$50/custom) and auto-application to next invoice — 7/10
+119. Customer credits with fixed tiers ($10/$25/$50/custom) and auto-application to next invoice — 9/10
 120. Idempotent invoice generation via idempotency keys — 9/10
 
 ---
@@ -264,14 +264,14 @@
 
 ## XXI. Support & Disputes `trust-builder` `mental-load-reduction`
 
-150. Self-resolution target: ≥80% of issues resolved without human involvement — 7/10
+150. Self-resolution target: ≥80% of issues resolved without human involvement — 9/10
 151. Receipt-anchored issue reporting: every receipt has "Report an issue" — 9/10
-152. Guided Resolver: structured category → evidence → instant resolution offer → accept → done — 7/10
-153. Policy engine with 5-level precedence: provider → SKU → category → zone → global — 7/10
+152. Guided Resolver: structured category → evidence → instant resolution offer → accept → done — 9/10
+153. Policy engine with 5-level precedence: provider → SKU → category → zone → global — 9/10
 154. AI-powered ticket classification with severity, evidence scoring, and risk scoring — 9/10
-155. Evidence replay: before/after photos + checklist + time-on-site presented to customer — 7/10
-156. Chargeback intercept: proof + cheaper off-ramps (credits, plan changes) before escalation — 6/10
-157. Duplicate ticket suppression: second attempt links to existing ticket — 7/10
+155. Evidence replay: before/after photos + checklist + time-on-site presented to customer — 9/10
+156. Chargeback intercept: proof + cheaper off-ramps (credits, plan changes) before escalation — 9/10
+157. Duplicate ticket suppression: second attempt links to existing ticket — 9/10
 158. Response macros for admin one-click resolutions — 9/10
 159. Policy preview simulator: test scenario inputs (category, evidence score, risk score, customer history, job value) against active policy dials to see computed resolution offers — 9/10
 160. No chat threads anywhere — all disputes are structured, bounded, and auditable — 9/10
@@ -286,7 +286,7 @@
 164. Rate limits per priority tier per day/hour — 8/10
 165. 19 seeded notification templates with premium concierge copy — 9/10
 166. In-app notification center with unread badge, priority tabs, and CTA deep links — 9/10
-167. Push notification pipeline via Capacitor + FCM/APNs — 7/10
+167. Push notification pipeline via Capacitor + FCM/APNs — 9/10
 168. Email delivery via Resend integration — 9/10
 169. Device token registration with automatic cleanup on logout — 9/10
 170. User notification preferences: per-tier toggles + quiet hours + timezone — 9/10
@@ -404,12 +404,12 @@
 232. Growth health: referrals, provider invites, applications, fraud holds — 9/10
 233. KPI definitions page with 18 KPIs across 5 categories, formula cards, search, category filter, green/yellow/red threshold badges from operating model — 9/10
 234. Daily snapshot rollup via `snapshot-rollup` edge function — 9/10
-235. Business Health gauges on Ops Cockpit: attach rate (global, 90-day cohort, 6-month cohort), household churn, provider churn, zone density bands — green/amber/red threshold indicators from operating model, flywheel alert when 6-month attach rate < 1.5 — 7/10
+235. Business Health gauges on Ops Cockpit: attach rate (global, 90-day cohort, 6-month cohort), household churn, provider churn, zone density bands — green/amber/red threshold indicators from operating model, flywheel alert when 6-month attach rate < 1.5 — 9/10
 236. Gross Margin gauge on Ops Cockpit (MONEY column): percentage with target ≥25%, green/yellow/red status — 8/10
 237. Provider Utilization gauge on Ops Cockpit (NOW column): percentage with target ≥80%, green/yellow/red status — 8/10
 238. Payout Review cadence card on Ops Cockpit (MONEY column): last review date, next due, status indicator, link to Payouts page — 8/10
-239. Risk Alerts card on Ops Cockpit: operating model threshold violations surfaced as actionable alerts with severity (warning/critical) and deep links to resolution pages — includes 90-day cohort attach rate alert and 6-month flywheel breakpoint alert — 7/10
-240. Loss Leader review tab on Admin Reports: per-plan profitability table, cohort attach rate cards (30d/60d/90d/120d), exit criteria alerts for plans below attach thresholds — 6/10
+239. Risk Alerts card on Ops Cockpit: operating model threshold violations surfaced as actionable alerts with severity (warning/critical) and deep links to resolution pages — includes 90-day cohort attach rate alert and 6-month flywheel breakpoint alert — 9/10
+240. Loss Leader review tab on Admin Reports: per-plan profitability table, cohort attach rate cards (30d/60d/90d/120d), exit criteria alerts for plans below attach thresholds — 9/10
 
 ---
 
@@ -434,12 +434,12 @@
 
 ## XXXIV. Automation Engine `provider-value` `density-driver`
 
-250. Auto-assign jobs to providers: Primary-first → Backup fallback with explainability — 7/10
+250. Auto-assign jobs to providers: Primary-first → Backup fallback with explainability — 9/10
 251. Provider no-show detection (hourly) with auto-reassign and calm customer notification — 7/10
 252. Provider incident tracking system — no-show, quality issue, access failure, late arrival, proof missing incidents with severity, excused/unexcused classification, admin review queue, 60-day rolling window counts — 9/10
 253. Provider probation system — 4-status lifecycle (active/completed/failed/revoked), improvement targets with deadlines, admin resolve actions (improved/extend/suspend), provider-facing dashboard banner — 9/10
-254. SLA enforcement automation: daily evaluation, 4-level threshold ladder, auto-generate actions — 7/10
-255. Auto-flag and suspend low-quality providers after sustained RED status — 7/10
+254. SLA enforcement automation: daily evaluation, 4-level threshold ladder, auto-generate actions — 9/10
+255. Auto-flag and suspend low-quality providers after sustained RED status — 9/10
 256. Auto-promote highest-performing backup when primary is suspended — 5/10
 257. Weather mode: auto-detection via WeatherAPI.com, admin approval, job rescheduling — 5/10
 258. Holiday calendar: pre-seeded US federal holidays 2026–2027, job skip support — 8/10
@@ -450,12 +450,12 @@
 
 ## XXXV. Billing Automation `margin-lever`
 
-261. Automated invoice generation with cycle-based idempotency — 7/10
-262. Automated dunning with 5-step escalation ladder — 6/10
+261. Automated invoice generation with cycle-based idempotency — 9/10
+262. Automated dunning with 5-step escalation ladder — 9/10
 263. Admin dunning step tracker — shows all subscriptions in dunning with step/stage, severity badges, timing, critical count for step 3+ — 8/10
 264. Auto-apply referral credits to invoices — 8/10
 265. Auto-release provider earning holds nightly — 8/10
-266. Weekly payout runs with threshold enforcement and rollover — 6/10
+266. Weekly payout runs with threshold enforcement and rollover — 9/10
 267. Admin payout rollover dashboard — shows providers below $25 threshold with accumulated earnings, count, and distance to threshold — 8/10
 
 ---

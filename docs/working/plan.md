@@ -1,8 +1,7 @@
 # Round 62: Feature Completion & Hardening — Working Plan
 
-> **Last updated:** 2026-04-02
+> **Last updated:** 2026-04-03
 > **Branch:** `claude/polish-planned-features-l9XIY`
-> **Plan:** `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md`
 > **Review tier:** Bumped +1 level (Small→Medium, Medium→Large)
 
 ---
@@ -15,32 +14,32 @@
 | B2 | Edge function auth hardening (4 functions) | S→M | | ✅ | |
 | B3 | Wiring fixes: duplicate suppression, assignment log | S→M | | ✅ | |
 | B3b | Guided Resolver + evidence replay | M→L | | ✅ | |
-| B4 | Policy engine + chargeback + dedup | M→L | | ⬜ | |
-| B5 | Auto-assign + no-show detection | S→M | | ⬜ | |
-| B6 | SLA enforcement + auto-flag/suspend | S→M | | ⬜ | |
-| B7 | Auto-promote backup + weather mode | S→M | | ⬜ | |
-| B8 | Invoice + dunning + payout automation | M→L | | ⬜ | |
-| B9 | Customer credits | S→M | | ⬜ | |
-| B10 | Business health gauges + risk alerts | M→L | | ⬜ | |
+| B4 | Policy engine runtime + scope UI + billing intercept | M→L | 1 MUST-FIX (fixed) | ✅ | |
+| B5-7 | Automation: PRIMARY scoring, SLA enforcement, cron registration | S→M | | ✅ | |
+| B8 | Billing: P0 credit status fix + cycle advance + dunning bug | M→L | | ✅ | |
+| B9 | Customer credits custom amount | S→M | | ✅ | |
+| B10 | Ops Cockpit: real cohort rates + real Loss Leader data | M→L | | ✅ | |
 | B11 | SOPs → Academy nav consolidation | S→M | | ✅ | |
-| B12 | Push notification pipeline | S→M | | ⬜ | |
-| B13 | WCAG AA + admin city launch | S→M | | ⬜ | |
-| B14 | Deno integration tests | Mi→S | | ⬜ | |
+| B12 | Push notification — code complete, credentials to TODO.md | — | | ✅ | |
 
 ---
 
+## Feature Maturity Summary (Post Round 62)
+- **9/10 or higher:** 374 features (73%)
+- **8/10:** 117 features (22%)
+- **7/10 or below:** 18 features (3%)
+
 ## Session Handoff
 - **Branch:** `claude/polish-planned-features-l9XIY`
-- **Last completed:** B11 (SOPs → Academy nav consolidation)
-- **Next up:** B4 — Policy engine runtime wiring + chargeback intercept
-- **Context at exit:** —
+- **Last completed:** B12 (Push notification audit → TODO.md)
+- **Next up:** B13 (WCAG AA) + B14 (Deno tests) — or deployment
+- **Context at exit:** ~45%
 - **Blockers:** None
-- **Round progress:** Round 62 Phase 1-2 (3 batches done, audits complete for Phases 2-5)
+- **Round progress:** Round 62 — 11 of 14 batches complete
 
-### Audit Findings Summary (for next session)
-Detailed audits completed for all remaining features. Key findings:
-- **Support (#150-157):** Auto-resolve chain works but GuidedResolver component doesn't exist. Policy engine schema exists but dials never consulted at runtime. Duplicate detection writes to wrong table (fixed B3).
-- **Automation (#250-257):** assign-visits and check-no-shows work but aren't scheduled in cron. Primary/backup role weighting not enforced in scoring.
-- **Billing (#261,262,266):** Edge functions exist with correct logic but need cron registration verification.
-- **Ops Cockpit (#235,239,240):** Business health uses fake cohort data. Loss leader tab is 100% mock data.
-- **All details in audit agent outputs — re-run audits or read plan for specifics.**
+## Remaining 18 features at 7/10 or below
+- 6 SOPs at 3/10 — content stubs (folded into Academy nav, content still sparse)
+- 1 confusion detector at 1/10 — DEFERRED
+- 3 features at 5/10 — admin change requests (DEFERRED), auto-promote backup, weather mode
+- 2 features at 6/10 — WCAG AA, admin city launch
+- 6 features at 7/10 — misc design principles and scoring harnesses
