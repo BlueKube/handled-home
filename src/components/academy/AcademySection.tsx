@@ -115,21 +115,21 @@ function WatchOutsSection({ section }: { section: TrainingSection }) {
           className={cn(
             "p-4",
             wo.severity === "critical"
-              ? "border-red-500/30 bg-red-950/10"
-              : "border-orange-500/20 bg-orange-950/10",
+              ? "border-red-500/30 bg-red-50 dark:bg-red-950/10"
+              : "border-orange-500/30 dark:border-orange-500/20 bg-orange-50 dark:bg-orange-950/10",
           )}
         >
           <div className="flex items-start gap-3">
             <AlertTriangle
               className={cn(
                 "h-5 w-5 flex-shrink-0 mt-0.5",
-                wo.severity === "critical" ? "text-red-400" : "text-orange-400",
+                wo.severity === "critical" ? "text-red-600 dark:text-red-400" : "text-orange-600 dark:text-orange-400",
               )}
             />
             <p
               className={cn(
                 "text-sm font-medium",
-                wo.severity === "critical" ? "text-red-200" : "text-orange-200",
+                wo.severity === "critical" ? "text-red-900 dark:text-red-200" : "text-orange-900 dark:text-orange-200",
               )}
             >
               {wo.text}
