@@ -33,5 +33,5 @@ CREATE POLICY anon_provider_referrals_insert ON public.provider_referrals
 -- Admin full access
 CREATE POLICY admin_provider_referrals_all ON public.provider_referrals
   FOR ALL USING (
-    EXISTS (SELECT 1 FROM public.admin_members WHERE user_id = auth.uid())
+    EXISTS (SELECT 1 FROM public.admin_memberships WHERE user_id = auth.uid() AND is_active = true)
   );

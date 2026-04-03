@@ -79,7 +79,7 @@ CREATE POLICY household_members_owner_update ON public.household_members
 -- Admin full access
 CREATE POLICY admin_household_members_all ON public.household_members
   FOR ALL USING (
-    EXISTS (SELECT 1 FROM public.admin_members WHERE user_id = auth.uid())
+    EXISTS (SELECT 1 FROM public.admin_memberships WHERE user_id = auth.uid() AND is_active = true)
   );
 
 -- ─── Auto-insert owner on property creation ───

@@ -65,12 +65,12 @@ ALTER TABLE public.provider_probation ENABLE ROW LEVEL SECURITY;
 -- Admin full access
 CREATE POLICY admin_incidents_all ON public.provider_incidents
   FOR ALL USING (
-    EXISTS (SELECT 1 FROM public.admin_members WHERE user_id = auth.uid())
+    EXISTS (SELECT 1 FROM public.admin_memberships WHERE user_id = auth.uid() AND is_active = true)
   );
 
 CREATE POLICY admin_probation_all ON public.provider_probation
   FOR ALL USING (
-    EXISTS (SELECT 1 FROM public.admin_members WHERE user_id = auth.uid())
+    EXISTS (SELECT 1 FROM public.admin_memberships WHERE user_id = auth.uid() AND is_active = true)
   );
 
 -- Providers can read their own incidents

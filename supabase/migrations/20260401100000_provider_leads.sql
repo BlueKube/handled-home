@@ -40,5 +40,5 @@ CREATE POLICY anon_provider_leads_insert ON public.provider_leads
 -- Admin full access: read, update, delete
 CREATE POLICY admin_provider_leads_all ON public.provider_leads
   FOR ALL USING (
-    EXISTS (SELECT 1 FROM public.admin_members WHERE user_id = auth.uid())
+    EXISTS (SELECT 1 FROM public.admin_memberships WHERE user_id = auth.uid() AND is_active = true)
   );

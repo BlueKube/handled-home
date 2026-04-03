@@ -37,7 +37,7 @@ CREATE POLICY property_transitions_own ON public.property_transitions
 
 CREATE POLICY admin_property_transitions_all ON public.property_transitions
   FOR ALL USING (
-    EXISTS (SELECT 1 FROM public.admin_members WHERE user_id = auth.uid())
+    EXISTS (SELECT 1 FROM public.admin_memberships WHERE user_id = auth.uid() AND is_active = true)
   );
 
 -- ─── Customer Leads ───
@@ -71,5 +71,5 @@ CREATE POLICY customer_leads_insert ON public.customer_leads
 -- Admin full access
 CREATE POLICY admin_customer_leads_all ON public.customer_leads
   FOR ALL USING (
-    EXISTS (SELECT 1 FROM public.admin_members WHERE user_id = auth.uid())
+    EXISTS (SELECT 1 FROM public.admin_memberships WHERE user_id = auth.uid() AND is_active = true)
   );
