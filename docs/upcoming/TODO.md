@@ -93,9 +93,9 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 
 ## Round 9: Provider Funnel Hardening (2026-04-01)
 
-- [ ] **Apply Round 9 migrations** — 5 new migrations: unique email constraint, lead-application linking trigger, get_category_gaps RPC, auto-notify trigger, referral attribution trigger
+- [x] **Apply Round 9 migrations** — ✅ Applied as consolidated migration via Lovable Cloud
   - **Why:** All provider funnel automation depends on these triggers and functions
-  - **Blocked:** Full funnel automation on production
+  - **Resolved:** Triggers and RPCs created
 
 - [ ] **Decide referral incentive structure** — The "Refer 3 providers → priority review" messaging is implemented but the actual priority review logic is not enforced. Decide: should 3+ referrals flag the application for faster admin review, or is the messaging aspirational?
   - **Why:** Provider expectation set by UI needs to be backed by a real workflow
