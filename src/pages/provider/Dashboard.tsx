@@ -236,7 +236,9 @@ export default function ProviderDashboard() {
     .filter((e) => new Date(e.created_at) >= weekAgo)
     .reduce((sum, e) => sum + e.total_cents, 0);
 
-  const firstName = profile?.full_name?.split(" ")[0] ?? "Provider";
+  const rawName = profile?.full_name?.split(" ")[0];
+  // If full_name is actually an email or missing, use a friendly fallback
+  const firstName = rawName && !rawName.includes("@") ? rawName : "there";
   const isLoading = jobsLoading || earningsLoading;
 
   const handleLockRoute = () => {
