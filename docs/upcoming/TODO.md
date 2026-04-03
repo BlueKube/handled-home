@@ -83,9 +83,9 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 
 ## Round 8: Provider Conversion Funnel (2026-04-01)
 
-- [ ] **Apply provider_leads and provider_referrals migrations** — Two new tables need to be applied to production database
+- [x] **Apply provider_leads and provider_referrals migrations** — ✅ Applied as consolidated migration via Lovable Cloud
   - **Why:** Browse page lead capture and referral form write to these tables
-  - **Blocked:** Lead capture on production
+  - **Resolved:** Tables created with RLS policies
 
 - [ ] **Configure email sending for zone launch notifications** — The `notify-zone-leads` edge function marks leads as "notified" but doesn't send actual emails. Need to configure Resend/SendGrid/etc. and wire into the function.
   - **Why:** Leads won't receive launch notification emails without email integration
