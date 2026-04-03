@@ -119,7 +119,7 @@ export function useSubmitCustomerIssue() {
             customer_note: params.note,
             zone_id: job?.zone_id ?? null,
             provider_org_id: job?.provider_org_id ?? null,
-            status: "ai_reviewing" as any,
+            status: "in_review",
           })
           .select("id")
           .single();

@@ -30,5 +30,5 @@ ALTER TABLE public.sop_runs ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY admin_sop_runs_all ON public.sop_runs
   FOR ALL USING (
-    EXISTS (SELECT 1 FROM public.admin_members WHERE user_id = auth.uid())
+    EXISTS (SELECT 1 FROM public.admin_memberships WHERE user_id = auth.uid() AND is_active = true)
   );

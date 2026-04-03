@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { Capacitor } from "@capacitor/core";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -74,7 +75,9 @@ export default function AuthPage() {
       password,
       options: {
         data: { full_name: fullName.trim(), intended_role: signupRole },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: Capacitor.isNativePlatform()
+          ? "handledhome://auth/callback"
+          : `${window.location.origin}/auth/callback`,
       },
     });
     if (error) {

@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
+import { useNativeInit } from "@/hooks/useNativeInit";
 
 import { AppLayout } from "@/components/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -187,6 +188,11 @@ function RootRedirect() {
   return <Navigate to={`/${activeRole}`} replace />;
 }
 
+function NativeInitWrapper({ children }: { children: React.ReactNode }) {
+  useNativeInit();
+  return <>{children}</>;
+}
+
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
     <QueryClientProvider client={queryClient}>
@@ -194,6 +200,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <NativeInitWrapper>
           <AuthProvider>
             <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="h-8 w-8 border-2 border-accent border-t-transparent rounded-full animate-spin" /></div>}>
               <Routes>
@@ -373,6 +380,7 @@ const App = () => (
               </Routes>
             </Suspense>
           </AuthProvider>
+          </NativeInitWrapper>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

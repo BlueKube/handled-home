@@ -69,7 +69,7 @@ TEST_ADMIN_PASSWORD       # Test admin account password
 
 ### Apply Migrations
 
-There are 183 migrations in `supabase/migrations/` (2026-02-21 through 2026-03-22). Apply them all:
+There are 194 migrations in `supabase/migrations/` (2026-02-21 through 2026-04-03). Apply them all:
 
 ```bash
 supabase db push
