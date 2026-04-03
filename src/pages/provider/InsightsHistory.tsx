@@ -31,12 +31,12 @@ export default function ProviderInsightsHistory() {
       eightWeeksAgo.setDate(eightWeeksAgo.getDate() - 56);
 
       const [jobsRes, issuesRes] = await Promise.all([
-        (supabase.from("jobs") as any)
+        supabase.from("jobs")
           .select("id, status, completed_at")
           .eq("provider_org_id", org!.id)
           .eq("status", "COMPLETED")
           .gte("completed_at", eightWeeksAgo.toISOString()),
-        (supabase.from("job_issues") as any)
+        supabase.from("job_issues")
           .select("id, created_at, jobs!inner(provider_org_id)")
           .eq("jobs.provider_org_id", org!.id)
           .gte("created_at", eightWeeksAgo.toISOString()),

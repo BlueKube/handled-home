@@ -23,7 +23,7 @@ export function useAdminJobs(filters: AdminJobFilters = {}) {
     queryFn: async () => {
       const offset = page * pageSize;
 
-      let query = (supabase.from("jobs") as any)
+      let query = supabase.from("jobs")
         .select(`
           *,
           property:properties(street_address, city, zip_code),

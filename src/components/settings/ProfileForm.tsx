@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,11 @@ export function ProfileForm() {
   const [phone, setPhone] = useState(profile?.phone ?? "");
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    setFullName(profile?.full_name ?? "");
+    setPhone(profile?.phone ?? "");
+  }, [profile?.full_name, profile?.phone]);
 
   const handleSave = async () => {
     if (!user) return;

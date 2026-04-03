@@ -27,7 +27,7 @@ export default function OpsGrowth() {
         invitesRes, cohortsRes, referralListRes,
         appListRes, heldRewardsRes,
       ] = await Promise.all([
-        (supabase.from("referrals") as any).select("id", { count: "exact", head: true }).eq("status", "ACTIVATED").gte("created_at", since),
+        supabase.from("referrals").select("id", { count: "exact", head: true }).eq("status", "ACTIVATED").gte("created_at", since),
         supabase.from("provider_applications").select("id", { count: "exact", head: true }).gte("created_at", since),
         supabase.from("referral_risk_flags").select("id", { count: "exact", head: true }).eq("status", "open" as any),
         // Provider invites sent
@@ -35,7 +35,7 @@ export default function OpsGrowth() {
         // Founding Partner cohorts (top by velocity = count of recent activations)
         supabase.from("market_cohorts").select("id, label, status, zone_id, zones(name)").eq("status", "active"),
         // Referral leaderboard
-        (supabase.from("referrals") as any).select("referrer_id, status, zone_id, zones(name)").eq("status", "ACTIVATED").gte("created_at", since),
+        supabase.from("referrals").select("referrer_id, status, zone_id, zones(name)").eq("status", "ACTIVATED").gte("created_at", since),
         // Provider application funnel
         supabase.from("provider_applications").select("id, status, category, created_at, user_id").gte("created_at", since).order("created_at", { ascending: false }).limit(50),
         // Held rewards
