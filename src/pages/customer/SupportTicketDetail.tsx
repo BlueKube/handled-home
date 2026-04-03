@@ -2,12 +2,13 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSupportTicketDetail } from "@/hooks/useSupportTicketDetail";
 import { useTicketActions } from "@/hooks/useTicketActions";
+import { useCustomerVisitDetail } from "@/hooks/useCustomerVisitDetail";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { TicketStatusChip } from "@/components/support/TicketStatusChip";
 import { ResolutionOfferCard } from "@/components/support/ResolutionOfferCard";
-import { ChevronLeft, Clock, MessageSquarePlus } from "lucide-react";
+import { ChevronLeft, Clock, MessageSquarePlus, Camera, CheckCircle2, Timer } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
 
@@ -16,6 +17,8 @@ export default function CustomerSupportTicketDetail() {
   const navigate = useNavigate();
   const { ticket, offers, events, isLoading } = useSupportTicketDetail(ticketId);
   const actions = useTicketActions(ticketId ?? "");
+  const jobId = (ticket as any)?.job_id;
+  const { data: visitEvidence } = useCustomerVisitDetail(jobId ?? undefined);
 
   const [showAddInfo, setShowAddInfo] = useState(false);
   const [addInfoNote, setAddInfoNote] = useState("");
@@ -100,6 +103,57 @@ export default function CustomerSupportTicketDetail() {
           <p className="text-sm text-muted-foreground">{ticket.customer_note}</p>
         )}
       </div>
+
+      {/* Evidence from linked visit */}
+      {visitEvidence && (
+        <Card className="p-4 space-y-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Proof from this visit</h3>
+
+          {/* Time on site */}
+          {visitEvidence.job.arrived_at && visitEvidence.job.departed_at && (
+            <div className="flex items-center gap-2 text-sm">
+              <Timer className="h-4 w-4 text-muted-foreground" />
+              <span>
+                On site {Math.round(
+                  (new Date(visitEvidence.job.departed_at).getTime() - new Date(visitEvidence.job.arrived_at).getTime()) / 60000
+                )} min
+              </span>
+            </div>
+          )}
+
+          {/* Checklist highlights */}
+          {visitEvidence.checklistHighlights.length > 0 && (
+            <div className="space-y-1">
+              {visitEvidence.checklistHighlights.slice(0, 5).map((item: any) => (
+                <div key={item.id} className="flex items-center gap-2 text-xs">
+                  <CheckCircle2 className={`h-3.5 w-3.5 ${item.done ? "text-success" : "text-destructive"}`} />
+                  <span className={item.done ? "" : "text-destructive"}>{item.label}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Photos */}
+          {visitEvidence.photos.length > 0 && (
+            <div className="flex gap-2 overflow-x-auto">
+              {visitEvidence.photos.slice(0, 4).map((photo: any) => (
+                <img
+                  key={photo.id}
+                  src={photo.signedUrl}
+                  alt="Visit photo"
+                  className="h-16 w-16 rounded-lg object-cover border shrink-0"
+                />
+              ))}
+              {visitEvidence.photos.length > 4 && (
+                <div className="h-16 w-16 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                  <Camera className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs ml-0.5">+{visitEvidence.photos.length - 4}</span>
+                </div>
+              )}
+            </div>
+          )}
+        </Card>
+      )}
 
       {/* Resolution summary */}
       {ticket.resolution_summary && (
