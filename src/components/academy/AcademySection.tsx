@@ -143,9 +143,9 @@ function WatchOutsSection({ section }: { section: TrainingSection }) {
 
 function AutomationSection({ section }: { section: TrainingSection }) {
   const typeLabel = {
-    "set-and-forget": { label: "Set & Forget", color: "text-green-400 bg-green-900/40 border-green-500/20" },
-    "daily-check": { label: "Check Daily", color: "text-amber-400 bg-amber-900/40 border-amber-500/20" },
-    "weekly-check": { label: "Check Weekly", color: "text-blue-400 bg-blue-900/40 border-blue-500/20" },
+    "set-and-forget": { label: "Set & Forget", color: "text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/40 border-green-300 dark:border-green-500/20" },
+    "daily-check": { label: "Check Daily", color: "text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/40 border-amber-300 dark:border-amber-500/20" },
+    "weekly-check": { label: "Check Weekly", color: "text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/40 border-blue-300 dark:border-blue-500/20" },
   };
 
   return (
