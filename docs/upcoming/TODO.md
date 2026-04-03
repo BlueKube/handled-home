@@ -123,6 +123,10 @@ Items that require API keys, backend changes, or design decisions beyond fronten
   - **Why:** New homeowners won't know about Handled Home without outreach
   - **Blocked:** Email service (Resend/SendGrid) not configured
 
+- [x] **Apply billing automation fixes** — ✅ Fixed apply_referral_credits_to_invoice to accept DUE invoices, added advance_billing_cycle, added applied_cents columns
+
+- [x] **Register pg_cron schedules** — ✅ 7 automation jobs registered (billing, dunning, assign-visits, check-no-shows, evaluate-provider-sla, check-weather, weekly-payout)
+
 ## Polish Rounds 28-29 Deferred Items (2026-04-02)
 
 - [ ] **Feature 75: Confusion detector unimplemented** — Rated 1/10. "Inline help when a customer changes cadence 3+ times" — needs a per-session cadence change counter in Routine.tsx and a help banner. Not implemented at all.

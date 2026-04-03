@@ -995,6 +995,7 @@ export type Database = {
       customer_credits: {
         Row: {
           amount_cents: number
+          applied_cents: number
           applied_to_invoice_id: string | null
           created_at: string
           customer_id: string
@@ -1006,6 +1007,7 @@ export type Database = {
         }
         Insert: {
           amount_cents?: number
+          applied_cents?: number
           applied_to_invoice_id?: string | null
           created_at?: string
           customer_id: string
@@ -1017,6 +1019,7 @@ export type Database = {
         }
         Update: {
           amount_cents?: number
+          applied_cents?: number
           applied_to_invoice_id?: string | null
           created_at?: string
           customer_id?: string
@@ -6053,6 +6056,7 @@ export type Database = {
         Row: {
           amount_cents: number
           applied_at: string | null
+          applied_cents: number
           created_at: string
           hold_reason: string | null
           hold_until: string | null
@@ -6072,6 +6076,7 @@ export type Database = {
         Insert: {
           amount_cents?: number
           applied_at?: string | null
+          applied_cents?: number
           created_at?: string
           hold_reason?: string | null
           hold_until?: string | null
@@ -6091,6 +6096,7 @@ export type Database = {
         Update: {
           amount_cents?: number
           applied_at?: string | null
+          applied_cents?: number
           created_at?: string
           hold_reason?: string | null
           hold_until?: string | null
@@ -9383,6 +9389,10 @@ export type Database = {
       }
       admin_void_invoice: {
         Args: { p_invoice_id: string; p_reason: string }
+        Returns: Json
+      }
+      advance_billing_cycle: {
+        Args: { p_subscription_id: string }
         Returns: Json
       }
       apply_customer_reschedule: {
