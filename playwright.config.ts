@@ -38,7 +38,7 @@ export default defineConfig({
         ...devices["iPhone 15"],
         storageState: "e2e/.auth/customer.json",
       },
-      testIgnore: [/byoc-happy-path\.spec\.ts/, /screenshot-catalog\.spec\.ts/],
+      testIgnore: [/byoc-happy-path\.spec\.ts/, /screenshot-catalog\.spec\.ts/, /academy-screenshots\.spec\.ts/],
       dependencies: ["auth-setup"],
     },
 
@@ -54,6 +54,14 @@ export default defineConfig({
       name: "screenshot-catalog",
       testMatch: /screenshot-catalog\.spec\.ts/,
       use: { ...devices["iPhone 15"] },
+      dependencies: ["auth-setup"],
+    },
+
+    // ── Academy screenshots (admin-only, desktop viewport) ──
+    {
+      name: "academy-screenshots",
+      testMatch: /academy-screenshots\.spec\.ts/,
+      use: { viewport: { width: 1440, height: 900 } },
       dependencies: ["auth-setup"],
     },
   ],
