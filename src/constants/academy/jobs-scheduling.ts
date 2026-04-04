@@ -30,17 +30,17 @@ After the planner runs, the assignment engine runs and assigns providers to visi
       {
         title: "Filter by status to find what matters",
         description: "NOT_STARTED shows today's upcoming work. IN_PROGRESS means a provider is on-site. ISSUE_REPORTED is your action queue — something went wrong. COMPLETED is your audit trail. Use the zone filter to narrow to a specific area. Date range filter lets you look backward at completed work.",
-        screenshot: { alt: "Jobs page with status filters" },
+        screenshot: { src: "/academy/jobs-list.png", alt: "Jobs page with status filters" },
       },
       {
         title: "Click into a job for the full story",
         description: "Job Detail shows everything: the customer, property, assigned provider (primary + backup), services included, proof photos, timeline of events, and the decision trace (why the system made the choices it did). The decision trace is your debugging tool — it answers 'why was this provider assigned?' or 'why was this job rescheduled?'",
-        screenshot: { alt: "Job Detail page showing timeline and proof" },
+        screenshot: { src: "/academy/jobs-list.png", alt: "Job Detail page showing timeline and proof" },
       },
       {
         title: "Use date range to audit last week",
         description: "Every Friday afternoon, filter to the last 7 days and sort by issues. This is your weekly quality audit. How many issues? Were they resolved? Any patterns? This 15-minute habit catches trends before they become crises.",
-        screenshot: { alt: "Jobs filtered by last 7 days with issue highlights" },
+        screenshot: { src: "/academy/jobs-list.png", alt: "Jobs filtered by last 7 days with issue highlights" },
       },
     ],
   },
@@ -52,12 +52,12 @@ After the planner runs, the assignment engine runs and assigns providers to visi
       {
         title: "Read the capacity status first",
         description: "Each zone card shows a capacity status: Stable (green, under 80%), Tight (yellow, 80-90%), or Risk (red, over 90%). A zone showing Risk on a specific day means you're one provider absence away from missed jobs on that day. Either redistribute or recruit.",
-        screenshot: { alt: "Service Days grid with zone capacity cards" },
+        screenshot: { src: "/academy/service-days.png", alt: "Service Days grid with zone capacity cards" },
       },
       {
         title: "Check the day-of-week breakdown",
         description: "Most zones have uneven demand. Mondays and Fridays are typically heavy (customers want their home clean before or after the weekend). Mid-week is lighter. If Tuesday shows 3/10 assigned but Friday shows 9/10, your capacity isn't the problem — your distribution is. The scheduling policy dials can help spread load.",
-        screenshot: { alt: "Service day Mon-Sun breakdown for a zone" },
+        screenshot: { src: "/academy/service-days.png", alt: "Service day Mon-Sun breakdown for a zone" },
       },
     ],
   },
@@ -69,17 +69,17 @@ After the planner runs, the assignment engine runs and assigns providers to visi
       {
         title: "Check planner run status every morning",
         description: "The planner should show 'Completed' with a green status for last night's run. If it shows 'Failed,' check the error details and escalate — a failed planner run means no new visits were generated for the draft window. Today's locked jobs are fine, but tomorrow's assignments could be missing.",
-        screenshot: { alt: "Planner Dashboard with recent run history" },
+        screenshot: { src: "/academy/scheduling-planner.png", alt: "Planner Dashboard with recent run history" },
       },
       {
         title: "Use 'Rebuild DRAFT' when you need a do-over",
         description: "Sometimes you make a change (new provider, zone capacity update) and want the draft window regenerated without waiting for tonight's nightly run. 'Rebuild DRAFT' only touches days 8-14 — it never changes locked days. Safe to run anytime during the day.",
-        screenshot: { alt: "Planner Dashboard rebuild DRAFT button" },
+        screenshot: { src: "/academy/scheduling-planner.png", alt: "Planner Dashboard rebuild DRAFT button" },
       },
       {
         title: "Watch for conflicts",
         description: "The planner surfaces conflicts: no_service_day (property in a zone without a service day defined for that weekday) and no_routine (customer has no active routine). Each conflict tells you what to fix upstream.",
-        screenshot: { alt: "Planner conflicts table" },
+        screenshot: { src: "/academy/scheduling-planner.png", alt: "Planner conflicts table" },
       },
     ],
   },
@@ -91,17 +91,17 @@ After the planner runs, the assignment engine runs and assigns providers to visi
       {
         title: "Understanding what the engine optimizes",
         description: "The assignment engine balances five weighted objectives: minimize drive time between stops, balance workload across providers, spread work across the week, reward familiarity (same provider returning to same home), and prefer zone-assigned providers. It runs after the planner and assigns a Primary + Backup provider to each visit.",
-        screenshot: { alt: "Assignment Dashboard with run stats" },
+        screenshot: { src: "/academy/assignment-dashboard.png", alt: "Assignment Dashboard with run stats" },
       },
       {
         title: "Check '% assigned primary' and '% with backup'",
         description: "Target is 95%+ assigned primary and 80%+ with backup. If primary assignment drops below 90%, check for capacity issues or provider availability blocks. If backup drops below 70%, you may need more providers in the zone — backups prevent cascading failures when primaries are unavailable.",
-        screenshot: { alt: "Assignment stats showing primary and backup percentages" },
+        screenshot: { src: "/academy/assignment-dashboard.png", alt: "Assignment stats showing primary and backup percentages" },
       },
       {
         title: "Don't touch assignment dials without data",
         description: "Assignment Config has 13 configuration dials (weights, thresholds, timing). The defaults are tuned based on typical zone density. Changing them without understanding the tradeoffs can cause wild swings — like over-weighting familiarity until a single provider gets assigned every job in a zone. If you think tuning is needed, discuss with a senior operator first.",
-        screenshot: { alt: "Assignment Config dial interface" },
+        screenshot: { src: "/academy/assignment-config.png", alt: "Assignment Config dial interface" },
       },
     ],
   },

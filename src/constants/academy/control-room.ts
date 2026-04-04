@@ -25,22 +25,22 @@ The change request workflow is the guardrail. Any pricing or payout change can r
       {
         title: "Understand the pricing hierarchy",
         description: "Base price (per SKU, platform-wide) → Zone override (specific to a zone, either absolute price or multiplier) → Effective price (what the customer actually pays). If a zone has no override, the base price applies. If it has a 1.15x multiplier, everything in that zone costs 15% more. This lets you charge more in high-cost markets without changing base prices.",
-        screenshot: { alt: "Pricing hierarchy showing base → zone override → effective" },
+        screenshot: { src: "/academy/control-pricing.png", alt: "Pricing hierarchy showing base → zone override → effective" },
       },
       {
         title: "Check the Change Log before making any change",
         description: "Before you touch pricing, check what was changed recently. The last person who changed lawn care pricing without checking the log accidentally reverted a zone-specific override that took 3 support tickets to diagnose. 30 seconds of checking prevents hours of cleanup.",
-        screenshot: { alt: "Change Log showing recent pricing modifications" },
+        screenshot: { src: "/academy/control-change-log.png", alt: "Change Log showing recent pricing modifications" },
       },
       {
         title: "Use multipliers over absolute overrides when possible",
         description: "If you raise the base price by 5%, every zone with a multiplier automatically adjusts. But zones with absolute overrides don't change — they're frozen at whatever was set. This means a mix of multipliers and absolutes creates pricing drift over time. Prefer multipliers for regional cost adjustments; use absolutes only when a zone needs a completely different price point.",
-        screenshot: { alt: "Zone override configuration showing multiplier vs absolute" },
+        screenshot: { src: "/academy/control-pricing.png", alt: "Zone override configuration showing multiplier vs absolute" },
       },
       {
         title: "Always include an audit reason",
         description: "Every pricing change requires a reason. 'Adjusting for market conditions' is useless. 'Increasing lawn base price from $45 to $52 to maintain 30% margin after provider rate increase effective April 1' is what the next person needs to understand your change. Write reasons for the person who has to reverse your change at 2am.",
-        screenshot: { alt: "Pricing change form with audit reason field" },
+        screenshot: { src: "/academy/control-pricing.png", alt: "Pricing change form with audit reason field" },
       },
     ],
   },

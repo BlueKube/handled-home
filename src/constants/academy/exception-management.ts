@@ -27,22 +27,22 @@ The key principle: exceptions have severity levels and "next best actions." The 
       {
         title: "Sort by severity, not by age",
         description: "A HIGH severity exception from 2 hours ago is more important than a LOW severity exception from yesterday. The severity is assigned based on customer impact: HIGH means a customer is affected right now (missed job, failed payment on a first bill). LOW means it needs attention but isn't time-sensitive (missing proof from a completed job).",
-        screenshot: { alt: "Exception list sorted by severity" },
+        screenshot: { src: "/academy/exceptions-list.png", alt: "Exception list sorted by severity" },
       },
       {
         title: "Read the 'next best action' before doing anything",
         description: "Every exception includes a suggested next action. For missing proof: 'Request proof from provider.' For failed payment: 'Retry after dunning step 2.' For missed job: 'Reassign to backup provider.' These suggestions are based on the exception type and the entity's current state. They're right 80% of the time.",
-        screenshot: { alt: "Exception detail showing next best action" },
+        screenshot: { src: "/academy/ops-exceptions.png", alt: "Exception detail showing next best action" },
       },
       {
         title: "Check the decision trace for context",
         description: "The decision trace shows why this exception exists — what the system tried, what failed, and what state the entity was in when the exception was created. This saves you from investigating something the system already investigated. If the trace says 'attempted assignment to backup provider: none available,' you know the problem is provider coverage, not a scheduling bug.",
-        screenshot: { alt: "Decision trace expanded on an exception" },
+        screenshot: { src: "/academy/ops-exceptions.png", alt: "Decision trace expanded on an exception" },
       },
       {
         title: "Resolve or escalate — never leave exceptions in limbo",
         description: "Every exception should end in one of two states: Resolved (you fixed it or the automation fixed it) or Escalated (you pushed it to someone with more authority). An exception sitting in 'open' for 3+ days is a red flag — either nobody's looking at the queue or nobody knows what to do. Both are problems.",
-        screenshot: { alt: "Exception with resolve/escalate action buttons" },
+        screenshot: { src: "/academy/ops-exceptions.png", alt: "Exception with resolve/escalate action buttons" },
       },
     ],
   },

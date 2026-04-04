@@ -29,25 +29,25 @@ Let's get started.`,
         title: "Complete your account setup",
         description:
           "Your manager will have sent you an invite. Accept it, set your password, and enable two-factor authentication before you do anything else. If the invite hasn't arrived, check your spam folder first, then ping your manager — don't try to work around it.",
-        screenshot: { alt: "Account setup and 2FA configuration screen" },
+        screenshot: { src: "/academy/first-week-admin-shell.png", alt: "Account setup and 2FA configuration screen" },
       },
       {
         title: "Navigate the admin shell",
         description:
           "Log in and spend ten minutes just clicking around. Don't change anything — just orient yourself. Notice the main nav sections: Cockpit, Execution, People, Markets, Catalog, Money, Growth, Support, Governance, Control Room, Academy, and Tools. The sidebar organizes every admin page into these groups. When something feels unfamiliar later, ask yourself which group it belongs to.",
-        screenshot: { alt: "Admin shell main navigation overview" },
+        screenshot: { src: "/academy/first-week-admin-shell.png", alt: "Admin shell main navigation overview" },
       },
       {
         title: "Find the Ops Cockpit",
         description:
           "The Ops Cockpit is your home base. It's the first screen you open every morning and the last one you check before you log off. It surfaces zone health, active job counts, exception queues, and provider status in one view. You don't need to understand every number today — just know where it lives and what it's called.",
-        screenshot: { alt: "Ops Cockpit dashboard with zone health and queue indicators" },
+        screenshot: { src: "/academy/first-week-ops-cockpit.png", alt: "Ops Cockpit dashboard with zone health and queue indicators" },
       },
       {
         title: "Watch the morning health check (don't touch anything yet)",
         description:
           "At the start of each morning, the operator on shift runs a health check: review zone statuses, scan open exceptions, confirm the Dispatcher Queues are draining normally. Today you watch someone else do this. Pay attention to the sequence — it's the same every day, which is intentional. Consistency is what lets you spot anomalies fast.",
-        screenshot: { alt: "Morning health check checklist in the Ops Cockpit" },
+        screenshot: { src: "/academy/first-week-ops-cockpit.png", alt: "Morning health check checklist in the Ops Cockpit" },
       },
       {
         title: "Ask one question at the end of the day",
@@ -71,13 +71,13 @@ Let's get started.`,
         title: "Morning check — scan zone health and queue depth",
         description:
           "Open the Ops Cockpit. Scan zone health indicators top to bottom. Any zone showing yellow or red is the first thing you address. Then look at queue depth in Dispatcher Queues — is volume moving at the expected rate for this time of day? On a normal morning this takes under five minutes. If something looks off, it takes longer because you're already investigating.",
-        screenshot: { alt: "Dispatcher Queues panel showing queue depth and drain rate" },
+        screenshot: { src: "/academy/first-week-dispatcher.png", alt: "Dispatcher Queues panel showing queue depth and drain rate" },
       },
       {
         title: "Learn to read the Dispatcher Queues",
         description:
           "The Dispatcher Queues show jobs moving through the system. Each queue represents a stage: Pending → Assigned → In Progress → Complete (and Exception for anything that fell out). A healthy queue has jobs flowing through without pooling in one stage. Pooling means something upstream isn't working. Today, have your supervisor narrate what they see as they read the queues — this context takes days to absorb from a manual alone.",
-        screenshot: { alt: "Dispatcher Queue stages with job state flow diagram" },
+        screenshot: { src: "/academy/first-week-dispatcher.png", alt: "Dispatcher Queue stages with job state flow diagram" },
       },
       {
         title: "Understand job states",
@@ -101,7 +101,7 @@ Let's get started.`,
         title: "Open the exception queue with your supervisor",
         description:
           "Today you handle your first exception — but with your supervisor next to you (or on a call). Pull up the exception queue in the Ops Cockpit. Pick the oldest unresolved exception that isn't flagged as critical. Read everything on the job record before you decide anything: job history, notes, provider assignment, customer details.",
-        screenshot: { alt: "Exception queue sorted by age with severity indicators" },
+        screenshot: { src: "/academy/ops-exceptions.png", alt: "Exception queue sorted by age with severity indicators" },
       },
       {
         title: "Learn the exception triage flow",
@@ -117,7 +117,7 @@ Let's get started.`,
         title: "Practice using macros for support tickets",
         description:
           "When a job requires a support ticket, use the macros library before writing anything from scratch. Macros exist for the twelve most common exception types. Using a macro isn't laziness — it ensures consistent customer communication and saves you three minutes per ticket. Find the macros under Support → Templates. Today, apply one macro to a real ticket (with supervisor sign-off before sending).",
-        screenshot: { alt: "Support ticket macros library with exception type filters" },
+        screenshot: { src: "/academy/support-macros.png", alt: "Support ticket macros library with exception type filters" },
       },
       {
         title: "Close the loop — log your resolution",
@@ -141,13 +141,13 @@ Let's get started.`,
         title: "Monitor zone health throughout the day",
         description:
           "Zone health isn't just a morning-check metric — it's a live signal you're watching throughout the day. Set a reminder to glance at zone status every 90 minutes. Most of the time it'll be green and you'll move on in ten seconds. The discipline of checking consistently means you catch degradation while it's still small.",
-        screenshot: { alt: "Zone health panel with real-time status indicators" },
+        screenshot: { src: "/academy/first-week-ops-cockpit.png", alt: "Zone health panel with real-time status indicators" },
       },
       {
         title: "Review provider performance",
         description:
           "Pull up the Provider Performance view and look at the last 7 days for your active zones. You're looking for providers with declining completion rates, rising exception rates, or unusually long job durations. You don't need to act on anything today — just build the habit of reading the numbers and noticing which providers are performing and which aren't.",
-        screenshot: { alt: "Provider performance table with completion rate and exception rate columns" },
+        screenshot: { src: "/academy/first-week-providers.png", alt: "Provider performance table with completion rate and exception rate columns" },
       },
       {
         title: "Start building your own patterns",

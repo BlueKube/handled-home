@@ -30,31 +30,31 @@ The zone lifecycle has four stages:
         title: "Start with the demand signal, not the map",
         description:
           "Before you draw a single boundary, pull your referral traffic heatmap and your inbound provider applications. Where are customers already searching? Where are providers already living? The best zone design follows existing density signals — you're formalizing what's already happening, not trying to create demand from scratch. If you don't have data yet, use US Census tract population density as a proxy: target areas with 3,000+ households per square mile as your initial anchor.",
-        screenshot: { alt: "Referral traffic heatmap overlaid on H3 hex grid" },
+        screenshot: { src: "/academy/zone-builder.png", alt: "Referral traffic heatmap overlaid on H3 hex grid" },
       },
       {
         title: "Draw the boundary at the natural density break",
         description:
           "Look for the edges where the heatmap cools off — that's where your zone boundary belongs. Don't try to include a neighborhood 'just in case' if the signal is weak there. A tight zone with strong density outperforms a large zone with thin coverage every single time. As a rule of thumb: launch zones should cover 15,000–40,000 households. Below 15K you won't generate enough job volume to retain providers. Above 40K you'll have drive-time problems before you have the provider count to solve them.",
-        screenshot: { alt: "Zone boundary drawn at density break with household count overlay" },
+        screenshot: { src: "/academy/zone-builder.png", alt: "Zone boundary drawn at density break with household count overlay" },
       },
       {
         title: "Set provider density requirements before you open the zone",
         description:
           "Minimum viable zone requires 5 active providers across at least 3 different service categories. 'Active' means they've completed at least 1 job in the last 30 days — not just onboarded. Ideal launch density is 8–12 providers. Below 5, you'll have unacceptable response times and customers will churn before you can fix it. Above 15, you'll have underutilized providers who will churn for the same reason. The sweet spot is sustainable density, not maximum density.",
-        screenshot: { alt: "Provider density map showing active providers within zone boundary" },
+        screenshot: { src: "/academy/zone-builder.png", alt: "Provider density map showing active providers within zone boundary" },
       },
       {
         title: "Set customer density thresholds for zone viability",
         description:
           "A zone becomes self-sustaining when it reaches 200 active subscribers. Below 100, providers are doing too much dead-driving and the economics don't work for them. Between 100–200, you're in the fragile zone — keep monitoring weekly. Above 200, the flywheel starts: providers are busy, response times are short, referrals compound. Your target steady state is 300–500 customers per zone before you consider splitting.",
-        screenshot: { alt: "Zone customer density chart showing viability thresholds" },
+        screenshot: { src: "/academy/zones-list.png", alt: "Zone customer density chart showing viability thresholds" },
       },
       {
         title: "Configure the zone in the system",
         description:
           "In Admin → Markets → Zones, create the zone record with the H3 hex IDs that define the boundary, the zone name, target launch date, assigned Zone Manager (if applicable), and minimum/maximum provider counts. Set the capacity thresholds here — the system uses these to trigger health alerts. Save as Draft until you're ready to move into soft launch. You can't accept customers in a Draft zone.",
-        screenshot: { alt: "Zone configuration form in Admin Markets panel" },
+        screenshot: { src: "/academy/zones-list.png", alt: "Zone configuration form in Admin Markets panel" },
       },
     ],
   },
@@ -87,25 +87,25 @@ Note: Business Health gauges (attach rate, churn, margin) are tracked separately
         title: "Diagnosing an undercapacity zone",
         description:
           "Signs: utilization above 85%, response time above 6 hours, providers declining jobs, customer churn ticking up. Root cause is almost always a provider supply problem — either you don't have enough providers, or the providers you have aren't working enough hours. First check: is the issue supply (not enough providers) or availability (providers are onboarded but not taking jobs)? Pull the Provider Availability report. If providers are available but not accepting, you have a matching or pricing problem. If they're simply not online, you have a retention or engagement problem.",
-        screenshot: { alt: "Provider Availability report showing online hours vs accepted jobs" },
+        screenshot: { src: "/academy/ops-zones.png", alt: "Provider Availability report showing online hours vs accepted jobs" },
       },
       {
         title: "Diagnosing an overcapacity zone",
         description:
           "Signs: utilization below 55%, providers completing fewer than 8 jobs per week, provider churn spiking as they seek more reliable income. You have too many providers for the demand. Short-term fix: pause provider recruitment and run a customer acquisition push. Medium-term fix: assess whether the zone's demand ceiling is genuinely low, or whether you simply haven't grown into the potential. If demand has plateaued after 90 days of acquisition effort, consider a zone merge.",
-        screenshot: { alt: "Zone utilization trend chart showing overcapacity indicators" },
+        screenshot: { src: "/academy/ops-zones.png", alt: "Zone utilization trend chart showing overcapacity indicators" },
       },
       {
         title: "When to split a zone",
         description:
           "Split triggers: zone has 500+ active customers, provider count is above 20, and response time is starting to creep up despite adequate provider count. What's happening is geographic sprawl — the zone has grown large enough that providers are driving across it rather than clustering. Before you split, make sure your new zones each have at least 8 providers who live or operate in that sub-area. A clean split creates two healthy zones. A premature split creates two fragile zones. Don't split below 400 customers total.",
-        screenshot: { alt: "Zone split wizard showing proposed sub-zone boundaries and provider distribution" },
+        screenshot: { src: "/academy/ops-zones.png", alt: "Zone split wizard showing proposed sub-zone boundaries and provider distribution" },
       },
       {
         title: "When to merge zones",
         description:
           "Merge triggers: two adjacent zones are both below 150 customers, both have fewer than 6 active providers, and neither has shown growth in 60 days. The combined zone needs to clear 8 providers and 200 customers post-merge to be viable — if it won't, you're merging two failing zones into one, which just delays the decision. Merges require customer communication (some customers will see a new Zone Manager or slightly different response times) and provider communication (territory expectations may change).",
-        screenshot: { alt: "Zone merge confirmation screen showing combined metrics projection" },
+        screenshot: { src: "/academy/ops-zones.png", alt: "Zone merge confirmation screen showing combined metrics projection" },
       },
     ],
   },
@@ -118,25 +118,25 @@ Note: Business Health gauges (attach rate, churn, margin) are tracked separately
         title: "Pre-launch checklist (30 days before soft launch)",
         description:
           "You need 8 pre-screened providers ready to activate on day one — not 8 in the pipeline, 8 who have completed background checks, signed agreements, and confirmed their availability. You need a waitlist of at least 50 interested customers (use a landing page + referral incentive to build this before launch). You need your SKU catalog configured for this market's job types, your pricing set against local competitive rates, and your first-week scheduling capacity blocked. If any of these are not ready, push the launch date — a bad launch is worse than a late one.",
-        screenshot: { alt: "Pre-launch checklist in Admin Markets showing completion status" },
+        screenshot: { src: "/academy/governance-launch.png", alt: "Pre-launch checklist in Admin Markets showing completion status" },
       },
       {
         title: "Soft launch: the first 2 weeks",
         description:
           "Activate your waitlist first — these are your most motivated early customers and the ones most likely to refer. Cap acceptance at 75% of your provider capacity so you have a buffer for problems. Do not run paid acquisition yet. Your job in the first two weeks is to find the operational issues that your planning didn't anticipate: scheduling conflicts specific to this market, customer expectations that differ from your other markets, provider behaviors that need coaching. Get your NPS above 40 before you scale.",
-        screenshot: { alt: "Soft launch dashboard showing waitlist activation and early job metrics" },
+        screenshot: { src: "/academy/governance-launch.png", alt: "Soft launch dashboard showing waitlist activation and early job metrics" },
       },
       {
         title: "Graduating from soft launch to live",
         description:
           "Criteria to go live: NPS above 40 over the last 30 days, issue rate below 8%, at least 8 active providers (completed at least 1 job each in the last 14 days), utilization between 60–80%. When all four are met, flip the zone status to Live in Admin → Markets → Zones. This unlocks paid acquisition campaigns. Brief your providers that volume will increase — manage their expectations so they're prepared, not overwhelmed.",
-        screenshot: { alt: "Zone status change modal with graduation criteria checklist" },
+        screenshot: { src: "/academy/governance-launch.png", alt: "Zone status change modal with graduation criteria checklist" },
       },
       {
         title: "Scaling from 1 zone to multi-zone",
         description:
           "Don't open Zone 2 until Zone 1 is healthy (green health score, stable for 60+ days). The temptation to expand while Zone 1 is still 'mostly working' is the most common mistake in market expansion. Zone 2 will pull your operational attention. If Zone 1 is fragile when that happens, it will deteriorate faster than you can manage both. The rule is: your first zone is your proof of concept. Your second zone is your proof that you can replicate it. Only expand when you can genuinely afford to split your attention.",
-        screenshot: { alt: "Multi-zone market map showing Zone 1 health before Zone 2 launch" },
+        screenshot: { src: "/academy/zones-list.png", alt: "Multi-zone market map showing Zone 1 health before Zone 2 launch" },
       },
     ],
   },
