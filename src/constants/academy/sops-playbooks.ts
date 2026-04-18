@@ -19,22 +19,22 @@ Key principle: follow the SOP until it stops making sense, then escalate. SOPs h
       {
         title: "Morning check-in (daily, 10 min)",
         description: "Cron Health → Notification Health → Ops Cockpit → Dispatcher Queues (At Risk tab) → Assignment status. This is your 'is everything running?' check. Notification Health takes 10 seconds — if email delivery is failing, customers aren't getting service confirmations and you won't know until they complain. If all green, move on with your day. If something's red, triage before doing anything else.",
-        screenshot: { alt: "Morning check-in sequence across pages" },
+        screenshot: { src: "/academy/ops-cockpit-dashboard.png", alt: "Morning check-in sequence across pages" },
       },
       {
         title: "Mid-day triage (daily, 15 min)",
         description: "Dispatcher Queues (all tabs) → Exception queue → Support tickets nearing SLA breach. This catches same-day issues before they cascade into customer complaints. The mid-day check is especially important because morning issues have had time to develop.",
-        screenshot: { alt: "Mid-day triage checklist" },
+        screenshot: { src: "/academy/ops-dispatcher-queues.png", alt: "Mid-day triage checklist" },
       },
       {
         title: "End-of-day reconciliation (daily, 10 min)",
         description: "Jobs page (today, filter by ISSUE_REPORTED) → Provider proof compliance → Any open exceptions from today. This is your 'did everything that was supposed to happen actually happen?' check. Unresolved items get flagged for tomorrow morning.",
-        screenshot: { alt: "End-of-day reconciliation view" },
+        screenshot: { src: "/academy/playbooks.png", alt: "End-of-day reconciliation view" },
       },
       {
         title: "Weekly review (Friday, 30 min)",
         description: "Zone health table (trends, not just today) → Exception Analytics (patterns, not individual items) → Provider performance summary → Support ticket volume trends. This is your 'what's the story of this week?' check. Write a brief summary for the team.",
-        screenshot: { alt: "Weekly review dashboard combination" },
+        screenshot: { src: "/academy/playbooks.png", alt: "Weekly review dashboard combination" },
       },
     ],
   },

@@ -22,22 +22,22 @@ The most important thing to understand: support tickets and job exceptions are r
       {
         title: "Check the SLA timer first",
         description: "Every ticket has an SLA based on its priority. SLA targets are configurable via Support Policies. The default policy sets sla_hours: 48. Admins can create per-category or per-zone SLA overrides. The timer starts when the customer submits. If you're near a breach, that ticket jumps the queue regardless of everything else. SLA breaches are tracked and affect operational metrics.",
-        screenshot: { alt: "Ticket list with SLA timers showing time remaining" },
+        screenshot: { src: "/academy/support-tickets.png", alt: "Ticket list with SLA timers showing time remaining" },
       },
       {
         title: "Read the customer's service history BEFORE replying",
         description: "This is non-negotiable. Click through to the customer's profile and check their last 5 completed jobs. Half the time, the answer to their complaint is visible in the proof photos from their last service. A customer saying 'my lawn wasn't mowed' when you have before/after photos from yesterday changes your response entirely.",
-        screenshot: { alt: "Customer service history showing recent completed jobs" },
+        screenshot: { src: "/academy/support-tickets.png", alt: "Customer service history showing recent completed jobs" },
       },
       {
         title: "Apply a macro, then personalize",
         description: "Macros give you a solid starting point. But never send a macro verbatim without personalizing it. Add the customer's name, reference the specific service, acknowledge the specific issue. A template that says 'We're sorry for the inconvenience' is generic. 'We're sorry your Tuesday lawn mowing didn't include edging, Sarah' is human.",
-        screenshot: { alt: "Macro selection with personalization" },
+        screenshot: { src: "/academy/support-macros.png", alt: "Macro selection with personalization" },
       },
       {
         title: "Resolve with a clear next action",
         description: "Every ticket resolution should include what you did and what happens next. 'I've credited your account $15 and scheduled a follow-up mowing for Friday' is a resolution. 'We'll look into it' is not.",
-        screenshot: { alt: "Ticket resolution with action taken" },
+        screenshot: { src: "/academy/support-tickets.png", alt: "Ticket resolution with action taken" },
       },
     ],
   },

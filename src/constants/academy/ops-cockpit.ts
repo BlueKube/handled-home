@@ -24,12 +24,13 @@ Think of it like the dashboard of a car. You don't stare at the RPM gauge all da
       {
         title: "Start with Cron Health (before the cockpit)",
         description: "Navigate to Governance → Cron Health first. If cron died overnight, half the cockpit numbers will be stale — billing didn't run, dunning didn't run, assignments didn't generate. You'll find out the hard way from customer complaints if you skip this. Takes 10 seconds. Make it muscle memory.",
-        screenshot: { alt: "Cron Health page showing recent successful runs" },
+        screenshot: { src: "/academy/ops-cron-health.png", alt: "Cron Health page showing recent successful runs" },
       },
       {
         title: "Scan the NOW column (left side)",
         description: "Look at jobs at risk, missing proof, and provider utilization. If jobs at risk is above zero, click through to Dispatcher Queues immediately. These are today's fires. If provider utilization is below 80%, that's a warning — check if assignment ran successfully. Below 60% is critical and means you likely have idle providers.",
         screenshot: {
+          src: "/academy/ops-cockpit-dashboard.png",
           alt: "Ops Cockpit NOW column",
           annotations: [
             { type: "box", x: 0, y: 15, w: 23, h: 45, label: "NOW column", color: "blue" },
@@ -40,22 +41,22 @@ Think of it like the dashboard of a car. You don't stare at the RPM gauge all da
       {
         title: "Check the MONEY column",
         description: "Revenue today and past due accounts. If failed payments are climbing, check if Stripe is having an outage before you start investigating individual accounts. A single Stripe incident can make 50 payments fail at once — that's not 50 customer problems, it's one infrastructure problem.",
-        screenshot: { alt: "Ops Cockpit MONEY column" },
+        screenshot: { src: "/academy/ops-cockpit-dashboard.png", alt: "Ops Cockpit MONEY column" },
       },
       {
         title: "Glance at QUALITY and MARKETS",
         description: "Issue rate trending up? Check if it's concentrated in one zone or one provider — that changes your response entirely. A platform-wide uptick means a process problem. A single-zone spike means one provider is struggling. Markets column is your leading indicator — if referrals drop to zero for a week, investigate before it becomes a retention problem.",
-        screenshot: { alt: "Ops Cockpit QUALITY and MARKETS columns" },
+        screenshot: { src: "/academy/ops-cockpit-dashboard.png", alt: "Ops Cockpit QUALITY and MARKETS columns" },
       },
       {
         title: "Check the Zone Health table (bottom)",
         description: "This table is your zone-by-zone report card. Green/Yellow/Red health scores. Sort by the worst-performing zone and ask: what's dragging it down? Capacity? Quality? Demand? Each one has a different fix. Don't try to fix all three at once.",
-        screenshot: { alt: "Zone Health table at bottom of Ops Cockpit" },
+        screenshot: { src: "/academy/ops-cockpit-dashboard.png", alt: "Zone Health table at bottom of Ops Cockpit" },
       },
       {
         title: "Review Risk Alerts card",
         description: "Risk alerts surface operating model threshold violations — like 90-day cohort attach rate dropping below target or a zone's issue rate breaching the critical threshold. These are your early warning system. A yellow alert means 'watch this.' A red alert means 'fix this today.'",
-        screenshot: { alt: "Risk Alerts card on Ops Cockpit" },
+        screenshot: { src: "/academy/ops-cockpit-dashboard.png", alt: "Risk Alerts card on Ops Cockpit" },
       },
     ],
   },
@@ -67,17 +68,17 @@ Think of it like the dashboard of a car. You don't stare at the RPM gauge all da
       {
         title: "Understand the six queue tabs",
         description: "At Risk (jobs that might not get done today), Missing Proof (completed but unverified), Unassigned (no provider assigned), Coverage Gaps (zone capacity issues), Customer Issues (tickets from customers), Provider Incidents (provider-reported problems). Work them in this order — At Risk first because those affect today's customers.",
-        screenshot: { alt: "Dispatcher Queues with six tabs" },
+        screenshot: { src: "/academy/ops-dispatcher-queues.png", alt: "Dispatcher Queues with six tabs" },
       },
       {
         title: "Learn the keyboard shortcuts",
         description: "J/K moves between items. Enter opens detail. E escalates. N adds a note. R refreshes. These save enormous time when you're triaging 20+ items. A dispatcher who uses the mouse to click each item individually will take 3x longer than one using keyboard shortcuts.",
-        screenshot: { alt: "Dispatcher Queues keyboard shortcut overlay" },
+        screenshot: { src: "/academy/ops-dispatcher-queues.png", alt: "Dispatcher Queues keyboard shortcut overlay" },
       },
       {
         title: "Triage by severity, not by order",
         description: "The queue sorts by severity and age automatically, but you should still scan visually. A 2-hour-old 'At Risk' job for a first-time customer is more urgent than a 6-hour-old missing proof for a recurring customer. First impressions are irreplaceable in home services.",
-        screenshot: { alt: "Dispatcher queue items sorted by severity" },
+        screenshot: { src: "/academy/ops-dispatcher-queues.png", alt: "Dispatcher queue items sorted by severity" },
       },
     ],
   },

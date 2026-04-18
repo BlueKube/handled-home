@@ -58,17 +58,17 @@ The K-factor measures viral growth: average referrals per customer × referral c
       {
         title: "Understand the referral tier system",
         description: "Referral tiers are fully configurable via the Programs tab — admins set milestone triggers, reward types, and amounts. There are no hardcoded tier names or thresholds. When you set up a program, design tiers that reward progression (e.g., a small credit at an early milestone, a larger reward at a higher one). Once live, don't change tier thresholds frequently — customers track their progress and feel cheated if the goalposts move.",
-        screenshot: { alt: "Referral program tiers configuration" },
+        screenshot: { src: "/academy/growth-programs.png", alt: "Referral program tiers configuration" },
       },
       {
         title: "Monitor fraud flags",
         description: "The Flags tab shows suspicious referral activity. Common patterns: same IP address for multiple referrals, referrals that sign up but never book a service, referral codes shared on coupon sites. The system flags these automatically. Your job is to review and decide: dismiss (false alarm) or review (actual gaming — flag for further investigation before taking action).",
-        screenshot: { alt: "Incentive fraud flags tab" },
+        screenshot: { src: "/academy/growth-programs.png", alt: "Incentive fraud flags tab" },
       },
       {
         title: "Check reward economics monthly",
         description: "In the Rewards tab, look at total credits issued vs. revenue from referred customers. If you're paying $30/referral and the average referred customer stays 8 months at $179/month, that's $1,432 in revenue for $30. Excellent. If the average referred customer cancels after 2 months, you're paying $30 for $358 — still profitable but watch the trend.",
-        screenshot: { alt: "Rewards tab showing credits issued vs. revenue impact" },
+        screenshot: { src: "/academy/growth-programs.png", alt: "Rewards tab showing credits issued vs. revenue impact" },
       },
     ],
   },

@@ -82,17 +82,17 @@ THE FOUR OBJECTIONS YOU'LL HEAR EVERY TIME
 • First-week scheduling capacity blocked — reserve 25% buffer so you're not maxed out on day one.
 
 If any of these are not ready, push the launch date. A bad launch is worse than a late one — early customers set the reputation for everything that follows.`,
-        screenshot: { alt: "Pre-launch checklist in admin showing completion status" },
+        screenshot: { src: "/academy/launch-readiness.png", alt: "Pre-launch checklist in admin showing completion status" },
       },
       {
         title: "Soft launch: weeks 1-2",
         description: "Activate your waitlist first — these are your most motivated early customers and the ones most likely to refer. Cap acceptance at 75% of your provider capacity so you have a buffer for problems. Do NOT run paid acquisition yet. Your job in the first two weeks is to find the operational issues that planning didn't anticipate: scheduling conflicts specific to this market, customer expectations that differ from your assumptions, provider behaviors that need coaching. Personally follow up on the first 10 completed jobs. Get your NPS above 40 before you scale — anything below that means you're not ready for volume.",
-        screenshot: { alt: "Soft launch dashboard showing early job metrics and NPS" },
+        screenshot: { src: "/academy/launch-readiness.png", alt: "Soft launch dashboard showing early job metrics and NPS" },
       },
       {
         title: "Go-live graduation: the four criteria",
         description: "Flip the zone to Live status (Admin → Markets → Zones) when ALL four criteria are met: NPS above 40 over the last 30 days, issue rate below 8%, at least 8 active providers (completed at least 1 job each in the last 14 days), utilization between 60-80%. This unlocks paid acquisition campaigns. Brief your providers that volume will increase — manage their expectations so they're prepared, not overwhelmed. Missing even one criterion means you're not ready. See the Zones & Markets module for the full graduation workflow.",
-        screenshot: { alt: "Zone status change modal with graduation criteria" },
+        screenshot: { src: "/academy/launch-readiness.png", alt: "Zone status change modal with graduation criteria" },
       },
       {
         title: "The 12-week milestone map",
@@ -104,7 +104,7 @@ Week 6: Soft launch — providers bring 5-10 BYOC customers each. You're now liv
 Week 7-8: Monitor. First service completions, proof photo compliance, billing receipts. Fix what breaks.
 Week 9-10: Measure. Retention, add-on attach rate, provider satisfaction. Is the model working?
 Week 11-12: Decide. Pull the five success metrics (see below) and match to one of three paths: If 60-day retention is above 70% AND gross margin is above 15%, you have a working model — expand to a second zone. If retention is above 70% but margin is below 15%, the customers like it but the economics are wrong — recalibrate pricing and payout rates. If retention is below 60%, the subscription isn't delivering enough value — investigate root cause before spending anything on growth.`,
-        screenshot: { alt: "12-week pilot timeline with milestone markers" },
+        screenshot: { src: "/academy/launch-readiness.png", alt: "12-week pilot timeline with milestone markers" },
       },
     ],
   },

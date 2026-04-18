@@ -51,22 +51,22 @@ Think of handles like cell phone data: you get an allocation, and overages cost 
       {
         title: "Start with a draft",
         description: "All new plans start in 'draft' status. This lets you configure everything — pricing text, entitlements, zone availability — without affecting live customers. Only activate when you're confident the plan is ready.",
-        screenshot: { alt: "Plans page showing draft plan being configured" },
+        screenshot: { src: "/academy/plans-list.png", alt: "Plans page showing draft plan being configured" },
       },
       {
         title: "Configure entitlements carefully",
         description: "For each SKU, decide: is it 'included' (no handles), 'extra_allowed' (costs handles), or 'blocked' (not available on this plan)? 'Available' means it's in the catalog but not part of the plan. This distinction is what customers see on their service cards — the entitlement badges.",
-        screenshot: { alt: "Plan entitlement configuration showing SKU rules" },
+        screenshot: { src: "/academy/plans-list.png", alt: "Plan entitlement configuration showing SKU rules" },
       },
       {
         title: "Set zone availability",
         description: "Toggle which zones can offer this plan. A plan available in a zone where you can't fulfill its included services is worse than no plan at all — it's a broken promise.",
-        screenshot: { alt: "Zone availability toggles on plan editor" },
+        screenshot: { src: "/academy/plans-list.png", alt: "Zone availability toggles on plan editor" },
       },
       {
         title: "Use 'Duplicate' for variations",
         description: "When creating a new tier, duplicate an existing plan and modify it. This preserves entitlement structure and zone settings as a starting point, reducing configuration errors. Much safer than building from scratch.",
-        screenshot: { alt: "Plan duplicate action" },
+        screenshot: { src: "/academy/bundles.png", alt: "Plan duplicate action" },
       },
     ],
   },

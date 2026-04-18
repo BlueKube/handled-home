@@ -49,22 +49,22 @@ A completed job without proof photos is an unverified claim. It may be perfectly
       {
         title: "Understand the seed data problem",
         description: "When the platform launched, every SKU duration and price was estimated. A 'standard lawn mowing' was set to 45 minutes based on industry averages. But YOUR providers in YOUR market might take 35 minutes (efficient crews, small lots) or 60 minutes (solo operators, larger properties). The calibration page helps you replace those estimates with real numbers.",
-        screenshot: { alt: "SKU Calibration page showing current vs. provider-reported values" },
+        screenshot: { src: "/academy/sku-calibration.png", alt: "SKU Calibration page showing current vs. provider-reported values" },
       },
       {
         title: "Enter provider-reported data by property size",
         description: "The calibration form has fields for Small, Medium, Large, and XL property durations. This is critical because a 'standard lawn mowing' on a 1/8 acre lot and a 1/2 acre lot are completely different jobs. Enter the actual durations from your provider interviews — not what you think they should be.",
-        screenshot: { alt: "Calibration input form with size tier fields" },
+        screenshot: { src: "/academy/sku-calibration.png", alt: "Calibration input form with size tier fields" },
       },
       {
         title: "Read the delta indicators",
         description: "Green (<5% delta) means your seed data was close. Yellow (5-20% delta) means it's off but manageable. Red (>20% delta) means your scheduling, billing, and route planning are based on wrong numbers. Fix reds immediately — they cause cascading problems.",
-        screenshot: { alt: "Delta indicators showing green/yellow/red thresholds" },
+        screenshot: { src: "/academy/sku-calibration.png", alt: "Delta indicators showing green/yellow/red thresholds" },
       },
       {
         title: "Apply calibration and export the report",
         description: "Clicking 'Apply' updates the SKU's average duration and price hint. Export the calibration report (JSON) for your records. This report is your audit trail showing what changed, when, and based on what data.",
-        screenshot: { alt: "Apply calibration button and export report" },
+        screenshot: { src: "/academy/sku-calibration.png", alt: "Apply calibration button and export report" },
       },
     ],
   },
@@ -76,7 +76,7 @@ A completed job without proof photos is an unverified claim. It may be perfectly
       {
         title: "Who to interview and how many",
         description: "Interview 5-10 providers across your target service categories before calibrating any SKU. Mix experience levels: include at least 2 mid-career providers (15-25 existing customers, 2-5 years in business) and 1-2 newer operators. Mid-career providers give you the most realistic duration and cost data because they've optimized their workflow but aren't so fast that their numbers are outliers.",
-        screenshot: { alt: "Provider interview scheduling tracker" },
+        screenshot: { src: "/academy/sku-list.png", alt: "Provider interview scheduling tracker" },
       },
       {
         title: "The questions that produce calibration data",
@@ -90,7 +90,7 @@ A completed job without proof photos is an unverified claim. It may be perfectly
 • "What equipment do you bring for each service level?" — This validates your SKU inclusions match what providers actually deliver.
 
 Also ask economics questions: "What do you currently charge per visit? What's your minimum to make a trip worthwhile? What would you need to earn per job on our platform to say yes?" These feed your payout configuration in the Control Room.`,
-        screenshot: { alt: "Provider interview question guide" },
+        screenshot: { src: "/academy/sku-list.png", alt: "Provider interview question guide" },
       },
       {
         title: "Map interview data to system parameters",
@@ -107,12 +107,12 @@ Also ask economics questions: "What do you currently charge per visit? What's yo
 • Seasonal patterns → seasonal service templates (Seasonal calendar)
 
 The most common mistake is mapping duration answers to the wrong level tier — a provider saying "45 minutes" for a standard lot doesn't mean 45 minutes for the Maintenance level. Always verify which level they're describing before entering data. Use the SKU Calibration workflow above to enter and validate.`,
-        screenshot: { alt: "Interview data to system parameter mapping table" },
+        screenshot: { src: "/academy/sku-list.png", alt: "Interview data to system parameter mapping table" },
       },
       {
         title: "Validate with a delta review before applying",
         description: "After entering provider data, the calibration page shows delta indicators — see SKU Calibration above for the full threshold breakdown. What matters at this step: if two providers gave you wildly different numbers for the same service, investigate before averaging. Are they working different property sizes? Different service levels? Different equipment? The discrepancy is data, not noise — it usually means your level definitions aren't granular enough, or your property-size tiers need adjustment. For the full provider recruitment and interview playbook — including who to target, where to find them, and how to pitch — see the Market Launch & Provider Recruitment module.",
-        screenshot: { alt: "Calibration delta review with provider data comparison" },
+        screenshot: { src: "/academy/sku-calibration.png", alt: "Calibration delta review with provider data comparison" },
       },
     ],
   },
