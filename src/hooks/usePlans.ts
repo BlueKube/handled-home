@@ -11,6 +11,8 @@ export interface Plan {
   current_entitlement_version_id: string | null;
   stripe_product_id: string | null;
   stripe_price_id: string | null;
+  plan_family: string | null;
+  size_tier: number | null;
   created_at: string;
   updated_at: string;
 }
