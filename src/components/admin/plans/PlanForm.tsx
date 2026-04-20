@@ -62,6 +62,44 @@ export function PlanForm({ plan, onChange, onSave, saving, planId }: {
         </div>
       </div>
 
+      {/* Variant */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Variant</h3>
+        <div className="space-y-2">
+          <Label>Plan family</Label>
+          <Select
+            value={plan.plan_family ?? ""}
+            onValueChange={(v) => onChange({ ...plan, plan_family: v === "__none__" ? null : v })}
+          >
+            <SelectTrigger><SelectValue placeholder="— (unassigned)" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">— (unassigned)</SelectItem>
+              {["legacy", "basic", "full", "premier"].map((f) => (
+                <SelectItem key={f} value={f} className="capitalize">{f}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label>Size tier</Label>
+          <Select
+            value={plan.size_tier != null ? String(plan.size_tier) : "__none__"}
+            onValueChange={(v) => onChange({ ...plan, size_tier: v === "__none__" ? null : parseInt(v, 10) })}
+          >
+            <SelectTrigger><SelectValue placeholder="— (none)" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">— (none)</SelectItem>
+              {[10, 20, 30, 40].map((t) => (
+                <SelectItem key={t} value={String(t)}>{t}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Family + tier determine which variant <code>pick_plan_variant</code> returns. Legacy plans keep Essential/Plus/Premium.
+        </p>
+      </div>
+
       {/* Stripe */}
       <div className="space-y-3">
         <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Stripe</h3>

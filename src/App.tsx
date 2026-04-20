@@ -107,6 +107,7 @@ const AdminZoneBuilder = lazy(() => import("@/pages/admin/ZoneBuilder"));
 const AdminCapacity = lazy(() => import("@/pages/admin/Capacity"));
 const AdminSKUs = lazy(() => import("@/pages/admin/SKUs"));
 const AdminPlans = lazy(() => import("@/pages/admin/Plans"));
+const AdminPlanVariantRules = lazy(() => import("@/pages/admin/PlanVariantRules"));
 const AdminSubscriptions = lazy(() => import("@/pages/admin/Subscriptions"));
 const AdminProviders = lazy(() => import("@/pages/admin/Providers"));
 const AdminProviderDetail = lazy(() => import("@/pages/admin/ProviderDetail"));
@@ -311,6 +312,7 @@ const App = () => (
                   <Route path="/admin/capacity" element={<AdminCapacity />} />
                   <Route path="/admin/skus" element={<AdminSKUs />} />
                   <Route path="/admin/plans" element={<AdminPlans />} />
+                  <Route path="/admin/plan-variant-rules" element={<AdminPlanVariantRules />} />
                   <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
                   <Route path="/admin/providers" element={<AdminProviders />} />
                   <Route path="/admin/providers/:id" element={<AdminProviderDetail />} />
