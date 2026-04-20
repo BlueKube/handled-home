@@ -189,3 +189,45 @@ Round 64 writes new migrations into `supabase/migrations/`. Lovable handles the 
 ### Review decisions (reference)
 
 - [ ] **Legacy family in variant rule form** — Phase 1 Batch 1.3 deliberately excluded `legacy` from the Variant Rules admin form (only basic/full/premier). Confirm this is correct: legacy plans (Essential/Plus/Premium) keep the flat pricing model and don't participate in variant resolution. If legacy ever needs its own rules, add it to the form select options.
+
+## Round 64.5: Supabase Self-Host Migration (2026-04-20) — BLOCKING
+
+Lovable Cloud lost its GitHub connection to this repo and can no longer apply migrations. Round 64 Phases 2–8 are blocked until we migrate off. Plan is in `/root/.claude/plans/i-used-the-new-nifty-avalanche.md` and live tracker is `docs/working/plan.md`.
+
+### Phase A — User prereqs (required before Claude Code can proceed)
+
+Deliver all of the following in one message to a new Claude Code session:
+
+- [ ] **Create a new Supabase project** at https://supabase.com/dashboard. Pick a region close to existing Lovable project (yxhdschpeezawraqsmug).
+- [ ] **Gather 5 credentials** from the new project:
+  - Project ref (e.g., `abcdefgh12345678`)
+  - Project URL (`https://<ref>.supabase.co`)
+  - Anon (publishable) key
+  - Service role key (Settings → API)
+  - Database password (Settings → Database)
+- [ ] **Generate a Supabase Personal Access Token** at https://supabase.com/dashboard/account/tokens. Label it "claude-code-sandbox". This is what Claude Code will use for CLI commands.
+- [ ] **Generate an Anthropic API key** at https://console.anthropic.com/ with billing enabled. This replaces `LOVABLE_API_KEY` in `predict-services` and `support-ai-classify`.
+- [ ] **Pull the direct DB connection string from Lovable** for the existing project `yxhdschpeezawraqsmug` (Lovable dashboard → Database → Connection string → Direct). If Lovable doesn't expose it, Claude Code will fall back to CSV per-table exports + Supabase Auth Admin API for users.
+- [ ] **Capture existing Lovable secrets** (dashboard screenshot). Needed: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY` (or email provider), `OPENWEATHER_API_KEY`, `CRON_SECRET`. Skip `LOVABLE_API_KEY` (replaced by Anthropic).
+
+### Phase A — Dashboard configuration on new project
+
+Do these in the new Supabase project's dashboard before Claude Code does anything:
+
+- [ ] **Auth → Email provider** — enable; match old project's confirm settings (likely disable email confirmations for dev).
+- [ ] **Auth → Google provider** — paste client ID + client secret from old project. Add the new project's `/auth/v1/callback` URL as an authorized redirect URI in Google Cloud Console.
+- [ ] **Auth → URL Configuration** — Site URL = `http://localhost:5173`, add production URL if any. Redirect URLs include both localhost and production.
+- [ ] **Auth → Email templates** — copy-paste from old project OR accept defaults.
+
+### Phase F — Cutover tasks (when Claude Code signals ready)
+
+Do these when Claude Code is about to flip `.env`:
+
+- [ ] **Stripe dashboard** — update webhook endpoint to `https://<new-ref>.supabase.co/functions/v1/stripe-webhook`. Keep both endpoints enabled for a 5-minute overlap.
+- [ ] **Google Cloud Console** — add new project's callback URL as authorized redirect URI (if not already).
+- [ ] **Production deploy** (if any) — redeploy after `.env` commit lands.
+- [ ] **Monitor Supabase Function logs** on new project for 30 min post-cutover.
+
+### Phase F + 24h — Decommission
+
+- [ ] **Archive the Lovable Cloud project** (no disable button — just stop using it, can delete project after 30 days confidence window).
