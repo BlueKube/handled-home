@@ -10,7 +10,7 @@
 
 | Batch | Title | Size | Status | Context |
 |-------|-------|------|--------|---------|
-| 1.1 | Migration + seed + `pick_plan_variant` RPC + RLS | M | ⬜ | |
+| 1.1 | Migration + seed + `pick_plan_variant` RPC + RLS | M | ✅ | ~50% |
 | 1.2 | TS types + `usePlanVariantRules` hook + `usePlans` extensions | S | ⬜ | |
 | 1.3 | Admin Plans UI + variant rule editor | M | ⬜ | |
 
@@ -34,11 +34,11 @@
 ## Session Handoff
 
 - **Branch:** `claude/pricing-tiered-model-6WCj9`
-- **Last completed:** Scope doc + working plan written.
-- **Next up:** Batch 1.1 — Migration + seed + `pick_plan_variant` RPC + RLS.
-- **Context at exit:** ~41% at plan write time.
+- **Last completed:** Batch 1.1 — plan_variants schema migration, 12 draft variants + 12 seed rules + `pick_plan_variant` RPC. Build + typecheck pass.
+- **Next up:** Batch 1.1 code review per CLAUDE.md §5 (Medium — 4 agents), then Batch 1.2.
+- **Context at exit:** ~50% post-build.
 - **Blockers:** None.
-- **Round progress:** 0 / ~28 batches.
+- **Round progress:** 1 / ~28 batches.
 
 ---
 
