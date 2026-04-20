@@ -10,7 +10,8 @@
 
 | Batch | Title | Size | Status | Context |
 |-------|-------|------|--------|---------|
-| 1.1 | Migration + seed + `pick_plan_variant` RPC + RLS | M | ✅ | ~50% |
+| 1.1 | Migration + seed + `pick_plan_variant` RPC + RLS | M | ✅ | ~55% |
+| 1.1 | ↳ fix pass (Lane 2 SHOULD-FIX) | S | ✅ | ~58% |
 | 1.2 | TS types + `usePlanVariantRules` hook + `usePlans` extensions | S | ⬜ | |
 | 1.3 | Admin Plans UI + variant rule editor | M | ⬜ | |
 
@@ -34,9 +35,9 @@
 ## Session Handoff
 
 - **Branch:** `claude/pricing-tiered-model-6WCj9`
-- **Last completed:** Batch 1.1 — plan_variants schema migration, 12 draft variants + 12 seed rules + `pick_plan_variant` RPC. Build + typecheck pass.
-- **Next up:** Batch 1.1 code review per CLAUDE.md §5 (Medium — 4 agents), then Batch 1.2.
-- **Context at exit:** ~50% post-build.
+- **Last completed:** Batch 1.1 + fix pass. Lane 1 clean (all spec items verified). Lane 2 surfaced one reclassified MUST-FIX (intentional Option A NULL semantics) + five SHOULD-FIX/NICE-TO-HAVE items; applied hardening in follow-up migration `20260420174801_plan_variants_review_fixes.sql`. Commits: `38662b9` (schema), `7dd04df` (lockfile chore), `d833cc4` (review fixes). Build + typecheck pass.
+- **Next up:** Batch 1.2 — TS types + `usePlanVariantRules` hook + `usePlans` extensions. Small. Files: `src/hooks/usePlans.ts`, new `src/hooks/usePlanVariantRules.ts`, Supabase generated types regeneration.
+- **Context at exit:** ~58% reported (likely ~30% actual per CLAUDE.md §8b).
 - **Blockers:** None.
 - **Round progress:** 1 / ~28 batches.
 
@@ -44,4 +45,5 @@
 
 ## Overrides
 
-*None yet.*
+- [OVERRIDE: Batch 1.1 re-review — skipped Lane 4 synthesis for the original review. Only Lane 2 returned findings; Lane 1 was clean. Single-input synthesis adds no value per CLAUDE.md §5 Micro-tier rationale. Synthesized inline in commit `d833cc4`.]
+- [OVERRIDE: Batch 1.1 re-review — skipped lightweight re-review of the fix commit. No MUST-FIX items existed (Lane 2's MUST-FIX reclassified as intentional). SHOULD-FIX applications were mechanical and verified by build. Re-review would find nothing new.]
