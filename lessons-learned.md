@@ -328,6 +328,36 @@ The most impactful errors found: dunning ladder had wrong day numbers (operators
 **Type:** Architecture
 All 7 automation engine functions (assign-visits, check-no-shows, check-weather, evaluate-provider-sla, run-billing-automation, run-dunning, weekly-payout) were fully implemented and deployed but had zero `cron.schedule()` calls. None of them would ever run autonomously. This is a pattern: deploying a function is not the same as scheduling it. Future edge functions should have cron registration as part of the deployment checklist.
 
+### [2026-04-20] Lovable owns Supabase migrations — the agent writes files, not applied state
+**Source:** Round 64 Phase 1 (user clarification during Batch 1.3)
+**Type:** Workflow
+The agent writing `supabase/migrations/*.sql` does not apply them to the live DB. Lovable handles the Supabase connection and must be asked explicitly to apply new migrations and regenerate `src/integrations/supabase/types.ts`. Without this step, the next phase's TS code can fall out of sync (hooks using `as any` won't get tightened types, new RPCs aren't callable in types even if the codegen is deferred). Always add Lovable-migration-apply items to `docs/upcoming/TODO.md` at the end of each phase that writes migrations, listing the exact migration filenames and a "why it blocks the next phase" note.
+
+### [2026-04-20] Stream idle timeouts on single Write calls over ~400 lines
+**Source:** Round 64 FULL-IMPLEMENTATION-PLAN.md authoring
+**Type:** Agent Signal
+A single `Write` tool call producing ~500+ lines of content hit `Stream idle timeout - partial response received` twice before I chunked it. Breaking into an initial Write (~80 lines) plus 7 sequential `Edit` passes with unique trailing-context anchors succeeded every time. Rule: for any output expected to exceed 300 lines, plan for an append pattern (Write skeleton → Edit sentinel → Edit sentinel → …). Saves a retry loop and avoids partial-file states between a failed stream and a fresh attempt.
+
+### [2026-04-20] Context usage is overestimated by ~2× in Claude Code UI — confirmed empirically
+**Source:** Round 64 Phase 1 session tracking
+**Type:** Agent Signal
+CLAUDE.md §8b flags this. Verified: during Round 64 Phase 1 I felt near capacity but `/context` showed 48% actual; after another full batch + review agents it was 53%. Tentative calibration: when I self-estimate "~65% reported," actual is closer to 30–35%. Rely on `/context` before session-boundary decisions, not on self-assessment. Particular pitfalls: large user pastes (~100k tokens each) feel small mid-turn but dominate the total.
+
+### [2026-04-20] Tailwind token typos don't fail the build — silent no-op classes
+**Source:** Round 64 Batch 1.3 Lane 2 review
+**Type:** Agent Signal
+`bg-warn/10 text-warn` rendered with no background and no foreground color — the "catch-all" badge was invisible. Tailwind's JIT silently drops unknown class names rather than erroring. The project uses `warning`, not `warn`. `npm run build` passes either way. Lesson: visual-regression screenshots are the only reliable catch; a quick grep for `bg-[a-z]+/\d+` and cross-check against `tailwind.config.ts` tokens is a cheap pre-commit check worth adding.
+
+### [2026-04-20] Radix Select + null state needs a sentinel value, not empty string
+**Source:** Round 64 Batch 1.3 Lane 2 review
+**Type:** Agent Signal
+Radix UI's Select rejects `""` as a SelectItem value but will accept it on the root Select (triggering placeholder render). The `size_tier` select used `__none__` sentinel mapped to null on change; the `plan_family` select used `""`. Works in both cases but inconsistent. Review found it; aligning to `__none__` throughout is cleaner. Pattern for any nullable enum-select: always define a reserved sentinel string and map it to null in the onChange handler. Document the pattern once in `design-guidelines.md` and the drift disappears.
+
+### [2026-04-20] npm run build gate is redundant on schema-only or TS-only batches
+**Source:** Round 64 Phase 1 workflow friction
+**Type:** Workflow
+`npx tsc --noEmit` takes ~5s; `npm run build` takes ~30s and produces a bundle that gets thrown away. For batches that change only migrations or only hook types (no new Vite entries, no routing, no dynamic imports), tsc is sufficient. Reserve the full build for batches that change routes (`src/App.tsx`), lazy imports, vite config, or new components consumed via dynamic import. Documented as `[OVERRIDE: skipped npm run build — TS-only batch]` in commit messages.
+
 ### Dismissed
 
 _None yet._

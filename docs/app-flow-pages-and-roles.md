@@ -1,6 +1,6 @@
 # app-flow-pages-and-roles.md
 
-> **Last updated:** 2026-04-01 — Full route audit against App.tsx. Added missing customer, provider, and admin routes. Corrected provider onboarding steps (6, not 5). Added admin control, scheduling, ops, and provider application routes.
+> **Last updated:** 2026-04-20 — Round 64 Phase 1 added `/admin/plan-variant-rules`. Plans page now groups by plan_family.
 
 ## Public Routes
 
@@ -121,7 +121,8 @@
 | `/admin/zones/builder` | Zone Builder |
 | `/admin/capacity` | *(redirect → /admin/zones)* |
 | `/admin/skus` | SKU Catalog |
-| `/admin/plans` | Subscription Plans |
+| `/admin/plans` | Subscription Plans (grouped by family: legacy/basic/full/premier/unassigned) |
+| `/admin/plan-variant-rules` | Plan Variant Rules — property_signals → size_tier mapping for `pick_plan_variant` |
 | `/admin/subscriptions` | Subscriptions |
 | `/admin/providers` | Providers |
 | `/admin/providers/:id` | *(dynamic: org name)* |

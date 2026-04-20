@@ -818,6 +818,17 @@
 508. `process-new-homeowner-handoff` edge function with error logging for lead creation and update failures — 9/10
 509. Admin "Customers" tab with all status colors including 'subscribed' — 9/10
 
+## L. Plan Variants & Size-Tier Resolution (Round 64 Phase 1) `margin-lever` `mental-load-reduction`
+
+510. `plans.plan_family` + `plans.size_tier` columns — express Basic/Full/Premier × 10/20/30/40 variant grid without breaking legacy Essential/Plus/Premium (backfilled as `plan_family='legacy'`) — 9/10
+511. `plan_variant_rules` table: admin-tunable priority-ordered tier matching (sqft_tiers, yard_tiers, windows_tiers, stories_tiers arrays; empty array = wildcard) — 9/10
+512. `pick_plan_variant(property_id, plan_family)` SECURITY DEFINER RPC: reads property_signals, matches rules, returns variant plan id with fallback to size_tier=10 on missing signals — 9/10
+513. 12 seeded draft variant plans (Basic/Full/Premier × 10/20/30/40) + 12 default sqft-primary selection rules — 9/10
+514. Admin Plans list grouped by family with tier chips and "Variant Rules" navigation — 9/10
+515. `/admin/plan-variant-rules` page: family filter tabs, rule cards with tier-array chips, catch-all badge for all-wildcard rules, side-sheet form with toggle-chip multi-select per dimension — 9/10
+516. `usePlanVariantRules` + `useCreateVariantRule` / `useUpdateVariantRule` / `useDeleteVariantRule` + `usePickPlanVariant` mutation hook — 9/10
+517. PlanForm Variant section: plan_family + size_tier inputs between Basics and Stripe with `__none__` sentinel for null — 9/10
+
 ---
 
-*Total features: 509 | Last updated: 2026-04-03 | 381 at 9/10+ (74%), 117 at 8/10 (22%), 11 at 7/10 or below (2%)*
+*Total features: 517 | Last updated: 2026-04-20 | Round 64 Phase 1 complete (8 new features); Phases 2–8 pending. Legacy count preserved: 381 at 9/10+ (74%), 117 at 8/10 (22%), 11 at 7/10 or below (2%).*

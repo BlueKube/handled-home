@@ -38,11 +38,12 @@
 ## Session Handoff
 
 - **Branch:** `claude/pricing-tiered-model-6WCj9`
-- **Last completed:** Phase 1 end-to-end (all 3 batches + 2 fix passes). Commits: `38662b9` 1.1 schema, `d833cc4` 1.1 hardening, `6592623` 1.2 hooks, `3f5fe9b` 1.3 admin UI, `962377a` 1.3 tailwind fix + TODO.md.
+- **Last completed:** Phase 1 end-to-end + inter-phase cleanup. Commits: `38662b9` 1.1 schema · `d833cc4` 1.1 hardening · `6592623` 1.2 hooks · `3f5fe9b` 1.3 admin UI · `962377a` 1.3 tailwind fix + TODO.md · `eb88e55` plan handoff · (next commit) cleanup + doc sync.
+- **Phase 1 archived to:** `docs/archive/round-64-phase-1-pricing-tiered-model-2026-04-20/` (3 batch specs).
 - **Blocker for Phase 2:** Lovable needs to apply migrations `20260420173758_plan_variants_schema.sql` + `20260420174801_plan_variants_review_fixes.sql` and regenerate `src/integrations/supabase/types.ts`. Tracked in `docs/upcoming/TODO.md` under "Round 64: Tier Variants".
-- **Next up:** Phase 2 — onboarding variant resolution + "Starts at" pricing. Starts with Batch 2.1 (PlanFamilyCard + PlanVariantCard component split). See `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` Phase 2 for scope.
-- **Context at exit:** ~60% reported — session boundary per CLAUDE.md §8 (over 60% = finish batch, start new session).
-- **Blockers:** Phase 2 work is front-end only until the Phase 1 migration blocker is cleared by Lovable, but component-split work can proceed in parallel.
+- **Next up:** Phase 2 — onboarding variant resolution + "Starts at" pricing. Starts with Batch 2.1 (`PlanFamilyCard` + `PlanVariantCard` component split). See `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` Phase 2 for scope.
+- **Context at exit (actual):** 53% per `/context` before cleanup; roughly 55% after. Session boundary appropriate for a merge-to-main checkpoint.
+- **Merge plan:** User will merge `claude/pricing-tiered-model-6WCj9` to `main` and start a fresh session for Phase 2.
 - **Round progress:** Phase 1 / 8 complete. 3 / ~28 batches.
 
 ---
