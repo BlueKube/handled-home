@@ -12,8 +12,11 @@
 |-------|-------|------|--------|---------|
 | 1.1 | Migration + seed + `pick_plan_variant` RPC + RLS | M | ✅ | ~55% |
 | 1.1 | ↳ fix pass (Lane 2 SHOULD-FIX) | S | ✅ | ~58% |
-| 1.2 | TS types + `usePlanVariantRules` hook + `usePlans` extensions | S | ⬜ | |
-| 1.3 | Admin Plans UI + variant rule editor | M | ⬜ | |
+| 1.2 | TS types + `usePlanVariantRules` hook + `usePlans` extensions | S | ✅ | ~52% |
+| 1.3 | Admin Plans UI + variant rule editor | M | ✅ | ~60% |
+| 1.3 | ↳ fix pass (tailwind token + defensives + TODO.md) | S | ✅ | ~60% |
+
+**Phase 1 complete.** All 12 variant plans + 12 seed rules in place, `pick_plan_variant` RPC deployed (pending Lovable apply), admin UI wired for family grouping + rule CRUD.
 
 ## Future phases (abbreviated — decomposed at each phase boundary)
 
@@ -35,11 +38,12 @@
 ## Session Handoff
 
 - **Branch:** `claude/pricing-tiered-model-6WCj9`
-- **Last completed:** Batch 1.1 + fix pass. Lane 1 clean (all spec items verified). Lane 2 surfaced one reclassified MUST-FIX (intentional Option A NULL semantics) + five SHOULD-FIX/NICE-TO-HAVE items; applied hardening in follow-up migration `20260420174801_plan_variants_review_fixes.sql`. Commits: `38662b9` (schema), `7dd04df` (lockfile chore), `d833cc4` (review fixes). Build + typecheck pass.
-- **Next up:** Batch 1.2 — TS types + `usePlanVariantRules` hook + `usePlans` extensions. Small. Files: `src/hooks/usePlans.ts`, new `src/hooks/usePlanVariantRules.ts`, Supabase generated types regeneration.
-- **Context at exit:** ~58% reported (likely ~30% actual per CLAUDE.md §8b).
-- **Blockers:** None.
-- **Round progress:** 1 / ~28 batches.
+- **Last completed:** Phase 1 end-to-end (all 3 batches + 2 fix passes). Commits: `38662b9` 1.1 schema, `d833cc4` 1.1 hardening, `6592623` 1.2 hooks, `3f5fe9b` 1.3 admin UI, `962377a` 1.3 tailwind fix + TODO.md.
+- **Blocker for Phase 2:** Lovable needs to apply migrations `20260420173758_plan_variants_schema.sql` + `20260420174801_plan_variants_review_fixes.sql` and regenerate `src/integrations/supabase/types.ts`. Tracked in `docs/upcoming/TODO.md` under "Round 64: Tier Variants".
+- **Next up:** Phase 2 — onboarding variant resolution + "Starts at" pricing. Starts with Batch 2.1 (PlanFamilyCard + PlanVariantCard component split). See `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` Phase 2 for scope.
+- **Context at exit:** ~60% reported — session boundary per CLAUDE.md §8 (over 60% = finish batch, start new session).
+- **Blockers:** Phase 2 work is front-end only until the Phase 1 migration blocker is cleared by Lovable, but component-split work can proceed in parallel.
+- **Round progress:** Phase 1 / 8 complete. 3 / ~28 batches.
 
 ---
 
