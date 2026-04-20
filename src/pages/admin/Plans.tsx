@@ -135,8 +135,8 @@ export default function AdminPlans() {
             if (plansInFamily.length === 0) return null;
             // Sort within family: size_tier ascending, then recommended_rank ascending.
             const sorted = [...plansInFamily].sort((a, b) => {
-              const tierA = a.size_tier ?? 999;
-              const tierB = b.size_tier ?? 999;
+              const tierA = a.size_tier ?? Number.POSITIVE_INFINITY;
+              const tierB = b.size_tier ?? Number.POSITIVE_INFINITY;
               if (tierA !== tierB) return tierA - tierB;
               return (a.recommended_rank ?? 0) - (b.recommended_rank ?? 0);
             });

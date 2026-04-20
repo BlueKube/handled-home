@@ -150,10 +150,10 @@ export default function AdminPlanVariantRules() {
     setDraft({
       plan_family: rule.plan_family,
       target_size_tier: rule.target_size_tier,
-      sqft_tiers: rule.sqft_tiers,
-      yard_tiers: rule.yard_tiers,
-      windows_tiers: rule.windows_tiers,
-      stories_tiers: rule.stories_tiers,
+      sqft_tiers: rule.sqft_tiers ?? [],
+      yard_tiers: rule.yard_tiers ?? [],
+      windows_tiers: rule.windows_tiers ?? [],
+      stories_tiers: rule.stories_tiers ?? [],
       priority: rule.priority,
       notes: rule.notes ?? "",
     });
@@ -268,7 +268,7 @@ export default function AdminPlanVariantRules() {
                       rule.windows_tiers.length +
                       rule.stories_tiers.length ===
                       0 && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-warn/10 text-warn">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-warning/10 text-warning">
                         catch-all (all wildcards)
                       </span>
                     )}

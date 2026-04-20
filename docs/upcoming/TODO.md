@@ -167,3 +167,25 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 - [x] **`offer-appointment-windows` had NO auth** — ✅ Fixed: added `requireUserJwt` (commit e86eb9b)
 - [x] **`backfill-property-zones`, `commit-zones`, `generate-zones` missing admin role check** — ✅ Fixed: added `requireAdminJwt` (commit e86eb9b)
 - [ ] **34 of 39 edge functions duplicate CORS headers inline** — Only 5 use the shared `_shared/cors.ts` module. Maintenance risk.
+
+## Round 64: Tier Variants, Credits UX, Snap-a-Fix (2026-04-20)
+
+### Lovable — Apply Supabase migrations
+Round 64 writes new migrations into `supabase/migrations/`. Lovable handles the Supabase connection, so **please ask Lovable to apply these migrations** after each phase lands:
+
+- [ ] **Phase 1 migrations** — `20260420173758_plan_variants_schema.sql` + `20260420174801_plan_variants_review_fixes.sql`
+  - **Why:** Adds `plans.plan_family` + `plans.size_tier`, creates `plan_variant_rules` table, seeds 12 draft variants + 12 seed rules, creates `pick_plan_variant(uuid, text)` SECURITY DEFINER RPC.
+  - **Blocked:** Phase 2 (onboarding variant resolution) cannot run without the RPC deployed.
+  - **Safety:** Legacy Essential/Plus/Premium rows backfill as `plan_family='legacy'` (NULL size_tier). Live subscriptions keep working. New variants are `status='draft'` until Phase 2 activation.
+- [ ] **Regenerate Supabase TS types after Phase 1 migrations apply** — `src/integrations/supabase/types.ts` currently has no awareness of `plan_variant_rules` or `pick_plan_variant`. Hooks use `as any` as the interim. Once Lovable regens, the `as any` casts can be tightened in a later batch.
+
+### Upcoming Phase TODOs (preview — will grow as phases land)
+
+- [ ] **Stripe products for credit packs (Phase 3)** — Create Starter ($149 / 300 credits), Homeowner ($269 / 600 credits, recommended), Year-round ($479 / 1,200 credits) products in Stripe. Add product + price IDs to `.env.local` / Lovable secrets as `VITE_CREDIT_PACK_STARTER_PRICE_ID`, etc.
+- [ ] **LOVABLE_API_KEY quota review (Phase 4)** — Snap-a-Fix AI classification will increase call volume vs. current support-ai-classify usage. Confirm the key can handle higher QPS or upgrade tier before Phase 4 rollout.
+- [ ] **Seed Fall Prep bundle content (Phase 6)** — Bundle line items + per-item credit pricing + zone rollout list. Needs admin to choose the initial zones to spotlight.
+- [ ] **Admin review of manual variant overrides (Phase 2)** — Onboarding will let customers override the `pick_plan_variant` result one tier up/down. Decide whether overrides need admin approval or auto-approve with a review flag.
+
+### Review decisions (reference)
+
+- [ ] **Legacy family in variant rule form** — Phase 1 Batch 1.3 deliberately excluded `legacy` from the Variant Rules admin form (only basic/full/premier). Confirm this is correct: legacy plans (Essential/Plus/Premium) keep the flat pricing model and don't participate in variant resolution. If legacy ever needs its own rules, add it to the form select options.

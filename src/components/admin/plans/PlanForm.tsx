@@ -68,7 +68,7 @@ export function PlanForm({ plan, onChange, onSave, saving, planId }: {
         <div className="space-y-2">
           <Label>Plan family</Label>
           <Select
-            value={plan.plan_family ?? ""}
+            value={plan.plan_family ?? "__none__"}
             onValueChange={(v) => onChange({ ...plan, plan_family: v === "__none__" ? null : v })}
           >
             <SelectTrigger><SelectValue placeholder="— (unassigned)" /></SelectTrigger>
