@@ -238,7 +238,8 @@ The 2026-04-21 session received the first six credentials (PAT, project ref/URL,
 - [x] **`STRIPE_SECRET_KEY`** — received 2026-04-21 session 2. Pushed to Supabase Edge Function secrets.
 - [x] **`STRIPE_WEBHOOK_SECRET`** — received 2026-04-21 session 2 (`whsec_...` from new event destination). Pushed to Supabase Edge Function secrets.
 - [x] **`RESEND_API_KEY`** — received 2026-04-21 session 2 (new key created per `re_...` format). Pushed to Supabase Edge Function secrets.
-- [ ] **`WEATHER_API_KEY`** — for `check-weather` edge function. **Source: weatherapi.com** (NOT openweathermap.org). Free tier available at https://www.weatherapi.com/ → Sign up → Dashboard → API key.
+- [x] **`WEATHER_API_KEY`** — received 2026-04-21 session 2. Pushed to Supabase Edge Function secrets. End-to-end cron invocation got past the key check.
+- [ ] **`check-weather` error-serialization bug (post-Round 64.5 cleanup)** — when invoked from cron, returns 500 with `error_message: "[object Object]"` in `cron_run_log`. Indicates a `catch(err) { return JSON.stringify(err) }` pattern somewhere that mangles non-Error throws. Pre-existing; not introduced by Round 64.5. Fix: locate the catch block, log `err instanceof Error ? err.message : JSON.stringify(err, Object.getOwnPropertyNames(err))`. Low priority — function is a non-critical cron and data is being reset before launch anyway.
 - [x] **`CRON_SECRET`** — generated 2026-04-21 via `openssl rand -hex 32`. Stored in `/root/.r64_5_secrets.env`.
 - [x] **`LOVABLE_DIRECT_DB_URL`** — no longer needed. Phase C-2 skipped 2026-04-21: old project is pre-launch test data only; all data reset before go-live. User's PAT has no access to old project anyway (different org).
 
