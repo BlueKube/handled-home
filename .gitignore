@@ -28,6 +28,10 @@ dist-ssr
 *.sln
 *.sw?
 
+# Claude Code — personal overrides + local credentials (not committed)
+.claude/settings.local.json
+!.claude/settings.local.example.json
+
 # Test artifacts
 test-results
 playwright-report

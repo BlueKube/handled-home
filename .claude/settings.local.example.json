@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_comment": "Copy this file to .claude/settings.local.json and fill in real values. The settings.local.json is gitignored — NEVER commit real credentials. Only dev-machine tier-2 credentials belong here (PATs, scoped API keys); production runtime secrets stay in Supabase Edge Function Secrets + Vercel Env Vars, not on your machine.",
+
+  "env": {
+    "_comment": "These populate Claude Code's process env + are inherited by tools, MCP servers, and Bash subprocesses. Supabase MCP reads SUPABASE_ACCESS_TOKEN from here via .mcp.json's ${SUPABASE_ACCESS_TOKEN} expansion.",
+
+    "SUPABASE_ACCESS_TOKEN": "sbp_REPLACE_ME",
+    "SUPABASE_PROJECT_REF": "gwbwnetatpgnqgarkvht",
+    "SUPABASE_URL": "https://gwbwnetatpgnqgarkvht.supabase.co",
+    "VERCEL_TOKEN": "vcp_REPLACE_ME",
+
+    "_skip_these_on_dev_machine_comment": "Deliberately NOT included — these live in Supabase Edge Function Secrets / Vercel Env Vars only, not on developer machines: SUPABASE_SERVICE_ROLE_KEY, SUPABASE_SECRET_KEY, SUPABASE_DB_PASSWORD, SUPABASE_DB_URL, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, RESEND_API_KEY, WEATHER_API_KEY, CRON_SECRET, GOOGLE_OAUTH_CLIENT_SECRET. If you need one of these ephemerally (e.g., for a one-time cutover or smoke test), paste it into a separate gitignored scratch file and delete after use."
+  }
+}

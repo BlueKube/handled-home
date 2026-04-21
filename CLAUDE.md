@@ -659,14 +659,25 @@ When the sandbox can't reach a service, escalate to the human for a dashboard ac
 
 CLI is the escape hatch for ops the MCP doesn't expose (multi-file function uploads via `--use-api`, one-off shell piping).
 
-### Scheduled Tasks / Session Env
+### Credential tiers
 
-The sandbox is ephemeral. Session-start checklist:
+Three tiers, matched to risk:
 
-1. `source /root/.r64_5_secrets.env` to populate `SUPABASE_ACCESS_TOKEN`, `ANTHROPIC_API_KEY`, etc. (required for MCP + CLI)
-2. Verify Supabase CLI exists at `/usr/local/bin/supabase` — if missing, `npm install -g supabase`
-3. Check `/tmp/` for any leftover scratch files from prior session; recreate applier scripts as needed
-4. Read `docs/working/plan.md` → Session Handoff section
+| Tier | Where it lives | What belongs here |
+|---|---|---|
+| 1 — Committed | Git (never) | **Nothing.** All refs to secrets in `.mcp.json`, `config.toml` etc. use `${VAR}` expansion. |
+| 2 — Developer machine | `.claude/settings.local.json` (gitignored) | `SUPABASE_ACCESS_TOKEN` (PAT), `VERCEL_TOKEN` (PAT), `SUPABASE_PROJECT_REF`, `SUPABASE_URL`. Revocable, scoped to your own account. |
+| 3 — Platform secret store | Supabase Edge Function Secrets, Vercel Env Vars | `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_DB_PASSWORD`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `WEATHER_API_KEY`, `CRON_SECRET`, `ANTHROPIC_API_KEY`, `GOOGLE_OAUTH_CLIENT_SECRET`. Production-privileged; never on dev machines. |
+
+`.claude/settings.local.json`'s `env` block populates Claude Code's process env at startup and is inherited by every tool, MCP server, Bash call, and hook. The template is `.claude/settings.local.example.json` (committed).
+
+### Session-start checklist
+
+1. **Locally (persistent):** `.claude/settings.local.json` is already populated — tools read from it automatically.
+2. **In the web sandbox (ephemeral):** the sandbox filesystem resets each session, so `.claude/settings.local.json` doesn't survive. Paste credentials once per new sandbox — either re-create `.claude/settings.local.json` or `export` in a shell. Same friction either way; web sandboxes don't persist user state.
+3. Verify Supabase CLI exists at `/usr/local/bin/supabase` — if missing, `npm install -g supabase`.
+4. Read `docs/working/plan.md` → Session Handoff section.
+5. If a tier-3 secret is needed ephemerally (one-time rotation, smoke test), source a scratch file and delete after use. Never add tier-3 secrets to `.claude/settings.local.json`.
 
 ### Slash Commands (`.claude/commands/`)
 
