@@ -81,17 +81,17 @@ export default function CustomerPlanDetail() {
         </div>
       </div>
 
-      {/* Handles callout */}
+      {/* Credits callout */}
       <Card className="border-accent/30 bg-accent/5">
         <CardContent className="pt-4 pb-4 space-y-3">
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-accent" />
-            <span className="text-lg font-bold">{handlesPerCycle} handles</span>
+            <span className="text-lg font-bold">{handlesPerCycle} credits</span>
             <span className="text-sm text-muted-foreground">per cycle</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            Each service costs a set number of handles. Most homes use 10–13 per month.
-            {rolloverCap > 0 ? ` Unused handles roll over (up to ${rolloverCap}).` : " Unused handles roll over."}
+            Each service costs a set number of credits. Most homes use 10–13 per month.
+            {rolloverCap > 0 ? ` Unused credits roll over (up to ${rolloverCap}).` : " Unused credits roll over."}
           </p>
         </CardContent>
       </Card>
@@ -162,7 +162,7 @@ export default function CustomerPlanDetail() {
             </div>
             <div className="flex items-start gap-2 text-sm text-muted-foreground">
               <Shield className="h-4 w-4 shrink-0 mt-0.5" />
-              <span>Your remaining handles carry over — nothing is lost.</span>
+              <span>Your remaining credits carry over — nothing is lost.</span>
             </div>
           </div>
           {entitlements?.messages.change_policy && (

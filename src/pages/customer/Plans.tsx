@@ -8,7 +8,7 @@ import { usePlanVariants, ACTIVE_FAMILIES, type ActiveFamily } from "@/hooks/use
 import { useResolvePlanVariant } from "@/hooks/useResolvePlanVariant";
 import { PlanFamilyCard } from "@/components/plans/PlanFamilyCard";
 import { FAMILY_HIGHLIGHTS } from "@/components/plans/planTierStyles";
-import { HandlesExplainer } from "@/components/plans/HandlesExplainer";
+import { CreditsExplainer } from "@/components/plans/CreditsExplainer";
 import { BundleSavingsCard } from "@/components/plans/BundleSavingsCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -211,7 +211,7 @@ export default function CustomerPlans() {
         </Alert>
       )}
 
-      <HandlesExplainer />
+      <CreditsExplainer />
 
       {families && !allFamiliesEmpty && (() => {
         const rec = recommendedFamily ? families[recommendedFamily][0] : undefined;

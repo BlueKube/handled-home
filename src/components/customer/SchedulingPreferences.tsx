@@ -82,7 +82,7 @@ export function SchedulingPreferences({
                   I need to be home
                 </Label>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  We'll schedule within a time window that works for you. This may reduce available days or increase handle cost.
+                  We'll schedule within a time window that works for you. This may reduce available days or increase credit cost.
                 </p>
               </div>
             </div>

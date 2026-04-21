@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Zap, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -20,6 +20,18 @@ export function AutopaySection() {
     pack_id: (settings?.pack_id ?? DEFAULT_PACK) as CreditPackId,
     threshold: settings?.threshold ?? DEFAULT_THRESHOLD,
   });
+
+  // Resync local state when the server-loaded settings resolve after the
+  // initial render (e.g., subscription query finishes). Without this, the
+  // UI shows default values even when the customer has saved settings.
+  useEffect(() => {
+    if (!settings) return;
+    setLocal({
+      enabled: settings.enabled,
+      pack_id: settings.pack_id,
+      threshold: settings.threshold,
+    });
+  }, [settings?.enabled, settings?.pack_id, settings?.threshold]);
 
   const persist = async (next: typeof local) => {
     setLocal(next);

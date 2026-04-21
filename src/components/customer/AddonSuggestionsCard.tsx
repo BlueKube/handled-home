@@ -71,7 +71,7 @@ export function AddonSuggestionsCard() {
         </CardHeader>
         <CardContent className="space-y-2">
           <p className="text-xs text-muted-foreground mb-3">
-            One-tap add-ons — pay with handles or card.
+            One-tap add-ons — pay with credits or card.
           </p>
           <div className="grid grid-cols-2 gap-2">
             {data.skus.map((sku) => {
@@ -95,7 +95,7 @@ export function AddonSuggestionsCard() {
                     <div className="flex items-center gap-1 mt-0.5">
                       {sku.handle_cost > 0 && (
                         <Badge variant="secondary" className="text-[10px] px-1 py-0">
-                          {sku.handle_cost} handles
+                          {sku.handle_cost} credits
                         </Badge>
                       )}
                       {sku.base_price_cents > 0 && (

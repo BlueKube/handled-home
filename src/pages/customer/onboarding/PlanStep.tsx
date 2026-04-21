@@ -6,7 +6,7 @@ import { usePlanVariants, type ActiveFamily, ACTIVE_FAMILIES } from "@/hooks/use
 import { useResolvePlanVariant } from "@/hooks/useResolvePlanVariant";
 import { PlanFamilyCard } from "@/components/plans/PlanFamilyCard";
 import { FAMILY_HIGHLIGHTS } from "@/components/plans/planTierStyles";
-import { HandlesExplainer } from "@/components/plans/HandlesExplainer";
+import { CreditsExplainer } from "@/components/plans/CreditsExplainer";
 import { TrustBar } from "@/components/customer/TrustBar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -192,7 +192,7 @@ export function PlanStep({
         </p>
       </div>
 
-      <HandlesExplainer />
+      <CreditsExplainer />
       <TrustBar />
 
       {variantsError ? (

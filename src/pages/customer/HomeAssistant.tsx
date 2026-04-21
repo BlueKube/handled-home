@@ -123,7 +123,7 @@ export default function HomeAssistantBooking() {
                   </div>
                   <p className="text-xs text-muted-foreground line-clamp-2">{sku.description}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="outline" className="text-[10px]">{sku.handle_cost} handles</Badge>
+                    <Badge variant="outline" className="text-[10px]">{sku.handle_cost} credits</Badge>
                     <span className="text-[10px] text-muted-foreground">${(sku.base_price_cents / 100).toFixed(0)}</span>
                   </div>
                 </div>
@@ -148,7 +148,7 @@ export default function HomeAssistantBooking() {
                 {/* Time & Price */}
                 <div className="flex items-center gap-3 text-sm">
                   <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />{timeLabel(selectedSku.duration_minutes)}</Badge>
-                  <Badge variant="outline">{selectedSku.handle_cost} handles</Badge>
+                  <Badge variant="outline">{selectedSku.handle_cost} credits</Badge>
                   <span className="text-muted-foreground">${(selectedSku.base_price_cents / 100).toFixed(2)}</span>
                 </div>
 
@@ -236,7 +236,7 @@ export default function HomeAssistantBooking() {
                         onClick={() => handleBook("handles")}
                       >
                         {booking ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
-                        Use {selectedSku.handle_cost} Handles
+                        Use {selectedSku.handle_cost} credits
                         {!canAfford(selectedSku) && (
                           <span className="ml-1 text-xs opacity-70">(need {selectedSku.handle_cost - (handleBalance ?? 0)} more)</span>
                         )}

@@ -57,7 +57,7 @@ export function ThisCycleSummary({
       {handlesTotal != null && handlesTotal > 0 && (
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>{handlesUsed ?? 0}/{handlesTotal} handles used this cycle</span>
+            <span>{handlesUsed ?? 0}/{handlesTotal} credits used this cycle</span>
           </div>
           {(rollover ?? 0) > 0 && (
             <p className="text-xs text-accent">
