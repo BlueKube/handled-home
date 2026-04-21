@@ -77,8 +77,8 @@ export function PlanFamilyCard({
 
         {highlights && highlights.length > 0 && (
           <ul className="space-y-1.5">
-            {highlights.map((h, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+            {highlights.map((h) => (
+              <li key={h} className="flex items-start gap-2 text-sm text-muted-foreground">
                 <Check className="h-4 w-4 text-accent shrink-0 mt-0.5" />
                 <span>{h}</span>
               </li>
@@ -92,22 +92,24 @@ export function PlanFamilyCard({
           </Badge>
         )}
 
-        <div className="flex gap-2 pt-1">
-          {onPreview && (
-            <Button variant="outline" size="sm" onClick={onPreview} className="flex-1">
-              View Details
-            </Button>
-          )}
-          {onSelect && zoneEnabled && (
-            <Button
-              size="sm"
-              onClick={onSelect}
-              className={`flex-1 ${isRecommended ? "bg-accent text-accent-foreground hover:bg-accent/90" : ""}`}
-            >
-              Get Started
-            </Button>
-          )}
-        </div>
+        {(onPreview || (onSelect && zoneEnabled)) && (
+          <div className="flex gap-2 pt-1">
+            {onPreview && (
+              <Button variant="outline" size="sm" onClick={onPreview} className="flex-1">
+                View Details
+              </Button>
+            )}
+            {onSelect && zoneEnabled && (
+              <Button
+                size="sm"
+                onClick={onSelect}
+                className={`flex-1 ${isRecommended ? "bg-accent text-accent-foreground hover:bg-accent/90" : ""}`}
+              >
+                Get Started
+              </Button>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

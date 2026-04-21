@@ -49,7 +49,7 @@ Building these once, as dumb/reusable components, keeps Batch 2.2 (PlanStep reso
     - `onConfirm?: () => void` — primary CTA. Renders "Continue" (or caller passes `confirmLabel` if they need "Activate", "Subscribe", etc.).
     - `confirmLabel?: string` — optional label override for the primary CTA. Defaults to `"Continue"`.
   - Visual shape: same card frame as `PlanFamilyCard`. Differences:
-    - Header shows variant name (e.g., `"Basic 30"`) as the Badge, with `family` label in smaller text above or to the left (e.g., muted `"Basic plan"` prefix so the hierarchy is clear).
+    - Header shows variant name (e.g., `"Basic 30"`) as the Badge, with a muted `"Basic plan" / "Full plan" / "Premier plan"` prefix above — derived from `family` via a lookup inside the component so callers don't have to pass a separate label prop.
     - Price row shows exact `variant.display_price_text` (no "Starts at").
     - Keeps the handles callout (`handlesPerCycle` in the accent pill) from existing `PlanCard`.
     - Renders the optional rationale callout above highlights.

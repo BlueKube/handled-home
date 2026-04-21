@@ -11,7 +11,6 @@ type Family = Exclude<PlanFamilyKey, "legacy">;
 interface PlanVariantCardProps {
   variant: Plan;
   family: Family;
-  familyLabel: string;
   handlesPerCycle?: number;
   rationale?: string;
   highlights?: string[];
@@ -21,10 +20,15 @@ interface PlanVariantCardProps {
   confirmLabel?: string;
 }
 
+const FAMILY_LABEL: Record<Family, string> = {
+  basic: "Basic plan",
+  full: "Full plan",
+  premier: "Premier plan",
+};
+
 export function PlanVariantCard({
   variant,
   family,
-  familyLabel,
   handlesPerCycle,
   rationale,
   highlights,
@@ -48,7 +52,7 @@ export function PlanVariantCard({
       )}
 
       <CardHeader className="pb-1 pt-6">
-        <p className="text-xs uppercase tracking-wide text-muted-foreground">{familyLabel}</p>
+        <p className="text-xs uppercase tracking-wide text-muted-foreground">{FAMILY_LABEL[family]}</p>
         <div className="flex items-center justify-between mt-1">
           <div className="flex items-center gap-2">
             <Badge variant="outline" className={`text-xs font-semibold ${TIER_ACCENT[family]}`}>
@@ -63,12 +67,12 @@ export function PlanVariantCard({
       </CardHeader>
 
       <CardContent className="space-y-4">
-        <div className="flex items-baseline gap-3">
-          {variant.display_price_text && (
+        {variant.display_price_text && (
+          <div className="flex items-baseline gap-3">
             <span className="text-3xl font-bold tracking-tight">{variant.display_price_text}</span>
-          )}
-          <span className="text-xs text-muted-foreground">/ 4 weeks</span>
-        </div>
+            <span className="text-xs text-muted-foreground">/ 4 weeks</span>
+          </div>
+        )}
 
         {handlesPerCycle != null && (
           <div className="flex items-center gap-2 rounded-lg bg-accent/5 border border-accent/20 px-3 py-2.5">
@@ -89,8 +93,8 @@ export function PlanVariantCard({
 
         {highlights && highlights.length > 0 && (
           <ul className="space-y-1.5">
-            {highlights.map((h, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+            {highlights.map((h) => (
+              <li key={h} className="flex items-start gap-2 text-sm text-muted-foreground">
                 <Check className="h-4 w-4 text-accent shrink-0 mt-0.5" />
                 <span>{h}</span>
               </li>
@@ -98,22 +102,24 @@ export function PlanVariantCard({
           </ul>
         )}
 
-        <div className="flex flex-col gap-2 pt-1">
-          {onConfirm && (
-            <Button
-              size="sm"
-              onClick={onConfirm}
-              className={isRecommended ? "bg-accent text-accent-foreground hover:bg-accent/90" : ""}
-            >
-              {confirmLabel}
-            </Button>
-          )}
-          {onChangeSize && (
-            <Button variant="ghost" size="sm" onClick={onChangeSize}>
-              See other sizes
-            </Button>
-          )}
-        </div>
+        {(onConfirm || onChangeSize) && (
+          <div className="flex flex-col gap-2 pt-1">
+            {onConfirm && (
+              <Button
+                size="sm"
+                onClick={onConfirm}
+                className={isRecommended ? "bg-accent text-accent-foreground hover:bg-accent/90" : ""}
+              >
+                {confirmLabel}
+              </Button>
+            )}
+            {onChangeSize && (
+              <Button variant="ghost" size="sm" onClick={onChangeSize}>
+                See other sizes
+              </Button>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
