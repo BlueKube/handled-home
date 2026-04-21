@@ -562,7 +562,7 @@ serve(async (req) => {
           });
         }
 
-        logStep("Transfer failed", { transferId: transfer.id });
+        logStep("Transfer reversed (failed)", { transferId: transfer.id });
         break;
       }
 
