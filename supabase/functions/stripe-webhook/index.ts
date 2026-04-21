@@ -474,7 +474,11 @@ serve(async (req) => {
         break;
       }
 
-      case "transfer.paid": {
+      case "transfer.created": {
+        // Stripe API 2025+: `transfer.paid` and `transfer.failed` were retired.
+        // Platform→Connect transfers are atomic, so `transfer.created` means the
+        // money has landed in the connected account's Stripe balance — same
+        // terminal state the old `transfer.paid` event signalled.
         const transfer = event.data.object as any;
         // Update provider payout status
         await supabase
@@ -519,11 +523,15 @@ serve(async (req) => {
           }
         }
 
-        logStep("Transfer paid", { transferId: transfer.id });
+        logStep("Transfer created (paid)", { transferId: transfer.id });
         break;
       }
 
-      case "transfer.failed": {
+      case "transfer.reversed": {
+        // Stripe API 2025+ replacement for the retired `transfer.failed` event.
+        // A reversed transfer means the platform reclaimed funds from the
+        // connected account — treat identically to the old failed-transfer path:
+        // flip the payout to FAILED, revert earnings to ELIGIBLE, log exception.
         const transfer = event.data.object as any;
         await supabase
           .from("provider_payouts")
