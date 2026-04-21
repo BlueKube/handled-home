@@ -18,7 +18,8 @@ import { CustomerNotificationBanners } from "@/components/customer/NotificationB
 import { SmartAppBanner } from "@/components/SmartAppBanner";
 import { HomeSetupCard } from "@/components/customer/HomeSetupCard";
 import { NextVisitCard } from "@/components/customer/NextVisitCard";
-import { HandleBalanceBar } from "@/components/customer/HandleBalanceBar";
+import { CreditsRing } from "@/components/customer/CreditsRing";
+import { LowCreditsBanner } from "@/components/customer/LowCreditsBanner";
 import { HomeSuggestions } from "@/components/customer/HomeSuggestions";
 import { PropertyHealthWidget } from "@/components/customer/PropertyHealthWidget";
 import { FloatingAddButton } from "@/components/customer/FloatingAddButton";
@@ -278,16 +279,44 @@ export default function CustomerDashboard() {
         />
       )}
 
-      {/* Handles Balance */}
-      {handleBalance != null && planHandles && planHandles.handles_per_cycle > 0 && (
-        <div className="space-y-1">
-          <div className="flex items-center gap-1">
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Handle Balance</p>
-            <HelpTip text="Handles are your service allowances — each handle equals one visit of a service per cycle. Your balance shows how many you have left this period." />
+      {/* Credits balance */}
+      {handleBalance != null && planHandles && planHandles.handles_per_cycle > 0 && (() => {
+        const cycleDays = subscription?.billing_cycle_length_days ?? null;
+        const annualCap = cycleDays
+          ? Math.round(planHandles.handles_per_cycle * (365 / cycleDays))
+          : 0;
+        return (
+          <div className="space-y-3">
+            <LowCreditsBanner
+              balance={handleBalance}
+              annualCap={annualCap}
+              onTopUp={() => navigate("/customer/credits")}
+            />
+            <div className="flex items-center gap-4 rounded-xl border border-border bg-card p-4">
+              <CreditsRing
+                balance={handleBalance}
+                perCycle={planHandles.handles_per_cycle}
+                annualCap={annualCap}
+                variant="compact"
+              />
+              <div className="flex-1">
+                <div className="flex items-center gap-1">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Credits balance
+                  </p>
+                  <HelpTip text="Credits are your service allowance — each service you book costs a set number. Unused credits roll over up to your plan's cap." />
+                </div>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  {planHandles.handles_per_cycle} credits per cycle
+                </p>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => navigate("/customer/credits")}>
+                Top up
+              </Button>
+            </div>
           </div>
-          <HandleBalanceBar balance={handleBalance} perCycle={planHandles.handles_per_cycle} />
-        </div>
-      )}
+        );
+      })()}
 
       {/* Property Health Score */}
       <PropertyHealthWidget propertyId={property?.id} />

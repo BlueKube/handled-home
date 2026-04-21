@@ -2,11 +2,13 @@
 
 Items that require API keys, backend changes, or design decisions beyond frontend gap closure. These are left for the owner to complete after the automated batch work.
 
+> **Last cleanup:** 2026-04-22 — marked resolved: Round 64.5 self-host migration (all phases), Round 64 Phase 1 migrations + types regen, variant-override decision (Phase 2). Active items are the Phase 3 deploy tasks (Stripe pack products + 2 edge function deploys + cron verification) and the Phase 2 follow-up bucket. Snap-a-Fix (Phase 4) is the next scheduled work.
+
 ## API Key / External Service Setup
 
-- [x] **CRON_SECRET** — ✅ Set via Lovable secrets. All 11 pg_cron jobs updated with `Bearer <CRON_SECRET>` auth header. ⚠️ **Replace `MyLittleSecret` with a strong random string** (`openssl rand -hex 32`) in both the secret and the cron migration SQL.
+- [x] **CRON_SECRET** — ✅ Resolved 2026-04-21. Rotated via `openssl rand -hex 32` during Round 64.5 self-host migration; stored in Supabase Edge Function Secrets on the new project `gwbwnetatpgnqgarkvht`. The old `MyLittleSecret` placeholder is gone.
 - [x] **Mapbox GL API key** — ✅ Set as `VITE_MAPBOX_ACCESS_TOKEN` via Lovable secrets. Env var name standardized across `AdminReadOnlyMap`, `MapboxZoneSelector`, and `AddressLookupTool`.
-- [x] **Stripe secret key** — ✅ Set as `STRIPE_SECRET_KEY` via Lovable secrets. Available to all edge functions (billing-automation, weekly-payout, dunning, etc.).
+- [x] **Stripe secret key** — ✅ Set as `STRIPE_SECRET_KEY` via Lovable secrets. Available to all edge functions (billing-automation, weekly-payout, dunning, etc.). Re-pushed to the self-hosted project during Round 64.5 cutover.
 - [ ] **Stripe publishable key + backend `create-setup-intent` edge function** — F13 Billing uses Stripe Elements for card collection. The UI will be built but needs a working Stripe publishable key (VITE_STRIPE_PUBLISHABLE_KEY) and backend intent creation to actually collect cards.
 
 ## Design Decisions (Needs Human Input)
@@ -171,69 +173,66 @@ Items that require API keys, backend changes, or design decisions beyond fronten
 ## Round 64: Tier Variants, Credits UX, Snap-a-Fix (2026-04-20)
 
 ### Lovable — Apply Supabase migrations
-Round 64 writes new migrations into `supabase/migrations/`. Lovable handles the Supabase connection, so **please ask Lovable to apply these migrations** after each phase lands:
+Round 64 writes new migrations into `supabase/migrations/`. Post-Round-64.5 these now auto-apply via the GitHub↔Supabase integration on push to main; the Lovable-apply step below is obsolete.
 
-- [ ] **Phase 1 migrations** — `20260420173758_plan_variants_schema.sql` + `20260420174801_plan_variants_review_fixes.sql`
-  - **Why:** Adds `plans.plan_family` + `plans.size_tier`, creates `plan_variant_rules` table, seeds 12 draft variants + 12 seed rules, creates `pick_plan_variant(uuid, text)` SECURITY DEFINER RPC.
-  - **Blocked:** Phase 2 (onboarding variant resolution) cannot run without the RPC deployed.
-  - **Safety:** Legacy Essential/Plus/Premium rows backfill as `plan_family='legacy'` (NULL size_tier). Live subscriptions keep working. New variants are `status='draft'` until Phase 2 activation.
-- [ ] **Regenerate Supabase TS types after Phase 1 migrations apply** — `src/integrations/supabase/types.ts` currently has no awareness of `plan_variant_rules` or `pick_plan_variant`. Hooks use `as any` as the interim. Once Lovable regens, the `as any` casts can be tightened in a later batch.
+- [x] **Phase 1 migrations** — `20260420173758_plan_variants_schema.sql` + `20260420174801_plan_variants_review_fixes.sql` — ✅ Applied to the self-hosted project `gwbwnetatpgnqgarkvht` during Round 64.5. `plans.plan_family` + `plans.size_tier` + `plan_variant_rules` + 12 draft variants + `pick_plan_variant` RPC all live.
+- [x] **Regenerate Supabase TS types after Phase 1 migrations apply** — ✅ `src/integrations/supabase/types.ts` regenerated with `pick_plan_variant` + `plan_variant_rules` typed. Round 64 Phase 2 uses the RPC directly without `as any` casts.
 
 ### Upcoming Phase TODOs (preview — will grow as phases land)
 
-- [ ] **Stripe products for credit packs (Phase 3)** — Create Starter ($149 / 300 credits), Homeowner ($269 / 600 credits, recommended), Year-round ($479 / 1,200 credits) products in Stripe. Add product + price IDs to `.env.local` / Lovable secrets as `VITE_CREDIT_PACK_STARTER_PRICE_ID`, etc.
+- [ ] **Stripe products for credit packs (Phase 3)** — Create Starter ($149 / 300 credits), Homeowner ($269 / 600 credits, recommended), Year-round ($479 / 1,200 credits) products in Stripe. **Add price ids to Supabase Edge Function Secrets (NOT frontend env vars)** as: `STRIPE_CREDIT_PACK_STARTER_PRICE_ID`, `STRIPE_CREDIT_PACK_HOMEOWNER_PRICE_ID`, `STRIPE_CREDIT_PACK_YEAR_ROUND_PRICE_ID`. Until the env vars are set, the `purchase-credit-pack` edge function returns `{url: null, message: ...}` and the frontend surfaces a "not available yet" toast. Also run `supabase functions deploy purchase-credit-pack` after Batch 3.3 merges to main (and the `20260421120000_grant_topup_credits` migration auto-applies via GitHub integration).
+
+- [ ] **Deploy process-credit-pack-autopay + verify cron (Phase 3 Batch 3.4)** — After merging, run `supabase functions deploy process-credit-pack-autopay` and verify the `process-credit-pack-autopay` cron job is registered (`SELECT * FROM cron.job WHERE jobname = 'process-credit-pack-autopay'` should show a 07:00 daily schedule). Smoke test: manually invoke the function with `curl -H "Authorization: Bearer $CRON_SECRET" https://gwbwnetatpgnqgarkvht.supabase.co/functions/v1/process-credit-pack-autopay` and confirm it returns `{processed, granted, skipped, errors}`. Requires the three Stripe price-id env vars above to be set.
 - [ ] **LOVABLE_API_KEY quota review (Phase 4)** — Snap-a-Fix AI classification will increase call volume vs. current support-ai-classify usage. Confirm the key can handle higher QPS or upgrade tier before Phase 4 rollout.
 - [ ] **Seed Fall Prep bundle content (Phase 6)** — Bundle line items + per-item credit pricing + zone rollout list. Needs admin to choose the initial zones to spotlight.
-- [ ] **Admin review of manual variant overrides (Phase 2)** — Onboarding will let customers override the `pick_plan_variant` result one tier up/down. Decide whether overrides need admin approval or auto-approve with a review flag.
+- [x] **Admin review of manual variant overrides (Phase 2)** — ✅ Decision locked 2026-04-21 in Batch 2.2: auto-approve override AND raise a flag via `customer_onboarding_progress.metadata.plan_variant_selection.admin_review_flagged`. Admin dashboard surface to read the flag is tracked separately below (Phase 2 deferred section).
 
 ### Review decisions (reference)
 
 - [ ] **Legacy family in variant rule form** — Phase 1 Batch 1.3 deliberately excluded `legacy` from the Variant Rules admin form (only basic/full/premier). Confirm this is correct: legacy plans (Essential/Plus/Premium) keep the flat pricing model and don't participate in variant resolution. If legacy ever needs its own rules, add it to the form select options.
 
-## Round 64.5: Supabase Self-Host Migration (2026-04-20) — BLOCKING
+### Phase 2 deferred (2026-04-21)
 
-Lovable Cloud lost its GitHub connection to this repo and can no longer apply migrations. Round 64 Phases 2–8 are blocked until we migrate off. Plan is in `/root/.claude/plans/i-used-the-new-nifty-avalanche.md` and live tracker is `docs/working/plan.md`.
+- [ ] **Admin review surface for variant override flag (Phase 2 follow-up)** — `customer_onboarding_progress.metadata.plan_variant_selection.admin_review_flagged=true` is set whenever a customer overrides the `pick_plan_variant` recommendation during onboarding. No admin dashboard surfaces this today. Add a "Flagged onboarding overrides" table to the admin console that queries `customer_onboarding_progress` for `metadata->'plan_variant_selection'->>'admin_review_flagged' = 'true'`, shows recommended vs selected variant + reason, and lets an admin mark reviewed.
+  - **Why:** Without this, the admin review flag is set but invisible.
+  - **Blocked:** Nothing — schema + writes are in place; just needs the admin UI.
+- [ ] **Public Browse live plan data** — `/browse` (public, unauthenticated) uses a hardcoded `FAMILY_SUMMARIES` constant because `plans` table RLS requires authenticated read. To go live, either (a) flip the 12 draft variants to `status='active'` and add an RLS policy `"Anyone can read active plans"` (selecting only columns safe for public display), or (b) add a `get_public_plan_families()` SECURITY DEFINER RPC that returns family-level aggregates.
+  - **Why:** Prices in Browse can drift from the DB if variants change; static data needs manual updates.
+  - **Blocked:** Product decision on when to flip variants to active.
+- [ ] **Promote `plan_variant_selection` metadata to first-class columns on `customer_plan_selections`** — Right now Batch 2.2 stashes `recommended_plan_id` / `override_reason` / `admin_review_flagged` in `customer_onboarding_progress.metadata`. Subscribe step (and `create-checkout-session`) doesn't yet copy those fields into `customer_plan_selections` / `subscriptions`. A follow-up migration + code pass should add columns and propagate.
+  - **Why:** Metadata is flexible but harder to query than columns; admin reporting will be easier with first-class columns.
+  - **Blocked:** Nothing — straightforward migration + SubscribeStep code path.
+- [ ] **BYOC variant sizing** — `PlanActivateStep` (BYOC) auto-selects the *smallest* variant of the recommended family. For a customer with a 4,000 sqft home this is inaccurate. Add property sizing to the BYOC flow or call `pick_plan_variant` if a property is already on file.
+  - **Why:** Large-home BYOC customers get under-sized plans.
+  - **Blocked:** Nothing — known shortcut, noted in Batch 2.3 spec.
+- [ ] **`BundleSavingsCard` family awareness** — Currently keyed on legacy `essential/plus/premium`. Plans.tsx translates the new `basic/full/premier` families via a local `BUNDLE_TIER_KEY` map. Update `BundleSavingsCard` to accept `ActiveFamily` keys directly and retire the translation.
 
-### Phase A — User prereqs (required before Claude Code can proceed)
+## Round 64.5: Supabase Self-Host Migration (2026-04-20) — COMPLETED 2026-04-21
 
-Deliver all of the following in one message to a new Claude Code session:
+Lovable Cloud lost its GitHub connection to this repo, so the project migrated to a new self-hosted Supabase project (`gwbwnetatpgnqgarkvht`). All Phase A/B/C/F work landed on branch `claude/supabase-self-host-migration` and was merged; follow-on Round 64 phases run on the new project. Original plan was at `/root/.claude/plans/i-used-the-new-nifty-avalanche.md`.
 
-- [ ] **Create a new Supabase project** at https://supabase.com/dashboard. Pick a region close to existing Lovable project (yxhdschpeezawraqsmug).
-- [ ] **Gather 5 credentials** from the new project:
-  - Project ref (e.g., `abcdefgh12345678`)
-  - Project URL (`https://<ref>.supabase.co`)
-  - Anon (publishable) key
-  - Service role key (Settings → API)
-  - Database password (Settings → Database)
-- [ ] **Generate a Supabase Personal Access Token** at https://supabase.com/dashboard/account/tokens. Label it "claude-code-sandbox". This is what Claude Code will use for CLI commands.
-- [ ] **Generate an Anthropic API key** at https://console.anthropic.com/ with billing enabled. This replaces `LOVABLE_API_KEY` in `predict-services` and `support-ai-classify`.
-- [ ] **Pull the direct DB connection string from Lovable** for the existing project `yxhdschpeezawraqsmug` (Lovable dashboard → Database → Connection string → Direct). If Lovable doesn't expose it, Claude Code will fall back to CSV per-table exports + Supabase Auth Admin API for users.
-- [ ] **Capture existing Lovable secrets** (dashboard screenshot). Needed: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY` (or email provider), `WEATHER_API_KEY`, `CRON_SECRET`. Skip `LOVABLE_API_KEY` (replaced by Anthropic).
+### Phase A — User prereqs
+
+- [x] **Create a new Supabase project** — ✅ Project `gwbwnetatpgnqgarkvht` created (us-west-1).
+- [x] **Gather 5 credentials** — ✅ Received in 2026-04-21 sessions.
+- [x] **Generate a Supabase Personal Access Token** — ✅ Stored on developer machine via `.claude/settings.local.json`.
+- [x] **Generate an Anthropic API key** — ✅ Wired into `_shared/anthropic.ts`; `predict-services` + `support-ai-classify` use `claude-haiku-4-5-20251001`.
+- [x] **Pull the direct DB connection string from Lovable** — ✅ No longer needed. Old project pre-launch test data only; reset before go-live. Skip.
+- [x] **Capture existing Lovable secrets** — ✅ All 5 (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, RESEND_API_KEY, WEATHER_API_KEY, CRON_SECRET) re-pushed to new project.
 
 ### Phase A — Dashboard configuration on new project
 
-Do these in the new Supabase project's dashboard before Claude Code does anything:
-
-- [ ] **Auth → Email provider** — enable; match old project's confirm settings (likely disable email confirmations for dev).
-- [ ] **Auth → Google provider** — paste client ID + client secret from old project. Add the new project's `/auth/v1/callback` URL as an authorized redirect URI in Google Cloud Console.
-- [ ] **Auth → URL Configuration** — Site URL = `http://localhost:5173`, add production URL if any. Redirect URLs include both localhost and production.
-- [ ] **Auth → Email templates** — copy-paste from old project OR accept defaults.
+- [x] **Auth → Email provider** — ✅ Enabled; dev confirmations disabled.
+- [x] **Auth → Google provider** — ✅ Client id/secret ported; callback URL added to Google Cloud Console.
+- [x] **Auth → URL Configuration** — ✅ Site URL + redirect URLs configured for localhost + production (`https://handledhome.app`).
+- [x] **Auth → Email templates** — ✅ Defaults accepted.
 - [x] **C-6 cron job repoint** — `ALTER DATABASE` rejected with `42501: permission denied` from both Management API AND dashboard SQL editor (Supabase Cloud locked the postgres role). Resolved via Vault-based migration `20260421050000` instead. Cron jobs now read `service_role_key` from `vault.secrets` via `cron_private.invoke_edge_function` SECURITY DEFINER helper. End-to-end smoke test passed.
 
-### Phase C-6 — Configure pg_cron database settings (2026-04-21, added this session)
+### Phase C-6 — Configure pg_cron database settings (2026-04-21)
 
-- [ ] **Run in Supabase dashboard SQL editor** (new project `gwbwnetatpgnqgarkvht`):
-  ```sql
-  ALTER DATABASE postgres SET app.settings.supabase_url = 'https://gwbwnetatpgnqgarkvht.supabase.co';
-  ALTER DATABASE postgres SET app.settings.service_role_key = '<paste sb_secret_... value>';
-  ```
-  - **Why:** All 7 pg_cron jobs use `current_setting('app.settings.*')` to resolve the function URL + auth header. Without these GUCs, the cron calls hit `null/functions/v1/...` and fail silently.
-  - **Blocked:** Management API postgres role lacks `ALTER DATABASE` privilege. Dashboard SQL editor runs with higher privilege.
-  - **Verify:** `show app.settings.supabase_url;` should echo the URL.
+- [x] **Run in Supabase dashboard SQL editor** — ✅ Superseded by the Vault-based `cron_private.invoke_edge_function` helper in migration `20260421050000`. The GUC approach (`ALTER DATABASE postgres SET app.settings.*`) was blocked by Supabase Cloud's postgres-role permissions; Vault reads replaced it. All 7 pg_cron jobs route through the helper and invoke edge functions with the service role key from `vault.secrets`.
 
-### Remaining Phase A secrets (Claude needs these to continue) — 2026-04-21
-
-The 2026-04-21 session received the first six credentials (PAT, project ref/URL, publishable key, secret key, DB URL, Anthropic key) and made Phases B-2/C-1/C-3/C-5/C-7 complete. Still needed:
+### Remaining Phase A secrets — received 2026-04-21
 
 - [x] **`STRIPE_SECRET_KEY`** — received 2026-04-21 session 2. Pushed to Supabase Edge Function secrets.
 - [x] **`STRIPE_WEBHOOK_SECRET`** — received 2026-04-21 session 2 (`whsec_...` from new event destination). Pushed to Supabase Edge Function secrets.
@@ -243,15 +242,13 @@ The 2026-04-21 session received the first six credentials (PAT, project ref/URL,
 - [x] **`CRON_SECRET`** — generated 2026-04-21 via `openssl rand -hex 32`. Stored in `/root/.r64_5_secrets.env`.
 - [x] **`LOVABLE_DIRECT_DB_URL`** — no longer needed. Phase C-2 skipped 2026-04-21: old project is pre-launch test data only; all data reset before go-live. User's PAT has no access to old project anyway (different org).
 
-### Phase F — Cutover tasks (when Claude Code signals ready)
+### Phase F — Cutover tasks
 
-Do these when Claude Code is about to flip `.env`:
-
-- [ ] **Stripe dashboard** — update webhook endpoint to `https://<new-ref>.supabase.co/functions/v1/stripe-webhook`. Keep both endpoints enabled for a 5-minute overlap.
-- [ ] **Google Cloud Console** — add new project's callback URL as authorized redirect URI (if not already).
-- [ ] **Production deploy** (if any) — redeploy after `.env` commit lands.
-- [ ] **Monitor Supabase Function logs** on new project for 30 min post-cutover.
+- [x] **Stripe dashboard** — ✅ Webhook endpoint updated to `https://gwbwnetatpgnqgarkvht.supabase.co/functions/v1/stripe-webhook`; subscribed to the 9 current events (incl. `transfer.created` / `.reversed` per Stripe 2025 API).
+- [x] **Google Cloud Console** — ✅ New callback URL added as authorized redirect URI.
+- [x] **Production deploy** — ✅ Vercel project `handled-home` is live at `https://handledhome.app` with the `.env` pointing at the new project.
+- [x] **Monitor Supabase Function logs** — ✅ Post-cutover smoke test passed (sign-up + onboarding render).
 
 ### Phase F + 24h — Decommission
 
-- [ ] **Archive the Lovable Cloud project** (no disable button — just stop using it, can delete project after 30 days confidence window).
+- [ ] **Archive the Lovable Cloud project** — pending; no disable button, just stop using it and delete after 30-day confidence window.

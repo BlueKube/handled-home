@@ -56,13 +56,16 @@ export function useOnboardingProgress() {
 
       const existing = query.data;
       if (existing) {
+        const mergedMetadata = updates.metadata
+          ? { ...(existing.metadata ?? {}), ...updates.metadata }
+          : existing.metadata;
         const { error } = await supabase
           .from("customer_onboarding_progress")
           .update({
             current_step: updates.current_step,
             completed_steps: updates.completed_steps ?? existing.completed_steps,
             selected_plan_id: updates.selected_plan_id !== undefined ? updates.selected_plan_id : existing.selected_plan_id,
-            metadata: (updates.metadata ?? existing.metadata) as unknown as Json,
+            metadata: mergedMetadata as unknown as Json,
           })
           .eq("id", existing.id);
         if (error) throw error;
@@ -85,12 +88,15 @@ export function useOnboardingProgress() {
       const prev = qc.getQueryData<OnboardingProgress | null>(["onboarding_progress", user?.id]);
       qc.setQueryData<OnboardingProgress | null>(["onboarding_progress", user?.id], (old) => {
         if (!old) return old;
+        const mergedMetadata = updates.metadata
+          ? { ...(old.metadata ?? {}), ...updates.metadata }
+          : old.metadata;
         return {
           ...old,
           current_step: updates.current_step,
           completed_steps: (updates.completed_steps ?? old.completed_steps) as OnboardingStep[],
           selected_plan_id: updates.selected_plan_id !== undefined ? updates.selected_plan_id : old.selected_plan_id,
-          metadata: (updates.metadata ?? old.metadata) as Record<string, unknown>,
+          metadata: mergedMetadata as Record<string, unknown>,
         };
       });
       return { prev };

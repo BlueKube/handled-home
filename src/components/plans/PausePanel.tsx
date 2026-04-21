@@ -98,7 +98,7 @@ export function PausePanel({ subscription }: PausePanelProps) {
             </div>
           )}
 
-          <p className="text-xs text-muted-foreground">Your handles balance is frozen — no services will be scheduled.</p>
+          <p className="text-xs text-muted-foreground">Your credits balance is frozen — no services will be scheduled.</p>
           <Button size="sm" onClick={handleResume} disabled={resumeSub.isPending}>
             <Play className="h-3.5 w-3.5 mr-1" />
             {resumeSub.isPending ? "Resuming…" : "Resume Now"}
@@ -123,7 +123,7 @@ export function PausePanel({ subscription }: PausePanelProps) {
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-xs text-muted-foreground">
-          Need a break? Pause for up to 8 weeks. Jobs are skipped and handles are frozen.
+          Need a break? Pause for up to 8 weeks. Jobs are skipped and credits are frozen.
         </p>
 
         <Select value={weeks} onValueChange={setWeeks}>

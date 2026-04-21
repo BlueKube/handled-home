@@ -41,7 +41,7 @@ export function CancellationFlow({ subscription }: CancellationFlowProps) {
         feedback: feedback || undefined,
         acceptRetentionOffer: true,
       });
-      toast.success(`Welcome back! ${result.bonus_handles} bonus handles added.`);
+      toast.success(`Welcome back! ${result.bonus_handles} bonus credits added.`);
       setDialogOpen(false);
       resetState();
     } catch (e: any) {
@@ -140,13 +140,13 @@ export function CancellationFlow({ subscription }: CancellationFlowProps) {
                 Before you go — a gift
               </AlertDialogTitle>
               <AlertDialogDescription>
-                We'd love to keep you! How about <span className="font-semibold text-foreground">5 bonus handles</span> on us?
+                We'd love to keep you! How about <span className="font-semibold text-foreground">5 bonus credits</span> on us?
               </AlertDialogDescription>
             </AlertDialogHeader>
 
             <Card className="border-accent/40 bg-accent/5 my-4">
               <CardContent className="pt-4 pb-4">
-                <p className="text-sm font-medium">Stay and get 5 free handles</p>
+                <p className="text-sm font-medium">Stay and get 5 free credits</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   That's extra services at no additional cost. Your subscription continues as-is.
                 </p>
@@ -158,7 +158,7 @@ export function CancellationFlow({ subscription }: CancellationFlowProps) {
                 No thanks, continue canceling
               </Button>
               <Button onClick={handleAcceptOffer} disabled={cancelWithReason.isPending}>
-                {cancelWithReason.isPending ? "Adding handles…" : "Stay & Get 5 Handles"}
+                {cancelWithReason.isPending ? "Adding credits…" : "Stay & Get 5 Credits"}
               </Button>
             </AlertDialogFooter>
           </>

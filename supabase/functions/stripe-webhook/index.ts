@@ -75,6 +75,69 @@ serve(async (req) => {
         const stripeCustomerId = session.customer;
         const stripeSubscriptionId = session.subscription;
 
+        // Credit-pack top-up path: mode=payment + metadata.origin marks it.
+        // Handle first so it short-circuits before the subscription-create
+        // path below.
+        if (session.mode === "payment" && session.metadata?.origin === "credit_pack_topup") {
+          const subscriptionId = session.metadata?.subscription_id;
+          const packId = session.metadata?.pack_id;
+          const creditsRaw = session.metadata?.credits;
+          const credits = creditsRaw ? parseInt(creditsRaw, 10) : NaN;
+
+          if (!userId || !subscriptionId || !packId || Number.isNaN(credits) || credits <= 0) {
+            logStep("Credit pack topup: missing or invalid metadata", { sessionId: session.id, metadata: session.metadata });
+            // The webhook dedupe insert has already marked this event as
+            // seen. Log a billing_exceptions row so ops can manually grant
+            // the credits (customer has been charged).
+            await supabase.from("billing_exceptions").insert({
+              type: "credit_pack_topup_metadata_invalid",
+              severity: "HIGH",
+              entity_type: "stripe_session",
+              entity_id: null,
+              customer_id: userId ?? null,
+              status: "OPEN",
+              next_action: `Manual credit grant required for Stripe session ${session.id}`,
+            });
+          } else {
+            const { data: rpcData, error: rpcErr } = await supabase.rpc("grant_topup_credits", {
+              p_subscription_id: subscriptionId,
+              p_customer_id: userId,
+              p_credits: credits,
+              p_pack_id: packId,
+              p_idempotency_key: event.id,
+            });
+            if (rpcErr) {
+              logStep("grant_topup_credits failed", { error: rpcErr.message, sessionId: session.id });
+              // Same reasoning as above — dedupe has claimed the event; we
+              // need a ticket so ops can reconcile.
+              await supabase.from("billing_exceptions").insert({
+                type: "credit_pack_topup_grant_failed",
+                severity: "HIGH",
+                entity_type: "subscription",
+                entity_id: subscriptionId,
+                customer_id: userId,
+                status: "OPEN",
+                next_action: `grant_topup_credits RPC failed for Stripe session ${session.id}: ${rpcErr.message}`,
+              });
+            } else {
+              logStep("Credit pack topup granted", { sessionId: session.id, result: rpcData });
+              await supabase.from("subscription_events").insert({
+                subscription_id: subscriptionId,
+                source: "stripe",
+                event_type: "credit_pack_purchased",
+                payload: {
+                  session_id: session.id,
+                  event_id: event.id,
+                  pack_id: packId,
+                  credits,
+                  rpc_result: rpcData,
+                },
+              });
+            }
+          }
+          break;
+        }
+
         if (userId && planId) {
           const { data: plan } = await supabase
             .from("plans")

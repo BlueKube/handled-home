@@ -7,7 +7,7 @@ import {
   Building2, Package, Map, UserPlus,
   CreditCard, CalendarDays, Megaphone, FileText, Lock,
   LogOut, Moon, Sun, TrendingUp, ChevronRight, BarChart3,
-  AlertTriangle, Banknote, Clock,
+  AlertTriangle, Banknote, Clock, Zap,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Switch } from "@/components/ui/switch";
@@ -41,6 +41,7 @@ const customerSections: MenuSection[] = [
     title: "Account",
     items: [
       { label: "Plans & Subscription", icon: CreditCard, path: "/customer/plans" },
+      { label: "Credits", icon: Zap, path: "/customer/credits" },
       { label: "Property", icon: MapPin, path: "/customer/property" },
       { label: "Billing", icon: Wallet, path: "/customer/billing" },
     ],

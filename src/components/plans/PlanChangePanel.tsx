@@ -72,7 +72,7 @@ export function PlanChangePanel({ subscription }: PlanChangePanelProps) {
             Switching to <span className="font-semibold text-foreground">{pendingPlan?.name ?? "..."}</span>{" "}
             on {subscription.pending_effective_at ? format(new Date(subscription.pending_effective_at), "MMM d, yyyy") : "next cycle"}.
           </p>
-          <p className="text-xs text-muted-foreground">Your handles balance will carry over.</p>
+          <p className="text-xs text-muted-foreground">Your credits balance will carry over.</p>
           <Button variant="outline" size="sm" onClick={handleCancelPending} disabled={cancelPending.isPending}>
             <X className="h-3.5 w-3.5 mr-1" />
             Cancel Change
@@ -89,7 +89,7 @@ export function PlanChangePanel({ subscription }: PlanChangePanelProps) {
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-xs text-muted-foreground">
-          Changes take effect at the start of your next billing cycle. Handles carry over.
+          Changes take effect at the start of your next billing cycle. Credits carry over.
         </p>
 
         <Select value={selectedPlanId} onValueChange={setSelectedPlanId}>

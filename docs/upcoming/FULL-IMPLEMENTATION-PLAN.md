@@ -1,9 +1,10 @@
 # Round 64 — Business-Model Shift: Tier Variants, Credits UX, Snap-a-Fix
 
 > **Created:** 2026-04-20
-> **Branch:** `claude/pricing-tiered-model-6WCj9`
+> **Branches:** Phase 1 on `claude/pricing-tiered-model-6WCj9` (merged); Phase 2 + Phase 3 on `claude/handled-home-phase-2-YTvlm` (awaiting merge as of 2026-04-22).
 > **Mode:** Quality (tiered review per CLAUDE.md §5)
 > **Scope:** 8 phases — schema, onboarding, credits UX, Snap-a-Fix, nav + visit detail, bundles, referral elevation, docs sync.
+> **Status (2026-04-22):** Phases 1 ✅ · 2 ✅ · 3 ✅ · 4–8 ⬜. Interstitial Round 64.5 (Supabase self-host migration) ✅.
 
 ---
 
@@ -33,7 +34,11 @@ This round delivers the shift end-to-end.
 
 ---
 
-## Phase 1 — Schema: size_tier on plans + plan_family + variant selection RPC
+## Phase 1 — Schema: size_tier on plans + plan_family + variant selection RPC ✅ SHIPPED
+
+> **Shipped:** 2026-04-20 on `claude/pricing-tiered-model-6WCj9`.
+> **Archive:** `docs/archive/round-64-phase-1-pricing-tiered-model-2026-04-20/`.
+> **Migrations live:** `20260420173758_plan_variants_schema.sql` + `20260420174801_plan_variants_review_fixes.sql`.
 
 ### Problem
 
@@ -77,7 +82,11 @@ Medium — schema change + RPC + admin UI. 3 parallel lanes + synthesis.
 
 ---
 
-## Phase 2 — Onboarding: home signals → variant → "Starts at" pricing
+## Phase 2 — Onboarding: home signals → variant → "Starts at" pricing ✅ SHIPPED
+
+> **Shipped:** 2026-04-21 on `claude/handled-home-phase-2-YTvlm`.
+> **Archive:** `docs/archive/round-64-phase-2-2026-04-21/`.
+> **Batches:** 2.1 `PlanFamilyCard` + `PlanVariantCard` + `planTierStyles.ts`. 2.2 `PlanStep` variant resolution + rationale + one-tier override + `useOnboardingProgress` metadata-merge. 2.3 Browse (static family summaries), customer Plans migration, BYOC `PlanActivateStep` migration, legacy `PlanCard.tsx` deleted.
 
 ### Problem
 
@@ -122,7 +131,12 @@ Medium — onboarding flow + two public surfaces + new checkout contract. 3 para
 
 ---
 
-## Phase 3 — Credits UX: ring, low-balance nudge, top-up packs, autopay
+## Phase 3 — Credits UX: ring, low-balance nudge, top-up packs, autopay ✅ SHIPPED
+
+> **Shipped:** 2026-04-22 on `claude/handled-home-phase-2-YTvlm` (same branch as Phase 2 due to task-rule branch pin).
+> **Archive:** `docs/archive/round-64-phase-3-2026-04-21/`.
+> **Batches:** 3.1 `CreditsRing` + `LowCreditsBanner`. 3.2 `/customer/credits` page (Top up · History · How it works). 3.3 `purchase-credit-pack` edge fn + `grant_topup_credits` SECURITY DEFINER RPC + `stripe-webhook` mode=payment branch. 3.4 Autopay toggle + `process-credit-pack-autopay` off-session cron + daily schedule migration. 3.5 Dashboard `CreditsRing` + `LowCreditsBanner` wire-up, full customer-visible "handles" → "credits" copy sweep, `HandleBalanceBar` deleted, `HandlesExplainer` → `CreditsExplainer`.
+> **Pending human tasks (see `docs/upcoming/TODO.md`):** Stripe pack products + 3 `STRIPE_CREDIT_PACK_*_PRICE_ID` Edge Function Secrets; `supabase functions deploy purchase-credit-pack` + `process-credit-pack-autopay`; verify 07:00 UTC cron registered.
 
 ### Problem
 

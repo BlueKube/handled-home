@@ -829,6 +829,35 @@
 516. `usePlanVariantRules` + `useCreateVariantRule` / `useUpdateVariantRule` / `useDeleteVariantRule` + `usePickPlanVariant` mutation hook — 9/10
 517. PlanForm Variant section: plan_family + size_tier inputs between Basics and Stripe with `__none__` sentinel for null — 9/10
 
+## LI. Onboarding Variant Resolution & "Starts at" Pricing (Round 64 Phase 2) `margin-lever` `mental-load-reduction`
+
+518. `PlanFamilyCard` + `PlanVariantCard` presentation primitives with shared `planTierStyles.ts` (family accent colors, `FAMILY_HIGHLIGHTS` bullets) — 9/10
+519. `usePlanVariants` hook: groups plans by family (basic/full/premier), includes drafts, ordered by recommended_rank then size_tier — 9/10
+520. `useResolvePlanVariant` mutation wrapping `pick_plan_variant` RPC with typed string return — 9/10
+521. `PlanStep` family-picker → `pick_plan_variant` → `PlanStepResolved` variant card flow with one-line rationale sentence ("Based on your ~2,000 sqft home, your Basic plan is Basic 20") and rapid-tap race guard — 9/10
+522. Adjacent-tier manual override (one step up/down) with 4-reason dropdown and admin review flag persisted to `customer_onboarding_progress.metadata.plan_variant_selection` — 9/10
+523. `buildRationale` helper: reverse-maps `home_sqft_tier` to readable range with yard-tier fallback and generic profile fallback when signals missing — 9/10
+524. `useOnboardingProgress` metadata semantics changed from replace → shallow merge so future steps can stash their own fields without clobbering — 9/10
+525. Public Browse family cards (static `FAMILY_SUMMARIES` pending public RLS policy); customer Plans family → resolved variant with "See other sizes" sibling selector; BYOC PlanActivateStep migrated to family cards — 9/10
+526. Legacy `PlanCard.tsx` deleted + `TIER_HIGHLIGHTS` / `getTierKey` legacy helpers retired across onboarding + BYOC shared modules — 9/10
+
+## LII. Credits UX: Ring, Low-Balance Nudge, Packs, Autopay (Round 64 Phase 3) `mental-load-reduction` `ARR-expansion`
+
+527. `CreditsRing` SVG component: compact (72px, Dashboard) + hero (180px, Credits page) variants; color transitions at healthy (accent) / low <20% cap (warning) / exhausted (destructive); hero variant layers inner cycle-progress ring when annualCap > perCycle — 9/10
+528. `LowCreditsBanner`: role="status" live-region; renders only when balance < 20% of annualCap and annualCap > 0; impact-framed copy ("Top up to avoid pausing work") with optional Top-up + Later CTAs — 9/10
+529. `/customer/credits` page: hero ring + reset date + Tabs for Top up · History · How it works; registered in App.tsx under CustomerPropertyGate; reachable via More → Account → Credits — 9/10
+530. Top-up tab: three hardcoded packs (Starter 300/$149, Homeowner 600/$269 recommended, Year-round 1200/$479) with derived per-credit rate + savings vs Starter baseline; redirect to Stripe Checkout via `purchase-credit-pack` edge function — 9/10
+531. History tab: `handle_transactions` grouped by month; txn_type → human label ("Topped up", "Monthly allowance", "Spent", "Expired", "Rolled over", "Refunded") with per-row icon — 9/10
+532. How-it-works tab: 3-section static explainer (What are credits · How they stretch · When they reset) using "credits" copy throughout — 9/10
+533. `purchase-credit-pack` edge function: requires user JWT, validates pack_id, prefers `subscriptions.stripe_customer_id` over email lookup (prevents cross-linking on shared email), returns `{url: null}` when `STRIPE_CREDIT_PACK_*_PRICE_ID` env vars unset, creates `mode: 'payment'` Checkout with `origin: 'credit_pack_topup'` metadata — 9/10
+534. `grant_topup_credits(subscription_id, customer_id, credits, pack_id, idempotency_key)` SECURITY DEFINER RPC: idempotent on Stripe event id, `FOR UPDATE` lock, `expires_at=NULL` (top-ups don't expire), `EXECUTE` granted only to `service_role` — 9/10
+535. `stripe-webhook` topup branch: `mode==='payment' && metadata.origin==='credit_pack_topup'` → `grant_topup_credits` with event.id as idempotency key; inserts `subscription_events` with `event_type='credit_pack_purchased'`; flags malformed metadata / RPC errors to `billing_exceptions` (HIGH severity) so the dedupe short-circuit can't silently lose a paid purchase — 9/10
+536. Autopay toggle + `useAutopaySettings` hook: writes `subscriptions.metadata.autopay_credits = {enabled, pack_id, threshold}` via shallow merge; disabled with helper copy when no active `customer_payment_methods` row; `useEffect` resyncs local state when server data resolves async — 9/10
+537. `process-credit-pack-autopay` cron edge function: `requireCronSecret`, scans active subscriptions with `autopay_credits.enabled=true`, creates Stripe PaymentIntents with `off_session=true, confirm=true` using default `customer_payment_methods.processor_ref`; SCA challenges + card declines + missing PM all flag specific `billing_exceptions.type` values for ops triage; successful grants log `subscription_events` with `event_type='credit_pack_autopay_charged'` — 9/10
+538. Daily 07:00 UTC pg_cron schedule (`process-credit-pack-autopay`) via the Vault-backed `cron_private.invoke_edge_function` helper from Round 64.5 — 9/10
+539. Customer-visible "handles" → "credits" copy sweep across Dashboard, PlanDetail, HomeAssistant, Credits page, CycleStatsRow, ThisCycleSummary, SchedulingPreferences, AddonSuggestionsCard, PausePanel, CancellationFlow (retention bonus copy), PlanChangePanel; internal identifiers (`useHandleBalance`, `handles_balance` column, `handle_transactions` table, `"handles" | "cash"` API string union) deliberately kept — 9/10
+540. `HandlesExplainer` renamed to `CreditsExplainer`; `HandleBalanceBar` deleted and Dashboard wired to `CreditsRing` (compact) + `LowCreditsBanner` + inline "Top up" CTA linking to `/customer/credits` — 9/10
+
 ---
 
-*Total features: 517 | Last updated: 2026-04-20 | Round 64 Phase 1 complete (8 new features); Phases 2–8 pending. Legacy count preserved: 381 at 9/10+ (74%), 117 at 8/10 (22%), 11 at 7/10 or below (2%).*
+*Total features: 540 | Last updated: 2026-04-22 | Round 64 Phases 1–3 complete (31 new features since 509); Phases 4–8 pending. Legacy count preserved: 381 at 9/10+ (74%), 117 at 8/10 (22%), 11 at 7/10 or below (2%).*
