@@ -1,18 +1,19 @@
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { usePlans } from "@/hooks/usePlans";
-import { PlanCard } from "@/components/plans/PlanCard";
-import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useMemo, useState } from "react";
+import { usePlanVariants, ACTIVE_FAMILIES, type ActiveFamily } from "@/hooks/usePlanVariants";
+import { PlanFamilyCard } from "@/components/plans/PlanFamilyCard";
+import { FAMILY_HIGHLIGHTS } from "@/components/plans/planTierStyles";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowRight, Loader2 } from "lucide-react";
-import { TIER_HIGHLIGHTS, getTierKey } from "./shared";
 import { QueryErrorCard } from "@/components/QueryErrorCard";
 
+const FAMILY_DISPLAY: Record<ActiveFamily, { name: string; tagline: string }> = {
+  basic: { name: "Basic", tagline: "The basics, handled." },
+  full: { name: "Full", tagline: "Your full outdoor routine." },
+  premier: { name: "Premier", tagline: "Total home care." },
+};
+
 export function PlanActivateStep({
-  providerName,
-  categoryLabel,
-  cadence,
   selectedPlanId,
   onSelectPlan,
   onActivate,
@@ -26,25 +27,32 @@ export function PlanActivateStep({
   onActivate: () => Promise<void>;
   onSkip: () => void;
 }) {
-  const { data: plans, isLoading: plansLoading, isError: plansError } = usePlans("active");
+  const { data: families, isLoading, isError } = usePlanVariants();
   const [activating, setActivating] = useState(false);
 
-  const { data: allHandles, isError: handlesError } = useQuery({
-    queryKey: ["plan_handles_all"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("plan_handles").select("plan_id, handles_per_cycle");
-      if (error) throw error;
-      return new Map((data ?? []).map((r: any) => [r.plan_id, r]));
-    },
-  });
-
-  // Auto-select recommended plan
-  useEffect(() => {
-    if (!selectedPlanId && plans?.length) {
-      const recommended = plans.reduce((best, p) => p.recommended_rank > best.recommended_rank ? p : best, plans[0]);
-      onSelectPlan(recommended.id);
+  const recommendedFamily = useMemo<ActiveFamily | null>(() => {
+    if (!families) return null;
+    let best: ActiveFamily | null = null;
+    let bestRank = -Infinity;
+    for (const family of ACTIVE_FAMILIES) {
+      const variants = families[family];
+      if (!variants.length) continue;
+      const rank = Math.max(...variants.map((v) => v.recommended_rank ?? 0));
+      if (rank > bestRank) {
+        bestRank = rank;
+        best = family;
+      }
     }
-  }, [plans, selectedPlanId, onSelectPlan]);
+    return best;
+  }, [families]);
+
+  // Auto-select recommended family's smallest variant on load.
+  useEffect(() => {
+    if (!selectedPlanId && families && recommendedFamily) {
+      const smallest = families[recommendedFamily][0];
+      if (smallest) onSelectPlan(smallest.id);
+    }
+  }, [families, recommendedFamily, selectedPlanId, onSelectPlan]);
 
   const handleActivate = async () => {
     setActivating(true);
@@ -55,7 +63,7 @@ export function PlanActivateStep({
     }
   };
 
-  if (plansLoading) {
+  if (isLoading) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-8 w-48" />
@@ -66,19 +74,31 @@ export function PlanActivateStep({
     );
   }
 
-  if (plansError || handlesError) {
+  if (isError) {
     return <QueryErrorCard message="Could not load plans." />;
   }
 
-  if (!plans || plans.length === 0) {
+  const anyVariants =
+    !!families && (families.basic.length > 0 || families.full.length > 0 || families.premier.length > 0);
+
+  if (!anyVariants) {
     return (
       <div className="space-y-6 text-center py-8">
         <h1 className="text-h2">No Plans Available</h1>
-        <p className="text-muted-foreground text-sm">Plans aren't available in your area yet. You can still connect with your provider.</p>
-        <Button onClick={onSkip} className="w-full">Continue Without a Plan</Button>
+        <p className="text-muted-foreground text-sm">
+          Plans aren't available in your area yet. You can still connect with your provider.
+        </p>
+        <Button onClick={onSkip} className="w-full">
+          Continue Without a Plan
+        </Button>
       </div>
     );
   }
+
+  const isSelectedInFamily = (family: ActiveFamily): boolean => {
+    if (!selectedPlanId || !families) return false;
+    return families[family].some((v) => v.id === selectedPlanId);
+  };
 
   return (
     <div className="space-y-6">
@@ -89,29 +109,30 @@ export function PlanActivateStep({
         </p>
       </div>
 
-      {/* Plan Cards */}
       <div className="space-y-4">
-        {plans?.map((plan) => {
-          const tierKey = getTierKey(plan.name);
-          const isRecommended = plans.length > 0 &&
-            plan.recommended_rank === Math.max(...plans.map((p) => p.recommended_rank));
-          const dbHandles = allHandles?.get(plan.id);
-
+        {ACTIVE_FAMILIES.map((family) => {
+          if (!families) return null;
+          const variants = families[family];
+          if (!variants.length) return null;
+          const smallest = variants[0];
+          const display = FAMILY_DISPLAY[family];
           return (
-            <PlanCard
-              key={plan.id}
-              plan={plan}
-              isRecommended={isRecommended}
+            <PlanFamilyCard
+              key={family}
+              family={family}
+              familyName={display.name}
+              tagline={display.tagline}
+              startsAtPriceText={smallest.display_price_text ?? "—"}
+              variantCount={variants.length}
+              highlights={FAMILY_HIGHLIGHTS[family]}
+              isRecommended={isSelectedInFamily(family) || recommendedFamily === family}
               zoneEnabled
-              handlesPerCycle={dbHandles?.handles_per_cycle}
-              tierHighlights={TIER_HIGHLIGHTS[tierKey]}
-              onBuildRoutine={() => onSelectPlan(plan.id)}
+              onSelect={() => onSelectPlan(smallest.id)}
             />
           );
         })}
       </div>
 
-      {/* CTA */}
       <Button
         onClick={handleActivate}
         disabled={activating || !selectedPlanId}

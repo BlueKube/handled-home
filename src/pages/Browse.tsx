@@ -1,15 +1,18 @@
 import { useState, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useSkus } from "@/hooks/useSkus";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Home, Sparkles, ArrowRight, CheckCircle2, Shield, Clock,
+  Home, Sparkles, ArrowRight, Shield, Clock,
   Leaf, Bug, Droplets, Scissors, Zap, Star, AlertTriangle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { PlanFamilyCard } from "@/components/plans/PlanFamilyCard";
+import { FAMILY_HIGHLIGHTS } from "@/components/plans/planTierStyles";
+import type { ActiveFamily } from "@/hooks/usePlanVariants";
 
 const CATEGORY_ICONS: Record<string, typeof Home> = {
   mowing: Scissors,
@@ -43,31 +46,23 @@ const CATEGORY_LABELS: Record<string, string> = {
   home_assistant: "Home Assistant",
 };
 
-const PLANS = [
-  {
-    name: "Essential",
-    price: 99,
-    handles: 14,
-    tagline: "The basics, handled.",
-    features: ["Weekly lawn mowing", "Basic pest control", "Seasonal cleanups", "Photo proof of every visit"],
-    popular: false,
-  },
-  {
-    name: "Plus",
-    price: 159,
-    handles: 28,
-    tagline: "Your full outdoor routine.",
-    features: ["Everything in Essential", "Window cleaning", "Hedge trimming", "Power washing", "Priority scheduling"],
-    popular: true,
-  },
-  {
-    name: "Premium",
-    price: 249,
-    handles: 50,
-    tagline: "Total home care.",
-    features: ["Everything in Plus", "Pool service", "Home assistant tasks", "Gutter cleaning", "Dryer vent cleaning", "Unlimited add-ons"],
-    popular: false,
-  },
+// Public Browse page is unauthenticated, so it can't query the plans table
+// (RLS requires authenticated). These summaries are the marketing floor for
+// each family — the smallest variant's price as "Starts at $X". If/when the
+// 12 draft variants flip to active and a public-read RLS policy lands,
+// replace with a live query via a scoped RPC. Tracked in docs/upcoming/TODO.md.
+interface FamilySummary {
+  family: ActiveFamily;
+  familyName: string;
+  tagline: string;
+  startsAtPriceText: string;
+  variantCount: number;
+}
+
+const FAMILY_SUMMARIES: FamilySummary[] = [
+  { family: "basic",   familyName: "Basic",   tagline: "The basics, handled.",       startsAtPriceText: "$79",  variantCount: 4 },
+  { family: "full",    familyName: "Full",    tagline: "Your full outdoor routine.", startsAtPriceText: "$149", variantCount: 4 },
+  { family: "premier", familyName: "Premier", tagline: "Total home care.",           startsAtPriceText: "$219", variantCount: 4 },
 ];
 
 export default function Browse() {
@@ -184,43 +179,22 @@ export default function Browse() {
         <div className="max-w-3xl mx-auto">
           <h2 className="text-xl font-bold text-center mb-2">Simple, transparent pricing</h2>
           <p className="text-sm text-muted-foreground text-center mb-8">
-            Billed every 4 weeks. No contracts. Cancel anytime.
+            Billed every 4 weeks. We size the plan to your home after sign-up. No contracts.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {PLANS.map((plan) => (
-              <Card key={plan.name} className={plan.popular ? "border-primary ring-1 ring-primary/20" : ""}>
-                <CardHeader className="pb-2">
-                  {plan.popular && (
-                    <Badge className="w-fit mb-2 text-[10px]">Most Popular</Badge>
-                  )}
-                  <CardTitle className="text-lg">{plan.name}</CardTitle>
-                  <p className="text-xs text-muted-foreground">{plan.tagline}</p>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <span className="text-3xl font-bold">${plan.price}</span>
-                    <span className="text-sm text-muted-foreground">/mo</span>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {plan.handles} service handles per cycle
-                  </div>
-                  <ul className="space-y-2">
-                    {plan.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2 text-sm">
-                        <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <Button
-                    variant={plan.popular ? "default" : "outline"}
-                    className="w-full"
-                    onClick={handleGetStarted}
-                  >
-                    Get Started <ArrowRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </CardContent>
-              </Card>
+            {FAMILY_SUMMARIES.map((f) => (
+              <PlanFamilyCard
+                key={f.family}
+                family={f.family}
+                familyName={f.familyName}
+                tagline={f.tagline}
+                startsAtPriceText={f.startsAtPriceText}
+                variantCount={f.variantCount}
+                highlights={FAMILY_HIGHLIGHTS[f.family]}
+                isRecommended={f.family === "full"}
+                zoneEnabled
+                onSelect={handleGetStarted}
+              />
             ))}
           </div>
         </div>

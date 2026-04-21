@@ -190,6 +190,22 @@ Round 64 writes new migrations into `supabase/migrations/`. Lovable handles the 
 
 - [ ] **Legacy family in variant rule form** — Phase 1 Batch 1.3 deliberately excluded `legacy` from the Variant Rules admin form (only basic/full/premier). Confirm this is correct: legacy plans (Essential/Plus/Premium) keep the flat pricing model and don't participate in variant resolution. If legacy ever needs its own rules, add it to the form select options.
 
+### Phase 2 deferred (2026-04-21)
+
+- [ ] **Admin review surface for variant override flag (Phase 2 follow-up)** — `customer_onboarding_progress.metadata.plan_variant_selection.admin_review_flagged=true` is set whenever a customer overrides the `pick_plan_variant` recommendation during onboarding. No admin dashboard surfaces this today. Add a "Flagged onboarding overrides" table to the admin console that queries `customer_onboarding_progress` for `metadata->'plan_variant_selection'->>'admin_review_flagged' = 'true'`, shows recommended vs selected variant + reason, and lets an admin mark reviewed.
+  - **Why:** Without this, the admin review flag is set but invisible.
+  - **Blocked:** Nothing — schema + writes are in place; just needs the admin UI.
+- [ ] **Public Browse live plan data** — `/browse` (public, unauthenticated) uses a hardcoded `FAMILY_SUMMARIES` constant because `plans` table RLS requires authenticated read. To go live, either (a) flip the 12 draft variants to `status='active'` and add an RLS policy `"Anyone can read active plans"` (selecting only columns safe for public display), or (b) add a `get_public_plan_families()` SECURITY DEFINER RPC that returns family-level aggregates.
+  - **Why:** Prices in Browse can drift from the DB if variants change; static data needs manual updates.
+  - **Blocked:** Product decision on when to flip variants to active.
+- [ ] **Promote `plan_variant_selection` metadata to first-class columns on `customer_plan_selections`** — Right now Batch 2.2 stashes `recommended_plan_id` / `override_reason` / `admin_review_flagged` in `customer_onboarding_progress.metadata`. Subscribe step (and `create-checkout-session`) doesn't yet copy those fields into `customer_plan_selections` / `subscriptions`. A follow-up migration + code pass should add columns and propagate.
+  - **Why:** Metadata is flexible but harder to query than columns; admin reporting will be easier with first-class columns.
+  - **Blocked:** Nothing — straightforward migration + SubscribeStep code path.
+- [ ] **BYOC variant sizing** — `PlanActivateStep` (BYOC) auto-selects the *smallest* variant of the recommended family. For a customer with a 4,000 sqft home this is inaccurate. Add property sizing to the BYOC flow or call `pick_plan_variant` if a property is already on file.
+  - **Why:** Large-home BYOC customers get under-sized plans.
+  - **Blocked:** Nothing — known shortcut, noted in Batch 2.3 spec.
+- [ ] **`BundleSavingsCard` family awareness** — Currently keyed on legacy `essential/plus/premium`. Plans.tsx translates the new `basic/full/premier` families via a local `BUNDLE_TIER_KEY` map. Update `BundleSavingsCard` to accept `ActiveFamily` keys directly and retire the translation.
+
 ## Round 64.5: Supabase Self-Host Migration (2026-04-20) — BLOCKING
 
 Lovable Cloud lost its GitHub connection to this repo and can no longer apply migrations. Round 64 Phases 2–8 are blocked until we migrate off. Plan is in `/root/.claude/plans/i-used-the-new-nifty-avalanche.md` and live tracker is `docs/working/plan.md`.

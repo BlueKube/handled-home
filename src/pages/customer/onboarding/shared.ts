@@ -17,19 +17,6 @@ export interface PropertyFormData {
   notes: string;
 }
 
-export const TIER_HIGHLIGHTS: Record<string, string[]> = {
-  essential: ["Weekly mow + edge trim", "Swap services each cycle", "Roll over unused handles"],
-  plus: ["Everything in Essential", "Seasonal services included", "Priority scheduling"],
-  premium: ["Everything in Plus", "Home Assistant access", "Dedicated provider team"],
-};
-
-export function getTierKey(name: string): string {
-  const lower = name.toLowerCase();
-  if (lower.includes("premium")) return "premium";
-  if (lower.includes("plus")) return "plus";
-  return "essential";
-}
-
 export function stripNonDigits(val: string): string {
   return val.replace(/\D/g, "").slice(0, 5);
 }
