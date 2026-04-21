@@ -17,7 +17,7 @@
 | C-1 | Apply all 198 migrations to new project | Claude | ✅ | Applied via Management API fallback (see OVERRIDEs). 198/198 recorded in `supabase_migrations.schema_migrations`. 187 public tables, 368 functions, 438 RLS policies. |
 | C-2 | Full data migration (pg_dump or CSV fallback) | Claude | ⬜ | Blocked — needs `LOVABLE_DIRECT_DB_URL` from user OR CSV export path. Not yet attempted. |
 | C-3 | Deploy 39 edge functions | Claude | ✅ | All 39 deployed via `supabase functions deploy --use-api --jobs 4`. Verified ACTIVE on new project: 27 `verify_jwt=false`, 12 `verify_jwt=true`. Config.toml `project_id` still points at old project — will flip at Phase F cutover. |
-| C-4 | Re-add secrets to new project | Claude | ⬜ | Blocked — needs `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `WEATHER_API_KEY`, `CRON_SECRET` from user. |
+| C-4 | Re-add secrets to new project | Claude | 🟡 5/6 | 5 secrets pushed via `supabase secrets set`: `ANTHROPIC_API_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `CRON_SECRET`. Digests verified. Only `WEATHER_API_KEY` pending (user to fetch from weatherapi.com). 38 of 39 edge functions fully unblocked. |
 | C-5 | Verify storage buckets (job-photos, provider-documents) | Claude | ✅ | Confirmed 4 buckets created by migrations: `job-photos`, `provider-documents`, `sku-images` (public), `support-attachments`. |
 | C-6 | pg_cron repoint (DB settings, not a migration) | User | 🟡 | Discovered: existing 7 cron jobs already use `current_setting('app.settings.supabase_url')` + `current_setting('app.settings.service_role_key')` — no URLs baked in. Just need `ALTER DATABASE postgres SET app.settings.*` values on new project. Management API postgres role lacks `ALTER DATABASE` privilege — user must run in dashboard SQL editor. See TODO.md. |
 | C-7 | Regenerate `src/integrations/supabase/types.ts` | Claude | ✅ | Regen via `supabase gen types typescript --project-id` (HTTPS path, works from sandbox). +254 lines: adds `plan_variant_rules` table + `pick_plan_variant` RPC types. PostgrestVersion 14.1 → 14.5. |
@@ -32,7 +32,7 @@
 
 ## Session Handoff
 
-- **Branch:** `claude/supabase-self-host-migration`. Pushed tip: `5b81090` (D-1 Anthropic swap).
+- **Branch:** `claude/supabase-self-host-migration`. Pushed tip: `e14c44c` (stripe-webhook transfer event rename + C-4 partial secrets push).
 - **Last completed (2026-04-21 sessions):** Phases B-2, C-1, C-3, C-5, C-7, D-1 + Vercel bootstrap + Supabase GitHub/Vercel integrations. Partial C-6 (only DB settings left to user).
   - B-2: Linked repo to `gwbwnetatpgnqgarkvht`.
   - C-1: All 198 migrations applied via Management API fallback (3 overrides documented).
@@ -44,8 +44,9 @@
   - **Supabase→Vercel integration:** connected, syncs Supabase env vars.
   - **D-1:** Anthropic swap in `predict-services` + `support-ai-classify` via new `_shared/anthropic.ts` helper (model `claude-haiku-4-5-20251001`). Both deployed ACTIVE. Section 5 Medium review passed (0 MUST-FIX).
 - **Next up:**
-  - **User actions (required before C-4/D-2/F can proceed):**
-    1. Provide remaining secrets: `ANTHROPIC_API_KEY` (for D-1 live inference), `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `WEATHER_API_KEY`, `CRON_SECRET`, `LOVABLE_DIRECT_DB_URL` (for C-2).
+  - **User actions (remaining):**
+    1. **`WEATHER_API_KEY`** from weatherapi.com — last C-4 secret. Non-blocking for Phase E overall; only `check-weather` is affected.
+    2. **`LOVABLE_DIRECT_DB_URL`** for Phase C-2 data migration (or say "use CSV fallback").
     2. Vercel env-var cleanup: delete `SUPABASE_SERVICE_ROLE_KEY` + `SUPABASE_JWT_SECRET` from `handled-home` (server-only; SPA shouldn't hold them). Add `VITE_MAPBOX_ACCESS_TOKEN` manually.
     3. Run in Supabase dashboard SQL editor (needed for C-6 cron jobs):
        ```sql

@@ -234,9 +234,9 @@ Do these in the new Supabase project's dashboard before Claude Code does anythin
 
 The 2026-04-21 session received the first six credentials (PAT, project ref/URL, publishable key, secret key, DB URL, Anthropic key) and made Phases B-2/C-1/C-3/C-5/C-7 complete. Still needed:
 
-- [x] **`STRIPE_SECRET_KEY`** — received 2026-04-21 session 2 (test mode key).
-- [ ] **`STRIPE_WEBHOOK_SECRET`** — user creating webhook destination in Stripe dashboard. URL: `https://gwbwnetatpgnqgarkvht.supabase.co/functions/v1/stripe-webhook`. Events: 9 types total — `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_succeeded`, `invoice.payment_failed`, `charge.dispute.created`, `account.updated`, `transfer.created`, `transfer.reversed`. (Stripe retired `transfer.paid`/`transfer.failed` in the 2025 API; code updated in commit `f84adfd` to use the modern events.)
-- [ ] **`RESEND_API_KEY`** — user must create NEW key at resend.com/api-keys. Existing "Handled Home Notifications" key value is unrecoverable (Resend only shows the key at creation time).
+- [x] **`STRIPE_SECRET_KEY`** — received 2026-04-21 session 2. Pushed to Supabase Edge Function secrets.
+- [x] **`STRIPE_WEBHOOK_SECRET`** — received 2026-04-21 session 2 (`whsec_...` from new event destination). Pushed to Supabase Edge Function secrets.
+- [x] **`RESEND_API_KEY`** — received 2026-04-21 session 2 (new key created per `re_...` format). Pushed to Supabase Edge Function secrets.
 - [ ] **`WEATHER_API_KEY`** — for `check-weather` edge function. **Source: weatherapi.com** (NOT openweathermap.org). Free tier available at https://www.weatherapi.com/ → Sign up → Dashboard → API key.
 - [x] **`CRON_SECRET`** — generated 2026-04-21 via `openssl rand -hex 32`. Stored in `/root/.r64_5_secrets.env`.
 - [ ] **`LOVABLE_DIRECT_DB_URL`** — direct Postgres connection string on old project `yxhdschpeezawraqsmug` (needed for Phase C-2 pg_dump data migration). If Lovable doesn't expose it, say so and Claude will fall back to CSV + Supabase Auth Admin API per-table export.
