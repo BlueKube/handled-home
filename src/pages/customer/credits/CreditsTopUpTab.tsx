@@ -31,7 +31,8 @@ export function CreditsTopUpTab() {
       } else {
         toast.error("Credit pack checkout isn't available yet. Please try again later.");
       }
-    } catch {
+    } catch (err) {
+      console.error("purchase-credit-pack invoke failed:", err);
       toast.error("Couldn't start checkout. Please try again.");
     } finally {
       setPurchasing(null);
@@ -89,7 +90,7 @@ export function CreditsTopUpTab() {
               <Button
                 className={`w-full ${isRecommended ? "bg-accent text-accent-foreground hover:bg-accent/90" : ""}`}
                 onClick={() => handleBuy(pack.id)}
-                disabled={isPurchasing || !!purchasing}
+                disabled={!!purchasing}
               >
                 {isPurchasing ? (
                   <>

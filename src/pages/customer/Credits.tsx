@@ -45,8 +45,11 @@ export default function CustomerCredits() {
   }
 
   const perCycle = planHandles?.handles_per_cycle ?? 0;
-  const cycleDays = subscription.billing_cycle_length_days ?? 28;
-  const annualCap = computeAnnualCap(perCycle, cycleDays);
+  const cycleDays = subscription.billing_cycle_length_days;
+  // Only derive / display annual cap when the cycle length is explicit.
+  // Without it we'd have to fabricate a 28-day default, which silently
+  // misleads customers on non-standard billing cycles.
+  const annualCap = cycleDays != null ? computeAnnualCap(perCycle, cycleDays) : 0;
   const resetText = subscription.billing_cycle_end_at
     ? `Resets ${format(parseISO(subscription.billing_cycle_end_at), "MMM d")}`
     : "—";
@@ -76,7 +79,8 @@ export default function CustomerCredits() {
           <p className="text-sm text-muted-foreground">{resetText}</p>
           {perCycle > 0 && (
             <p className="text-xs text-muted-foreground">
-              {perCycle} credits this cycle · up to {annualCap} per year
+              {perCycle} credits this cycle
+              {annualCap > 0 ? ` · up to ${annualCap} per year` : ""}
             </p>
           )}
         </div>

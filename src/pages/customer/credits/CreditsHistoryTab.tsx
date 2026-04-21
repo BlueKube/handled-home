@@ -55,15 +55,14 @@ function iconForTxn(t: HandleTxn) {
   }
 }
 
-export function CreditsHistoryTab({ subscriptionId }: { subscriptionId: string | null }) {
+export function CreditsHistoryTab({ subscriptionId }: { subscriptionId: string }) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["handle_transactions", subscriptionId],
-    enabled: !!subscriptionId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("handle_transactions")
         .select("id, txn_type, amount, reference_type, reference_id, metadata, created_at")
-        .eq("subscription_id", subscriptionId!)
+        .eq("subscription_id", subscriptionId)
         .order("created_at", { ascending: false })
         .limit(50);
       if (error) throw error;

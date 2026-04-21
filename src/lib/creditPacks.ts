@@ -11,42 +11,33 @@ export interface CreditPack {
   savingsPct?: number;
 }
 
-// Starter pack sets the baseline per-credit rate. Savings on larger packs
-// are computed against it.
-const STARTER_RATE = 149 / 300; // $0.4967 / credit
-
-function savingsAgainstStarter(priceCents: number, credits: number): number {
+function formatPerCreditText(priceCents: number, credits: number): string {
   const rate = priceCents / 100 / credits;
-  const pct = ((STARTER_RATE - rate) / STARTER_RATE) * 100;
-  return Math.round(pct);
+  return `$${rate.toFixed(2)} / credit`;
+}
+
+// Price + credits is the source of truth. priceText, perCreditText, and
+// savings percentages are all derived so a future price change flows
+// through without copy drift.
+function buildPack(
+  base: Omit<CreditPack, "priceText" | "perCreditText" | "savingsPct"> & { savingsVsCents?: number },
+): CreditPack {
+  const { savingsVsCents, ...rest } = base;
+  const starterRate = 14900 / 100 / 300; // $0.4967 / credit — the baseline pack
+  const thisRate = base.priceCents / 100 / base.credits;
+  const savingsPct = savingsVsCents != null
+    ? Math.round(((starterRate - thisRate) / starterRate) * 100)
+    : undefined;
+  return {
+    ...rest,
+    priceText: `$${Math.round(base.priceCents / 100)}`,
+    perCreditText: formatPerCreditText(base.priceCents, base.credits),
+    savingsPct,
+  };
 }
 
 export const CREDIT_PACKS: CreditPack[] = [
-  {
-    id: "starter",
-    name: "Starter",
-    credits: 300,
-    priceCents: 14900,
-    priceText: "$149",
-    perCreditText: "$0.50 / credit",
-  },
-  {
-    id: "homeowner",
-    name: "Homeowner",
-    credits: 600,
-    priceCents: 26900,
-    priceText: "$269",
-    perCreditText: "$0.45 / credit",
-    recommended: true,
-    savingsPct: savingsAgainstStarter(26900, 600),
-  },
-  {
-    id: "year_round",
-    name: "Year-round",
-    credits: 1200,
-    priceCents: 47900,
-    priceText: "$479",
-    perCreditText: "$0.40 / credit",
-    savingsPct: savingsAgainstStarter(47900, 1200),
-  },
+  buildPack({ id: "starter",    name: "Starter",    credits: 300,  priceCents: 14900 }),
+  buildPack({ id: "homeowner",  name: "Homeowner",  credits: 600,  priceCents: 26900, recommended: true, savingsVsCents: 14900 }),
+  buildPack({ id: "year_round", name: "Year-round", credits: 1200, priceCents: 47900, savingsVsCents: 14900 }),
 ];
