@@ -159,7 +159,18 @@ export default function OnboardingWizard() {
         {effectiveStep === "zone_check" && <ZoneCheckStep onComplete={async () => { await completeStep("zone_check"); }} onWaitlist={() => navigate("/customer")} />}
         {effectiveStep === "plan" && (
           <PlanStep
-            onSelectPlan={async (planId: string) => { await completeStep("plan", { selected_plan_id: planId }); }}
+            onSelectPlan={async ({ planId, recommendedPlanId, overrideReason }) => {
+              await completeStep("plan", {
+                selected_plan_id: planId,
+                metadata: {
+                  plan_variant_selection: {
+                    recommended_plan_id: recommendedPlanId,
+                    override_reason: overrideReason,
+                    admin_review_flagged: overrideReason !== null,
+                  },
+                },
+              });
+            }}
             onSkip={async () => { try { await completeStep("plan"); } catch { toast.error("Couldn't save progress — try again."); } }}
           />
         )}
