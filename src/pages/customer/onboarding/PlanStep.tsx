@@ -164,7 +164,6 @@ export function PlanStep({
     return (
       <PlanStepResolved
         family={selectedFamily}
-        resolvedVariant={resolvedVariant}
         displayVariant={displayVariant}
         adjacentVariants={adjacent}
         handlesPerCycle={handlesPerCycle}

@@ -17,7 +17,6 @@ const NO_REASON_SENTINEL = "__none__";
 
 interface PlanStepResolvedProps {
   family: ActiveFamily;
-  resolvedVariant: Plan;
   displayVariant: Plan;
   adjacentVariants: Plan[];
   handlesPerCycle?: number;
