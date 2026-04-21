@@ -240,7 +240,7 @@ The 2026-04-21 session received the first six credentials (PAT, project ref/URL,
 - [x] **`RESEND_API_KEY`** — received 2026-04-21 session 2 (new key created per `re_...` format). Pushed to Supabase Edge Function secrets.
 - [ ] **`WEATHER_API_KEY`** — for `check-weather` edge function. **Source: weatherapi.com** (NOT openweathermap.org). Free tier available at https://www.weatherapi.com/ → Sign up → Dashboard → API key.
 - [x] **`CRON_SECRET`** — generated 2026-04-21 via `openssl rand -hex 32`. Stored in `/root/.r64_5_secrets.env`.
-- [ ] **`LOVABLE_DIRECT_DB_URL`** — direct Postgres connection string on old project `yxhdschpeezawraqsmug` (needed for Phase C-2 pg_dump data migration). If Lovable doesn't expose it, say so and Claude will fall back to CSV + Supabase Auth Admin API per-table export.
+- [x] **`LOVABLE_DIRECT_DB_URL`** — no longer needed. Phase C-2 skipped 2026-04-21: old project is pre-launch test data only; all data reset before go-live. User's PAT has no access to old project anyway (different org).
 
 ### Phase F — Cutover tasks (when Claude Code signals ready)
 

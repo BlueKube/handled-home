@@ -15,7 +15,7 @@
 | B-1 | Install Supabase CLI in sandbox | Claude | ✅ | v2.90.0 at `/usr/local/bin/supabase` |
 | B-2 | `supabase login --token` + `supabase link` | Claude | ✅ | Project linked to `gwbwnetatpgnqgarkvht` (Handled Home, us-west-1). `supabase/.temp/linked-project.json` created. |
 | C-1 | Apply all 198 migrations to new project | Claude | ✅ | Applied via Management API fallback (see OVERRIDEs). 198/198 recorded in `supabase_migrations.schema_migrations`. 187 public tables, 368 functions, 438 RLS policies. |
-| C-2 | Full data migration (pg_dump or CSV fallback) | Claude | ⬜ | Blocked — needs `LOVABLE_DIRECT_DB_URL` from user OR CSV export path. Not yet attempted. |
+| C-2 | Full data migration (pg_dump or CSV fallback) | Claude | ⏭️ skipped | User confirmed 2026-04-21: old project is pre-launch test data only (seed migrations + a few test accounts), and all data will be reset before go-live. Skipping avoids the friction of cross-org Lovable project access. Verified the friction is real: user's PAT returns 403 on old project (different org); sandbox cannot reach any pooler host. Seed SKUs + plans already migrated via the 198 DDL migrations; user will recreate a handful of test accounts manually. |
 | C-3 | Deploy 39 edge functions | Claude | ✅ | All 39 deployed via `supabase functions deploy --use-api --jobs 4`. Verified ACTIVE on new project: 27 `verify_jwt=false`, 12 `verify_jwt=true`. Config.toml `project_id` still points at old project — will flip at Phase F cutover. |
 | C-4 | Re-add secrets to new project | Claude | 🟡 5/6 | 5 secrets pushed via `supabase secrets set`: `ANTHROPIC_API_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `CRON_SECRET`. Digests verified. Only `WEATHER_API_KEY` pending (user to fetch from weatherapi.com). 38 of 39 edge functions fully unblocked. |
 | C-5 | Verify storage buckets (job-photos, provider-documents) | Claude | ✅ | Confirmed 4 buckets created by migrations: `job-photos`, `provider-documents`, `sku-images` (public), `support-attachments`. |
@@ -23,7 +23,7 @@
 | C-7 | Regenerate `src/integrations/supabase/types.ts` | Claude | ✅ | Regen via `supabase gen types typescript --project-id` (HTTPS path, works from sandbox). +254 lines: adds `plan_variant_rules` table + `pick_plan_variant` RPC types. PostgrestVersion 14.1 → 14.5. |
 | D-1 | Anthropic swap in `predict-services` + `support-ai-classify` | Claude | ✅ | `_shared/anthropic.ts` helper + both callers swapped to `claude-haiku-4-5-20251001` direct-to-Anthropic. Both functions deployed + ACTIVE. Section 5 Medium review (4 agents): 0 MUST-FIX, 1 SHOULD-FIX deferred (see Overrides). Commit `5b81090`. |
 | D-2 | Stripe webhook URL update | User | ⬜ | User updates Stripe dashboard at cutover |
-| D-3 | Prepare `.env` swap (don't commit yet) | Claude | ⬜ | Stage locally only |
+| D-3 | Prepare `.env` swap (don't commit yet) | Claude | ✅ | `.env.local` staged at repo root with new project values (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PROJECT_ID`, `VITE_SUPABASE_PUBLISHABLE_KEY`). Vite precedence `.env.local` > `.env` means `npm run dev` immediately targets the new project. Gitignored via `.env.*` rule. `.env` itself untouched — will be flipped in a single commit at Phase F cutover. Mapbox token left as a commented placeholder (not in sandbox). |
 | E | Smoke test via `.env.local` against new project | Claude + user | ⬜ | Sign-in flow needs user browser |
 | F | Commit `.env` flip + user updates Stripe/Google | Both | ⬜ | Single commit + dashboard work |
 | G | Unblock Round 64 Phase 2 (tighten `as any`, kick off Batch 2.1) | Claude | ⬜ | Last step of 64.5, first step of Round 64 Phase 2 |
@@ -57,7 +57,7 @@
   - **Claude-side next (when credentials arrive):** C-4 (push all secrets via `supabase secrets set`), C-2 (data migration — Lovable pg_dump or CSV), then E/F/G.
 - **Context at exit:** Check `/context`.
 - **Blockers:** Remaining Phase A user secrets + dashboard SQL for pg_cron + auth provider config + Vercel env cleanup.
-- **Round progress:** ~9 / 15 phase-steps complete (B-1, B-2, C-1, C-3, C-5, C-7, D-1, partial C-6; ~60%).
+- **Round progress:** 11 / 16 phase-steps complete (B-1, B-2, C-1, C-3, C-5, C-6, C-7, D-1, D-3) + partial C-4 (5/6 secrets) + skipped C-2 (~69% + skip). Remaining: `WEATHER_API_KEY` for C-4 completion, dashboard Auth config, Phase E smoke test, Phase F cutover commit, Phase G Round 64 resume.
 - **Sandbox notes (for next session):**
   - Supabase CLI at `/usr/local/bin/supabase` v2.90.0 — reinstall if missing (sandbox is ephemeral).
   - Secrets at `/root/.r64_5_secrets.env` may not persist — have user re-paste if absent.
