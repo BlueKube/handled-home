@@ -218,6 +218,7 @@ Do these in the new Supabase project's dashboard before Claude Code does anythin
 - [ ] **Auth → Google provider** — paste client ID + client secret from old project. Add the new project's `/auth/v1/callback` URL as an authorized redirect URI in Google Cloud Console.
 - [ ] **Auth → URL Configuration** — Site URL = `http://localhost:5173`, add production URL if any. Redirect URLs include both localhost and production.
 - [ ] **Auth → Email templates** — copy-paste from old project OR accept defaults.
+- [x] **C-6 cron job repoint** — `ALTER DATABASE` rejected with `42501: permission denied` from both Management API AND dashboard SQL editor (Supabase Cloud locked the postgres role). Resolved via Vault-based migration `20260421050000` instead. Cron jobs now read `service_role_key` from `vault.secrets` via `cron_private.invoke_edge_function` SECURITY DEFINER helper. End-to-end smoke test passed.
 
 ### Phase C-6 — Configure pg_cron database settings (2026-04-21, added this session)
 
