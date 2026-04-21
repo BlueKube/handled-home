@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, Loader2, Star } from "lucide-react";
 import { toast } from "sonner";
 import { CREDIT_PACKS, type CreditPackId } from "@/lib/creditPacks";
+import { AutopaySection } from "./AutopaySection";
 
 export function CreditsTopUpTab() {
   const { user } = useAuth();
@@ -105,6 +106,8 @@ export function CreditsTopUpTab() {
           </Card>
         );
       })}
+
+      <AutopaySection />
     </div>
   );
 }
