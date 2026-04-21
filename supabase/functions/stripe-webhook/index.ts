@@ -75,6 +75,34 @@ serve(async (req) => {
         const stripeCustomerId = session.customer;
         const stripeSubscriptionId = session.subscription;
 
+        // Credit-pack top-up path: mode=payment + metadata.origin marks it.
+        // Handle first so it short-circuits before the subscription-create
+        // path below.
+        if (session.mode === "payment" && session.metadata?.origin === "credit_pack_topup") {
+          const subscriptionId = session.metadata?.subscription_id;
+          const packId = session.metadata?.pack_id;
+          const creditsRaw = session.metadata?.credits;
+          const credits = creditsRaw ? parseInt(creditsRaw, 10) : NaN;
+
+          if (!userId || !subscriptionId || !packId || Number.isNaN(credits) || credits <= 0) {
+            logStep("Credit pack topup: missing or invalid metadata", { sessionId: session.id, metadata: session.metadata });
+          } else {
+            const { data: rpcData, error: rpcErr } = await supabase.rpc("grant_topup_credits", {
+              p_subscription_id: subscriptionId,
+              p_customer_id: userId,
+              p_credits: credits,
+              p_pack_id: packId,
+              p_idempotency_key: event.id,
+            });
+            if (rpcErr) {
+              logStep("grant_topup_credits failed", { error: rpcErr.message, sessionId: session.id });
+            } else {
+              logStep("Credit pack topup granted", { sessionId: session.id, result: rpcData });
+            }
+          }
+          break;
+        }
+
         if (userId && planId) {
           const { data: plan } = await supabase
             .from("plans")
