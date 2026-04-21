@@ -219,6 +219,27 @@ Do these in the new Supabase project's dashboard before Claude Code does anythin
 - [ ] **Auth → URL Configuration** — Site URL = `http://localhost:5173`, add production URL if any. Redirect URLs include both localhost and production.
 - [ ] **Auth → Email templates** — copy-paste from old project OR accept defaults.
 
+### Phase C-6 — Configure pg_cron database settings (2026-04-21, added this session)
+
+- [ ] **Run in Supabase dashboard SQL editor** (new project `gwbwnetatpgnqgarkvht`):
+  ```sql
+  ALTER DATABASE postgres SET app.settings.supabase_url = 'https://gwbwnetatpgnqgarkvht.supabase.co';
+  ALTER DATABASE postgres SET app.settings.service_role_key = '<paste sb_secret_... value>';
+  ```
+  - **Why:** All 7 pg_cron jobs use `current_setting('app.settings.*')` to resolve the function URL + auth header. Without these GUCs, the cron calls hit `null/functions/v1/...` and fail silently.
+  - **Blocked:** Management API postgres role lacks `ALTER DATABASE` privilege. Dashboard SQL editor runs with higher privilege.
+  - **Verify:** `show app.settings.supabase_url;` should echo the URL.
+
+### Remaining Phase A secrets (Claude needs these to continue) — 2026-04-21
+
+The 2026-04-21 session received the first six credentials (PAT, project ref/URL, publishable key, secret key, DB URL, Anthropic key) and made Phases B-2/C-1/C-3/C-5/C-7 complete. Still needed:
+
+- [ ] **`STRIPE_SECRET_KEY`**, **`STRIPE_WEBHOOK_SECRET`** — from old Lovable secrets dashboard.
+- [ ] **`RESEND_API_KEY`** (or other email provider key).
+- [ ] **`OPENWEATHER_API_KEY`** — for `check-weather` edge function.
+- [ ] **`CRON_SECRET`** — shared secret for `run-scheduled-jobs` / manual cron invocation.
+- [ ] **`LOVABLE_DIRECT_DB_URL`** — direct Postgres connection string on old project `yxhdschpeezawraqsmug` (needed for Phase C-2 pg_dump data migration). If Lovable doesn't expose it, say so and Claude will fall back to CSV + Supabase Auth Admin API per-table export.
+
 ### Phase F — Cutover tasks (when Claude Code signals ready)
 
 Do these when Claude Code is about to flip `.env`:

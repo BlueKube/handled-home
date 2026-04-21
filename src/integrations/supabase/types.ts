@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.1"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -3709,6 +3709,48 @@ export type Database = {
         }
         Relationships: []
       }
+      plan_variant_rules: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          plan_family: string
+          priority: number
+          sqft_tiers: string[]
+          stories_tiers: string[]
+          target_size_tier: number
+          updated_at: string
+          windows_tiers: string[]
+          yard_tiers: string[]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          plan_family: string
+          priority?: number
+          sqft_tiers?: string[]
+          stories_tiers?: string[]
+          target_size_tier: number
+          updated_at?: string
+          windows_tiers?: string[]
+          yard_tiers?: string[]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          plan_family?: string
+          priority?: number
+          sqft_tiers?: string[]
+          stories_tiers?: string[]
+          target_size_tier?: number
+          updated_at?: string
+          windows_tiers?: string[]
+          yard_tiers?: string[]
+        }
+        Relationships: []
+      }
       plan_zone_availability: {
         Row: {
           created_at: string
@@ -3755,7 +3797,9 @@ export type Database = {
           display_price_text: string | null
           id: string
           name: string
+          plan_family: string | null
           recommended_rank: number | null
+          size_tier: number | null
           status: string
           stripe_price_id: string | null
           stripe_product_id: string | null
@@ -3768,7 +3812,9 @@ export type Database = {
           display_price_text?: string | null
           id?: string
           name: string
+          plan_family?: string | null
           recommended_rank?: number | null
+          size_tier?: number | null
           status?: string
           stripe_price_id?: string | null
           stripe_product_id?: string | null
@@ -3781,7 +3827,9 @@ export type Database = {
           display_price_text?: string | null
           id?: string
           name?: string
+          plan_family?: string | null
           recommended_rank?: number | null
+          size_tier?: number | null
           status?: string
           stripe_price_id?: string | null
           stripe_product_id?: string | null
@@ -4983,6 +5031,66 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_incidents: {
+        Row: {
+          classified_by_user_id: string | null
+          created_at: string
+          details: Json
+          excuse_reason: string | null
+          id: string
+          incident_type: string
+          is_excused: boolean
+          provider_org_id: string
+          severity: string
+          updated_at: string
+          visit_id: string | null
+          zone_id: string | null
+        }
+        Insert: {
+          classified_by_user_id?: string | null
+          created_at?: string
+          details?: Json
+          excuse_reason?: string | null
+          id?: string
+          incident_type: string
+          is_excused?: boolean
+          provider_org_id: string
+          severity?: string
+          updated_at?: string
+          visit_id?: string | null
+          zone_id?: string | null
+        }
+        Update: {
+          classified_by_user_id?: string | null
+          created_at?: string
+          details?: Json
+          excuse_reason?: string | null
+          id?: string
+          incident_type?: string
+          is_excused?: boolean
+          provider_org_id?: string
+          severity?: string
+          updated_at?: string
+          visit_id?: string | null
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_incidents_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_incidents_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       provider_invites: {
         Row: {
           allowed_zone_ids: string[]
@@ -5488,6 +5596,62 @@ export type Database = {
           },
           {
             foreignKeyName: "provider_payouts_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_probation: {
+        Row: {
+          created_at: string
+          deadline_at: string
+          entry_reason: string
+          id: string
+          outcome: string | null
+          progress_notes: string | null
+          provider_org_id: string
+          resolved_at: string | null
+          resolved_by_user_id: string | null
+          sla_level_at_entry: string | null
+          status: string
+          targets: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deadline_at: string
+          entry_reason: string
+          id?: string
+          outcome?: string | null
+          progress_notes?: string | null
+          provider_org_id: string
+          resolved_at?: string | null
+          resolved_by_user_id?: string | null
+          sla_level_at_entry?: string | null
+          status?: string
+          targets?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deadline_at?: string
+          entry_reason?: string
+          id?: string
+          outcome?: string | null
+          progress_notes?: string | null
+          provider_org_id?: string
+          resolved_at?: string | null
+          resolved_by_user_id?: string | null
+          sla_level_at_entry?: string | null
+          status?: string
+          targets?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_probation_provider_org_id_fkey"
             columns: ["provider_org_id"]
             isOneToOne: false
             referencedRelation: "provider_orgs"
@@ -6815,17 +6979,21 @@ export type Database = {
           inclusions: string[]
           is_addon: boolean
           is_featured: boolean
+          licensing_required: string[] | null
           members_only: boolean
+          min_provider_rating: number | null
           name: string
           presence_required: boolean
           price_hint_cents: number | null
           pricing_notes: string | null
           proof_rules: Json
           provider_category: string
+          recommended_frequency: string | null
           required_equipment: string[]
           required_photos: Json
           requires_training_gate: boolean
           scheduling_profile: Database["public"]["Enums"]["scheduling_profile"]
+          seasonal_availability: string | null
           status: string
           updated_at: string
           weather_sensitive: boolean
@@ -6850,17 +7018,21 @@ export type Database = {
           inclusions?: string[]
           is_addon?: boolean
           is_featured?: boolean
+          licensing_required?: string[] | null
           members_only?: boolean
+          min_provider_rating?: number | null
           name: string
           presence_required?: boolean
           price_hint_cents?: number | null
           pricing_notes?: string | null
           proof_rules?: Json
           provider_category?: string
+          recommended_frequency?: string | null
           required_equipment?: string[]
           required_photos?: Json
           requires_training_gate?: boolean
           scheduling_profile?: Database["public"]["Enums"]["scheduling_profile"]
+          seasonal_availability?: string | null
           status?: string
           updated_at?: string
           weather_sensitive?: boolean
@@ -6885,17 +7057,21 @@ export type Database = {
           inclusions?: string[]
           is_addon?: boolean
           is_featured?: boolean
+          licensing_required?: string[] | null
           members_only?: boolean
+          min_provider_rating?: number | null
           name?: string
           presence_required?: boolean
           price_hint_cents?: number | null
           pricing_notes?: string | null
           proof_rules?: Json
           provider_category?: string
+          recommended_frequency?: string | null
           required_equipment?: string[]
           required_photos?: Json
           requires_training_gate?: boolean
           scheduling_profile?: Database["public"]["Enums"]["scheduling_profile"]
+          seasonal_availability?: string | null
           status?: string
           updated_at?: string
           weather_sensitive?: boolean
@@ -7017,6 +7193,7 @@ export type Database = {
       }
       sku_levels: {
         Row: {
+          access_mode: Database["public"]["Enums"]["access_mode"] | null
           created_at: string
           effective_start_cycle: string | null
           exclusions: string[]
@@ -7027,13 +7204,18 @@ export type Database = {
           label: string
           level_number: number
           planned_minutes: number
+          presence_required: boolean | null
           proof_checklist_template: Json | null
           proof_photo_min: number
+          property_size_tier: string | null
+          provider_payout_hint_cents: number | null
           short_description: string | null
           sku_id: string
           updated_at: string
+          weather_sensitive: boolean | null
         }
         Insert: {
+          access_mode?: Database["public"]["Enums"]["access_mode"] | null
           created_at?: string
           effective_start_cycle?: string | null
           exclusions?: string[]
@@ -7044,13 +7226,18 @@ export type Database = {
           label: string
           level_number?: number
           planned_minutes?: number
+          presence_required?: boolean | null
           proof_checklist_template?: Json | null
           proof_photo_min?: number
+          property_size_tier?: string | null
+          provider_payout_hint_cents?: number | null
           short_description?: string | null
           sku_id: string
           updated_at?: string
+          weather_sensitive?: boolean | null
         }
         Update: {
+          access_mode?: Database["public"]["Enums"]["access_mode"] | null
           created_at?: string
           effective_start_cycle?: string | null
           exclusions?: string[]
@@ -7061,11 +7248,15 @@ export type Database = {
           label?: string
           level_number?: number
           planned_minutes?: number
+          presence_required?: boolean | null
           proof_checklist_template?: Json | null
           proof_photo_min?: number
+          property_size_tier?: string | null
+          provider_payout_hint_cents?: number | null
           short_description?: string | null
           sku_id?: string
           updated_at?: string
+          weather_sensitive?: boolean | null
         }
         Relationships: [
           {
@@ -7177,6 +7368,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sop_runs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          sop_id: string
+          started_at: string
+          started_by_user_id: string
+          status: string
+          step_notes: Json
+          steps_completed: Json
+          total_steps: number
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          sop_id: string
+          started_at?: string
+          started_by_user_id: string
+          status?: string
+          step_notes?: Json
+          steps_completed?: Json
+          total_steps: number
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          sop_id?: string
+          started_at?: string
+          started_by_user_id?: string
+          status?: string
+          step_notes?: Json
+          steps_completed?: Json
+          total_steps?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       subscription_events: {
         Row: {
@@ -9437,7 +9670,9 @@ export type Database = {
         }
         Returns: Json
       }
-      bootstrap_new_user: { Args: { _full_name: string }; Returns: undefined }
+      bootstrap_new_user:
+        | { Args: { _full_name: string }; Returns: undefined }
+        | { Args: { _full_name: string; _role?: string }; Returns: undefined }
       bulk_set_zone_multiplier: {
         Args: {
           p_price_multiplier: number
@@ -9588,6 +9823,7 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: Database["public"]["Enums"]["admin_role"]
       }
+      get_byoc_invite_public: { Args: { p_token: string }; Returns: Json }
       get_category_gaps: { Args: { p_zip_codes: string[] }; Returns: Json }
       get_day_order: {
         Args: { p_default_day: string; p_strategy: string }
@@ -9745,6 +9981,10 @@ export type Database = {
       pause_subscription: {
         Args: { p_subscription_id: string; p_weeks: number }
         Returns: Json
+      }
+      pick_plan_variant: {
+        Args: { p_plan_family: string; p_property_id: string }
+        Returns: string
       }
       process_move_date_transitions: { Args: never; Returns: number }
       propose_provider_action: {
@@ -10112,6 +10352,12 @@ export type Database = {
         | "customer_reschedule"
         | "weather_safety"
         | "quality_block"
+        | "payment_failed"
+        | "payment_past_due"
+        | "payout_failed"
+        | "dispute_opened"
+        | "earnings_held"
+        | "reconciliation_mismatch"
       plan_window: "locked" | "draft"
       provider_application_status:
         | "draft"
@@ -10405,6 +10651,12 @@ export const Constants = {
         "customer_reschedule",
         "weather_safety",
         "quality_block",
+        "payment_failed",
+        "payment_past_due",
+        "payout_failed",
+        "dispute_opened",
+        "earnings_held",
+        "reconciliation_mismatch",
       ],
       plan_window: ["locked", "draft"],
       provider_application_status: [

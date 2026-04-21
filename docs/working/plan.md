@@ -16,11 +16,11 @@
 | B-2 | `supabase login --token` + `supabase link` | Claude | ✅ | Project linked to `gwbwnetatpgnqgarkvht` (Handled Home, us-west-1). `supabase/.temp/linked-project.json` created. |
 | C-1 | Apply all 198 migrations to new project | Claude | ✅ | Applied via Management API fallback (see OVERRIDEs). 198/198 recorded in `supabase_migrations.schema_migrations`. 187 public tables, 368 functions, 438 RLS policies. |
 | C-2 | Full data migration (pg_dump or CSV fallback) | Claude | ⬜ | Blocked — needs `LOVABLE_DIRECT_DB_URL` from user OR CSV export path. Not yet attempted. |
-| C-3 | Deploy 39 edge functions | Claude | ⬜ | `supabase functions deploy` uses HTTPS Management API — should work from this sandbox. |
+| C-3 | Deploy 39 edge functions | Claude | ✅ | All 39 deployed via `supabase functions deploy --use-api --jobs 4`. Verified ACTIVE on new project: 27 `verify_jwt=false`, 12 `verify_jwt=true`. Config.toml `project_id` still points at old project — will flip at Phase F cutover. |
 | C-4 | Re-add secrets to new project | Claude | ⬜ | Blocked — needs `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `OPENWEATHER_API_KEY`, `CRON_SECRET` from user. |
 | C-5 | Verify storage buckets (job-photos, provider-documents) | Claude | ✅ | Confirmed 4 buckets created by migrations: `job-photos`, `provider-documents`, `sku-images` (public), `support-attachments`. |
-| C-6 | pg_cron repoint migration (new URLs + service key) | Claude | ⬜ | New migration file; `supabase db push` |
-| C-7 | Regenerate `src/integrations/supabase/types.ts` | Claude | ⬜ | `supabase gen types typescript --project-id` |
+| C-6 | pg_cron repoint (DB settings, not a migration) | User | 🟡 | Discovered: existing 7 cron jobs already use `current_setting('app.settings.supabase_url')` + `current_setting('app.settings.service_role_key')` — no URLs baked in. Just need `ALTER DATABASE postgres SET app.settings.*` values on new project. Management API postgres role lacks `ALTER DATABASE` privilege — user must run in dashboard SQL editor. See TODO.md. |
+| C-7 | Regenerate `src/integrations/supabase/types.ts` | Claude | ✅ | Regen via `supabase gen types typescript --project-id` (HTTPS path, works from sandbox). +254 lines: adds `plan_variant_rules` table + `pick_plan_variant` RPC types. PostgrestVersion 14.1 → 14.5. |
 | D-1 | Anthropic swap in `predict-services` + `support-ai-classify` | Claude | ⬜ | New `_shared/anthropic.ts` helper; model `claude-haiku-4-5-20251001` |
 | D-2 | Stripe webhook URL update | User | ⬜ | User updates Stripe dashboard at cutover |
 | D-3 | Prepare `.env` swap (don't commit yet) | Claude | ⬜ | Stage locally only |
@@ -32,12 +32,31 @@
 
 ## Session Handoff
 
-- **Branch:** `claude/supabase-self-host-migration` (off Round 64 Phase 1 tip `27c31c7`).
-- **Last completed:** Phase B-1 — Supabase CLI v2.90.0 downloaded from GitHub releases, unpacked to `/usr/local/bin/supabase`. New branch created.
-- **Next up:** Phase B-2 (`supabase login` + `supabase link`). Requires the 5 credentials listed in Phase A (see `docs/upcoming/TODO.md` Round 64.5 section).
-- **Context at exit:** ~55% — continuing on plan checkpoint.
-- **Blockers:** **Phase A user prereqs.** Claude Code cannot create a Supabase project, generate PATs, or paste secrets into dashboards. User hand-off required before Phase B-2.
-- **Round progress:** 1 / 15 phase-steps complete.
+- **Branch:** `claude/supabase-self-host-migration`. Pushed tip: latest commit includes Phase C-1 + C-3 + C-7.
+- **Last completed (2026-04-21 session):** Phases B-2, C-1, C-3, C-5, C-7. Partial C-6 (design-wise — only DB settings left to user).
+  - B-2: Linked repo to `gwbwnetatpgnqgarkvht`.
+  - C-1: All 198 migrations applied via Management API fallback (3 overrides documented).
+  - C-3: All 39 edge functions deployed and ACTIVE on new project.
+  - C-5: 4 storage buckets confirmed present from migrations.
+  - C-7: `src/integrations/supabase/types.ts` regenerated (+254 lines for `plan_variant_rules` / `pick_plan_variant`).
+- **Next up:**
+  - **User actions (required before C-4/D-2/F can proceed):**
+    1. Provide remaining Phase A secrets: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `OPENWEATHER_API_KEY`, `CRON_SECRET`, `LOVABLE_DIRECT_DB_URL` (for C-2).
+    2. Run in Supabase dashboard SQL editor (needed for C-6 cron jobs):
+       ```sql
+       ALTER DATABASE postgres SET app.settings.supabase_url = 'https://gwbwnetatpgnqgarkvht.supabase.co';
+       ALTER DATABASE postgres SET app.settings.service_role_key = '<SUPABASE_SECRET_KEY>';
+       ```
+    3. Auth provider config in dashboard (see 64.5 TODO.md) before Phase E smoke test.
+  - **Claude-side next (when credentials arrive):** C-4 (secrets), C-2 (data migration — Lovable pg_dump), D-1 (Anthropic swap in predict-services + support-ai-classify).
+- **Context at exit:** Check `/context` — next session should start fresh at round boundary.
+- **Blockers:** Remaining Phase A user secrets + dashboard SQL for pg_cron + auth provider config.
+- **Round progress:** ~8 / 15 phase-steps complete (B-1, B-2, C-1, C-3, C-5, C-7, partial C-6; ~53%).
+- **Sandbox notes (for next session):**
+  - Supabase CLI at `/usr/local/bin/supabase` v2.90.0 — reinstall if missing (sandbox is ephemeral).
+  - Secrets at `/root/.r64_5_secrets.env` may not persist — have user re-paste if absent.
+  - Migration applier at `/tmp/apply_migrations.py` is ephemeral; will need rewrite if resuming migration work.
+  - Pooler/direct DB still blocked from sandbox; continue using Management API for SQL.
 
 ---
 
