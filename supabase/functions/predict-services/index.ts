@@ -1,5 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { callAnthropicTool } from "../_shared/anthropic.ts";
+
+const MODEL = "claude-haiku-4-5-20251001";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,7 +20,6 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
@@ -49,13 +51,6 @@ serve(async (req) => {
     if (!property_id) {
       return new Response(JSON.stringify({ error: "property_id required" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    if (!lovableApiKey) {
-      return new Response(JSON.stringify({ error: "LOVABLE_API_KEY not configured" }), {
-        status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -166,94 +161,56 @@ Based on property context, visit patterns, seasonal timing, and coverage gaps, p
 
 Return 3-6 predictions ranked by confidence.`;
 
-    const startMs = Date.now();
-
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${lovableApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: "You are a predictive analytics engine. Return structured predictions only." },
-          { role: "user", content: prompt },
-        ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "predict_services",
-              description: "Return ranked service predictions for a property.",
-              parameters: {
-                type: "object",
-                properties: {
-                  predictions: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        sku_id: { type: "string", description: "UUID of the predicted service SKU" },
-                        confidence: { type: "integer", description: "Confidence score 0-100" },
-                        reason: { type: "string", description: "Brief customer-facing reason (max 80 chars)" },
-                        timing_hint: {
-                          type: "string",
-                          enum: ["now", "next_month", "next_season"],
-                          description: "When this service should ideally be scheduled",
-                        },
-                      },
-                      required: ["sku_id", "confidence", "reason", "timing_hint"],
-                      additionalProperties: false,
-                    },
-                  },
+    const aiResult = await callAnthropicTool<{
+      predictions: Array<{
+        sku_id: string;
+        confidence: number;
+        reason: string;
+        timing_hint: string;
+      }>;
+    }>({
+      system: "You are a predictive analytics engine. Return structured predictions only.",
+      userContent: prompt,
+      toolName: "predict_services",
+      toolDescription: "Return ranked service predictions for a property.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          predictions: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                sku_id: { type: "string", description: "UUID of the predicted service SKU" },
+                confidence: { type: "integer", description: "Confidence score 0-100" },
+                reason: { type: "string", description: "Brief customer-facing reason (max 80 chars)" },
+                timing_hint: {
+                  type: "string",
+                  enum: ["now", "next_month", "next_season"],
+                  description: "When this service should ideally be scheduled",
                 },
-                required: ["predictions"],
-                additionalProperties: false,
               },
+              required: ["sku_id", "confidence", "reason", "timing_hint"],
+              additionalProperties: false,
             },
           },
-        ],
-        tool_choice: { type: "function", function: { name: "predict_services" } },
-      }),
+        },
+        required: ["predictions"],
+        additionalProperties: false,
+      },
+      model: MODEL,
+      maxTokens: 2048,
     });
 
-    if (!aiResponse.ok) {
-      const status = aiResponse.status;
-      const errText = await aiResponse.text();
-      console.error("AI gateway error:", status, errText);
-
-      if (status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limited, try again later" }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted" }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      return new Response(JSON.stringify({ error: "AI prediction failed" }), {
-        status: 500,
+    if (!aiResult.ok) {
+      return new Response(JSON.stringify({ error: aiResult.error }), {
+        status: aiResult.status,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const aiData = await aiResponse.json();
-    const latencyMs = Date.now() - startMs;
-
-    const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall) {
-      return new Response(JSON.stringify({ error: "No predictions returned" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const result = JSON.parse(toolCall.function.arguments);
+    const result = aiResult.input;
+    const latencyMs = aiResult.latencyMs;
     const predictions = result.predictions ?? [];
 
     // Validate sku_ids exist
@@ -287,7 +244,7 @@ Return 3-6 predictions ranked by confidence.`;
 
     // Log inference run
     await supabase.from("ai_inference_runs").insert({
-      model_name: "google/gemini-3-flash-preview",
+      model_name: MODEL,
       input_summary: `predict-services: ${validPredictions.length} predictions for property ${property_id}`,
       output: result,
       latency_ms: latencyMs,

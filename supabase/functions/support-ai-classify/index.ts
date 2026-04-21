@@ -1,5 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { callAnthropicTool, type AnthropicContentBlock } from "../_shared/anthropic.ts";
+
+const MODEL = "claude-haiku-4-5-20251001";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,7 +19,6 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
 
     // M-1: Auth is mandatory — verify caller is ticket owner, admin, or service_role
     const authHeader = req.headers.get("Authorization");
@@ -73,13 +75,6 @@ serve(async (req) => {
           });
         }
       }
-    }
-
-    if (!lovableApiKey) {
-      return new Response(JSON.stringify({ error: "LOVABLE_API_KEY not configured" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
     }
 
     const supabase = createClient(supabaseUrl, serviceKey);
@@ -184,20 +179,7 @@ serve(async (req) => {
       ? `\nCustomer's recent tickets (last 5): ${JSON.stringify(recentTickets.map(t => ({ type: t.ticket_type, category: t.category, status: t.status, created: t.created_at })))}`
       : "\nNo recent ticket history.";
 
-    const startMs = Date.now();
-
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${lovableApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          {
-            role: "system",
-            content: `You are a support ticket classifier and resolution engine for a home services marketplace. Analyze the ticket and classify it. Consider severity, evidence quality, risk of chargeback or fraud, whether this might be a duplicate, and whether it can be auto-resolved.
+    const systemPrompt = `You are a support ticket classifier and resolution engine for a home services marketplace. Analyze the ticket and classify it. Consider severity, evidence quality, risk of chargeback or fraud, whether this might be a duplicate, and whether it can be auto-resolved.
 
 Auto-resolution criteria:
 - Clear-cut service quality issues with photo evidence (e.g., missed area, incomplete work)
@@ -209,146 +191,121 @@ Do NOT auto-resolve:
 - Safety concerns
 - Repeated complaints from same customer (potential abuse)
 - High-value disputes (>$100)
-- Issues requiring provider investigation`,
-          },
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: `Classify this support ticket and determine if it can be auto-resolved:
+- Issues requiring provider investigation`;
+
+    const userBlocks: AnthropicContentBlock[] = [
+      {
+        type: "text",
+        text: `Classify this support ticket and determine if it can be auto-resolved:
 Type: ${ticket.ticket_type}
 Category: ${ticket.category || "none"}
 Severity (customer-reported): ${ticket.severity}
 Customer note: "${ticket.customer_note || "none"}"${jobContext}${photoContext}${issuePhotoContext}${historyContext}`,
-              },
-              // Include job photos for visual analysis
-              ...photoUrls.map(url => ({
-                type: "image_url" as const,
-                image_url: { url },
-              })),
-              // Include customer issue photos
-              ...issuePhotoUrls.map(url => ({
-                type: "image_url" as const,
-                image_url: { url },
-              })),
-            ],
+      },
+      ...photoUrls.map((url) => ({ type: "image" as const, source: { type: "url" as const, url } })),
+      ...issuePhotoUrls.map((url) => ({ type: "image" as const, source: { type: "url" as const, url } })),
+    ];
+
+    type ClassifyResult = {
+      ai_summary: string;
+      recommended_severity: "low" | "medium" | "high" | "critical";
+      evidence_score: number;
+      risk_score: number;
+      duplicate_ticket_id?: string;
+      classification: {
+        is_repeat_offender: boolean;
+        recommended_action: "auto_resolve" | "offer_credit" | "needs_review" | "escalate";
+        reasoning: string;
+      };
+      auto_resolvable: boolean;
+      suggested_credit_cents: number;
+      resolution_explanation: string;
+      photo_analysis: { has_evidence: boolean; evidence_description: string };
+    };
+
+    const aiResult = await callAnthropicTool<ClassifyResult>({
+      system: systemPrompt,
+      userContent: userBlocks,
+      toolName: "classify_ticket",
+      toolDescription: "Return classification and auto-resolution results for a support ticket.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          ai_summary: {
+            type: "string",
+            description: "One-sentence summary of the issue for admin queue view (max 100 chars).",
           },
-        ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "classify_ticket",
-              description: "Return classification and auto-resolution results for a support ticket.",
-              parameters: {
-                type: "object",
-                properties: {
-                  ai_summary: {
-                    type: "string",
-                    description: "One-sentence summary of the issue for admin queue view (max 100 chars).",
-                  },
-                  recommended_severity: {
-                    type: "string",
-                    enum: ["low", "medium", "high", "critical"],
-                  },
-                  evidence_score: {
-                    type: "number",
-                    description: "Score 0-100 indicating strength of evidence provided.",
-                  },
-                  risk_score: {
-                    type: "number",
-                    description: "Score 0-100 indicating chargeback/fraud/abuse risk.",
-                  },
-                  duplicate_ticket_id: {
-                    type: "string",
-                    description: "ID of a likely duplicate ticket if detected, or null.",
-                  },
-                  classification: {
-                    type: "object",
-                    properties: {
-                      is_repeat_offender: { type: "boolean" },
-                      recommended_action: {
-                        type: "string",
-                        enum: ["auto_resolve", "offer_credit", "needs_review", "escalate"],
-                      },
-                      reasoning: { type: "string" },
-                    },
-                    required: ["is_repeat_offender", "recommended_action", "reasoning"],
-                    additionalProperties: false,
-                  },
-                  auto_resolvable: {
-                    type: "boolean",
-                    description: "True if AI is confident this can be resolved without human review.",
-                  },
-                  suggested_credit_cents: {
-                    type: "integer",
-                    description: "AI-recommended credit amount in cents, or 0 if no credit needed.",
-                  },
-                  resolution_explanation: {
-                    type: "string",
-                    description: "Customer-facing explanation of the resolution (max 200 chars).",
-                  },
-                  photo_analysis: {
-                    type: "object",
-                    properties: {
-                      has_evidence: { type: "boolean", description: "Whether photos provide relevant evidence." },
-                      evidence_description: { type: "string", description: "Brief description of what photos show." },
-                    },
-                    required: ["has_evidence", "evidence_description"],
-                    additionalProperties: false,
-                  },
-                },
-                required: [
-                  "ai_summary", "recommended_severity", "evidence_score", "risk_score",
-                  "classification", "auto_resolvable", "suggested_credit_cents",
-                  "resolution_explanation", "photo_analysis"
-                ],
-                additionalProperties: false,
+          recommended_severity: {
+            type: "string",
+            enum: ["low", "medium", "high", "critical"],
+          },
+          evidence_score: {
+            type: "number",
+            description: "Score 0-100 indicating strength of evidence provided.",
+          },
+          risk_score: {
+            type: "number",
+            description: "Score 0-100 indicating chargeback/fraud/abuse risk.",
+          },
+          duplicate_ticket_id: {
+            type: "string",
+            description: "ID of a likely duplicate ticket if detected, or null.",
+          },
+          classification: {
+            type: "object",
+            properties: {
+              is_repeat_offender: { type: "boolean" },
+              recommended_action: {
+                type: "string",
+                enum: ["auto_resolve", "offer_credit", "needs_review", "escalate"],
               },
+              reasoning: { type: "string" },
             },
+            required: ["is_repeat_offender", "recommended_action", "reasoning"],
+            additionalProperties: false,
           },
+          auto_resolvable: {
+            type: "boolean",
+            description: "True if AI is confident this can be resolved without human review.",
+          },
+          suggested_credit_cents: {
+            type: "integer",
+            description: "AI-recommended credit amount in cents, or 0 if no credit needed.",
+          },
+          resolution_explanation: {
+            type: "string",
+            description: "Customer-facing explanation of the resolution (max 200 chars).",
+          },
+          photo_analysis: {
+            type: "object",
+            properties: {
+              has_evidence: { type: "boolean", description: "Whether photos provide relevant evidence." },
+              evidence_description: { type: "string", description: "Brief description of what photos show." },
+            },
+            required: ["has_evidence", "evidence_description"],
+            additionalProperties: false,
+          },
+        },
+        required: [
+          "ai_summary", "recommended_severity", "evidence_score", "risk_score",
+          "classification", "auto_resolvable", "suggested_credit_cents",
+          "resolution_explanation", "photo_analysis",
         ],
-        tool_choice: { type: "function", function: { name: "classify_ticket" } },
-      }),
+        additionalProperties: false,
+      },
+      model: MODEL,
+      maxTokens: 4096,
     });
 
-    if (!aiResponse.ok) {
-      const status = aiResponse.status;
-      const errText = await aiResponse.text();
-      console.error("AI gateway error:", status, errText);
-
-      if (status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limited, try again later" }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted" }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      return new Response(JSON.stringify({ error: "AI classification failed" }), {
-        status: 500,
+    if (!aiResult.ok) {
+      return new Response(JSON.stringify({ error: aiResult.error }), {
+        status: aiResult.status,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const aiData = await aiResponse.json();
-    const latencyMs = Date.now() - startMs;
-
-    const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall) {
-      return new Response(JSON.stringify({ error: "No classification returned" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const result = JSON.parse(toolCall.function.arguments);
+    const result = aiResult.input;
+    const latencyMs = aiResult.latencyMs;
 
     // Update ticket with AI results (includes new auto-resolution fields + duplicate link)
     const ticketUpdate: Record<string, unknown> = {
@@ -374,7 +331,7 @@ Customer note: "${ticket.customer_note || "none"}"${jobContext}${photoContext}${
     // Log inference run
     await supabase.from("ai_inference_runs").insert({
       ticket_id,
-      model_name: "google/gemini-3-flash-preview",
+      model_name: MODEL,
       input_summary: `${ticket.ticket_type}/${ticket.category}: ${ticket.customer_note?.slice(0, 100) || "no note"}`,
       classification: result.classification,
       evidence_score: result.evidence_score,
