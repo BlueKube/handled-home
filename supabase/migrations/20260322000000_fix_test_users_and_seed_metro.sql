@@ -355,8 +355,14 @@ BEGIN
   -- PHASE C: PROVIDERS
   -- ════════════════════════════════════════════════════════════
 
-  -- C1. Provider orgs (org 1 exists)
+  -- C1. Provider orgs
+  -- v_org1 was originally inserted by 20260223032019 (emptied in c3ba864). That
+  -- file's "fully superseded by Mar 22" claim missed this row and several
+  -- dependent rows below — Mar 22's FK chain (provider_coverage → v_org1,
+  -- provider_payout_accounts → v_org1) breaks on fresh Preview bootstraps
+  -- unless we re-insert it here.
   INSERT INTO provider_orgs (id, name, status, contact_phone, home_base_zip, created_by_user_id, accountable_owner_user_id, needs_review) VALUES
+    (v_org1, 'Austin Pro Services',       'ACTIVE',    '512-555-0100', '78701', v_customer_id, v_customer_id, false),
     (v_org2, 'Green Thumb Landscaping',    'ACTIVE',    '512-555-0201', '78745', v_owner2, v_owner2, false),
     (v_org3, 'Lone Star Lawn Care',        'ACTIVE',    '512-555-0301', '78721', v_owner3, v_owner3, false),
     (v_org4, 'Capital City Maintenance',   'ACTIVE',    '512-555-0401', '78664', v_owner4, v_owner4, false),
