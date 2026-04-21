@@ -22,7 +22,7 @@ Round 64 Phase 1 shipped the schema + RPC for plan variants (`plan_variants_sche
 
 | Batch | Title | Size | Status | Context | Notes |
 |-------|-------|------|--------|---------|-------|
-| 2.1 | `PlanFamilyCard` + `PlanVariantCard` split | M | 🟡 implementation pushed, review pending | | Reusable components + `planTierStyles.ts`. Foundation for 2.2 + 2.3. |
+| 2.1 | `PlanFamilyCard` + `PlanVariantCard` split | M | ✅ | | Reusable components + `planTierStyles.ts`. Medium review (2 lanes + synthesis; Lane 3 skipped — first batch in phase). 4 SHOULD-FIX applied in `c36eb0e`. |
 | 2.2 | `PlanStep` variant resolution + rationale + override | M | ⬜ | | Calls `pick_plan_variant`; renders one-line rationale; manual override with admin-flag. |
 | 2.3 | Browse + Plans + Subscribe/Checkout integration | L | ⬜ | | `Browse.tsx` family-level cards; `Plans.tsx` resolved variant; `create-checkout-session` writes resolved `plan_id`. Largest batch — Large review (5 agents). |
 
@@ -30,12 +30,12 @@ Round 64 Phase 1 shipped the schema + RPC for plan variants (`plan_variants_sche
 
 ## Session Handoff
 
-- **Branch:** Round 64.5 work was on `claude/supabase-self-host-migration`. That branch is merged and can be deleted (`git push origin --delete claude/supabase-self-host-migration`). Next session should branch off main: `git checkout main && git pull && git checkout -b feat/round-64-phase-2-onboarding-variant-pricing`.
-- **Last completed:** Round 64.5 (Supabase self-host migration). Production now runs on the new self-hosted Supabase project `gwbwnetatpgnqgarkvht`. Sign-up tested live at https://handledhome.app, customer onboarding flow renders.
-- **Next up:** Batch 2.1 — `PlanFamilyCard` + `PlanVariantCard` split. Spec → implement → review → push, per Section 5.
-- **Context at exit:** Current session is at end of Round 64.5 cutover. Recommend fresh session for Phase 2 start (round boundary).
-- **Blockers:** None known. All Round 64.5 user-side dashboard config is complete.
-- **Round progress:** Phase 1 done (Batches 1.1, 1.2, 1.3). Phase 2 not started. Phases 3–8 not started.
+- **Branch:** `claude/handled-home-phase-2-YTvlm` (per this session's task-rule override of the handoff's suggested `feat/round-64-phase-2-...` name). Branched implicitly via `git reset --hard origin/main` to pick up commit `5b8b334` (settings.local.json pattern). Two commits pushed this session: `f6e44b8` (Batch 2.1 impl) + `c36eb0e` (Batch 2.1 review fixes).
+- **Last completed:** Batch 2.1 — `PlanFamilyCard` + `PlanVariantCard` split. Medium review ran with 2 parallel lanes + synthesis (Lane 3 skipped per `[OVERRIDE: first batch in Phase 2]`). 4 SHOULD-FIX items applied; lightweight re-review clean. No MUST-FIX. Components are *added only* — no existing call sites changed.
+- **Next up:** Batch 2.2 — `PlanStep` variant resolution + rationale copy + manual override. Will call `pick_plan_variant(property_id, family)`, render the one-line rationale ("Based on your ~2,800 sqft home, your Basic plan is Basic 30"), and add a one-tier-up/down override dropdown with admin review flag.
+- **Context at exit:** (unreported — see /context). Session did orientation + full Batch 2.1 cycle (spec + impl + review + fix + re-review).
+- **Blockers:** None for Batch 2.2. Pre-existing non-blocking items: `/root/.r64_5_secrets.env` missing from this sandbox (re-source if available in next session for infra ops); `supabase`/`vercel` CLIs not installed locally (Phase 2 is frontend-only — not needed).
+- **Round progress:** Phase 1 done. Phase 2: 1 of 3 batches complete (2.1 ✅). Phases 3–8 not started.
 
 ---
 
