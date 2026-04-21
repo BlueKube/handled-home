@@ -22,7 +22,7 @@ Round 64 Phase 1 shipped the schema + RPC for plan variants (`plan_variants_sche
 
 | Batch | Title | Size | Status | Context | Notes |
 |-------|-------|------|--------|---------|-------|
-| 2.1 | `PlanFamilyCard` + `PlanVariantCard` split | M | ⬜ | | Reusable components. Foundation for 2.2 + 2.3. |
+| 2.1 | `PlanFamilyCard` + `PlanVariantCard` split | M | 🟡 implementation pushed, review pending | | Reusable components + `planTierStyles.ts`. Foundation for 2.2 + 2.3. |
 | 2.2 | `PlanStep` variant resolution + rationale + override | M | ⬜ | | Calls `pick_plan_variant`; renders one-line rationale; manual override with admin-flag. |
 | 2.3 | Browse + Plans + Subscribe/Checkout integration | L | ⬜ | | `Browse.tsx` family-level cards; `Plans.tsx` resolved variant; `create-checkout-session` writes resolved `plan_id`. Largest batch — Large review (5 agents). |
 
