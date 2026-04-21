@@ -208,7 +208,7 @@ Deliver all of the following in one message to a new Claude Code session:
 - [ ] **Generate a Supabase Personal Access Token** at https://supabase.com/dashboard/account/tokens. Label it "claude-code-sandbox". This is what Claude Code will use for CLI commands.
 - [ ] **Generate an Anthropic API key** at https://console.anthropic.com/ with billing enabled. This replaces `LOVABLE_API_KEY` in `predict-services` and `support-ai-classify`.
 - [ ] **Pull the direct DB connection string from Lovable** for the existing project `yxhdschpeezawraqsmug` (Lovable dashboard → Database → Connection string → Direct). If Lovable doesn't expose it, Claude Code will fall back to CSV per-table exports + Supabase Auth Admin API for users.
-- [ ] **Capture existing Lovable secrets** (dashboard screenshot). Needed: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY` (or email provider), `OPENWEATHER_API_KEY`, `CRON_SECRET`. Skip `LOVABLE_API_KEY` (replaced by Anthropic).
+- [ ] **Capture existing Lovable secrets** (dashboard screenshot). Needed: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY` (or email provider), `WEATHER_API_KEY`, `CRON_SECRET`. Skip `LOVABLE_API_KEY` (replaced by Anthropic).
 
 ### Phase A — Dashboard configuration on new project
 
@@ -234,10 +234,11 @@ Do these in the new Supabase project's dashboard before Claude Code does anythin
 
 The 2026-04-21 session received the first six credentials (PAT, project ref/URL, publishable key, secret key, DB URL, Anthropic key) and made Phases B-2/C-1/C-3/C-5/C-7 complete. Still needed:
 
-- [ ] **`STRIPE_SECRET_KEY`**, **`STRIPE_WEBHOOK_SECRET`** — from old Lovable secrets dashboard.
-- [ ] **`RESEND_API_KEY`** (or other email provider key).
-- [ ] **`OPENWEATHER_API_KEY`** — for `check-weather` edge function.
-- [ ] **`CRON_SECRET`** — shared secret for `run-scheduled-jobs` / manual cron invocation.
+- [x] **`STRIPE_SECRET_KEY`** — received 2026-04-21 session 2 (test mode key).
+- [ ] **`STRIPE_WEBHOOK_SECRET`** — user creating webhook destination in Stripe dashboard. URL: `https://gwbwnetatpgnqgarkvht.supabase.co/functions/v1/stripe-webhook`. Events: 9 types (see stripe-webhook/index.ts).
+- [ ] **`RESEND_API_KEY`** — user must create NEW key at resend.com/api-keys. Existing "Handled Home Notifications" key value is unrecoverable (Resend only shows the key at creation time).
+- [ ] **`WEATHER_API_KEY`** — for `check-weather` edge function. **Source: weatherapi.com** (NOT openweathermap.org). Free tier available at https://www.weatherapi.com/ → Sign up → Dashboard → API key.
+- [x] **`CRON_SECRET`** — generated 2026-04-21 via `openssl rand -hex 32`. Stored in `/root/.r64_5_secrets.env`.
 - [ ] **`LOVABLE_DIRECT_DB_URL`** — direct Postgres connection string on old project `yxhdschpeezawraqsmug` (needed for Phase C-2 pg_dump data migration). If Lovable doesn't expose it, say so and Claude will fall back to CSV + Supabase Auth Admin API per-table export.
 
 ### Phase F — Cutover tasks (when Claude Code signals ready)
