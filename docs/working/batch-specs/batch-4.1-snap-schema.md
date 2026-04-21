@@ -75,13 +75,14 @@ CREATE TABLE public.job_tasks (
   status              text NOT NULL DEFAULT 'pending'
     CHECK (status IN ('pending','in_progress','done','skipped')),
   created_at          timestamptz NOT NULL DEFAULT now(),
+  updated_at          timestamptz NOT NULL DEFAULT now(),
   completed_at        timestamptz
 );
 
 CREATE INDEX idx_job_tasks_job ON public.job_tasks(job_id);
-CREATE INDEX idx_job_tasks_snap_request ON public.job_tasks(snap_request_id) WHERE snap_request_id IS NOT NULL;
 
--- Partial uniqueness: one snap task per snap_request_id (when present).
+-- Partial unique index doubles as the lookup index for snap_request_id — no
+-- need for a separate non-unique index on the same column + predicate.
 CREATE UNIQUE INDEX uniq_job_tasks_snap_request ON public.job_tasks(snap_request_id)
   WHERE snap_request_id IS NOT NULL;
 ```
@@ -235,23 +236,21 @@ Notes:
 - `storage.foldername(name)[1]` = customer_id, `[2]` = snap_request_id. Enforced at path level so a customer can't write into another customer's prefix.
 - Provider read works through the `snap_requests → jobs → provider_members` linkage, gated on the snap being linked to a job.
 
-### `updated_at` trigger on `snap_requests`
+### `updated_at` triggers
+
+Both new tables reuse the existing project-wide helper `public.update_updated_at_column()` (defined in migration `20260221235955`) instead of a one-off function:
 
 ```sql
-CREATE OR REPLACE FUNCTION public.tg_snap_requests_updated_at()
-RETURNS trigger
-LANGUAGE plpgsql
-AS $$
-BEGIN
-  NEW.updated_at := now();
-  RETURN NEW;
-END;
-$$;
-
 CREATE TRIGGER snap_requests_updated_at
   BEFORE UPDATE ON public.snap_requests
-  FOR EACH ROW EXECUTE FUNCTION public.tg_snap_requests_updated_at();
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+CREATE TRIGGER job_tasks_updated_at
+  BEFORE UPDATE ON public.job_tasks
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 ```
+
+`job_tasks` also carries an `updated_at timestamptz NOT NULL DEFAULT now()` column so the helper has something to write.
 
 ---
 
@@ -295,6 +294,6 @@ Reviewers: flagging 4.2–4.4 work as missing is **not a MUST-FIX** for this bat
 
 ## Review notes
 
-- Lane 1 (spec completeness) should check: 2 tables, all listed columns/constraints, 4 + 4 RLS policies, 3 storage policies, 1 trigger, 2 indexes per table (plus the partial unique).
+- Lane 1 (spec completeness) should check: 2 tables, all listed columns/constraints, 4 + 4 RLS policies, 3 storage policies, 2 triggers (both reusing `public.update_updated_at_column`), 3 indexes on `snap_requests` (customer, partial linked_job, status), 2 indexes on `job_tasks` (job, partial-unique snap_request_id).
 - Lane 2 (bug scan) should flag: SQL injection surfaces (none expected in DDL-only), missing `ON DELETE` specs, policy gaps, and any `has_role` call without the `::app_role` cast.
 - Lane 3 **skipped** per the first-batch-in-phase rule. Tag with `[OVERRIDE: Lane 3 skipped — first batch in Phase 4, no prior review findings]` in commit body.

@@ -19,7 +19,7 @@
 -- ---------------------------------------------------------------------------
 CREATE TABLE public.snap_requests (
   id                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  customer_id       uuid NOT NULL,
+  customer_id       uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   property_id       uuid NOT NULL REFERENCES public.properties(id) ON DELETE CASCADE,
   subscription_id   uuid REFERENCES public.subscriptions(id) ON DELETE SET NULL,
   photo_paths       text[] NOT NULL DEFAULT '{}',
@@ -42,20 +42,10 @@ CREATE INDEX idx_snap_requests_linked_job ON public.snap_requests(linked_job_id)
   WHERE linked_job_id IS NOT NULL;
 CREATE INDEX idx_snap_requests_status    ON public.snap_requests(status);
 
--- updated_at maintenance
-CREATE OR REPLACE FUNCTION public.tg_snap_requests_updated_at()
-RETURNS trigger
-LANGUAGE plpgsql
-AS $$
-BEGIN
-  NEW.updated_at := now();
-  RETURN NEW;
-END;
-$$;
-
+-- updated_at maintenance (reuses the project-wide public.update_updated_at_column helper)
 CREATE TRIGGER snap_requests_updated_at
   BEFORE UPDATE ON public.snap_requests
-  FOR EACH ROW EXECUTE FUNCTION public.tg_snap_requests_updated_at();
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 -- ---------------------------------------------------------------------------
 -- RLS: snap_requests
@@ -110,15 +100,21 @@ CREATE TABLE public.job_tasks (
   status            text NOT NULL DEFAULT 'pending'
     CHECK (status IN ('pending','in_progress','done','skipped')),
   created_at        timestamptz NOT NULL DEFAULT now(),
+  updated_at        timestamptz NOT NULL DEFAULT now(),
   completed_at      timestamptz
 );
 
-CREATE INDEX idx_job_tasks_job          ON public.job_tasks(job_id);
-CREATE INDEX idx_job_tasks_snap_request ON public.job_tasks(snap_request_id)
-  WHERE snap_request_id IS NOT NULL;
+CREATE INDEX idx_job_tasks_job ON public.job_tasks(job_id);
+
+-- Partial unique index on snap_request_id doubles as the lookup index; no need
+-- for a separate non-unique index on the same column + predicate.
 CREATE UNIQUE INDEX uniq_job_tasks_snap_request
   ON public.job_tasks(snap_request_id)
   WHERE snap_request_id IS NOT NULL;
+
+CREATE TRIGGER job_tasks_updated_at
+  BEFORE UPDATE ON public.job_tasks
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 -- ---------------------------------------------------------------------------
 -- RLS: job_tasks
