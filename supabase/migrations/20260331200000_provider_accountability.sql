@@ -77,7 +77,7 @@ CREATE POLICY admin_probation_all ON public.provider_probation
 CREATE POLICY provider_incidents_read ON public.provider_incidents
   FOR SELECT USING (
     provider_org_id IN (
-      SELECT org_id FROM public.provider_members WHERE user_id = auth.uid()
+      SELECT provider_org_id FROM public.provider_members WHERE user_id = auth.uid()
     )
   );
 
@@ -85,6 +85,6 @@ CREATE POLICY provider_incidents_read ON public.provider_incidents
 CREATE POLICY provider_probation_read ON public.provider_probation
   FOR SELECT USING (
     provider_org_id IN (
-      SELECT org_id FROM public.provider_members WHERE user_id = auth.uid()
+      SELECT provider_org_id FROM public.provider_members WHERE user_id = auth.uid()
     )
   );
