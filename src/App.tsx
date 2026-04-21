@@ -37,6 +37,7 @@ const CustomerSettings = lazy(() => import("@/pages/customer/Settings"));
 const CustomerMoving = lazy(() => import("@/pages/customer/Moving"));
 const CustomerServices = lazy(() => import("@/pages/customer/Services"));
 const CustomerPlans = lazy(() => import("@/pages/customer/Plans"));
+const CustomerCredits = lazy(() => import("@/pages/customer/Credits"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
 const Terms = lazy(() => import("@/pages/Terms"));
 const Browse = lazy(() => import("@/pages/Browse"));
@@ -245,6 +246,7 @@ const App = () => (
                   <Route path="/customer/home-assistant" element={<CustomerPropertyGate><CustomerHomeAssistant /></CustomerPropertyGate>} />
                   <Route path="/customer/issues" element={<CustomerPropertyGate><CustomerIssues /></CustomerPropertyGate>} />
                   <Route path="/customer/subscription" element={<CustomerPropertyGate><CustomerSubscription /></CustomerPropertyGate>} />
+                  <Route path="/customer/credits" element={<CustomerPropertyGate><CustomerCredits /></CustomerPropertyGate>} />
                   <Route path="/customer/billing" element={<CustomerPropertyGate><CustomerBilling /></CustomerPropertyGate>} />
                   <Route path="/customer/billing/methods" element={<CustomerPropertyGate><CustomerBillingMethods /></CustomerPropertyGate>} />
                   <Route path="/customer/billing/history" element={<CustomerPropertyGate><CustomerBillingHistory /></CustomerPropertyGate>} />
