@@ -1,6 +1,6 @@
 # Lessons Learned & Suggestions
 
-> **Last updated:** 2026-04-21
+> **Last updated:** 2026-04-22
 
 Accumulated across all projects and sessions. Read at the start of every session.
 
@@ -414,6 +414,58 @@ Added `@supabase/mcp-server-supabase` to `.mcp.json` mid-round. Across the remai
 **Source:** `check-weather` smoke test after WEATHER_API_KEY was set
 **Type:** Agent Signal
 When an edge function catches an error and stringifies it via `JSON.stringify(err)` or `` `${err}` ``, Error instances serialize to `"[object Object]"` because their enumerable properties are empty. Needs `err instanceof Error ? err.message : JSON.stringify(err, Object.getOwnPropertyNames(err))`. Classic pattern worth a codebase-wide grep + fix sweep. Not blocking for the migration, but any function with this pattern loses useful diagnostics on every real error.
+
+## Round 64 Phase 2+3 Lessons (2026-04-22) — Variant Pricing + Credits UX
+
+### [2026-04-22] Shared react-query keys with drifting Map value shapes cross-contaminate silently
+**Source:** Batch 2.2 Lane 2 review — MUST-FIX on `plan_handles_all`
+**Type:** Architecture
+Three screens (`PlanStep.tsx`, `Plans.tsx`, `PlanActivateStep.tsx`) all use `queryKey: ["plan_handles_all"]` but populated the Map with different value shapes: full row, partial row, or bare `handles_per_cycle` number. Because react-query shares the cache across screens, whichever one loads first wins — the second screen crashes on `.handles_per_cycle` against a number, or `.get(id)` returns a stripped object. Build passes in isolation; the crash only appears on navigation. Rule: when multiple files share a query key, the queryFn return shape is a public contract. Either align all producers to the richest shape (fix used here — match Plans.tsx's full row) or narrow the key (e.g., `["plan_handles_all", "numbers"]`). A project-wide grep for shared query keys at batch-review time catches this cheaply.
+
+### [2026-04-22] Stripe webhook dedupe pre-commits the event → paid-but-no-credits is a real failure mode
+**Source:** Batch 3.3 Lane 2 synthesis (real bug risk found before shipping)
+**Type:** Architecture
+`stripe-webhook/index.ts` inserts `payment_webhook_events` with `processed: false` *before* the switch runs. If the switch fails mid-case (RPC error, malformed metadata), Stripe retries — but the retry's insert hits `23505` on `processor_event_id` and returns `{duplicate: true}` status 200. Net result: the customer is charged, no credits granted, no retry possible. Fix pattern used for Batch 3.3: every terminal failure in a money-moving branch writes a `billing_exceptions` row (severity=HIGH) with a specific `type` tag so ops can reconcile manually. Fundamental fix would be making the dedupe transactional with the side effects, but that's a webhook-wide rewrite — the billing_exceptions escape valve is cheaper and equally safe.
+
+### [2026-04-22] jsonb metadata bags need shallow-merge semantics, not replace
+**Source:** Batch 2.2 `useOnboardingProgress` refactor
+**Type:** Architecture
+`customer_onboarding_progress.metadata` is jsonb — intentionally flexible, with multiple steps over time stashing their own fields (`plan_variant_selection`, later `autopay_credits`, etc.). The original `upsertProgress` mutation replaced metadata wholesale, which works when only one writer exists but silently clobbers every other writer's field the moment a second writer appears. Fixed proactively by making the mutation `{ ...(existing.metadata ?? {}), ...updates.metadata }` before any second writer existed. Same fix applied in `useAutopaySettings.save`. Generalization: any hook that writes to a jsonb bag should default to shallow-merge. Rule worth adding to new-hook code review — a grep-able signal is `metadata: (updates.metadata ?? existing.metadata)` in mutation code.
+
+### [2026-04-22] Reuse Stripe customer id from the subscription row; don't look up by email
+**Source:** Batch 3.3 Lane 2 MUST-FIX on `purchase-credit-pack/index.ts`
+**Type:** Security
+Looking up the Stripe customer by email (`stripe.customers.list({ email, limit: 1 })`) cross-links distinct Supabase users who share an email address to the same Stripe customer — and therefore the same saved payment methods. The canonical link is `subscriptions.stripe_customer_id`, pinned at subscription creation. Fix order used: `subscription.stripe_customer_id ?? emailLookup ?? stripe.customers.create(...)`. Same principle applies to any third-party customer lookup: if the local FK is present, use it. Email-as-key is a last-resort bootstrap, not a routine path.
+
+### [2026-04-22] Large-batch 5-agent review can be overridden when 3-lane findings are unambiguous
+**Source:** Batches 2.3 + 3.3 override decisions
+**Type:** Workflow
+Large batches (per CLAUDE.md §5) run 3 parallel lanes + Sonnet synthesis + Haiku second-opinion = 5 agents. I overrode Lanes 4+5 twice when the 3-lane output met all three of: (a) no contradictions between lanes, (b) every finding had file:line specificity, and (c) no finding straddled lane boundaries needing synthesis mediation. Documented as `[OVERRIDE]` in each fix commit with the reasoning. When those conditions hold, synthesis agents only restate; when they don't (contradiction, ambiguity, cross-cutting issues), run the full 5. This isn't a blanket shortcut — Batch 3.3 had a Lane 2 MUST-FIX I verified against schema myself before deciding it was a non-issue, which is exactly the kind of cross-lane reconciliation synthesis normally does. If you can't do that reconciliation inline with confidence, don't skip.
+
+### [2026-04-22] Background agents unlock parallel review + forward work
+**Source:** Batch 3.4 review ran in background while Batch 3.5 was implemented
+**Type:** Agent Signal
+Launched Batch 3.4's combined review as `run_in_background: true`, then started Batch 3.5 implementation (which touches different files) immediately. When 3.4's review returned, the 3.5 impl was ~60% done; I applied the 3.4 fix (AutopaySection useEffect resync), then continued 3.5. Saved ~10 minutes of serial latency. Constraint that made it safe: 3.5's touched files (Dashboard, copy-sweep files) had zero overlap with 3.4's (AutopaySection, process-credit-pack-autopay). Rule: when two adjacent batches are file-disjoint, run the earlier review in background and start the next impl. When files overlap, stay serial.
+
+### [2026-04-22] Copy sweeps need a final project-wide grep, not spec enumeration
+**Source:** Batch 3.5 Lane 1 MUST-FIX — missed `Use {N} Handles` string
+**Type:** Workflow
+The Batch 3.5 spec enumerated exact files + line numbers for the "handles → credits" sweep. Review's Lane 1 grep ran `\bhandles?\b` across `src/pages/customer/**/*.tsx src/components/customer/**/*.tsx src/components/plans/**/*.tsx` and caught `AddonSuggestionsCard.tsx:158` — a CTA label that wasn't in the spec's line enumeration. Lesson: for copy-sweep batches, the authoritative gate is the grep across the scope, not the spec's file list. Treat the spec as a starting inventory, run the grep once you think you're done, and let the grep generate the final fix list. Saved a re-review pass by making the grep itself part of the batch's acceptance criteria (explicit in 3.5's AC #1) so review ran it too.
+
+### [2026-04-22] Local state derived from a TanStack query needs explicit resync
+**Source:** Batch 3.4 Lane 2 SHOULD-FIX — AutopaySection stale defaults
+**Type:** Architecture
+`useState({ enabled: settings?.enabled ?? false, ... })` runs exactly once on mount — when the TanStack query resolves later and `settings` flips from `null` → `{enabled: true, ...}`, the local state stays on the defaults. The customer sees `enabled=false` even though the server has `enabled=true` saved. Fix: `useEffect(() => setLocal({...settings}), [settings?.enabled, settings?.pack_id, settings?.threshold])` so local resyncs when deps change. Alternative is to derive directly from `settings` without local state, but that's messier with optimistic form changes. Pattern to watch for: any `useState(() => query.data?.foo ?? default)` — almost always needs a resync effect.
+
+### [2026-04-22] Stripe webhook branching needs BOTH `mode` and `metadata.origin`
+**Source:** Batch 3.3 implementation decision
+**Type:** Architecture
+`checkout.session.completed` fires for both subscription-create (`mode: 'subscription'`) and credit-pack top-up (`mode: 'payment'` + `metadata.origin: 'credit_pack_topup'`). Branching only on `mode` is fragile: a future flow could also use `mode: 'payment'` for a different purpose (gift cards, one-off service add-ons) and silently route through the topup handler. Require both: `session.mode === 'payment' && session.metadata?.origin === 'credit_pack_topup'`. Off-session PaymentIntent flows (Batch 3.4's autopay) follow the same pattern — every new payment path gets a unique `origin` string so the handler can't be mistaken. Also covers SCA-required `requires_action` responses: check `pi.status !== 'succeeded'` explicitly rather than assuming non-error = success.
+
+### [2026-04-22] Static marketing data with a TODO escape hatch is pragmatic, not debt
+**Source:** Batch 2.3 Browse.tsx decision
+**Type:** Workflow
+`/browse` is public/unauthenticated but the `plans` table RLS requires auth — so live plan data can't flow through. Two options: (a) add a public RLS policy and flip the 12 draft variants to `active`, (b) keep a hardcoded `FAMILY_SUMMARIES` constant with a TODO.md entry pointing to the future RLS/RPC decision. Chose (b) because the RLS change is a product-level policy call that shouldn't happen in a frontend batch, and the drift risk is bounded (3 prices across 3 families, visible in any marketing review). Rule: static fallbacks with a visible TODO entry are acceptable when the "make it live" decision is cross-cutting. Drop an inline code comment next to the fallback pointing to the TODO item — reviewers should never have to hunt for the context.
 
 ### Dismissed
 
