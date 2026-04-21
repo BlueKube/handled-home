@@ -60,6 +60,19 @@
 
 ---
 
+## 2026-04-21 (second session) — Integrations + Vercel
+
+- **Supabase CLI reinstalled + relinked** — sandbox is ephemeral; `/usr/local/bin/supabase` v2.90.0 restored, `supabase link` re-run against `gwbwnetatpgnqgarkvht`. Secrets re-pasted by user into `/root/.r64_5_secrets.env`.
+- **Vercel project created** — user imported `BlueKube/handled-home` into Vercel under `bkennington-4433`'s scope. First deploy succeeded. Landing page renders.
+- **`vercel.json` added at repo root** — SPA rewrite (`/(.*)` → `/index.html`) for `BrowserRouter` deep links. Committed in this session.
+- **Integrations pending user action:**
+  - Supabase → Settings → Integrations → **GitHub**: click Enable integration. Production branch `main`, working dir `.`, "Supabase changes only" ON, Branch limit 3. Remote already has 198 migrations recorded; main has 196 — integration will no-op on first sync and start auto-applying future migrations on push.
+  - Supabase → Settings → Integrations → **Vercel**: connect to `handled-home` Vercel project for env var auto-sync.
+  - Vercel → add `VITE_MAPBOX_ACCESS_TOKEN` manually (Supabase can't sync this one).
+- **Unrelated heads-up:** `.env` is not gitignored at repo root. Flagged for a separate cleanup batch; not blocking.
+
+---
+
 ## Overrides
 
 - `[OVERRIDE: supabase db push — sandbox cannot reach Postgres pooler (port 5432/6543 blocked) or IPv6-only direct DB host; applying 198 migrations via Management API /database/query endpoint over HTTPS instead. User approved 2026-04-21.]`
