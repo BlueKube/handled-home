@@ -60,24 +60,29 @@ serve(async (req) => {
       });
     }
 
-    // Find the customer's active subscription — webhook needs it to credit
-    // the correct balance row. No active sub = no top-up.
-    const { data: subscription } = await supabase
+    // Find the customer's active subscription. If multiple exist (edge case),
+    // deterministically pick the most recent so we don't silently no-op.
+    const { data: subscriptions } = await supabase
       .from("subscriptions")
-      .select("id")
+      .select("id, stripe_customer_id")
       .eq("customer_id", user.id)
       .eq("status", "active")
-      .maybeSingle();
+      .order("created_at", { ascending: false })
+      .limit(1);
 
+    const subscription = subscriptions?.[0];
     if (!subscription?.id) {
       return jsonResponse(409, { error: "Active subscription required" });
     }
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
-    // Reuse or create the Stripe customer.
-    let stripeCustomerId: string | undefined;
-    if (customerEmail) {
+    // Prefer the Stripe customer id already pinned on the subscription over
+    // an email lookup — email-lookup can cross-link distinct Supabase users
+    // that share an email address. Fall back to email → Stripe search, then
+    // finally to create, mirroring create-checkout-session:65-76.
+    let stripeCustomerId: string | undefined = subscription.stripe_customer_id ?? undefined;
+    if (!stripeCustomerId && customerEmail) {
       const customers = await stripe.customers.list({ email: customerEmail, limit: 1 });
       if (customers.data.length > 0) {
         stripeCustomerId = customers.data[0].id;
