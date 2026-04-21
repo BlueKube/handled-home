@@ -155,7 +155,7 @@ export function AddonSuggestionsCard() {
                       ) : (
                         <Sparkles className="h-4 w-4 mr-2" />
                       )}
-                      Use {selectedSku.handle_cost} Handles
+                      Use {selectedSku.handle_cost} credits
                       {!canAffordHandles(selectedSku) && (
                         <span className="ml-1 text-xs opacity-70">(need {selectedSku.handle_cost - (handleBalance ?? 0)} more)</span>
                       )}
