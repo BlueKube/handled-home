@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-> **Last updated:** 2026-04-02
+> **Last updated:** 2026-04-21
 
 Universal instructions for AI agents working in this repo. No project-specific content lives here — all project context lives in the canonical documents below.
 
@@ -360,8 +360,14 @@ When changing a primary CTA or user flow entry point, grep for all links to the 
 ├── DEPLOYMENT.md                       # Deployment guide (env vars, migrations, Edge Functions)
 ├── lessons-learned.md                  # Lessons learned + suggestions (read every session)
 ├── README.md                           # Human onboarding guide
+├── .env                                # Committed Vite defaults (publishable keys only — no secrets)
+├── .mcp.json                           # Project-scoped MCP servers (Supabase, Stitch)
+├── vercel.json                         # SPA rewrite for BrowserRouter deep links
 ├── .claude/
-│   ├── settings.json                   # Claude Code settings
+│   ├── settings.json                   # Claude Code settings (hooks, permissions)
+│   ├── settings.local.json             # Gitignored personal overrides
+│   ├── agents/                         # Reusable sub-agent prompts
+│   ├── commands/                       # Slash commands
 │   └── hooks/
 │       └── stop-check.sh              # Post-response validation hook
 ├── docs/
@@ -378,6 +384,15 @@ When changing a primary CTA or user flow entry point, grep for all links to the 
 │   │   ├── TODO.md                     # Human action items (persistent across rounds)
 │   │   └── FULL-IMPLEMENTATION-PLAN.md # Round scope — phases (PRDs) + deliverables
 │   └── archive/                        # Completed phases (kebab-name-YYYY-MM-DD/)
+├── supabase/
+│   ├── migrations/                     # SQL migrations (auto-applied via GitHub integration on push to main)
+│   ├── functions/                      # Edge Functions (39+)
+│   │   └── _shared/
+│   │       ├── anthropic.ts            # Anthropic API helper (claude-haiku-4-5-20251001)
+│   │       ├── auth.ts                 # requireCronSecret / requireServiceRole / requireUserJwt helpers
+│   │       ├── cors.ts
+│   │       └── deps.ts
+│   └── config.toml                     # CLI config — project_id here targets the active Supabase project
 └── src/                                # Application source code
 ```
 
@@ -598,7 +613,9 @@ Every commit message should be self-contained — a future agent reading `git lo
 
 ---
 
-## 12. Commands
+## 12. Commands + Tooling
+
+### Local build + test
 
 ```bash
 # Development server
@@ -615,6 +632,41 @@ npm test
 ```
 
 Both `npm run build` and `npx tsc --noEmit` must pass before a batch is considered complete.
+
+### Infrastructure access (from Claude Code)
+
+| Tool | How to reach it | Reliability from sandbox |
+|---|---|---|
+| **Supabase MCP server** (`@supabase/mcp-server-supabase`) | Configured in `.mcp.json`; tools prefixed `mcp__supabase__*` | ✅ Works — uses `api.supabase.com` (allowlisted) |
+| **Supabase CLI** (`/usr/local/bin/supabase`) | Direct invoke | ✅ Works for Management API paths (secrets, functions deploy, gen types) |
+| **Supabase Management API** (curl) | `https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_REF/database/query` | ✅ Works — fallback when `supabase db push` can't reach the pooler |
+| **Supabase Postgres pooler** (port 5432/6543) | Direct libpq / pg_dump | ❌ Blocked from sandbox allowlist — use Management API instead |
+| **Anthropic API** (for edge function work) | `https://api.anthropic.com` | ✅ Works — allowlisted |
+| **Vercel API / CLI** | `vercel` CLI + `VERCEL_TOKEN` | ❌ Blocked — `*.vercel.com` not on sandbox allowlist. Token saved for local use only. |
+| **GitHub** | `gh` CLI / GitHub MCP tools | ✅ Works via MCP |
+
+When the sandbox can't reach a service, escalate to the human for a dashboard action rather than looping on network errors.
+
+### Supabase MCP tools (prefer over CLI when structured output matters)
+
+- `mcp__supabase__execute_sql` — run any SQL, typed rows back
+- `mcp__supabase__apply_migration` — applies + records in `schema_migrations` atomically
+- `mcp__supabase__list_migrations`, `list_tables`, `list_extensions`, `list_edge_functions`
+- `mcp__supabase__deploy_edge_function`
+- `mcp__supabase__get_logs` — function logs (much cleaner than screenshotting the dashboard)
+- `mcp__supabase__generate_typescript_types` — piped straight to `src/integrations/supabase/types.ts`
+- `mcp__supabase__get_advisors` — security + performance lints; re-run after migrations
+
+CLI is the escape hatch for ops the MCP doesn't expose (multi-file function uploads via `--use-api`, one-off shell piping).
+
+### Scheduled Tasks / Session Env
+
+The sandbox is ephemeral. Session-start checklist:
+
+1. `source /root/.r64_5_secrets.env` to populate `SUPABASE_ACCESS_TOKEN`, `ANTHROPIC_API_KEY`, etc. (required for MCP + CLI)
+2. Verify Supabase CLI exists at `/usr/local/bin/supabase` — if missing, `npm install -g supabase`
+3. Check `/tmp/` for any leftover scratch files from prior session; recreate applier scripts as needed
+4. Read `docs/working/plan.md` → Session Handoff section
 
 ### Slash Commands (`.claude/commands/`)
 

@@ -1,6 +1,6 @@
 # Lessons Learned & Suggestions
 
-> **Last updated:** 2026-03-30
+> **Last updated:** 2026-04-21
 
 Accumulated across all projects and sessions. Read at the start of every session.
 
@@ -357,6 +357,63 @@ Radix UI's Select rejects `""` as a SelectItem value but will accept it on the r
 **Source:** Round 64 Phase 1 workflow friction
 **Type:** Workflow
 `npx tsc --noEmit` takes ~5s; `npm run build` takes ~30s and produces a bundle that gets thrown away. For batches that change only migrations or only hook types (no new Vite entries, no routing, no dynamic imports), tsc is sufficient. Reserve the full build for batches that change routes (`src/App.tsx`), lazy imports, vite config, or new components consumed via dynamic import. Documented as `[OVERRIDE: skipped npm run build — TS-only batch]` in commit messages.
+
+## Round 64.5 Lessons (2026-04-21) — Supabase Self-Host Migration
+
+### [2026-04-21] Supabase pooler is blocked from the Claude Code sandbox; Management API is the end-run
+**Source:** Round 64.5 Phase C-1 (applying 198 migrations to the new project)
+**Type:** Infrastructure
+`supabase db push` requires a live connection to the session pooler on port 5432/6543. The sandbox allowlist permits `api.supabase.com` (HTTPS) but blocks `aws-*.pooler.supabase.com`. The workaround is POSTing SQL to `https://api.supabase.com/v1/projects/$REF/database/query` — it accepts arbitrary SQL including DDL and seed inserts, and returns structured results. Rule for migration work: if the CLI hangs on a network error, don't debug it — pivot to the REST endpoint or the Supabase MCP `apply_migration` tool, both of which are HTTPS. Also applies to pg_dump from legacy projects: the sandbox cannot reach any pooler, so data migration either goes through Management API `execute_sql` or happens on the user's local machine.
+
+### [2026-04-21] Supabase Cloud locks `ALTER DATABASE` from the postgres role — use Vault for cron service_role_key
+**Source:** Round 64.5 Phase C-6 (pg_cron repoint failed, rescoped mid-phase)
+**Type:** Architecture
+The original plan was `ALTER DATABASE postgres SET app.settings.service_role_key = ...` to mirror the old project's cron pattern. Supabase Cloud now returns `ERROR 42501: permission denied` from both the Management API AND the dashboard SQL editor — the `postgres` role lost this privilege sometime in 2024-2025. The working pattern is `vault.create_secret(<key>, 'service_role_key')` plus a SECURITY DEFINER helper (`cron_private.invoke_edge_function`) that reads from `vault.decrypted_secrets` at cron execution time. Works under the locked privilege model, keeps the secret out of migration files, and passes the URL in as a plain string (URLs aren't secrets). Any cron job registered today should go through the helper, not inline `current_setting('app.settings.*')`.
+
+### [2026-04-21] Vite env var precedence: shell env > `.env.*` files
+**Source:** Round 64.5 Phase D-3 / F reasoning
+**Type:** Architecture
+Vite loads `.env` files via `dotenv`, and dotenv does not overwrite already-set environment variables. That means Vercel's injected env vars (Production/Preview/Development scopes) always beat whatever's committed to `.env`. Practical consequence: the committed `.env` is a *fallback*, not a source of truth — production can target a completely different Supabase project than the committed `.env` says, and nothing will warn you. When cutting over projects, keep the committed `.env` aligned with Vercel's Production vars as a hygiene measure, even if the runtime is already correct. The drift otherwise bites the next developer who clones the repo and runs `npm run dev` without setting env vars.
+
+### [2026-04-21] Sandbox network allowlist is narrow — plan tooling around it
+**Source:** Round 64.5 Phase E (Vercel token test + weatherapi.com validation)
+**Type:** Infrastructure
+Confirmed reachable from sandbox: `api.supabase.com`, `api.anthropic.com`, `api.github.com` (via MCP). Confirmed blocked: `api.vercel.com`, `*.vercel.app`, `handledhome.app` (resolves to Vercel), `api.weatherapi.com`. Tokens for blocked hosts still get saved for when the user runs Claude Code locally, but the CLI or direct curl will fail with `HTTP 403 Host not in allowlist` from the sandbox. Design implication: treat Vercel-side operations (env vars, redeploys, logs) as user-escalated by default. Supabase-side operations are fully autonomous. Round out the autonomy gap by leaning on the GitHub↔Vercel auto-deploy — pushing to `main` is equivalent to triggering a Vercel deploy from the sandbox's perspective.
+
+### [2026-04-21] Stripe's 2025 API retired `transfer.paid` and `transfer.failed` — use `transfer.created` + `transfer.reversed`
+**Source:** Round 64.5 Stripe webhook destination setup (user couldn't find the events in the picker)
+**Type:** Architecture
+On Stripe API version `2025-08-27.basil` and later, transfers to connected accounts are atomic — the old `transfer.paid` (money landed) and `transfer.failed` (money bounced) events are gone. `transfer.created` carries the same terminal semantic as the old paid event; `transfer.reversed` replaces failed. Any handler listening on the retired names will never fire. Code fix is a 2-line case label rename, behavior identical. Whenever Stripe's event picker shows fewer events than the handler expects, check the changelog before assuming a UI bug — they consolidate events across API versions.
+
+### [2026-04-21] Google Cloud "Authorized domains" only accepts domains you own; Supabase callback URL goes in the OAuth client, not the consent screen
+**Source:** Round 64.5 Google OAuth setup
+**Type:** Workflow
+The OAuth Consent Screen's **Authorized domains** field is for "top private domains" you control — `supabase.co` is rejected because you don't own it. The Supabase auth callback (`https://<ref>.supabase.co/auth/v1/callback`) goes in the OAuth Client's **Authorized redirect URIs**, a separate page. Two fields, two purposes, same-looking UI. For the consent screen, add only your owned domains (e.g., `handledhome.app`); for the client, add localhost + prod domain + prod `www` as JavaScript origins, and Supabase callback as the redirect URI.
+
+### [2026-04-21] Resend API keys can only be revealed at creation — no retrieval, no recovery
+**Source:** Round 64.5 Phase C-4 (user couldn't view existing Resend key)
+**Type:** Workflow
+Resend's dashboard and API both hard-refuse to return stored key values once the creation modal closes. If the key wasn't saved immediately, the only path forward is delete + create new. Same pattern is standard for most modern SaaS API keys (Stripe live keys, Twilio auth tokens, etc.) — plan to capture keys at creation-time into a password manager or secrets file, don't count on retrieving them later. Worth putting into the user-facing TODO as an explicit instruction when asking for any API key.
+
+### [2026-04-21] Claude.ai Connectors ≠ Claude Code MCP — different runtimes, different registration paths
+**Source:** User confusion after seeing Claude.ai Directory listing
+**Type:** Workflow
+The "Connectors" Anthropic exposes in claude.ai Settings (Vercel, Supabase, GitHub, Gmail, etc.) run in Anthropic's infrastructure and only apply to web/desktop claude.ai conversations. Claude Code in the terminal does NOT see them. Claude Code's equivalent is MCP servers declared in `.mcp.json` (project-scoped) or `~/.claude.json` (user-scoped) — these get spawned as subprocesses by Claude Code and expose their tools in the current CLI session. Connecting both sides is fine (they're free and harmless) but they don't substitute for each other. Future sessions that need tool access should check `.mcp.json` first, not assume a Claude.ai Connector carries over.
+
+### [2026-04-21] Supabase MCP > curl for structured operations, but CLI is the escape hatch for weird ops
+**Source:** Round 64.5 MCP install + usage pattern
+**Type:** Agent Signal
+Added `@supabase/mcp-server-supabase` to `.mcp.json` mid-round. Across the remaining work, MCP tools (`execute_sql`, `apply_migration`, `get_advisors`) eliminated ~6 JSON-escape dances around `curl -d '{"query": ...}'`. CLI stayed useful for `functions deploy --use-api` (MCP version exists but CLI handles multi-file `_shared/` uploads more reliably) and for `secrets set` with many keys at once. Rule: install the MCP as soon as the project is stable enough to have a known project-ref; keep the CLI for bulk ops and anything the MCP doesn't expose.
+
+### [2026-04-21] `.env` was tracked in git from Lovable import — gitignore rule applied after initial commit has no effect
+**Source:** Round 64.5 Phase F pre-flight check
+**Type:** Security
+`.env` is in `.gitignore` but also in `git ls-files .env`, because the initial Lovable "Add files via upload" commit included it. Gitignore only applies to UNTRACKED files; once tracked, it keeps tracking. Not a live leak since the committed values are publishable keys only, but worth a `git rm --cached .env` + recommit at some point. Generalization: on any project imported from another platform, run `git ls-files | xargs git check-ignore 2>/dev/null | grep -v 'not ignored'` (or the inverse) to find this category of drift. The .env case here was caught by coincidence during the cutover commit — it could easily have sat unchecked for months.
+
+### [2026-04-21] The `[object Object]` error message is a pre-existing JS `catch(err)` bug pattern
+**Source:** `check-weather` smoke test after WEATHER_API_KEY was set
+**Type:** Agent Signal
+When an edge function catches an error and stringifies it via `JSON.stringify(err)` or `` `${err}` ``, Error instances serialize to `"[object Object]"` because their enumerable properties are empty. Needs `err instanceof Error ? err.message : JSON.stringify(err, Object.getOwnPropertyNames(err))`. Classic pattern worth a codebase-wide grep + fix sweep. Not blocking for the migration, but any function with this pattern loses useful diagnostics on every real error.
 
 ### Dismissed
 

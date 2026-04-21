@@ -1,6 +1,6 @@
 # Workflow — Implementation Plan to Production
 
-> **Last updated:** 2026-03-31
+> **Last updated:** 2026-04-21
 
 A portable, repeatable workflow for taking a product idea through phased implementation to completion. Designed for Claude Code + human collaboration on any project.
 
@@ -42,6 +42,22 @@ Each phase should declare its execution mode:
 
 - **Quality mode** (default) — Tiered review system (1–5 agents sized to batch risk), full documentation sync. Production-ready.
 - **Speed mode** — Reduced 2-agent review (1 combined reviewer + 1 synthesis, no Lane 3). Used for prototypes, validation builds, and low-risk changes. Max 2 fix passes then move on.
+
+### Tooling available during execution
+
+Prefer structured tools over shell parsing wherever possible:
+
+| Operation | Preferred path | Fallback |
+|---|---|---|
+| Run SQL / inspect data | `mcp__supabase__execute_sql` | `curl` to `api.supabase.com/v1/projects/$REF/database/query` |
+| Apply migration | `mcp__supabase__apply_migration` (auto-records in `schema_migrations`) | Manual: push to `main` (GitHub integration auto-applies), or Management API + manual `schema_migrations` insert |
+| Deploy edge function | `supabase functions deploy --use-api` | `mcp__supabase__deploy_edge_function` |
+| Regenerate types | `mcp__supabase__generate_typescript_types` (write to `src/integrations/supabase/types.ts`) | `supabase gen types typescript --project-id $REF > src/integrations/supabase/types.ts` |
+| Set Edge Function secret | `supabase secrets set` (CLI handles multiple at once) | Supabase MCP |
+| Read function logs | `mcp__supabase__get_logs` | Dashboard screenshot |
+| Vercel env / deploy / logs | Escalate to human — sandbox allowlist blocks `*.vercel.com` | Claude.ai Vercel Connector for read-only visibility in web chats |
+
+See `CLAUDE.md §12` for the full tooling matrix and sandbox network allowlist notes.
 
 ---
 
