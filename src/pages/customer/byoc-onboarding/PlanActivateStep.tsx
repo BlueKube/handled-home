@@ -46,12 +46,18 @@ export function PlanActivateStep({
     return best;
   }, [families]);
 
-  // Auto-select recommended family's smallest variant on load.
+  // Auto-select recommended family's smallest variant on load — also
+  // re-runs when the existing selectedPlanId points at a legacy plan that
+  // is not in any active family (otherwise we'd highlight the recommended
+  // family but the Activate CTA would fire a ghost plan id).
   useEffect(() => {
-    if (!selectedPlanId && families && recommendedFamily) {
-      const smallest = families[recommendedFamily][0];
-      if (smallest) onSelectPlan(smallest.id);
-    }
+    if (!families || !recommendedFamily) return;
+    const selectedIsKnown =
+      !!selectedPlanId &&
+      ACTIVE_FAMILIES.some((f) => families[f].some((v) => v.id === selectedPlanId));
+    if (selectedIsKnown) return;
+    const smallest = families[recommendedFamily][0];
+    if (smallest) onSelectPlan(smallest.id);
   }, [families, recommendedFamily, selectedPlanId, onSelectPlan]);
 
   const handleActivate = async () => {
@@ -95,11 +101,6 @@ export function PlanActivateStep({
     );
   }
 
-  const isSelectedInFamily = (family: ActiveFamily): boolean => {
-    if (!selectedPlanId || !families) return false;
-    return families[family].some((v) => v.id === selectedPlanId);
-  };
-
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -125,7 +126,7 @@ export function PlanActivateStep({
               startsAtPriceText={smallest.display_price_text ?? "—"}
               variantCount={variants.length}
               highlights={FAMILY_HIGHLIGHTS[family]}
-              isRecommended={isSelectedInFamily(family) || recommendedFamily === family}
+              isRecommended={recommendedFamily === family}
               zoneEnabled
               onSelect={() => onSelectPlan(smallest.id)}
             />

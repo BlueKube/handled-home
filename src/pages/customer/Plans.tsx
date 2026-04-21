@@ -85,9 +85,13 @@ export default function CustomerPlans() {
     if (!families || !customerZoneId || !allAvail) return true;
     const variants = families[family];
     if (!variants.length) return false;
+    // Per-variant default is false: if a zone is known and there's no explicit
+    // availability row for a (plan, zone) pair, treat that variant as disabled
+    // (matches pre-Batch-2.3 Plans.tsx fail-closed semantics). A family is
+    // enabled iff at least one variant is explicitly enabled in the zone.
     return variants.some((v) => {
       const row = allAvail.find((a) => a.plan_id === v.id && a.zone_id === customerZoneId);
-      return row?.is_enabled ?? true;
+      return row?.is_enabled ?? false;
     });
   };
 
