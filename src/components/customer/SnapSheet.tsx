@@ -245,9 +245,16 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
         try {
           await cancelSnap.mutateAsync({ snapId: draft.snapId });
           // Refund succeeded — safe to clear finalized so a retry can
-          // re-run the full flow from the top.
+          // re-run the full flow from the top. Rethrow so the outer
+          // catch surfaces the original routing error to the user.
           setFinalized(false);
-        } catch {
+          throw routeErr;
+        } catch (cancelErr) {
+          // If the rethrown routeErr landed here, propagate it so the
+          // outer catch toasts once. If cancelSnap ITSELF failed,
+          // surface the refund-pending toast and return so the outer
+          // generic toast doesn't stack on top of it.
+          if (cancelErr === routeErr) throw routeErr;
           toast({
             title: "Routing failed — refund pending",
             description:
@@ -256,8 +263,8 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
           });
           // Don't clear finalized — a retry would otherwise re-hold
           // credits on top of the existing hold.
+          return;
         }
-        throw routeErr;
       }
 
       toast({
