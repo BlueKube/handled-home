@@ -1,10 +1,11 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth, AppRole } from "@/contexts/AuthContext";
 import {
-  Home, CalendarDays, ListChecks, Clock, MoreHorizontal,
-  Briefcase, DollarSign, BarChart3,
+  Home, Wrench, CalendarClock, HelpCircle,
+  Briefcase, DollarSign, BarChart3, MoreHorizontal,
   LayoutDashboard, Globe, Package, Shield,
 } from "lucide-react";
+import { SnapFab } from "@/components/customer/SnapFab";
 
 interface TabItem {
   label: string;
@@ -14,10 +15,9 @@ interface TabItem {
 
 const customerTabs: TabItem[] = [
   { label: "Home", icon: Home, path: "/customer" },
-  { label: "Schedule", icon: CalendarDays, path: "/customer/schedule" },
-  { label: "Routine", icon: ListChecks, path: "/customer/routine" },
-  { label: "Activity", icon: Clock, path: "/customer/activity" },
-  { label: "More", icon: MoreHorizontal, path: "/customer/more" },
+  { label: "Services", icon: Wrench, path: "/customer/services" },
+  { label: "Visits", icon: CalendarClock, path: "/customer/visits" },
+  { label: "Help", icon: HelpCircle, path: "/customer/help" },
 ];
 
 const providerTabs: TabItem[] = [
@@ -44,8 +44,9 @@ const tabsByRole: Record<AppRole, TabItem[]> = {
 
 /** Routes that should highlight a parent tab they don't prefix-match. */
 const TAB_CHILD_PATHS: Record<string, string[]> = {
-  "/customer/activity": ["/customer/visits/"],
-  "/customer/schedule": ["/customer/appointment/", "/customer/reschedule/"],
+  "/customer/visits": ["/customer/visits/", "/customer/appointment/", "/customer/reschedule/", "/customer/schedule"],
+  "/customer/services": ["/customer/routine"],
+  "/customer/help": ["/customer/support"],
   "/provider/performance": ["/provider/quality"],
 };
 
@@ -54,14 +55,13 @@ export function BottomTabBar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Admin uses AdminShell sidebar — hide bottom tabs
   if (effectiveRole === "admin") return null;
 
   const tabs = tabsByRole[effectiveRole] ?? customerTabs;
+  const isCustomer = effectiveRole === "customer";
 
   const isActive = (tab: TabItem) => {
     if (tab.path.endsWith("/more")) {
-      // "More" catches everything not matched by another tab (including child paths)
       const allPrefixes = tabs
         .filter((t) => !t.path.endsWith("/more"))
         .flatMap((t) => [t.path, ...(TAB_CHILD_PATHS[t.path] ?? [])]);
@@ -72,34 +72,46 @@ export function BottomTabBar() {
     if (tab.path === `/${effectiveRole}`) {
       return location.pathname === tab.path;
     }
-    // Check direct prefix match OR any registered child paths
     return (
       location.pathname.startsWith(tab.path) ||
       (TAB_CHILD_PATHS[tab.path] ?? []).some((prefix) => location.pathname.startsWith(prefix))
     );
   };
 
+  const tabButton = (tab: TabItem) => {
+    const active = isActive(tab);
+    return (
+      <button
+        key={tab.path}
+        onClick={() => navigate(tab.path)}
+        className={`relative flex flex-col items-center justify-center flex-1 gap-0.5 transition-all duration-150 active:scale-90 ${
+          active ? "text-accent" : "text-muted-foreground"
+        }`}
+      >
+        <tab.icon className={`h-5 w-5 transition-transform duration-150 ${active ? "stroke-[2.5] scale-110" : ""}`} />
+        <span className="text-[10px] font-medium leading-tight">{tab.label}</span>
+        {active && (
+          <span className="absolute bottom-1.5 h-1 w-1 rounded-full bg-accent" />
+        )}
+      </button>
+    );
+  };
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-lg border-t border-border/50 shadow-[0_-1px_3px_rgba(0,0,0,0.05)] safe-bottom">
-      <div className="flex items-stretch justify-around h-14">
-        {tabs.map((tab) => {
-          const active = isActive(tab);
-          return (
-            <button
-              key={tab.path}
-              onClick={() => navigate(tab.path)}
-              className={`relative flex flex-col items-center justify-center flex-1 gap-0.5 transition-all duration-150 active:scale-90 ${
-                active ? "text-accent" : "text-muted-foreground"
-              }`}
-            >
-              <tab.icon className={`h-5 w-5 transition-transform duration-150 ${active ? "stroke-[2.5] scale-110" : ""}`} />
-              <span className="text-[10px] font-medium leading-tight">{tab.label}</span>
-              {active && (
-                <span className="absolute bottom-1.5 h-1 w-1 rounded-full bg-accent" />
-              )}
-            </button>
-          );
-        })}
+      <div className="relative flex items-stretch justify-around h-14">
+        {isCustomer ? (
+          <>
+            {tabButton(tabs[0])}
+            {tabButton(tabs[1])}
+            <div className="flex-1 flex items-stretch justify-center" aria-hidden="true" />
+            {tabButton(tabs[2])}
+            {tabButton(tabs[3])}
+            <SnapFab />
+          </>
+        ) : (
+          tabs.map((tab) => tabButton(tab))
+        )}
       </div>
     </nav>
   );
