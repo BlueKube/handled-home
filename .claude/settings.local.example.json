@@ -10,6 +10,15 @@
     "SUPABASE_URL": "https://gwbwnetatpgnqgarkvht.supabase.co",
     "VERCEL_TOKEN": "vcp_REPLACE_ME",
 
+    "_playwright_comment": "Test-user credentials read by e2e/auth.setup.ts. Needed for Tier 3+ E2E runs per docs/testing-strategy.md. BASE_URL points at the Vercel preview URL of the PR under test, extracted from the Vercel bot comment. These accounts are assigned roles via migration 20260422210000_assign_bkennington_test_user_roles.sql.",
+    "CUSTOMER_EMAIL": "bkennington+customer@bluekube.com",
+    "CUSTOMER_PASSWORD": "REPLACE_ME",
+    "PROVIDER_EMAIL": "bkennington+provider@bluekube.com",
+    "PROVIDER_PASSWORD": "REPLACE_ME",
+    "ADMIN_EMAIL": "bkennington+admin@bluekube.com",
+    "ADMIN_PASSWORD": "REPLACE_ME",
+    "BASE_URL": "https://handled-home-git-<branch-slug>-bkennington-4433s-projects.vercel.app",
+
     "_skip_these_on_dev_machine_comment": "Deliberately NOT included — these live in Supabase Edge Function Secrets / Vercel Env Vars only, not on developer machines: SUPABASE_SERVICE_ROLE_KEY, SUPABASE_SECRET_KEY, SUPABASE_DB_PASSWORD, SUPABASE_DB_URL, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, RESEND_API_KEY, WEATHER_API_KEY, CRON_SECRET, GOOGLE_OAUTH_CLIENT_SECRET. If you need one of these ephemerally (e.g., for a one-time cutover or smoke test), paste it into a separate gitignored scratch file and delete after use."
   }
 }
