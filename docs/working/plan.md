@@ -32,8 +32,8 @@ Phase 4 does **not** touch the bottom nav shape — that restructure is Phase 5.
 | Batch | Title | Size | Status | Context |
 |-------|-------|------|--------|---------|
 | 4.1 | Schema: snap_requests + job_tasks + snap-photos bucket + RLS | M | ✅ | — |
-| 4.2 | SnapSheet + useSubmitSnap + SnapFab (capture / describe / route / submit; static preview) | M | ⬜ | — |
-| 4.3 | snap-ai-classify edge function + SnapSheet AI preview wire-up | M | ⬜ | — |
+| 4.2 | SnapSheet + useSubmitSnap + SnapFab (capture / describe / route / submit; static preview) | M | ✅ | — |
+| 4.3 | snap-ai-classify edge function + SnapSheet AI preview wire-up | M | 🟡 in review | — |
 | 4.4 | Routing handlers (next_visit → job_tasks, ad_hoc → dispatch_requests) + refund path + status machine | L | ⬜ | — |
 
 ### Batch 4.1 — Schema (M, review tier = Medium 3-lane + synthesis)
