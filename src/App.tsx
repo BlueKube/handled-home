@@ -43,7 +43,6 @@ const Terms = lazy(() => import("@/pages/Terms"));
 const Browse = lazy(() => import("@/pages/Browse"));
 const ProviderBrowse = lazy(() => import("@/pages/ProviderBrowse"));
 const CustomerPlanDetail = lazy(() => import("@/pages/customer/PlanDetail"));
-const CustomerRoutine = lazy(() => import("@/pages/customer/Routine"));
 const CustomerSubscribe = lazy(() => import("@/pages/customer/Subscribe"));
 const CustomerServiceDay = lazy(() => import("@/pages/customer/ServiceDay"));
 const CustomerRoutineReview = lazy(() => import("@/pages/customer/RoutineReview"));
@@ -225,20 +224,22 @@ const App = () => (
                   <Route path="/customer/property-sizing" element={<CustomerPropertySizing />} />
                   <Route path="/customer/plans" element={<CustomerPlans />} />
                   <Route path="/customer/plans/:planId" element={<CustomerPlanDetail />} />
-                  <Route path="/customer/routine" element={<CustomerPropertyGate><CustomerRoutine /></CustomerPropertyGate>} />
+                  {/* /customer/routine collapses into /customer/services per Round 64 Phase 5. Sub-routes stay active — onboarding flows link to them directly. */}
+                  <Route path="/customer/routine" element={<CustomerPropertyGate><Navigate to="/customer/services" replace /></CustomerPropertyGate>} />
                   <Route path="/customer/routine/review" element={<CustomerPropertyGate><CustomerRoutineReview /></CustomerPropertyGate>} />
                   <Route path="/customer/routine/confirm" element={<CustomerPropertyGate><CustomerRoutineConfirm /></CustomerPropertyGate>} />
                   <Route path="/customer/subscribe" element={<CustomerSubscribe />} />
                   <Route path="/customer/service-day" element={<CustomerPropertyGate><CustomerServiceDay /></CustomerPropertyGate>} />
                   <Route path="/customer" element={<CustomerPropertyGate><CustomerDashboard /></CustomerPropertyGate>} />
                   <Route path="/customer/schedule" element={<CustomerPropertyGate><CustomerSchedule /></CustomerPropertyGate>} />
-                  <Route path="/customer/activity" element={<CustomerPropertyGate><CustomerActivity /></CustomerPropertyGate>} />
+                  {/* /customer/visits is the new canonical URL; CustomerActivity serves as a temporary shell until Batch 5.3 ships /pages/customer/Visits.tsx. */}
+                  <Route path="/customer/visits" element={<CustomerPropertyGate><CustomerActivity /></CustomerPropertyGate>} />
+                  <Route path="/customer/activity" element={<CustomerPropertyGate><Navigate to="/customer/visits" replace /></CustomerPropertyGate>} />
                   <Route path="/customer/build" element={<CustomerPropertyGate><CustomerBuild /></CustomerPropertyGate>} />
                   {/* Redirects for old routes (gated for parity with route table) */}
-                  <Route path="/customer/history" element={<CustomerPropertyGate><Navigate to="/customer/activity" replace /></CustomerPropertyGate>} />
-                  <Route path="/customer/visits" element={<CustomerPropertyGate><Navigate to="/customer/activity" replace /></CustomerPropertyGate>} />
+                  <Route path="/customer/history" element={<CustomerPropertyGate><Navigate to="/customer/visits" replace /></CustomerPropertyGate>} />
                   <Route path="/customer/upcoming" element={<CustomerPropertyGate><Navigate to="/customer/schedule" replace /></CustomerPropertyGate>} />
-                  <Route path="/customer/timeline" element={<CustomerPropertyGate><Navigate to="/customer/activity" replace /></CustomerPropertyGate>} />
+                  <Route path="/customer/timeline" element={<CustomerPropertyGate><Navigate to="/customer/visits" replace /></CustomerPropertyGate>} />
                   <Route path="/customer/visits/:jobId" element={<CustomerPropertyGate><CustomerVisitDetail /></CustomerPropertyGate>} />
                   <Route path="/customer/appointment/:visitId" element={<CustomerPropertyGate><CustomerAppointmentPicker /></CustomerPropertyGate>} />
                   <Route path="/customer/reschedule/:visitId" element={<CustomerPropertyGate><CustomerReschedule /></CustomerPropertyGate>} />
@@ -259,7 +260,10 @@ const App = () => (
                   <Route path="/customer/settings" element={<CustomerPropertyGate><CustomerSettings /></CustomerPropertyGate>} />
                   <Route path="/customer/moving" element={<CustomerPropertyGate><CustomerMoving /></CustomerPropertyGate>} />
                   <Route path="/customer/services" element={<CustomerPropertyGate><CustomerServices /></CustomerPropertyGate>} />
-                  <Route path="/customer/more" element={<CustomerPropertyGate><MoreMenuPage /></CustomerPropertyGate>} />
+                  {/* /customer/more collapses into the avatar drawer (Batch 5.2). The `?drawer=true` query param will be consumed by the drawer to auto-open on redirect landing. */}
+                  <Route path="/customer/more" element={<CustomerPropertyGate><Navigate to="/customer?drawer=true" replace /></CustomerPropertyGate>} />
+                  {/* /customer/help currently redirects to /customer/support; a dedicated help page may replace this in a later phase. */}
+                  <Route path="/customer/help" element={<CustomerPropertyGate><Navigate to="/customer/support" replace /></CustomerPropertyGate>} />
                   <Route path="/customer/notifications" element={<SharedNotifications />} />
                   <Route path="/customer/recommend-provider" element={<CustomerPropertyGate><CustomerRecommendProvider /></CustomerPropertyGate>} />
                   <Route path="/customer/recommend-provider/status" element={<CustomerPropertyGate><CustomerRecommendProviderStatus /></CustomerPropertyGate>} />

@@ -1,96 +1,89 @@
-# Session Handoff — between Round 64 phases 4 → 5
+# Round 64 Phase 5 — Nav shape + Visit Detail as page-of-the-day
 
-> **Last session ended:** 2026-04-22 · **Next session:** starts fresh at this handoff
+> **Round:** 64 · **Phase:** 5 of 8 · **Started:** 2026-04-22
+> **PRD:** `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` §"Phase 5 — Nav shape + Visit Detail as page-of-the-day"
+> **Execution mode:** Quality (production-facing structural change across the customer app)
 
 ---
 
-## Round 64 status
+## Why this phase next
 
-| Phase | Status | Archive |
-|---|---|---|
-| Phase 1 (plan variants schema) | ✅ Shipped | pre-existing |
-| Phase 2 (onboarding variant resolution + "Starts at" pricing) | ✅ Shipped | `docs/archive/round-64-phase-2-2026-04-21/` |
-| Phase 3 (Credits UX + credit-pack purchase + autopay) | ✅ Shipped | `docs/archive/round-64-phase-3-2026-04-21/` |
-| Phase 4 (Snap-a-Fix) | ✅ Shipped | `docs/archive/round-64-phase-4-2026-04-22/` |
-| Phase 5 (Nav shape + Visit Detail) | ⬜ Not started | — |
-| Phase 6 (Fall Prep bundle) | ⬜ Not started | — |
-| Phase 7 (Provider tooling) | ⬜ Not started | — |
-| Phase 8 (Admin + growth) | ⬜ Not started | — |
+Phase 5 is the largest structurally-valuable work remaining in Round 64 and is a *prerequisite* for Phases 6 and 7:
 
-## PRs shipped 2026-04-22
+- **Phase 6** (seasonal bundles) fills in the Services-page spotlight created here.
+- **Phase 7** (BYOC/BYOP/referrals) extends the new three-mode VisitDetail with post-visit CTAs.
 
-| PR | Title | Status |
-|---|---|---|
-| #6  | Batch 4.1 — Snap-a-Fix schema (snap_requests, job_tasks, snap-photos bucket) | Merged |
-| #7  | Bootstrap-chain fix (unblocked Supabase Preview for every PR) | Merged |
-| #8  | Batch 4.2 — SnapSheet + SnapFab + useSubmitSnap | Merged |
-| #9  | Batch 4.3 — snap-ai-classify edge function + AI preview wire-up | Merged |
-| #10 | Batch 4.4 — routing RPCs + dispatch_requests + refund path | Merged (self-merged) |
-| #11 | chore: assign roles to bkennington+ test users | Merged (self-merged) |
-| #12 | chore: add auth-smoke scripts + mark Tier 3 credential TODO resolved | Merged (self-merged) |
-| #13 | docs: Playwright env vars in settings.local.example.json | Merged (self-merged) |
+Doing Phase 5 first avoids re-doing cross-cutting nav + VisitDetail work later.
 
-## What's different going into the next session
+## Batch table
 
-New since Round 64 started:
+| Batch | Title | Size | Status | Context |
+|-------|-------|------|--------|---------|
+| 5.1 | BottomTabBar 4-tab restructure + center Snap FAB + legacy route redirects | M | ✅ | TBD |
+| 5.2 | AvatarDrawer + AppHeader integration (plan/billing/credits/account/referrals/help in drawer) | M | ⬜ | |
+| 5.3 | `/customer/services` + `/customer/visits` page shells (consume existing data) | M | ⬜ | |
+| 5.4 | VisitDetail three-mode rewrite (preview / live / complete) + type chips | L | ⬜ | |
+| 5.5 | ReportIssueSheet 4-category rewrite | M | ⬜ | |
 
-1. **`docs/testing-strategy.md`** — living 5-tier testing protocol with canonical "Sarah the busy mom" persona as the AI judge. Next session's batches should cite the right tier and include Tier 2 Vitest coverage from day one.
-2. **Self-merge authority.** I merge my own PRs after the pre-merge checklist (CI green / review protocol complete / doc sync / progress table updated / phase archive if applicable). Lesson from this session: actively poll `get_check_runs` instead of waiting on silent success-webhooks.
-3. **Lane 4 synthesis must run as a sub-agent.** Inline synthesis cuts the corner and misses cross-read findings. Logged in `lessons-learned.md` under "Code review."
-4. **Three test users provisioned.** `bkennington+{customer,provider,admin}@bluekube.com` with password `65406540`. Roles live in prod via migration `20260422210000`. Smoke scripts at `scripts/smoke-auth-roles.sh` and `scripts/smoke-auth.mjs` verify.
+### Review sizing per batch
 
-## Blockers still in play
+| Batch | Tier | Agents | Rationale |
+|-------|------|--------|-----------|
+| 5.1 | Medium | 3 lanes + Lane 4 synthesis (sub-agent) | New nav + redirects — cross-cutting but well-scoped. Skip Lane 3 — first batch in phase. |
+| 5.2 | Medium | 3 lanes + Lane 4 synthesis (sub-agent) | New drawer component + AppHeader rewrite + many consumer-link rewrites. |
+| 5.3 | Medium | 3 lanes + Lane 4 synthesis (sub-agent) | Two new page shells; existing-data reuse reduces risk. |
+| 5.4 | Large | 3 lanes + Sonnet synthesis + Haiku second-opinion | VisitDetail is a high-traffic page; three-mode split is the most subtle batch of the phase. |
+| 5.5 | Medium | 3 lanes + Lane 4 synthesis (sub-agent) | Replaces a user-visible flow; "credits back" promise needs trust-signal review. |
 
-- **Sandbox egress** doesn't include `handledhome.app` or `*.vercel.app`. Browser-based Playwright against the real app has to run from CI or a dev machine. The API-level smoke works from anywhere.
-- **Playwright WebKit** not pre-installed in the sandbox; only Chromium-1194. `e2e/auth.setup.ts` uses iPhone 15 (WebKit). Workaround: add a Chromium-based auth-setup variant OR run on CI.
-- **Supabase MCP** configured in `.mcp.json` but needs `SUPABASE_ACCESS_TOKEN` set in `.claude/settings.local.json` (gitignored). Until that lands, direct DB queries from the agent aren't available — use migrations via PR instead.
-- **Types regen** for `snap_requests` / `job_tasks` / `dispatch_requests` still blocked on `SUPABASE_ACCESS_TOKEN`. Carried `as any` casts from Phase 4 are tracked in TODO.md for cleanup.
+### Testing tier per batch
 
-## Recommended next-session entry points
+Per `docs/testing-strategy.md` Appendix A + §3.
 
-Pick **one** and have the next session start there:
+| Batch | T1 | T2 | T3 | T4 | T5 |
+|-------|----|----|----|----|----|
+| 5.1 | ✅ | — | ✅ (smoke: tab navigation works, FAB opens SnapSheet) | — | Optional after Vercel Preview green |
+| 5.2 | ✅ | ✅ (drawer state hook) | ✅ (smoke: drawer opens from every page) | — | Optional |
+| 5.3 | ✅ | ✅ (list/grouping logic) | ✅ (smoke: Services + Visits render seeded fixtures) | — | Optional |
+| 5.4 | ✅ | ✅ (mode-detection helper) | ✅ | ✅ (`e2e/visit-detail-three-mode.spec.ts`) | ✅ recommended — Sarah judge per mode |
+| 5.5 | ✅ | ✅ (category routing) | ✅ | ✅ (`e2e/report-issue.spec.ts`) | ✅ recommended — trust signals on "credits back" |
 
-### Option A — Start Phase 5
+Each batch cites tiers in the PR's Test plan section.
 
-Read `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` lines 255+ for Phase 5 PRD (nav restructure: 5-tab → 4-tab + center Snap FAB + avatar drawer; Visit Detail as one URL with preview/live/complete temporal modes). Decompose into 3–5 batches, seed a fresh `docs/working/plan.md`, begin Batch 5.1.
+## Blast radius / escalation triggers
 
-This is the largest, most strategically-valuable remaining work.
+Batches 5.1–5.3 + 5.5 are within self-merge authority. Escalate only if:
 
-### Option B — Knock out scattered TODO items
+- A redirect loop appears in prod browser testing.
+- VisitDetail (5.4) live-mode exposes a provider's real-time location to the wrong customer (auth boundary).
+- Any of the migrations these batches touch land in `supabase/migrations/` — none planned, but if one appears, escalate for review.
 
-From `docs/upcoming/TODO.md`, items the agent can handle autonomously:
+## Phase-level verification (run at the end of 5.5)
 
-- `BundleSavingsCard` family-awareness cleanup (drop the local translation map)
-- `check-weather` edge function `[object Object]` error-serialization fix
-- Feature 75 — confusion detector (per-session cadence change counter in Routine.tsx)
-- Feature 263 — WorkSetup.tsx decomposition (469 → <300 lines)
-- Feature 272 — ZoneBuilder.tsx decomposition (579 → <300 lines)
-- Provider geo-indexes in WorkSetup.handleSave (h3-js is already installed)
-- Admin review surface for variant-override flag (Phase 2 deferred)
-- Public Browse live plan data (RLS policy or SECURITY DEFINER RPC)
+Per PRD "Deliverables" block:
 
-Each is a small, self-contained batch. Good for warming up a fresh session before Phase 5.
+- All 4 bottom tabs render; FAB opens SnapSheet.
+- Avatar drawer reachable from every customer page; Plan/Billing/Credits in drawer list.
+- `grep -r '/customer/more\|/customer/routine\|/customer/activity' src/` returns only App.tsx redirect entries.
+- VisitDetail renders correctly for seeded preview/live/complete fixtures.
+- Issue flow shows 4 categories; "Fix didn't hold" creates a support ticket with `category` populated.
+- `npx tsc --noEmit` + `npm run build` + `npm run lint` clean.
 
-### Option C — Start Phase 6 or Phase 7 first
+## Branch strategy
 
-Phases are not strictly ordered. If there's a business reason to prioritize Fall Prep bundle content (6), provider tooling (7), or admin + growth (8) over the nav restructure, skip Phase 5 for now.
+Each batch ships as its own PR against `main`, following `BlueKube/handled-home` Round 64 Phase 4 convention:
 
-## Pending human tasks (carried forward, not blocking)
-
-See `docs/upcoming/TODO.md` — active items include:
-- Stripe credit-pack product creation (Phase 3)
-- `supabase functions deploy snap-ai-classify` (Phase 4)
-- Smoke-test Phase 4 RPCs in prod
-- Surface `SUPABASE_ACCESS_TOKEN` to unlock types regen + Supabase MCP in the sandbox
-- Install WebKit + allow `handledhome.app`/`*.vercel.app` through sandbox egress to unlock full Tier 3 Playwright
+- Branch name: `feat/round-64-phase-5-batch-<N>-<slug>` (e.g. `feat/round-64-phase-5-batch-5.1-bottom-nav`).
+- Every PR runs the review protocol per CLAUDE.md §5, with Lane 4 as a sub-agent (never inline).
+- Self-merge after pre-merge checklist clears (CLAUDE.md §11).
+- Migration bootstrap-chain rule applies if any SQL lands (none planned this phase).
 
 ---
 
 ## Session Handoff
 
-- **Branch:** `main` (clean, synced at commit `3c90f7d`).
-- **Last completed:** PR #13 merged. Phase 4 shipped + archived. Test users provisioned + verified.
-- **Next up:** Pick Option A, B, or C above. Read `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` + this handoff first.
-- **Context at previous exit:** 65% reported (≈32% actual per 2× calibration).
-- **Blockers:** None for continuing work. See "Blockers still in play" for tools the agent can't currently use.
-- **Round progress:** Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅ · Phase 4 ✅ · Phases 5–8 ⬜.
+- **Branch at session end:** `feat/round-64-phase-5-batch-5.1-bottom-nav` — PR #17 open, CI terminal-green (Vercel Preview ✅, Supabase Preview ✅ skipped), Medium-tier review complete (zero MUST/SHOULD-FIX), pending self-merge.
+- **Last completed:** Batch 5.1 shipped to PR #17 with review complete. Doc-sync amendments applied.
+- **Next up:** Self-merge PR #17 (after this doc-sync commit lands); then Batch 5.2 — AvatarDrawer + AppHeader integration.
+- **Context at exit:** TBD — check `/context` after each batch.
+- **Blockers:** Same as prior session (sandbox egress + Tier 3 Playwright requires preview URL).
+- **Round progress:** Phases 1–4 ✅ · Phase 5: Batch 5.1 ✅ (pending merge) · Batches 5.2–5.5 ⬜ · Phases 6–8 ⬜.

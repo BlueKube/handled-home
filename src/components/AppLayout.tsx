@@ -1,7 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { BottomTabBar } from "@/components/BottomTabBar";
 import { AppHeader } from "@/components/AppHeader";
-import { SnapFab } from "@/components/customer/SnapFab";
 import { useDeviceToken } from "@/hooks/useDeviceToken";
 import { useDeepLinks } from "@/hooks/useDeepLinks";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,7 +9,7 @@ import { Eye, X } from "lucide-react";
 export function AppLayout() {
   useDeviceToken();
   useDeepLinks();
-  const { previewRole, setPreviewRole, effectiveRole } = useAuth();
+  const { previewRole, setPreviewRole } = useAuth();
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -32,7 +31,6 @@ export function AppLayout() {
       <main id="main-content" className="flex-1 overflow-auto pb-20">
         <Outlet />
       </main>
-      {effectiveRole === "customer" && <SnapFab />}
       <BottomTabBar />
     </div>
   );
