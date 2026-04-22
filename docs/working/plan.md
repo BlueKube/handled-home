@@ -33,8 +33,10 @@ Phase 4 does **not** touch the bottom nav shape — that restructure is Phase 5.
 |-------|-------|------|--------|---------|
 | 4.1 | Schema: snap_requests + job_tasks + snap-photos bucket + RLS | M | ✅ | — |
 | 4.2 | SnapSheet + useSubmitSnap + SnapFab (capture / describe / route / submit; static preview) | M | ✅ | — |
-| 4.3 | snap-ai-classify edge function + SnapSheet AI preview wire-up | M | 🟡 in review | — |
-| 4.4 | Routing handlers (next_visit → job_tasks, ad_hoc → dispatch_requests) + refund path + status machine | L | ⬜ | — |
+| 4.3 | snap-ai-classify edge function + SnapSheet AI preview wire-up | M | ✅ | — |
+| 4.4 | Routing handlers (next_visit → job_tasks, ad_hoc → dispatch_requests) + refund path + status machine | L | ✅ | — |
+
+**Phase 4 complete.** Next session / user action: archive `docs/working/plan.md` + `docs/working/batch-specs/*` to `docs/archive/round-64-phase-4-<date>/` per CLAUDE.md §8 phase-transition protocol. This happens after PR #10 merges and the branch is deleted — doing it in a follow-up commit on main keeps the batch spec visible to PR reviewers until merge.
 
 ### Batch 4.1 — Schema (M, review tier = Medium 3-lane + synthesis)
 

@@ -252,6 +252,24 @@
 
 ---
 
+## XIX-B. Snap-a-Fix `mental-load-reduction` `trust-builder` `margin-lever`
+
+*Shipped in Round 64 Phase 4 (2026-04-22).*
+
+144a. Floating camera FAB on every customer screen that opens a bottom sheet for photo-first capture — 9/10
+144b. 4-step capture flow: take/pick photo → describe + area chip (bath/kitchen/yard/exterior/other) → AI preview → routing → submit — 9/10
+144c. `snap-ai-classify` edge function (Haiku 4.5 with tool-use) returns summary + suggested SKU + credit estimate + area inference + confidence + urgency signal within ~5s — 8/10 (pending Tier 3 E2E validation)
+144d. 5-second client-side timeout with graceful fallback to placeholder card on classify-timeout or error — 9/10
+144e. Per-snap routing: Urgent (ad_hoc dispatch queue) or Next visit (attached to next scheduled job as a `task_type='snap'` job_task) — 9/10
+144f. Credit-hold mechanic with AI-suggested amount + 1.2× premium on ad_hoc to cover scope drift; partial refund on completion if actual < held — 9/10
+144g. `handle_snap_routing` + `resolve_snap` SECURITY DEFINER RPCs with `SELECT FOR UPDATE` + status-transition-guarded UPDATEs to prevent concurrent double-route / double-refund — 9/10
+144h. `no_upcoming_job` handling: when customer has no routine visit scheduled, UI flips routing to ad_hoc on the same credit hold (no double-charge) with clear toast — 9/10
+144i. Orphan cleanup: draft rows + photos removed on sheet close when credits aren't held (with TOCTOU-safe delete-then-check so finalized snaps keep their photos) — 9/10
+144j. `ai_inference_runs` observability — both support-ai-classify and snap-ai-classify inference runs logged to the same table (nullable ticket_id + new snap_request_id with CHECK) — 9/10
+144k. `snap-photos` storage bucket with customer-write / admin-read / provider-via-linkage read policies — 9/10
+
+---
+
 ## XX. Home Assistant Category `margin-lever` `mental-load-reduction`
 
 145. Time-boxed SKUs: 30 / 60 / 90-minute sessions with clear boundaries — 9/10

@@ -24,6 +24,8 @@ import {
 } from "@/hooks/useCreateSnapDraft";
 import { useClassifySnap, type SnapClassification } from "@/hooks/useClassifySnap";
 import { useFinalizeSnap, type SnapRouting } from "@/hooks/useFinalizeSnap";
+import { useRouteSnap, RouteSnapError } from "@/hooks/useRouteSnap";
+import { useCancelSnap } from "@/hooks/useCancelSnap";
 
 interface SnapSheetProps {
   open: boolean;
@@ -73,6 +75,8 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
   const createDraft = useCreateSnapDraft();
   const classify = useClassifySnap();
   const finalize = useFinalizeSnap();
+  const routeSnap = useRouteSnap();
+  const cancelSnap = useCancelSnap();
   // Monotonically increasing generation counter — any classify result for a
   // generation older than the current one is stale and must be ignored. Used
   // to defeat the Back→Continue race Lane 2/4 flagged.
@@ -196,17 +200,73 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
     }
   };
 
+  // Chain finalize (hold credits) → route (attach to next_visit OR open
+  // dispatch_request). If routing fails with no_upcoming_job, keep the hold
+  // and flip the UI to ad_hoc so the user can retry on the same credits.
+  // Any other routing failure → cancel/refund and surface the error.
   const handleSubmit = async () => {
     if (!draft || !routing) return;
+
+    const isAdHocRetry = finalized;
     const creditsToHold = routingHoldAmount(routing, classification);
+
     try {
-      await finalize.mutateAsync({
-        snapId: draft.snapId,
-        subscriptionId: draft.subscriptionId,
-        routing,
-        creditsToHold,
-      });
-      setFinalized(true);
+      if (!isAdHocRetry) {
+        // First attempt: hold credits via finalize, then route.
+        await finalize.mutateAsync({
+          snapId: draft.snapId,
+          subscriptionId: draft.subscriptionId,
+          routing,
+          creditsToHold,
+        });
+        setFinalized(true);
+      }
+      // else: credits already held from the failed next_visit attempt — skip
+      // the hold and just route again.
+
+      try {
+        await routeSnap.mutateAsync({ snapId: draft.snapId });
+      } catch (routeErr) {
+        if (routeErr instanceof RouteSnapError && routeErr.code === "no_upcoming_job") {
+          toast({
+            title: "No upcoming visits",
+            description:
+              "Your routine doesn't have a scheduled visit yet. Choose Urgent to dispatch someone instead.",
+          });
+          // Flip routing UI to ad_hoc; leave credits held so the retry is free.
+          setRouting("ad_hoc");
+          return;
+        }
+        // Any other routing failure — attempt to refund credits. If the
+        // refund itself fails, leave `finalized=true` so a user retry
+        // doesn't re-enter finalize and double-hold; surface a distinct
+        // toast so the customer knows support-intervention may be needed.
+        // (Sheet stays open either way.)
+        try {
+          await cancelSnap.mutateAsync({ snapId: draft.snapId });
+          // Refund succeeded — safe to clear finalized so a retry can
+          // re-run the full flow from the top. Rethrow so the outer
+          // catch surfaces the original routing error to the user.
+          setFinalized(false);
+          throw routeErr;
+        } catch (cancelErr) {
+          // If the rethrown routeErr landed here, propagate it so the
+          // outer catch toasts once. If cancelSnap ITSELF failed,
+          // surface the refund-pending toast and return so the outer
+          // generic toast doesn't stack on top of it.
+          if (cancelErr === routeErr) throw routeErr;
+          toast({
+            title: "Routing failed — refund pending",
+            description:
+              "We couldn't release your credits automatically. Contact support if they don't return within a few minutes.",
+            variant: "destructive",
+          });
+          // Don't clear finalized — a retry would otherwise re-hold
+          // credits on top of the existing hold.
+          return;
+        }
+      }
+
       toast({
         title: "Snap submitted",
         description:
@@ -436,10 +496,21 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
                 </Button>
                 <Button
                   className="flex-1"
-                  disabled={!routing || finalize.isPending}
+                  disabled={
+                    !routing ||
+                    finalize.isPending ||
+                    routeSnap.isPending ||
+                    cancelSnap.isPending
+                  }
                   onClick={handleSubmit}
                 >
-                  {finalize.isPending ? "Submitting…" : "Submit"}
+                  {finalize.isPending
+                    ? "Holding credits…"
+                    : routeSnap.isPending
+                      ? "Routing…"
+                      : cancelSnap.isPending
+                        ? "Refunding…"
+                        : "Submit"}
                 </Button>
               </div>
             </>

@@ -184,6 +184,21 @@ Round 64 writes new migrations into `supabase/migrations/`. Post-Round-64.5 thes
 
 - [ ] **Deploy process-credit-pack-autopay + verify cron (Phase 3 Batch 3.4)** — After merging, run `supabase functions deploy process-credit-pack-autopay` and verify the `process-credit-pack-autopay` cron job is registered (`SELECT * FROM cron.job WHERE jobname = 'process-credit-pack-autopay'` should show a 07:00 daily schedule). Smoke test: manually invoke the function with `curl -H "Authorization: Bearer $CRON_SECRET" https://gwbwnetatpgnqgarkvht.supabase.co/functions/v1/process-credit-pack-autopay` and confirm it returns `{processed, granted, skipped, errors}`. Requires the three Stripe price-id env vars above to be set.
 - [ ] **LOVABLE_API_KEY quota review (Phase 4)** — Snap-a-Fix AI classification will increase call volume vs. current support-ai-classify usage. Confirm the key can handle higher QPS or upgrade tier before Phase 4 rollout.
+
+### Phase 4 Snap-a-Fix deploy tasks (2026-04-22)
+
+- [ ] **Deploy snap-ai-classify (Phase 4 Batch 4.3)** — After PR #9 merged to main, run `supabase functions deploy snap-ai-classify`. Migration `20260422100000_ai_inference_runs_snap_support.sql` auto-applies via GitHub integration. Verify `ANTHROPIC_API_KEY` is already in project Edge Function Secrets (should be — `support-ai-classify` uses it).
+- [ ] **Smoke-test Phase 4 routing RPCs in prod (Phase 4 Batch 4.4)** — After PR #10 merges, migration `20260422200000_snap_routing.sql` creates `dispatch_requests` + `handle_snap_routing(uuid)` + `resolve_snap(uuid, int, bool)`. Run in Supabase SQL editor:
+  ```sql
+  -- Sanity: both RPCs callable; dispatch_requests exists with RLS.
+  SELECT proname, prosecdef FROM pg_proc WHERE proname IN ('handle_snap_routing','resolve_snap');
+  SELECT tablename, rowsecurity FROM pg_tables WHERE tablename='dispatch_requests';
+  ```
+  Confirm `prosecdef=true` on both (SECURITY DEFINER) and `rowsecurity=true` on dispatch_requests.
+- [ ] **Regen snap_requests / job_tasks / dispatch_requests types (Phase 4 carry-over)** — Sandbox lacks SUPABASE_ACCESS_TOKEN so the agent carried `as any` casts forward through Phase 4. After Phase 4 merges, run `supabase gen types typescript --project-id gwbwnetatpgnqgarkvht > src/integrations/supabase/types.ts` locally, commit. First pre-Round-65 cleanup.
+- [ ] **Wire complete_job → resolve_snap trigger (Phase 4 deferred → Phase 5/7)** — Currently `resolve_snap` is called manually. When a provider completes a job that has a `job_tasks` row with `task_type='snap'`, the trigger should auto-call `resolve_snap(snap_request_id, credits_actual)`. Schema already supports this (resolve_snap accepts service_role). Can be added as a Phase 5 visit-detail batch or Phase 7 provider-tooling batch.
+- [ ] **Test-user credentials for Playwright (testing-strategy.md Appendix C item 3)** — Agent needs `customer@test.com` / `provider@test.com` / `admin@test.com` passwords surfaced to the sandbox (via `.claude/settings.local.json` or Vercel preview env vars) to unlock Tier 3 E2E runs. Blocks automated E2E validation of the Snap flow.
+
 - [ ] **Seed Fall Prep bundle content (Phase 6)** — Bundle line items + per-item credit pricing + zone rollout list. Needs admin to choose the initial zones to spotlight.
 - [x] **Admin review of manual variant overrides (Phase 2)** — ✅ Decision locked 2026-04-21 in Batch 2.2: auto-approve override AND raise a flag via `customer_onboarding_progress.metadata.plan_variant_selection.admin_review_flagged`. Admin dashboard surface to read the flag is tracked separately below (Phase 2 deferred section).
 
