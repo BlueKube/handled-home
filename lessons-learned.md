@@ -170,6 +170,10 @@ _2026-04-22 · Batch 2.3 Browse.tsx_
 
 ### Code review
 
+#### Inline synthesis cuts the Lane 4 corner — always spawn the synthesis sub-agent
+CLAUDE.md §5 + §7 rule 3 are explicit: Lanes 1–3 run as sub-agents, and a Lane 4 sub-agent is the **only** place the three lane outputs cross-validate. Doing synthesis inline in the main context defeats both goals — lane noise floods the main context (~3× expected token load for a Medium batch), and no independent cross-reading catches contradictions or inter-lane gaps. A retroactive Lane 4 run on Batch 4.2 confirmed all 7 MUST/high-value fixes were correct, but caught one missed SHOULD-FIX (score 30): `spend_handles` returns `new_balance` yet `onSuccess` didn't seed `["handle_balance"]` cache, causing a stale-balance flash on CreditsRing. Required cross-reading the RPC return shape against the onSuccess handler — neither lane could spot it alone. Lesson: never skip Lane 4, and tag any deviation with `[OVERRIDE: ...]` so `git log` grep surfaces the corner.
+_2026-04-22 · Round 64 Phase 4 Batch 4.2_
+
 #### Multi-agent audits produce high volume but need synthesis
 4 UI/UX agents + 5 gstack agents = 9 reports; without a Lane 4 synthesis step, duplicate and contradictory findings pile up. The gstack framework (6 Forcing Questions, CEO Review scope analysis, CSO audit) all produce actionable findings — CSO caught 3 genuine critical vulnerabilities that needed immediate fixing.
 _2026-03-29 · Session 1_

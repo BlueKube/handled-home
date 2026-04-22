@@ -16,6 +16,7 @@ export type SnapSubmitInput = {
 
 export type SnapSubmitResult = {
   snapId: string;
+  subscriptionId: string;
   newBalance: number;
 };
 
@@ -115,12 +116,15 @@ export function useSubmitSnap() {
         throw new Error(result.error ?? "Failed to hold credits");
       }
 
-      return { snapId, newBalance: result.new_balance ?? 0 };
+      return { snapId, subscriptionId: subscription.id, newBalance: result.new_balance ?? 0 };
     },
-    onSuccess: () => {
-      // Prefix-match invalidations to pick up every variant of these keys
-      // (subscription-id-suffixed, user-id-suffixed, etc.). Matches the
-      // pattern used by useAddonSuggestions / useHomeAssistant.
+    onSuccess: (result) => {
+      // Seed the handle_balance cache with the authoritative balance from
+      // spend_handles so CreditsRing doesn't flash a stale number between
+      // submit and the refetch that invalidation triggers. Prefix-match
+      // invalidations pick up every variant of these keys (subscription-id
+      // or user-id suffixed) — matches useAddonSuggestions / useHomeAssistant.
+      queryClient.setQueryData(["handle_balance", result.subscriptionId], result.newBalance);
       queryClient.invalidateQueries({ queryKey: ["subscription"] });
       queryClient.invalidateQueries({ queryKey: ["handle_balance"] });
       queryClient.invalidateQueries({ queryKey: ["handle_transactions"] });
