@@ -355,8 +355,14 @@ BEGIN
   -- PHASE C: PROVIDERS
   -- ════════════════════════════════════════════════════════════
 
-  -- C1. Provider orgs (org 1 exists)
+  -- C1. Provider orgs
+  -- v_org1 was originally inserted by 20260223032019 (emptied in c3ba864). That
+  -- file's "fully superseded by Mar 22" claim missed this row and several
+  -- dependent rows below — Mar 22's FK chain (provider_coverage → v_org1,
+  -- provider_payout_accounts → v_org1) breaks on fresh Preview bootstraps
+  -- unless we re-insert it here.
   INSERT INTO provider_orgs (id, name, status, contact_phone, home_base_zip, created_by_user_id, accountable_owner_user_id, needs_review) VALUES
+    (v_org1, 'Austin Pro Services',       'ACTIVE',    '512-555-0100', '78701', v_customer_id, v_customer_id, false),
     (v_org2, 'Green Thumb Landscaping',    'ACTIVE',    '512-555-0201', '78745', v_owner2, v_owner2, false),
     (v_org3, 'Lone Star Lawn Care',        'ACTIVE',    '512-555-0301', '78721', v_owner3, v_owner3, false),
     (v_org4, 'Capital City Maintenance',   'ACTIVE',    '512-555-0401', '78664', v_owner4, v_owner4, false),
@@ -1380,9 +1386,12 @@ BEGIN
   ON CONFLICT (id) DO NOTHING;
 
   -- H3. Referral programs (2: customer + provider)
-  -- Provider program already exists (f1000000-...-000000000030), add customer program
+  -- The provider program (f1000000-...-000000000030) was originally inserted by
+  -- 20260223032019 (emptied in c3ba864). H4 below FK-references it, so we must
+  -- re-insert here on fresh Preview bootstraps.
   INSERT INTO referral_programs (id, name, description, referrer_type, milestone_triggers, referrer_reward_amount_cents, referred_reward_amount_cents, referrer_reward_type, referred_reward_type, hold_days, status) VALUES
-    ('d3004000-0000-0000-0000-000000000050', 'Customer Referral', 'Earn credits for every neighbor you refer', 'customer', ARRAY['installed', 'subscribed']::referral_milestone_type[], 2500, 1500, 'customer_credit', 'customer_credit', 7, 'active')
+    ('f1000000-0000-0000-0000-000000000030', 'Provider Growth',   'Earn bonuses for every customer you refer',   'provider', ARRAY['installed', 'subscribed', 'first_visit']::referral_milestone_type[], 2500, 1000, 'provider_bonus', 'customer_credit', 14, 'active'),
+    ('d3004000-0000-0000-0000-000000000050', 'Customer Referral', 'Earn credits for every neighbor you refer',   'customer', ARRAY['installed', 'subscribed']::referral_milestone_type[],                 2500, 1500, 'customer_credit',  'customer_credit', 7,  'active')
   ON CONFLICT (id) DO NOTHING;
 
   -- H4. Referral codes (10 customer codes)
