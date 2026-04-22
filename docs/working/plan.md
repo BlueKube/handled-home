@@ -20,7 +20,7 @@ Doing Phase 5 first avoids re-doing cross-cutting nav + VisitDetail work later.
 | Batch | Title | Size | Status | Context |
 |-------|-------|------|--------|---------|
 | 5.1 | BottomTabBar 4-tab restructure + center Snap FAB + legacy route redirects | M | ✅ | TBD |
-| 5.2 | AvatarDrawer + AppHeader integration (plan/billing/credits/account/referrals/help in drawer) | M | ⬜ | |
+| 5.2 | AvatarDrawer + AppHeader integration (plan/billing/credits/account/referrals/help in drawer) | M | 🟡 impl done, review pending | |
 | 5.3 | `/customer/services` + `/customer/visits` page shells (consume existing data) | M | ⬜ | |
 | 5.4 | VisitDetail three-mode rewrite (preview / live / complete) + type chips | L | ⬜ | |
 | 5.5 | ReportIssueSheet 4-category rewrite | M | ⬜ | |
