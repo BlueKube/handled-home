@@ -22,10 +22,20 @@ export function useClassifySnap() {
       });
 
       if (error) {
-        // FunctionsFetchError / FunctionsRelayError don't reliably expose
-        // .message — fall back to String(error) so we never throw a
-        // "Classification failed" with a silent cause.
-        throw new Error(error?.message ?? String(error));
+        // FunctionsFetchError / FunctionsRelayError hide `.message` but expose
+        // enumerable .name / .context. Per lessons-learned ("[object Object]
+        // error messages come from JSON.stringify(err) on Error instances"),
+        // fall back to JSON.stringify with getOwnPropertyNames so nothing is
+        // rendered as "[object Object]".
+        let detail: string;
+        if (error instanceof Error) {
+          detail = error.message;
+        } else if (typeof error === "object" && error !== null) {
+          detail = JSON.stringify(error, Object.getOwnPropertyNames(error));
+        } else {
+          detail = String(error);
+        }
+        throw new Error(detail || "Classification failed");
       }
 
       const result = data as (SnapClassification & { success?: boolean; error?: string }) | null;

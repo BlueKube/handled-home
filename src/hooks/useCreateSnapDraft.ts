@@ -109,14 +109,32 @@ export async function cleanupSnapDraft(draft: SnapDraft): Promise<void> {
     return;
   }
 
+  // Delete-then-check: use .select() to capture which rows actually matched.
+  // If nothing came back, the row was finalized between our state read and
+  // the delete — we must NOT remove the photo in that case (the finalized
+  // snap_request still points at it). This closes the TOCTOU photo hole
+  // that pass-2 Lane 2 flagged — the read-then-delete only narrowed the
+  // window; this close-out makes the photo-remove conditional on the row
+  // actually having been deleted.
+  let rowDeleted = false;
   try {
-    await (supabase.from("snap_requests") as any)
+    const { data, error } = await (supabase.from("snap_requests") as any)
       .delete()
       .eq("id", draft.snapId)
-      .eq("credits_held", 0);
+      .eq("credits_held", 0)
+      .select("id");
+    if (error) {
+      console.warn("cleanupSnapDraft row delete failed:", error);
+      return;
+    }
+    rowDeleted = Array.isArray(data) && data.length > 0;
   } catch (err) {
-    console.warn("cleanupSnapDraft row delete failed:", err);
+    console.warn("cleanupSnapDraft row delete threw:", err);
+    return;
   }
+
+  if (!rowDeleted) return;
+
   try {
     await supabase.storage.from("snap-photos").remove([draft.photoPath]);
   } catch (err) {
