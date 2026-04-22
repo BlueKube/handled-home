@@ -50,7 +50,8 @@ export function AvatarDrawer() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { theme, setTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
 
   const notificationsData = useNotifications();
   const { unreadCount } = notificationsData;
@@ -61,13 +62,13 @@ export function AvatarDrawer() {
   const autoOpenedRef = useRef(false);
 
   useEffect(() => {
-    if (autoOpenedRef.current) return;
-    if (searchParams.get("drawer") === "true") {
+    if (searchParams.get("drawer") !== "true") return;
+    const next = new URLSearchParams(searchParams);
+    next.delete("drawer");
+    setSearchParams(next, { replace: true });
+    if (!autoOpenedRef.current) {
       autoOpenedRef.current = true;
       setOpen(true);
-      const next = new URLSearchParams(searchParams);
-      next.delete("drawer");
-      setSearchParams(next, { replace: true });
     }
   }, [searchParams, setSearchParams]);
 
@@ -171,19 +172,19 @@ export function AvatarDrawer() {
             <Card>
               <CardContent className="p-0">
                 <button
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  aria-pressed={theme === "dark"}
+                  onClick={() => setTheme(isDark ? "light" : "dark")}
+                  aria-pressed={isDark}
                   className="flex items-center gap-3 w-full px-4 py-3.5 text-left text-foreground hover:bg-secondary/50 active:bg-secondary transition-colors rounded-xl"
                 >
-                  {theme === "dark" ? (
+                  {isDark ? (
                     <Sun className="h-5 w-5 text-muted-foreground" />
                   ) : (
                     <Moon className="h-5 w-5 text-muted-foreground" />
                   )}
                   <span className="font-medium flex-1">
-                    {theme === "dark" ? "Light mode" : "Dark mode"}
+                    {isDark ? "Light mode" : "Dark mode"}
                   </span>
-                  <Switch checked={theme === "dark"} className="pointer-events-none" />
+                  <Switch checked={isDark} className="pointer-events-none" />
                 </button>
               </CardContent>
             </Card>
@@ -201,7 +202,7 @@ export function AvatarDrawer() {
                   </AlertDialogTrigger>
                 </CardContent>
               </Card>
-              <AlertDialogContent>
+              <AlertDialogContent onEscapeKeyDown={(e) => e.stopPropagation()}>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Sign out?</AlertDialogTitle>
                   <AlertDialogDescription>
