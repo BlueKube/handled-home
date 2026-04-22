@@ -122,6 +122,19 @@ curl -X POST "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_REF/databas
 
 Or use the Supabase MCP server's `apply_migration` tool, which handles both steps automatically.
 
+### Migration bootstrap-chain rule (for Supabase Preview + GitHub integration)
+
+**Every new migration must `-- Previous migration: <filename>` chain off the prior one.** The Supabase↔GitHub integration refuses to build a preview branch if any migration in the diff has no declared parent — it blocks the *entire* PR's Supabase Preview check, not just the orphan file.
+
+Discovered in Round 64 Phase 4: PR #6 shipped two unchained migrations, which silently blocked every subsequent PR's Supabase Preview from ever reporting. PR #7 backfilled the chain comments and unstuck the queue. Agents write migrations in batches, so the fix is mechanical: the first line of every `20YYMMDDHHMMSS_slug.sql` file should be a comment naming the file it builds on, pointing back to the most recent prior migration on `main`.
+
+```sql
+-- Previous migration: 20260421183000_add_plan_variants_snapshots.sql
+-- Purpose: …
+```
+
+When you merge a branch whose first migration predates the current `main` HEAD, re-point the chain during the merge so the declared parent matches the file that actually precedes yours on `main`. Integration re-checks on merge; stale chains trigger a re-open.
+
 ### Key Migration Areas
 
 | Area | What it covers |
@@ -319,7 +332,26 @@ Add `handledhome://auth/callback` to the allowed redirect URLs in your Supabase 
 
 ## 5b. Apple App Store Review Preparation
 
-### Test Account for Reviewers
+### Test accounts for agent-driven + Playwright testing
+
+Three persistent test users are provisioned in prod for the 5-tier testing protocol (`docs/testing-strategy.md` Tier 3+). Passwords live in `.claude/settings.local.json` (gitignored) and in `.claude/settings.local.example.json` as `REPLACE_ME` placeholders.
+
+| Role | Email | Purpose |
+|---|---|---|
+| Customer | `bkennington+customer@bluekube.com` | Happy-path customer flows, Tier 4 E2E |
+| Provider | `bkennington+provider@bluekube.com` | Provider dashboard + job acceptance Tier 4 |
+| Admin | `bkennington+admin@bluekube.com` | Admin surfaces, operational dashboards |
+
+Roles are assigned via migration (`supabase/migrations/20260422210000_assign_bkennington_test_user_roles.sql`). To verify:
+
+```bash
+scripts/smoke-auth-roles.sh       # DB-level check (reads bkennington_profile_roles view)
+scripts/smoke-auth.mjs            # API-level check (logs in and asserts role)
+```
+
+Both scripts read credentials from env; see `.claude/settings.local.example.json` for the variable names.
+
+### Test Account for Reviewers (App Store)
 
 1. **Create the auth user** in Supabase Auth dashboard:
    - Email: `reviewer@handledhome.com`

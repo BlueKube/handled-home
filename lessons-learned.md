@@ -168,6 +168,22 @@ _2026-04-22 · Batch 3.5 Lane 1 MUST-FIX_
 `/browse` is public/unauthenticated but the `plans` RLS requires auth — so live plan data can't flow through. Two options: add a public RLS policy + flip draft variants to active, or hardcode `FAMILY_SUMMARIES` with a TODO entry. Chose the hardcode: the RLS change is product-level and shouldn't happen in a frontend batch, and drift risk is bounded. Rule: static fallbacks with a visible TODO entry are acceptable when the "make it live" decision is cross-cutting — drop an inline code comment next to the fallback linking the TODO item.
 _2026-04-22 · Batch 2.3 Browse.tsx_
 
+#### Actively poll GitHub check_runs after push — don't wait on silent success-webhooks
+After `git push`, silent CI successes arrive late or not at all; only *failures* are reliably webhooked. Polling `mcp__github__pull_request_read` with `method: "get_check_runs"` immediately after opening the PR returned terminal status in seconds for 9 consecutive PRs in Round 64 Phase 4. The habit of "push, wait for a webhook" adds 5–15 minutes per merge and encourages context-switching. Adopt active polling as the default; reserve webhooks for failure notifications you didn't initiate.
+_2026-04-22 · Round 64 Phase 4 PRs #6–#14_
+
+#### Pre-merge checklist + self-merge authority — shorter feedback loop, still gated
+Round 64 Phase 4 formalized a 7-item pre-merge checklist (CLAUDE.md §11) that the agent runs after CI turns green and before calling `merge_pull_request`. Self-merge authority applies when every item passes, for doc-only, tooling, and batch-spec'd feature PRs. Escalate for auth/payment/RLS changes, ambiguous MUST-FIX findings, or spec drift. Practical effect: 9 PRs merged by the agent in one session without human intervention, with zero revert-required issues. The checklist lives in CLAUDE.md rather than WORKFLOW.md because it's an *agent behavior rule*, not a workflow step.
+_2026-04-22 · Round 64 Phase 4 workflow evolution_
+
+#### Bundle multiple trivial PRs into a dependency chain, not parallel branches
+Four small PRs (#11 migration, #12 smoke scripts, #13 env docs, #14 handoff) were all logically sequential — each referenced the prior merge's artifact. Creating them serially (each off main, pushed + self-merged before the next) kept `git log` linear and let Supabase Preview's migration bootstrap-chain validate correctly. Creating them as parallel branches would have forced rebases and risked chain breaks. Rule: when PRs build on each other's artifacts, serialize them; only parallelize when the diffs are truly independent.
+_2026-04-22 · Round 64 Phase 4 closeout PRs_
+
+#### Five-tier testing protocol established — pointer to docs/testing-strategy.md
+Round 64 Phase 4 produced the first explicit testing strategy for this repo: Tier 1 static (tsc + build + lint + vitest), Tier 2 unit/integration (vitest on changed files), Tier 3 contract/API (smoke scripts), Tier 4 E2E (Playwright against the Vercel Preview), Tier 5 experiential (AI-as-judge using the "Sarah, 38-year-old busy mom" canonical persona). Per-batch tier selection lives in the batch spec. The "Test plan" section of every PR template should cite which tiers ran. Full protocol + persona in `docs/testing-strategy.md`.
+_2026-04-22 · Round 64 Phase 4 Batch 4.5_
+
 ### Code review
 
 #### Inline synthesis cuts the Lane 4 corner — always spawn the synthesis sub-agent
@@ -365,6 +381,14 @@ _2026-04-21 · Round 64.5 Google OAuth setup_
 #### Resend (and most modern SaaS) API keys are revealed only at creation
 Resend's dashboard and API both hard-refuse to return stored key values once the creation modal closes. If the key wasn't saved immediately, the only path is delete + create new. Standard for Stripe live keys, Twilio auth tokens, etc. Plan to capture keys at creation into a password manager or secrets file, and put that instruction into the user-facing TODO when asking for any API key.
 _2026-04-21 · Round 64.5 Phase C-4_
+
+#### Migrations must declare `-- Previous migration: …` or Supabase Preview blocks every PR
+The Supabase↔GitHub integration refuses to build a preview branch if any migration in the diff has no declared parent — and it blocks the *entire PR's* Supabase Preview check, not just the orphan. PR #6 in Round 64 Phase 4 shipped two unchained migrations which silently gated every subsequent PR's preview for hours until PR #7 backfilled the chain comments. First line of every new `20YYMMDDHHMMSS_slug.sql` must be `-- Previous migration: <filename>` pointing at the most recent migration already on `main`. When merging a branch whose first migration predates `main` HEAD, re-point the chain during merge. Documented in DEPLOYMENT.md §2 "Migration bootstrap-chain rule."
+_2026-04-22 · Round 64 Phase 4 PR #7 bootstrap fix_
+
+#### Three persistent test users are provisioned — use them for Tier 3+ testing
+`bkennington+{customer,provider,admin}@bluekube.com` exist in prod with role assignments pinned via migration `20260422210000`. Passwords live in `.claude/settings.local.json` (gitignored) and are placeholders in `.claude/settings.local.example.json`. Two smoke scripts verify: `scripts/smoke-auth-roles.sh` hits the DB-level view `bkennington_profile_roles`; `scripts/smoke-auth.mjs` logs in via the JS SDK and asserts the role. New Tier 3/4 tests should reuse these accounts rather than provisioning per-test users.
+_2026-04-22 · Round 64 Phase 4 PRs #11–#12_
 
 ### Agent calibration & signals
 

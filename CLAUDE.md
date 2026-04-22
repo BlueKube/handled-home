@@ -16,6 +16,7 @@ Do not look here for what this project is. Look here:
 | What features exist and what's shipped? | `docs/feature-list.md` |
 | What do the screens look like? | `docs/screen-flows.md` |
 | How do we build it? | `WORKFLOW.md` |
+| How do we verify it works? | `docs/testing-strategy.md` |
 | How does the business run? | `docs/operating-model.md` *(add when model is defined)* |
 | What routes and roles exist? | `docs/app-flow-pages-and-roles.md` *(add when 10+ pages)* |
 | What are the design standards? | `docs/design-guidelines.md` *(add when design system solidifies)* |
@@ -33,6 +34,7 @@ Read `docs/masterplan.md` at the start of every session. It is the foundational 
 | `docs/masterplan.md` | Human (Define Agent) | Product vision, problem statement, value prop, business model, target users |
 | `docs/feature-list.md` | Human + Implementation Agent | Numbered capability inventory with DONE / IN PROGRESS / PLANNED / DEFERRED status |
 | `docs/screen-flows.md` | Human (Define Agent) | Every screen's layout, components, navigation, empty states, loading states |
+| `docs/testing-strategy.md` | Implementation Agent + Human | Five-tier testing protocol (static → unit → integration → E2E → AI-as-judge), canonical personas, per-batch tier selection, pre-merge checklist |
 
 ### Optional (add as the project matures)
 
@@ -71,6 +73,7 @@ Read `docs/masterplan.md` at the start of every session. It is the foundational 
 | Route tree and access control | `docs/app-flow-pages-and-roles.md` |
 | Design system and patterns | `docs/design-guidelines.md` |
 | Workflow procedure | `WORKFLOW.md` |
+| Testing tiers, personas, pre-merge checklist | `docs/testing-strategy.md` |
 | Repo and agent instructions | `CLAUDE.md` (this file) |
 | Active phase plan and batch progress | `docs/working/plan.md` |
 | Round scope, phase definitions (PRDs) | `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` |
@@ -610,6 +613,52 @@ docs: sync documentation after phase N         # Documentation sync
 `<scope>` is a short area identifier (e.g., `auth`, `dashboard`, `billing`).
 
 Every commit message should be self-contained — a future agent reading `git log` should understand what was done without opening the diff.
+
+### Pull request flow
+
+Every batch ships as a PR — the push-then-PR loop is the default for all feature branches.
+
+1. **Push the feature branch** — `git push -u origin <branch>`.
+2. **Open a PR against `main`** as ready-for-review (not draft). Body = summary + test plan + session link, per the template in this file's "Creating pull requests" section.
+3. **Wait for CI by polling, not by assuming.** Call `mcp__github__pull_request_read` with `method: "get_check_runs"`. Do not assume success just because no failure webhook arrived — silent passes are common.
+4. **Run the pre-merge checklist** (below) before merging.
+5. **Merge** — self-merge authority applies (see below), or request human review if the checklist flags ambiguity.
+6. **Sync main locally** — `git checkout main && git pull origin main` so the next branch starts from the merged state.
+
+### Pre-merge checklist
+
+Run through this list *after* CI returns green and *before* calling `merge_pull_request`. The Implementation Agent has self-merge authority once every box is true.
+
+- [ ] **CI check_runs all terminal.** No `queued` / `in_progress`. Vercel Preview = `success` (or `skipped` with a documented reason). Supabase Preview = `success` or `skipped` (skips when the diff touches no `supabase/` files).
+- [ ] **Tier 1 gates pass locally** — `npx tsc --noEmit`, `npm run build`, `npm run lint`, `npm test` (if tests changed). See `docs/testing-strategy.md` for the full tier map.
+- [ ] **Review protocol complete** — Sized per CLAUDE.md §5. Lane 4 synthesis ran as a sub-agent, not inline. All MUST-FIX findings resolved or explicitly deferred with `[OVERRIDE: ...]` in the commit.
+- [ ] **Doc sync current** — `docs/working/plan.md` progress table reflects this batch. `docs/feature-list.md` updated if a feature moved state. North-star docs still truthful.
+- [ ] **Migrations applied or documented** — If the PR touches `supabase/migrations/`, either the GitHub↔Supabase integration will apply on merge (verify the preview check didn't skip), or the PR body explicitly documents manual apply steps.
+- [ ] **No unresolved review threads.** Check `mcp__github__pull_request_read` with `method: "get_review_comments"` before merging. Bot-only comments (Vercel / Supabase status echoes) don't count.
+- [ ] **Blast radius understood** — Read the diff one more time. A PR that seemed "docs-only" but touches `.github/workflows/`, `vercel.json`, `supabase/config.toml`, or `.mcp.json` is not docs-only; escalate if you're not sure.
+
+If any box is false, fix first or ask the human. Never green-light a merge on a passing-but-incomplete checklist.
+
+### Self-merge authority
+
+The Implementation Agent may merge its own PRs when every pre-merge box is checked. No second human approval is required for:
+
+- Doc-only PRs (changes under `docs/`, `CLAUDE.md`, `WORKFLOW.md`, `DEPLOYMENT.md`, `README.md`, `lessons-learned.md`).
+- Test, scaffolding, and tooling changes under `scripts/`, `.claude/`, `supabase/functions/_shared/`, test files.
+- Batch-level feature PRs that passed the review protocol and have a decomposed spec in `docs/working/batch-specs/`.
+
+Escalate to the human instead of self-merging when:
+
+- The PR touches auth boundaries, payment flows, RLS policies, or destructive SQL (DROP, DELETE without WHERE, TRUNCATE).
+- A review lane flagged a MUST-FIX that can't be resolved without product-level input.
+- The diff drifts from the batch spec and the drift isn't a pure find-and-replace.
+- CI is red and you can't see a narrow, safe fix.
+
+Always prefer `merge_method: "merge"` unless the repo convention says otherwise. Squash-merges destroy the batch-level `git log` history that Lane 3 relies on.
+
+### Actively poll CI, don't wait on webhooks
+
+Webhooks announce *failures* reliably; silent *successes* arrive late or not at all. After pushing, call `mcp__github__pull_request_read` with `method: "get_check_runs"` directly. This shaved 5–15 minutes per PR across the 9 merged in Round 64 Phase 4.
 
 ---
 
