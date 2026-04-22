@@ -187,6 +187,9 @@ Round 64 writes new migrations into `supabase/migrations/`. Post-Round-64.5 thes
 
 ### Phase 4 Snap-a-Fix deploy tasks (2026-04-22)
 
+- [ ] **Enable "Automatically delete head branches" in repo settings (2026-04-22)** — GitHub → Repo Settings → General → Pull Requests → toggle ON. The sandbox git proxy returns HTTP 403 on `git push --delete`, so the agent can't clean up merged branches itself. After enabling, every merged PR's branch is auto-deleted. One-time manual sweep needed for these 6 stale branches already on origin: `chore/assign-bkennington-test-user-roles`, `chore/auth-smoke-scripts`, `claude/phase-4-snap-a-fix-CJKXs`, `docs/session-handoff-post-phase-4`, `docs/settings-local-playwright-envs`, `docs/workflow-testing-harness-captures`.
+  - **Why:** Stale remote branches clutter the Branches view and make it harder to see what's actually in flight.
+  - **Blocked:** Nothing — cosmetic cleanup + future ergonomics.
 - [ ] **Deploy snap-ai-classify (Phase 4 Batch 4.3)** — After PR #9 merged to main, run `supabase functions deploy snap-ai-classify`. Migration `20260422100000_ai_inference_runs_snap_support.sql` auto-applies via GitHub integration. Verify `ANTHROPIC_API_KEY` is already in project Edge Function Secrets (should be — `support-ai-classify` uses it).
 - [ ] **Smoke-test Phase 4 routing RPCs in prod (Phase 4 Batch 4.4)** — After PR #10 merges, migration `20260422200000_snap_routing.sql` creates `dispatch_requests` + `handle_snap_routing(uuid)` + `resolve_snap(uuid, int, bool)`. Run in Supabase SQL editor:
   ```sql
