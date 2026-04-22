@@ -2,19 +2,43 @@ import { useEffect, useRef, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Camera, CheckCircle2, Bath, ChefHat, Trees, Home, HelpCircle, Zap, CalendarDays } from "lucide-react";
 import {
-  useSubmitSnap,
-  type SnapArea,
-  type SnapRouting,
-  SNAP_HOLD_DEFAULTS,
-} from "@/hooks/useSubmitSnap";
+  Camera,
+  CheckCircle2,
+  Bath,
+  ChefHat,
+  Trees,
+  Home,
+  HelpCircle,
+  Zap,
+  CalendarDays,
+  Loader2,
+  Sparkles,
+} from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import {
+  useCreateSnapDraft,
+  cleanupSnapDraft,
+  type SnapArea,
+  type SnapDraft,
+} from "@/hooks/useCreateSnapDraft";
+import { useClassifySnap, type SnapClassification } from "@/hooks/useClassifySnap";
+import { useFinalizeSnap, type SnapRouting } from "@/hooks/useFinalizeSnap";
 
 interface SnapSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+// Fallback credit holds when AI classification isn't available.
+const FALLBACK_HOLD: Record<SnapRouting, number> = {
+  next_visit: 120,
+  ad_hoc: 200,
+};
+
+// Multiplier applied to AI-suggested credits so the hold covers unexpected
+// scope (refund is issued if actual < held).
+const AD_HOC_PREMIUM = 1.2;
 
 const AREAS: { value: SnapArea; label: string; Icon: React.ElementType }[] = [
   { value: "bath", label: "Bath", Icon: Bath },
@@ -24,6 +48,15 @@ const AREAS: { value: SnapArea; label: string; Icon: React.ElementType }[] = [
   { value: "other", label: "Other", Icon: HelpCircle },
 ];
 
+function routingHoldAmount(
+  routing: SnapRouting,
+  classification: SnapClassification | null,
+): number {
+  if (!classification) return FALLBACK_HOLD[routing];
+  const base = classification.suggested_credits;
+  return routing === "ad_hoc" ? Math.round(base * AD_HOC_PREMIUM) : base;
+}
+
 export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [photo, setPhoto] = useState<File | null>(null);
@@ -31,12 +64,16 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
   const [description, setDescription] = useState("");
   const [area, setArea] = useState<SnapArea | null>(null);
   const [routing, setRouting] = useState<SnapRouting | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const submitMutation = useSubmitSnap();
+  const [draft, setDraft] = useState<SnapDraft | null>(null);
+  const [classification, setClassification] = useState<SnapClassification | null>(null);
+  const [classifyFailed, setClassifyFailed] = useState(false);
+  const [finalized, setFinalized] = useState(false);
 
-  // Guarantee the preview object URL is revoked if the sheet unmounts with
-  // one still live (route change, parent conditional render) — reset() only
-  // runs on explicit close.
+  const fileRef = useRef<HTMLInputElement>(null);
+  const createDraft = useCreateSnapDraft();
+  const classify = useClassifySnap();
+  const finalize = useFinalizeSnap();
+
   useEffect(() => {
     return () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -51,6 +88,19 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
     setDescription("");
     setArea(null);
     setRouting(null);
+    setDraft(null);
+    setClassification(null);
+    setClassifyFailed(false);
+    setFinalized(false);
+  };
+
+  const handleClose = () => {
+    // If the sheet closes with a draft that never got finalized, clean up the
+    // orphan row + uploaded photo. Fire-and-forget — errors are logged inside.
+    if (draft && !finalized) {
+      void cleanupSnapDraft(draft);
+    }
+    reset();
   };
 
   const handlePhotoSelected = (file: File) => {
@@ -60,21 +110,48 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
     setStep(2);
   };
 
-  const handleSubmit = async () => {
-    if (!photo || !routing) return;
+  const handleStep2Continue = async () => {
+    if (!photo) return;
     try {
-      await submitMutation.mutateAsync({
+      const result = await createDraft.mutateAsync({
         file: photo,
         description: description.trim() || undefined,
         area,
-        routing,
-        creditsToHold: SNAP_HOLD_DEFAULTS[routing],
       });
+      setDraft(result);
+      setStep(3);
+      // Kick off classification. Intentionally not awaited — the step-3
+      // render reacts to the mutation state.
+      void classify
+        .mutateAsync({ snapId: result.snapId })
+        .then((res) => setClassification(res))
+        .catch(() => setClassifyFailed(true));
+    } catch (err) {
+      toast({
+        title: "Couldn't upload photo",
+        description: err instanceof Error ? err.message : "Something went wrong",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!draft || !routing) return;
+    const creditsToHold = routingHoldAmount(routing, classification);
+    try {
+      await finalize.mutateAsync({
+        snapId: draft.snapId,
+        subscriptionId: draft.subscriptionId,
+        routing,
+        creditsToHold,
+      });
+      setFinalized(true);
       toast({
         title: "Snap submitted",
-        description: routing === "ad_hoc"
-          ? "We'll dispatch someone soon."
-          : "We'll add this to your next visit.",
+        description:
+          routing === "ad_hoc"
+            ? "We'll dispatch someone soon."
+            : "We'll add this to your next visit.",
       });
       reset();
       onOpenChange(false);
@@ -91,7 +168,7 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
     <Sheet
       open={open}
       onOpenChange={(next) => {
-        if (!next) reset();
+        if (!next) handleClose();
         onOpenChange(next);
       }}
     >
@@ -104,7 +181,7 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
           {step === 1 && (
             <>
               <p className="text-sm text-muted-foreground">
-                Take a photo of whatever needs handling. We'll estimate the credits after you submit.
+                Take a photo of whatever needs handling. We'll estimate the credits before you submit.
               </p>
               <input
                 ref={fileRef}
@@ -170,8 +247,12 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
                 <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>
                   Back
                 </Button>
-                <Button className="flex-1" onClick={() => setStep(3)}>
-                  Continue
+                <Button
+                  className="flex-1"
+                  disabled={createDraft.isPending}
+                  onClick={handleStep2Continue}
+                >
+                  {createDraft.isPending ? "Uploading…" : "Continue"}
                 </Button>
               </div>
             </>
@@ -179,20 +260,53 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
 
           {step === 3 && (
             <>
-              <div className="p-4 rounded-lg border border-border bg-secondary/30 space-y-2">
-                <div className="flex items-center gap-2 text-sm font-medium">
-                  <CheckCircle2 className="h-4 w-4 text-accent" />
-                  Almost ready
+              {classify.isPending && !classification && !classifyFailed && (
+                <div className="p-4 rounded-lg border border-border bg-secondary/30 flex items-start gap-3">
+                  <Loader2 className="h-5 w-5 text-accent animate-spin shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-sm font-medium">Analyzing your photo…</div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Takes a few seconds.
+                    </p>
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  We'll estimate the credits after submit and confirm before they're used.
-                </p>
-              </div>
+              )}
+
+              {classification && (
+                <div className="p-4 rounded-lg border border-accent/40 bg-accent/5 space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Sparkles className="h-4 w-4 text-accent" />
+                    We think…
+                  </div>
+                  <p className="text-base">{classification.summary}</p>
+                  <p className="text-sm text-muted-foreground">
+                    About <span className="font-semibold text-foreground">{classification.suggested_credits} credits</span>{" "}
+                    — confirm on the next step.
+                  </p>
+                </div>
+              )}
+
+              {classifyFailed && !classification && (
+                <div className="p-4 rounded-lg border border-border bg-secondary/30 space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <CheckCircle2 className="h-4 w-4 text-accent" />
+                    Almost ready
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    We couldn't auto-estimate this one — you'll see a default hold on the next step. Refunds apply if the fix needs fewer credits.
+                  </p>
+                </div>
+              )}
+
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1" onClick={() => setStep(2)}>
                   Back
                 </Button>
-                <Button className="flex-1" onClick={() => setStep(4)}>
+                <Button
+                  className="flex-1"
+                  disabled={classify.isPending && !classifyFailed}
+                  onClick={() => setStep(4)}
+                >
                   Continue
                 </Button>
               </div>
@@ -205,6 +319,7 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
               <div className="space-y-2">
                 <button
                   onClick={() => setRouting("ad_hoc")}
+                  aria-pressed={routing === "ad_hoc"}
                   className={`w-full text-left p-3 rounded-lg border transition-colors ${
                     routing === "ad_hoc"
                       ? "border-accent bg-accent/10"
@@ -217,7 +332,7 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
                       <div className="flex items-baseline justify-between">
                         <span className="text-sm font-semibold">Urgent</span>
                         <span className="text-xs text-muted-foreground">
-                          ~{SNAP_HOLD_DEFAULTS.ad_hoc} credits held
+                          ~{routingHoldAmount("ad_hoc", classification)} credits held
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">
@@ -228,6 +343,7 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
                 </button>
                 <button
                   onClick={() => setRouting("next_visit")}
+                  aria-pressed={routing === "next_visit"}
                   className={`w-full text-left p-3 rounded-lg border transition-colors ${
                     routing === "next_visit"
                       ? "border-accent bg-accent/10"
@@ -240,7 +356,7 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
                       <div className="flex items-baseline justify-between">
                         <span className="text-sm font-semibold">Next visit</span>
                         <span className="text-xs text-muted-foreground">
-                          ~{SNAP_HOLD_DEFAULTS.next_visit} credits held
+                          ~{routingHoldAmount("next_visit", classification)} credits held
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">
@@ -259,10 +375,10 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
                 </Button>
                 <Button
                   className="flex-1"
-                  disabled={!routing || submitMutation.isPending}
+                  disabled={!routing || finalize.isPending}
                   onClick={handleSubmit}
                 >
-                  {submitMutation.isPending ? "Submitting…" : "Submit"}
+                  {finalize.isPending ? "Submitting…" : "Submit"}
                 </Button>
               </div>
             </>
