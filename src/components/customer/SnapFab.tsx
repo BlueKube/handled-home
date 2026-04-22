@@ -13,7 +13,8 @@ export function SnapFab() {
       <button
         onClick={() => setOpen(true)}
         aria-label="Snap a fix"
-        className="fixed bottom-16 left-1/2 -translate-x-1/2 z-50 h-14 w-14 rounded-full bg-accent text-accent-foreground shadow-lg shadow-accent/30 flex items-center justify-center transition-transform duration-150 active:scale-90 hover:shadow-accent/50 safe-bottom"
+        style={{ bottom: "calc(4rem + env(safe-area-inset-bottom, 0px))" }}
+        className="fixed left-1/2 -translate-x-1/2 z-50 h-14 w-14 rounded-full bg-accent text-accent-foreground shadow-lg shadow-accent/30 flex items-center justify-center transition-transform duration-150 active:scale-90 hover:shadow-accent/50"
       >
         <Camera className="h-6 w-6" strokeWidth={2.5} />
       </button>

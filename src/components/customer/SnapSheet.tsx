@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,6 +33,15 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
   const [routing, setRouting] = useState<SnapRouting | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const submitMutation = useSubmitSnap();
+
+  // Guarantee the preview object URL is revoked if the sheet unmounts with
+  // one still live (route change, parent conditional render) — reset() only
+  // runs on explicit close.
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
 
   const reset = () => {
     setStep(1);
@@ -128,7 +137,8 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
                 </p>
                 <Textarea
                   value={description}
-                  onChange={(e) => setDescription(e.target.value.slice(0, 280))}
+                  maxLength={280}
+                  onChange={(e) => setDescription(e.target.value)}
                   placeholder="e.g. leaky under the sink, been happening for a few days"
                   rows={3}
                 />
@@ -143,6 +153,7 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
                     <button
                       key={value}
                       onClick={() => setArea(value)}
+                      aria-pressed={area === value}
                       className={`flex items-center gap-1.5 px-3 py-2 rounded-full border text-sm transition-colors ${
                         area === value
                           ? "border-accent bg-accent/10 text-accent"

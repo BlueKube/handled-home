@@ -76,8 +76,9 @@ export function useSubmitSnap() {
           credits_held: creditsToHold,
         });
       if (insertErr) {
-        // Best-effort cleanup of the uploaded object.
-        await supabase.storage.from("snap-photos").remove([path]);
+        // Best-effort cleanup of the uploaded object; ignore cleanup errors
+        // so the original failure surfaces.
+        await supabase.storage.from("snap-photos").remove([path]).catch(() => {});
         throw insertErr;
       }
 
@@ -92,16 +93,22 @@ export function useSubmitSnap() {
           p_reference_id: snapId,
         },
       );
+      const rollback = async () => {
+        await (supabase.from("snap_requests") as any).delete().eq("id", snapId).then(
+          () => {},
+          () => {},
+        );
+        await supabase.storage.from("snap-photos").remove([path]).catch(() => {});
+      };
+
       if (spendErr) {
-        await (supabase.from("snap_requests") as any).delete().eq("id", snapId);
-        await supabase.storage.from("snap-photos").remove([path]);
+        await rollback();
         throw spendErr;
       }
 
       const result = spendResult as { success: boolean; error?: string; new_balance?: number };
       if (!result.success) {
-        await (supabase.from("snap_requests") as any).delete().eq("id", snapId);
-        await supabase.storage.from("snap-photos").remove([path]);
+        await rollback();
         if (result.error === "insufficient_handles") {
           throw new Error("Not enough credits to submit this snap.");
         }
@@ -111,8 +118,12 @@ export function useSubmitSnap() {
       return { snapId, newBalance: result.new_balance ?? 0 };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["subscription", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["handle_transactions", user?.id] });
+      // Prefix-match invalidations to pick up every variant of these keys
+      // (subscription-id-suffixed, user-id-suffixed, etc.). Matches the
+      // pattern used by useAddonSuggestions / useHomeAssistant.
+      queryClient.invalidateQueries({ queryKey: ["subscription"] });
+      queryClient.invalidateQueries({ queryKey: ["handle_balance"] });
+      queryClient.invalidateQueries({ queryKey: ["handle_transactions"] });
     },
   });
 }
