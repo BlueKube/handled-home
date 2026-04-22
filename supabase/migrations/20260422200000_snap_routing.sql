@@ -117,7 +117,12 @@ DECLARE
   v_dispatch_id uuid;
   v_urgency text;
 BEGIN
-  SELECT * INTO v_snap FROM snap_requests WHERE id = p_snap_request_id;
+  -- Lock the snap row for the remainder of the transaction so two
+  -- concurrent route calls can't both pass the state-guard and double-
+  -- route. Second caller waits; when it resumes, the guard below fires
+  -- with 'already_routed' because the winner set status.
+  SELECT * INTO v_snap FROM snap_requests WHERE id = p_snap_request_id
+    FOR UPDATE;
   IF NOT FOUND THEN
     RETURN jsonb_build_object('success', false, 'error', 'snap_not_found');
   END IF;
@@ -146,32 +151,50 @@ BEGIN
   v_urgency := COALESCE(v_snap.ai_classification->>'urgency_signal', 'medium');
 
   IF v_snap.routing = 'next_visit' THEN
-    SELECT j.id INTO v_next_job
-    FROM jobs j
-    WHERE j.customer_id = v_snap.customer_id
-      AND j.property_id = v_snap.property_id
-      AND j.scheduled_date >= CURRENT_DATE
-      AND j.status IN ('NOT_STARTED','IN_PROGRESS')
-    ORDER BY j.scheduled_date ASC, j.created_at ASC
-    LIMIT 1;
+    -- INSERT...SELECT pattern so the job_tasks row only lands if the
+    -- target job still satisfies the status predicate at write time.
+    -- Narrows the job-status TOCTOU window to a single statement.
+    WITH target AS (
+      SELECT j.id
+      FROM jobs j
+      WHERE j.customer_id = v_snap.customer_id
+        AND j.property_id = v_snap.property_id
+        AND j.scheduled_date >= CURRENT_DATE
+        AND j.status IN ('NOT_STARTED','IN_PROGRESS')
+      ORDER BY j.scheduled_date ASC, j.created_at ASC
+      LIMIT 1
+    )
+    INSERT INTO job_tasks (
+      job_id, task_type, snap_request_id, description, credits_estimated, status
+    )
+    SELECT t.id, 'snap', v_snap.id,
+           COALESCE(v_snap.ai_classification->>'summary', v_snap.description),
+           v_snap.credits_held, 'pending'
+    FROM target t
+    RETURNING job_id INTO v_next_job;
 
     IF v_next_job IS NULL THEN
       RETURN jsonb_build_object('success', false, 'error', 'no_upcoming_job');
     END IF;
 
-    INSERT INTO job_tasks (
-      job_id, task_type, snap_request_id, description, credits_estimated, status
-    ) VALUES (
-      v_next_job, 'snap', v_snap.id,
-      COALESCE(v_snap.ai_classification->>'summary', v_snap.description),
-      v_snap.credits_held, 'pending'
-    );
-
+    -- Status-transition guard — FOR UPDATE above already serializes us,
+    -- but the explicit predicate makes the invariant self-documenting
+    -- and protects against future refactors.
     UPDATE snap_requests
     SET linked_job_id = v_next_job,
         status = 'scheduled',
         updated_at = now()
-    WHERE id = v_snap.id;
+    WHERE id = v_snap.id
+      AND status IN ('submitted','triaged');
+
+    IF NOT FOUND THEN
+      -- Concurrency escape hatch: another caller won. Back out the task
+      -- insert so we don't leave a dangling job_task for a snap whose
+      -- status no longer claims it.
+      DELETE FROM job_tasks
+      WHERE snap_request_id = v_snap.id AND job_id = v_next_job;
+      RETURN jsonb_build_object('success', false, 'error', 'already_routed');
+    END IF;
 
     RETURN jsonb_build_object(
       'success', true,
@@ -189,7 +212,13 @@ BEGIN
 
     UPDATE snap_requests
     SET status = 'dispatched', updated_at = now()
-    WHERE id = v_snap.id;
+    WHERE id = v_snap.id
+      AND status IN ('submitted','triaged');
+
+    IF NOT FOUND THEN
+      DELETE FROM dispatch_requests WHERE id = v_dispatch_id;
+      RETURN jsonb_build_object('success', false, 'error', 'already_routed');
+    END IF;
 
     RETURN jsonb_build_object(
       'success', true,
@@ -239,7 +268,12 @@ DECLARE
   v_refund_amount int;
   v_is_service_caller boolean := (v_caller IS NULL);
 BEGIN
-  SELECT * INTO v_snap FROM snap_requests WHERE id = p_snap_request_id;
+  -- Lock the snap row. Serializes concurrent resolve_snap calls so only
+  -- one caller can transition from an open status to resolved/canceled,
+  -- preventing double-refund. Second caller, on resume, re-reads v_snap
+  -- with the updated status and hits already_resolved below.
+  SELECT * INTO v_snap FROM snap_requests WHERE id = p_snap_request_id
+    FOR UPDATE;
   IF NOT FOUND THEN
     RETURN jsonb_build_object('success', false, 'error', 'snap_not_found');
   END IF;
@@ -259,6 +293,22 @@ BEGIN
   END IF;
 
   IF p_canceled THEN
+    -- Transition first with a status guard. Only the caller whose UPDATE
+    -- actually flips the row issues the refund.
+    UPDATE snap_requests
+    SET status = 'canceled',
+        credits_actual = 0,
+        resolved_at = now(),
+        updated_at = now()
+    WHERE id = v_snap.id
+      AND status NOT IN ('resolved','canceled');
+    IF NOT FOUND THEN
+      RETURN jsonb_build_object(
+        'success', false,
+        'error', 'already_resolved'
+      );
+    END IF;
+
     IF v_snap.credits_held > 0 AND v_snap.subscription_id IS NOT NULL THEN
       PERFORM refund_handles(
         v_snap.subscription_id,
@@ -268,13 +318,6 @@ BEGIN
         NULL
       );
     END IF;
-
-    UPDATE snap_requests
-    SET status = 'canceled',
-        credits_actual = 0,
-        resolved_at = now(),
-        updated_at = now()
-    WHERE id = v_snap.id;
 
     RETURN jsonb_build_object(
       'success', true,
@@ -295,7 +338,14 @@ BEGIN
       status = 'resolved',
       resolved_at = now(),
       updated_at = now()
-  WHERE id = v_snap.id;
+  WHERE id = v_snap.id
+    AND status NOT IN ('resolved','canceled');
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object(
+      'success', false,
+      'error', 'already_resolved'
+    );
+  END IF;
 
   IF v_final_actual < v_snap.credits_held AND v_snap.subscription_id IS NOT NULL THEN
     v_refund_amount := v_snap.credits_held - v_final_actual;
@@ -317,7 +367,8 @@ BEGIN
   RETURN jsonb_build_object(
     'success', true,
     'resolution', 'resolved_full',
-    'credits_actual', v_final_actual
+    'credits_actual', v_final_actual,
+    'refunded', 0
   );
 END;
 $$;

@@ -3,8 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type CancelSnapResult = {
   success: true;
-  resolution: "canceled";
+  resolution: "canceled" | "already_resolved";
   refunded: number;
+  /** Server-reported status when `resolution === 'already_resolved'`. */
+  priorStatus?: string;
 };
 
 // Parse the raw (data, error) pair from supabase.rpc("resolve_snap", ...
@@ -24,7 +26,16 @@ export function parseCancelSnapResponse(
 
   if (result.success === false) {
     if (result.error === "already_resolved") {
-      return { success: true, resolution: "canceled", refunded: 0 };
+      // Idempotent-safe for SnapSheet's refund-on-failure path, but
+      // don't lie about the prior state — surface the server-reported
+      // status so a caller that cares (admin UI, audit log) can tell
+      // whether the snap had been completed or actually canceled.
+      return {
+        success: true,
+        resolution: "already_resolved",
+        refunded: 0,
+        priorStatus: result.status,
+      };
     }
     throw new Error(result.error ?? "Cancel failed");
   }

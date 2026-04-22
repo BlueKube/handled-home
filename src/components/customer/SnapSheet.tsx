@@ -237,10 +237,26 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
           setRouting("ad_hoc");
           return;
         }
-        // Any other routing failure — refund credits (best effort) and
-        // surface the error. Sheet stays open so the user can see the toast.
-        await cancelSnap.mutateAsync({ snapId: draft.snapId }).catch(() => {});
-        setFinalized(false);
+        // Any other routing failure — attempt to refund credits. If the
+        // refund itself fails, leave `finalized=true` so a user retry
+        // doesn't re-enter finalize and double-hold; surface a distinct
+        // toast so the customer knows support-intervention may be needed.
+        // (Sheet stays open either way.)
+        try {
+          await cancelSnap.mutateAsync({ snapId: draft.snapId });
+          // Refund succeeded — safe to clear finalized so a retry can
+          // re-run the full flow from the top.
+          setFinalized(false);
+        } catch {
+          toast({
+            title: "Routing failed — refund pending",
+            description:
+              "We couldn't release your credits automatically. Contact support if they don't return within a few minutes.",
+            variant: "destructive",
+          });
+          // Don't clear finalized — a retry would otherwise re-hold
+          // credits on top of the existing hold.
+        }
         throw routeErr;
       }
 
@@ -473,10 +489,21 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
                 </Button>
                 <Button
                   className="flex-1"
-                  disabled={!routing || finalize.isPending}
+                  disabled={
+                    !routing ||
+                    finalize.isPending ||
+                    routeSnap.isPending ||
+                    cancelSnap.isPending
+                  }
                   onClick={handleSubmit}
                 >
-                  {finalize.isPending ? "Submitting…" : "Submit"}
+                  {finalize.isPending
+                    ? "Holding credits…"
+                    : routeSnap.isPending
+                      ? "Routing…"
+                      : cancelSnap.isPending
+                        ? "Refunding…"
+                        : "Submit"}
                 </Button>
               </div>
             </>

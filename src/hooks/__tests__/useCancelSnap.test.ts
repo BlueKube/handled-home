@@ -14,18 +14,22 @@ describe("parseCancelSnapResponse", () => {
     });
   });
 
-  it("treats {success:false, error:'already_resolved'} as a zero-refund success (idempotent)", () => {
+  it("treats {success:false, error:'already_resolved'} as a zero-refund success and preserves prior status", () => {
     // SnapSheet calls cancelSnap in the refund-on-route-failure path and
     // may also double-fire on error-recovery flows; treating
-    // already_resolved as success keeps that path safe.
+    // already_resolved as success keeps that path safe. The `resolution`
+    // field surfaces that it was not a fresh cancel and `priorStatus`
+    // echoes the server's real status so auditors can tell whether the
+    // prior resolution was a completion or an earlier cancel.
     const result = parseCancelSnapResponse(
       { success: false, error: "already_resolved", status: "resolved" },
       null,
     );
     expect(result).toEqual({
       success: true,
-      resolution: "canceled",
+      resolution: "already_resolved",
       refunded: 0,
+      priorStatus: "resolved",
     });
   });
 
