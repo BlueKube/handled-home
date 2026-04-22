@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { compressImage } from "@/lib/imageCompression";
 
 export function useJobActions(jobId: string | undefined) {
   const queryClient = useQueryClient();
@@ -182,32 +183,4 @@ export function useJobActions(jobId: string | undefined) {
   });
 
   return { startJob, updateChecklistItem, uploadPhoto, retryUpload, reportIssue, completeJob, recordArrival, recordDeparture };
-}
-
-// Canvas-based image compression
-async function compressImage(file: File, maxDim: number): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      let { width, height } = img;
-      if (width > maxDim || height > maxDim) {
-        const ratio = Math.min(maxDim / width, maxDim / height);
-        width = Math.round(width * ratio);
-        height = Math.round(height * ratio);
-      }
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return reject(new Error("No canvas context"));
-      ctx.drawImage(img, 0, 0, width, height);
-      canvas.toBlob(
-        (blob) => (blob ? resolve(blob) : reject(new Error("Compression failed"))),
-        "image/jpeg",
-        0.85
-      );
-    };
-    img.onerror = reject;
-    img.src = URL.createObjectURL(file);
-  });
 }
