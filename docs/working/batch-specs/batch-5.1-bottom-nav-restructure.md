@@ -52,7 +52,7 @@ For Batch 5.1 we ship the nav restructure + legacy route redirects. The AvatarDr
 4. Tapping `Services` navigates to `/customer/services`.
 5. Tapping `Visits` navigates to `/customer/visits` and the existing Activity content renders (temporary; 5.3 replaces).
 6. Tapping `Help` navigates to `/customer/help` → redirects to `/customer/support`.
-7. Visiting `/customer/more` redirects to `/customer`.
+7. Visiting `/customer/more` redirects to `/customer?drawer=true`. The `?drawer=true` query param is documented for Batch 5.2's `AvatarDrawer` to consume on landing so the drawer auto-opens (preserves the "More" tap intent).
 8. Visiting `/customer/routine` redirects to `/customer/services`.
 9. Visiting `/customer/activity` redirects to `/customer/visits`.
 10. Sub-routes `/customer/routine/review`, `/customer/routine/confirm`, `/customer/visits/:jobId` continue to render their current components (no regression).

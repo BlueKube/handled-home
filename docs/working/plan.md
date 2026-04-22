@@ -19,7 +19,7 @@ Doing Phase 5 first avoids re-doing cross-cutting nav + VisitDetail work later.
 
 | Batch | Title | Size | Status | Context |
 |-------|-------|------|--------|---------|
-| 5.1 | BottomTabBar 4-tab restructure + center Snap FAB + legacy route redirects | M | ⬜ | |
+| 5.1 | BottomTabBar 4-tab restructure + center Snap FAB + legacy route redirects | M | ✅ | TBD |
 | 5.2 | AvatarDrawer + AppHeader integration (plan/billing/credits/account/referrals/help in drawer) | M | ⬜ | |
 | 5.3 | `/customer/services` + `/customer/visits` page shells (consume existing data) | M | ⬜ | |
 | 5.4 | VisitDetail three-mode rewrite (preview / live / complete) + type chips | L | ⬜ | |
@@ -81,9 +81,9 @@ Each batch ships as its own PR against `main`, following `BlueKube/handled-home`
 
 ## Session Handoff
 
-- **Branch at session end:** Update per progress — starts on `claude/resume-handled-home-Hz1Se` / `main`. Each batch creates its own feature branch.
-- **Last completed:** Session seeded; Batch 5.1 starting.
-- **Next up:** Batch 5.1 — BottomTabBar 4-tab restructure + center Snap FAB + legacy route redirects.
+- **Branch at session end:** `feat/round-64-phase-5-batch-5.1-bottom-nav` — PR #17 open, CI terminal-green (Vercel Preview ✅, Supabase Preview ✅ skipped), Medium-tier review complete (zero MUST/SHOULD-FIX), pending self-merge.
+- **Last completed:** Batch 5.1 shipped to PR #17 with review complete. Doc-sync amendments applied.
+- **Next up:** Self-merge PR #17 (after this doc-sync commit lands); then Batch 5.2 — AvatarDrawer + AppHeader integration.
 - **Context at exit:** TBD — check `/context` after each batch.
-- **Blockers:** Per blockers still in play (sandbox egress, Tier 3 Playwright requires preview URL). Same as prior session.
-- **Round progress:** Phases 1–4 ✅ · Phase 5 starting · Phases 6–8 ⬜.
+- **Blockers:** Same as prior session (sandbox egress + Tier 3 Playwright requires preview URL).
+- **Round progress:** Phases 1–4 ✅ · Phase 5: Batch 5.1 ✅ (pending merge) · Batches 5.2–5.5 ⬜ · Phases 6–8 ⬜.
