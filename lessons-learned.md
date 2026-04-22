@@ -284,9 +284,9 @@ _2026-04-22 · Batch 3.4 Lane 2 SHOULD-FIX — AutopaySection_
 Vite loads `.env` via `dotenv`, and dotenv does not overwrite already-set environment variables. Vercel's injected env vars always beat whatever's committed. The committed `.env` is a fallback, not a source of truth — production can target a different Supabase project and nothing warns you. When cutting over projects, keep the committed `.env` aligned with Vercel's Production vars as hygiene.
 _2026-04-21 · Round 64.5 Phase D-3 / F_
 
-#### Query params are lost across the auth-guard redirect — carry intent in session storage
-Redirects that encode intent in query params (`/customer/more` → `/customer?drawer=true` so `AvatarDrawer` auto-opens) will silently lose the param for unauthenticated deep-links. The flow is: deep-link → `ProtectedRoute` bounces to `/auth` → after login, the router lands at the role's default URL (`/customer`), not the original intent URL. Work around by stashing the intent in `sessionStorage` on the redirect render and consuming it at the target, or by including the full redirect URL in the auth return-to path. First noticed on the `/customer/more` → drawer redirect in Batch 5.1; Batch 5.2's `AvatarDrawer` will need to handle the stash pattern.
-_2026-04-22 · Round 64 Phase 5 Batch 5.1 synthesis gap finding_
+#### `?redirect=` on ProtectedRoute preserves query params through the auth bounce
+`ProtectedRoute.tsx` encodes the full `pathname + search + hash` into `/auth?redirect=...`, and `AuthPage.tsx` consumes it post-login. So a deep link like `/customer/more?drawer=true` does survive the unauthenticated flow intact — the user lands back at the original URL, which React Router then redirects (Batch 5.1) to `/customer?drawer=true`, and `AvatarDrawer` (Batch 5.2) reads the param and auto-opens. Do NOT reach for sessionStorage stash patterns before verifying whether `ProtectedRoute`'s `?redirect=` already covers the case — a prior Batch 5.1 Lane 4 synthesis flagged this as a gap and it was a false positive. If you add a new auth-guarded route, double-check that it goes through `ProtectedRoute` (not a bespoke bounce) and you inherit this behavior for free.
+_2026-04-22 · Round 64 Phase 5 Batch 5.2 investigation (supersedes Batch 5.1 entry above)_
 
 ### Backend / DB / RPCs / Edge functions
 
