@@ -21,7 +21,12 @@ export function useClassifySnap() {
         body: { snap_request_id: snapId },
       });
 
-      if (error) throw new Error(error.message ?? "Classification failed");
+      if (error) {
+        // FunctionsFetchError / FunctionsRelayError don't reliably expose
+        // .message — fall back to String(error) so we never throw a
+        // "Classification failed" with a silent cause.
+        throw new Error(error?.message ?? String(error));
+      }
 
       const result = data as (SnapClassification & { success?: boolean; error?: string }) | null;
       if (!result) throw new Error("Empty response from classify");

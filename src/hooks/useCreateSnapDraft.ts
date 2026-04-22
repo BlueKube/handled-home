@@ -83,12 +83,37 @@ export function useCreateSnapDraft() {
 
 // Cleanup for drafts that never got finalized — customer closed the sheet
 // mid-flow. Fire-and-forget; errors are logged but don't surface.
+//
+// Race guard (Lane 4 M1, Batch 4.3): the row DELETE already filters on
+// credits_held=0 so a finalized row survives, but the storage DELETE has no
+// equivalent condition. Read the DB state first and short-circuit entirely
+// when credits_held > 0 — this protects the photo of a finalized snap if
+// the user closes the sheet in the microsecond window between spend_handles
+// succeeding and React flipping `finalized`.
 export async function cleanupSnapDraft(draft: SnapDraft): Promise<void> {
+  try {
+    const { data, error } = await (supabase.from("snap_requests") as any)
+      .select("credits_held")
+      .eq("id", draft.snapId)
+      .maybeSingle();
+    if (error) {
+      console.warn("cleanupSnapDraft state read failed:", error);
+      return;
+    }
+    if (!data || (data as { credits_held: number }).credits_held > 0) {
+      // Row was finalized or already gone — leave both the row and the photo.
+      return;
+    }
+  } catch (err) {
+    console.warn("cleanupSnapDraft state read threw:", err);
+    return;
+  }
+
   try {
     await (supabase.from("snap_requests") as any)
       .delete()
       .eq("id", draft.snapId)
-      .eq("credits_held", 0); // safety: never delete a finalized snap
+      .eq("credits_held", 0);
   } catch (err) {
     console.warn("cleanupSnapDraft row delete failed:", err);
   }

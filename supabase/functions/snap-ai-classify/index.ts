@@ -125,6 +125,11 @@ serve(async (req) => {
     }
 
     const photoUrls = signed.map((s) => s.signedUrl).filter(Boolean);
+    if (photoUrls.length < paths.length) {
+      console.warn(
+        `snap-ai-classify: requested ${paths.length} signed URLs, got ${photoUrls.length}`,
+      );
+    }
 
     const systemPrompt = `You are a helpful triage assistant for Handled Home, a residential home-maintenance marketplace. A customer just snapped a photo of something that needs fixing and you need to classify it before they commit credits.
 

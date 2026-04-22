@@ -73,12 +73,27 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
   const createDraft = useCreateSnapDraft();
   const classify = useClassifySnap();
   const finalize = useFinalizeSnap();
+  // Monotonically increasing generation counter — any classify result for a
+  // generation older than the current one is stale and must be ignored. Used
+  // to defeat the Back→Continue race Lane 2/4 flagged.
+  const classifyGenRef = useRef(0);
+  const classifyTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     return () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl);
     };
   }, [previewUrl]);
+
+  // Clear any pending classify-timeout when the sheet unmounts.
+  useEffect(() => {
+    return () => {
+      if (classifyTimeoutRef.current !== null) {
+        window.clearTimeout(classifyTimeoutRef.current);
+        classifyTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   const reset = () => {
     setStep(1);
@@ -110,8 +125,59 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
     setStep(2);
   };
 
+  const kickOffClassify = (snapId: string) => {
+    const gen = ++classifyGenRef.current;
+    setClassification(null);
+    setClassifyFailed(false);
+
+    // 5s client-side timeout (spec acceptance #4). If classify hasn't
+    // resolved by then, fall back to the placeholder card. Server-side
+    // call keeps running; its eventual result is ignored via the
+    // generation check.
+    if (classifyTimeoutRef.current !== null) {
+      window.clearTimeout(classifyTimeoutRef.current);
+    }
+    classifyTimeoutRef.current = window.setTimeout(() => {
+      if (gen === classifyGenRef.current) setClassifyFailed(true);
+      classifyTimeoutRef.current = null;
+    }, 5000);
+
+    const clearTimer = () => {
+      if (classifyTimeoutRef.current !== null) {
+        window.clearTimeout(classifyTimeoutRef.current);
+        classifyTimeoutRef.current = null;
+      }
+    };
+
+    void classify
+      .mutateAsync({ snapId })
+      .then((res) => {
+        if (gen !== classifyGenRef.current) return; // stale — user went Back/Continue
+        clearTimer(); // cancel the 5s fallback now that we have a real answer
+        setClassification(res);
+        setClassifyFailed(false);
+      })
+      .catch(() => {
+        if (gen !== classifyGenRef.current) return;
+        clearTimer();
+        setClassifyFailed(true);
+      });
+  };
+
   const handleStep2Continue = async () => {
+    // Guard against same-frame double-tap.
+    if (createDraft.isPending) return;
     if (!photo) return;
+
+    // If the user went Back from step 3 and hit Continue again with an
+    // existing draft, reuse it instead of creating a second one. Re-kick
+    // classify if we don't yet have a result.
+    if (draft) {
+      setStep(3);
+      if (!classification && !classify.isPending) kickOffClassify(draft.snapId);
+      return;
+    }
+
     try {
       const result = await createDraft.mutateAsync({
         file: photo,
@@ -120,12 +186,7 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
       });
       setDraft(result);
       setStep(3);
-      // Kick off classification. Intentionally not awaited — the step-3
-      // render reacts to the mutation state.
-      void classify
-        .mutateAsync({ snapId: result.snapId })
-        .then((res) => setClassification(res))
-        .catch(() => setClassifyFailed(true));
+      kickOffClassify(result.snapId);
     } catch (err) {
       toast({
         title: "Couldn't upload photo",
