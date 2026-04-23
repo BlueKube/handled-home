@@ -55,7 +55,7 @@ Batch T.1 unlocked Tier 3/5 testing per-PR but took 7 CI iterations to get green
 3. `CLAUDE.md` §7 contains a new rule that explicitly names this grep-before-assume pattern.
 4. `CLAUDE.md` §12 Local build + test section references `ux-report`, `creative-audit`, `growth-report` scripts with purposes.
 5. `docs/testing-strategy.md` Appendix C reflects completed items with PR references.
-6. `docs/testing-strategy.md` gains Appendix E with six gotchas in uniform trap/symptom/fix format.
+6. `docs/testing-strategy.md` gains Appendix E with **≥ 6 gotchas** in uniform trap/symptom/fix format. Scope was soft-extended to 7 during implementation to include `peter-evans/create-or-update-comment` duplicate-comments (E.7), which was a review finding in T.1 and matches an existing `lessons-learned.md` entry — keeping the two synchronized is worth one extra Appendix E section.
 7. `docs/working/plan.md` has a T.2 row and an updated Session Handoff.
 8. No `.ts`, `.tsx`, `.yml`, or `.json` files changed (verified by `git diff --stat`).
 

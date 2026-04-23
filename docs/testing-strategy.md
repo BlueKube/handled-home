@@ -627,6 +627,3 @@ Tactical traps encountered while wiring the per-PR harness in Batch T.1 (PR #19)
 
 **Fix:** prepend `peter-evans/find-comment@v3` with `body-includes: "### Playwright PR run"`, then pass `comment-id: ${{ steps.find-comment.outputs.comment-id }}` and `edit-mode: replace` to the create-or-update step. Single status comment, updated in place. Canonical implementation in `playwright-pr.yml` `comment` job.
 
-
-
-
