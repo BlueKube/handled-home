@@ -27,7 +27,7 @@ Doing Phase 5 first avoids re-doing cross-cutting nav + VisitDetail work later.
 | **T.3** | **Tier 5 visibility — inline scores + advisory threshold + dismiss-list stub (Layer 1 + 2 stub of convergence architecture)** | **S** | **✅** | TBD |
 | **T.4** | **Tier 5 milestone captures on avatar-drawer.spec.ts** | **Micro** | **✅** | TBD |
 | **T.5** | **Autonomous coding system paper — end-to-end workflow documentation for publication** | **S** | **✅** | TBD |
-| **T.6** | **Tier 5 milestone artifact-flow debug — `ls -R test-results/` step in playwright-pr.yml e2e + ai-judge jobs** | **Micro** | **🟡 in progress** | |
+| **T.6** | **Tier 5 artifact-flow debug → stale model ID + silent try/catch fix (model bump to `claude-haiku-4-5-20251001` + error.json surfacing)** | **Micro→Small `[OVERRIDE]`** | **✅** | TBD |
 | 5.4 | VisitDetail three-mode rewrite (preview / live / complete) + type chips | L | ⬜ | |
 | 5.5 | ReportIssueSheet 4-category rewrite | M | ⬜ | |
 
@@ -87,10 +87,14 @@ Each batch ships as its own PR against `main`, following `BlueKube/handled-home`
 
 ## Session Handoff
 
-- **Branch at session end:** `feat/round-64-phase-5-t6-tier5-artifact-flow-debug` — T.6 diagnostic in flight.
-- **Last completed:** T.5 paper merged (PR #24, commit 996c014). T.6 (this batch) adds `ls -R test-results/` diagnostic to both `e2e` and `ai-judge` jobs in `playwright-pr.yml` — output lands in `$GITHUB_STEP_SUMMARY` so cause of scaffold-mode Tier 5 output is visible without artifact downloads.
-- **Next up:** Watch T.6 PR's CI; read the diagnostic output; apply fix in the same PR; self-merge. Then Batch 5.4 (VisitDetail three-mode — Large tier, 5-agent review) or Phase 6 (seasonal bundles) at human discretion.
-- **Open TODO:** T.6's diagnostic itself is the in-flight investigation — once the CI summary surfaces which of the four hypotheses (Playwright outputDir cleaning / upload-artifact scope / download-artifact path / script filter) is correct, fix in same PR or spin off T.7.
+- **Branch at session end:** `feat/round-64-phase-5-t6-tier5-artifact-flow-debug` — T.6 review-resolved, pending self-merge.
+- **Last completed:** T.6 root-caused the Tier 5 scaffold-mode regression from PR #23: not an artifact-flow issue at all — every model call was silently 404ing against the stale default `claude-sonnet-4-20250514`. Fixed by bumping all 3 AI-eval scripts to `claude-haiku-4-5-20251001` (matches `supabase/functions/_shared/anthropic.ts`) and hardening the try/catch error path to write a visible `ux-review-report-${role}-error.json` + surface a 🛑 advisory line in the PR comment. The latest CI on commit `0eba41f` (run 24859813878) proved both halves work: the fix made the call reach Anthropic, and the new error path caught the subsequent credit-exhaustion 400 and rendered it in the PR comment. That credit-balance issue is now the only blocker to real Sarah scores and is a human action item logged in `docs/upcoming/TODO.md`.
+- **Next up:** (1) Self-merge T.6 — the infrastructure is ready to light up the moment credits are refilled. (2) Human: top up Anthropic credits (or rotate `ANTHROPIC_API_KEY` to a funded account). (3) After credits arrive, any subsequent PR's Tier 5 matrix should produce real Sarah-persona scores with zero additional code. (4) Then fresh session for Batch 5.4 (VisitDetail three-mode — Large tier, 5-agent review) or Phase 6 (seasonal bundles).
+- **Open TODOs** (persist in `docs/upcoming/TODO.md`):
+  - 🛑 **Anthropic credit balance exhausted** — only blocker to live Tier 5 signal.
+  - T.6-follow-up: demote diagnostic from `if: always()` to `if: failure() || ACTIONS_STEP_DEBUG == 'true'` once the first clean green Tier 5 run posts real scores. Keep a 1-line "milestones present: N/7" summary in the always-on path.
+  - Seed property profile for the 3 persistent test users (carried over from Phase 5).
+  - Rotate Vercel Protection Bypass secret (carried over from T.1).
 - **Context at exit:** TBD — check `/context` after each batch.
-- **Blockers:** None for future batches. Two non-blocking follow-ups still logged in `docs/upcoming/TODO.md`: (1) seed a property profile for the 3 persistent test users; (2) rotate the Vercel bypass secret after the setup-chat exposure.
-- **Round progress:** Phases 1–4 ✅ · Phase 5: Batches 5.1 ✅ · 5.2 ✅ · T.1 ✅ · T.2 ✅ · 5.3 ✅ · T.3 ✅ · T.4 ✅ · T.5 ✅ · T.6 🟡 · 5.4–5.5 ⬜ · Phases 6–8 ⬜.
+- **Blockers:** T.6 "real scores visible" acceptance criterion is blocked by external Anthropic credit exhaustion — not a code issue. Override documented in the batch spec.
+- **Round progress:** Phases 1–4 ✅ · Phase 5: Batches 5.1 ✅ · 5.2 ✅ · T.1 ✅ · T.2 ✅ · 5.3 ✅ · T.3 ✅ · T.4 ✅ · T.5 ✅ · T.6 ✅ (pending self-merge) · 5.4–5.5 ⬜ · Phases 6–8 ⬜.

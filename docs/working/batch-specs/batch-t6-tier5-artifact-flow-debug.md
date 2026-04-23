@@ -49,10 +49,10 @@ No application code touched. No migrations. No new Anthropic API spend if the wo
 
 ## Acceptance criteria
 
-- The new diagnostic steps run on every PR (until demoted), exit 0, and produce a clearly-labeled section in the Actions UI summary tab.
-- After this PR's first CI run, the workflow log + summary tells us *exactly* which of the four hypotheses is correct.
-- If the fix is a 1-line change (path glob, env var, etc.), apply in same PR. If it requires app-code or rewiring at the Playwright config level (e.g. dedicated outputDir for milestones), spin off as Batch T.7.
-- The status comment on this PR's final CI run shows real numeric scores in at least one role row (i.e. the loop is closed end-to-end).
+- The new diagnostic steps run on every PR (until demoted), exit 0, and produce a clearly-labeled section in the Actions UI summary tab. ✅ MET
+- After this PR's first CI run, the workflow log + summary tells us *exactly* which of the four hypotheses is correct. ✅ MET — diagnostic showed milestones round-tripping intact (7 PNGs all 3 matrix shards); none of the four original hypotheses was correct; the real cause was a stale model ID (new hypothesis 5).
+- If the fix is a 1-line change (path glob, env var, etc.), apply in same PR. If it requires app-code or rewiring at the Playwright config level (e.g. dedicated outputDir for milestones), spin off as Batch T.7. ✅ MET — model ID fix applied in same PR (commit 0eba41f).
+- The status comment on this PR's final CI run shows real numeric scores in at least one role row (i.e. the loop is closed end-to-end). 🟡 **[OVERRIDE: blocked by external Anthropic account — credit balance exhausted; CI run 24859813878 surfaces this cleanly via the new 🛑 advisory banner. The T.6 code fix is verified working — any new silent failure now lands as a visible PR comment line. Logged as human action item in docs/upcoming/TODO.md. Merging T.6 unblocks the next PR to produce real scores immediately after the human tops up credits.]**
 
 ## Out of scope
 
