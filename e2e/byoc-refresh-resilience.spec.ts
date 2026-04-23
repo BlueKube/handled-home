@@ -28,10 +28,11 @@ test.describe("BYOC Refresh Resilience", () => {
 
   test.use({ storageState: path.join(__dirname, ".auth", "customer.json") });
 
+  // TEST_BYOC_TOKEN is optional per docs/testing-strategy.md Appendix D —
+  // when unset, skip the BYOC suite rather than hard-fail the PR.
+  test.skip(!TOKEN, "TEST_BYOC_TOKEN not set — BYOC specs skipped");
+
   test.beforeAll(() => {
-    if (!TOKEN) {
-      throw new Error("TEST_BYOC_TOKEN must be set as an environment variable");
-    }
     ensureMilestonesDir();
   });
 

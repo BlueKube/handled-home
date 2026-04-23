@@ -97,13 +97,16 @@ jobs:
       - run: npx playwright install --with-deps
 
       - name: Validate required secrets
+        # Validates the 7 hard-required credentials. TEST_BYOC_TOKEN is
+        # intentionally optional — the BYOC specs handle its absence with a
+        # test-level `test.skip` so PRs that don't touch BYOC flows don't
+        # require a live invite token.
         run: |
           missing=0
           for var in TEST_CUSTOMER_EMAIL TEST_CUSTOMER_PASSWORD \
                      TEST_PROVIDER_EMAIL TEST_PROVIDER_PASSWORD \
                      TEST_ADMIN_EMAIL    TEST_ADMIN_PASSWORD \
-                     VERCEL_AUTOMATION_BYPASS_SECRET \
-                     TEST_BYOC_TOKEN; do
+                     VERCEL_AUTOMATION_BYPASS_SECRET; do
             if [ -z "${!var}" ]; then
               echo "::error title=Missing secret::$var is not set. Add it in Settings → Secrets and variables → Actions."
               missing=1
@@ -118,7 +121,6 @@ jobs:
           TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
           TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
-          TEST_BYOC_TOKEN: ${{ secrets.TEST_BYOC_TOKEN }}
 
       - name: Warm up preview (auth + dashboard bundle)
         run: |
