@@ -1,151 +1,89 @@
 import { useState, useMemo } from "react";
-import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Search, Star, AlertTriangle } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ChevronRight, Sparkles } from "lucide-react";
 import { useSkus } from "@/hooks/useSkus";
 import type { ServiceSku } from "@/hooks/useSkus";
 import { SkuDetailView } from "@/components/SkuDetailView";
 import { ServiceCard } from "@/components/customer/ServiceCard";
-import { getCategoryLabel, getCategoryIcon, CATEGORY_ORDER } from "@/lib/serviceCategories";
+import { getCategoryIcon } from "@/lib/serviceCategories";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
-import { useEntitlements } from "@/hooks/useEntitlements";
-import type { EntitlementStatus } from "@/components/plans/EntitlementBadge";
+import { useEntitlements, type EntitlementSku } from "@/hooks/useEntitlements";
+import { QueryErrorCard } from "@/components/QueryErrorCard";
 
 export default function CustomerServices() {
-  const [search, setSearch] = useState("");
   const [selectedSku, setSelectedSku] = useState<ServiceSku | null>(null);
 
-  const { data: skus = [], isLoading, isError } = useSkus({
-    search: search || undefined,
-  });
-
   const { data: subscription } = useCustomerSubscription();
-  const { data: entitlements } = useEntitlements(
+  const {
+    data: entitlements,
+    isLoading: entitlementsLoading,
+    isError: entitlementsError,
+    refetch: refetchEntitlements,
+  } = useEntitlements(
     subscription?.plan_id ?? null,
     subscription?.zone_id ?? null,
     subscription?.entitlement_version_id ?? null,
   );
 
-  const skuStatusMap = useMemo(() => {
-    const map = new Map<string, EntitlementStatus>();
-    if (entitlements?.skus) {
-      for (const sku of entitlements.skus) {
-        map.set(sku.sku_id, sku.status);
-      }
+  const {
+    data: skus = [],
+    isLoading: skusLoading,
+    isError: skusError,
+    refetch: refetchSkus,
+  } = useSkus({});
+
+  const skuById = useMemo(() => new Map(skus.map((s) => [s.id, s])), [skus]);
+
+  const { included, addons } = useMemo(() => {
+    const ents = entitlements?.skus ?? [];
+    const out: { included: EntitlementSku[]; addons: EntitlementSku[] } = {
+      included: [],
+      addons: [],
+    };
+    for (const ent of ents) {
+      if (ent.status === "included") out.included.push(ent);
+      else if (ent.status === "extra_allowed") out.addons.push(ent);
+      // blocked and provider_only intentionally omitted — customer view.
     }
-    return map;
+    return out;
   }, [entitlements]);
 
-  const featured = useMemo(
-    () => skus.filter((s) => s.is_featured).sort((a, b) => a.display_order - b.display_order),
-    [skus]
-  );
-
-  const grouped = useMemo(() => {
-    const groups: Record<string, ServiceSku[]> = {};
-    skus.forEach((s) => {
-      const cat = s.category || "other";
-      if (!groups[cat]) groups[cat] = [];
-      groups[cat].push(s);
-    });
-    // Sort within each group by display_order
-    Object.values(groups).forEach((arr) =>
-      arr.sort((a, b) => a.display_order - b.display_order)
-    );
-    return groups;
-  }, [skus]);
-
-  const sortedCategories = useMemo(() => {
-    const cats = Object.keys(grouped);
-    return cats.sort((a, b) => {
-      const ai = CATEGORY_ORDER.indexOf(a);
-      const bi = CATEGORY_ORDER.indexOf(b);
-      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
-    });
-  }, [grouped]);
-
-  const isSearching = search.trim().length > 0;
+  const hasPlan = !!subscription?.plan_id;
+  const isLoading = entitlementsLoading || skusLoading;
+  const isError = entitlementsError || skusError;
 
   return (
     <div className="p-4 md:p-6 space-y-6 animate-fade-in">
-      <h1 className="text-h2">Our Services</h1>
+      <h1 className="text-h2">Services</h1>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search services..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9"
-        />
-      </div>
+      <SeasonalBundleSpotlight />
 
       {isError ? (
-        <div className="flex flex-col items-center gap-2 py-8">
-          <AlertTriangle className="h-5 w-5 text-destructive" />
-          <p className="text-sm text-muted-foreground">Failed to load services. Check your connection and try again.</p>
-        </div>
-      ) : isLoading ? (
-        <p className="text-center text-muted-foreground py-8">Loading…</p>
-      ) : skus.length === 0 ? (
-        <p className="text-center text-muted-foreground py-8">No services available.</p>
-      ) : isSearching ? (
-        /* Flat search results */
-        <div className="grid grid-cols-2 gap-3">
-          {skus.map((sku) => (
-            <ServiceCard key={sku.id} sku={sku} onClick={() => setSelectedSku(sku)} entitlementStatus={skuStatusMap.get(sku.id)} />
-          ))}
-        </div>
+        <QueryErrorCard
+          message="Failed to load your services. Check your connection and try again."
+          onRetry={() => {
+            refetchEntitlements();
+            refetchSkus();
+          }}
+        />
       ) : (
         <>
-          {/* Featured Services */}
-          {featured.length > 0 && (
-            <section>
-              <h2 className="text-h3 flex items-center gap-2 mb-3">
-                <Star className="h-4.5 w-4.5 text-warning fill-warning" />
-                Featured
-              </h2>
-              <ScrollArea className="w-full">
-                <div className="flex gap-3 pb-3">
-                  {featured.map((sku) => (
-                    <ServiceCard
-                      key={sku.id}
-                      sku={sku}
-                      variant="featured"
-                      onClick={() => setSelectedSku(sku)}
-                      entitlementStatus={skuStatusMap.get(sku.id)}
-                    />
-                  ))}
-                </div>
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
-            </section>
-          )}
-
-          {/* Category Groups */}
-          {sortedCategories.map((cat) => {
-            const Icon = getCategoryIcon(cat);
-            return (
-              <section key={cat}>
-                <h2 className="text-h3 flex items-center gap-2 mb-3">
-                  <Icon className="h-4.5 w-4.5 text-muted-foreground" />
-                  {getCategoryLabel(cat)}
-                </h2>
-                <div className="grid grid-cols-2 gap-3">
-                  {grouped[cat].map((sku) => (
-                    <ServiceCard
-                      key={sku.id}
-                      sku={sku}
-                      onClick={() => setSelectedSku(sku)}
-                      entitlementStatus={skuStatusMap.get(sku.id)}
-                    />
-                  ))}
-                </div>
-              </section>
-            );
-          })}
+          <IncludedInPlan
+            hasPlan={hasPlan}
+            isLoading={isLoading}
+            items={included}
+            skuById={skuById}
+            onSelect={setSelectedSku}
+          />
+          <AvailableAddons
+            hasPlan={hasPlan}
+            isLoading={isLoading}
+            items={addons}
+            skuById={skuById}
+            onSelect={setSelectedSku}
+          />
         </>
       )}
 
@@ -160,5 +98,109 @@ export default function CustomerServices() {
         </SheetContent>
       </Sheet>
     </div>
+  );
+}
+
+function SeasonalBundleSpotlight() {
+  return (
+    <Card className="p-4 bg-accent/5 border-accent/20 flex items-start gap-3">
+      <Sparkles className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+      <div>
+        <p className="text-sm font-semibold">Seasonal bundles coming soon</p>
+        <p className="text-xs text-muted-foreground mt-1">
+          One-tap stacks like Fall Prep and Spring Refresh will appear here when a bundle is active in your zone.
+        </p>
+      </div>
+    </Card>
+  );
+}
+
+interface SectionProps {
+  hasPlan: boolean;
+  isLoading: boolean;
+  items: EntitlementSku[];
+  skuById: Map<string, ServiceSku>;
+  onSelect: (sku: ServiceSku) => void;
+}
+
+function IncludedInPlan({ hasPlan, isLoading, items, skuById, onSelect }: SectionProps) {
+  return (
+    <section>
+      <h2 className="text-h3 mb-3">Included in your plan</h2>
+      {isLoading ? (
+        <div className="space-y-2">
+          <Skeleton className="h-14 rounded-xl" />
+          <Skeleton className="h-14 rounded-xl" />
+          <Skeleton className="h-14 rounded-xl" />
+        </div>
+      ) : !hasPlan ? (
+        <p className="text-sm text-muted-foreground">
+          Activate a plan to see what's included.
+        </p>
+      ) : items.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          No recurring services included in this plan yet.
+        </p>
+      ) : (
+        <Card className="p-0 divide-y divide-border">
+          {items.map((ent) => {
+            const sku = skuById.get(ent.sku_id);
+            const Icon = getCategoryIcon(ent.category);
+            return (
+              <button
+                key={ent.sku_id}
+                onClick={() => sku && onSelect(sku)}
+                disabled={!sku}
+                className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-secondary/30 active:bg-secondary/50 transition-colors first:rounded-t-xl last:rounded-b-xl disabled:opacity-60"
+              >
+                <Icon className="h-5 w-5 text-muted-foreground shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{ent.sku_name}</p>
+                  <p className="text-xs text-muted-foreground">{ent.ui_explainer || ent.ui_badge}</p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+              </button>
+            );
+          })}
+        </Card>
+      )}
+    </section>
+  );
+}
+
+function AvailableAddons({ hasPlan, isLoading, items, skuById, onSelect }: SectionProps) {
+  return (
+    <section>
+      <h2 className="text-h3 mb-3">Available add-ons</h2>
+      {isLoading ? (
+        <div className="grid grid-cols-2 gap-3">
+          <Skeleton className="h-40 rounded-xl" />
+          <Skeleton className="h-40 rounded-xl" />
+        </div>
+      ) : !hasPlan ? (
+        <p className="text-sm text-muted-foreground">
+          Activate a plan to unlock add-ons.
+        </p>
+      ) : items.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          No add-ons available for this plan right now.
+        </p>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          {items.map((ent) => {
+            const sku = skuById.get(ent.sku_id);
+            if (!sku) return null;
+            return (
+              <ServiceCard
+                key={ent.sku_id}
+                sku={sku}
+                onClick={() => onSelect(sku)}
+                entitlementStatus={ent.status}
+              />
+            );
+          })}
+        </div>
+      )}
+    </section>
   );
 }
