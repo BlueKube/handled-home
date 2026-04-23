@@ -29,8 +29,11 @@ test.describe("BYOC Invalid Invite", () => {
     // ByocActivate shows "This invitation is no longer active" for invalid tokens.
     // The wizard's InviteFallbackScreen shows "This invitation is no longer active".
     try {
+      // The fallback screen renders multiple copies of matching text
+      // ("no longer active" heading + "expired" in body). `.first()` avoids
+      // Playwright's strict-mode multi-match failure.
       await expect(
-        page.getByText(/no longer active|invalid|not found|expired|something went wrong/i)
+        page.getByText(/no longer active|invalid|not found|expired|something went wrong/i).first()
       ).toBeVisible({ timeout: 30000 });
     } catch {
       await page.screenshot({

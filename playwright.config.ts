@@ -3,6 +3,19 @@ import { defineConfig, devices } from "@playwright/test";
 const BASE_URL =
   process.env.BASE_URL || "http://invalid-base-url-set-BASE_URL-secret";
 
+// Vercel Preview deployments are protected by default; the bypass secret is
+// forwarded as a header so Playwright can reach the preview URL. Local runs
+// against prod (`handledhome.app`) or the dev server skip the header.
+const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+// Only the protection-bypass header is needed — Playwright's extraHTTPHeaders
+// sends it on every request, so cookie persistence via x-vercel-set-bypass-
+// cookie isn't necessary. Sending that header also causes Vercel to respond
+// with a 307 redirect to set the cookie, which interferes with warm-up probes
+// and can destabilize test timing.
+const extraHTTPHeaders = bypassSecret
+  ? { "x-vercel-protection-bypass": bypassSecret }
+  : undefined;
+
 export default defineConfig({
   testDir: "./e2e",
   outputDir: "test-results",
@@ -21,6 +34,7 @@ export default defineConfig({
     screenshot: "only-on-failure",
     navigationTimeout: 60_000,
     actionTimeout: 15_000,
+    extraHTTPHeaders,
   },
 
   projects: [

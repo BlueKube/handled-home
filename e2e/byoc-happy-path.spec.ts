@@ -22,10 +22,12 @@ function uniqueStreet() {
 test.describe("BYOC Onboarding — Happy Path", () => {
   const TOKEN = process.env.TEST_BYOC_TOKEN;
 
+  // TEST_BYOC_TOKEN is optional per docs/testing-strategy.md Appendix D —
+  // when unset, skip the BYOC suite rather than hard-fail the PR. Populate
+  // the secret via a live BYOC invite token to exercise this flow in CI.
+  test.skip(!TOKEN, "TEST_BYOC_TOKEN not set — BYOC specs skipped");
+
   test.beforeAll(() => {
-    if (!TOKEN) {
-      throw new Error("TEST_BYOC_TOKEN must be set as an environment variable");
-    }
     ensureMilestonesDir();
   });
 

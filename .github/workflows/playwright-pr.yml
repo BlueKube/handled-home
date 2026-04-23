@@ -1,0 +1,308 @@
+name: Playwright E2E (PR)
+
+# Runs Tier 3 (E2E) + optional Tier 5 (AI-as-judge with Sarah persona)
+# against the Vercel Preview URL for each PR. Companion to the manual-only
+# `playwright.yml`, which is retained for full-catalog / deep-audit runs
+# initiated by hand.
+#
+# Budget note: with ANTHROPIC_API_KEY set + 3-role matrix on ui-affecting
+# PRs, a full run costs ~$0.30-$0.50 in Anthropic usage per PR. Remove the
+# ANTHROPIC_API_KEY secret to kill the Tier 5 spend while keeping Tier 3
+# Playwright running for every PR.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
+      - ".gitignore"
+
+concurrency:
+  group: playwright-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  wait-for-preview:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      preview_url: ${{ steps.resolve.outputs.url }}
+    steps:
+      - name: Resolve Vercel preview URL via GitHub Deployments API
+        id: resolve
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sha = context.payload.pull_request.head.sha;
+            core.info(`Polling for Vercel Preview deployment on sha ${sha}`);
+            const maxAttempts = 32; // 32 * 15s = 8 minutes
+            for (let i = 0; i < maxAttempts; i++) {
+              const { data: deployments } = await github.rest.repos.listDeployments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                sha,
+                per_page: 30,
+              });
+              const previewDeps = deployments.filter(d =>
+                d.environment && d.environment.toLowerCase().includes('preview')
+              );
+              for (const dep of previewDeps) {
+                const { data: statuses } = await github.rest.repos.listDeploymentStatuses({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  deployment_id: dep.id,
+                  per_page: 30,
+                });
+                const success = statuses.find(s => s.state === 'success' && s.environment_url);
+                if (success) {
+                  core.info(`✓ Preview ready at ${success.environment_url}`);
+                  core.setOutput('url', success.environment_url);
+                  return;
+                }
+                const failed = statuses.find(s => s.state === 'failure' || s.state === 'error');
+                if (failed) {
+                  core.setFailed(`Vercel deployment ${dep.id} reported state=${failed.state}`);
+                  return;
+                }
+              }
+              core.info(`Attempt ${i + 1}/${maxAttempts} — no successful Preview deployment yet, sleeping 15s`);
+              await new Promise(r => setTimeout(r, 15000));
+            }
+            core.setFailed('Vercel Preview deployment did not reach success state within 8 minutes');
+
+  e2e:
+    needs: wait-for-preview
+    # Run whenever a preview URL was resolved, even if the resolver job itself
+    # reported a non-success outcome mid-run (e.g. a transient status). Step
+    # outputs persist across sub-steps, so we can proceed as long as the URL
+    # is set.
+    if: always() && needs.wait-for-preview.outputs.preview_url != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        # Using npm (not bun) for the PR-triggered workflow — the repo ships
+        # a committed package-lock.json that's known-good; bun.lock can drift
+        # between bun versions and produces opaque failures in ~5s. The manual
+        # `playwright.yml` still uses bun for continuity with existing audit
+        # runs — revisit once bun is stable across workflows.
+        run: npm ci
+
+      - run: npx playwright install --with-deps
+
+      - name: Validate required secrets
+        # Validates the 7 hard-required credentials. TEST_BYOC_TOKEN is
+        # intentionally optional — the BYOC specs handle its absence with a
+        # test-level `test.skip` so PRs that don't touch BYOC flows don't
+        # require a live invite token.
+        run: |
+          missing=0
+          for var in TEST_CUSTOMER_EMAIL TEST_CUSTOMER_PASSWORD \
+                     TEST_PROVIDER_EMAIL TEST_PROVIDER_PASSWORD \
+                     TEST_ADMIN_EMAIL    TEST_ADMIN_PASSWORD \
+                     VERCEL_AUTOMATION_BYPASS_SECRET; do
+            if [ -z "${!var}" ]; then
+              echo "::error title=Missing secret::$var is not set. Add it in Settings → Secrets and variables → Actions."
+              missing=1
+            fi
+          done
+          if [ "$missing" -eq 1 ]; then exit 1; fi
+        env:
+          TEST_CUSTOMER_EMAIL: ${{ secrets.TEST_CUSTOMER_EMAIL }}
+          TEST_CUSTOMER_PASSWORD: ${{ secrets.TEST_CUSTOMER_PASSWORD }}
+          TEST_PROVIDER_EMAIL: ${{ secrets.TEST_PROVIDER_EMAIL }}
+          TEST_PROVIDER_PASSWORD: ${{ secrets.TEST_PROVIDER_PASSWORD }}
+          TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
+          TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+
+      - name: Warm up preview (auth + dashboard bundle)
+        # Vercel responds with 307 when `x-vercel-set-bypass-cookie` is present
+        # (it redirects to set the cookie). Curl doesn't follow redirects by
+        # default. We don't need cookie persistence for a one-off warm-up
+        # check — just the bypass header per request is enough to prove the
+        # secret is valid. Playwright's extraHTTPHeaders also sends the
+        # protection-bypass header on every request, so no cookie-set needed
+        # there either.
+        run: |
+          echo "Warming up $BASE_URL ..."
+          FINAL_STATUS=0
+          for i in 1 2 3 4 5; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 \
+              -H "x-vercel-protection-bypass: $VERCEL_AUTOMATION_BYPASS_SECRET" \
+              "$BASE_URL/auth" || echo "000")
+            echo "  Attempt $i → HTTP $STATUS"
+            FINAL_STATUS=$STATUS
+            if [ "$STATUS" = "200" ]; then
+              echo "Preview is warm ✓"
+              break
+            fi
+            sleep 10
+          done
+          if [ "$FINAL_STATUS" != "200" ]; then
+            echo "::error title=Preview warm-up failed::BASE_URL=$BASE_URL returned final HTTP $FINAL_STATUS after 5 attempts. Likely causes: (1) VERCEL_AUTOMATION_BYPASS_SECRET doesn't match the value set in Vercel Dashboard → Project → Settings → Deployment Protection → Protection Bypass for Automation, or (2) the bypass secret was rotated in Vercel but the GH secret is stale."
+            exit 1
+          fi
+        env:
+          BASE_URL: ${{ needs.wait-for-preview.outputs.preview_url }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+        env:
+          BASE_URL: ${{ needs.wait-for-preview.outputs.preview_url }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          TEST_CUSTOMER_EMAIL: ${{ secrets.TEST_CUSTOMER_EMAIL }}
+          TEST_CUSTOMER_PASSWORD: ${{ secrets.TEST_CUSTOMER_PASSWORD }}
+          TEST_PROVIDER_EMAIL: ${{ secrets.TEST_PROVIDER_EMAIL }}
+          TEST_PROVIDER_PASSWORD: ${{ secrets.TEST_PROVIDER_PASSWORD }}
+          TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
+          TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
+          TEST_BYOC_TOKEN: ${{ secrets.TEST_BYOC_TOKEN }}
+
+      - name: Print Playwright failure summary
+        if: failure()
+        run: |
+          echo "## Playwright failure summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ -d test-results ]; then
+            echo "### test-results/ directory contents" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            ls -la test-results/ 2>&1 | head -40 >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -f test-results/.last-run.json ]; then
+            echo "### last-run.json" >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat test-results/.last-run.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "### Error contexts from failed specs" >> "$GITHUB_STEP_SUMMARY"
+          # Playwright writes per-failure error-context.md alongside screenshots.
+          find test-results -name "error-context.md" -print 2>/dev/null | while read ctx; do
+            echo "#### $ctx" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            head -100 "$ctx" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          done
+          echo "### Spec stdout (tail)" >> "$GITHUB_STEP_SUMMARY"
+          find test-results -name "stdout.txt" -print 2>/dev/null | while read f; do
+            echo "#### $f (last 60 lines)" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            tail -60 "$f" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          done
+          echo "### Screenshot inventory (download artifact for visual diffs)" >> "$GITHUB_STEP_SUMMARY"
+          find test-results -name "*.png" -print 2>/dev/null | head -20 >> "$GITHUB_STEP_SUMMARY" || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: test-results/
+
+  ai-judge:
+    needs: [wait-for-preview, e2e]
+    if: always() && needs.e2e.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        role: [customer, provider, admin]
+        include:
+          - role: customer
+            filter: "customer,byoc,public"
+          - role: provider
+            filter: "provider"
+          - role: admin
+            filter: "admin"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Download test results from e2e job
+        uses: actions/download-artifact@v4
+        with:
+          name: test-results
+          path: test-results/
+
+      - name: Generate Sarah-persona UX report (${{ matrix.role }})
+        if: env.ANTHROPIC_API_KEY != ''
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          UX_ROLE_FILTER: ${{ matrix.filter }}
+        run: npm run ux-report
+
+      - name: Skip AI judge (no ANTHROPIC_API_KEY)
+        if: env.ANTHROPIC_API_KEY == ''
+        env:
+          ANTHROPIC_API_KEY: ""
+        run: |
+          echo "::notice title=Tier 5 skipped::ANTHROPIC_API_KEY secret not set — AI judge did not run for role=${{ matrix.role }}. Add the secret in Settings → Secrets and variables → Actions to enable."
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ai-report-${{ matrix.role }}
+          path: |
+            test-results/ux-review-report-*.md
+            test-results/ux-review-scores-*.json
+
+  comment:
+    needs: [wait-for-preview, e2e, ai-judge]
+    if: always() && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Find existing Playwright status comment
+        id: find-comment
+        uses: peter-evans/find-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: "github-actions[bot]"
+          body-includes: "### Playwright PR run"
+
+      - name: Post summary comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body: |
+            ### Playwright PR run — ${{ needs.e2e.result == 'success' && '✅ Pass' || needs.e2e.result == 'skipped' && '⏭️ Skipped' || '❌ Fail' }}
+
+            | Tier | Status |
+            |---|---|
+            | Preview resolved | ${{ needs.wait-for-preview.result }} |
+            | Tier 3 — Playwright E2E | ${{ needs.e2e.result }} |
+            | Tier 5 — AI judge (3-role matrix) | ${{ needs.ai-judge.result }} |
+
+            **Preview URL:** ${{ needs.wait-for-preview.outputs.preview_url || 'n/a' }}
+
+            Artifacts: [Run details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+            <sub>If Tier 3 failed on missing secrets, populate them in Settings → Secrets and variables → Actions (see `docs/testing-strategy.md` Appendix D).</sub>
