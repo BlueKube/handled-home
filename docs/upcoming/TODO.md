@@ -2,6 +2,14 @@
 
 Items that require API keys, backend changes, or design decisions beyond frontend gap closure. These are left for the owner to complete after the automated batch work.
 
+### 2026-04-23 — Tier 5 milestone capture (T.3 follow-up)
+
+- [ ] **Make the AI judge actually see our UI.** Batch T.3 made Tier 5 scores visible in the PR comment, which immediately exposed that the harness has been running in scaffold mode — `test-results/milestones/` is empty because only the skipped BYOC specs write milestone screenshots. The judge scored zero screens this session and the comment shows `—` across all role rows.
+  - **Why:** Tier 5 is only useful once Sarah (and the other personas) actually see the features we ship. Until then every PR shows the ⚠️ "no screenshots captured" note and we get no signal.
+  - **What to do:** add `MilestoneTracker.capture()` calls to representative specs — `avatar-drawer.spec.ts` is a good starter (5 tests covering a core flow). Follow the pattern from `byoc-happy-path.spec.ts:38` / `byoc-invalid-invite.spec.ts:55`. Each capture writes a PNG + manifest entry that the AI judge iterates over.
+  - **Blocked:** nothing blocked — the infrastructure all exists (`tracker.writeManifest()` pattern, personas, workflow). Just needs the wire-up in a future batch. A natural fit is Batch 5.4 (VisitDetail three-mode) which will want milestone captures per mode anyway.
+  - **Source:** PR #22 (T.3) CI run — first time the new comment format rendered and exposed the gap.
+
 ### 2026-04-22 — Round 64 Phase 5 testing harness follow-ups
 
 - [ ] **Seed a property profile for the three persistent test users on every Supabase branch.** Without a property, `CustomerPropertyGate` redirects all authenticated navigations to `/customer/onboarding`, which makes Tier 4 E2E specs brittle (they have to treat both the intended destination and `/customer/onboarding` as valid outcomes). Options: (a) add a seed migration that inserts a property row for `bkennington+{customer,provider,admin}@bluekube.com` at every preview branch, (b) provide a per-spec `test.beforeAll` that hits a Supabase RPC to idempotently seed. (a) is simpler but (b) is more isolated.

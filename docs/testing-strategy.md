@@ -335,6 +335,30 @@ Disagreements between variants are signal. A flow that Sarah loves but Skeptical
 
 Cheap enough to run on every Tier 4/5 batch. Very cheap to run as a nightly sweep against main to catch drift.
 
+### 5.8 Convergence architecture
+
+A naive "fix everything the AI judge flags" loop never converges — findings are subjective, models drift between runs, and fixes generate new findings. The Tier 5 harness is therefore structured as a **regression detector with an explicit dismissal escape hatch**, not an "improve until perfect" loop. Four layers:
+
+| Layer | Purpose | Status |
+|---|---|---|
+| **1 — Threshold check** | Absolute thresholds now (clarity/trust < 5.0 OR friction > 6.0 → ⚠️ advisory, matching the script's own `screensFlagged` convention at `scripts/generate-synthetic-ux-report.ts:458`). Baseline-anchored comparison (score dropped ≥ 1.0 from main's baseline → fail) in T.4. | ⚠️ **T.3 ships absolute thresholds, advisory-only.** |
+| **2 — Dismissed-findings filter** | `docs/testing-acceptable-findings.md` enumerates findings the team has accepted. CI filters these out before comparing to threshold. | 🟡 **T.3 ships the file stub; filter logic in T.4.** |
+| **3 — PM triage loop** | An agent (or human) reads the judge output and routes findings: regression → auto fix batch; persistent issue → polish backlog; one-off → drop; aesthetic disagreement → dismiss-list entry. | 🟡 **Manual for now; semi-automated in T.4.** |
+| **4 — Convergence caps** | Hard stops: max 2 polish passes per feature per round; 3 fix attempts → escalate or redesign; weekly Tier 5 budget. | ⬜ **Deferred.** |
+
+**Honest limits of the loop:**
+
+- The judge can't tell you whether a feature should exist — only whether an existing one is usable. Strategic product decisions stay with the human.
+- The judge can't prioritize across flows — onboarding friction costs 100× more than settings friction but scores the same. Weighting by funnel stage is a human / PM concern.
+- The judge drifts silently when Anthropic retunes the model. `UX_MODEL` is pinned in `scripts/generate-synthetic-ux-report.ts` and should only be bumped deliberately.
+- Baselines are moving targets. Every N rounds, the human approves the current state as the new baseline so the bar doesn't ratchet up forever.
+
+**The v1 loop (T.3 + future T.4):**
+
+1. Every PR: Tier 5 runs the Sarah persona (+ 6 others for de-biasing) across 3-role matrix.
+2. **T.3 (this batch):** per-role aggregate scores + top frictions are inlined in the PR status comment. Absolute-threshold breaches are flagged ⚠️ advisory.
+3. **T.4 (deferred):** baseline comparison, dismiss-list filtering, and automated fix-batch creation for regressions. Human approves baseline bumps.
+
 ---
 
 ## 6. Retroactive application — testing older PRs with the new strategy
@@ -601,13 +625,15 @@ Tactical traps encountered while wiring the per-PR harness in Batch T.1 (PR #19)
 
 **Fix:** add an `if: failure()` step after the Playwright run that dumps `test-results/.last-run.json`, each `error-context.md`, stdout tails, and the screenshot inventory into `$GITHUB_STEP_SUMMARY`. Renders as markdown in the Actions UI Summary tab — no download cycle. Template in `playwright-pr.yml` "Print Playwright failure summary" step.
 
-### E.5 — `paths-ignore` on `pull_request` doesn't reliably skip the workflow
+### E.5 — `paths-ignore` semantics are subtle for multi-file PRs
 
-**Symptom:** set `paths-ignore: ["docs/**", "**/*.md", ".gitignore"]` on a `pull_request` workflow, pushed a docs-only commit, and the workflow still queued and ran jobs.
+**Symptom:** set `paths-ignore: ["docs/**", "**/*.md", ".gitignore"]` on a `pull_request` workflow, then pushed a *single commit* touching `docs/working/plan.md` only on top of a PR whose overall diff (vs. main) still included non-docs files. The workflow queued and ran.
 
-**Root cause:** GitHub's path-filter semantics for `pull_request` events are less strict than for `push` events; multi-commit PRs and path-filter edge cases can cause the workflow to trigger despite all files matching the ignore list.
+**Root cause:** `paths-ignore` on `pull_request` events evaluates against the **PR's total diff vs. the base branch**, not against the latest commit. If ANY changed file in the PR's full diff fails the `paths-ignore` check, the workflow runs on every subsequent push — even pushes that are docs-only. An earlier version of this note described `paths-ignore` as "unreliable"; the actual behavior is documented, just counter-intuitive.
 
-**Fix:** don't rely on `paths-ignore` as a cost-control gate. Either gate individual jobs with an `if:` that inspects `github.event.pull_request.changed_files` via `actions/github-script`, or accept the extra run cost for docs-only commits and let them pass quickly.
+Verified on PR #22 (T.3): that PR's diff includes `.github/workflows/playwright-pr.yml` (non-ignored) plus 4 markdown files (ignored). The workflow triggered correctly because the aggregate diff is not all-ignored. On PR #20 (T.2, docs-only), the workflow was also observed to run — that case is closer to the inconsistency end of the spectrum and worth revisiting if we see repeated anomalies.
+
+**Fix:** use `paths-ignore` with the expectation that it filters PRs whose *entire* diff is ignorable. For per-commit cost control (skip re-runs on docs-only commits within a feature PR), gate jobs with an `if:` that inspects changed files via `actions/github-script`. For aggregate PR-level skipping (docs-only PRs), rely on `paths-ignore` but verify on first use.
 
 ### E.6 — Un-onboarded test users trip `CustomerPropertyGate`
 
