@@ -415,6 +415,8 @@ These rules prevent data loss and enable reliable multi-session execution.
 
 5. **Never block on human input during autonomous execution.** If something is ambiguous, make the best judgment call based on the batch spec, commit with a note explaining the decision, and flag it for human review in `plan.md`.
 
+6. **Grep the filesystem before assuming tooling isn't built.** Docs lag reality. Before scoping any testing / tooling / infra batch, run `ls .github/workflows/ scripts/ e2e/ e2e/prompts/ 2>/dev/null` and grep for candidate terms (`ANTHROPIC_API_KEY`, `playwright install`, persona names, npm scripts in `package.json`). Round 64 Batch T.1 lost ~20% of a batch re-authoring a workflow because I trusted a "tier 5 is prototype" remark in `docs/testing-strategy.md` that no longer matched `scripts/generate-synthetic-ux-report.ts` + seven persona prompts already on disk. Same rule applies to any "we should add X" impulse — check whether X exists first.
+
 **Failure recovery:** The Session Handoff section tells the next session where things stopped. Git commits + pushes provide incremental checkpoints. `🟡` status shows exactly what was completed. Uncommitted work is lost, but batch specs make reimplementation fast.
 
 ---
@@ -678,9 +680,25 @@ npx tsc --noEmit
 
 # Run tests
 npm test
+
+# E2E — runs Playwright against the URL in $BASE_URL (local dev server or a
+# Vercel preview). Requires test-user credentials + Vercel bypass secret in
+# env; see docs/testing-strategy.md Appendix D for the full secrets list.
+npm run test:e2e
+
+# AI-as-judge audits (Tier 5). Each script reads screenshots from
+# test-results/walkthrough/ and sends them to Claude with a rubric.
+# All three require ANTHROPIC_API_KEY; the :dry variants produce a
+# scaffolded report without billing.
+npm run ux-report          # Sarah-persona UX review across a role's screens
+npm run ux-report:dry
+npm run creative-audit     # Creative-Director flow-level critique
+npm run creative-audit:dry
+npm run growth-report      # Business-model growth audit
+npm run growth-report:dry
 ```
 
-Both `npm run build` and `npx tsc --noEmit` must pass before a batch is considered complete.
+Both `npm run build` and `npx tsc --noEmit` must pass before a batch is considered complete. The AI-audit scripts run automatically per-PR via `.github/workflows/playwright-pr.yml` — invoke them locally only when iterating on rubrics or debugging a specific failing flow.
 
 ### Infrastructure access (from Claude Code)
 
