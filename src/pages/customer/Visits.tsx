@@ -12,49 +12,73 @@ import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
 
 type Bucket = "upcoming" | "in_progress" | "past";
 
-const BUCKETS: { key: Bucket; label: string; statuses: string[] }[] = [
-  { key: "upcoming", label: "Upcoming", statuses: ["NOT_STARTED"] },
-  { key: "in_progress", label: "In progress", statuses: ["IN_PROGRESS"] },
-  { key: "past", label: "Past", statuses: ["COMPLETED", "PARTIAL_COMPLETE"] },
-];
+const BUCKET_LABEL: Record<Bucket, string> = {
+  upcoming: "Upcoming",
+  in_progress: "In progress",
+  past: "Past",
+};
 
-function partitionJobs(jobs: CustomerJob[]): Record<Bucket, CustomerJob[]> {
-  const out: Record<Bucket, CustomerJob[]> = { upcoming: [], in_progress: [], past: [] };
-  for (const job of jobs) {
-    for (const bucket of BUCKETS) {
-      if (bucket.statuses.includes(job.status)) {
-        out[bucket.key].push(job);
-        break;
-      }
-    }
-    // ISSUE_REPORTED and other statuses are intentionally dropped from the
-    // customer-facing Visits view — they surface via notifications / support
-    // flows instead.
-  }
-  // Upcoming ascending by scheduled_date; In progress + Past descending by
-  // most-recent activity.
-  out.upcoming.sort((a, b) =>
-    (a.scheduled_date ?? "").localeCompare(b.scheduled_date ?? ""),
-  );
-  out.in_progress.sort((a, b) =>
-    (b.started_at ?? b.scheduled_date ?? "").localeCompare(
-      a.started_at ?? a.scheduled_date ?? "",
-    ),
-  );
-  out.past.sort((a, b) =>
-    (b.completed_at ?? b.scheduled_date ?? "").localeCompare(
-      a.completed_at ?? a.scheduled_date ?? "",
-    ),
-  );
-  return out;
+const BUCKET_ORDER: Bucket[] = ["upcoming", "in_progress", "past"];
+
+// ISO date (YYYY-MM-DD) for today; used to filter stale NOT_STARTED jobs
+// out of the Upcoming bucket so past-scheduled-never-started rows don't
+// linger indefinitely (spec AC 8 + Round 64 Phase 5 Batch 5.3 Lane 1 finding).
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
 }
 
 export default function CustomerVisits() {
-  const { data: jobs = [], isLoading, isError, refetch } = useCustomerJobs("all", {
-    includePhotos: true,
-  });
+  // Two queries instead of one: "completed" gets photos (Past tab shows
+  // photo_count); "upcoming" gets NOT_STARTED + IN_PROGRESS + ISSUE_REPORTED
+  // without the signed-URL round-trips. Splitting also sidesteps the hook's
+  // limit(100) cap — ISSUE_REPORTED history no longer crowds out Past jobs.
+  const {
+    data: activeJobs = [],
+    isLoading: activeLoading,
+    isError: activeError,
+    refetch: refetchActive,
+  } = useCustomerJobs("upcoming");
 
-  const buckets = useMemo(() => partitionJobs(jobs), [jobs]);
+  const {
+    data: pastJobs = [],
+    isLoading: pastLoading,
+    isError: pastError,
+    refetch: refetchPast,
+  } = useCustomerJobs("completed", { includePhotos: true });
+
+  const isLoading = activeLoading || pastLoading;
+  const isError = activeError || pastError;
+  const refetch = () => {
+    refetchActive();
+    refetchPast();
+  };
+
+  const buckets = useMemo<Record<Bucket, CustomerJob[]>>(() => {
+    const today = todayIso();
+    return {
+      upcoming: activeJobs
+        .filter(
+          (j) =>
+            j.status === "NOT_STARTED" &&
+            // null scheduled_date stays visible (legit "unscheduled but
+            // upcoming" state); past-dated never-started jobs are hidden.
+            (j.scheduled_date == null || j.scheduled_date >= today),
+        )
+        .sort((a, b) => (a.scheduled_date ?? "").localeCompare(b.scheduled_date ?? "")),
+      in_progress: activeJobs
+        .filter((j) => j.status === "IN_PROGRESS")
+        .sort((a, b) =>
+          (b.started_at ?? b.scheduled_date ?? "").localeCompare(
+            a.started_at ?? a.scheduled_date ?? "",
+          ),
+        ),
+      past: [...pastJobs].sort((a, b) =>
+        (b.completed_at ?? b.scheduled_date ?? "").localeCompare(
+          a.completed_at ?? a.scheduled_date ?? "",
+        ),
+      ),
+    };
+  }, [activeJobs, pastJobs]);
 
   if (isError) {
     return (
@@ -71,21 +95,21 @@ export default function CustomerVisits() {
 
       <Tabs defaultValue="upcoming">
         <TabsList className="grid w-full grid-cols-3">
-          {BUCKETS.map((b) => (
-            <TabsTrigger key={b.key} value={b.key}>
-              {b.label}
-              {!isLoading && buckets[b.key].length > 0 && (
+          {BUCKET_ORDER.map((bucket) => (
+            <TabsTrigger key={bucket} value={bucket}>
+              {BUCKET_LABEL[bucket]}
+              {!isLoading && buckets[bucket].length > 0 && (
                 <Badge variant="secondary" className="ml-2 text-[10px] px-1.5 py-0">
-                  {buckets[b.key].length}
+                  {buckets[bucket].length}
                 </Badge>
               )}
             </TabsTrigger>
           ))}
         </TabsList>
 
-        {BUCKETS.map((b) => (
-          <TabsContent key={b.key} value={b.key} className="mt-4">
-            <BucketPanel bucket={b.key} jobs={buckets[b.key]} isLoading={isLoading} />
+        {BUCKET_ORDER.map((bucket) => (
+          <TabsContent key={bucket} value={bucket} className="mt-4">
+            <BucketPanel bucket={bucket} jobs={buckets[bucket]} isLoading={isLoading} />
           </TabsContent>
         ))}
       </Tabs>
@@ -158,9 +182,10 @@ function VisitRow({ job, bucket }: { job: CustomerJob; bucket: Bucket }) {
   return (
     <Card
       onClick={() => navigate(`/customer/visits/${job.id}`)}
-      className="p-3 cursor-pointer hover:bg-secondary/30 transition-colors"
+      className="p-3 cursor-pointer hover:bg-secondary/30 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       role="button"
       tabIndex={0}
+      aria-label={`${title} — ${dateLabel}`}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();

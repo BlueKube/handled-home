@@ -60,7 +60,10 @@ export default function CustomerServices() {
 
       <SeasonalBundleSpotlight />
 
-      {isError ? (
+      {!isLoading && isError ? (
+        // Only surface the error card once both queries have settled — avoids
+        // a flash of error state when one query errors while the other is
+        // still on its first fetch.
         <QueryErrorCard
           message="Failed to load your services. Check your connection and try again."
           onRetry={() => {
@@ -149,9 +152,10 @@ function IncludedInPlan({ hasPlan, isLoading, items, skuById, onSelect }: Sectio
             return (
               <button
                 key={ent.sku_id}
-                onClick={() => sku && onSelect(sku)}
-                disabled={!sku}
-                className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-secondary/30 active:bg-secondary/50 transition-colors first:rounded-t-xl last:rounded-b-xl disabled:opacity-60"
+                type="button"
+                onClick={() => { if (sku) onSelect(sku); }}
+                aria-disabled={!sku}
+                className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-secondary/30 active:bg-secondary/50 transition-colors first:rounded-t-xl last:rounded-b-xl aria-disabled:opacity-60 aria-disabled:cursor-not-allowed"
               >
                 <Icon className="h-5 w-5 text-muted-foreground shrink-0" />
                 <div className="flex-1 min-w-0">
