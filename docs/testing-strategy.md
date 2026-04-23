@@ -64,23 +64,21 @@ When to skip:
 
 ### Tier 3 — E2E against the Vercel preview (UI batches)
 
-The Playwright setup is already mature: `playwright.config.ts` reads `BASE_URL`, `auth.setup.ts` logs in customer + provider + admin test users into reusable storage states, 5 specs cover BYOC flows + screenshot catalog.
+**Status: live per-PR** via `.github/workflows/playwright-pr.yml`. Runs automatically on every non-draft PR touching `src/` or `e2e/`. The workflow resolves the Vercel preview URL dynamically, injects the `x-vercel-protection-bypass` header, runs `npm run test:e2e`, uploads Playwright report + test-results artifacts, and posts a summary comment back to the PR.
 
-Per-batch protocol:
-1. After PR opens + Vercel Preview goes ✅, extract the preview URL from the Vercel bot comment (first line of the comment body).
-2. Run the relevant spec subset:
-   ```bash
-   BASE_URL="<preview-url>" \
-   CUSTOMER_EMAIL=customer@test.com CUSTOMER_PASSWORD=... \
-   PROVIDER_EMAIL=provider@test.com PROVIDER_PASSWORD=... \
-   ADMIN_EMAIL=admin@test.com ADMIN_PASSWORD=... \
-   npm run test:e2e
-   ```
-3. Attach the `test-results/html-report/` index + any failure screenshots to the PR as a comment.
+The Playwright setup is mature: `playwright.config.ts` reads `BASE_URL`, `auth.setup.ts` logs in customer + provider + admin test users into reusable storage states, 6 specs cover BYOC flows + screenshot catalog + AvatarDrawer.
 
-**Blockers to unlock this tier (asks for the human):**
-- Set test-user passwords as Vercel preview env vars OR hand me the credentials once for `.claude/settings.local.json`. Without them, Playwright fails at auth-setup.
-- Confirm the three test users exist on every Supabase Preview branch. They should, per `20260322000000_fix_test_users_and_seed_metro.sql`.
+**Local-run protocol** (when you need to iterate faster than CI):
+```bash
+BASE_URL="<preview-url>" \
+VERCEL_AUTOMATION_BYPASS_SECRET="<bypass>" \
+TEST_CUSTOMER_EMAIL=… TEST_CUSTOMER_PASSWORD=… \
+TEST_PROVIDER_EMAIL=… TEST_PROVIDER_PASSWORD=… \
+TEST_ADMIN_EMAIL=…    TEST_ADMIN_PASSWORD=…    \
+npm run test:e2e
+```
+
+See **Appendix D — secrets inventory** for every variable the workflow expects, where to set it, and sensitivity tier.
 
 ### Tier 4 — New spec per new flow (feature batches)
 
@@ -525,6 +523,39 @@ This is the recommended build-out sequence. Don't do all of this at once; each s
 8. **Add Playwright MCP to `.mcp.json`** when the agent needs per-batch exploratory testing (interactive) rather than spec-file runs. Evaluate Chrome DevTools MCP at the first hard-to-diagnose failure.
 9. **Start retro coverage** for the top-3 revenue flows (Billing, Subscribe, Credit pack).
 10. **Quarterly review.** Update this doc.
+
+---
+
+## Appendix D — Secrets inventory
+
+Every secret referenced by the testing harness. Add to the repo via **Settings → Secrets and variables → Actions → Repository secrets** (unless noted).
+
+| Secret name | Purpose | Where it's used | Sensitivity | Rotation cadence |
+|---|---|---|---|---|
+| `TEST_CUSTOMER_EMAIL` | Customer test-user email | `playwright-pr.yml`, `playwright.yml`, `e2e/auth.setup.ts` | Low (fixed test account) | Rotate when changing the test user's password |
+| `TEST_CUSTOMER_PASSWORD` | Customer test-user password | same | Medium (account takeover if leaked) | Quarterly or on suspected leak |
+| `TEST_PROVIDER_EMAIL` | Provider test-user email | same | Low | same as customer |
+| `TEST_PROVIDER_PASSWORD` | Provider test-user password | same | Medium | same as customer |
+| `TEST_ADMIN_EMAIL` | Admin test-user email | same | Low | same as customer |
+| `TEST_ADMIN_PASSWORD` | Admin test-user password | same — **higher blast radius because admin** | **High** (admin access to prod data) | Monthly or after any suspected session exposure |
+| `VERCEL_AUTOMATION_BYPASS_SECRET` | Bypasses Vercel Preview Protection so Playwright can reach the preview URL | `playwright-pr.yml` (and `playwright.config.ts` via env) | Medium (anyone with this can view any preview) | Rotate after first setup + on any suspected leak; regenerate in Vercel Dashboard → Project → Settings → Deployment Protection |
+| `ANTHROPIC_API_KEY` | Tier 5 AI-judge (Sarah persona) API calls | `playwright-pr.yml` `ai-judge` matrix, `playwright.yml` `ai-reports` | High (paid usage, rate-limited) | Remove secret to kill all Tier 5 spend; rotate on suspected leak |
+| `BASE_URL` | Static target for the manual `playwright.yml` (prod or a pinned preview) | `playwright.yml` only — the new PR workflow derives this per-PR | Low | Update when prod URL changes |
+| `TEST_BYOC_TOKEN` | BYOC happy-path spec fixture token | `playwright-pr.yml` `e2e`, `playwright.yml` `e2e` | Low | As needed |
+
+### Not stored as GH Secrets (local-only)
+
+Populate in `.claude/settings.local.json` (gitignored) for local Claude Code runs:
+
+- `SUPABASE_ACCESS_TOKEN` — management API for schema changes (see CLAUDE.md §12 Credential tiers)
+- `VERCEL_TOKEN` — if running `vercel` CLI locally
+- `SUPABASE_PROJECT_REF`, `SUPABASE_URL` — convenience for sandbox operations
+
+### Hygiene notes
+
+- **Never echo secrets in workflow logs.** The `Validate required secrets` step in `playwright-pr.yml` uses `[ -z "${!var}" ]` — this checks whether a var is empty without printing its value. Do NOT `echo "$SECRET"` anywhere for debugging.
+- **Playwright traces may contain auth cookies.** `trace: "on-first-retry"` in `playwright.config.ts` captures network state on retries. Traces uploaded as artifacts are visible to anyone who can view the PR — don't expose PR access to untrusted parties.
+- **Rotate test-user passwords after any public incident.** These accounts hold seeded demo data in prod; an attacker with the password can see but not meaningfully modify the platform. Still: rotate.
 
 
 
