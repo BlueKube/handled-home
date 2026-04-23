@@ -176,6 +176,7 @@ jobs:
         # doesn't suppress the diagnostic.
         if: always()
         run: |
+          mkdir -p t6-diagnostic
           {
             echo "## T.6 milestone-flow diagnostic — post-Playwright (e2e job)"
             echo ""
@@ -207,7 +208,13 @@ jobs:
             else
               echo "⚠️ \`test-results/milestones/manifest.json\` not present."
             fi
-          } | tee -a "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$GITHUB_STEP_SUMMARY" | tee t6-diagnostic/e2e.md
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: t6-diagnostic-e2e
+          path: t6-diagnostic/
 
       - name: Print Playwright failure summary
         if: failure()
@@ -295,6 +302,7 @@ jobs:
         # round-tripping. Same `if: always()` semantics.
         if: always()
         run: |
+          mkdir -p t6-diagnostic
           {
             echo "## T.6 milestone-flow diagnostic — post-download (ai-judge / ${{ matrix.role }})"
             echo ""
@@ -329,9 +337,15 @@ jobs:
             echo ""
             echo "### Role filter for this matrix shard"
             echo "\`UX_ROLE_FILTER=${UX_ROLE_FILTER:-<unset>}\`"
-          } | tee -a "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$GITHUB_STEP_SUMMARY" | tee t6-diagnostic/aijudge-${{ matrix.role }}.md
         env:
           UX_ROLE_FILTER: ${{ matrix.filter }}
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: t6-diagnostic-aijudge-${{ matrix.role }}
+          path: t6-diagnostic/
 
       - name: Generate Sarah-persona UX report (${{ matrix.role }})
         if: env.ANTHROPIC_API_KEY != ''
@@ -374,6 +388,40 @@ jobs:
         with:
           path: ai-reports/
           pattern: ai-report-*
+
+      - name: Download T.6 diagnostic artifacts
+        # Batch T.6 — pulls the tiny diagnostic markdown files from the e2e
+        # and ai-judge jobs so the comment can render what Playwright wrote
+        # vs. what arrived after artifact round-tripping. Remove this step
+        # once the milestone-flow regression is closed.
+        if: always()
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          path: t6-diagnostic/
+          pattern: t6-diagnostic-*
+
+      - name: Collect T.6 diagnostic body
+        id: t6-diag
+        if: always()
+        run: |
+          T6=""
+          if [ -d t6-diagnostic ]; then
+            # Emit each file wrapped in a collapsible <details> block so the
+            # PR comment stays scannable. Files are tiny (<10 KB each).
+            for f in $(find t6-diagnostic -name '*.md' | sort); do
+              label=$(basename "$f" .md)
+              T6+=$'\n\n<details>\n<summary>T.6 diagnostic — '"${label}"$'</summary>\n\n'
+              T6+="$(cat "$f")"
+              T6+=$'\n\n</details>\n'
+            done
+          fi
+          {
+            echo "body<<T6_EOF"
+            printf '%s' "$T6"
+            echo ""
+            echo "T6_EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Parse Tier 5 summaries
         id: parse-ai
@@ -514,6 +562,7 @@ jobs:
 
             **Preview URL:** ${{ needs.wait-for-preview.outputs.preview_url || 'n/a' }}
             ${{ steps.parse-ai.outputs.tier5 }}
+            ${{ steps.t6-diag.outputs.body }}
             Artifacts: [Run details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
             <sub>If Tier 3 failed on missing secrets, populate them in Settings → Secrets and variables → Actions (see `docs/testing-strategy.md` Appendix D).</sub>
