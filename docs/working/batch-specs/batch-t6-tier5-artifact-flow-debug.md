@@ -1,7 +1,7 @@
 # Batch T.6 — Tier 5 milestone artifact-flow debug
 
-> **Round:** 64 · **Phase:** 5 (tooling sidebar) · **Size:** Micro → may grow to Small if a fix lands in the same PR
-> **Review:** Quality — 1 combined reviewer (Micro tier per CLAUDE.md §5)
+> **Round:** 64 · **Phase:** 5 (tooling sidebar) · **Size:** Micro → Small `[OVERRIDE: Micro → Small — stale model-ID fix + error-surface hardening added logic beyond pure diagnostic; documented at reviewer's request]`
+> **Review:** Quality — Small tier: 1 combined reviewer, no synthesis (single input lane)
 > **Testing tiers:** T1 yaml lint (workflow validates). T3 the workflow itself runs on this PR — that *is* the test.
 > **Branch:** `feat/round-64-phase-5-t6-tier5-artifact-flow-debug`
 
