@@ -7,8 +7,12 @@ const BASE_URL =
 // forwarded as a header so Playwright can reach the preview URL. Local runs
 // against prod (`handledhome.app`) or the dev server skip the header.
 const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+// Vercel's documented values for x-vercel-set-bypass-cookie are "samesitenone"
+// or "true"; the integer string "1" is not specified. Using "samesitenone"
+// lets the cookie apply to cross-site navigations (Playwright context) and is
+// the form used by Vercel's own automation examples.
 const extraHTTPHeaders = bypassSecret
-  ? { "x-vercel-protection-bypass": bypassSecret, "x-vercel-set-bypass-cookie": "true" }
+  ? { "x-vercel-protection-bypass": bypassSecret, "x-vercel-set-bypass-cookie": "samesitenone" }
   : undefined;
 
 export default defineConfig({

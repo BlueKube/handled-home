@@ -82,6 +82,8 @@ See **Appendix D — secrets inventory** for every variable the workflow expects
 
 ### Tier 4 — New spec per new flow (feature batches)
 
+**Status: active.** `e2e/avatar-drawer.spec.ts` (Batch 5.2 retro) is the first spec produced under this tier after PR #19. Each subsequent batch with a new user flow adds a spec per the table below and ships it in the same PR.
+
 For every new user-facing flow, add a `.spec.ts` in `e2e/` before closing the batch. Examples:
 
 | Flow | Spec name | Assertions |
@@ -94,7 +96,9 @@ Keep specs **idempotent**: each spec resets state it depends on (via `test.befor
 
 ### Tier 5 — Experiential (AI-as-judge)
 
-See Section 5 below. This is the frontier tier — takes 30 s to a few minutes, uses an LLM to evaluate the flow's clarity, friction, and affect against a rubric. Not a blocker for merge today; a signal for polish rounds.
+**Status: live per-PR when `ANTHROPIC_API_KEY` is set.** Runs via the `ai-judge` matrix (3 parallel role jobs) in `.github/workflows/playwright-pr.yml`. The Sarah persona (`e2e/prompts/personas/busy-homeowner.md`) is the canonical judge. Not merge-blocking; a signal for polish rounds.
+
+See Section 5 below. This is the frontier tier — takes 30 s to a few minutes, uses an LLM to evaluate the flow's clarity, friction, and affect against a rubric.
 
 ---
 

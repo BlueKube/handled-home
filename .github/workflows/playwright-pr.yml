@@ -30,18 +30,55 @@ jobs:
     outputs:
       preview_url: ${{ steps.resolve.outputs.url }}
     steps:
-      - name: Wait for Vercel preview to be ready
+      - name: Resolve Vercel preview URL via GitHub Deployments API
         id: resolve
-        uses: patrickedqvist/wait-for-vercel-preview@v1.3.1
+        uses: actions/github-script@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          max_timeout: 480
-          check_interval: 15
-          environment: Preview
+          script: |
+            const sha = context.payload.pull_request.head.sha;
+            core.info(`Polling for Vercel Preview deployment on sha ${sha}`);
+            const maxAttempts = 32; // 32 * 15s = 8 minutes
+            for (let i = 0; i < maxAttempts; i++) {
+              const { data: deployments } = await github.rest.repos.listDeployments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                sha,
+                per_page: 30,
+              });
+              const previewDeps = deployments.filter(d =>
+                d.environment && d.environment.toLowerCase().includes('preview')
+              );
+              for (const dep of previewDeps) {
+                const { data: statuses } = await github.rest.repos.listDeploymentStatuses({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  deployment_id: dep.id,
+                  per_page: 30,
+                });
+                const success = statuses.find(s => s.state === 'success' && s.environment_url);
+                if (success) {
+                  core.info(`✓ Preview ready at ${success.environment_url}`);
+                  core.setOutput('url', success.environment_url);
+                  return;
+                }
+                const failed = statuses.find(s => s.state === 'failure' || s.state === 'error');
+                if (failed) {
+                  core.setFailed(`Vercel deployment ${dep.id} reported state=${failed.state}`);
+                  return;
+                }
+              }
+              core.info(`Attempt ${i + 1}/${maxAttempts} — no successful Preview deployment yet, sleeping 15s`);
+              await new Promise(r => setTimeout(r, 15000));
+            }
+            core.setFailed('Vercel Preview deployment did not reach success state within 8 minutes');
 
   e2e:
     needs: wait-for-preview
-    if: needs.wait-for-preview.outputs.preview_url != ''
+    # Run whenever a preview URL was resolved, even if the resolver job itself
+    # reported a non-success outcome mid-run (e.g. a transient status). Step
+    # outputs persist across sub-steps, so we can proceed as long as the URL
+    # is set.
+    if: always() && needs.wait-for-preview.outputs.preview_url != ''
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -65,7 +102,8 @@ jobs:
           for var in TEST_CUSTOMER_EMAIL TEST_CUSTOMER_PASSWORD \
                      TEST_PROVIDER_EMAIL TEST_PROVIDER_PASSWORD \
                      TEST_ADMIN_EMAIL    TEST_ADMIN_PASSWORD \
-                     VERCEL_AUTOMATION_BYPASS_SECRET; do
+                     VERCEL_AUTOMATION_BYPASS_SECRET \
+                     TEST_BYOC_TOKEN; do
             if [ -z "${!var}" ]; then
               echo "::error title=Missing secret::$var is not set. Add it in Settings → Secrets and variables → Actions."
               missing=1
@@ -80,6 +118,7 @@ jobs:
           TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
           TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          TEST_BYOC_TOKEN: ${{ secrets.TEST_BYOC_TOKEN }}
 
       - name: Warm up preview (auth + dashboard bundle)
         run: |
@@ -126,7 +165,7 @@ jobs:
 
   ai-judge:
     needs: [wait-for-preview, e2e]
-    if: needs.wait-for-preview.outputs.preview_url != '' && success()
+    if: always() && needs.e2e.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -189,10 +228,20 @@ jobs:
     permissions:
       pull-requests: write
     steps:
+      - name: Find existing Playwright status comment
+        id: find-comment
+        uses: peter-evans/find-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: "github-actions[bot]"
+          body-includes: "### Playwright PR run"
+
       - name: Post summary comment
         uses: peter-evans/create-or-update-comment@v4
         with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
           body: |
             ### Playwright PR run — ${{ needs.e2e.result == 'success' && '✅ Pass' || needs.e2e.result == 'skipped' && '⏭️ Skipped' || '❌ Fail' }}
 

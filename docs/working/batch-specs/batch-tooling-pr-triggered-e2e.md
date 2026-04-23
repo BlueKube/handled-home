@@ -49,8 +49,8 @@ This batch closes all five gaps in one PR without disturbing the existing manual
 1. `.github/workflows/playwright-pr.yml` exists and triggers on `pull_request` types `opened`, `synchronize`, `reopened`, `ready_for_review`.
 2. The workflow skips PRs in draft state.
 3. The workflow skips when the diff is docs-only (`docs/**`, `**/*.md`, `.gitignore`).
-4. The workflow resolves the Vercel preview URL dynamically via `wait-for-vercel-preview`.
-5. The `e2e` job validates 7 required secrets (test-user credentials + bypass secret) and fails fast with a clear `::error` annotation when any are missing.
+4. The workflow resolves the Vercel preview URL dynamically via an `actions/github-script` block that polls the GitHub Deployments API for the PR's HEAD SHA and returns the `environment_url` of the first `Preview` deployment that reaches `state=success`. This replaces an earlier attempt using `patrickedqvist/wait-for-vercel-preview` that failed under Vercel Preview Protection because the action does its own HTTP check without the bypass header.
+5. The `e2e` job validates 8 required secrets (test-user credentials + bypass secret + BYOC token) and fails fast with a clear `::error` annotation when any are missing.
 6. The `e2e` job warms the preview URL with the bypass header before running Playwright.
 7. `npm run test:e2e` runs against the resolved preview URL.
 8. Playwright artifacts (`playwright-report/`, `test-results/`) upload on success and failure.

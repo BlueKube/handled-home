@@ -21,8 +21,9 @@ test.describe("Avatar drawer (Batch 5.2)", () => {
 
     await avatar.click();
 
-    // Drawer open + header present.
-    const drawer = page.getByRole("dialog");
+    // Drawer open + header present. `.first()` scopes to the Sheet's dialog —
+    // the NotificationPanel also renders role="dialog" but only when open.
+    const drawer = page.getByRole("dialog").first();
     await expect(drawer).toBeVisible();
 
     // All six menu items visible (Plan, Billing, Credits, Account, Referrals, Help & support).
@@ -41,16 +42,16 @@ test.describe("Avatar drawer (Batch 5.2)", () => {
     await page.getByRole("button", { name: /^credits$/i }).click();
 
     await expect(page).toHaveURL(/\/customer\/credits$/);
-    await expect(page.getByRole("dialog")).not.toBeVisible();
+    await expect(page.getByRole("dialog").first()).not.toBeVisible();
   });
 
   test("?drawer=true auto-opens the drawer and strips the param", async ({ page }) => {
     await page.goto("/customer?drawer=true");
 
-    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole("dialog").first()).toBeVisible({ timeout: 10_000 });
 
     // URL has been cleaned — drawer param removed via replace.
-    await expect(page).toHaveURL(/\/customer(\?.*)?$/);
+    await expect(page).toHaveURL(/\/customer$/);
     expect(page.url()).not.toContain("drawer=true");
   });
 
@@ -58,7 +59,7 @@ test.describe("Avatar drawer (Batch 5.2)", () => {
     await page.goto("/customer/more");
 
     await expect(page).toHaveURL(/\/customer(\?.*)?$/, { timeout: 10_000 });
-    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(page.getByRole("dialog").first()).toBeVisible();
   });
 
   test("sign-out confirmation opens and cancels without closing the drawer", async ({ page }) => {
