@@ -341,7 +341,7 @@ A naive "fix everything the AI judge flags" loop never converges — findings ar
 
 | Layer | Purpose | Status |
 |---|---|---|
-| **1 — Threshold check** | Absolute thresholds now (any persona-mean score < 3.0 → ⚠️ advisory). Baseline-anchored comparison (score dropped ≥ 1.0 from main's baseline → fail) in T.4. | ⚠️ **T.3 ships absolute thresholds, advisory-only.** |
+| **1 — Threshold check** | Absolute thresholds now (clarity/trust < 5.0 OR friction > 6.0 → ⚠️ advisory, matching the script's own `screensFlagged` convention at `scripts/generate-synthetic-ux-report.ts:458`). Baseline-anchored comparison (score dropped ≥ 1.0 from main's baseline → fail) in T.4. | ⚠️ **T.3 ships absolute thresholds, advisory-only.** |
 | **2 — Dismissed-findings filter** | `docs/testing-acceptable-findings.md` enumerates findings the team has accepted. CI filters these out before comparing to threshold. | 🟡 **T.3 ships the file stub; filter logic in T.4.** |
 | **3 — PM triage loop** | An agent (or human) reads the judge output and routes findings: regression → auto fix batch; persistent issue → polish backlog; one-off → drop; aesthetic disagreement → dismiss-list entry. | 🟡 **Manual for now; semi-automated in T.4.** |
 | **4 — Convergence caps** | Hard stops: max 2 polish passes per feature per round; 3 fix attempts → escalate or redesign; weekly Tier 5 budget. | ⬜ **Deferred.** |
