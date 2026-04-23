@@ -24,7 +24,9 @@ Doing Phase 5 first avoids re-doing cross-cutting nav + VisitDetail work later.
 | **T.1** | **Tooling sidebar — PR-triggered Tier 3/5 workflow + AvatarDrawer Tier 4 spec + secrets inventory** | **M** | **✅** | TBD |
 | **T.2** | **Retrospective doc sync — lessons from T.1 into CLAUDE.md / testing-strategy / lessons-learned** | **S** | **✅** | TBD |
 | 5.3 | `/customer/services` + `/customer/visits` page shells (consume existing data) | M | ✅ | TBD |
-| **T.3** | **Tier 5 visibility — inline scores + advisory threshold + dismiss-list stub (Layer 1 + 2 stub of convergence architecture)** | **S** | **🟡 impl done, review pending** | |
+| **T.3** | **Tier 5 visibility — inline scores + advisory threshold + dismiss-list stub (Layer 1 + 2 stub of convergence architecture)** | **S** | **✅** | TBD |
+| **T.4** | **Tier 5 milestone captures on avatar-drawer.spec.ts** | **Micro** | **✅** | TBD |
+| **T.5** | **Autonomous coding system paper — end-to-end workflow documentation for publication** | **S** | **🟡 impl done, review pending** | |
 | 5.4 | VisitDetail three-mode rewrite (preview / live / complete) + type chips | L | ⬜ | |
 | 5.5 | ReportIssueSheet 4-category rewrite | M | ⬜ | |
 
@@ -84,9 +86,10 @@ Each batch ships as its own PR against `main`, following `BlueKube/handled-home`
 
 ## Session Handoff
 
-- **Branch at session end:** `feat/round-64-phase-5-t3-ai-judge-visibility` — T.3 (Tier 5 visibility + advisory threshold + dismiss-list stub) implementation done; PR pending.
-- **Last completed:** Batch 5.3 (Services + Visits shells) merged via PR #21. T.3 sketched with convergence architecture framing in testing-strategy.md §5.8.
-- **Next up:** Ship T.3 (PR #22), then Batch 5.4 — VisitDetail three-mode rewrite (the remaining Large-tier feature batch of Phase 5).
+- **Branch at session end:** `feat/round-64-phase-5-t5-autonomous-coding-paper` — T.5 paper written + pushed; PR pending.
+- **Last completed:** Eight PRs shipped this session: #17 (5.1 nav) → #18 (5.2 drawer) → #19 (T.1 harness, 7-iteration bring-up) → #20 (T.2 retro doc sync) → #21 (5.3 services+visits shells) → #22 (T.3 Tier 5 visibility + convergence architecture) → #23 (T.4 milestone captures) → T.5 paper in flight.
+- **Next up:** Self-merge T.5. Then fresh session for Batch 5.4 (VisitDetail three-mode — Large tier, 5-agent review) or Phase 6 (seasonal bundles) at human discretion.
+- **Open TODO:** debug why Tier 5 milestones don't reach the ai-judge job despite T.4 adding captures — probable causes are Playwright outputDir cleaning, upload-artifact path scope, or download-artifact timing. First investigation of next session.
 - **Context at exit:** TBD — check `/context` after each batch.
 - **Blockers:** None for future batches. Two non-blocking follow-ups still logged in `docs/upcoming/TODO.md`: (1) seed a property profile for the 3 persistent test users; (2) rotate the Vercel bypass secret after the setup-chat exposure.
-- **Round progress:** Phases 1–4 ✅ · Phase 5: Batches 5.1 ✅ · 5.2 ✅ · T.1 ✅ · T.2 ✅ · 5.3–5.5 ⬜ · Phases 6–8 ⬜.
+- **Round progress:** Phases 1–4 ✅ · Phase 5: Batches 5.1 ✅ · 5.2 ✅ · T.1 ✅ · T.2 ✅ · 5.3 ✅ · T.3 ✅ · T.4 ✅ · T.5 🟡 · 5.4–5.5 ⬜ · Phases 6–8 ⬜.

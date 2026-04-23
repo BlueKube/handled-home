@@ -2,6 +2,15 @@
 
 Items that require API keys, backend changes, or design decisions beyond frontend gap closure. These are left for the owner to complete after the automated batch work.
 
+### 2026-04-23 — Tier 5 milestone artifact flow (T.4 follow-up)
+
+- [ ] **Debug why captures don't reach the AI judge.** Batch T.4 added `MilestoneTracker.capture()` calls to `e2e/avatar-drawer.spec.ts`. The tests ran successfully in PR #23's CI (all 8 checks green), but the subsequent `ai-judge` matrix still produced scaffold-mode output — the status comment shows `—` across all three roles with the "no milestone screenshots captured" advisory.
+  - **Why:** Until captures flow through, Tier 5 is cosmetic infrastructure with zero actual signal. The T.3 visibility layer is the eye on the problem; now we need the data.
+  - **Probable causes (order of likelihood):** (1) Playwright's default outputDir cleaning wipes `test-results/milestones/` at the start of a run, removing it before beforeAll recreates it; (2) `upload-artifact` at the `e2e` job excludes the `milestones/` subdirectory because of how the artifact path pattern is written; (3) `download-artifact` at the `ai-judge` job extracts into a different path than expected; (4) filename-prefix filter in `generate-synthetic-ux-report.ts:147` rejects the files.
+  - **Diagnostic plan:** add a one-off step to the `ai-judge` job that runs `ls -R test-results/` immediately before `npm run ux-report`. The output will land in the workflow log and answer all four hypotheses at once.
+  - **Blocked:** Nothing blocked — Tier 5 scoring is currently cosmetic; fixing this unlocks real advisory signal on every subsequent PR.
+  - **Source:** PR #23 (T.4) CI run — comment surfaced the still-empty scores despite T.4's capture additions.
+
 ### 2026-04-23 — Tier 5 milestone capture (T.3 follow-up)
 
 - [ ] **Make the AI judge actually see our UI.** Batch T.3 made Tier 5 scores visible in the PR comment, which immediately exposed that the harness has been running in scaffold mode — `test-results/milestones/` is empty because only the skipped BYOC specs write milestone screenshots. The judge scored zero screens this session and the comment shows `—` across all role rows.
