@@ -55,7 +55,7 @@ const CustomerCoverageMap = lazy(() => import("@/pages/customer/CoverageMap"));
 const CustomerPropertySizing = lazy(() => import("@/pages/customer/PropertySizing"));
 const CustomerAppointmentPicker = lazy(() => import("@/pages/customer/AppointmentPicker"));
 const CustomerSchedule = lazy(() => import("@/pages/customer/Schedule"));
-const CustomerActivity = lazy(() => import("@/pages/customer/Activity"));
+const CustomerVisits = lazy(() => import("@/pages/customer/Visits"));
 const CustomerReschedule = lazy(() => import("@/pages/customer/Reschedule"));
 const CustomerRecommendProvider = lazy(() => import("@/pages/customer/RecommendProvider"));
 const CustomerRecommendProviderStatus = lazy(() => import("@/pages/customer/RecommendProviderStatus"));
@@ -232,8 +232,8 @@ const App = () => (
                   <Route path="/customer/service-day" element={<CustomerPropertyGate><CustomerServiceDay /></CustomerPropertyGate>} />
                   <Route path="/customer" element={<CustomerPropertyGate><CustomerDashboard /></CustomerPropertyGate>} />
                   <Route path="/customer/schedule" element={<CustomerPropertyGate><CustomerSchedule /></CustomerPropertyGate>} />
-                  {/* /customer/visits is the new canonical URL; CustomerActivity serves as a temporary shell until Batch 5.3 ships /pages/customer/Visits.tsx. */}
-                  <Route path="/customer/visits" element={<CustomerPropertyGate><CustomerActivity /></CustomerPropertyGate>} />
+                  {/* /customer/visits — canonical URL post-Batch-5.3. Upcoming / In progress / Past tabs consume existing useCustomerJobs data. */}
+                  <Route path="/customer/visits" element={<CustomerPropertyGate><CustomerVisits /></CustomerPropertyGate>} />
                   <Route path="/customer/activity" element={<CustomerPropertyGate><Navigate to="/customer/visits" replace /></CustomerPropertyGate>} />
                   <Route path="/customer/build" element={<CustomerPropertyGate><CustomerBuild /></CustomerPropertyGate>} />
                   {/* Redirects for old routes (gated for parity with route table) */}

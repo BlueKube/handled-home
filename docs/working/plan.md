@@ -23,7 +23,7 @@ Doing Phase 5 first avoids re-doing cross-cutting nav + VisitDetail work later.
 | 5.2 | AvatarDrawer + AppHeader integration (plan/billing/credits/account/referrals/help in drawer) | M | ✅ | TBD |
 | **T.1** | **Tooling sidebar — PR-triggered Tier 3/5 workflow + AvatarDrawer Tier 4 spec + secrets inventory** | **M** | **✅** | TBD |
 | **T.2** | **Retrospective doc sync — lessons from T.1 into CLAUDE.md / testing-strategy / lessons-learned** | **S** | **✅** | TBD |
-| 5.3 | `/customer/services` + `/customer/visits` page shells (consume existing data) | M | ⬜ | |
+| 5.3 | `/customer/services` + `/customer/visits` page shells (consume existing data) | M | 🟡 impl done, review pending | |
 | 5.4 | VisitDetail three-mode rewrite (preview / live / complete) + type chips | L | ⬜ | |
 | 5.5 | ReportIssueSheet 4-category rewrite | M | ⬜ | |
 
