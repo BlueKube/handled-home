@@ -128,17 +128,24 @@ jobs:
       - name: Warm up preview (auth + dashboard bundle)
         run: |
           echo "Warming up $BASE_URL ..."
-          for i in 1 2 3 4; do
+          FINAL_STATUS=0
+          for i in 1 2 3 4 5; do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 \
               -H "x-vercel-protection-bypass: $VERCEL_AUTOMATION_BYPASS_SECRET" \
+              -H "x-vercel-set-bypass-cookie: samesitenone" \
               "$BASE_URL/auth" || echo "000")
             echo "  Attempt $i → HTTP $STATUS"
+            FINAL_STATUS=$STATUS
             if [ "$STATUS" = "200" ]; then
               echo "Preview is warm ✓"
               break
             fi
             sleep 10
           done
+          if [ "$FINAL_STATUS" != "200" ]; then
+            echo "::error title=Preview warm-up failed::BASE_URL=$BASE_URL returned final HTTP $FINAL_STATUS after 5 attempts. Likely causes: (1) VERCEL_AUTOMATION_BYPASS_SECRET doesn't match the value set in Vercel Dashboard → Project → Settings → Deployment Protection, or (2) the bypass secret was rotated in Vercel but the GH secret is stale."
+            exit 1
+          fi
         env:
           BASE_URL: ${{ needs.wait-for-preview.outputs.preview_url }}
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
@@ -155,6 +162,41 @@ jobs:
           TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
           TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
           TEST_BYOC_TOKEN: ${{ secrets.TEST_BYOC_TOKEN }}
+
+      - name: Print Playwright failure summary
+        if: failure()
+        run: |
+          echo "## Playwright failure summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ -d test-results ]; then
+            echo "### test-results/ directory contents" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            ls -la test-results/ 2>&1 | head -40 >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -f test-results/.last-run.json ]; then
+            echo "### last-run.json" >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat test-results/.last-run.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "### Error contexts from failed specs" >> "$GITHUB_STEP_SUMMARY"
+          # Playwright writes per-failure error-context.md alongside screenshots.
+          find test-results -name "error-context.md" -print 2>/dev/null | while read ctx; do
+            echo "#### $ctx" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            head -100 "$ctx" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          done
+          echo "### Spec stdout (tail)" >> "$GITHUB_STEP_SUMMARY"
+          find test-results -name "stdout.txt" -print 2>/dev/null | while read f; do
+            echo "#### $f (last 60 lines)" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            tail -60 "$f" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          done
+          echo "### Screenshot inventory (download artifact for visual diffs)" >> "$GITHUB_STEP_SUMMARY"
+          find test-results -name "*.png" -print 2>/dev/null | head -20 >> "$GITHUB_STEP_SUMMARY" || true
 
       - uses: actions/upload-artifact@v4
         if: always()
