@@ -335,6 +335,30 @@ Disagreements between variants are signal. A flow that Sarah loves but Skeptical
 
 Cheap enough to run on every Tier 4/5 batch. Very cheap to run as a nightly sweep against main to catch drift.
 
+### 5.8 Convergence architecture
+
+A naive "fix everything the AI judge flags" loop never converges — findings are subjective, models drift between runs, and fixes generate new findings. The Tier 5 harness is therefore structured as a **regression detector with an explicit dismissal escape hatch**, not an "improve until perfect" loop. Four layers:
+
+| Layer | Purpose | Status |
+|---|---|---|
+| **1 — Threshold check** | Absolute thresholds now (any persona-mean score < 3.0 → ⚠️ advisory). Baseline-anchored comparison (score dropped ≥ 1.0 from main's baseline → fail) in T.4. | ⚠️ **T.3 ships absolute thresholds, advisory-only.** |
+| **2 — Dismissed-findings filter** | `docs/testing-acceptable-findings.md` enumerates findings the team has accepted. CI filters these out before comparing to threshold. | 🟡 **T.3 ships the file stub; filter logic in T.4.** |
+| **3 — PM triage loop** | An agent (or human) reads the judge output and routes findings: regression → auto fix batch; persistent issue → polish backlog; one-off → drop; aesthetic disagreement → dismiss-list entry. | 🟡 **Manual for now; semi-automated in T.4.** |
+| **4 — Convergence caps** | Hard stops: max 2 polish passes per feature per round; 3 fix attempts → escalate or redesign; weekly Tier 5 budget. | ⬜ **Deferred.** |
+
+**Honest limits of the loop:**
+
+- The judge can't tell you whether a feature should exist — only whether an existing one is usable. Strategic product decisions stay with the human.
+- The judge can't prioritize across flows — onboarding friction costs 100× more than settings friction but scores the same. Weighting by funnel stage is a human / PM concern.
+- The judge drifts silently when Anthropic retunes the model. `UX_MODEL` is pinned in `scripts/generate-synthetic-ux-report.ts` and should only be bumped deliberately.
+- Baselines are moving targets. Every N rounds, the human approves the current state as the new baseline so the bar doesn't ratchet up forever.
+
+**The v1 loop (T.3 + future T.4):**
+
+1. Every PR: Tier 5 runs the Sarah persona (+ 6 others for de-biasing) across 3-role matrix.
+2. **T.3 (this batch):** per-role aggregate scores + top frictions are inlined in the PR status comment. Absolute-threshold breaches are flagged ⚠️ advisory.
+3. **T.4 (deferred):** baseline comparison, dismiss-list filtering, and automated fix-batch creation for regressions. Human approves baseline bumps.
+
 ---
 
 ## 6. Retroactive application — testing older PRs with the new strategy

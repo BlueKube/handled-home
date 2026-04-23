@@ -23,7 +23,8 @@ Doing Phase 5 first avoids re-doing cross-cutting nav + VisitDetail work later.
 | 5.2 | AvatarDrawer + AppHeader integration (plan/billing/credits/account/referrals/help in drawer) | M | ✅ | TBD |
 | **T.1** | **Tooling sidebar — PR-triggered Tier 3/5 workflow + AvatarDrawer Tier 4 spec + secrets inventory** | **M** | **✅** | TBD |
 | **T.2** | **Retrospective doc sync — lessons from T.1 into CLAUDE.md / testing-strategy / lessons-learned** | **S** | **✅** | TBD |
-| 5.3 | `/customer/services` + `/customer/visits` page shells (consume existing data) | M | 🟡 impl done, review pending | |
+| 5.3 | `/customer/services` + `/customer/visits` page shells (consume existing data) | M | ✅ | TBD |
+| **T.3** | **Tier 5 visibility — inline scores + advisory threshold + dismiss-list stub (Layer 1 + 2 stub of convergence architecture)** | **S** | **🟡 impl done, review pending** | |
 | 5.4 | VisitDetail three-mode rewrite (preview / live / complete) + type chips | L | ⬜ | |
 | 5.5 | ReportIssueSheet 4-category rewrite | M | ⬜ | |
 
@@ -83,9 +84,9 @@ Each batch ships as its own PR against `main`, following `BlueKube/handled-home`
 
 ## Session Handoff
 
-- **Branch at session end:** `feat/round-64-phase-5-t2-doc-sync` — PR #20 merged. T.2 retrospective doc sync complete.
-- **Last completed:** T.2. Tactical CI/infra lessons from T.1's 7-iteration debug cycle are now in `lessons-learned.md` + `CLAUDE.md` §7 + `docs/testing-strategy.md` Appendix E. Future sessions have the durable pointer.
-- **Next up:** Batch 5.3 — `/customer/services` + `/customer/visits` page shells. The first feature batch after the testing-harness + doc-sync foundation.
+- **Branch at session end:** `feat/round-64-phase-5-t3-ai-judge-visibility` — T.3 (Tier 5 visibility + advisory threshold + dismiss-list stub) implementation done; PR pending.
+- **Last completed:** Batch 5.3 (Services + Visits shells) merged via PR #21. T.3 sketched with convergence architecture framing in testing-strategy.md §5.8.
+- **Next up:** Ship T.3 (PR #22), then Batch 5.4 — VisitDetail three-mode rewrite (the remaining Large-tier feature batch of Phase 5).
 - **Context at exit:** TBD — check `/context` after each batch.
 - **Blockers:** None for future batches. Two non-blocking follow-ups still logged in `docs/upcoming/TODO.md`: (1) seed a property profile for the 3 persistent test users; (2) rotate the Vercel bypass secret after the setup-chat exposure.
 - **Round progress:** Phases 1–4 ✅ · Phase 5: Batches 5.1 ✅ · 5.2 ✅ · T.1 ✅ · T.2 ✅ · 5.3–5.5 ⬜ · Phases 6–8 ⬜.

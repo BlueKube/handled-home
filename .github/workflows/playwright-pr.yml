@@ -278,6 +278,108 @@ jobs:
     permissions:
       pull-requests: write
     steps:
+      - name: Download Tier 5 artifacts
+        # Pulls each role's ai-report-{role} artifact into ai-reports/. Graceful:
+        # if none exist (e.g. ai-judge was skipped for missing ANTHROPIC_API_KEY),
+        # downstream parsing just emits "—" for each role and the comment falls
+        # back to the plain status matrix.
+        if: always()
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          path: ai-reports/
+          pattern: ai-report-*
+
+      - name: Parse Tier 5 summaries
+        id: parse-ai
+        if: always()
+        # Absolute-threshold scan (Layer 1 of the convergence architecture in
+        # docs/testing-strategy.md §5.8). ADVISORY ONLY during the calibration
+        # window — the step always exits 0; the block just annotates the
+        # comment with ⚠️ lines so a human / PM agent can triage.
+        env:
+          THRESHOLD: "3.0"
+        run: |
+          set -euo pipefail
+          TIER5_BLOCK=""
+
+          has_any_artifact=false
+          for role in customer provider admin; do
+            if [ -d "ai-reports/ai-report-${role}" ]; then
+              has_any_artifact=true
+              break
+            fi
+          done
+
+          if [ "$has_any_artifact" = "true" ]; then
+            TIER5_BLOCK+=$'\n\n#### Tier 5 — AI judge (persona rubric)\n\n'
+            TIER5_BLOCK+=$'| Role | Avg Clarity | Avg Trust | Avg Friction | Screens Flagged |\n'
+            TIER5_BLOCK+=$'|---|---|---|---|---|\n'
+
+            ADVISORY_LINES=""
+            FRICTION_BLOCKS=""
+
+            for role in customer provider admin; do
+              SCORES_FILE=""
+              REPORT_FILE=""
+              if [ -d "ai-reports/ai-report-${role}" ]; then
+                SCORES_FILE=$(find "ai-reports/ai-report-${role}" -name 'ux-review-scores-*.json' -print -quit 2>/dev/null || true)
+                REPORT_FILE=$(find "ai-reports/ai-report-${role}" -name 'ux-review-report-*.md' -print -quit 2>/dev/null || true)
+              fi
+
+              if [ -n "$SCORES_FILE" ] && [ -f "$SCORES_FILE" ]; then
+                # Persona-level means (across all personas the judge ran).
+                CLARITY=$(jq -r '([.personas[].avgClarity] | add / length * 10 | round) / 10' "$SCORES_FILE" 2>/dev/null || echo "—")
+                TRUST=$(jq -r '([.personas[].avgTrust] | add / length * 10 | round) / 10' "$SCORES_FILE" 2>/dev/null || echo "—")
+                FRICTION=$(jq -r '([.personas[].avgFriction] | add / length * 10 | round) / 10' "$SCORES_FILE" 2>/dev/null || echo "—")
+                FLAGGED=$(jq -r '[.personas[].screensFlagged] | add' "$SCORES_FILE" 2>/dev/null || echo "0")
+                TOTAL=$(jq -r '.screens | length' "$SCORES_FILE" 2>/dev/null || echo "0")
+
+                role_cap="${role^}"
+                TIER5_BLOCK+="| ${role_cap} | ${CLARITY} | ${TRUST} | ${FRICTION} | ${FLAGGED} / ${TOTAL} |"$'\n'
+
+                # Absolute-threshold advisory — lower = worse on clarity/trust,
+                # lower = worse on friction (script writes higher = more friction).
+                # Treat all three as "below 3.0 is concerning" for v1; calibrate
+                # after 3-5 PRs of data per testing-strategy.md §5.8 Layer 1.
+                for pair in "Clarity:${CLARITY}" "Trust:${TRUST}" "Friction:${FRICTION}"; do
+                  metric="${pair%%:*}"
+                  value="${pair##*:}"
+                  if [ "$value" != "—" ]; then
+                    if awk -v v="$value" -v t="$THRESHOLD" 'BEGIN { exit !(v < t) }'; then
+                      ADVISORY_LINES+="- ⚠️ **${role_cap}** \`avg${metric}\` = ${value} (below advisory threshold ${THRESHOLD})"$'\n'
+                    fi
+                  fi
+                done
+
+                # Top 3 frictions from "Top 5 UX Fixes" section.
+                if [ -n "$REPORT_FILE" ] && [ -f "$REPORT_FILE" ]; then
+                  FRICTIONS=$(awk '/^### Top 5 UX Fixes/{flag=1; next} /^###/{flag=0} flag && /^[0-9]+\./' "$REPORT_FILE" | head -3 || true)
+                  if [ -n "$FRICTIONS" ]; then
+                    FRICTION_BLOCKS+=$'\n<details>\n<summary>Top 3 frictions — '"${role_cap}"$'</summary>\n\n'"${FRICTIONS}"$'\n\n</details>\n'
+                  fi
+                fi
+              else
+                role_cap="${role^}"
+                TIER5_BLOCK+="| ${role_cap} | — | — | — | — |"$'\n'
+              fi
+            done
+
+            if [ -n "$ADVISORY_LINES" ]; then
+              TIER5_BLOCK+=$'\n**Advisory (absolute threshold = '"${THRESHOLD}"$', not merge-blocking):**\n\n'"${ADVISORY_LINES}"
+              TIER5_BLOCK+=$'\n<sub>Dismissible findings live in `docs/testing-acceptable-findings.md`. Filter logic is Layer 2 (deferred to T.4).</sub>\n'
+            fi
+
+            TIER5_BLOCK+="${FRICTION_BLOCKS}"
+          fi
+
+          {
+            echo "tier5<<TIER5_EOF"
+            printf '%s' "$TIER5_BLOCK"
+            echo ""
+            echo "TIER5_EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Find existing Playwright status comment
         id: find-comment
         uses: peter-evans/find-comment@v3
@@ -302,7 +404,7 @@ jobs:
             | Tier 5 — AI judge (3-role matrix) | ${{ needs.ai-judge.result }} |
 
             **Preview URL:** ${{ needs.wait-for-preview.outputs.preview_url || 'n/a' }}
-
+            ${{ steps.parse-ai.outputs.tier5 }}
             Artifacts: [Run details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
             <sub>If Tier 3 failed on missing secrets, populate them in Settings → Secrets and variables → Actions (see `docs/testing-strategy.md` Appendix D).</sub>
