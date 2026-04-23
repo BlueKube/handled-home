@@ -80,7 +80,10 @@ export default function CustomerVisits() {
     };
   }, [activeJobs, pastJobs]);
 
-  if (isError) {
+  if (!isLoading && isError) {
+    // Same race gate as Services.tsx: when one of the two queries errors
+    // while the other is still on first fetch, don't flash the error card
+    // — wait for both to settle.
     return (
       <div className="p-4 pb-24 space-y-4 animate-fade-in">
         <h1 className="text-h2">Visits</h1>
