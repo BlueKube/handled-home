@@ -21,7 +21,7 @@ Doing Phase 5 first avoids re-doing cross-cutting nav + VisitDetail work later.
 |-------|-------|------|--------|---------|
 | 5.1 | BottomTabBar 4-tab restructure + center Snap FAB + legacy route redirects | M | ✅ | TBD |
 | 5.2 | AvatarDrawer + AppHeader integration (plan/billing/credits/account/referrals/help in drawer) | M | ✅ | TBD |
-| **T.1** | **Tooling sidebar — PR-triggered Tier 3/5 workflow + AvatarDrawer Tier 4 spec + secrets inventory** | **M** | **🟡 impl done, review pending** | |
+| **T.1** | **Tooling sidebar — PR-triggered Tier 3/5 workflow + AvatarDrawer Tier 4 spec + secrets inventory** | **M** | **✅** | TBD |
 | 5.3 | `/customer/services` + `/customer/visits` page shells (consume existing data) | M | ⬜ | |
 | 5.4 | VisitDetail three-mode rewrite (preview / live / complete) + type chips | L | ⬜ | |
 | 5.5 | ReportIssueSheet 4-category rewrite | M | ⬜ | |
@@ -82,11 +82,9 @@ Each batch ships as its own PR against `main`, following `BlueKube/handled-home`
 
 ## Session Handoff
 
-- **Branch at session end:** `feat/round-64-phase-5-tooling-pr-triggered-e2e` — PR #19 to open, testing harness tooling batch.
-- **Last completed:** PRs #17 (Batch 5.1) + #18 (Batch 5.2) merged. Tooling sidebar T.1 implemented; review pending.
-- **Next up:** Ship T.1 (PR #19), then return to Batch 5.3 — `/customer/services` + `/customer/visits` page shells.
+- **Branch at session end:** `feat/round-64-phase-5-tooling-pr-triggered-e2e` — PR #19 merged; testing harness is live per-PR.
+- **Last completed:** T.1 tooling sidebar. Tier 3 Playwright + Tier 5 AI judge (3-role matrix) now run on every non-draft PR touching `src/` or `e2e/`. All 8 checks green on the final run (commit `88103e3`).
+- **Next up:** Batch 5.3 — `/customer/services` + `/customer/visits` page shells (consume existing data). The first batch to benefit from the new harness automatically.
 - **Context at exit:** TBD — check `/context` after each batch.
-- **Blockers:**
-  - **User-side:** populate GH Secrets per `docs/testing-strategy.md` Appendix D (7 required + 2 optional). Without them, Tier 3 runs on T.1's own CI will fail on the secrets-validate step — expected and documented.
-  - **Sandbox egress:** `*.vercel.app` allowlist change queued on user's side; may need a new Claude Code session to propagate.
-- **Round progress:** Phases 1–4 ✅ · Phase 5: Batches 5.1 ✅ · 5.2 ✅ · T.1 🟡 · 5.3–5.5 ⬜ · Phases 6–8 ⬜.
+- **Blockers:** None for future batches. Two non-blocking follow-ups logged in `docs/upcoming/TODO.md`: (1) seed a property profile for the 3 persistent test users (unblocks stricter Tier 4 destination assertions); (2) rotate the Vercel bypass secret after the setup-chat exposure.
+- **Round progress:** Phases 1–4 ✅ · Phase 5: Batches 5.1 ✅ · 5.2 ✅ · T.1 ✅ · 5.3–5.5 ⬜ · Phases 6–8 ⬜.
