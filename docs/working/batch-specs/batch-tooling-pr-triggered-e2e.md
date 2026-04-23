@@ -67,7 +67,7 @@ This batch closes all five gaps in one PR without disturbing the existing manual
 
 ## Data shape / schema changes
 
-None.
+None in this batch. **Follow-up identified:** the persistent test customer `bkennington+customer@bluekube.com` has no property profile on Supabase Preview branches, so `CustomerPropertyGate` redirects them to `/customer/onboarding` on most navigations. That is correct app behavior but makes Tier 4 specs brittle when they assert specific destination URLs. The pragmatic fix in this batch is to assert the drawer's *intent* (click → close → navigate away) rather than the destination's render state. A follow-up batch should either (a) seed a minimal property via migration for the three persistent test users, or (b) provide a per-spec `test.beforeAll` that hits a Supabase RPC to seed the property — whichever fits the testing-strategy.md cadence better.
 
 ## Edge cases
 

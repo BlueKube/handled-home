@@ -2,6 +2,19 @@
 
 Items that require API keys, backend changes, or design decisions beyond frontend gap closure. These are left for the owner to complete after the automated batch work.
 
+### 2026-04-22 — Round 64 Phase 5 testing harness follow-ups
+
+- [ ] **Seed a property profile for the three persistent test users on every Supabase branch.** Without a property, `CustomerPropertyGate` redirects all authenticated navigations to `/customer/onboarding`, which makes Tier 4 E2E specs brittle (they have to treat both the intended destination and `/customer/onboarding` as valid outcomes). Options: (a) add a seed migration that inserts a property row for `bkennington+{customer,provider,admin}@bluekube.com` at every preview branch, (b) provide a per-spec `test.beforeAll` that hits a Supabase RPC to idempotently seed. (a) is simpler but (b) is more isolated.
+  - **Why:** Unblocks clean destination-URL assertions in Tier 4 specs and enables downstream flows (Credits, Billing, Settings) to be covered end-to-end.
+  - **Blocked:** Nothing blocked — current tests work around the gap with relaxed assertions. This is a polish / precision improvement.
+  - **Source:** PR #19 e2e run; AvatarDrawer tests 2 & 4 initially failed with `page.url() === /customer/onboarding` instead of the expected destination.
+
+- [ ] **Rotate the Vercel Protection Bypass secret.** The current value was pasted in session chat (necessary for a one-off setup); chat transcripts are retained. Once PR #19's harness has logged a clean green run, regenerate in Vercel Dashboard → Project → Settings → Deployment Protection → Protection Bypass for Automation → "+ Add", delete the old one, and update `VERCEL_AUTOMATION_BYPASS_SECRET` in GH Secrets.
+  - **Why:** Secret hygiene. Chat-exposed credentials should be considered burned.
+  - **Blocked:** Nothing blocked — current secret works. Do it opportunistically, no urgency.
+
+
+
 > **Last cleanup:** 2026-04-22 — marked resolved: Round 64.5 self-host migration (all phases), Round 64 Phase 1 migrations + types regen, variant-override decision (Phase 2). Active items are the Phase 3 deploy tasks (Stripe pack products + 2 edge function deploys + cron verification) and the Phase 2 follow-up bucket. Snap-a-Fix (Phase 4) is the next scheduled work.
 
 ## API Key / External Service Setup
