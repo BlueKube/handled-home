@@ -368,6 +368,7 @@ jobs:
           path: |
             test-results/ux-review-report-*.md
             test-results/ux-review-scores-*.json
+            test-results/ux-review-report-*-error.json
 
   comment:
     needs: [wait-for-preview, e2e, ai-judge]
@@ -511,6 +512,20 @@ jobs:
               else
                 role_cap="${role^}"
                 TIER5_BLOCK+="| ${role_cap} | — | — | — | — |"$'\n'
+              fi
+
+              # If the script caught an AI error and wrote an error.json,
+              # surface it here so a future silent regression doesn't masquerade
+              # as "no screenshots". Distinct from the scaffold-note banner
+              # below because this carries the actual error message.
+              ERROR_FILE=""
+              if [ -d "ai-reports/ai-report-${role}" ]; then
+                ERROR_FILE=$(find "ai-reports/ai-report-${role}" -name 'ux-review-report-*-error.json' -print -quit 2>/dev/null || true)
+              fi
+              if [ -n "$ERROR_FILE" ] && [ -f "$ERROR_FILE" ]; then
+                ERR_MSG=$(jq -r '.message // "unknown"' "$ERROR_FILE" 2>/dev/null || echo "unknown")
+                ERR_MODEL=$(jq -r '.model // "unknown"' "$ERROR_FILE" 2>/dev/null || echo "unknown")
+                ADVISORY_LINES+="- 🛑 **${role_cap}** AI evaluation crashed against model \`${ERR_MODEL}\`: ${ERR_MSG}"$'\n'
               fi
             done
 

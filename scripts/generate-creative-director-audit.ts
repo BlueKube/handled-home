@@ -22,7 +22,7 @@
  * Environment:
  *   ANTHROPIC_API_KEY  — Required (falls back to scaffold mode)
  *   UX_CONCURRENCY     — Max parallel API calls (default: 2)
- *   UX_MODEL           — Claude model (default: claude-sonnet-4-20250514)
+ *   UX_MODEL           — Claude model (default: claude-haiku-4-5-20251001)
  *   UX_MAX_RETRIES     — Rate limit retry attempts (default: 5)
  */
 
@@ -38,7 +38,7 @@ const SCORES_FILE = path.resolve("test-results/creative-director-scores.json");
 
 const DRY_RUN = process.argv.includes("--dry-run");
 const CONCURRENCY = parseInt(process.env.UX_CONCURRENCY ?? "2", 10);
-const MODEL = process.env.UX_MODEL ?? "claude-sonnet-4-20250514";
+const MODEL = process.env.UX_MODEL ?? "claude-haiku-4-5-20251001";
 const MAX_RETRIES = parseInt(process.env.UX_MAX_RETRIES ?? "5", 10);
 
 // ── Risk Types ──
