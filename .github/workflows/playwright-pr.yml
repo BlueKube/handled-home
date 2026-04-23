@@ -126,13 +126,19 @@ jobs:
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
 
       - name: Warm up preview (auth + dashboard bundle)
+        # Vercel responds with 307 when `x-vercel-set-bypass-cookie` is present
+        # (it redirects to set the cookie). Curl doesn't follow redirects by
+        # default. We don't need cookie persistence for a one-off warm-up
+        # check — just the bypass header per request is enough to prove the
+        # secret is valid. Playwright's extraHTTPHeaders also sends the
+        # protection-bypass header on every request, so no cookie-set needed
+        # there either.
         run: |
           echo "Warming up $BASE_URL ..."
           FINAL_STATUS=0
           for i in 1 2 3 4 5; do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 \
               -H "x-vercel-protection-bypass: $VERCEL_AUTOMATION_BYPASS_SECRET" \
-              -H "x-vercel-set-bypass-cookie: samesitenone" \
               "$BASE_URL/auth" || echo "000")
             echo "  Attempt $i → HTTP $STATUS"
             FINAL_STATUS=$STATUS
@@ -143,7 +149,7 @@ jobs:
             sleep 10
           done
           if [ "$FINAL_STATUS" != "200" ]; then
-            echo "::error title=Preview warm-up failed::BASE_URL=$BASE_URL returned final HTTP $FINAL_STATUS after 5 attempts. Likely causes: (1) VERCEL_AUTOMATION_BYPASS_SECRET doesn't match the value set in Vercel Dashboard → Project → Settings → Deployment Protection, or (2) the bypass secret was rotated in Vercel but the GH secret is stale."
+            echo "::error title=Preview warm-up failed::BASE_URL=$BASE_URL returned final HTTP $FINAL_STATUS after 5 attempts. Likely causes: (1) VERCEL_AUTOMATION_BYPASS_SECRET doesn't match the value set in Vercel Dashboard → Project → Settings → Deployment Protection → Protection Bypass for Automation, or (2) the bypass secret was rotated in Vercel but the GH secret is stale."
             exit 1
           fi
         env:
