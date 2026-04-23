@@ -184,6 +184,14 @@ _2026-04-22 · Round 64 Phase 4 closeout PRs_
 Round 64 Phase 4 produced the first explicit testing strategy for this repo: Tier 1 static (tsc + build + lint + vitest), Tier 2 unit/integration (vitest on changed files), Tier 3 contract/API (smoke scripts), Tier 4 E2E (Playwright against the Vercel Preview), Tier 5 experiential (AI-as-judge using the "Sarah, 38-year-old busy mom" canonical persona). Per-batch tier selection lives in the batch spec. The "Test plan" section of every PR template should cite which tiers ran. Full protocol + persona in `docs/testing-strategy.md`.
 _2026-04-22 · Round 64 Phase 4 Batch 4.5_
 
+#### Grep the filesystem before assuming tooling isn't built
+Starting Batch T.1, I read `docs/testing-strategy.md` and treated its "blockers to unlock this tier" language as current state — then spent the first 20% of the batch re-authoring a workflow before discovering `.github/workflows/playwright.yml`, `scripts/generate-synthetic-ux-report.ts`, `scripts/generate-creative-director-audit.ts`, `scripts/generate-growth-audit.ts`, and seven persona prompt files in `e2e/prompts/personas/` already existed. Docs lag reality; the filesystem is truth. Session start now runs `ls .github/workflows/ scripts/ e2e/ e2e/prompts/ 2>/dev/null` and `grep -l "ANTHROPIC" scripts/ .github/workflows/` as a 10-second sanity check before scoping any testing / tooling batch. Applies equally to any "we should add X" impulse — check if X was already added and forgotten.
+_2026-04-22 · Round 64 Phase 5 Batch T.1_
+
+#### PR-triggered Tier 3/5 harness is live — see `.github/workflows/playwright-pr.yml`
+After T.1 merged, every non-draft PR touching `src/` or `e2e/` auto-runs: (1) `wait-for-preview` (github-script polls GitHub Deployments API — does NOT hit the URL so Preview Protection is transparent), (2) `e2e` runs Playwright against the resolved preview URL with `x-vercel-protection-bypass` header, (3) `ai-judge` matrix runs the Sarah persona against customer/provider/admin screens if `ANTHROPIC_API_KEY` is set (remove the secret to kill Tier 5 spend), (4) `comment` posts an idempotent status comment via `peter-evans/find-comment` + `create-or-update-comment` with `edit-mode: replace`. The existing manual `playwright.yml` is untouched and remains the full-catalog audit runner. Budget: ~$0.30-0.50/PR with the AI judge on.
+_2026-04-22 · Round 64 Phase 5 Batch T.1_
+
 ### Code review
 
 #### Inline synthesis cuts the Lane 4 corner — always spawn the synthesis sub-agent
@@ -393,6 +401,30 @@ _2026-04-22 · Round 64 Phase 4 PR #7 bootstrap fix_
 #### Three persistent test users are provisioned — use them for Tier 3+ testing
 `bkennington+{customer,provider,admin}@bluekube.com` exist in prod with role assignments pinned via migration `20260422210000`. Passwords live in `.claude/settings.local.json` (gitignored) and are placeholders in `.claude/settings.local.example.json`. Two smoke scripts verify: `scripts/smoke-auth-roles.sh` hits the DB-level view `bkennington_profile_roles`; `scripts/smoke-auth.mjs` logs in via the JS SDK and asserts the role. New Tier 3/4 tests should reuse these accounts rather than provisioning per-test users.
 _2026-04-22 · Round 64 Phase 4 PRs #11–#12_
+
+#### Vercel Preview Protection requires the bypass header — and `wait-for-vercel-preview` can't send it
+`patrickedqvist/wait-for-vercel-preview@v1.3.1` resolves the preview URL via GitHub Deployments API (correct) but then does its own HTTP probe *without* the `x-vercel-protection-bypass` header. Under Preview Protection the probe returns 401 forever and the action times out — even though the URL output was set mid-run. Fix: replace the action with an `actions/github-script@v7` block that polls Deployments API (`listDeployments({ sha })` → `listDeploymentStatuses` → first `state=success` with `environment_url`) and skips the HTTP check entirely. Canonical implementation in `.github/workflows/playwright-pr.yml` job `wait-for-preview`.
+_2026-04-22 · Round 64 Phase 5 Batch T.1_
+
+#### `x-vercel-set-bypass-cookie` triggers a 307 redirect — drop it for stateless automation
+Vercel's bypass header pair is two separate knobs: `x-vercel-protection-bypass: <secret>` authenticates the request; `x-vercel-set-bypass-cookie: samesitenone` *additionally* asks Vercel to set a persistent cookie — which Vercel implements via a 307 redirect to the destination. `curl` without `-L` sees the 307 and aborts; Playwright follows the redirect but pays a round-trip per navigation. Neither case needs cookie persistence — extraHTTPHeaders re-sends the auth header on every request. Send `x-vercel-protection-bypass` alone. Cost T.1 four CI iterations to diagnose.
+_2026-04-22 · Round 64 Phase 5 Batch T.1_
+
+#### Prefer `npm ci` over `bun install --frozen-lockfile` in CI when `package-lock.json` is committed
+Three CI iterations on PR #19 failed in ~12 seconds at `bun install --frozen-lockfile`, too early for `npx playwright install` to even start and too opaque to diagnose without downloading artifacts. Switching to `actions/setup-node@v4` + `cache: npm` + `npm ci` worked on the first attempt. bun's lockfile format can drift between minor releases; `npm ci` with committed `package-lock.json` is the reliable fallback. The manual `playwright.yml` is still on bun — don't change two things at once.
+_2026-04-22 · Round 64 Phase 5 Batch T.1_
+
+#### Use `GITHUB_STEP_SUMMARY` for CI failure diagnostics — beats artifact downloads
+Playwright's html-report artifact is the gold-standard debugger but requires downloading a zip and opening locally. A one-step `if: failure()` block that dumps `test-results/.last-run.json`, each `error-context.md`, tails of `stdout.txt`, and the screenshot inventory into `$GITHUB_STEP_SUMMARY` renders in the Actions UI summary tab immediately — no download cycle. Pattern in `.github/workflows/playwright-pr.yml` "Print Playwright failure summary" step. Apply to any long-running CI job where diagnosis currently requires artifact downloads.
+_2026-04-22 · Round 64 Phase 5 Batch T.1_
+
+#### `paths-ignore` on `pull_request` doesn't reliably skip the workflow
+Set `paths-ignore: ["docs/**", "**/*.md", ".gitignore"]` on a `pull_request` workflow and pushed a docs-only commit — expected the workflow to skip entirely. It still queued and ran `wait-for-preview`. GitHub's path-filter semantics for `pull_request` events are inconsistent with `push` events; don't rely on `paths-ignore` as a cost-control gate. Gate at the job level with an explicit `if: !contains(github.event.pull_request.changed_files.*.filename, 'docs/')` or check the diff via `actions/github-script` in a precondition step.
+_2026-04-22 · Round 64 Phase 5 Batch T.1_
+
+#### Un-onboarded test users trip `CustomerPropertyGate` — Tier 4 assertions must allow `/customer/onboarding`
+The persistent test customer has no property profile on Supabase Preview branches. `CustomerPropertyGate` redirects authenticated users without a property to `/customer/onboarding`, so every gated destination (Plans, Billing, Credits, Settings, Referrals, Support) lands on /onboarding during Tier 4 runs. Don't assert exact destination URLs in drawer/nav specs — accept either the intended destination OR `/customer/onboarding` via regex. Long-term fix (logged in `docs/upcoming/TODO.md`): seed a property via migration or per-spec `beforeAll` RPC. Until then, keep assertions intent-based: "click fires navigate + drawer closes" rather than "destination page rendered."
+_2026-04-22 · Round 64 Phase 5 Batch T.1_
 
 ### Agent calibration & signals
 

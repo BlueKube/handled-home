@@ -22,6 +22,7 @@ Doing Phase 5 first avoids re-doing cross-cutting nav + VisitDetail work later.
 | 5.1 | BottomTabBar 4-tab restructure + center Snap FAB + legacy route redirects | M | ✅ | TBD |
 | 5.2 | AvatarDrawer + AppHeader integration (plan/billing/credits/account/referrals/help in drawer) | M | ✅ | TBD |
 | **T.1** | **Tooling sidebar — PR-triggered Tier 3/5 workflow + AvatarDrawer Tier 4 spec + secrets inventory** | **M** | **✅** | TBD |
+| **T.2** | **Retrospective doc sync — lessons from T.1 into CLAUDE.md / testing-strategy / lessons-learned** | **S** | **🟡 impl done, review pending** | |
 | 5.3 | `/customer/services` + `/customer/visits` page shells (consume existing data) | M | ⬜ | |
 | 5.4 | VisitDetail three-mode rewrite (preview / live / complete) + type chips | L | ⬜ | |
 | 5.5 | ReportIssueSheet 4-category rewrite | M | ⬜ | |
@@ -82,9 +83,9 @@ Each batch ships as its own PR against `main`, following `BlueKube/handled-home`
 
 ## Session Handoff
 
-- **Branch at session end:** `feat/round-64-phase-5-tooling-pr-triggered-e2e` — PR #19 merged; testing harness is live per-PR.
-- **Last completed:** T.1 tooling sidebar. Tier 3 Playwright + Tier 5 AI judge (3-role matrix) now run on every non-draft PR touching `src/` or `e2e/`. All 8 checks green on the final run (commit `88103e3`).
-- **Next up:** Batch 5.3 — `/customer/services` + `/customer/visits` page shells (consume existing data). The first batch to benefit from the new harness automatically.
+- **Branch at session end:** `feat/round-64-phase-5-t2-doc-sync` — PR #20 to open; retrospective doc sync after T.1.
+- **Last completed:** T.1 (per-PR Tier 3/5 harness) merged via PR #19. T.2 captures the tactical lessons from that 7-iteration CI debug cycle into the durable docs.
+- **Next up:** Ship T.2, then return to Batch 5.3 — `/customer/services` + `/customer/visits` page shells.
 - **Context at exit:** TBD — check `/context` after each batch.
-- **Blockers:** None for future batches. Two non-blocking follow-ups logged in `docs/upcoming/TODO.md`: (1) seed a property profile for the 3 persistent test users (unblocks stricter Tier 4 destination assertions); (2) rotate the Vercel bypass secret after the setup-chat exposure.
-- **Round progress:** Phases 1–4 ✅ · Phase 5: Batches 5.1 ✅ · 5.2 ✅ · T.1 ✅ · 5.3–5.5 ⬜ · Phases 6–8 ⬜.
+- **Blockers:** None for future batches. Two non-blocking follow-ups still logged in `docs/upcoming/TODO.md`: (1) seed a property profile for the 3 persistent test users; (2) rotate the Vercel bypass secret after the setup-chat exposure.
+- **Round progress:** Phases 1–4 ✅ · Phase 5: Batches 5.1 ✅ · 5.2 ✅ · T.1 ✅ · T.2 🟡 · 5.3–5.5 ⬜ · Phases 6–8 ⬜.

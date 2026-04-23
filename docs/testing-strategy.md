@@ -517,16 +517,18 @@ Summarize.
 
 This is the recommended build-out sequence. Don't do all of this at once; each step should prove value before we add the next.
 
-1. **Add `npm run lint` to the Tier 1 gate.** (Trivial, do today.)
-2. **Write Vitest for `src/lib/imageCompression.ts`.** (Pattern exemplar.)
-3. **Set test-user passwords as Vercel preview env vars** — unlocks Tier 3 runs. (Human ask.)
-4. **First Tier 3 run** against a real preview URL — the Batch 4.4 PR is a natural candidate. Capture learnings.
-5. **First new Tier 4 spec — `e2e/snap-submit.spec.ts`** during Batch 4.4.
-6. **Add `@axe-core/playwright`** to Tier 3 runs. Baseline the a11y issues; treat new ones as regressions.
-7. **Prototype Tier 5 walkthrough script** — one flow, one judge, rubric v1, read output, iterate. No merge-blocking yet.
+1. ✅ **Add `npm run lint` to the Tier 1 gate.** Scoped to changed files in PR #17 (Batch 5.1); repo-wide lint has ~902 pre-existing errors tracked as separate debt.
+2. ✅ **Write Vitest for `src/lib/imageCompression.ts`.** Pre-existing; `src/lib/__tests__/initials.test.ts` added in PR #18 (Batch 5.2) as the second pure-helper exemplar.
+3. ✅ **Set test-user credentials as secrets** — populated in GH Secrets 2026-04-22 (PR #19 / Batch T.1). Inventory in Appendix D.
+4. ✅ **First Tier 3 run** against a real preview URL — PR #19's fix commit `88103e3` produced the first full-green Playwright run against a Vercel preview.
+5. ✅ **First new Tier 4 spec — `e2e/avatar-drawer.spec.ts`** — shipped with PR #19 as retroactive coverage for Batch 5.2's drawer. The `snap-submit.spec.ts` originally planned for Batch 4.4 was deferred; follow-up tracked under Tier 4 section.
+6. **Add `@axe-core/playwright`** to Tier 3 runs. Baseline the a11y issues; treat new ones as regressions. **← next open item.**
+7. ✅ **Tier 5 walkthrough is operational, not prototype.** `scripts/generate-synthetic-ux-report.ts` + `generate-creative-director-audit.ts` + `generate-growth-audit.ts` ship per-PR via the `ai-judge` matrix in `.github/workflows/playwright-pr.yml`. Sarah persona at `e2e/prompts/personas/busy-homeowner.md`. (Originally thought to be pending as of the April 2026 strategy draft — actually built out.)
 8. **Add Playwright MCP to `.mcp.json`** when the agent needs per-batch exploratory testing (interactive) rather than spec-file runs. Evaluate Chrome DevTools MCP at the first hard-to-diagnose failure.
 9. **Start retro coverage** for the top-3 revenue flows (Billing, Subscribe, Credit pack).
 10. **Quarterly review.** Update this doc.
+
+**Parallel follow-up (not strictly ordered):** seed a property profile for the three persistent test users so Tier 4 specs can assert strict destination URLs (see `docs/upcoming/TODO.md`).
 
 ---
 
@@ -560,6 +562,70 @@ Populate in `.claude/settings.local.json` (gitignored) for local Claude Code run
 - **Never echo secrets in workflow logs.** The `Validate required secrets` step in `playwright-pr.yml` uses `[ -z "${!var}" ]` — this checks whether a var is empty without printing its value. Do NOT `echo "$SECRET"` anywhere for debugging.
 - **Playwright traces may contain auth cookies.** `trace: "on-first-retry"` in `playwright.config.ts` captures network state on retries. Traces uploaded as artifacts are visible to anyone who can view the PR — don't expose PR access to untrusted parties.
 - **Rotate test-user passwords after any public incident.** These accounts hold seeded demo data in prod; an attacker with the password can see but not meaningfully modify the platform. Still: rotate.
+
+---
+
+## Appendix E — CI / infrastructure gotchas
+
+Tactical traps encountered while wiring the per-PR harness in Batch T.1 (PR #19). If one of these symptoms shows up in a future CI run, apply the documented fix instead of re-diagnosing.
+
+### E.1 — `wait-for-vercel-preview` action fails under Preview Protection
+
+**Symptom:** `patrickedqvist/wait-for-vercel-preview@v1.3.1` finds the preview URL via GitHub Deployments API, sets the `url` output, then times out on an internal HTTP check of that URL. Job conclusion: `failure`. Downstream `e2e` job skips because the default `needs:` semantics drop skip a dependent whose parent failed — regardless of the `if:` condition.
+
+**Root cause:** the action's HTTP-check step calls the preview URL without sending `x-vercel-protection-bypass`, so Vercel returns 401 until the action gives up.
+
+**Fix:** replace the action with an `actions/github-script@v7` block that polls Deployments API only — no HTTP check. Canonical implementation in `.github/workflows/playwright-pr.yml` job `wait-for-preview`. Additionally, set the dependent job's condition to `if: always() && needs.wait-for-preview.outputs.preview_url != ''` so a non-success status on the resolver doesn't skip the downstream job when the URL was actually set.
+
+### E.2 — `x-vercel-set-bypass-cookie` forces a 307 redirect
+
+**Symptom:** warm-up curl prints `Attempt N → HTTP 307` five times in a row. Bypass secret is correct; browser access via `?x-vercel-protection-bypass=<secret>` works (app renders).
+
+**Root cause:** sending `x-vercel-set-bypass-cookie: samesitenone` asks Vercel to set a persistent bypass cookie, which it implements by redirecting (307) the request to the same URL so the cookie lands on the destination. `curl` without `-L` stops at 307.
+
+**Fix:** send `x-vercel-protection-bypass` alone. `extraHTTPHeaders` on Playwright already re-sends it per-request, so cookie persistence is unnecessary. For one-off curl probes, just skip the second header. See `playwright.config.ts` + `playwright-pr.yml` `Warm up preview` step.
+
+### E.3 — `bun install --frozen-lockfile` fails opaquely in CI
+
+**Symptom:** `e2e` job completes in ~12 seconds, far too fast to have run Playwright. No clear error in the log — the `bun install` step exits non-zero with minimal output.
+
+**Root cause:** bun's lockfile format drifts between minor bun releases. `--frozen-lockfile` treats any drift as a hard fail. `oven-sh/setup-bun@v2` with `bun-version: latest` can pick up a bun release that doesn't match the committed `bun.lock`.
+
+**Fix:** when the repo ships a committed `package-lock.json`, switch the workflow to `actions/setup-node@v4` with `cache: npm` + `npm ci`. Deterministic, ~30s install, known-good lockfile path. The manual `playwright.yml` can stay on bun for continuity — don't change two things at once.
+
+### E.4 — Use `GITHUB_STEP_SUMMARY` for CI failure diagnostics
+
+**Symptom:** Playwright test fails in CI; the actual error is only in `test-results/error-context.md` inside the uploaded artifact. Diagnosing requires downloading + extracting the zip every iteration.
+
+**Root cause:** Playwright writes rich failure data to `test-results/` but the console log only shows a summary. Artifacts upload per-PR but aren't rendered inline.
+
+**Fix:** add an `if: failure()` step after the Playwright run that dumps `test-results/.last-run.json`, each `error-context.md`, stdout tails, and the screenshot inventory into `$GITHUB_STEP_SUMMARY`. Renders as markdown in the Actions UI Summary tab — no download cycle. Template in `playwright-pr.yml` "Print Playwright failure summary" step.
+
+### E.5 — `paths-ignore` on `pull_request` doesn't reliably skip the workflow
+
+**Symptom:** set `paths-ignore: ["docs/**", "**/*.md", ".gitignore"]` on a `pull_request` workflow, pushed a docs-only commit, and the workflow still queued and ran jobs.
+
+**Root cause:** GitHub's path-filter semantics for `pull_request` events are less strict than for `push` events; multi-commit PRs and path-filter edge cases can cause the workflow to trigger despite all files matching the ignore list.
+
+**Fix:** don't rely on `paths-ignore` as a cost-control gate. Either gate individual jobs with an `if:` that inspects `github.event.pull_request.changed_files` via `actions/github-script`, or accept the extra run cost for docs-only commits and let them pass quickly.
+
+### E.6 — Un-onboarded test users trip `CustomerPropertyGate`
+
+**Symptom:** Tier 4 spec clicks `AvatarDrawer` → "Credits" menu item; expected URL `/customer/credits`, actual URL `/customer/onboarding`. Every PropertyGate'd destination redirects to onboarding.
+
+**Root cause:** the persistent test customer has no property profile seeded on Supabase Preview branches. `CustomerPropertyGate` correctly redirects authenticated users without a property.
+
+**Fix (current):** write Tier 4 destination assertions as intent-based — `toHaveURL(/\/customer\/(credits|onboarding)/)` — and verify the drawer closed / navigation fired rather than the destination rendered.
+
+**Fix (ideal, follow-up):** seed a property profile for the three persistent test users via migration OR a per-spec `test.beforeAll` that hits a Supabase RPC. Tracked in `docs/upcoming/TODO.md`.
+
+### E.7 — `peter-evans/create-or-update-comment` creates duplicate comments without `comment-id`
+
+**Symptom:** every PR push adds another `### Playwright PR run` status block to the PR — N commits produce N comments.
+
+**Root cause:** `peter-evans/create-or-update-comment@v4` creates a new comment unless you pass a `comment-id`. Without one, it has nothing to update.
+
+**Fix:** prepend `peter-evans/find-comment@v3` with `body-includes: "### Playwright PR run"`, then pass `comment-id: ${{ steps.find-comment.outputs.comment-id }}` and `edit-mode: replace` to the create-or-update step. Single status comment, updated in place. Canonical implementation in `playwright-pr.yml` `comment` job.
 
 
 
