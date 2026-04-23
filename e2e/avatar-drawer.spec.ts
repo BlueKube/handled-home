@@ -1,8 +1,14 @@
 import { test, expect } from "@playwright/test";
+import { ensureMilestonesDir, milestonePath, MilestoneTracker } from "./milestone";
 
 // Tier 4 spec for Round 64 Phase 5 Batch 5.2 (AvatarDrawer).
 // Runs under the `chromium-mobile` project, which loads pre-authenticated
 // customer storage state from `e2e/.auth/customer.json` via auth.setup.ts.
+//
+// Each test also writes milestone screenshots to test-results/milestones/
+// so the Tier 5 AI judge has real screens to evaluate. This was the gap
+// Batch T.4 closed — before, the harness ran in scaffold mode because no
+// specs wrote milestones.
 //
 // Covers:
 // 1. Avatar button renders with initials in AppHeader.
@@ -12,9 +18,27 @@ import { test, expect } from "@playwright/test";
 // 5. /customer/more redirects to /customer?drawer=true and opens the drawer.
 // 6. Sign-out confirmation dialog opens + cancel preserves the drawer.
 
+const FLOW = "customer-avatar-drawer";
+
 test.describe("Avatar drawer (Batch 5.2)", () => {
+  test.beforeAll(() => {
+    ensureMilestonesDir();
+  });
+
   test("avatar opens drawer with menu items and user header", async ({ page }) => {
+    const tracker = new MilestoneTracker();
+
     await page.goto("/customer");
+    await page.screenshot({ path: milestonePath("customer-01-avatar-closed") });
+    tracker.capture({
+      filename: "customer-01-avatar-closed.png",
+      flow: FLOW,
+      step: "dashboard with avatar button",
+      stepNumber: 1,
+      route: "/customer",
+      userGoal: "See my home at a glance and access account controls",
+      screenType: "dashboard",
+    });
 
     const avatar = page.getByRole("button", { name: /account menu/i });
     await expect(avatar).toBeVisible();
@@ -33,9 +57,24 @@ test.describe("Avatar drawer (Batch 5.2)", () => {
 
     // Sign out row present.
     await expect(drawer.getByRole("button", { name: /^sign out$/i })).toBeVisible();
+
+    await page.screenshot({ path: milestonePath("customer-02-avatar-drawer-open") });
+    tracker.capture({
+      filename: "customer-02-avatar-drawer-open.png",
+      flow: FLOW,
+      step: "avatar drawer open with all menu items",
+      stepNumber: 2,
+      route: "/customer",
+      userGoal: "Find plan, billing, credits, account, referrals, and help in one place",
+      screenType: "wizard-step",
+    });
+
+    tracker.writeManifest();
   });
 
   test("menu item navigation closes drawer and initiates navigation", async ({ page }) => {
+    const tracker = new MilestoneTracker();
+
     await page.goto("/customer");
     await page.getByRole("button", { name: /account menu/i }).click();
 
@@ -48,9 +87,24 @@ test.describe("Avatar drawer (Batch 5.2)", () => {
     // is tested elsewhere.
     await expect(page).toHaveURL(/\/customer\/(credits|onboarding)/);
     await expect(page.getByRole("dialog").first()).not.toBeVisible();
+
+    await page.screenshot({ path: milestonePath("customer-03-credits-after-nav") });
+    tracker.capture({
+      filename: "customer-03-credits-after-nav.png",
+      flow: FLOW,
+      step: "landed after drawer Credits tap (may redirect via PropertyGate)",
+      stepNumber: 3,
+      route: page.url(),
+      userGoal: "See my credit balance after tapping Credits from the drawer",
+      screenType: "dashboard",
+    });
+
+    tracker.writeManifest();
   });
 
   test("?drawer=true auto-opens the drawer and strips the param", async ({ page }) => {
+    const tracker = new MilestoneTracker();
+
     await page.goto("/customer?drawer=true");
 
     await expect(page.getByRole("dialog").first()).toBeVisible({ timeout: 10_000 });
@@ -60,9 +114,24 @@ test.describe("Avatar drawer (Batch 5.2)", () => {
     // /customer (onboarded) or bounces to /customer/onboarding.
     await expect(page).toHaveURL(/\/customer(\/onboarding)?$/);
     expect(page.url()).not.toContain("drawer=true");
+
+    await page.screenshot({ path: milestonePath("customer-04-drawer-auto-open") });
+    tracker.capture({
+      filename: "customer-04-drawer-auto-open.png",
+      flow: FLOW,
+      step: "drawer auto-opened via ?drawer=true URL param",
+      stepNumber: 4,
+      route: page.url(),
+      userGoal: "Jump straight into the account menu via a shared or deep-linked URL",
+      screenType: "wizard-step",
+    });
+
+    tracker.writeManifest();
   });
 
   test("/customer/more redirect leaves the legacy URL", async ({ page }) => {
+    const tracker = new MilestoneTracker();
+
     await page.goto("/customer/more");
 
     // The redirect fires; URL must leave /customer/more. Destination is
@@ -70,9 +139,24 @@ test.describe("Avatar drawer (Batch 5.2)", () => {
     // for not-yet-onboarded ones. Either is correct app behavior.
     await expect(page).not.toHaveURL(/\/customer\/more$/, { timeout: 10_000 });
     await expect(page).toHaveURL(/\/customer(\/onboarding|\?.*)?$/);
+
+    await page.screenshot({ path: milestonePath("customer-05-more-redirect-landing") });
+    tracker.capture({
+      filename: "customer-05-more-redirect-landing.png",
+      flow: FLOW,
+      step: "landed after legacy /customer/more redirect",
+      stepNumber: 5,
+      route: page.url(),
+      userGoal: "Reach the account menu via the legacy URL a bookmark or external link points to",
+      screenType: "dashboard",
+    });
+
+    tracker.writeManifest();
   });
 
   test("sign-out confirmation opens and cancels without closing the drawer", async ({ page }) => {
+    const tracker = new MilestoneTracker();
+
     await page.goto("/customer");
     await page.getByRole("button", { name: /account menu/i }).click();
 
@@ -84,10 +168,23 @@ test.describe("Avatar drawer (Batch 5.2)", () => {
     await expect(confirm).toBeVisible();
     await expect(confirm.getByText(/sign out\?/i)).toBeVisible();
 
+    await page.screenshot({ path: milestonePath("customer-06-signout-confirm") });
+    tracker.capture({
+      filename: "customer-06-signout-confirm.png",
+      flow: FLOW,
+      step: "sign-out confirmation AlertDialog visible over drawer",
+      stepNumber: 6,
+      route: "/customer",
+      userGoal: "Avoid accidentally signing out by confirming intent",
+      screenType: "wizard-step",
+    });
+
     await confirm.getByRole("button", { name: /^cancel$/i }).click();
     await expect(confirm).not.toBeVisible();
 
     // Drawer still open (F3 fix — Escape/cancel don't bubble to close the Sheet).
     await expect(drawer).toBeVisible();
+
+    tracker.writeManifest();
   });
 });
