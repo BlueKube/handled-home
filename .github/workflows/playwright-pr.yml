@@ -169,6 +169,46 @@ jobs:
           TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
           TEST_BYOC_TOKEN: ${{ secrets.TEST_BYOC_TOKEN }}
 
+      - name: Tier 5 milestone-flow diagnostic (post-Playwright)
+        # Batch T.6 — surface what Playwright actually wrote into test-results/
+        # so we can see if MilestoneTracker captures landed in the expected
+        # path before upload-artifact runs. Runs always so a failing test
+        # doesn't suppress the diagnostic.
+        if: always()
+        run: |
+          {
+            echo "## T.6 milestone-flow diagnostic — post-Playwright (e2e job)"
+            echo ""
+            if [ ! -d test-results ]; then
+              echo "❌ \`test-results/\` directory does not exist."
+              exit 0
+            fi
+            echo "### Top-level directories under test-results/"
+            echo '```'
+            find test-results -maxdepth 2 -type d 2>/dev/null | sort | head -40
+            echo '```'
+            echo ""
+            echo "### Milestone PNG count"
+            png_count=$(find test-results -type f -name '*.png' 2>/dev/null | wc -l | tr -d ' ')
+            milestone_count=$(find test-results/milestones -type f -name '*.png' 2>/dev/null | wc -l | tr -d ' ')
+            echo "- Total PNGs under \`test-results/\`: **${png_count}**"
+            echo "- PNGs under \`test-results/milestones/\` specifically: **${milestone_count}**"
+            echo ""
+            echo "### First 20 PNG paths (anywhere under test-results/)"
+            echo '```'
+            find test-results -type f -name '*.png' 2>/dev/null | head -20
+            echo '```'
+            echo ""
+            if [ -f test-results/milestones/manifest.json ]; then
+              echo "### test-results/milestones/manifest.json"
+              echo '```json'
+              cat test-results/milestones/manifest.json
+              echo '```'
+            else
+              echo "⚠️ \`test-results/milestones/manifest.json\` not present."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Print Playwright failure summary
         if: failure()
         run: |
@@ -247,6 +287,51 @@ jobs:
         with:
           name: test-results
           path: test-results/
+
+      - name: Tier 5 milestone-flow diagnostic (post-download, ${{ matrix.role }})
+        # Batch T.6 — same diagnostic as the e2e job, run after download-
+        # artifact extracts the test-results bundle. Comparing the two
+        # reports tells us whether the milestones survived upload+download
+        # round-tripping. Same `if: always()` semantics.
+        if: always()
+        run: |
+          {
+            echo "## T.6 milestone-flow diagnostic — post-download (ai-judge / ${{ matrix.role }})"
+            echo ""
+            if [ ! -d test-results ]; then
+              echo "❌ \`test-results/\` directory does not exist after download-artifact."
+              exit 0
+            fi
+            echo "### Top-level directories under test-results/"
+            echo '```'
+            find test-results -maxdepth 2 -type d 2>/dev/null | sort | head -40
+            echo '```'
+            echo ""
+            echo "### Milestone PNG count"
+            png_count=$(find test-results -type f -name '*.png' 2>/dev/null | wc -l | tr -d ' ')
+            milestone_count=$(find test-results/milestones -type f -name '*.png' 2>/dev/null | wc -l | tr -d ' ')
+            echo "- Total PNGs under \`test-results/\`: **${png_count}**"
+            echo "- PNGs under \`test-results/milestones/\` specifically: **${milestone_count}**"
+            echo ""
+            echo "### First 20 PNG paths (anywhere under test-results/)"
+            echo '```'
+            find test-results -type f -name '*.png' 2>/dev/null | head -20
+            echo '```'
+            echo ""
+            if [ -f test-results/milestones/manifest.json ]; then
+              echo "### test-results/milestones/manifest.json (first 60 lines)"
+              echo '```json'
+              head -60 test-results/milestones/manifest.json
+              echo '```'
+            else
+              echo "⚠️ \`test-results/milestones/manifest.json\` not present after download."
+            fi
+            echo ""
+            echo "### Role filter for this matrix shard"
+            echo "\`UX_ROLE_FILTER=${UX_ROLE_FILTER:-<unset>}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+        env:
+          UX_ROLE_FILTER: ${{ matrix.filter }}
 
       - name: Generate Sarah-persona UX report (${{ matrix.role }})
         if: env.ANTHROPIC_API_KEY != ''

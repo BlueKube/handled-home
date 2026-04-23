@@ -26,7 +26,8 @@ Doing Phase 5 first avoids re-doing cross-cutting nav + VisitDetail work later.
 | 5.3 | `/customer/services` + `/customer/visits` page shells (consume existing data) | M | ✅ | TBD |
 | **T.3** | **Tier 5 visibility — inline scores + advisory threshold + dismiss-list stub (Layer 1 + 2 stub of convergence architecture)** | **S** | **✅** | TBD |
 | **T.4** | **Tier 5 milestone captures on avatar-drawer.spec.ts** | **Micro** | **✅** | TBD |
-| **T.5** | **Autonomous coding system paper — end-to-end workflow documentation for publication** | **S** | **🟡 impl done, review pending** | |
+| **T.5** | **Autonomous coding system paper — end-to-end workflow documentation for publication** | **S** | **✅** | TBD |
+| **T.6** | **Tier 5 milestone artifact-flow debug — `ls -R test-results/` step in playwright-pr.yml e2e + ai-judge jobs** | **Micro** | **🟡 in progress** | |
 | 5.4 | VisitDetail three-mode rewrite (preview / live / complete) + type chips | L | ⬜ | |
 | 5.5 | ReportIssueSheet 4-category rewrite | M | ⬜ | |
 
@@ -86,10 +87,10 @@ Each batch ships as its own PR against `main`, following `BlueKube/handled-home`
 
 ## Session Handoff
 
-- **Branch at session end:** `feat/round-64-phase-5-t5-autonomous-coding-paper` — T.5 paper written + pushed; PR pending.
-- **Last completed:** Eight PRs shipped this session: #17 (5.1 nav) → #18 (5.2 drawer) → #19 (T.1 harness, 7-iteration bring-up) → #20 (T.2 retro doc sync) → #21 (5.3 services+visits shells) → #22 (T.3 Tier 5 visibility + convergence architecture) → #23 (T.4 milestone captures) → T.5 paper in flight.
-- **Next up:** Self-merge T.5. Then fresh session for Batch 5.4 (VisitDetail three-mode — Large tier, 5-agent review) or Phase 6 (seasonal bundles) at human discretion.
-- **Open TODO:** debug why Tier 5 milestones don't reach the ai-judge job despite T.4 adding captures — probable causes are Playwright outputDir cleaning, upload-artifact path scope, or download-artifact timing. First investigation of next session.
+- **Branch at session end:** `feat/round-64-phase-5-t6-tier5-artifact-flow-debug` — T.6 diagnostic in flight.
+- **Last completed:** T.5 paper merged (PR #24, commit 996c014). T.6 (this batch) adds `ls -R test-results/` diagnostic to both `e2e` and `ai-judge` jobs in `playwright-pr.yml` — output lands in `$GITHUB_STEP_SUMMARY` so cause of scaffold-mode Tier 5 output is visible without artifact downloads.
+- **Next up:** Watch T.6 PR's CI; read the diagnostic output; apply fix in the same PR; self-merge. Then Batch 5.4 (VisitDetail three-mode — Large tier, 5-agent review) or Phase 6 (seasonal bundles) at human discretion.
+- **Open TODO:** T.6's diagnostic itself is the in-flight investigation — once the CI summary surfaces which of the four hypotheses (Playwright outputDir cleaning / upload-artifact scope / download-artifact path / script filter) is correct, fix in same PR or spin off T.7.
 - **Context at exit:** TBD — check `/context` after each batch.
 - **Blockers:** None for future batches. Two non-blocking follow-ups still logged in `docs/upcoming/TODO.md`: (1) seed a property profile for the 3 persistent test users; (2) rotate the Vercel bypass secret after the setup-chat exposure.
-- **Round progress:** Phases 1–4 ✅ · Phase 5: Batches 5.1 ✅ · 5.2 ✅ · T.1 ✅ · T.2 ✅ · 5.3 ✅ · T.3 ✅ · T.4 ✅ · T.5 🟡 · 5.4–5.5 ⬜ · Phases 6–8 ⬜.
+- **Round progress:** Phases 1–4 ✅ · Phase 5: Batches 5.1 ✅ · 5.2 ✅ · T.1 ✅ · T.2 ✅ · 5.3 ✅ · T.3 ✅ · T.4 ✅ · T.5 ✅ · T.6 🟡 · 5.4–5.5 ⬜ · Phases 6–8 ⬜.
