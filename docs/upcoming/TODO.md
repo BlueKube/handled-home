@@ -2,22 +2,13 @@
 
 Items that require API keys, backend changes, or design decisions beyond frontend gap closure. These are left for the owner to complete after the automated batch work.
 
-### 2026-04-23 — Tier 5 milestone artifact flow (T.4 follow-up)
+### 2026-04-23 — Tier 5 milestone artifact flow (T.4 follow-up) — 🟡 FIX SHIPPED in T.6 (PR #25), awaiting CI confirmation
 
-- [ ] **Debug why captures don't reach the AI judge.** Batch T.4 added `MilestoneTracker.capture()` calls to `e2e/avatar-drawer.spec.ts`. The tests ran successfully in PR #23's CI (all 8 checks green), but the subsequent `ai-judge` matrix still produced scaffold-mode output — the status comment shows `—` across all three roles with the "no milestone screenshots captured" advisory.
-  - **Why:** Until captures flow through, Tier 5 is cosmetic infrastructure with zero actual signal. The T.3 visibility layer is the eye on the problem; now we need the data.
-  - **Probable causes (order of likelihood):** (1) Playwright's default outputDir cleaning wipes `test-results/milestones/` at the start of a run, removing it before beforeAll recreates it; (2) `upload-artifact` at the `e2e` job excludes the `milestones/` subdirectory because of how the artifact path pattern is written; (3) `download-artifact` at the `ai-judge` job extracts into a different path than expected; (4) filename-prefix filter in `generate-synthetic-ux-report.ts:147` rejects the files.
-  - **Diagnostic plan:** add a one-off step to the `ai-judge` job that runs `ls -R test-results/` immediately before `npm run ux-report`. The output will land in the workflow log and answer all four hypotheses at once.
-  - **Blocked:** Nothing blocked — Tier 5 scoring is currently cosmetic; fixing this unlocks real advisory signal on every subsequent PR.
-  - **Source:** PR #23 (T.4) CI run — comment surfaced the still-empty scores despite T.4's capture additions.
+- [ ] **Debug why captures don't reach the AI judge.** Root cause was NOT artifact-flow related — T.6's diagnostic (rendered directly into PR #25's status comment via `t6-diagnostic-*` artifacts) confirmed milestones reached ai-judge intact (7 PNGs + manifest.json post-download across all 3 matrix shards). The break was that `scripts/generate-synthetic-ux-report.ts` defaulted to the stale model ID `claude-sonnet-4-20250514`; every Anthropic call 404'd, the blanket try/catch silently fell back to scaffold mode that doesn't write `ux-review-scores-*.json`, and the PR comment's "no screenshots captured" footnote fired for this scenario as well as for the genuinely-empty case. Fix shipped in commit `0eba41f`: all three AI-eval scripts now default to `claude-haiku-4-5-20251001` (matches `supabase/functions/_shared/anthropic.ts`), plus the error surface is hardened so a future silent AI crash writes a visible `ux-review-report-${role}-error.json` and surfaces a 🛑 line in the PR comment with the exact model + error. Mark this item resolved once PR #25's CI posts non-`—` scores in the Customer row. Lessons captured in `lessons-learned.md` under § Workflow & process (silent try/catch; diagnostic routing; edit-in-place comment webhook trap).
 
-### 2026-04-23 — Tier 5 milestone capture (T.3 follow-up)
+### 2026-04-23 — Tier 5 milestone capture (T.3 follow-up) — 🟡 FIX SHIPPED in T.6 (PR #25), awaiting CI confirmation
 
-- [ ] **Make the AI judge actually see our UI.** Batch T.3 made Tier 5 scores visible in the PR comment, which immediately exposed that the harness has been running in scaffold mode — `test-results/milestones/` is empty because only the skipped BYOC specs write milestone screenshots. The judge scored zero screens this session and the comment shows `—` across all role rows.
-  - **Why:** Tier 5 is only useful once Sarah (and the other personas) actually see the features we ship. Until then every PR shows the ⚠️ "no screenshots captured" note and we get no signal.
-  - **What to do:** add `MilestoneTracker.capture()` calls to representative specs — `avatar-drawer.spec.ts` is a good starter (5 tests covering a core flow). Follow the pattern from `byoc-happy-path.spec.ts:38` / `byoc-invalid-invite.spec.ts:55`. Each capture writes a PNG + manifest entry that the AI judge iterates over.
-  - **Blocked:** nothing blocked — the infrastructure all exists (`tracker.writeManifest()` pattern, personas, workflow). Just needs the wire-up in a future batch. A natural fit is Batch 5.4 (VisitDetail three-mode) which will want milestone captures per mode anyway.
-  - **Source:** PR #22 (T.3) CI run — first time the new comment format rendered and exposed the gap.
+- [ ] **Make the AI judge actually see our UI.** Same batch (T.6) closes this — once the model ID fix lands, the existing T.4 captures on `avatar-drawer.spec.ts` (6 screens) plus the BYOC invalid-invite fallback (1 screen) should produce real Sarah-persona scores on PR #25's next CI run. Per-flow capture additions continue as future polish batches (Batch 5.4 VisitDetail three-mode is the natural next landing spot).
 
 ### 2026-04-22 — Round 64 Phase 5 testing harness follow-ups
 
