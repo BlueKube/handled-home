@@ -87,12 +87,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - run: bun install --frozen-lockfile
+      - name: Install dependencies
+        # Using npm (not bun) for the PR-triggered workflow — the repo ships
+        # a committed package-lock.json that's known-good; bun.lock can drift
+        # between bun versions and produces opaque failures in ~5s. The manual
+        # `playwright.yml` still uses bun for continuity with existing audit
+        # runs — revisit once bun is stable across workflows.
+        run: npm ci
 
       - run: npx playwright install --with-deps
 
@@ -187,12 +190,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - run: bun install --frozen-lockfile
+      - run: npm ci
 
       - name: Download test results from e2e job
         uses: actions/download-artifact@v4
