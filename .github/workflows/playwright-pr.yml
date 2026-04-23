@@ -169,6 +169,53 @@ jobs:
           TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
           TEST_BYOC_TOKEN: ${{ secrets.TEST_BYOC_TOKEN }}
 
+      - name: Tier 5 milestone-flow diagnostic (post-Playwright)
+        # Batch T.6 — surface what Playwright actually wrote into test-results/
+        # so we can see if MilestoneTracker captures landed in the expected
+        # path before upload-artifact runs. Runs always so a failing test
+        # doesn't suppress the diagnostic.
+        if: always()
+        run: |
+          mkdir -p t6-diagnostic
+          {
+            echo "## T.6 milestone-flow diagnostic — post-Playwright (e2e job)"
+            echo ""
+            if [ ! -d test-results ]; then
+              echo "❌ \`test-results/\` directory does not exist."
+              exit 0
+            fi
+            echo "### Top-level directories under test-results/"
+            echo '```'
+            find test-results -maxdepth 2 -type d 2>/dev/null | sort | head -40
+            echo '```'
+            echo ""
+            echo "### Milestone PNG count"
+            png_count=$(find test-results -type f -name '*.png' 2>/dev/null | wc -l | tr -d ' ')
+            milestone_count=$(find test-results/milestones -type f -name '*.png' 2>/dev/null | wc -l | tr -d ' ')
+            echo "- Total PNGs under \`test-results/\`: **${png_count}**"
+            echo "- PNGs under \`test-results/milestones/\` specifically: **${milestone_count}**"
+            echo ""
+            echo "### First 20 PNG paths (anywhere under test-results/)"
+            echo '```'
+            find test-results -type f -name '*.png' 2>/dev/null | head -20
+            echo '```'
+            echo ""
+            if [ -f test-results/milestones/manifest.json ]; then
+              echo "### test-results/milestones/manifest.json"
+              echo '```json'
+              cat test-results/milestones/manifest.json
+              echo '```'
+            else
+              echo "⚠️ \`test-results/milestones/manifest.json\` not present."
+            fi
+          } | tee -a "$GITHUB_STEP_SUMMARY" | tee t6-diagnostic/e2e.md
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: t6-diagnostic-e2e
+          path: t6-diagnostic/
+
       - name: Print Playwright failure summary
         if: failure()
         run: |
@@ -248,6 +295,58 @@ jobs:
           name: test-results
           path: test-results/
 
+      - name: Tier 5 milestone-flow diagnostic (post-download, ${{ matrix.role }})
+        # Batch T.6 — same diagnostic as the e2e job, run after download-
+        # artifact extracts the test-results bundle. Comparing the two
+        # reports tells us whether the milestones survived upload+download
+        # round-tripping. Same `if: always()` semantics.
+        if: always()
+        run: |
+          mkdir -p t6-diagnostic
+          {
+            echo "## T.6 milestone-flow diagnostic — post-download (ai-judge / ${{ matrix.role }})"
+            echo ""
+            if [ ! -d test-results ]; then
+              echo "❌ \`test-results/\` directory does not exist after download-artifact."
+              exit 0
+            fi
+            echo "### Top-level directories under test-results/"
+            echo '```'
+            find test-results -maxdepth 2 -type d 2>/dev/null | sort | head -40
+            echo '```'
+            echo ""
+            echo "### Milestone PNG count"
+            png_count=$(find test-results -type f -name '*.png' 2>/dev/null | wc -l | tr -d ' ')
+            milestone_count=$(find test-results/milestones -type f -name '*.png' 2>/dev/null | wc -l | tr -d ' ')
+            echo "- Total PNGs under \`test-results/\`: **${png_count}**"
+            echo "- PNGs under \`test-results/milestones/\` specifically: **${milestone_count}**"
+            echo ""
+            echo "### First 20 PNG paths (anywhere under test-results/)"
+            echo '```'
+            find test-results -type f -name '*.png' 2>/dev/null | head -20
+            echo '```'
+            echo ""
+            if [ -f test-results/milestones/manifest.json ]; then
+              echo "### test-results/milestones/manifest.json (first 60 lines)"
+              echo '```json'
+              head -60 test-results/milestones/manifest.json
+              echo '```'
+            else
+              echo "⚠️ \`test-results/milestones/manifest.json\` not present after download."
+            fi
+            echo ""
+            echo "### Role filter for this matrix shard"
+            echo "\`UX_ROLE_FILTER=${UX_ROLE_FILTER:-<unset>}\`"
+          } | tee -a "$GITHUB_STEP_SUMMARY" | tee t6-diagnostic/aijudge-${{ matrix.role }}.md
+        env:
+          UX_ROLE_FILTER: ${{ matrix.filter }}
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: t6-diagnostic-aijudge-${{ matrix.role }}
+          path: t6-diagnostic/
+
       - name: Generate Sarah-persona UX report (${{ matrix.role }})
         if: env.ANTHROPIC_API_KEY != ''
         env:
@@ -269,6 +368,7 @@ jobs:
           path: |
             test-results/ux-review-report-*.md
             test-results/ux-review-scores-*.json
+            test-results/ux-review-report-*-error.json
 
   comment:
     needs: [wait-for-preview, e2e, ai-judge]
@@ -289,6 +389,40 @@ jobs:
         with:
           path: ai-reports/
           pattern: ai-report-*
+
+      - name: Download T.6 diagnostic artifacts
+        # Batch T.6 — pulls the tiny diagnostic markdown files from the e2e
+        # and ai-judge jobs so the comment can render what Playwright wrote
+        # vs. what arrived after artifact round-tripping. Remove this step
+        # once the milestone-flow regression is closed.
+        if: always()
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          path: t6-diagnostic/
+          pattern: t6-diagnostic-*
+
+      - name: Collect T.6 diagnostic body
+        id: t6-diag
+        if: always()
+        run: |
+          T6=""
+          if [ -d t6-diagnostic ]; then
+            # Emit each file wrapped in a collapsible <details> block so the
+            # PR comment stays scannable. Files are tiny (<10 KB each).
+            for f in $(find t6-diagnostic -name '*.md' | sort); do
+              label=$(basename "$f" .md)
+              T6+=$'\n\n<details>\n<summary>T.6 diagnostic — '"${label}"$'</summary>\n\n'
+              T6+="$(cat "$f")"
+              T6+=$'\n\n</details>\n'
+            done
+          fi
+          {
+            echo "body<<T6_EOF"
+            printf '%s' "$T6"
+            echo ""
+            echo "T6_EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Parse Tier 5 summaries
         id: parse-ai
@@ -379,6 +513,20 @@ jobs:
                 role_cap="${role^}"
                 TIER5_BLOCK+="| ${role_cap} | — | — | — | — |"$'\n'
               fi
+
+              # If the script caught an AI error and wrote an error.json,
+              # surface it here so a future silent regression doesn't masquerade
+              # as "no screenshots". Distinct from the scaffold-note banner
+              # below because this carries the actual error message.
+              ERROR_FILE=""
+              if [ -d "ai-reports/ai-report-${role}" ]; then
+                ERROR_FILE=$(find "ai-reports/ai-report-${role}" -name 'ux-review-report-*-error.json' -print -quit 2>/dev/null || true)
+              fi
+              if [ -n "$ERROR_FILE" ] && [ -f "$ERROR_FILE" ]; then
+                ERR_MSG=$(jq -r '.message // "unknown"' "$ERROR_FILE" 2>/dev/null || echo "unknown")
+                ERR_MODEL=$(jq -r '.model // "unknown"' "$ERROR_FILE" 2>/dev/null || echo "unknown")
+                ADVISORY_LINES+="- 🛑 **${role_cap}** AI evaluation crashed against model \`${ERR_MODEL}\`: ${ERR_MSG}"$'\n'
+              fi
             done
 
             if [ -n "$ADVISORY_LINES" ]; then
@@ -429,6 +577,7 @@ jobs:
 
             **Preview URL:** ${{ needs.wait-for-preview.outputs.preview_url || 'n/a' }}
             ${{ steps.parse-ai.outputs.tier5 }}
+            ${{ steps.t6-diag.outputs.body }}
             Artifacts: [Run details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
             <sub>If Tier 3 failed on missing secrets, populate them in Settings → Secrets and variables → Actions (see `docs/testing-strategy.md` Appendix D).</sub>

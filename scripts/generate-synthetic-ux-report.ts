@@ -19,7 +19,7 @@
  * Environment:
  *   ANTHROPIC_API_KEY  — Required for AI evaluations (falls back to scaffold mode)
  *   UX_CONCURRENCY     — Max parallel API calls (default: 3)
- *   UX_MODEL           — Claude model to use (default: claude-sonnet-4-20250514)
+ *   UX_MODEL           — Claude model to use (default: claude-haiku-4-5-20251001)
  */
 
 import Anthropic from "@anthropic-ai/sdk";
@@ -38,7 +38,7 @@ const MANIFEST_FILE = path.join(MILESTONES_DIR, "manifest.json");
 
 const DRY_RUN = process.argv.includes("--dry-run");
 const CONCURRENCY = parseInt(process.env.UX_CONCURRENCY ?? "1", 10);
-const MODEL = process.env.UX_MODEL ?? "claude-sonnet-4-20250514";
+const MODEL = process.env.UX_MODEL ?? "claude-haiku-4-5-20251001";
 const MAX_RETRIES = parseInt(process.env.UX_MAX_RETRIES ?? "5", 10);
 const REQUEST_DELAY_MS = parseInt(process.env.UX_REQUEST_DELAY_MS ?? "15000", 10);
 /** Comma-separated prefixes to include, e.g. "customer,byoc" or "admin". Empty = all. */
@@ -941,9 +941,41 @@ async function main() {
       console.log(`Scores snapshot written to ${SCORES_FILE}`);
     } catch (aiError: unknown) {
       const msg = aiError instanceof Error ? aiError.message : String(aiError);
-      console.error(`\nAI evaluation failed: ${msg}`);
-      console.error("Falling back to scaffold report.\n");
-      report = generateScaffoldReport(screenshots, personas);
+      const stack = aiError instanceof Error ? aiError.stack : undefined;
+      // Log loudly so CI logs show the cause, not a silent scaffold switch.
+      console.error("\n========================================");
+      console.error("AI EVALUATION FAILED — falling back to scaffold");
+      console.error("========================================");
+      console.error(`Model: ${MODEL}`);
+      console.error(`Error: ${msg}`);
+      if (stack) console.error(`Stack: ${stack}`);
+      console.error("========================================\n");
+      // Persist the error alongside the scaffold report so downstream
+      // surfaces (PR comments, artifact inspection) can distinguish "no
+      // screenshots" from "AI crashed" without digging into job logs.
+      const errorFile = OUTPUT_FILE.replace(/\.md$/, "-error.json");
+      fs.writeFileSync(
+        errorFile,
+        JSON.stringify(
+          {
+            model: MODEL,
+            timestamp: new Date().toISOString(),
+            message: msg,
+            stack: stack ?? null,
+            screenshotCount: screenshots.length,
+            personaCount: personas.length,
+          },
+          null,
+          2
+        ),
+        "utf-8"
+      );
+      console.error(`Error details written to ${errorFile}`);
+      report =
+        `> ⚠️ AI evaluation failed and fell back to scaffold.\n` +
+        `> **Model**: \`${MODEL}\`\n` +
+        `> **Error**: ${msg}\n\n` +
+        generateScaffoldReport(screenshots, personas);
     }
   } else {
     report = generateScaffoldReport(screenshots, personas);
