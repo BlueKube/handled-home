@@ -493,7 +493,7 @@ After synthesis returns, the agent:
 5. Runs a **lightweight re-review** — Lanes 1+2 only + synthesis. Lane 3 is skipped because git history doesn't meaningfully change in a single fix commit.
 6. Caps at 3 fix passes. If findings persist, escalate.
 
-This session's PR #21 (Batch 5.3) exercises this loop in detail: initial review found 2 MUST-FIX + 5 SHOULD-FIX, fix commit resolved them, re-review found 1 new bug introduced by the fix (symmetric race gate missed), 1-line follow-up commit resolved that, merge.
+This session's PR #21 (Batch 5.3) exercises this loop in detail: initial review found 2 MUST-FIX + 4 SHOULD-FIX, fix commit resolved them, re-review found 1 new bug introduced by the fix (symmetric race gate missed), 1-line follow-up commit resolved that, merge.
 
 ### 6.8 Anti-patterns the system explicitly guards against
 
@@ -1250,7 +1250,8 @@ The file layout is not accidental. Each directory is load-bearing for one specif
 │   ├── generate-creative-director-audit.ts
 │   ├── generate-growth-audit.ts
 │   ├── smoke-auth.mjs                  ← Contract smoke for test users.
-│   └── smoke-auth-roles.sh             ← Same via DB view.
+│   ├── smoke-auth-roles.sh             ← Same via DB view.
+│   └── fetch-pr-review.sh              ← Helper for pulling review context.
 │
 ├── src/                                ← Application source.
 │   ├── pages/                          ← React pages per role (customer/provider/admin).
@@ -1326,7 +1327,7 @@ The following is a full measurement of the session that produced this document. 
 Across the 8 PRs:
 
 - **MUST-FIX findings (score 75+):** 2 total, both on PR #21 (Batch 5.3). Both resolved in the same fix commit.
-- **SHOULD-FIX findings (score 25-74):** ~14 total across all PRs. All resolved in same-PR fix commits; none escalated to human.
+- **SHOULD-FIX findings (score 25-74):** ~15 total across all PRs (5 of which came from the PR #19 code-review pass bundled with the harness fix loop, not surfaced separately in §16.2's per-PR table). All resolved in same-PR fix commits; none escalated to human.
 - **DROP findings (< 25):** ~8 total. Logged in synthesis reports, no action.
 
 Zero findings required cross-PR follow-up fixes — the review loop converged within the 3-pass cap on every PR.
