@@ -625,13 +625,15 @@ Tactical traps encountered while wiring the per-PR harness in Batch T.1 (PR #19)
 
 **Fix:** add an `if: failure()` step after the Playwright run that dumps `test-results/.last-run.json`, each `error-context.md`, stdout tails, and the screenshot inventory into `$GITHUB_STEP_SUMMARY`. Renders as markdown in the Actions UI Summary tab — no download cycle. Template in `playwright-pr.yml` "Print Playwright failure summary" step.
 
-### E.5 — `paths-ignore` on `pull_request` doesn't reliably skip the workflow
+### E.5 — `paths-ignore` semantics are subtle for multi-file PRs
 
-**Symptom:** set `paths-ignore: ["docs/**", "**/*.md", ".gitignore"]` on a `pull_request` workflow, pushed a docs-only commit, and the workflow still queued and ran jobs.
+**Symptom:** set `paths-ignore: ["docs/**", "**/*.md", ".gitignore"]` on a `pull_request` workflow, then pushed a *single commit* touching `docs/working/plan.md` only on top of a PR whose overall diff (vs. main) still included non-docs files. The workflow queued and ran.
 
-**Root cause:** GitHub's path-filter semantics for `pull_request` events are less strict than for `push` events; multi-commit PRs and path-filter edge cases can cause the workflow to trigger despite all files matching the ignore list.
+**Root cause:** `paths-ignore` on `pull_request` events evaluates against the **PR's total diff vs. the base branch**, not against the latest commit. If ANY changed file in the PR's full diff fails the `paths-ignore` check, the workflow runs on every subsequent push — even pushes that are docs-only. An earlier version of this note described `paths-ignore` as "unreliable"; the actual behavior is documented, just counter-intuitive.
 
-**Fix:** don't rely on `paths-ignore` as a cost-control gate. Either gate individual jobs with an `if:` that inspects `github.event.pull_request.changed_files` via `actions/github-script`, or accept the extra run cost for docs-only commits and let them pass quickly.
+Verified on PR #22 (T.3): that PR's diff includes `.github/workflows/playwright-pr.yml` (non-ignored) plus 4 markdown files (ignored). The workflow triggered correctly because the aggregate diff is not all-ignored. On PR #20 (T.2, docs-only), the workflow was also observed to run — that case is closer to the inconsistency end of the spectrum and worth revisiting if we see repeated anomalies.
+
+**Fix:** use `paths-ignore` with the expectation that it filters PRs whose *entire* diff is ignorable. For per-commit cost control (skip re-runs on docs-only commits within a feature PR), gate jobs with an `if:` that inspects changed files via `actions/github-script`. For aggregate PR-level skipping (docs-only PRs), rely on `paths-ignore` but verify on first use.
 
 ### E.6 — Un-onboarded test users trip `CustomerPropertyGate`
 
