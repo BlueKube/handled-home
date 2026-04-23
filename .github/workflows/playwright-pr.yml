@@ -207,7 +207,7 @@ jobs:
             else
               echo "⚠️ \`test-results/milestones/manifest.json\` not present."
             fi
-          } >> "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Print Playwright failure summary
         if: failure()
@@ -329,7 +329,7 @@ jobs:
             echo ""
             echo "### Role filter for this matrix shard"
             echo "\`UX_ROLE_FILTER=${UX_ROLE_FILTER:-<unset>}\`"
-          } >> "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
         env:
           UX_ROLE_FILTER: ${{ matrix.filter }}
 
