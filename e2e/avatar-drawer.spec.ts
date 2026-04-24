@@ -8,7 +8,9 @@ import { ensureMilestonesDir, milestonePath, MilestoneTracker } from "./mileston
 // Each test also writes milestone screenshots to test-results/milestones/
 // so the Tier 5 AI judge has real screens to evaluate. This was the gap
 // Batch T.4 closed — before, the harness ran in scaffold mode because no
-// specs wrote milestones.
+// specs wrote milestones. Batch T.6 ID'd + fixed the model ID that was
+// causing silent scaffold fallback post-T.4. Batch T.7 demoted the T.6
+// diagnostic from always-on to on-failure/debug.
 //
 // Covers:
 // 1. Avatar button renders with initials in AppHeader.
