@@ -169,12 +169,20 @@ jobs:
           TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
           TEST_BYOC_TOKEN: ${{ secrets.TEST_BYOC_TOKEN }}
 
-      - name: Tier 5 milestone-flow diagnostic (post-Playwright)
-        # Batch T.6 — surface what Playwright actually wrote into test-results/
-        # so we can see if MilestoneTracker captures landed in the expected
-        # path before upload-artifact runs. Runs always so a failing test
-        # doesn't suppress the diagnostic.
+      - name: Tier 5 milestone summary (always-on)
+        # Batch T.7 — replaces the verbose T.6 always-on diagnostic with a
+        # single-line count. The full block below still fires on failure
+        # or when ACTIONS_STEP_DEBUG=true.
         if: always()
+        run: |
+          count=$(find test-results/milestones -type f -name '*.png' 2>/dev/null | wc -l | tr -d ' ')
+          echo "## Tier 5 milestones: ${count} captured (post-Playwright, e2e job)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Tier 5 milestone-flow diagnostic (on failure or ACTIONS_STEP_DEBUG)
+        # Batch T.6 — verbose inventory of test-results/ for debugging the
+        # Tier 5 artifact flow. Demoted in T.7 to failure-or-debug so the
+        # PR comment stays clean on passing runs.
+        if: failure() || env.ACTIONS_STEP_DEBUG == 'true'
         run: |
           mkdir -p t6-diagnostic
           {
@@ -211,7 +219,7 @@ jobs:
           } | tee -a "$GITHUB_STEP_SUMMARY" | tee t6-diagnostic/e2e.md
 
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure() || env.ACTIONS_STEP_DEBUG == 'true'
         with:
           name: t6-diagnostic-e2e
           path: t6-diagnostic/
@@ -295,12 +303,16 @@ jobs:
           name: test-results
           path: test-results/
 
-      - name: Tier 5 milestone-flow diagnostic (post-download, ${{ matrix.role }})
-        # Batch T.6 — same diagnostic as the e2e job, run after download-
-        # artifact extracts the test-results bundle. Comparing the two
-        # reports tells us whether the milestones survived upload+download
-        # round-tripping. Same `if: always()` semantics.
+      - name: Tier 5 milestone summary (always-on, ${{ matrix.role }})
+        # Batch T.7 — always-on one-liner replacing T.6's verbose block.
         if: always()
+        run: |
+          count=$(find test-results/milestones -type f -name '*.png' 2>/dev/null | wc -l | tr -d ' ')
+          echo "## Tier 5 milestones: ${count} captured (post-download, ai-judge / ${{ matrix.role }})" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Tier 5 milestone-flow diagnostic (on failure or ACTIONS_STEP_DEBUG, ${{ matrix.role }})
+        # Batch T.6 — post-download inventory; demoted in T.7.
+        if: failure() || env.ACTIONS_STEP_DEBUG == 'true'
         run: |
           mkdir -p t6-diagnostic
           {
@@ -342,7 +354,7 @@ jobs:
           UX_ROLE_FILTER: ${{ matrix.filter }}
 
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure() || env.ACTIONS_STEP_DEBUG == 'true'
         with:
           name: t6-diagnostic-aijudge-${{ matrix.role }}
           path: t6-diagnostic/
@@ -393,9 +405,10 @@ jobs:
       - name: Download T.6 diagnostic artifacts
         # Batch T.6 — pulls the tiny diagnostic markdown files from the e2e
         # and ai-judge jobs so the comment can render what Playwright wrote
-        # vs. what arrived after artifact round-tripping. Remove this step
-        # once the milestone-flow regression is closed.
-        if: always()
+        # vs. what arrived after artifact round-tripping. Batch T.7 gated
+        # this on failure-or-debug; on green runs the artifacts aren't
+        # uploaded and this download is a graceful no-op.
+        if: needs.e2e.result == 'failure' || needs.ai-judge.result == 'failure' || env.ACTIONS_STEP_DEBUG == 'true'
         continue-on-error: true
         uses: actions/download-artifact@v4
         with:
@@ -404,7 +417,7 @@ jobs:
 
       - name: Collect T.6 diagnostic body
         id: t6-diag
-        if: always()
+        if: needs.e2e.result == 'failure' || needs.ai-judge.result == 'failure' || env.ACTIONS_STEP_DEBUG == 'true'
         run: |
           T6=""
           if [ -d t6-diagnostic ]; then
