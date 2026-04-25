@@ -57,11 +57,11 @@
 - **role:** customer
 - **screen / file:** every form + every error state + every onboarding transition (cross-cutting)
 - **metric:** trust
-- **score:** customer avgTrust 3.7 (advisory threshold < 5.0)
-- **finding (verbatim):** "Add explicit reassurance at every critical transition — inject trust-building copy before forms and error states that directly addresses users' core fear: 'Your [Provider Name] service continues — we're just adding an easier way to manage it online' (for first-time users and skeptical providers) or 'No charges — we're just setting up your account' (for price-sensitive users). Place this above onboarding forms and error screens."
+- **score:** customer avgTrust 3.7 (advisory threshold < 5.0) — flagged on both PRs
+- **finding (verbatim):** "Add explicit reassurance at every critical transition — inject trust-building copy before forms and error states that directly addresses users' core fear: 'Your [Provider Name] service continues — we're just adding an easier way to manage it online' (for first-time users and skeptical providers) or 'No charges — we're just setting up your account' (for price-sensitive users). Place this above onboarding forms and error screens." (PR #28). PR #31 framed the same theme as "Add provider branding and reassurance copy to every screen — Display '[Provider Name] via Handled Home' or 'Your service with [Company] stays the same' prominently on onboarding, menu, and error screens (especially Byoc Invalid Fallback, Customer 02, Customer 04) to address skeptical provider and confused user concerns."
 - **first seen:** PR #28 (`76846df`)
-- **pr_history:** PR #28 (`76846df`)
-- **notes:** Cross-cutting trust-signal pattern. Needs design / product input on copy voice before any single-PR fix. Queue for a UX.N batch alongside button-pair-clarity once enough instances accumulate. The "Your Provider continues / no charges" framing is design-direction-level and should be confirmed with the human before mass copy edits land.
+- **pr_history:** PR #28 (`76846df`) · PR #31 (`6cf2eaa`) — 2/3 toward MUST-FIX promotion
+- **notes:** Cross-cutting trust-signal pattern. Needs design / product input on copy voice before any single-PR fix. Queue for a UX.N batch alongside button-pair-clarity once enough instances accumulate. The "Your Provider continues / no charges" framing is design-direction-level and should be confirmed with the human before mass copy edits land. **2026-04-25 UPDATE:** flagged again on PR #31 (Batch 5.4 VisitDetail rewrite). Same finding, different screens (BYOC Invalid Fallback + customer menu surfaces). One more PR hit promotes this to MUST-FIX per docs/testing-strategy.md §5.9.
 
 ---
 

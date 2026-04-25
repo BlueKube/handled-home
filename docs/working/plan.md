@@ -29,7 +29,7 @@ Doing Phase 5 first avoids re-doing cross-cutting nav + VisitDetail work later.
 | **T.5** | **Autonomous coding system paper — end-to-end workflow documentation for publication** | **S** | **✅** | TBD |
 | **T.6** | **Tier 5 artifact-flow debug → stale model ID + silent try/catch fix (model bump to `claude-haiku-4-5-20251001` + error.json surfacing)** | **Micro→Small `[OVERRIDE]`** | **✅** | TBD |
 | **T.7** | **Demote T.6 diagnostic — always-on one-liner + on-failure/debug full block. Also validates Anthropic credit refill.** | **Micro** | **✅** | |
-| 5.4 | VisitDetail three-mode rewrite (preview / live / complete) + type chips | L | 🟡 in progress | |
+| 5.4 | VisitDetail three-mode rewrite (preview / live / complete) + type chips | L | ✅ | |
 | 5.5 | ReportIssueSheet 4-category rewrite | M | ⬜ | |
 
 ### Review sizing per batch
@@ -88,12 +88,15 @@ Each batch ships as its own PR against `main`, following `BlueKube/handled-home`
 
 ## Session Handoff
 
-- **Branch at session end:** `main` clean, synced at `22724bb` (PR #28 merged — Tier 5 credit-refill verification).
-- **Last completed:** Tier 5 loop fully validated end-to-end. PRs #25 (T.6 model-ID fix + error surface), #26 (T.7 diagnostic demotion), #27 (TODO reopen), and #28 (credit verification) all merged. PR #28's CI (run `24877301683`) produced the first real Sarah-persona scores on this repo: **Customer avgClarity 4.7 · avgTrust 3.7 · avgFriction 7.1** (49 vision evaluations × 7 personas × 7 screens). All three advisory thresholds fired as designed (Layer 1 of the convergence architecture). Top frictions: skeleton loaders on un-onboarded test-user state, vague button-pair ambiguity, and missing transition reassurance copy — #1 is a test-data artifact, #2 + #3 are real actionable UX findings.
-- **Next up:** Batch 5.4 (VisitDetail three-mode rewrite) is the next substantive Phase 5 work. Large tier, 5-agent review. Deserves a fresh session per CLAUDE.md §8. The Tier 5 pipeline is now live; Batch 5.4's CI will produce real scores automatically on its PR.
+- **Branch at session end:** `main` clean, synced at `6cf2eaa` (PR #31 — Batch 5.4 merged).
+- **Last completed:** Batch 5.4 — VisitDetail three-mode rewrite shipped. 430-line receipt page split into a router (`getVisitMode` pure helper, 16-case Vitest suite) + three mode sub-components (Preview / Live / Complete) + a type-chip component with stub classifier + a static LiveMiniMap placeholder. Large-tier review caught two MUST-FIX bugs: (1) stale status enum values — `"SCHEDULED"` / `"CANCELLED"` that don't exist in the DB CHECK constraint (real values: `NOT_STARTED`, `IN_PROGRESS`, `ISSUE_REPORTED`, `PARTIAL_COMPLETE`, `COMPLETED`, `CANCELED`), would have shipped the entire feature as dead code; (2) `?snap=1` CTA navigated to a listener that didn't exist — claimed a Batch 5.1 contract that was never implemented. Both resolved in the same PR; SnapFab now mirrors the `?drawer=true` pattern from Batch 5.2. Tier 5 on the final CI produced Customer scores 4.6 / 3.7 / 7.3 (same-noise as PR #28's un-onboarded-user fixture); findings triaged per §5.9 — 2 test-data artifacts dropped, 1 cross-cutting trust-copy theme queued in `sarah-backlog.md` (2/3 PRs toward promotion).
+- **Next up:** Batch 5.5 (ReportIssueSheet 4-category rewrite) is the last remaining Phase 5 feature batch. Medium tier, 3 lanes + synthesis. Then Phase 5 ✅ closes and Phase 6 (seasonal bundles) opens — that's a fresh-session boundary per CLAUDE.md §8.
 - **Open TODOs** (persist in `docs/upcoming/TODO.md`):
-  - Seed property profile for the 3 persistent test users (carried over from Phase 5; explains Sarah's "skeleton loaders" top friction).
+  - Seed property profile for the 3 persistent test users — explains Sarah's recurring "skeleton loaders / blank landing" top frictions. Priority just jumped: 2nd PR in a row flagged it.
+  - Real `getChipType` classifier (snap_request_id linkage, bundle membership, credits-paid detection) — backend batch. Chips are hidden today (only render on non-"included" types) so no user-visible impact until the classifier lands.
+  - Real GPS / live ETA provider-location feed → Phase 7.
+  - Inline rating widget refactor (replaces modal) → 5.4.1.
   - Rotate Vercel Protection Bypass secret (carried over from T.1).
-- **Context at exit:** TBD — check `/context` after each batch.
-- **Blockers:** None. Tier 5 advisory signals are calibration data, not merge-blocking.
-- **Round progress:** Phases 1–4 ✅ · Phase 5: Batches 5.1 ✅ · 5.2 ✅ · T.1 ✅ · T.2 ✅ · 5.3 ✅ · T.3 ✅ · T.4 ✅ · T.5 ✅ · T.6 ✅ · T.7 ✅ · 5.4–5.5 ⬜ · Phases 6–8 ⬜.
+- **Context at exit:** TBD — check `/context` before deciding next batch.
+- **Blockers:** None.
+- **Round progress:** Phases 1–4 ✅ · Phase 5: 5.1 ✅ · 5.2 ✅ · T.1–T.7 ✅ · 5.3 ✅ · **5.4 ✅** · 5.5 ⬜ · Phases 6–8 ⬜.
