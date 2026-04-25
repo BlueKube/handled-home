@@ -28,8 +28,8 @@ Doing Phase 5 first avoids re-doing cross-cutting nav + VisitDetail work later.
 | **T.4** | **Tier 5 milestone captures on avatar-drawer.spec.ts** | **Micro** | **✅** | TBD |
 | **T.5** | **Autonomous coding system paper — end-to-end workflow documentation for publication** | **S** | **✅** | TBD |
 | **T.6** | **Tier 5 artifact-flow debug → stale model ID + silent try/catch fix (model bump to `claude-haiku-4-5-20251001` + error.json surfacing)** | **Micro→Small `[OVERRIDE]`** | **✅** | TBD |
-| **T.7** | **Demote T.6 diagnostic — always-on one-liner + on-failure/debug full block. Also validates Anthropic credit refill.** | **Micro** | **🟡 in progress** | |
-| 5.4 | VisitDetail three-mode rewrite (preview / live / complete) + type chips | L | ⬜ | |
+| **T.7** | **Demote T.6 diagnostic — always-on one-liner + on-failure/debug full block. Also validates Anthropic credit refill.** | **Micro** | **✅** | |
+| 5.4 | VisitDetail three-mode rewrite (preview / live / complete) + type chips | L | 🟡 in progress | |
 | 5.5 | ReportIssueSheet 4-category rewrite | M | ⬜ | |
 
 ### Review sizing per batch
