@@ -34,8 +34,10 @@ interface CategoryCopy {
   privateToHandled?: boolean; // feedback-only micro-flow
 }
 
-const CATEGORIES: readonly CategoryCopy[] = [
-  {
+// Record-keyed so TypeScript enforces exhaustiveness — adding a variant to
+// VisitIssueCategory without a copy entry here becomes a compile error.
+const CATEGORY_COPY: Record<VisitIssueCategory, CategoryCopy> = {
+  fix_didnt_hold: {
     value: "fix_didnt_hold",
     label: "Fix didn't hold",
     blurb: "Something we fixed came back. We'll fix it again — credits come back if we can't.",
@@ -43,7 +45,7 @@ const CATEGORIES: readonly CategoryCopy[] = [
     photoMode: "optional",
     placeholder: "Which fix stopped working? (a photo helps but isn't required)",
   },
-  {
+  damage: {
     value: "damage",
     label: "Damage",
     blurb: "Anything that got damaged during the visit. A photo is required so we can move quickly.",
@@ -51,7 +53,7 @@ const CATEGORIES: readonly CategoryCopy[] = [
     photoMode: "required",
     placeholder: "What got damaged, and where on your property?",
   },
-  {
+  task_skipped: {
     value: "task_skipped",
     label: "Task skipped",
     blurb: "A task on your list didn't get done. We'll make it right and the credits come back if we can't.",
@@ -59,7 +61,7 @@ const CATEGORIES: readonly CategoryCopy[] = [
     photoMode: "optional",
     placeholder: "Which task was skipped?",
   },
-  {
+  feedback: {
     value: "feedback",
     label: "Feedback",
     blurb: "For the Handled team — not your provider. Every note gets read.",
@@ -68,12 +70,16 @@ const CATEGORIES: readonly CategoryCopy[] = [
     placeholder: "Tell us anything. Praise, frustration, a specific suggestion.",
     privateToHandled: true,
   },
-] as const;
+};
 
-function findCategory(value: VisitIssueCategory): CategoryCopy {
-  // CATEGORIES is the typed source of truth; value is always one of the 4 variants.
-  return CATEGORIES.find((c) => c.value === value)!;
-}
+// Iteration order for the picker. Declared separately from the Record so the
+// visual sequence is explicit and easy to reorder without touching copy.
+const CATEGORY_ORDER: readonly VisitIssueCategory[] = [
+  "fix_didnt_hold",
+  "damage",
+  "task_skipped",
+  "feedback",
+];
 
 export function ReportIssueSheet({
   open,
@@ -94,7 +100,7 @@ export function ReportIssueSheet({
     ? Math.floor((Date.now() - new Date(visitDate).getTime()) / (24 * 60 * 60 * 1000))
     : 0;
 
-  const selected = category ? findCategory(category) : null;
+  const selected = category ? CATEGORY_COPY[category] : null;
   const photoRequired = selected?.photoMode === "required";
   const photoAllowed = selected?.photoMode !== "hidden";
 
@@ -177,7 +183,8 @@ export function ReportIssueSheet({
                 Pick the closest match. Each category routes to the right team.
               </p>
               <div className="space-y-2">
-                {CATEGORIES.map((c) => {
+                {CATEGORY_ORDER.map((key) => {
+                  const c = CATEGORY_COPY[key];
                   const Icon = c.icon;
                   return (
                     <button
@@ -226,12 +233,7 @@ export function ReportIssueSheet({
               onNoteChange={setNote}
               photo={photo}
               onPhotoChange={setPhoto}
-              onBack={() => {
-                setStep("picker");
-                setCategory(null);
-                setNote("");
-                setPhoto(null);
-              }}
+              onBack={reset}
               onSubmit={handleSubmit}
               submitting={submitMutation.isPending}
             />

@@ -91,15 +91,24 @@ export function ReportIssueDetailsStep({
               <CheckCircle2 className="h-4 w-4 text-success" />
               <span className="text-sm truncate flex-1">{photo.name}</span>
               <Button
+                type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => onPhotoChange(null)}
+                onClick={() => {
+                  // Clear the input's value so re-selecting the same file
+                  // refires onChange. Browsers dedupe identical file picks,
+                  // so without this the Remove → pick-same-again path
+                  // silently does nothing.
+                  if (fileRef.current) fileRef.current.value = "";
+                  onPhotoChange(null);
+                }}
               >
                 Remove
               </Button>
             </div>
           ) : (
             <Button
+              type="button"
               variant="outline"
               className="w-full"
               onClick={() => fileRef.current?.click()}
@@ -112,6 +121,7 @@ export function ReportIssueDetailsStep({
       )}
 
       <Button
+        type="button"
         className="w-full"
         disabled={
           !note.trim() || (photoRequired && !photo) || submitting
