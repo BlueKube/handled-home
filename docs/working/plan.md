@@ -31,7 +31,7 @@ Doing Phase 5 first avoids re-doing cross-cutting nav + VisitDetail work later.
 | **T.7** | **Demote T.6 diagnostic — always-on one-liner + on-failure/debug full block. Also validates Anthropic credit refill.** | **Micro** | **✅** | |
 | 5.4 | VisitDetail three-mode rewrite (preview / live / complete) + type chips | L | ✅ | |
 | 5.5 | ReportIssueSheet 4-category rewrite | M | ✅ | |
-| **DX.1** | **Workflow self-improvements (drop Stitch, /pre-pr, migration-chain check, /closeout, types-regen workflow)** | **Micro** | **🟡 in progress** | |
+| **DX.1** | **Workflow self-improvements (drop Stitch, /pre-pr, migration-chain check, /closeout, types-regen workflow)** | **Micro** | **✅** | |
 
 ### Review sizing per batch
 
@@ -89,18 +89,18 @@ Each batch ships as its own PR against `main`, following `BlueKube/handled-home`
 
 ## Session Handoff
 
-- **Branch at session end:** `main` clean, synced at `76d1e87` (PR #33 — Batch 5.5 merged). **Phase 5 ✅ complete.**
-- **Last completed:** Batch 5.5 — ReportIssueSheet 4-category rewrite. Replaces the legacy 3-step wizard with a 4-category picker (Fix didn't hold · Damage · Task skipped · Feedback) + per-category micro-flows (damage required photo; feedback text-only). Adds nullable `customer_issues.category` column with CHECK on the 4 new values; legacy `reason` column preserved + derived via `CATEGORY_TO_REASON`. Medium-tier review returned no MUST-FIX; 3 SHOULD-FIX resolved in the fix pass (button `type="button"`, `fileRef.current.value` clear on Remove, DRY reset via shared helper) plus one nice-to-have compile-time-exhaustiveness swap (`Record<VisitIssueCategory, CategoryCopy>` keyed lookup replaces non-null-assertion `find`). **Supabase Preview Branch applied the migration cleanly — first real-DB validation of the new column on this session.** Tier 5 on final CI: Customer 3.9 / 3.2 / 7.6.
-- **Round 64 Phase 5 round-up — what shipped:** 11 batches across 4 sessions. Structural nav + drawer (5.1, 5.2). Testing harness unlock (T.1–T.7: PR-triggered Tier 3/5, visibility layer, milestone captures, artifact-flow debug, diagnostic demotion, credit verification, finding-triage rule). Page shells (5.3). Three-mode VisitDetail rewrite + type chips (5.4). ReportIssueSheet 4-category rewrite (5.5). Tier 5 went from scaffold-only to live Sarah-persona scoring with the §5.9 triage + §5.8 convergence architecture + the sarah-backlog 3-strikes promotion rule all wired end-to-end.
+- **Branch at session end:** `main` clean, synced at `5872c1d` (PR #35 — Batch DX.1 merged). **Phase 5 ✅ complete · DX.1 ✅ shipped as a between-phase tooling sweep.**
+- **Last completed:** Batch DX.1 — workflow self-improvements (Micro). Five recurring frictions from Round 64 Phase 5 closed in one batch: (1) dropped Stitch from `.mcp.json` (-30k context tokens / cycle; Bearer-token revocation logged); (2) `/pre-pr` slash command + `scripts/pre-pr-check.sh` (parallel `tsc + build + vitest`); (3) `scripts/check-migration-chain.sh` (catches orphan-chain trap pre-push); (4) `/closeout` slash command (standardizes the post-merge docs PR loop); (5) `.github/workflows/regen-types.yml` (auto-regen Supabase types on migration push-to-main, **ships dormant** until `SUPABASE_ACCESS_TOKEN` lands in GH Secrets — closes the recurring `as any` carry-over). Plus 4 lessons-learned entries (2 documenting upstream gaps: no MCP tool for workflow-run logs; agent webhook doesn't subscribe to `issue_comment.edited`). Micro review returned no MUST-FIX; 1 SHOULD-FIX resolved (comment explaining the intentional `set -e` omission in `pre-pr-check.sh`). This closeout PR is the first real use of the new `/closeout` runbook.
 - **🛑 Next session MUST-FIX — cut Batch UX.1 trust-copy sweep:** The `transition-trust-copy` finding hit 3 consecutive PRs (#28, #31, #33) — 3/3 rule triggered per `docs/testing-strategy.md` §5.9. See `docs/working/sarah-backlog.md` for scope and grep approach. Needs design/product input on voice before the sweep lands.
-- **Next substantive work:** Phase 6 (seasonal bundles as ARR loop) per `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` — **fresh-session boundary per CLAUDE.md §8**. Phase 6 includes migrations (seasonal_bundle_templates, bundle_line_items) + customer Services-page bundle spotlight + admin tooling for bundle windows + per-line credit pricing. Non-trivial; deserves a clean context window.
+- **Next substantive work:** Phase 6 (seasonal bundles as ARR loop) per `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` — **fresh-session boundary per CLAUDE.md §8**. Phase 6 includes migrations (seasonal_bundle_templates, bundle_line_items) + customer Services-page bundle spotlight + admin tooling for bundle windows + per-line credit pricing. Non-trivial; deserves a clean context window. **The new tooling will be load-bearing on Phase 6**: types-regen activates automatically post-merge, `/pre-pr` runs before every PR, `check-migration-chain.sh` validates each new migration's bootstrap-chain.
 - **Open TODOs** (persist in `docs/upcoming/TODO.md`):
-  - Seed property profile for the 3 persistent test users — 3rd PR in a row flagged the skeleton/placeholder artifacts. **Priority jumped again.**
-  - Real `getChipType` classifier (snap_request_id linkage, bundle membership, credits-paid detection) — backend batch. Chips hidden today.
+  - **NEW:** Add `SUPABASE_ACCESS_TOKEN` to GH Secrets — activates `regen-types.yml` (DX.1).
+  - **NEW:** Revoke the Stitch bearer token left in git history (DX.1).
+  - Seed property profile for the 3 persistent test users — 3rd PR in a row flagged the skeleton/placeholder artifacts. **High priority.**
+  - Real `getChipType` classifier (snap_request_id linkage, bundle membership, credits-paid detection) — backend batch.
   - Real GPS / live ETA provider-location feed → Phase 7.
   - Inline rating widget refactor → 5.4.1 follow-up.
   - Rotate Vercel Protection Bypass secret (carried from T.1).
-  - Regen `src/integrations/supabase/types.ts` post-merge for the new `customer_issues.category` column (removes the `as any` carry-over from `useSubmitCustomerIssue`).
 - **Context at exit:** check `/context` before deciding Phase 6 entry.
 - **Blockers:** None.
-- **Round progress:** Phases 1–4 ✅ · **Phase 5 ✅ complete (11/11 batches)** · Phases 6–8 ⬜.
+- **Round progress:** Phases 1–4 ✅ · **Phase 5 ✅ complete (11/11 batches)** · DX.1 ✅ · Phases 6–8 ⬜.
