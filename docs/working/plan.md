@@ -30,7 +30,7 @@ Doing Phase 5 first avoids re-doing cross-cutting nav + VisitDetail work later.
 | **T.6** | **Tier 5 artifact-flow debug → stale model ID + silent try/catch fix (model bump to `claude-haiku-4-5-20251001` + error.json surfacing)** | **Micro→Small `[OVERRIDE]`** | **✅** | TBD |
 | **T.7** | **Demote T.6 diagnostic — always-on one-liner + on-failure/debug full block. Also validates Anthropic credit refill.** | **Micro** | **✅** | |
 | 5.4 | VisitDetail three-mode rewrite (preview / live / complete) + type chips | L | ✅ | |
-| 5.5 | ReportIssueSheet 4-category rewrite | M | ⬜ | |
+| 5.5 | ReportIssueSheet 4-category rewrite | M | 🟡 in progress | |
 
 ### Review sizing per batch
 
