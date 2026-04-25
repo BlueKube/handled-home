@@ -268,11 +268,11 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
       }
 
       toast({
-        title: "Snap submitted",
+        title: "We've got your snap",
         description:
           routing === "ad_hoc"
-            ? "We'll dispatch someone soon."
-            : "We'll add this to your next visit.",
+            ? "A pro will pick it up — you'll get an update."
+            : "We'll add this to your next visit. You'll get an update.",
       });
       reset();
       onOpenChange(false);
