@@ -154,6 +154,12 @@ export default function OnboardingWizard() {
         </div>
       </div>
 
+      {effectiveStep !== "complete" && (
+        <p className="px-4 mt-3 text-xs text-muted-foreground text-center">
+          We'll match you with a vetted pro in your zone.
+        </p>
+      )}
+
       <div className="px-4 mt-4">
         {effectiveStep === "property" && <PropertyStep onComplete={async () => { await completeStep("property"); }} />}
         {effectiveStep === "zone_check" && <ZoneCheckStep onComplete={async () => { await completeStep("zone_check"); }} onWaitlist={() => navigate("/customer")} />}

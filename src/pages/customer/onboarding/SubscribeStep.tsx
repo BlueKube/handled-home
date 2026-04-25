@@ -54,6 +54,9 @@ export function SubscribeStep({ planId, onComplete, onSkip }: { planId: string |
       <div className="text-center">
         <Sparkles className="h-10 w-10 text-accent mx-auto mb-3" />
         <h1 className="text-h2">Confirm your membership</h1>
+        <p className="text-muted-foreground text-sm mt-1">
+          One step before your first visit.
+        </p>
       </div>
       <Card>
         <CardHeader className="pb-2"><CardTitle className="text-lg">{plan.name}</CardTitle></CardHeader>
@@ -63,6 +66,9 @@ export function SubscribeStep({ planId, onComplete, onSkip }: { planId: string |
           <p className="text-xs text-muted-foreground">Billed every 4 weeks. Cancel anytime.</p>
         </CardContent>
       </Card>
+      <p className="text-xs text-muted-foreground text-center">
+        Card collected by Stripe. We never see your card number.
+      </p>
       <Button className="w-full h-12 text-base font-semibold rounded-xl" onClick={handleCheckout} disabled={loading}>
         {loading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Processing…</> : "Subscribe Now"}
       </Button>

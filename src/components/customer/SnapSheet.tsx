@@ -304,6 +304,9 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
               <p className="text-sm text-muted-foreground">
                 Take a photo of whatever needs handling. We'll estimate the credits before you submit.
               </p>
+              <p className="text-xs text-muted-foreground">
+                A pro reviews the photo and matches the right fix.
+              </p>
               <input
                 ref={fileRef}
                 type="file"
@@ -345,7 +348,8 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
                 </div>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground mb-2">Where in the home?</p>
+                <p className="text-sm text-muted-foreground mb-1">Where in the home?</p>
+                <p className="text-xs text-muted-foreground mb-2">Helps the pro know what to bring.</p>
                 <div className="flex flex-wrap gap-2">
                   {AREAS.map(({ value, label, Icon }) => (
                     <button

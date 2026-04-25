@@ -63,6 +63,9 @@ export function PropertyStep({ onComplete }: { onComplete: () => Promise<void> }
         <p className="text-muted-foreground text-sm mt-1">We need a few details to match you with the right service team.</p>
       </div>
       <div className="space-y-4">
+        <p className="text-xs text-muted-foreground">
+          Confirms which zone serves your home.
+        </p>
         <div className="space-y-1.5">
           <Label htmlFor="ob-street">Street Address *</Label>
           <Input id="ob-street" value={form.street_address} onChange={(e) => updateField("street_address", e.target.value)} placeholder="123 Main St" />

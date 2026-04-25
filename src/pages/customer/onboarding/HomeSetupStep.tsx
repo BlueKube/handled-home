@@ -119,6 +119,9 @@ export function HomeSetupStep({ onComplete }: { onComplete: () => Promise<void> 
         <h1 className="text-h2">Home size (quick estimate)</h1>
         <p className="text-muted-foreground text-sm mt-1">Helps us pick the right service level. All fields optional.</p>
       </div>
+      <p className="text-xs text-muted-foreground text-center">
+        Sizes your plan to match the work.
+      </p>
       <div className="space-y-5">
         {SIZING_GROUPS.map((group) => {
           const Icon = group.icon;
