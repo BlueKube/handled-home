@@ -50,18 +50,18 @@
 - **pr_history:** PR #28 (`76846df`)
 - **notes:** Triaged as queue (not fix-in-batch) because the finding spans the onboarding wizard AND the BYOC invite-recovery flow — multi-surface pattern. Wait until 8+ button-pair instances accumulate, or the finding repeats on 3+ PRs, before cutting a batch. May fold naturally into Phase 5 5.4/5.5 if those batches touch the same screens.
 
-### transition-trust-copy — 2026-04-24 — Sarah (customer)
+### transition-trust-copy — 2026-04-24 — Sarah (customer) — 🛑 PROMOTED TO MUST-FIX (3/3 rule)
 
-- **status:** open
+- **status:** **promoted-to-must-fix** (3-strikes rule triggered 2026-04-25 post-PR #33)
 - **theme:** trust-copy
 - **role:** customer
-- **screen / file:** every form + every error state + every onboarding transition (cross-cutting)
+- **screen / file:** every form + every error state + every data-collection field + onboarding transitions (cross-cutting)
 - **metric:** trust
-- **score:** customer avgTrust 3.7 (advisory threshold < 5.0) — flagged on both PRs
-- **finding (verbatim):** "Add explicit reassurance at every critical transition — inject trust-building copy before forms and error states that directly addresses users' core fear: 'Your [Provider Name] service continues — we're just adding an easier way to manage it online' (for first-time users and skeptical providers) or 'No charges — we're just setting up your account' (for price-sensitive users). Place this above onboarding forms and error screens." (PR #28). PR #31 framed the same theme as "Add provider branding and reassurance copy to every screen — Display '[Provider Name] via Handled Home' or 'Your service with [Company] stays the same' prominently on onboarding, menu, and error screens (especially Byoc Invalid Fallback, Customer 02, Customer 04) to address skeptical provider and confused user concerns."
+- **score:** customer avgTrust trended 3.7 → 3.7 → 3.2 — all three runs below 5.0 advisory
+- **finding (verbatim):** paraphrased across three consecutive PRs — "Add explicit reassurance at every critical transition / Add provider branding + reassurance copy to every screen / Add trust-building context above every data collection field explaining why data is needed and how it protects the user's existing relationship (e.g., 'We'll match you with the right service team—your current provider stays the same' or 'Your address helps us confirm service availability in your area')."
 - **first seen:** PR #28 (`76846df`)
-- **pr_history:** PR #28 (`76846df`) · PR #31 (`6cf2eaa`) — 2/3 toward MUST-FIX promotion
-- **notes:** Cross-cutting trust-signal pattern. Needs design / product input on copy voice before any single-PR fix. Queue for a UX.N batch alongside button-pair-clarity once enough instances accumulate. The "Your Provider continues / no charges" framing is design-direction-level and should be confirmed with the human before mass copy edits land. **2026-04-25 UPDATE:** flagged again on PR #31 (Batch 5.4 VisitDetail rewrite). Same finding, different screens (BYOC Invalid Fallback + customer menu surfaces). One more PR hit promotes this to MUST-FIX per docs/testing-strategy.md §5.9.
+- **pr_history:** PR #28 (`76846df`) · PR #31 (`6cf2eaa`) · PR #33 (`76d1e87`) — **3/3 consecutive PRs; promotion rule triggered per `docs/testing-strategy.md` §5.9**
+- **notes:** Cross-cutting trust-copy gap flagged in three consecutive Sarah runs across three different feature surfaces. The theme is real and doesn't vary by batch, so further per-batch evidence is wasted. **Next session should cut `Batch UX.1 — trust-copy sweep`**: grep all data-collection forms + onboarding transitions + error screens; add single-sentence reassurance copy per field/transition. Needs design/product input on voice before the sweep lands — specifically the "Your Provider continues" framing and how it interacts with BYOC vs direct-signup users.
 
 ---
 
