@@ -76,7 +76,10 @@ for f in "${FILES[@]}"; do
   fi
 
   # The pointed-at file must be older than the current one (chronological
-  # ordering by filename prefix). Migrations follow YYYYMMDDHHMMSS_*.sql.
+  # ordering by filename prefix). Migrations follow YYYYMMDDHHMMSS_*.sql —
+  # zero-padded fixed-width, so lexicographic comparison via [ \> ] is
+  # numerically correct. If the convention ever changes, swap to integer
+  # compare on the timestamp portion.
   current_ts="$(basename "$f" | cut -d_ -f1)"
   prev_ts="$(basename "$prev_file" | cut -d_ -f1)"
   if [ "$prev_ts" \> "$current_ts" ] || [ "$prev_ts" = "$current_ts" ]; then

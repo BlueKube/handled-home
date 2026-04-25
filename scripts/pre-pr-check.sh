@@ -16,6 +16,12 @@
 #   PRE_PR_SKIP_VITEST=1  Skip `vitest` (only set this if no test files
 #                          touched).
 
+# Intentionally NO `set -e`: each gate runs in a subshell that writes
+# OK/FAIL to a .result file. We then parse those strings to decide the
+# script's exit code. `set -e` would short-circuit on the first failure
+# and prevent the parallel gates from finishing, defeating the point.
+# `wait $PID` here is for ordering (don't read .result before the gate
+# finishes), not for exit-code propagation.
 set -uo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
