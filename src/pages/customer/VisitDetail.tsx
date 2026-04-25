@@ -60,6 +60,6 @@ export default function CustomerVisitDetail() {
   const mode = getVisitMode(data.job);
 
   if (mode === "preview") return <VisitDetailPreview jobId={jobId} data={data} />;
-  if (mode === "live") return <VisitDetailLive jobId={jobId} data={data} />;
+  if (mode === "live") return <VisitDetailLive data={data} />;
   return <VisitDetailComplete jobId={jobId} data={data} />;
 }

@@ -17,7 +17,6 @@ import {
 import type { VisitDetail } from "@/hooks/useCustomerVisitDetail";
 
 interface Props {
-  jobId: string;
   data: VisitDetail;
 }
 
@@ -47,7 +46,7 @@ function useEtaLabel(scheduledDate: string | null): string {
   return "Service in progress";
 }
 
-export function VisitDetailLive({ jobId, data }: Props) {
+export function VisitDetailLive({ data }: Props) {
   const navigate = useNavigate();
   const { job, skus, checklistHighlights } = data;
   const etaLabel = useEtaLabel(job.scheduled_date);
