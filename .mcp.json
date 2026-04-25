@@ -1,13 +1,5 @@
 {
   "mcpServers": {
-    "stitch": {
-      "type": "http",
-      "url": "https://stitch.googleapis.com/mcp",
-      "headers": {
-        "Authorization": "Bearer AQ.Ab8RN6JAYVtwcil2zw5c5KSkFeelf6Q5WoLy_7FPH-S5v9_vGg",
-        "X-Goog-User-Project": "6279422033514512205"
-      }
-    },
     "supabase": {
       "command": "npx",
       "args": [

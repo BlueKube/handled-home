@@ -31,6 +31,7 @@ Doing Phase 5 first avoids re-doing cross-cutting nav + VisitDetail work later.
 | **T.7** | **Demote T.6 diagnostic — always-on one-liner + on-failure/debug full block. Also validates Anthropic credit refill.** | **Micro** | **✅** | |
 | 5.4 | VisitDetail three-mode rewrite (preview / live / complete) + type chips | L | ✅ | |
 | 5.5 | ReportIssueSheet 4-category rewrite | M | ✅ | |
+| **DX.1** | **Workflow self-improvements (drop Stitch, /pre-pr, migration-chain check, /closeout, types-regen workflow)** | **Micro** | **🟡 in progress** | |
 
 ### Review sizing per batch
 

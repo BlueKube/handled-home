@@ -2,6 +2,19 @@
 
 Items that require API keys, backend changes, or design decisions beyond frontend gap closure. These are left for the owner to complete after the automated batch work.
 
+### 2026-04-25 — Activate `regen-types.yml` (Batch DX.1 follow-up)
+
+- [ ] **Add `SUPABASE_ACCESS_TOKEN` to GitHub Secrets.** Batch DX.1 ships `.github/workflows/regen-types.yml` dormant. Once the token is set, every push-to-main that touches `supabase/migrations/**` auto-opens a PR with a refreshed `src/integrations/supabase/types.ts` — closes the `as any` carry-over pattern documented across Round 64 Phases 1–5.
+  - **How:** Generate a PAT at https://supabase.com/dashboard/account/tokens (scope: read access is sufficient for `gen types`). Add to GH Secrets as `SUPABASE_ACCESS_TOKEN` on the `handled-home` repo.
+  - **Verify:** `Actions → Regen Supabase types after migration → Run workflow` against `main` should succeed and either open a PR (if types drifted) or no-op (if already current).
+  - **Blocked:** Future-batch ergonomics — agents still have to write `as any` casts on new columns until this lands.
+
+### 2026-04-25 — Revoke the Stitch bearer token (Batch DX.1 follow-up)
+
+- [ ] **Revoke the Stitch token committed at `.mcp.json:7` in commits prior to DX.1.** Batch DX.1 removed the Stitch MCP entry (unused on this codebase) but the bearer token `AQ.Ab8RN6JAYVtwcil2zw5c5KSkFeelf6Q5WoLy_7FPH-S5v9_vGg` still lives in git history. Treat as burned: revoke at the Stitch console.
+  - **Why:** Standard secret-hygiene per lessons-learned.md ("Resend (and most modern SaaS) API keys are revealed only at creation"). Token was in plaintext on a public/private repo for several months.
+  - **Blocked:** Nothing — this codebase doesn't use Stitch, so the revocation has no functional impact.
+
 ### 2026-04-24 — Anthropic API credit balance — ✅ RESOLVED on 2026-04-24 (verified via PR #28 CI)
 
 > **Final status:** Resolved. PR #28's CI (run `24877301683`, commit `76846df`) produced the first real Sarah-persona scores on this repo: Customer avgClarity 4.7, avgTrust 3.7, avgFriction 7.1 (all three advisory-flagged per the T.3 thresholds, consistent with the un-onboarded test-user state). Provider and Admin rows correctly stay at `—` until role-specific milestone captures land in future batches. The T.6 🛑 error banner did not fire — the graceful-degradation path correctly yielded to the happy path once credits were live.

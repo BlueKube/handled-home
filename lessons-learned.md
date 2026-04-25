@@ -208,6 +208,32 @@ _2026-04-23 · Round 64 Phase 5 Batch T.6_
 `$GITHUB_STEP_SUMMARY` renders beautifully in the Actions UI but isn't exposed via REST, so an agent running outside the browser is blind to it. Job logs ARE in REST but gated by auth — anonymous curl returned 403. Fastest working path for T.6: write the diagnostic text to a tiny dedicated file inside a job, `upload-artifact` it under a unique name, `download-artifact` the whole pattern in the downstream `comment` job, concatenate the files into a step output, and inject that output into the PR status comment body. `get_comments` on the PR returns the comment text via MCP — no auth issues. One full round-trip, ~30 extra lines of yaml, and the diagnostic is permanently scannable from any agent/human with PR read access. Pattern will stay in this workflow as a low-cost always-on milestone inventory even after T.6 resolves.
 _2026-04-23 · Round 64 Phase 5 Batch T.6_
 
+#### Upstream gap: no MCP tool exposes GitHub Actions job logs — workaround is artifact → PR-comment plumbing
+The MCP github server (`@modelcontextprotocol/server-github` and friends) covers PRs / commits / branches / search but not workflow-run logs. Direct `curl` to `api.github.com/repos/.../actions/jobs/$id/logs` returns 403 from sandbox / agent contexts (auth-walled even for public repos). Net effect: when CI surfaces useful debug-only output via stdout or `$GITHUB_STEP_SUMMARY`, the agent can't read it. T.6 spent 3 CI cycles building the artifact-upload → comment-download workaround. Until upstream ships an MCP equivalent, encode any agent-relevant CI diagnostic into the PR comment body or an artifact the comment job can render — never assume job logs are reachable.
+_2026-04-25 · Batch DX.1 retrospective_
+
+#### Upstream gap: `peter-evans/create-or-update-comment@v4` with `edit-mode: replace` emits `issue_comment.edited`, not `.created`
+The Anthropic agent webhook subscription (as observed during Round 64 Phase 5) only fires on `issue_comment.created` events. A workflow that creates a status comment on first run and edits it on subsequent runs (the canonical pattern for keeping a PR thread tidy) only delivers ONE webhook to the agent — the very first one. Every re-run of CI is silent. Workaround that worked: actively poll `mcp__github__pull_request_read get_check_runs` after every push per CLAUDE.md §11. Long-term fix is upstream — either subscribe to `.edited` events too, or have the workflow post a fresh ephemeral comment per run as a notification trigger.
+_2026-04-25 · Batch DX.1 retrospective_
+
+### Workflow tooling shipped in DX.1
+
+#### `bash scripts/pre-pr-check.sh` runs Tier 1 + 2 gates in parallel — invoke before opening any feature PR
+Replaces the manual `tsc + build + vitest` cycle that recurred 7+ times in a session. Ships with `PRE_PR_SKIP_BUILD=1` (TS-only / docs-only changes per CLAUDE.md §13) and `PRE_PR_SKIP_VITEST=1` (when no test files touched) escape hatches. Prints a per-gate ✅/❌ table and tails the failing gate's last 40 lines. Slash command: `/pre-pr`.
+_2026-04-25 · Batch DX.1_
+
+#### `bash scripts/check-migration-chain.sh` validates the bootstrap-chain header on uncommitted migrations
+Defaults to `--uncommitted` mode (staged + unstaged + untracked). Catches the orphan-chain trap (lessons-learned entry "Migrations must declare `-- Previous migration: …`") before push. Pass `--all` for an audit run that flags 200+ historical violations from before the rule was mandatory. Add to your pre-push routine on any batch that touches `supabase/migrations/`.
+_2026-04-25 · Batch DX.1_
+
+#### `/closeout` slash command — post-merge sync-and-PR loop
+Runbook for the docs-only PR that follows every feature merge: sync `main`, branch, update `plan.md` Session Handoff + sarah-backlog (apply §5.9 promotion rule if 3-strikes triggered), commit, PR, self-merge per CLAUDE.md §11. Replaces the manual closeout flow (5×/session in Round 64 Phase 5).
+_2026-04-25 · Batch DX.1_
+
+#### `.github/workflows/regen-types.yml` — auto-regen Supabase types after migrations land on main
+Ships dormant: the regenerate step skips when `SUPABASE_ACCESS_TOKEN` is unset and emits a `$GITHUB_STEP_SUMMARY` activation guide. Once the secret lands (logged in `docs/upcoming/TODO.md`), every push-to-main touching `supabase/migrations/**` opens a PR with a refreshed `src/integrations/supabase/types.ts`. Closes the recurring `as any` carry-over loop documented across Round 64 Phases 1–5 (Snap, Plan Variants, Credits, customer_issues.category).
+_2026-04-25 · Batch DX.1_
+
 ### Code review
 
 #### Inline synthesis cuts the Lane 4 corner — always spawn the synthesis sub-agent
