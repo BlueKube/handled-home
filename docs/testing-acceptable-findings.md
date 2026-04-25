@@ -2,6 +2,7 @@
 
 > **Status:** Layer 2 stub (introduced in Batch T.3). The filter logic that consumes this file is deferred to Batch T.4.
 > **Purpose:** Findings the AI judge will re-flag on every run but that the team has explicitly accepted. Once T.4 ships, the CI comparison logic reads this file and drops matching findings before evaluating thresholds — so accepted trade-offs don't generate noise forever.
+> **Triage:** Don't add entries here on instinct — apply the per-finding rule in `docs/testing-strategy.md` §5.9 first. Most findings end up either fixed-in-batch or queued in `docs/working/sarah-backlog.md`. This file is reserved for "accepted as-is" — findings the team has reviewed and consciously decided NOT to fix.
 
 ## How to use this file (forward-looking — applies once T.4 is live)
 
