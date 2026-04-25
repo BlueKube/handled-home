@@ -29,7 +29,6 @@ export function VisitTypeChip({ type, className }: Props) {
         VARIANT_CLASSES[type],
         className
       )}
-      aria-label={`${VARIANT_LABELS[type]} service`}
     >
       {VARIANT_LABELS[type]}
     </span>

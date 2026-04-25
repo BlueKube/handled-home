@@ -53,7 +53,7 @@ export function LiveMiniMap() {
         </div>
       </div>
       <p className="text-xs text-muted-foreground italic">
-        Real-time tracking coming soon — for now, this shows the route shape only.
+        Route shape only — we don't track exact provider location.
       </p>
     </Card>
   );

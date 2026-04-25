@@ -41,8 +41,10 @@ function useEtaLabel(scheduledDate: string | null): string {
   if (diffMin > 60) return `Arrives ${format(scheduled, "h:mm a")}`;
   if (diffMin > 1) return `Arrives in ~${diffMin} min`;
   if (diffMin >= -10) return "Arriving any minute";
-  if (diffMin >= -120) return "Service in progress";
-  return "Wrapping up";
+  // Past the scheduled window. The mode router falls back to preview after
+  // -2h (visitMode.ts), so this branch fires only while the live window
+  // is open. "Service in progress" reads accurately for the whole tail.
+  return "Service in progress";
 }
 
 export function VisitDetailLive({ jobId, data }: Props) {
@@ -109,7 +111,9 @@ export function VisitDetailLive({ jobId, data }: Props) {
                       </p>
                     )}
                   </div>
-                  <VisitTypeChip type={chipType} />
+                  {/* See VisitDetailPreview.tsx: hide the chip while the
+                      classifier returns the "included" default. */}
+                  {chipType !== "included" && <VisitTypeChip type={chipType} />}
                 </li>
               );
             })}
@@ -196,9 +200,6 @@ export function VisitDetailLive({ jobId, data }: Props) {
       <p className="text-xs text-center text-muted-foreground px-4">
         We'll switch this view to your visit receipt as soon as the provider closes the visit.
       </p>
-
-      {/* Acknowledge unused jobId so future hooks (mark-watched, refetch-on-focus, etc.) have a place. */}
-      <div hidden data-job-id={jobId} />
     </div>
   );
 }

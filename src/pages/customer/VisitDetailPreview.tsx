@@ -126,7 +126,11 @@ export function VisitDetailPreview({ jobId, data }: Props) {
                       </p>
                     )}
                   </div>
-                  <VisitTypeChip type={chipType} />
+                  {/* "Included" is the implicit default — hide the chip until
+                      the classifier returns a differentiating type
+                      (Snap/Bundle/Credits). Prevents the every-row-says-the-
+                      same-thing UI noise during the stub period. */}
+                  {chipType !== "included" && <VisitTypeChip type={chipType} />}
                 </li>
               );
             })}

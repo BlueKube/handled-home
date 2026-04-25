@@ -13,24 +13,59 @@ describe("getVisitMode", () => {
       expected: "complete",
     },
     {
-      label: "IN_PROGRESS → live",
+      label: "CANCELED → complete (terminal state, single L per DB enum)",
+      job: { status: "CANCELED", scheduled_date: HOURS_FROM_NOW(-12) },
+      expected: "complete",
+    },
+    {
+      label: "IN_PROGRESS → live (regardless of scheduled_date)",
       job: { status: "IN_PROGRESS", scheduled_date: HOURS_FROM_NOW(-1) },
       expected: "live",
     },
     {
-      label: "SCHEDULED within +1h → live (boundary: exactly 1h)",
-      job: { status: "SCHEDULED", scheduled_date: HOURS_FROM_NOW(1) },
+      label: "ISSUE_REPORTED → live (mid-flight paused state)",
+      job: { status: "ISSUE_REPORTED", scheduled_date: HOURS_FROM_NOW(0) },
       expected: "live",
     },
     {
-      label: "SCHEDULED 30min out → live",
-      job: { status: "SCHEDULED", scheduled_date: HOURS_FROM_NOW(0.5) },
+      label: "PARTIAL_COMPLETE → live (provider stopped early; not finished)",
+      job: { status: "PARTIAL_COMPLETE", scheduled_date: HOURS_FROM_NOW(-2) },
       expected: "live",
     },
     {
-      label: "SCHEDULED >1h out → preview (boundary: 1h + 1ms)",
+      label: "NOT_STARTED + scheduled within +1h → live (boundary: exactly +1h)",
+      job: { status: "NOT_STARTED", scheduled_date: HOURS_FROM_NOW(1) },
+      expected: "live",
+    },
+    {
+      label: "NOT_STARTED + 30min out → live",
+      job: { status: "NOT_STARTED", scheduled_date: HOURS_FROM_NOW(0.5) },
+      expected: "live",
+    },
+    {
+      label: "NOT_STARTED + 1h overdue → live (within -2h window)",
+      job: { status: "NOT_STARTED", scheduled_date: HOURS_FROM_NOW(-1) },
+      expected: "live",
+    },
+    {
+      label: "NOT_STARTED + exactly 2h overdue → live (boundary: -2h)",
+      job: { status: "NOT_STARTED", scheduled_date: HOURS_FROM_NOW(-2) },
+      expected: "live",
+    },
+    {
+      label: "NOT_STARTED + 2h+1ms overdue → preview (stuck/abandoned, not live)",
       job: {
-        status: "SCHEDULED",
+        status: "NOT_STARTED",
+        scheduled_date: new Date(
+          NOW.getTime() - 2 * 60 * 60 * 1000 - 1
+        ).toISOString(),
+      },
+      expected: "preview",
+    },
+    {
+      label: "NOT_STARTED + 1h+1ms out → preview (just past the live window)",
+      job: {
+        status: "NOT_STARTED",
         scheduled_date: new Date(
           NOW.getTime() + 60 * 60 * 1000 + 1
         ).toISOString(),
@@ -38,32 +73,22 @@ describe("getVisitMode", () => {
       expected: "preview",
     },
     {
-      label: "SCHEDULED 24h out → preview",
-      job: { status: "SCHEDULED", scheduled_date: HOURS_FROM_NOW(24) },
+      label: "NOT_STARTED + 24h out → preview",
+      job: { status: "NOT_STARTED", scheduled_date: HOURS_FROM_NOW(24) },
       expected: "preview",
     },
     {
-      label: "SCHEDULED with null scheduled_date → preview",
-      job: { status: "SCHEDULED", scheduled_date: null },
+      label: "NOT_STARTED with null scheduled_date → preview",
+      job: { status: "NOT_STARTED", scheduled_date: null },
       expected: "preview",
     },
     {
-      label: "SCHEDULED with malformed scheduled_date → preview",
-      job: { status: "SCHEDULED", scheduled_date: "not-a-date" },
+      label: "NOT_STARTED with malformed scheduled_date → preview",
+      job: { status: "NOT_STARTED", scheduled_date: "not-a-date" },
       expected: "preview",
     },
     {
-      label: "CANCELLED → complete (closest-existing semantics)",
-      job: { status: "CANCELLED", scheduled_date: HOURS_FROM_NOW(-12) },
-      expected: "complete",
-    },
-    {
-      label: "NO_SHOW → complete",
-      job: { status: "NO_SHOW", scheduled_date: HOURS_FROM_NOW(-2) },
-      expected: "complete",
-    },
-    {
-      label: "PENDING (unknown status) → complete fallback",
+      label: "Unknown status → complete (defensive fallback)",
       job: { status: "PENDING", scheduled_date: HOURS_FROM_NOW(2) },
       expected: "complete",
     },
@@ -72,9 +97,8 @@ describe("getVisitMode", () => {
   });
 
   it("uses Date.now() default when no `now` argument is supplied", () => {
-    // Smoke test only — the function must not throw and must return a valid mode.
     const result = getVisitMode({
-      status: "SCHEDULED",
+      status: "NOT_STARTED",
       scheduled_date: new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString(),
     });
     expect(["preview", "live", "complete"]).toContain(result);
