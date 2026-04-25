@@ -234,6 +234,22 @@ _2026-04-25 · Batch DX.1_
 Ships dormant: the regenerate step skips when `SUPABASE_ACCESS_TOKEN` is unset and emits a `$GITHUB_STEP_SUMMARY` activation guide. Once the secret lands (logged in `docs/upcoming/TODO.md`), every push-to-main touching `supabase/migrations/**` opens a PR with a refreshed `src/integrations/supabase/types.ts`. Closes the recurring `as any` carry-over loop documented across Round 64 Phases 1–5 (Snap, Plan Variants, Credits, customer_issues.category).
 _2026-04-25 · Batch DX.1_
 
+### CI workflow patterns
+
+#### `npm install -g supabase@latest` is a footgun on GH Actions — use `supabase/setup-cli@v1` instead
+DX.1 originally shipped `regen-types.yml` with `npm install -g supabase@latest` followed by a `supabase gen types ...` invocation. The first activation run failed with bare `Process completed with exit code 1` and no readable stderr. Root cause was the npm-global pattern: PATH wiring + npm prefix issues + occasional install-time flakes mean the `supabase` binary isn't reliably callable in subsequent steps. Canonical pattern — `uses: supabase/setup-cli@v1` with `with: version: latest` — handles binary download + PATH placement directly. Apply to any new workflow that needs the Supabase CLI.
+_2026-04-25 · DX.1 follow-up (PR #37)_
+
+#### When piping a CLI's stdout to a file, ALSO capture stderr — otherwise failures are invisible to the runner UI
+Original `regen-types.yml` redirected only stdout (`supabase gen types ... > types.ts.new`). When the CLI failed, stderr DID land in the runner log group, but the `Process completed with exit code 1` summary line is what the user sees first — and the actual error gets lost in a collapsed log group. Pattern that works: `2> >(tee /tmp/x.err >&2)` to keep stderr live in the runner log AND save a copy, then on failure cat the error file via `::error::` annotation so it bubbles to the PR-level summary. Combine with `[ -s output.file ]` to assert the output is non-empty before consuming it. Applies broadly — any workflow that pipes a CLI's stdout to a file (type generators, OpenAPI dumpers, codegen tools).
+_2026-04-25 · DX.1 follow-up (PR #37)_
+
+### Batch shape
+
+#### "Between-phase tooling sweep" is a viable Micro-batch shape — bundle accumulated workflow frictions
+DX.1 grouped 5 unrelated dev-tooling improvements (drop unused MCP server, parallel pre-PR script, migration-chain check, closeout runbook, types-regen workflow) into one Micro batch and shipped it between Phase 5 and Phase 6. Worked well: review tier was Micro (1 reviewer + no synthesis), the changes were independent and additive (no rollback risk), and bundling avoided 5 separate review cycles. Also closes a class of "improvement debt" that otherwise lives in `lessons-learned.md` indefinitely. Heuristic: when 4+ workflow frictions accumulate within a phase, cut a tooling sweep batch instead of carrying them into the next phase. Activation steps for any dormant tooling (secrets, env vars) get logged in `docs/upcoming/TODO.md` as part of the batch.
+_2026-04-25 · Batch DX.1_
+
 ### Code review
 
 #### Inline synthesis cuts the Lane 4 corner — always spawn the synthesis sub-agent

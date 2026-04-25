@@ -54,9 +54,11 @@ jobs:
 
       - name: Install Supabase CLI
         if: env.SUPABASE_ACCESS_TOKEN != ''
+        uses: supabase/setup-cli@v1
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        run: npm install -g supabase@latest
+        with:
+          version: latest
 
       - name: Regenerate types
         if: env.SUPABASE_ACCESS_TOKEN != ''
@@ -64,9 +66,20 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           PROJECT_REF: gwbwnetatpgnqgarkvht
         run: |
+          # Capture stderr alongside stdout so any CLI failure is visible
+          # in the runner log (the previous version redirected only stdout
+          # to the .new file, hiding error messages on failure).
+          set -o pipefail
+          supabase --version
           supabase gen types typescript \
             --project-id "$PROJECT_REF" \
+            2> >(tee /tmp/supabase-gen-types.err >&2) \
             > src/integrations/supabase/types.ts.new
+          if [ ! -s src/integrations/supabase/types.ts.new ]; then
+            echo "::error::supabase gen types produced an empty file. stderr was:"
+            cat /tmp/supabase-gen-types.err || true
+            exit 1
+          fi
           mv src/integrations/supabase/types.ts.new src/integrations/supabase/types.ts
 
       - name: Open PR if types changed
