@@ -2,10 +2,31 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
+/**
+ * Batch 5.5 category taxonomy. Populates the new
+ * `customer_issues.category` column (see migration
+ * 20260425020000_customer_issues_category.sql). The legacy `reason`
+ * column is still required by its CHECK constraint, so we derive it
+ * from the category via `CATEGORY_TO_REASON` below on every insert.
+ */
+export type VisitIssueCategory =
+  | "fix_didnt_hold"
+  | "damage"
+  | "task_skipped"
+  | "feedback";
+
+const CATEGORY_TO_REASON: Record<VisitIssueCategory, string> = {
+  fix_didnt_hold: "missed_something",
+  damage: "damage_concern",
+  task_skipped: "missed_something",
+  feedback: "not_satisfied",
+};
+
 export interface CustomerIssueRow {
   id: string;
   job_id: string;
   reason: string;
+  category: VisitIssueCategory | null;
   note: string;
   status: string;
   photo_storage_path: string | null;
@@ -58,11 +79,13 @@ export function useSubmitCustomerIssue() {
   return useMutation({
     mutationFn: async (params: {
       jobId: string;
-      reason: string;
+      category: VisitIssueCategory;
       note: string;
       photo?: File;
     }) => {
       if (!user) throw new Error("Not authenticated");
+
+      const legacyReason = CATEGORY_TO_REASON[params.category];
 
       let photoPath: string | null = null;
       let photoStatus: string | null = null;
@@ -90,11 +113,16 @@ export function useSubmitCustomerIssue() {
         .insert({
           job_id: params.jobId,
           customer_id: user.id,
-          reason: params.reason,
+          reason: legacyReason,
+          // New Batch 5.5 category column. `as any` cast stays until
+          // `src/integrations/supabase/types.ts` is regenerated post-merge —
+          // sandbox lacks SUPABASE_ACCESS_TOKEN, matches the Round 64 Phase 4
+          // Snap carry-over pattern. Remove after the next `supabase gen types`.
+          category: params.category,
           note: params.note,
           photo_storage_path: photoPath,
           photo_upload_status: photoStatus,
-        })
+        } as any)
         .select()
         .single();
 
@@ -115,7 +143,11 @@ export function useSubmitCustomerIssue() {
             customer_id: user.id,
             job_id: params.jobId,
             ticket_type: "service_issue" as any,
-            category: params.reason as any,
+            // support_tickets.category is free-form text (no CHECK), so we
+            // pass the new category directly. Admin dashboard + AI classifier
+            // both read from customer_note today — categorical signal is
+            // additive and non-breaking.
+            category: params.category as any,
             customer_note: params.note,
             zone_id: job?.zone_id ?? null,
             provider_org_id: job?.provider_org_id ?? null,
