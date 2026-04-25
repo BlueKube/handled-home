@@ -295,6 +295,7 @@ export type Database = {
           model_name: string
           output: Json | null
           risk_score: number | null
+          snap_request_id: string | null
           ticket_id: string | null
         }
         Insert: {
@@ -310,6 +311,7 @@ export type Database = {
           model_name: string
           output?: Json | null
           risk_score?: number | null
+          snap_request_id?: string | null
           ticket_id?: string | null
         }
         Update: {
@@ -325,6 +327,7 @@ export type Database = {
           model_name?: string
           output?: Json | null
           risk_score?: number | null
+          snap_request_id?: string | null
           ticket_id?: string | null
         }
         Relationships: [
@@ -333,6 +336,13 @@ export type Database = {
             columns: ["duplicate_ticket_id"]
             isOneToOne: false
             referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_inference_runs_snap_request_id_fkey"
+            columns: ["snap_request_id"]
+            isOneToOne: false
+            referencedRelation: "snap_requests"
             referencedColumns: ["id"]
           },
           {
@@ -1144,6 +1154,7 @@ export type Database = {
       }
       customer_issues: {
         Row: {
+          category: string | null
           created_at: string
           customer_id: string
           id: string
@@ -1160,6 +1171,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          category?: string | null
           created_at?: string
           customer_id: string
           id?: string
@@ -1176,6 +1188,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          category?: string | null
           created_at?: string
           customer_id?: string
           id?: string
@@ -1644,6 +1657,70 @@ export type Database = {
           scoring?: Json
         }
         Relationships: []
+      }
+      dispatch_requests: {
+        Row: {
+          assigned_provider_org_id: string | null
+          created_at: string
+          customer_id: string
+          dispatched_at: string | null
+          id: string
+          property_id: string
+          resolved_at: string | null
+          snap_request_id: string
+          status: string
+          updated_at: string
+          urgency: string | null
+        }
+        Insert: {
+          assigned_provider_org_id?: string | null
+          created_at?: string
+          customer_id: string
+          dispatched_at?: string | null
+          id?: string
+          property_id: string
+          resolved_at?: string | null
+          snap_request_id: string
+          status?: string
+          updated_at?: string
+          urgency?: string | null
+        }
+        Update: {
+          assigned_provider_org_id?: string | null
+          created_at?: string
+          customer_id?: string
+          dispatched_at?: string | null
+          id?: string
+          property_id?: string
+          resolved_at?: string | null
+          snap_request_id?: string
+          status?: string
+          updated_at?: string
+          urgency?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dispatch_requests_assigned_provider_org_id_fkey"
+            columns: ["assigned_provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "provider_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dispatch_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dispatch_requests_snap_request_id_fkey"
+            columns: ["snap_request_id"]
+            isOneToOne: false
+            referencedRelation: "snap_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       dunning_events: {
         Row: {
@@ -2448,6 +2525,73 @@ export type Database = {
             columns: ["sku_id"]
             isOneToOne: false
             referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_tasks: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          credits_actual: number | null
+          credits_estimated: number | null
+          description: string | null
+          id: string
+          job_id: string
+          sku_id: string | null
+          snap_request_id: string | null
+          status: string
+          task_type: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          credits_actual?: number | null
+          credits_estimated?: number | null
+          description?: string | null
+          id?: string
+          job_id: string
+          sku_id?: string | null
+          snap_request_id?: string | null
+          status?: string
+          task_type: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          credits_actual?: number | null
+          credits_estimated?: number | null
+          description?: string | null
+          id?: string
+          job_id?: string
+          sku_id?: string | null
+          snap_request_id?: string | null
+          status?: string
+          task_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_tasks_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_tasks_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_tasks_snap_request_id_fkey"
+            columns: ["snap_request_id"]
+            isOneToOne: false
+            referencedRelation: "snap_requests"
             referencedColumns: ["id"]
           },
         ]
@@ -7369,6 +7513,85 @@ export type Database = {
           },
         ]
       }
+      snap_requests: {
+        Row: {
+          ai_classification: Json | null
+          area: string | null
+          created_at: string
+          credits_actual: number | null
+          credits_held: number
+          customer_id: string
+          description: string | null
+          id: string
+          linked_job_id: string | null
+          photo_paths: string[]
+          property_id: string
+          resolved_at: string | null
+          routing: string | null
+          status: string
+          subscription_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_classification?: Json | null
+          area?: string | null
+          created_at?: string
+          credits_actual?: number | null
+          credits_held?: number
+          customer_id: string
+          description?: string | null
+          id?: string
+          linked_job_id?: string | null
+          photo_paths?: string[]
+          property_id: string
+          resolved_at?: string | null
+          routing?: string | null
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_classification?: Json | null
+          area?: string | null
+          created_at?: string
+          credits_actual?: number | null
+          credits_held?: number
+          customer_id?: string
+          description?: string | null
+          id?: string
+          linked_job_id?: string | null
+          photo_paths?: string[]
+          property_id?: string
+          resolved_at?: string | null
+          routing?: string | null
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "snap_requests_linked_job_id_fkey"
+            columns: ["linked_job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "snap_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "snap_requests_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sop_runs: {
         Row: {
           completed_at: string | null
@@ -9899,6 +10122,20 @@ export type Database = {
         }
         Returns: Json
       }
+      grant_topup_credits: {
+        Args: {
+          p_credits: number
+          p_customer_id: string
+          p_idempotency_key: string
+          p_pack_id: string
+          p_subscription_id: string
+        }
+        Returns: Json
+      }
+      handle_snap_routing: {
+        Args: { p_snap_request_id: string }
+        Returns: Json
+      }
       has_admin_role: {
         Args: {
           p_role: Database["public"]["Enums"]["admin_role"]
@@ -10110,6 +10347,14 @@ export type Database = {
       }
       resolve_property_zone: {
         Args: { p_lat: number; p_lng: number; p_resolution?: number }
+        Returns: Json
+      }
+      resolve_snap: {
+        Args: {
+          p_canceled?: boolean
+          p_credits_actual?: number
+          p_snap_request_id: string
+        }
         Returns: Json
       }
       resolve_weather_event: { Args: { p_event_id: string }; Returns: Json }
