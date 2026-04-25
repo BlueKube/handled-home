@@ -1042,7 +1042,13 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 ### Screen 11.3: Visit Detail (Receipt)
 
 **Route**: `/customer/visits/:jobId`
-**Purpose**: Proof-first receipt confirming your membership value — photos and checklist before narrative
+**Purpose**: Same URL serves three distinct UIs based on visit lifecycle stage (Batch 5.4). The router (`src/pages/customer/VisitDetail.tsx`) calls `getVisitMode(job)` (`src/lib/visitMode.ts`) and renders one of:
+
+- **Preview** (`SCHEDULED` AND `scheduled_date > now + 1h`) — see Screen 11.3a
+- **Live** (`IN_PROGRESS`, OR `SCHEDULED` AND `scheduled_date ≤ now + 1h`) — see Screen 11.3b
+- **Complete** (`COMPLETED` and all terminal states) — sections below
+
+The Complete-mode receipt (current behavior) — proof-first, photos and checklist before narrative
 
 **Sections (top to bottom)**:
 
@@ -1109,6 +1115,43 @@ Built on shadcn/ui: Card, Button, Input, Textarea, Label, Badge, Tabs, Dialog, S
 **Empty State**: Camera icon + "Your visit receipt and proof photos will appear here once the service is complete."
 **Loading**: Skeleton header and photo grid placeholders
 **Error State**: "Your visit receipt couldn't be loaded — your service record is still saved. Go back and try again."
+
+### Screen 11.3a: Visit Detail — Preview Mode
+
+**File**: `src/pages/customer/VisitDetailPreview.tsx`
+**When it renders**: `job.status === "SCHEDULED"` AND `scheduled_date` is more than 1 hour in the future.
+**Purpose**: Tell the customer what's coming and let them adjust before the visit locks.
+
+**Sections (top to bottom)**:
+
+1. **Back Button** → `/customer/visits`
+2. **Header** — `StatusBadge` (scheduled) + H2 "Upcoming visit" + caption "We'll notify you the morning of your visit."
+3. **Hero Card** — three rows:
+   - Calendar icon + "Scheduled for" + date
+   - Clock icon + "Arrival window" + time
+   - UserCircle2 icon + "Provider" + "Assigned the day before" + sub-caption "You'll see their name + photo as soon as routing locks in."
+4. **Task List Card** — bordered rows with SKU name + level + inline `VisitTypeChip` (Included / Snap / Bundle / Credits) per task. Empty state: "Tasks will be confirmed before your visit."
+5. **CTA Grid (2-up)** — outline "Reschedule" (CalendarClock) → `/customer/appointment/:jobId` · default "Add a Snap" (Camera) → `/customer?snap=1`
+6. **Footer caption** — "Need to add a one-off task? Snap a photo and we'll add it to this visit if your provider has time."
+
+**Type-chip stub**: `getChipType` (`src/lib/visitChipType.ts`) currently returns `included` for everything until the backend signals exist. Backend follow-up tracked in `docs/upcoming/TODO.md`.
+
+### Screen 11.3b: Visit Detail — Live Mode
+
+**File**: `src/pages/customer/VisitDetailLive.tsx`
+**When it renders**: `job.status === "IN_PROGRESS"` OR `job.status === "SCHEDULED"` AND `scheduled_date ≤ now + 1h`.
+**Purpose**: Status + nearest-task highlight + Snap upsell (highest-intent moment).
+
+**Sections (top to bottom)**:
+
+1. **Back Button** → `/customer/visits`
+2. **Header** — `StatusBadge` + H2 "Visit in progress" + Clock-prefixed ETA label.
+   - ETA logic (live, refreshes every 30s): >1h → "Arrives 4:30 PM"; 2–60min → "Arrives in ~X min"; ±10min around scheduled → "Arriving any minute"; -10 to -120min → "Service in progress"; <-2h → "Wrapping up".
+3. **LiveMiniMap** card (`src/components/customer/LiveMiniMap.tsx`) — bordered SVG with route line + provider pin + house pin. Caption: "Real-time tracking coming soon — for now, this shows the route shape only." `[OVERRIDE: real GPS feed deferred to Phase 7]`.
+4. **Today's services Card** — same task-list shape as Preview (SKU + chip).
+5. **Progress Card** (conditional, when `checklistHighlights` non-empty) — checklist with first non-DONE item highlighted (`bg-primary/5`, primary border, "in progress" label). DONE items strike-through. Other pending items show muted Circle.
+6. **Snap Prompt Card** (warning/15 background) — Camera icon + "Notice something else?" + sub-text + full-width "Add a Snap" button → `/customer?snap=1`. This is the highest-intent upsell moment in the customer app.
+7. **Footer caption** — "We'll switch this view to your visit receipt as soon as the provider closes the visit."
 
 ### Screen 11.4: Appointment Picker
 
