@@ -359,6 +359,38 @@ A naive "fix everything the AI judge flags" loop never converges — findings ar
 2. **T.3 (this batch):** per-role aggregate scores + top frictions are inlined in the PR status comment. Absolute-threshold breaches are flagged ⚠️ advisory.
 3. **T.4 (deferred):** baseline comparison, dismiss-list filtering, and automated fix-batch creation for regressions. Human approves baseline bumps.
 
+### 5.9 Triage rule for Tier 5 findings — when to fix in batch vs queue
+
+Once a Sarah/persona finding is unfiltered (Layer 1 fired and Layer 2 didn't dismiss it), the operating question is: fix in the same PR, or queue for a later polish batch? The hybrid rule below is the runbook. Apply it per-finding, not per-PR.
+
+| Finding shape | Action | Rationale |
+|---|---|---|
+| **Test-data artifact** (e.g. "Los Angeles, TX placeholder", skeleton loaders from un-onboarded test user) | **Drop.** If it points at a real fixture gap, append one line to `docs/upcoming/TODO.md`. | Not a code defect. The fixture is the fix. |
+| **Copy / label / single-component fix on the changed surface, < 30 lines, no design judgment needed** | **Fix in same PR.** Commit as `fix(ux): resolve PR#N Sarah findings — <list>`. | Context is loaded; reviewer is critiquing what just shipped. Re-visiting later doubles cost. |
+| **Severe — Sarah explicitly says "I'd quit here"** | **Fix in same PR regardless of size.** Escalate if the fix needs design input. | High-impact wins compound. |
+| **Trust-signal addition on the form/screen this batch owns** | **Fix in same PR.** | Same reasoning as copy fix. |
+| **Pattern that affects 3+ surfaces** ("vague button pairs everywhere", "no transition reassurance copy") | **Queue in `docs/working/sarah-backlog.md`.** When ~8 thematically-similar items accumulate, cut a UX.N polish batch that fixes all instances via grep. | A feature batch shouldn't morph into a cross-cutting polish sweep. Bundling beats N round-trips. |
+| **Needs product / design judgment** ("which copy is on-brand?") | **Queue + flag.** Add a TODO entry routed to the human. | Don't make the call solo. |
+| **Calibration noise** (first 3-5 real Tier 5 PRs) | **Triage skeptically.** Pattern only — log repeats; ignore one-off oddities. | Sarah hasn't been validated yet. After ~10 PRs of real data, trust climbs. |
+| **Aesthetic disagreement that the team has explicitly accepted** | **Add to `docs/testing-acceptable-findings.md`** with rationale. | Layer 2 will filter it once T.4 ships the filter logic; today it lives there for human reference. |
+
+**Promotion rule.** A finding that re-appears across **3+ PRs in a row** on un-changed code is a real signal, not noise. Promote to MUST-FIX status — cut a fix batch immediately even if it's cross-cutting. The 3-strikes count is tracked manually in the backlog file's `pr_history:` field.
+
+**Cap on in-batch fixes.** No more than **3 Sarah-driven fixes** in any single feature PR. If 4+ findings would qualify under "fix in same PR" above, take the top 2-3 and queue the rest. This prevents scope creep and keeps the PR diff focused on its stated batch goal.
+
+**Where these rules live:**
+- The triage rule itself — this section.
+- The queue — `docs/working/sarah-backlog.md` (append-only).
+- The dismiss list — `docs/testing-acceptable-findings.md` (Layer 2 stub awaiting filter wire-up).
+- The fixture gaps — `docs/upcoming/TODO.md`.
+
+**The honest failure modes of either extreme:**
+
+- *Fix everything in batch* → batches grow unboundedly; every feature PR turns into a UX-polish sweep; spec drift; reviewers can't keep up.
+- *Queue everything* → the backlog becomes a graveyard; cheap wins that should've been one-line edits get re-discovered three batches later at 5× the cost; Sarah's signal goes unused.
+
+The hybrid only outperforms either if it's *consistently applied*. That requires the rule to live in this doc — not in conversation transcripts that vanish at session end.
+
 ---
 
 ## 6. Retroactive application — testing older PRs with the new strategy
