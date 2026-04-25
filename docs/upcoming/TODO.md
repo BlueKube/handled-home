@@ -2,12 +2,19 @@
 
 Items that require API keys, backend changes, or design decisions beyond frontend gap closure. These are left for the owner to complete after the automated batch work.
 
-### 2026-04-25 — Activate `regen-types.yml` (Batch DX.1 follow-up)
+### 2026-04-25 — Activate `regen-types.yml` (Batch DX.1 follow-up) — 🟡 SECRET SET, RE-RUN PENDING (post-PR #37 fix)
 
-- [ ] **Add `SUPABASE_ACCESS_TOKEN` to GitHub Secrets.** Batch DX.1 ships `.github/workflows/regen-types.yml` dormant. Once the token is set, every push-to-main that touches `supabase/migrations/**` auto-opens a PR with a refreshed `src/integrations/supabase/types.ts` — closes the `as any` carry-over pattern documented across Round 64 Phases 1–5.
-  - **How:** Generate a PAT at https://supabase.com/dashboard/account/tokens (scope: read access is sufficient for `gen types`). Add to GH Secrets as `SUPABASE_ACCESS_TOKEN` on the `handled-home` repo.
-  - **Verify:** `Actions → Regen Supabase types after migration → Run workflow` against `main` should succeed and either open a PR (if types drifted) or no-op (if already current).
-  - **Blocked:** Future-batch ergonomics — agents still have to write `as any` casts on new columns until this lands.
+- [x] **Add `SUPABASE_ACCESS_TOKEN` to GitHub Secrets.** ✅ Done 2026-04-25. The first activation run failed with bare `Process completed with exit code 1` (no readable stderr) — root-caused as the `npm install -g supabase@latest` install pattern. PR #37 (`4e7f58b`) replaces it with `supabase/setup-cli@v1` and adds stderr capture.
+- [ ] **Re-trigger the workflow to verify PR #37's fix.** Go to https://github.com/BlueKube/handled-home/actions/workflows/regen-types.yml → `Run workflow` against `main`. Expected: ✅ success, either no PR (types already current) or auto-opened `chore/regen-supabase-types` PR (if drift exists). If still ❌, the new stderr capture surfaces the actual error via `::error::` annotation + the runner log will show `supabase --version` + the failing command's stderr inline.
+  - **Why:** Future-batch ergonomics — until verified, agents may still pre-emptively write `as any` casts on new columns.
+  - **Blocked:** Nothing blocked on the codebase side; just needs one manual workflow trigger.
+
+### 2026-04-25 — Stale `supabase/config.toml` project_id (cleanup)
+
+- [ ] **Update `supabase/config.toml:1` `project_id` from `yxhdschpeezawraqsmug` → `gwbwnetatpgnqgarkvht`.** The file still references the pre-Round-64.5 Lovable Cloud project. Per `DEPLOYMENT.md` + `.mcp.json`, the active self-hosted project is `gwbwnetatpgnqgarkvht`. Tools that read `config.toml` (CLI link, some MCP entrypoints) will target the wrong project — caught no real bug yet only because the agent has overridden via `--project-id` flags everywhere it matters.
+  - **Why:** Hygiene — eliminates a foot-gun for any future `supabase link` / `supabase db pull` invocation that omits the explicit project flag.
+  - **Blocked:** Nothing — one-line edit, ship in any near-future batch (or as a standalone Micro PR).
+  - **Source:** Surfaced during PR #37 validation (verifying the workflow's hardcoded `PROJECT_REF: gwbwnetatpgnqgarkvht` was correct against the rest of the repo).
 
 ### 2026-04-25 — Revoke the Stitch bearer token (Batch DX.1 follow-up)
 
