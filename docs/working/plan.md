@@ -21,7 +21,7 @@ Existing infra to coexist with (NOT replace):
 |-------|-------|------|--------|---------|
 | 6.1 | Migration: `bundles` + `bundle_items` tables + RLS + Fall Prep strawman seed | M | ✅ | |
 | 6.2 | Customer: Bundle detail page + booking flow + Services-page spotlight integration | M | ✅ | |
-| 6.3 | Admin: `SeasonalBundles.tsx` CRUD + zone rollout + window date editor | M | ⬜ | |
+| 6.3 | Admin: `SeasonalBundles.tsx` CRUD + zone rollout + window date editor | M | ✅ | |
 
 ### Review sizing per batch
 
@@ -149,13 +149,18 @@ Each batch ships as its own PR against `main`, following `BlueKube/handled-home`
 
 ## Session Handoff
 
-- **Branch at session end:** `main` clean, synced at `1c799f5` (PR #44 — Batch 6.2 customer bundle detail + booking + Services spotlight merged). **Phases 1–5 ✅ · DX.1 ✅ · UX.1 ✅ · Phase 6 in progress (2/3 batches done).**
-- **Last completed:** **Batch 6.2 — Customer Bundle detail + booking + Services-page spotlight** (PR #44, `1c799f5`). 8 new files (3 hooks, 2 components, 1 page, 1 helper + test) + 2 modifications (Services.tsx replaces local stub, App.tsx route). `useBookBundle` mutation: client-side balance pre-check → ref-based double-tap debounce → empty-items guard → `spend_handles` RPC → `job_tasks` inserts (task_type='bundle') → on partial-success writes `billing_exceptions` HIGH with entity_type='bundle'. onSuccess seeds handle_balance cache via `setQueryData` BEFORE invalidating (avoids stale-balance flash — same pattern useFinalizeSnap adopted after Phase 4 Batch 4.2 review; **Lane 3 caught this as a repeat-mistake from prior history**). Medium-tier review with all 4 lanes (Lane 3 included this time): 1 MUST-FIX + 5 SHOULD-FIX + 2 DROP, all 6 fixes shipped in fix-pass commit `7caa915`. Sarah re-run scored avgClarity 4.8 / avgTrust 3.9 / avgFriction 7.1 — improvements are within run-to-run AI variance since the captured screens are still avatar-drawer not bundle surfaces (UX.1 follow-up gap).
-- **🟡 Auto-PR pending:** `regen-types.yml` should auto-open a `chore/regen-supabase-types` PR shortly after the Batch 6.1 schema landed (still pending — investigate next session). Once it lands, self-merge to clean up `as any` casts on `bundles` / `bundle_items` queries in 6.2's hooks.
-- **Next substantive work:** **Batch 6.3 — Admin `SeasonalBundles.tsx` CRUD + zone rollout + window editor** per `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` §Phase 6 + spec at `docs/working/batch-specs/batch-6.3-admin-seasonal-bundles-crud.md` (drafted in this session, ready for implementation). Medium tier review. Final batch of Phase 6 — closes out the 3-batch sequence so the human admin can curate bundles without writing migrations.
+- **Branch at session end:** `main` clean, synced at `d293569` (PR #46 — Batch 6.3 admin SeasonalBundles CRUD + atomic RPC merged). **Phases 1–6 ✅ COMPLETE · DX.1 ✅ · UX.1 ✅. Round 64: 6 of 8 phases shipped. Phases 7–8 remaining.**
+- **Last completed:** **Batch 6.3 — Admin SeasonalBundles CRUD + atomic replace RPC** (PR #46, `d293569`). 8 new files + 3 modified + 1 new migration (`replace_bundle_items` SECURITY DEFINER RPC for atomic delete-insert-recompute). Admin can now create/edit/promote/archive bundles entirely through the UI — no migrations needed for bundle content. Slug auto-derives from name + locks after first save. Zones multi-select with full keyboard a11y. Line items inline CRUD. Live "Savings preview" computed from items + total. Save & Activate flow disabled when 0 items. Collapsible Active/Drafts/Archived sections (Drafts default-open). Medium-tier review with all 4 lanes (Lane 3 included): **2 MUST-FIX + 5 SHOULD-FIX + 3 DROP** (1 false-positive Lane 1 finding dropped). All 7 fixes shipped in `be0a1c7`. **Supabase Preview validated the RPC migration** end-to-end on branch `mglkxltjoeyjdeeqxgmh` — all 8 CI checks ✅.
+- **🎉 Phase 6 ✅ COMPLETE — bundles ARR loop is live end-to-end:**
+  1. **6.1** schema (`bundles` + `bundle_items` tables + RLS + Fall Prep strawman seed in draft)
+  2. **6.2** customer surfaces (`useBundles`/`useBundle`/`useBookBundle`, BundleDetail page at `/customer/bundles/:slug`, Services-page spotlight, "Choose visit day" picker)
+  3. **6.3** admin curation (`SeasonalBundles.tsx` at `/admin/seasonal-bundles`, BundleEditSheet, atomic `replace_bundle_items` RPC)
+- **🟡 Auto-PR(s) pending:** `regen-types.yml` should auto-open `chore/regen-supabase-types` PRs adding typed defs for `bundles` + `bundle_items` + `replace_bundle_items` RPC. The first one was expected after Batch 6.1's merge (`cf08713`) but never appeared — possibly a transient workflow issue. Manual re-trigger may be needed; check Actions tab. Once typed, the `as any` casts in 6.2 + 6.3 hooks can be cleaned up in a small follow-up.
+- **Next substantive work:** **Phase 7 — BYOC / BYOP / referral elevation** per `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md`. **Fresh-session boundary recommended** — Round 64 is closing in (Phases 7–8 left). Phase 7 is 3 batches: post-visit ReceiptSuggestions rotation, dashboard growth card, onboarding "who could you bring?" step + Referrals page restyle. No new schema. Medium review tier each.
+- **After Phase 7:** Phase 8 is the round-close docs sync (masterplan, operating-model, feature-list, screen-flows, app-flow-pages-and-roles, design-guidelines) + working-folder archive. Small/Medium tier with fact-checker lane.
 - **Open TODOs** (persist in `docs/upcoming/TODO.md`):
-  - **🟡 Pending:** Self-merge the regen-types auto-PR (still hasn't appeared after PR #42's merge — may need a manual workflow re-trigger).
-  - **NEW (UX.1 follow-up):** Add Tier 5 milestone captures for onboarding/auth/snap/bundles surfaces — Sarah keeps measuring the same drawer screens. The bundle work in 6.2 is invisible to the harness.
+  - **🟡 Pending:** Self-merge the regen-types auto-PR(s) when they appear (or manually re-trigger the workflow).
+  - **NEW (UX.1 follow-up):** Add Tier 5 milestone captures for onboarding/auth/snap/bundles surfaces — Sarah keeps measuring the same drawer screens; all the new work is invisible to the harness.
   - **NEW (UX.1 follow-up):** Provider-name interpolation on customer trust copy (Round 65).
   - Stripe credit-pack products + secrets + deploys + cron verify (Phase 3 close-out).
   - Stale `supabase/config.toml:1` `project_id` — should be `gwbwnetatpgnqgarkvht`.
@@ -166,6 +171,7 @@ Each batch ships as its own PR against `main`, following `BlueKube/handled-home`
   - Inline rating widget refactor → 5.4.1 follow-up.
   - Rotate Vercel Protection Bypass secret (carried from T.1).
   - Rename legacy `src/pages/admin/Bundles.tsx` → `Routines.tsx` during Phase 8 doc-sync.
-- **Context at exit:** check `/context` before deciding Batch 6.3 entry.
-- **Blockers:** None.
-- **Round progress:** Phases 1–5 ✅ · DX.1 ✅ · UX.1 ✅ · **Phase 6 🟡 (Batch 6.1 ✅, 6.2 ✅, 6.3 ⬜)** · Phases 7–8 ⬜.
+  - **Admin needs to actually populate Fall Prep:** flip status='active' + add zone_ids + verify line items via the new `/admin/seasonal-bundles` UI. Until then customers see no bundle.
+- **Context at exit:** check `/context` before deciding Phase 7 entry.
+- **Blockers:** None — Phase 7 is gated only on starting a fresh session.
+- **Round progress:** Phases 1–5 ✅ · DX.1 ✅ · UX.1 ✅ · **Phase 6 ✅ COMPLETE (3/3 batches)** · Phases 7–8 ⬜.
