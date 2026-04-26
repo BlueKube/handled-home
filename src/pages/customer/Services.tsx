@@ -2,11 +2,12 @@ import { useState, useMemo } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronRight, Sparkles } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useSkus } from "@/hooks/useSkus";
 import type { ServiceSku } from "@/hooks/useSkus";
 import { SkuDetailView } from "@/components/SkuDetailView";
 import { ServiceCard } from "@/components/customer/ServiceCard";
+import { SeasonalBundleSpotlight } from "@/components/customer/SeasonalBundleSpotlight";
 import { getCategoryIcon } from "@/lib/serviceCategories";
 import { useCustomerSubscription } from "@/hooks/useSubscription";
 import { useEntitlements, type EntitlementSku } from "@/hooks/useEntitlements";
@@ -101,20 +102,6 @@ export default function CustomerServices() {
         </SheetContent>
       </Sheet>
     </div>
-  );
-}
-
-function SeasonalBundleSpotlight() {
-  return (
-    <Card className="p-4 bg-accent/5 border-accent/20 flex items-start gap-3">
-      <Sparkles className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-      <div>
-        <p className="text-sm font-semibold">Seasonal bundles coming soon</p>
-        <p className="text-xs text-muted-foreground mt-1">
-          One-tap stacks like Fall Prep and Spring Refresh will appear here when a bundle is active in your zone.
-        </p>
-      </div>
-    </Card>
   );
 }
 
