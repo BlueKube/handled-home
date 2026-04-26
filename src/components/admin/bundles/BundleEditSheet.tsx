@@ -168,10 +168,16 @@ export function BundleEditSheet({ open, onOpenChange, bundle }: BundleEditSheetP
       return;
     }
 
+    // Save flow (review SF-1): persist items first so separate_credits
+    // matches the new total before metadata UPDATE writes the new
+    // total_credits — avoids tripping CHECK (separate_credits >= total_credits)
+    // when raising total_credits while items also grow.
     try {
       let bundleId: string;
       if (isEditing && bundle) {
         bundleId = bundle.id;
+        // Replace items first (RPC is atomic — Lane 4 MF-1).
+        await replaceItems.mutateAsync({ bundleId, items: draft.items });
         await update.mutateAsync({
           id: bundleId,
           name: draft.name.trim(),
@@ -196,9 +202,8 @@ export function BundleEditSheet({ open, onOpenChange, bundle }: BundleEditSheetP
           zone_ids: draft.zone_ids,
         });
         bundleId = created.id;
+        await replaceItems.mutateAsync({ bundleId, items: draft.items });
       }
-
-      await replaceItems.mutateAsync({ bundleId, items: draft.items });
 
       if (alsoActivate) {
         await promote.mutateAsync(bundleId);
@@ -213,7 +218,19 @@ export function BundleEditSheet({ open, onOpenChange, bundle }: BundleEditSheetP
       );
       onOpenChange(false);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Save failed.";
+      // Lane 4 MF-2: detect Postgres unique-violation (23505) and surface a
+      // human message instead of the raw "duplicate key value violates
+      // unique constraint" wire string.
+      const errObj = e as { code?: string; message?: string };
+      const isDuplicateSlug =
+        errObj?.code === "23505" ||
+        (errObj?.message?.includes("duplicate key") ?? false) ||
+        (errObj?.message?.includes("bundles_slug_key") ?? false);
+      const msg = isDuplicateSlug
+        ? "A bundle with this slug already exists. Pick a different name or edit the slug."
+        : e instanceof Error
+          ? e.message
+          : "Save failed.";
       toast.error(msg);
     }
   };
@@ -416,8 +433,18 @@ export function BundleEditSheet({ open, onOpenChange, bundle }: BundleEditSheetP
                   <Badge
                     key={z.id}
                     variant={active ? "default" : "outline"}
-                    className="cursor-pointer select-none"
+                    className="cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    role="checkbox"
+                    aria-checked={active}
+                    tabIndex={isPending ? -1 : 0}
                     onClick={() => !isPending && toggleZone(z.id)}
+                    onKeyDown={(e) => {
+                      if (isPending) return;
+                      if (e.key === " " || e.key === "Enter") {
+                        e.preventDefault();
+                        toggleZone(z.id);
+                      }
+                    }}
                   >
                     {z.name}
                   </Badge>

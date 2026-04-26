@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus } from "lucide-react";
+import { Plus, ChevronDown, ChevronRight } from "lucide-react";
 import { useAdminBundles, type AdminBundle } from "@/hooks/useAdminBundles";
 import { BundleRow } from "@/components/admin/bundles/BundleRow";
 import { BundleEditSheet } from "@/components/admin/bundles/BundleEditSheet";
@@ -54,18 +54,21 @@ export default function SeasonalBundles() {
           <BundleSection
             title="Active"
             bundles={grouped.active}
+            defaultOpen={false}
             emptyMessage="No active bundles. Promote a draft to flip it on."
             onEdit={handleEdit}
           />
           <BundleSection
             title="Drafts"
             bundles={grouped.draft}
+            defaultOpen
             emptyMessage="No drafts. Tap New bundle to start one."
             onEdit={handleEdit}
           />
           <BundleSection
             title="Archived"
             bundles={grouped.archived}
+            defaultOpen={false}
             emptyMessage="No archived bundles."
             onEdit={handleEdit}
           />
@@ -84,27 +87,46 @@ export default function SeasonalBundles() {
 interface SectionProps {
   title: string;
   bundles: AdminBundle[];
+  defaultOpen: boolean;
   emptyMessage: string;
   onEdit: (b: AdminBundle) => void;
 }
 
-function BundleSection({ title, bundles, emptyMessage, onEdit }: SectionProps) {
+function BundleSection({
+  title,
+  bundles,
+  defaultOpen,
+  emptyMessage,
+  onEdit,
+}: SectionProps) {
+  const [open, setOpen] = useState(defaultOpen);
+  const Chevron = open ? ChevronDown : ChevronRight;
   return (
     <section>
-      <h2 className="text-h3 mb-3">
-        {title}{" "}
-        <span className="text-sm text-muted-foreground font-normal">
-          ({bundles.length})
-        </span>
-      </h2>
-      {bundles.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{emptyMessage}</p>
-      ) : (
-        <Card className="p-0 divide-y divide-border">
-          {bundles.map((b) => (
-            <BundleRow key={b.id} bundle={b} onEdit={onEdit} />
-          ))}
-        </Card>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-2 mb-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+        aria-expanded={open}
+      >
+        <Chevron className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
+        <h2 className="text-h3">
+          {title}{" "}
+          <span className="text-sm text-muted-foreground font-normal">
+            ({bundles.length})
+          </span>
+        </h2>
+      </button>
+      {open && (
+        bundles.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{emptyMessage}</p>
+        ) : (
+          <Card className="p-0 divide-y divide-border">
+            {bundles.map((b) => (
+              <BundleRow key={b.id} bundle={b} onEdit={onEdit} />
+            ))}
+          </Card>
+        )
       )}
     </section>
   );

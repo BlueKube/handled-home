@@ -78,7 +78,11 @@ export function useUpdateBundle() {
 }
 
 // Replaces the entire bundle_items set for a bundle and recomputes
-// separate_credits as sum(items.credits). Single-flight from the admin UI.
+// separate_credits as sum(items.credits). Atomic — all three operations
+// (delete-existing, insert-new, update-separate_credits) run inside the
+// public.replace_bundle_items RPC's implicit transaction so a mid-flight
+// failure rolls back cleanly. Replaces the previous three-round-trip
+// flow that could corrupt the bundle on partial failure (Lane 4 MF-1).
 export function useReplaceBundleItems() {
   const qc = useQueryClient();
   return useMutation({
@@ -89,36 +93,28 @@ export function useReplaceBundleItems() {
       bundleId: string;
       items: ItemInput[];
     }) => {
-      // Step 1: delete existing items for this bundle.
-      const { error: deleteErr } = await client()
-        .from("bundle_items")
-        .delete()
-        .eq("bundle_id", bundleId);
-      if (deleteErr) throw deleteErr;
-
-      // Step 2: insert the new set (if any).
-      if (items.length > 0) {
-        const rows = items.map((it) => ({
-          bundle_id: bundleId,
-          label: it.label,
-          est_minutes: it.est_minutes,
-          credits: it.credits,
-          sort_order: it.sort_order,
-          sku_id: it.sku_id ?? null,
-        }));
-        const { error: insertErr } = await client().from("bundle_items").insert(rows);
-        if (insertErr) throw insertErr;
-      }
-
-      // Step 3: recompute separate_credits and persist on the bundle row.
-      const newSeparate = items.reduce((acc, it) => acc + it.credits, 0);
-      const { error: updateErr } = await client()
-        .from("bundles")
-        .update({ separate_credits: newSeparate })
-        .eq("id", bundleId);
-      if (updateErr) throw updateErr;
-
-      return { bundleId, items: items.length, separate_credits: newSeparate };
+      const itemsPayload = items.map((it) => ({
+        label: it.label,
+        est_minutes: it.est_minutes,
+        credits: it.credits,
+        sort_order: it.sort_order,
+        sku_id: it.sku_id ?? null,
+      }));
+      const { data, error } = await supabase.rpc("replace_bundle_items", {
+        p_bundle_id: bundleId,
+        p_items: itemsPayload,
+      });
+      if (error) throw error;
+      const result = (data ?? {}) as {
+        bundle_id?: string;
+        separate_credits?: number;
+        item_count?: number;
+      };
+      return {
+        bundleId,
+        items: items.length,
+        separate_credits: result.separate_credits ?? 0,
+      };
     },
     onSuccess: () => invalidateAll(qc),
   });

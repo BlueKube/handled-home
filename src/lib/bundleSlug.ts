@@ -4,7 +4,10 @@
 export function slugify(name: string): string {
   return name
     .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "") // drop combining diacritics
+    // \p{M} matches any Unicode "Mark" code point — the combining
+    // diacritical block plus enclosing/spacing marks. Using the property
+    // escape avoids editor-level mangling of literal combining characters.
+    .replace(/\p{M}/gu, "")
     .toLowerCase()
     .trim()
     .replace(/[^\w\s-]/g, "") // drop punctuation (keep alphanum + _ + -)
