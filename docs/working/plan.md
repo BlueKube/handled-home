@@ -1,4 +1,64 @@
-# Round 64 Phase 5 — Nav shape + Visit Detail as page-of-the-day
+# Round 64 Phase 6 — Seasonal bundles as the ARR loop
+
+> **Round:** 64 · **Phase:** 6 of 8 · **Started:** 2026-04-26
+> **PRD:** `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` §"Phase 6 — Seasonal bundles as the ARR loop"
+> **Execution mode:** Quality (production-facing schema + customer + admin surfaces)
+> **Branch root:** Each batch ships as its own PR against `main`.
+
+---
+
+## Why this phase
+
+Phase 6 is the primary ARR expansion mechanism for the round. A Basic-30 customer paying ~$189/mo becomes a ~$2,800/yr customer once they adopt 2 seasonal bundles. The mechanic: bundles attach to an existing visit day (no new appointment friction), with itemized credit savings per line ("save 120 credits"). One in-season bundle spotlight on the Services page; admin curates window dates + per-zone rollout + per-line credits.
+
+Existing infra to coexist with (NOT replace):
+- `seasonal_templates` (SKU-anchored, per-SKU default windows) + `useSeasonalOrders` / `useSeasonalSelections` / `useSeasonalTemplates` hooks. Different concept (per-SKU recurring) — Phase 6's `bundles` is multi-SKU bundles with their own metadata.
+- `src/pages/admin/Bundles.tsx` is misnamed (it shows **routines**, not service bundles). Batch 6.3 introduces a new `SeasonalBundles.tsx` admin page at `/admin/seasonal-bundles` to avoid the collision. **Phase 8 doc-sync** can rename the legacy `Bundles.tsx` → `Routines.tsx` cleanly.
+
+## Batch table
+
+| Batch | Title | Size | Status | Context |
+|-------|-------|------|--------|---------|
+| 6.1 | Migration: `bundles` + `bundle_items` tables + RLS + Fall Prep strawman seed | M | ⬜ | |
+| 6.2 | Customer: Bundle detail page + booking flow + Services-page spotlight integration | M | ⬜ | |
+| 6.3 | Admin: `SeasonalBundles.tsx` CRUD + zone rollout + window date editor | M | ⬜ | |
+
+### Review sizing per batch
+
+| Batch | Tier | Agents | Rationale |
+|-------|------|--------|-----------|
+| 6.1 | Medium | 3 lanes + Lane 4 synthesis (sub-agent) | Schema + seed + RLS — new tables; first batch in phase, skip Lane 3 |
+| 6.2 | Medium | 3 lanes + Lane 4 synthesis (sub-agent) | New customer page + booking RPC integration; revisit Lane 3 |
+| 6.3 | Medium | 3 lanes + Lane 4 synthesis (sub-agent) | Admin CRUD with destructive write paths |
+
+### Testing tier per batch
+
+| Batch | T1 | T2 | T3 | T4 | T5 |
+|-------|----|----|----|----|----|
+| 6.1 | ✅ | — | ✅ (smoke SQL: bundles + bundle_items shape, RLS read as customer) | — | — |
+| 6.2 | ✅ | ✅ (bundle savings math helper) | ✅ | ✅ recommended (`e2e/bundle-detail.spec.ts`) | ✅ optional (Sarah on bundle detail) |
+| 6.3 | ✅ | ✅ (form validation) | ✅ | — | — |
+
+## Fresh-session boundaries
+
+Phase 6 is large. Each batch deserves its own session per CLAUDE.md §8:
+- **This session:** Batch 6.1 only (schema + seed). Closeout. Stop.
+- **Next session:** Batch 6.2 (customer-facing). Closeout. Stop.
+- **Following session:** Batch 6.3 (admin). Closeout. Phase 6 ✅ → Phase 7 entry decision.
+
+## Blast radius / escalation triggers
+
+- Any change to `seasonal_templates` or `seasonal_orders` tables (those are working today; Phase 6 must NOT touch them)
+- Any production data write before the schema is validated by the Supabase Preview check
+- RLS policy that exposes admin-only writes to non-admin roles
+
+## Post-merge regen-types reminder
+
+Each Phase 6 batch that lands a migration will trigger `regen-types.yml` to auto-open a `chore/regen-supabase-types` PR (verified working in PR #39). Self-merge those PRs after `tsc --noEmit` clean.
+
+---
+
+# Round 64 Phase 5 — Nav shape + Visit Detail as page-of-the-day (archived to Round 64.5 archive at phase end)
 
 > **Round:** 64 · **Phase:** 5 of 8 · **Started:** 2026-04-22
 > **PRD:** `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` §"Phase 5 — Nav shape + Visit Detail as page-of-the-day"
