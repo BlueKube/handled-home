@@ -50,21 +50,22 @@
 - **pr_history:** PR #28 (`76846df`)
 - **notes:** Triaged as queue (not fix-in-batch) because the finding spans the onboarding wizard AND the BYOC invite-recovery flow — multi-surface pattern. Wait until 8+ button-pair instances accumulate, or the finding repeats on 3+ PRs, before cutting a batch. May fold naturally into Phase 5 5.4/5.5 if those batches touch the same screens.
 
-### transition-trust-copy — 2026-04-24 — Sarah (customer) — 🛑 PROMOTED TO MUST-FIX (3/3 rule)
+### transition-trust-copy — 2026-04-24 — Sarah (customer) — ✅ FIXED in PR #40 (`d1fa15b`)
 
-- **status:** **promoted-to-must-fix** (3-strikes rule triggered 2026-04-25 post-PR #33)
+- **status:** **fixed** — Batch UX.1 (PR #40, merged 2026-04-25 at `d1fa15b`)
 - **theme:** trust-copy
 - **role:** customer
 - **screen / file:** every form + every error state + every data-collection field + onboarding transitions (cross-cutting)
 - **metric:** trust
-- **score:** customer avgTrust trended 3.7 → 3.7 → 3.2 — all three runs below 5.0 advisory
+- **score:** customer avgTrust trended 3.7 → 3.7 → 3.2 → 3.4 (PR #40 small uptick — see notes below for measurement-coverage gap that explains why 5.0 was not reached on this run)
 - **finding (verbatim):** paraphrased across three consecutive PRs — "Add explicit reassurance at every critical transition / Add provider branding + reassurance copy to every screen / Add trust-building context above every data collection field explaining why data is needed and how it protects the user's existing relationship (e.g., 'We'll match you with the right service team—your current provider stays the same' or 'Your address helps us confirm service availability in your area')."
 - **first seen:** PR #28 (`76846df`)
-- **pr_history:** PR #28 (`76846df`) · PR #31 (`6cf2eaa`) · PR #33 (`76d1e87`) — **3/3 consecutive PRs; promotion rule triggered per `docs/testing-strategy.md` §5.9**
-- **notes:** Cross-cutting trust-copy gap flagged in three consecutive Sarah runs across three different feature surfaces. The theme is real and doesn't vary by batch, so further per-batch evidence is wasted. **Next session should cut `Batch UX.1 — trust-copy sweep`**: grep all data-collection forms + onboarding transitions + error screens; add single-sentence reassurance copy per field/transition. Needs design/product input on voice before the sweep lands — specifically the "Your Provider continues" framing and how it interacts with BYOC vs direct-signup users.
+- **pr_history:** PR #28 (`76846df`) · PR #31 (`6cf2eaa`) · PR #33 (`76d1e87`) → **fix shipped: PR #40 (`d1fa15b`)**
+- **resolution:** Batch UX.1 (MVP scope) added Pattern A (why-we-ask micro-copy) above every data-collection field in onboarding + auth + snap + payment surfaces; Pattern B (transition reassurance) on every step destination; Pattern C (origin framing) on `OnboardingWizard` (self-signup) and `AuthPage` BYOC banner. Voice rubric locked in `docs/working/batch-specs/batch-ux-1-trust-copy-sweep.md`. 10 files, 185 net additions, JSX-only.
+- **measurement-coverage caveat:** PR #40's Sarah re-run scored 3.4 (small uptick from 3.2) — the trust-copy work is correctly in code, but the existing milestone capture set (`avatar-drawer.spec.ts` from Batch T.4) doesn't include any of the surfaces UX.1 modified. Sarah measured the same drawer screens as prior runs. Two follow-up TODOs logged in `docs/upcoming/TODO.md`: (1) add milestone captures for onboarding/auth/snap so a future Sarah run can validate the patterns Sarah was asking for, (2) consider provider-name interpolation on customer-facing trust copy as a Round 65 trust-copy follow-up (Sarah's #3 friction in PR #40 explicitly asks for `"Your [Provider Name] service continues"` framing).
 
 ---
 
 ## Closed findings
 
-_(None yet. Move entries here once `status: fixed` or `status: dismissed` is set.)_
+The `transition-trust-copy` entry above retains its full history rather than being moved here, since the resolution included a measurement-coverage caveat worth surfacing in the same place as the original finding. Future fully-resolved entries (no caveats) should be moved down here.

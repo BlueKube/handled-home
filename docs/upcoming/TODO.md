@@ -9,6 +9,20 @@ Items that require API keys, backend changes, or design decisions beyond fronten
   - **Why:** Future-batch ergonomics — until verified, agents may still pre-emptively write `as any` casts on new columns.
   - **Blocked:** Nothing blocked on the codebase side; just needs one manual workflow trigger.
 
+### 2026-04-25 — UX.1 follow-ups: Sarah measurement coverage + provider-name interpolation
+
+PR #40 (Batch UX.1 trust-copy sweep, `d1fa15b`) shipped the trust-copy patterns Sarah's 3/3-promotion finding asked for, but the avgTrust score moved only 3.2 → 3.4 because the existing milestone capture set (`avatar-drawer.spec.ts` from Batch T.4) doesn't include any of the surfaces UX.1 modified. Two follow-up items separate the measurement gap from the new trust-copy direction Sarah surfaced in PR #40.
+
+- [ ] **Add Tier 5 milestone captures for onboarding + auth + snap surfaces.** Without captures of PropertyStep, HomeSetupStep, PlanStep / PlanStepResolved, SubscribeStep, ServiceDayStep, AuthPage signup tab, and SnapSheet, Sarah keeps re-measuring the same drawer screens — UX.1's actual trust-copy work is invisible to the harness. Pattern to copy: `e2e/avatar-drawer.spec.ts` from Batch T.4. Likely needs the seeded test-customer property (separate TODO below) so the captures can advance through onboarding without redirect-to-onboarding.
+  - **Why:** Closes the "measurement coverage" caveat documented under sarah-backlog `transition-trust-copy` entry. A future Sarah run can then validate whether avgTrust ≥ 5.0 on the actually-modified surfaces.
+  - **Blocked:** Strongly benefits from the seeded test-property fixture (existing TODO).
+  - **Source:** PR #40 Tier 5 result + plan.md UX.1 closeout note.
+
+- [ ] **Provider-name interpolation on customer-facing trust copy.** Sarah's #3 friction in PR #40 explicitly asked for `"Your [Provider Name] service continues—Handled Home just adds online management"` framing instead of generic "your provider stays the same." This requires a `provider_name` join on the BYOC banner copy + transition copy where appropriate. Round 65 trust-copy follow-up — not in UX.1 MVP scope.
+  - **Why:** Sarah identified personalization as the next trust-leverage step; generic copy ceilings out around 4.0 trust per the harness data so far.
+  - **Blocked:** Schema lookup — needs a hook returning the customer's primary BYOC provider's `provider_orgs.name`. Light data work.
+  - **Source:** PR #40 Sarah top-3 friction item #3.
+
 ### 2026-04-25 — Stale `supabase/config.toml` project_id (cleanup)
 
 - [ ] **Update `supabase/config.toml:1` `project_id` from `yxhdschpeezawraqsmug` → `gwbwnetatpgnqgarkvht`.** The file still references the pre-Round-64.5 Lovable Cloud project. Per `DEPLOYMENT.md` + `.mcp.json`, the active self-hosted project is `gwbwnetatpgnqgarkvht`. Tools that read `config.toml` (CLI link, some MCP entrypoints) will target the wrong project — caught no real bug yet only because the agent has overridden via `--project-id` flags everywhere it matters.
