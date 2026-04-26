@@ -19,7 +19,7 @@ Existing infra to coexist with (NOT replace):
 
 | Batch | Title | Size | Status | Context |
 |-------|-------|------|--------|---------|
-| 6.1 | Migration: `bundles` + `bundle_items` tables + RLS + Fall Prep strawman seed | M | ⬜ | |
+| 6.1 | Migration: `bundles` + `bundle_items` tables + RLS + Fall Prep strawman seed | M | ✅ | |
 | 6.2 | Customer: Bundle detail page + booking flow + Services-page spotlight integration | M | ⬜ | |
 | 6.3 | Admin: `SeasonalBundles.tsx` CRUD + zone rollout + window date editor | M | ⬜ | |
 
@@ -149,20 +149,24 @@ Each batch ships as its own PR against `main`, following `BlueKube/handled-home`
 
 ## Session Handoff
 
-- **Branch at session end:** `main` clean, synced at `d1fa15b` (PR #40 — Batch UX.1 trust-copy sweep merged). **Phase 5 ✅ · DX.1 ✅ · DX.1 follow-up #37 ✅ · regen-types verified via PR #39 ✅ · UX.1 ✅.**
-- **Last completed:** **Batch UX.1 — trust-copy sweep (MVP scope)** (PR #40, `d1fa15b`). Closed the 3/3-promotion `transition-trust-copy` finding from sarah-backlog. Pattern A (why-we-ask micro-copy) on every data-collection field across onboarding + auth + snap + payment; Pattern B (transition reassurance) on every step destination; Pattern C (origin framing) on `OnboardingWizard` self-signup + `AuthPage` BYOC banner ("Your provider stays the same. Handled Home is the system around them."). Voice rubric: present-tense, outcome-stated, specifics over vague reassurance. 10 files, 185 net additions, JSX-only. Medium-tier review: 0 MUST-FIX, 6 SHOULD-FIX (all resolved in fix-pass commit), 4 DROP including a Lane 2 BYOC false-positive verified via grep. Lane 4 synthesis ran as sub-agent. Tier 5 Sarah re-run scored avgTrust 3.2 → 3.4 (small uptick); the 5.0 advisory threshold was NOT cleared because the existing milestone capture set (avatar-drawer.spec.ts) doesn't include the onboarding/auth/snap surfaces UX.1 modified — Sarah measured the same drawer screens as prior runs. Two follow-ups logged.
-- **Next substantive work:** Phase 6 (seasonal bundles ARR loop) per `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` — **fresh-session boundary per CLAUDE.md §8**. UX.1 cleared the pre-Phase-6 MUST-FIX gate. Phase 6 includes migrations (seasonal_bundle_templates, bundle_line_items) + customer Services-page bundle spotlight + admin tooling for bundle windows + per-line credit pricing. Non-trivial; deserves a clean context window.
+- **Branch at session end:** `main` clean, synced at `cf08713` (PR #42 — Batch 6.1 bundles schema + Fall Prep seed merged). **Phases 1–5 ✅ · DX.1 ✅ · DX.1 follow-up #37 ✅ · UX.1 ✅ · Phase 6 in progress (1/3 batches done).**
+- **Last completed:** **Batch 6.1 — bundles schema + Fall Prep strawman seed** (PR #42, `cf08713`). Schema-only batch. Two new tables (`public.bundles` + `public.bundle_items`) with admin-gated writes (`public.has_role(auth.uid(), 'admin')`) + customer reads scoped by `status='active'` AND `CURRENT_DATE` in window AND zone matching the customer's `service_day_assignment.zone_id` (status `'confirmed'` or `'offered'`). One Fall Prep strawman bundle seeded in `'draft'` status with empty `zone_ids` (admin curates real values via Batch 6.3 UI). Math: 540 total / 660 separate / save 120. `ON CONFLICT (slug) DO NOTHING` on the seed makes the migration idempotent. Medium-tier review: 0 MUST-FIX, 1 SHOULD-FIX (F4 idempotency, fixed in commit `5463ea1`), 4 DROP. Lane 4 synthesis ran as sub-agent. **Supabase Preview validated the migration + seed end-to-end** on preview branch `xlkcjiedshezfdyexaha` — all 8 CI checks ✅.
+- **🟡 Auto-PR pending:** `regen-types.yml` will auto-open a `chore/regen-supabase-types` PR within ~1 minute of this merge — adds typed defs for `bundles` + `bundle_items` + any related RPC/columns. Self-merge after `tsc --noEmit` clean (existing pattern from PR #39).
+- **Next substantive work:** **Batch 6.2 — Customer Bundle detail + booking flow + Services-page spotlight** per `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` §Phase 6. **Fresh-session boundary** — Phase 6 is large; each batch deserves its own session per CLAUDE.md §8. Batch 6.2 includes: `src/pages/customer/Bundles/[slug].tsx` page (hero + itemized line list + savings pill), `useBookBundle(bundleId, targetJobId)` mutation that holds credits via `spend_handles` and inserts `job_tasks` rows, "Choose visit day" picker, Services-page spotlight integration. Medium tier review.
+- **Batch 6.3 (after 6.2):** Admin `SeasonalBundles.tsx` CRUD at `/admin/seasonal-bundles` — name avoids the existing `Bundles.tsx` (misnamed routines viewer). Phase 8 doc-sync can rename the legacy file to `Routines.tsx` cleanly.
 - **Open TODOs** (persist in `docs/upcoming/TODO.md`):
-  - **NEW (UX.1 follow-up):** Add Tier 5 milestone captures for onboarding/auth/snap so a future Sarah run can actually validate the trust-copy patterns UX.1 added. Without these captures, Sarah keeps measuring the same drawer screens.
-  - **NEW (UX.1 follow-up):** Provider-name interpolation on customer-facing trust copy ("Your [Provider Name] service continues") — Sarah's #3 friction in PR #40 explicitly asked for this. Round 65 work.
-  - **NEW (UX.1 carry-over):** Sarah's PR #40 also flagged loading-state messaging gaps and step-progression indicator inconsistencies — separate themes from trust-copy. If they reappear on Phase 6 PRs they'll get sarah-backlog entries.
-  - Stale `supabase/config.toml:1` `project_id = "yxhdschpeezawraqsmug"` — should be `gwbwnetatpgnqgarkvht`. Small cleanup, not blocking.
-  - Revoke the Stitch bearer token left in git history (DX.1) — user-side action.
-  - Seed property profile for the 3 persistent test users — high priority; would unblock cleaner Tier 4 destination assertions.
-  - Real `getChipType` classifier (snap_request_id linkage, bundle membership, credits-paid detection) — backend batch.
+  - **🟡 Pending:** Self-merge the `regen-types.yml` auto-PR after Batch 6.1's types-regen lands.
+  - **NEW (UX.1 follow-up):** Add Tier 5 milestone captures for onboarding/auth/snap surfaces — without these Sarah's avgTrust score is just measuring the same drawer screens (PR #42 reconfirmed: 3.4 → 3.1 noise).
+  - **NEW (UX.1 follow-up):** Provider-name interpolation on customer trust copy (Round 65).
+  - Stripe credit-pack products + 3 Edge Function Secrets + `purchase-credit-pack` + `process-credit-pack-autopay` deploys + cron verify (Phase 3 close-out).
+  - Stale `supabase/config.toml:1` `project_id` — should be `gwbwnetatpgnqgarkvht`.
+  - Revoke the Stitch bearer token left in git history (DX.1).
+  - Seed property profile for the 3 persistent test users.
+  - Real `getChipType` classifier — backend batch.
   - Real GPS / live ETA provider-location feed → Phase 7.
   - Inline rating widget refactor → 5.4.1 follow-up.
   - Rotate Vercel Protection Bypass secret (carried from T.1).
-- **Context at exit:** check `/context` before deciding Phase 6 entry.
-- **Blockers:** None — Phase 6 is gated only on starting a fresh session.
-- **Round progress:** Phases 1–4 ✅ · **Phase 5 ✅ complete (11/11 batches)** · DX.1 ✅ · DX.1 follow-up #37 ✅ · UX.1 ✅ · Phases 6–8 ⬜.
+  - Rename legacy `src/pages/admin/Bundles.tsx` → `Routines.tsx` during Phase 8 doc-sync (it's a routines viewer, misnamed).
+- **Context at exit:** check `/context` before deciding Batch 6.2 entry — recommended fresh session.
+- **Blockers:** None — Batch 6.2 is gated only on starting a fresh session.
+- **Round progress:** Phases 1–5 ✅ · DX.1 ✅ · DX.1 follow-up #37 ✅ · UX.1 ✅ · **Phase 6 🟡 (Batch 6.1 ✅, 6.2 ⬜, 6.3 ⬜)** · Phases 7–8 ⬜.
