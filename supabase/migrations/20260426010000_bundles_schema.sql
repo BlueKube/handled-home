@@ -140,6 +140,9 @@ CREATE POLICY "bundle_items_admin_write" ON public.bundle_items
 -- flips status='active' and populates zone_ids via the Batch 6.3 UI.
 -- Math: separate (660) = sum(items.credits) = 200+120+100+160+80; bundle
 -- total_credits (540) discounts that by 120 (~18%).
+-- ON CONFLICT (slug) DO NOTHING makes the seed idempotent — re-runs
+-- (e.g. local `supabase db reset`) succeed silently. On a no-op INSERT
+-- the CTE returns no rows, so the bundle_items SELECT inserts nothing.
 WITH inserted AS (
   INSERT INTO public.bundles (
     slug, name, season,
@@ -160,6 +163,7 @@ WITH inserted AS (
     540,
     660
   )
+  ON CONFLICT (slug) DO NOTHING
   RETURNING id
 )
 INSERT INTO public.bundle_items (bundle_id, label, est_minutes, credits, sort_order)
