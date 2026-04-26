@@ -9,6 +9,18 @@ Items that require API keys, backend changes, or design decisions beyond fronten
   - **Why:** Future-batch ergonomics — until verified, agents may still pre-emptively write `as any` casts on new columns.
   - **Blocked:** Nothing blocked on the codebase side; just needs one manual workflow trigger.
 
+### 2026-04-26 — Batch 6.1 follow-ups: types-regen self-merge + admin Bundles legacy rename
+
+- [ ] **Self-merge the auto-opened `chore/regen-supabase-types` PR** that `regen-types.yml` will produce within ~1 minute of PR #42's merge. The PR will add typed defs for `bundles` + `bundle_items` (and possibly `update_updated_at_column` references). Verify `npx tsc --noEmit` clean locally on the chore branch, then merge. Same pattern as PR #39.
+  - **Why:** Without typed defs, Batch 6.2 will need `as any` casts on every `bundles` / `bundle_items` query — the carry-over loop the regen-types workflow was built to close.
+  - **Blocked:** Nothing — workflow is now reliable post-PR #37 fix.
+  - **Source:** Batch 6.1 (PR #42, `cf08713`).
+
+- [ ] **Rename legacy `src/pages/admin/Bundles.tsx` → `Routines.tsx` during Phase 8 doc-sync.** The existing file at `src/pages/admin/Bundles.tsx` is misnamed — it shows customer **routines**, not service bundles. To avoid the naming collision when Batch 6.3 ships the real admin Bundles UI, the new admin page lands at `src/pages/admin/SeasonalBundles.tsx` mounted at `/admin/seasonal-bundles`. Phase 8 (Round 64 docs sync + cleanup) is the natural moment to rename the legacy file to `Routines.tsx` and remap its route to `/admin/routines`.
+  - **Why:** Two pages with similar concept names ("Bundles" = routines vs. seasonal bundles) is a long-term confusion source; resolving it during the round-close cleanup is cleaner than during a feature batch.
+  - **Blocked:** Nothing — pure rename + route remap.
+  - **Source:** Batch 6.1 plan investigation (PR #42).
+
 ### 2026-04-25 — UX.1 follow-ups: Sarah measurement coverage + provider-name interpolation
 
 PR #40 (Batch UX.1 trust-copy sweep, `d1fa15b`) shipped the trust-copy patterns Sarah's 3/3-promotion finding asked for, but the avgTrust score moved only 3.2 → 3.4 because the existing milestone capture set (`avatar-drawer.spec.ts` from Batch T.4) doesn't include any of the surfaces UX.1 modified. Two follow-up items separate the measurement gap from the new trust-copy direction Sarah surfaced in PR #40.
