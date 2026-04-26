@@ -36,6 +36,7 @@ const CustomerSupportTicketDetail = lazy(() => import("@/pages/customer/SupportT
 const CustomerSettings = lazy(() => import("@/pages/customer/Settings"));
 const CustomerMoving = lazy(() => import("@/pages/customer/Moving"));
 const CustomerServices = lazy(() => import("@/pages/customer/Services"));
+const CustomerBundleDetail = lazy(() => import("@/pages/customer/BundleDetail"));
 const CustomerPlans = lazy(() => import("@/pages/customer/Plans"));
 const CustomerCredits = lazy(() => import("@/pages/customer/Credits"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
@@ -260,6 +261,7 @@ const App = () => (
                   <Route path="/customer/settings" element={<CustomerPropertyGate><CustomerSettings /></CustomerPropertyGate>} />
                   <Route path="/customer/moving" element={<CustomerPropertyGate><CustomerMoving /></CustomerPropertyGate>} />
                   <Route path="/customer/services" element={<CustomerPropertyGate><CustomerServices /></CustomerPropertyGate>} />
+                  <Route path="/customer/bundles/:slug" element={<CustomerPropertyGate><CustomerBundleDetail /></CustomerPropertyGate>} />
                   {/* /customer/more collapses into the avatar drawer (Batch 5.2). The `?drawer=true` query param will be consumed by the drawer to auto-open on redirect landing. */}
                   <Route path="/customer/more" element={<CustomerPropertyGate><Navigate to="/customer?drawer=true" replace /></CustomerPropertyGate>} />
                   {/* /customer/help currently redirects to /customer/support; a dedicated help page may replace this in a later phase. */}
