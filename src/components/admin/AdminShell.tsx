@@ -97,6 +97,7 @@ const navGroups: NavGroup[] = [
       { title: "Level Analytics", url: "/admin/ops/levels", icon: SlidersHorizontal },
       { title: "Plans", url: "/admin/plans", icon: CreditCard },
       { title: "Bundles", url: "/admin/bundles", icon: Layers },
+      { title: "Seasonal Bundles", url: "/admin/seasonal-bundles", icon: Layers },
     ],
   },
   {

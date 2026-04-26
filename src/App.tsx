@@ -133,6 +133,7 @@ const AdminOpsDefinitions = lazy(() => import("@/pages/admin/OpsDefinitions"));
 const AdminLevelAnalytics = lazy(() => import("@/pages/admin/LevelAnalytics"));
 const AdminServiceDays = lazy(() => import("@/pages/admin/ServiceDays"));
 const AdminBundles = lazy(() => import("@/pages/admin/Bundles"));
+const AdminSeasonalBundles = lazy(() => import("@/pages/admin/SeasonalBundles"));
 const AdminJobs = lazy(() => import("@/pages/admin/Jobs"));
 const AdminJobDetail = lazy(() => import("@/pages/admin/JobDetail"));
 const AdminBilling = lazy(() => import("@/pages/admin/Billing"));
@@ -337,6 +338,7 @@ const App = () => (
                   <Route path="/admin/scheduling/exceptions" element={<AdminSchedulingExceptions />} />
                   <Route path="/admin/service-days" element={<AdminServiceDays />} />
                   <Route path="/admin/bundles" element={<AdminBundles />} />
+                  <Route path="/admin/seasonal-bundles" element={<AdminSeasonalBundles />} />
                   <Route path="/admin/support" element={<AdminSupport />} />
                   <Route path="/admin/support/tickets/:ticketId" element={<AdminSupportTicketDetail />} />
                   <Route path="/admin/support/policies" element={<AdminSupportPolicies />} />
