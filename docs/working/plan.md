@@ -20,7 +20,7 @@ Existing infra to coexist with (NOT replace):
 | Batch | Title | Size | Status | Context |
 |-------|-------|------|--------|---------|
 | 6.1 | Migration: `bundles` + `bundle_items` tables + RLS + Fall Prep strawman seed | M | ✅ | |
-| 6.2 | Customer: Bundle detail page + booking flow + Services-page spotlight integration | M | ⬜ | |
+| 6.2 | Customer: Bundle detail page + booking flow + Services-page spotlight integration | M | ✅ | |
 | 6.3 | Admin: `SeasonalBundles.tsx` CRUD + zone rollout + window date editor | M | ⬜ | |
 
 ### Review sizing per batch
@@ -149,16 +149,15 @@ Each batch ships as its own PR against `main`, following `BlueKube/handled-home`
 
 ## Session Handoff
 
-- **Branch at session end:** `main` clean, synced at `cf08713` (PR #42 — Batch 6.1 bundles schema + Fall Prep seed merged). **Phases 1–5 ✅ · DX.1 ✅ · DX.1 follow-up #37 ✅ · UX.1 ✅ · Phase 6 in progress (1/3 batches done).**
-- **Last completed:** **Batch 6.1 — bundles schema + Fall Prep strawman seed** (PR #42, `cf08713`). Schema-only batch. Two new tables (`public.bundles` + `public.bundle_items`) with admin-gated writes (`public.has_role(auth.uid(), 'admin')`) + customer reads scoped by `status='active'` AND `CURRENT_DATE` in window AND zone matching the customer's `service_day_assignment.zone_id` (status `'confirmed'` or `'offered'`). One Fall Prep strawman bundle seeded in `'draft'` status with empty `zone_ids` (admin curates real values via Batch 6.3 UI). Math: 540 total / 660 separate / save 120. `ON CONFLICT (slug) DO NOTHING` on the seed makes the migration idempotent. Medium-tier review: 0 MUST-FIX, 1 SHOULD-FIX (F4 idempotency, fixed in commit `5463ea1`), 4 DROP. Lane 4 synthesis ran as sub-agent. **Supabase Preview validated the migration + seed end-to-end** on preview branch `xlkcjiedshezfdyexaha` — all 8 CI checks ✅.
-- **🟡 Auto-PR pending:** `regen-types.yml` will auto-open a `chore/regen-supabase-types` PR within ~1 minute of this merge — adds typed defs for `bundles` + `bundle_items` + any related RPC/columns. Self-merge after `tsc --noEmit` clean (existing pattern from PR #39).
-- **Next substantive work:** **Batch 6.2 — Customer Bundle detail + booking flow + Services-page spotlight** per `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` §Phase 6. **Fresh-session boundary** — Phase 6 is large; each batch deserves its own session per CLAUDE.md §8. Batch 6.2 includes: `src/pages/customer/Bundles/[slug].tsx` page (hero + itemized line list + savings pill), `useBookBundle(bundleId, targetJobId)` mutation that holds credits via `spend_handles` and inserts `job_tasks` rows, "Choose visit day" picker, Services-page spotlight integration. Medium tier review.
-- **Batch 6.3 (after 6.2):** Admin `SeasonalBundles.tsx` CRUD at `/admin/seasonal-bundles` — name avoids the existing `Bundles.tsx` (misnamed routines viewer). Phase 8 doc-sync can rename the legacy file to `Routines.tsx` cleanly.
+- **Branch at session end:** `main` clean, synced at `1c799f5` (PR #44 — Batch 6.2 customer bundle detail + booking + Services spotlight merged). **Phases 1–5 ✅ · DX.1 ✅ · UX.1 ✅ · Phase 6 in progress (2/3 batches done).**
+- **Last completed:** **Batch 6.2 — Customer Bundle detail + booking + Services-page spotlight** (PR #44, `1c799f5`). 8 new files (3 hooks, 2 components, 1 page, 1 helper + test) + 2 modifications (Services.tsx replaces local stub, App.tsx route). `useBookBundle` mutation: client-side balance pre-check → ref-based double-tap debounce → empty-items guard → `spend_handles` RPC → `job_tasks` inserts (task_type='bundle') → on partial-success writes `billing_exceptions` HIGH with entity_type='bundle'. onSuccess seeds handle_balance cache via `setQueryData` BEFORE invalidating (avoids stale-balance flash — same pattern useFinalizeSnap adopted after Phase 4 Batch 4.2 review; **Lane 3 caught this as a repeat-mistake from prior history**). Medium-tier review with all 4 lanes (Lane 3 included this time): 1 MUST-FIX + 5 SHOULD-FIX + 2 DROP, all 6 fixes shipped in fix-pass commit `7caa915`. Sarah re-run scored avgClarity 4.8 / avgTrust 3.9 / avgFriction 7.1 — improvements are within run-to-run AI variance since the captured screens are still avatar-drawer not bundle surfaces (UX.1 follow-up gap).
+- **🟡 Auto-PR pending:** `regen-types.yml` should auto-open a `chore/regen-supabase-types` PR shortly after the Batch 6.1 schema landed (still pending — investigate next session). Once it lands, self-merge to clean up `as any` casts on `bundles` / `bundle_items` queries in 6.2's hooks.
+- **Next substantive work:** **Batch 6.3 — Admin `SeasonalBundles.tsx` CRUD + zone rollout + window editor** per `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` §Phase 6 + spec at `docs/working/batch-specs/batch-6.3-admin-seasonal-bundles-crud.md` (drafted in this session, ready for implementation). Medium tier review. Final batch of Phase 6 — closes out the 3-batch sequence so the human admin can curate bundles without writing migrations.
 - **Open TODOs** (persist in `docs/upcoming/TODO.md`):
-  - **🟡 Pending:** Self-merge the `regen-types.yml` auto-PR after Batch 6.1's types-regen lands.
-  - **NEW (UX.1 follow-up):** Add Tier 5 milestone captures for onboarding/auth/snap surfaces — without these Sarah's avgTrust score is just measuring the same drawer screens (PR #42 reconfirmed: 3.4 → 3.1 noise).
+  - **🟡 Pending:** Self-merge the regen-types auto-PR (still hasn't appeared after PR #42's merge — may need a manual workflow re-trigger).
+  - **NEW (UX.1 follow-up):** Add Tier 5 milestone captures for onboarding/auth/snap/bundles surfaces — Sarah keeps measuring the same drawer screens. The bundle work in 6.2 is invisible to the harness.
   - **NEW (UX.1 follow-up):** Provider-name interpolation on customer trust copy (Round 65).
-  - Stripe credit-pack products + 3 Edge Function Secrets + `purchase-credit-pack` + `process-credit-pack-autopay` deploys + cron verify (Phase 3 close-out).
+  - Stripe credit-pack products + secrets + deploys + cron verify (Phase 3 close-out).
   - Stale `supabase/config.toml:1` `project_id` — should be `gwbwnetatpgnqgarkvht`.
   - Revoke the Stitch bearer token left in git history (DX.1).
   - Seed property profile for the 3 persistent test users.
@@ -166,7 +165,7 @@ Each batch ships as its own PR against `main`, following `BlueKube/handled-home`
   - Real GPS / live ETA provider-location feed → Phase 7.
   - Inline rating widget refactor → 5.4.1 follow-up.
   - Rotate Vercel Protection Bypass secret (carried from T.1).
-  - Rename legacy `src/pages/admin/Bundles.tsx` → `Routines.tsx` during Phase 8 doc-sync (it's a routines viewer, misnamed).
-- **Context at exit:** check `/context` before deciding Batch 6.2 entry — recommended fresh session.
-- **Blockers:** None — Batch 6.2 is gated only on starting a fresh session.
-- **Round progress:** Phases 1–5 ✅ · DX.1 ✅ · DX.1 follow-up #37 ✅ · UX.1 ✅ · **Phase 6 🟡 (Batch 6.1 ✅, 6.2 ⬜, 6.3 ⬜)** · Phases 7–8 ⬜.
+  - Rename legacy `src/pages/admin/Bundles.tsx` → `Routines.tsx` during Phase 8 doc-sync.
+- **Context at exit:** check `/context` before deciding Batch 6.3 entry.
+- **Blockers:** None.
+- **Round progress:** Phases 1–5 ✅ · DX.1 ✅ · UX.1 ✅ · **Phase 6 🟡 (Batch 6.1 ✅, 6.2 ✅, 6.3 ⬜)** · Phases 7–8 ⬜.
