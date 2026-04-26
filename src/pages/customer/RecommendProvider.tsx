@@ -22,10 +22,13 @@ import { HelpTip } from "@/components/ui/help-tip";
 
 type ViewState = "form" | "confirmed";
 
+const ALLOWED_REFERRERS = new Set(["post_visit"]);
+
 export default function RecommendProvider() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const referrer = searchParams.get("from");
+  const rawReferrer = searchParams.get("from");
+  const referrer = rawReferrer && ALLOWED_REFERRERS.has(rawReferrer) ? rawReferrer : null;
   const { submit } = useByopRecommendations();
 
   const [view, setView] = useState<ViewState>("form");

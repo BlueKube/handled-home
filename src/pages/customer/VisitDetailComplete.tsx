@@ -230,8 +230,8 @@ export function VisitDetailComplete({ jobId, data }: Props) {
         />
       )}
 
-      {job.status === "COMPLETED" && (
-        <PostVisitGrowthCard rating={review?.rating ?? null} />
+      {job.status === "COMPLETED" && (review?.rating ?? 0) >= 4 && (
+        <PostVisitGrowthCard />
       )}
 
       {job.status === "COMPLETED" && !issue && (

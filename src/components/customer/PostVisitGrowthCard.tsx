@@ -5,22 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Heart, Users, X } from "lucide-react";
 import { usePostVisitGrowth } from "@/hooks/usePostVisitGrowth";
 
-interface Props {
-  rating: number | null | undefined;
-}
-
 /**
- * Renders one growth CTA after a 4- or 5-star visit rating.
- * Variant chosen by usePostVisitGrowth (BYOP vs referral). Hidden
- * for ratings below 4, while data loads, when no variant applies,
- * or when the user dismisses the card for this session.
+ * Renders one growth CTA after a positive visit rating. The parent
+ * is responsible for the rating gate so the underlying queries only
+ * fire when the card is going to be shown.
  */
-export function PostVisitGrowthCard({ rating }: Props) {
+export function PostVisitGrowthCard() {
   const navigate = useNavigate();
   const { variant, isLoading } = usePostVisitGrowth();
   const [dismissed, setDismissed] = useState(false);
 
-  if (rating == null || rating < 4) return null;
   if (isLoading || variant === null) return null;
   if (dismissed) return null;
 
@@ -61,6 +55,7 @@ export function PostVisitGrowthCard({ rating }: Props) {
             </Button>
           </div>
           <button
+            type="button"
             onClick={() => setDismissed(true)}
             className="p-1.5 rounded hover:bg-secondary text-muted-foreground min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label="Dismiss"
