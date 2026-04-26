@@ -12,6 +12,7 @@ import { ShareCardSheet } from "@/components/customer/ShareCardSheet";
 import { ReceiptSuggestions } from "@/components/customer/ReceiptSuggestions";
 import { QuickFeedbackCard } from "@/components/customer/QuickFeedbackCard";
 import { PrivateReviewCard } from "@/components/customer/PrivateReviewCard";
+import { PostVisitGrowthCard } from "@/components/customer/PostVisitGrowthCard";
 import { VisitDetailLevelCallouts } from "@/components/customer/VisitDetailLevelCallouts";
 import { VisitDetailReferralCard } from "@/components/customer/VisitDetailReferralCard";
 import { HelpTip } from "@/components/ui/help-tip";
@@ -227,6 +228,10 @@ export function VisitDetailComplete({ jobId, data }: Props) {
           onSubmit={(payload) => submitReview.mutate(payload)}
           isSubmitting={submitReview.isPending}
         />
+      )}
+
+      {job.status === "COMPLETED" && (
+        <PostVisitGrowthCard rating={review?.rating ?? null} />
       )}
 
       {job.status === "COMPLETED" && !issue && (
