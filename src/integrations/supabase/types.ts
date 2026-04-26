@@ -542,6 +542,108 @@ export type Database = {
         }
         Relationships: []
       }
+      bundle_items: {
+        Row: {
+          bundle_id: string
+          created_at: string
+          credits: number
+          est_minutes: number
+          id: string
+          label: string
+          sku_id: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          bundle_id: string
+          created_at?: string
+          credits: number
+          est_minutes: number
+          id?: string
+          label: string
+          sku_id?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          bundle_id?: string
+          created_at?: string
+          credits?: number
+          est_minutes?: number
+          id?: string
+          label?: string
+          sku_id?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bundle_items_bundle_id_fkey"
+            columns: ["bundle_id"]
+            isOneToOne: false
+            referencedRelation: "bundles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bundle_items_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "service_skus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bundles: {
+        Row: {
+          created_at: string
+          description: string | null
+          hero_image_path: string | null
+          id: string
+          name: string
+          season: string
+          separate_credits: number
+          slug: string
+          status: string
+          total_credits: number
+          updated_at: string
+          window_end_date: string
+          window_start_date: string
+          zone_ids: string[]
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          hero_image_path?: string | null
+          id?: string
+          name: string
+          season: string
+          separate_credits: number
+          slug: string
+          status?: string
+          total_credits: number
+          updated_at?: string
+          window_end_date: string
+          window_start_date: string
+          zone_ids?: string[]
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          hero_image_path?: string | null
+          id?: string
+          name?: string
+          season?: string
+          separate_credits?: number
+          slug?: string
+          status?: string
+          total_credits?: number
+          updated_at?: string
+          window_end_date?: string
+          window_start_date?: string
+          zone_ids?: string[]
+        }
+        Relationships: []
+      }
       byoc_activations: {
         Row: {
           activated_at: string
