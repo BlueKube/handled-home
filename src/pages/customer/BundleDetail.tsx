@@ -81,15 +81,19 @@ export default function BundleDetail() {
         targetJobId: jobId,
         subscriptionId: subscription.id,
         customerId: user.id,
+        currentBalance: balance,
       });
       setPickerOpen(false);
       toast.success(`${bundle.name} added to your visit.`);
       navigate(`/customer/visits/${jobId}`);
     } catch (err) {
       if (err instanceof BookBundleError) {
+        // Don't surface in_flight as an error toast — it just means a second
+        // tap raced; the first attempt is still in progress.
+        if (err.code === "in_flight") return;
         if (err.code === "insufficient_handles") {
           toast.error(
-            `Not enough credits. You have ${err.balance ?? 0}, this bundle holds ${err.required ?? bundle.total_credits}.`,
+            `Not enough credits. You have ${err.balance ?? balance ?? 0}, this bundle holds ${err.required ?? bundle.total_credits}.`,
           );
         } else {
           toast.error(err.message);
@@ -97,11 +101,19 @@ export default function BundleDetail() {
       } else {
         toast.error("Something went wrong. Try again.");
       }
+      // Close the picker on error so the customer isn't stuck looking at a
+      // sheet with no spinner. Retry by re-opening the picker.
+      setPickerOpen(false);
     }
   };
 
-  const balanceShort =
+  // Two states: balance unknown (still loading) vs. confirmed-short.
+  // Both disable the CTA, but only confirmed-short shows the warning copy.
+  const balanceLoading = balance === undefined;
+  const balanceConfirmedShort =
     typeof balance === "number" && balance < bundle.total_credits;
+  const ctaDisabled =
+    bookBundle.isPending || balanceLoading || balanceConfirmedShort;
 
   return (
     <div className="p-4 pb-24 space-y-6 animate-fade-in">
@@ -176,7 +188,7 @@ export default function BundleDetail() {
 
       {/* CTA */}
       <div className="space-y-2">
-        {balanceShort && (
+        {balanceConfirmedShort && (
           <p className="text-xs text-destructive text-center">
             You have {balance} credits — this bundle needs {bundle.total_credits}. Top
             up first or pick a smaller add-on.
@@ -185,7 +197,7 @@ export default function BundleDetail() {
         <Button
           className="w-full h-12 text-base font-semibold rounded-xl"
           onClick={() => setPickerOpen(true)}
-          disabled={bookBundle.isPending || balanceShort}
+          disabled={ctaDisabled}
         >
           Add to a visit
         </Button>
