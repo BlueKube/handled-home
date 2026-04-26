@@ -154,6 +154,21 @@ export default function OnboardingWizard() {
         </div>
       </div>
 
+      {effectiveStep === "property" && (
+        <p className="px-4 mt-3 text-xs text-muted-foreground text-center">
+          You're in. Setting up your home takes about 3 minutes.
+        </p>
+      )}
+      {effectiveStep !== "property" && effectiveStep !== "complete" && (
+        // Pattern C: this wizard is the self-signup path. BYOC users are
+        // routed to ByocOnboardingWizard at /customer/onboarding/byoc/:token,
+        // so no BYOC conditional is needed here.
+        // [OVERRIDE: Pattern C BYOC branch — BYOC users see ByocOnboardingWizard; not applicable here]
+        <p className="px-4 mt-3 text-xs text-muted-foreground text-center">
+          We'll match you with a vetted pro in your zone.
+        </p>
+      )}
+
       <div className="px-4 mt-4">
         {effectiveStep === "property" && <PropertyStep onComplete={async () => { await completeStep("property"); }} />}
         {effectiveStep === "zone_check" && <ZoneCheckStep onComplete={async () => { await completeStep("zone_check"); }} onWaitlist={() => navigate("/customer")} />}

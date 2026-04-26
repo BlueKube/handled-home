@@ -63,6 +63,9 @@ export function ServiceDayStep({ onComplete }: { onComplete: () => Promise<void>
         <CalendarCheck className="h-10 w-10 text-accent mx-auto mb-3" />
         <h1 className="text-h2">Your Service Day</h1>
         <p className="text-muted-foreground text-sm mt-1">We match you to the most efficient route day — so your provider arrives on time, every time.</p>
+        <p className="text-xs text-muted-foreground mt-2">
+          Payment in. Pick a service day to wrap up.
+        </p>
       </div>
       {assignment && offeredDay && (
         <Card className="p-5 space-y-3">

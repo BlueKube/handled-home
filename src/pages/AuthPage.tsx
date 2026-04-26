@@ -131,11 +131,17 @@ export default function AuthPage() {
       </div>
 
       {/* BYOC invite context banner */}
-      {isByocInvite && (
+      {isByocInvite ? (
         <div className="mx-auto w-full max-w-xs mb-4 rounded-xl bg-accent/10 border border-accent/20 px-4 py-3 text-center">
           <p className="text-sm font-medium text-foreground">You've been invited by your service provider</p>
-          <p className="text-xs text-muted-foreground mt-0.5">Create an account to activate your invite</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Your provider stays the same. Handled Home is the system around them.</p>
         </div>
+      ) : (
+        tab === "signup" && (
+          <p className="mx-auto w-full max-w-sm mb-4 px-2 text-xs text-muted-foreground text-center">
+            We'll match you with a vetted pro in your zone.
+          </p>
+        )
       )}
 
       {/* Tab switcher */}
@@ -220,6 +226,7 @@ export default function AuthPage() {
             <Label htmlFor="signup-email" className="text-sm font-medium">Email</Label>
             <Input id="signup-email" type="email" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} required
               disabled={loading} className="mt-1.5" />
+            <p className="text-xs text-muted-foreground mt-1">Used for receipts and visit recaps. No marketing.</p>
           </div>
           <div>
             <Label htmlFor="signup-password" className="text-sm font-medium">Password</Label>

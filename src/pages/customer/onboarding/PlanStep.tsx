@@ -190,6 +190,9 @@ export function PlanStep({
         <p className="text-muted-foreground text-sm mt-1">
           We'll match the right size to your home.
         </p>
+        <p className="text-xs text-muted-foreground mt-2">
+          You can change or cancel anytime.
+        </p>
       </div>
 
       <CreditsExplainer />

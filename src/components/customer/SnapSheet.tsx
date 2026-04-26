@@ -268,11 +268,11 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
       }
 
       toast({
-        title: "Snap submitted",
+        title: "We've got your snap",
         description:
           routing === "ad_hoc"
-            ? "We'll dispatch someone soon."
-            : "We'll add this to your next visit.",
+            ? "A pro will pick it up — you'll get an update."
+            : "We'll add this to your next visit. You'll get an update.",
       });
       reset();
       onOpenChange(false);
@@ -303,6 +303,9 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
             <>
               <p className="text-sm text-muted-foreground">
                 Take a photo of whatever needs handling. We'll estimate the credits before you submit.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                A pro reviews the photo and matches the right fix.
               </p>
               <input
                 ref={fileRef}
@@ -345,7 +348,8 @@ export function SnapSheet({ open, onOpenChange }: SnapSheetProps) {
                 </div>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground mb-2">Where in the home?</p>
+                <p className="text-sm text-muted-foreground mb-1">Where in the home?</p>
+                <p className="text-xs text-muted-foreground mb-2">Helps the pro know what to bring.</p>
                 <div className="flex flex-wrap gap-2">
                   {AREAS.map(({ value, label, Icon }) => (
                     <button

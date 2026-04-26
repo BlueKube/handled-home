@@ -131,6 +131,10 @@ export function PlanStepResolved({
         </div>
       )}
 
+      <p className="text-xs text-muted-foreground text-center">
+        You're not charged yet. Payment comes on the next step.
+      </p>
+
       <Button
         className="w-full h-12 text-base font-semibold rounded-xl"
         onClick={onConfirm}

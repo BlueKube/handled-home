@@ -119,6 +119,9 @@ export function FixPaymentPanel({ subscriptionId }: FixPaymentPanelProps) {
         )}
 
         {/* Fix Payment button */}
+        <p className="text-xs text-muted-foreground">
+          Held by Stripe. We never store card numbers.
+        </p>
         <Button variant="destructive" size="sm" className="w-full min-h-[44px]" onClick={handleFixPayment} disabled={loading}>
           {loading ? "Opening…" : "Fix Payment"}
         </Button>

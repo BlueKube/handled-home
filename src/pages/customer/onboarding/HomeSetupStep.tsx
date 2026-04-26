@@ -81,6 +81,7 @@ export function HomeSetupStep({ onComplete }: { onComplete: () => Promise<void> 
           <Sparkles className="h-10 w-10 text-accent mx-auto mb-3" />
           <h1 className="text-h2">Make recommendations smarter</h1>
           <p className="text-muted-foreground text-sm mt-1">What's already handled at your home? This takes about 30 seconds.</p>
+          <p className="text-xs text-muted-foreground mt-2">Address confirmed. Now let's size your plan.</p>
         </div>
         <div className="space-y-2.5">
           {COVERAGE_CATEGORIES.map((cat) => {
@@ -119,6 +120,9 @@ export function HomeSetupStep({ onComplete }: { onComplete: () => Promise<void> 
         <h1 className="text-h2">Home size (quick estimate)</h1>
         <p className="text-muted-foreground text-sm mt-1">Helps us pick the right service level. All fields optional.</p>
       </div>
+      <p className="text-xs text-muted-foreground text-center">
+        Sizes your plan to match the work. Helps us right-size your service plan.
+      </p>
       <div className="space-y-5">
         {SIZING_GROUPS.map((group) => {
           const Icon = group.icon;
