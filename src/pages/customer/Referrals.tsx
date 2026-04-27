@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Copy, Check, Users, Gift, Clock, ChevronRight, ChevronLeft, Target, Star, Trophy, AlertTriangle } from "lucide-react";
 import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
-import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -67,7 +66,7 @@ export default function CustomerReferrals() {
         <ChevronLeft className="h-4 w-4" />
         <span className="text-sm">More</span>
       </button>
-      <h1 className="text-h2">Referrals <HelpTip text="Share your code with neighbors. When they subscribe, you both earn a $30 credit toward your next cycle." /></h1>
+      <h1 className="text-h2">Referrals <HelpTip text="Share your code with neighbors. When they subscribe, you both earn 30 credits toward your next cycle." /></h1>
 
       {/* Share Section */}
       <Card>
@@ -113,15 +112,15 @@ export default function CustomerReferrals() {
         <Card>
           <CardContent className="pt-4 text-center">
             <Gift className="h-5 w-5 text-accent mx-auto mb-1" />
-            <p className="text-2xl font-bold">${(earnedCents / 100).toFixed(0)}</p>
-            <p className="text-xs text-muted-foreground">Earned</p>
+            <p className="text-2xl font-bold">{(earnedCents / 100).toFixed(0)}</p>
+            <p className="text-xs text-muted-foreground">credits earned</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
             <Clock className="h-5 w-5 text-accent mx-auto mb-1" />
-            <p className="text-2xl font-bold">${(pendingCents / 100).toFixed(0)}</p>
-            <p className="text-xs text-muted-foreground">Pending</p>
+            <p className="text-2xl font-bold">{(pendingCents / 100).toFixed(0)}</p>
+            <p className="text-xs text-muted-foreground">credits pending</p>
           </CardContent>
         </Card>
       </div>
@@ -137,7 +136,7 @@ export default function CustomerReferrals() {
           {(() => {
             const referralCount = referrals.data?.length ?? 0;
             const milestones = [
-              { target: 3, reward: "$30 credit", icon: Star, label: "Starter" },
+              { target: 3, reward: "30 credits", icon: Star, label: "Starter" },
               { target: 5, reward: "Free month", icon: Trophy, label: "Ambassador" },
               { target: 10, reward: "VIP status", icon: Gift, label: "Champion" },
             ];
@@ -145,16 +144,51 @@ export default function CustomerReferrals() {
             const progress = Math.min((referralCount / current.target) * 100, 100);
             const remaining = Math.max(0, current.target - referralCount);
 
+            // SVG ring geometry — matches Credits-page CreditsRing aesthetic
+            const ringSize = 96;
+            const strokeWidth = 8;
+            const radius = (ringSize - strokeWidth) / 2;
+            const circumference = 2 * Math.PI * radius;
+            const dashOffset = circumference - (progress / 100) * circumference;
+
             return (
               <>
-                <div className="text-center">
-                  <p className="text-sm font-medium">
+                <div className="flex flex-col items-center gap-3">
+                  <div
+                    className="relative"
+                    style={{ width: ringSize, height: ringSize }}
+                    role="img"
+                    aria-label={`${referralCount} of ${current.target} referrals toward ${current.reward}`}
+                  >
+                    <svg width={ringSize} height={ringSize} className="-rotate-90" aria-hidden="true">
+                      <circle
+                        cx={ringSize / 2}
+                        cy={ringSize / 2}
+                        r={radius}
+                        strokeWidth={strokeWidth}
+                        className="stroke-muted fill-none"
+                      />
+                      <circle
+                        cx={ringSize / 2}
+                        cy={ringSize / 2}
+                        r={radius}
+                        strokeWidth={strokeWidth}
+                        strokeDasharray={circumference}
+                        strokeDashoffset={dashOffset}
+                        strokeLinecap="round"
+                        className="stroke-accent fill-none transition-[stroke-dashoffset] duration-500"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center" aria-hidden="true">
+                      <span className="text-xl font-bold leading-none">{referralCount}</span>
+                      <span className="text-[10px] text-muted-foreground">of {current.target}</span>
+                    </div>
+                  </div>
+                  <p className="text-sm font-medium text-center">
                     {remaining > 0
                       ? `${remaining} more referral${remaining !== 1 ? "s" : ""} to unlock: ${current.reward}`
                       : "All milestones unlocked!"}
                   </p>
-                  <Progress value={progress} className="h-2 mt-2" />
-                  <p className="text-xs text-muted-foreground mt-1">{referralCount} / {current.target} referrals</p>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   {milestones.map((m) => {
