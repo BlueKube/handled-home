@@ -18,6 +18,7 @@ import { CustomerNotificationBanners } from "@/components/customer/NotificationB
 import { SmartAppBanner } from "@/components/SmartAppBanner";
 import { HomeSetupCard } from "@/components/customer/HomeSetupCard";
 import { NextVisitCard } from "@/components/customer/NextVisitCard";
+import { DashboardGrowthCard } from "@/components/customer/DashboardGrowthCard";
 import { CreditsRing } from "@/components/customer/CreditsRing";
 import { LowCreditsBanner } from "@/components/customer/LowCreditsBanner";
 import { HomeSuggestions } from "@/components/customer/HomeSuggestions";
@@ -268,6 +269,9 @@ export default function CustomerDashboard() {
         </div>
         <NextVisitCard job={nextJob} isLoading={jobsLoading} />
       </div>
+
+      {/* Growth rotation card — gated to fully-onboarded subscribers so it doesn't compete with HomeSetupCard / Bridge CTA */}
+      {serviceDayConfirmed && subscription && <DashboardGrowthCard />}
 
       {/* Cycle Stats */}
       {serviceDayConfirmed && (
