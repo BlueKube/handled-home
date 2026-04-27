@@ -107,7 +107,7 @@ const adminSections: MenuSection[] = [
       { label: "Billing", icon: CreditCard, path: "/admin/billing" },
       { label: "Payouts", icon: Banknote, path: "/admin/payouts" },
       { label: "Plans", icon: CreditCard, path: "/admin/plans" },
-      { label: "Bundles", icon: Package, path: "/admin/bundles" },
+      { label: "Routines", icon: Package, path: "/admin/routines" },
     ],
   },
   {

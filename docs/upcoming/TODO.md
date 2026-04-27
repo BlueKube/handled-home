@@ -25,7 +25,7 @@ Caveat: PR #49's ai-judge measured the same 7 avatar-drawer screens that Batch T
   - **Blocked:** Nothing — workflow is now reliable post-PR #37 fix.
   - **Source:** Batch 6.1 (PR #42, `cf08713`).
 
-- [ ] **Rename legacy `src/pages/admin/Bundles.tsx` → `Routines.tsx` during Phase 8 doc-sync.** The existing file at `src/pages/admin/Bundles.tsx` is misnamed — it shows customer **routines**, not service bundles. To avoid the naming collision when Batch 6.3 ships the real admin Bundles UI, the new admin page lands at `src/pages/admin/SeasonalBundles.tsx` mounted at `/admin/seasonal-bundles`. Phase 8 (Round 64 docs sync + cleanup) is the natural moment to rename the legacy file to `Routines.tsx` and remap its route to `/admin/routines`.
+- [x] **Rename legacy `src/pages/admin/Bundles.tsx` → `Routines.tsx`.** ✅ Done in Batch 8.2. File renamed, route remapped `/admin/bundles` → `/admin/routines`, MoreMenu + AdminShell sidebar updated. The new `/admin/seasonal-bundles` UI from Batch 6.3 is unaffected.
   - **Why:** Two pages with similar concept names ("Bundles" = routines vs. seasonal bundles) is a long-term confusion source; resolving it during the round-close cleanup is cleaner than during a feature batch.
   - **Blocked:** Nothing — pure rename + route remap.
   - **Source:** Batch 6.1 plan investigation (PR #42).

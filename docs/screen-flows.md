@@ -2935,3 +2935,67 @@ Preferences
 - Job completion shows earning feedback
 - `npm run build` passes
 - Full walkthrough on 390×844 viewport
+
+---
+
+## Round 64 New Screens (2026-04-20 → 2026-04-27)
+
+> Added by Batch 8.2 doc-sync. Each entry is a brief screen reference; the full implementation lives in the archived batch specs at `docs/archive/round-64-pricing-tiered-model-2026-04-27/batch-specs/`.
+
+### Snap Sheet (Phase 4)
+- **Route:** opened via floating Snap FAB (center of BottomTabBar) on every customer screen.
+- **Steps:** photo capture/pick → describe + area chip → AI preview (Haiku 4.5 classify) → routing pick (Next visit / Urgent) → submit.
+- **States:** capturing, classifying (5s timeout → fallback), preview, routing, submitting, error, no-upcoming-job.
+- **File:** `src/components/customer/SnapSheet.tsx`.
+
+### Customer Services page (Phase 5.3)
+- **Route:** `/customer/services` · tab in BottomTabBar.
+- **Sections:** active routine, available add-ons, seasonal-bundle spotlight (when an active bundle exists in the customer's zone).
+
+### Customer Visits page (Phase 5.3)
+- **Route:** `/customer/visits` · tab in BottomTabBar.
+- **Sections:** Next visit, In-progress, Recent (preview / live / complete grouping).
+
+### VisitDetail three-mode (Phase 5.4)
+- **Routes:** `/customer/visits/:jobId` — auto-detects mode from `job.status` + timestamps.
+- **Modes:**
+  - **Preview** — scheduled, future visit. Shows expected SKUs, scheduled day, prep checklist.
+  - **Live** — in-progress (provider arrived). Shows live state + photos as they upload.
+  - **Complete** — completed receipt. Photos + work summary + presence proof + private review + post-visit growth card (Phase 7.1) + always-on referral card.
+
+### AvatarDrawer (Phase 5.2)
+- **Trigger:** avatar icon in the AppHeader (every customer page) OR `?drawer=true` URL param after auth bounce.
+- **Contents:** plan, billing, credits, account, referrals, help, sign out.
+
+### BundleDetail page (Phase 6.2)
+- **Route:** `/customer/bundles/:slug` (e.g., `/customer/bundles/fall-prep-2026`).
+- **Sections:** headline + window, line items with credit prices, savings_credits banner, "Choose visit day" picker that calls `useBookBundle`.
+
+### Services SeasonalBundleSpotlight (Phase 6.2)
+- **Location:** card on the `/customer/services` page above add-ons.
+- **Hidden** when no active bundle exists in the customer's zone (`useBundles()` returns empty).
+
+### Admin SeasonalBundles page (Phase 6.3)
+- **Route:** `/admin/seasonal-bundles`.
+- **Sections:** Active / Drafts (default open) / Archived collapsible groups; row actions: edit, activate, archive.
+- **BundleEditSheet:** slug auto-derives from name then locks; zones multi-select with full keyboard a11y; line items inline CRUD with live "Savings preview"; Save & Activate disabled when 0 items.
+
+### BringSomeoneStep onboarding (Phase 7.3)
+- **Position:** between `service_day` and `routine` in the onboarding wizard.
+- **Inputs:** provider name (required), category (chip-select), phone (optional).
+- **Actions:** Send recommendation (writes BYOP row tagged `[from: onboarding]`) OR Skip for now.
+
+### Referrals page restyle (Phase 7.3)
+- **Route:** `/customer/referrals`.
+- **Visual update:** circular SVG progress ring around the referral count (Credits-page aesthetic). Earned + Pending cards display "X credits", no `$` symbol anywhere.
+
+### PostVisitGrowthCard (Phase 7.1)
+- **Position:** `VisitDetailComplete` after `PrivateReviewCard`.
+- **Gate:** rating ≥ 4 stars + customer hasn't engaged with at least one growth lever.
+- **Variants:** "Recommend a pro" → `/customer/recommend-provider?from=post_visit` · "Share your code" → `/customer/referrals`.
+- **Dismiss:** session-only.
+
+### DashboardGrowthCard (Phase 7.2)
+- **Position:** Dashboard, directly under `NextVisitCard`.
+- **Gate:** subscribed + service-day-confirmed; rate-limited via localStorage (1/week shown, 14-day dismiss persistence).
+- **Variants:** same as PostVisitGrowthCard with `?from=dashboard` attribution.

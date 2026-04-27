@@ -31,7 +31,7 @@ interface RoutineSummary {
   items: RoutineItem[];
 }
 
-export default function AdminBundles() {
+export default function AdminRoutines() {
   const [selectedRoutine, setSelectedRoutine] = useState<RoutineSummary | null>(null);
 
   const { data: routines, isLoading, isError } = useQuery({
