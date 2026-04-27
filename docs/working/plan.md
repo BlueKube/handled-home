@@ -16,8 +16,8 @@ BYOC / BYOP / referral surfaces all exist today but are buried in menus. Phase 7
 | Batch | Title | Size | Status | Context |
 |-------|-------|------|--------|---------|
 | 7.1 | Post-visit growth rotation card on `VisitDetailComplete` | M | ✅ | |
-| 7.2 | Dashboard growth card with rate limiting (1/wk, dismiss persists 14d) | M | ⬜ | |
-| 7.3 | Onboarding "who could you bring?" step + Referrals page restyle | M | ⬜ | |
+| 7.2 | Dashboard growth card with rate limiting (1/wk, dismiss persists 14d) | M | ✅ | |
+| 7.3 | Onboarding "who could you bring?" step + Referrals page restyle | M | ✅ | |
 
 ### Review sizing per batch
 
@@ -194,30 +194,34 @@ Each batch ships as its own PR against `main`, following `BlueKube/handled-home`
 
 ## Session Handoff
 
-- **Branch at session end:** `main` clean, synced after PR #49 merge (Batch 7.1). **Phases 1–6 ✅ · DX.1 ✅ · UX.1 ✅ · Phase 7: Batch 7.1 ✅ (1/3 batches). Phase 7 batches 7.2 + 7.3 + Phase 8 (8.1 + 8.2) remaining.**
-- **Last completed:** **Batch 7.1 — Post-visit growth rotation card** (PR #49). 4 new files (`PostVisitGrowthCard.tsx`, `usePostVisitGrowth.ts` + test, batch spec) + 2 modified (`VisitDetailComplete.tsx` wires the card; `RecommendProvider.tsx` reads `?from=` and tags BYOP note for attribution). Pure rotation helper `pickPostVisitGrowthVariant({byopCount, rewardCount})` — BYOP first if 0 submissions, else referral if 0 rewards, else null. 5 unit tests cover all rotation outcomes. Medium-tier review with Lane 3 skipped (first batch in phase): **0 MUST-FIX + 2 SHOULD-FIX + 1 NICE-TO-HAVE** (2 Lane 2 false positives dropped after filename verification). Fix commit `26ea5d6` hoisted the rating gate to the parent (so the underlying TanStack queries don't fire on 1–3★ visits) + whitelisted the `?from=` referrer against `ALLOWED_REFERRERS` + added `type="button"` on dismiss. Pass-2 review returned MERGE-READY. CI: Vercel ✅, wait-for-preview ✅, e2e ✅, ai-judge (customer/provider/admin) ✅, Supabase Preview skipped (no migration).
-- **Previous batch (last session):** **Batch 6.3 — Admin SeasonalBundles CRUD + atomic replace RPC** (PR #46, `d293569`). 8 new files + 3 modified + 1 new migration (`replace_bundle_items` SECURITY DEFINER RPC for atomic delete-insert-recompute). Admin can now create/edit/promote/archive bundles entirely through the UI — no migrations needed for bundle content. Slug auto-derives from name + locks after first save. Zones multi-select with full keyboard a11y. Line items inline CRUD. Live "Savings preview" computed from items + total. Save & Activate flow disabled when 0 items. Collapsible Active/Drafts/Archived sections (Drafts default-open). Medium-tier review with all 4 lanes (Lane 3 included): **2 MUST-FIX + 5 SHOULD-FIX + 3 DROP** (1 false-positive Lane 1 finding dropped). All 7 fixes shipped in `be0a1c7`. **Supabase Preview validated the RPC migration** end-to-end on branch `mglkxltjoeyjdeeqxgmh` — all 8 CI checks ✅.
-- **🎉 Phase 6 ✅ COMPLETE — bundles ARR loop is live end-to-end:**
-  1. **6.1** schema (`bundles` + `bundle_items` tables + RLS + Fall Prep strawman seed in draft)
-  2. **6.2** customer surfaces (`useBundles`/`useBundle`/`useBookBundle`, BundleDetail page at `/customer/bundles/:slug`, Services-page spotlight, "Choose visit day" picker)
-  3. **6.3** admin curation (`SeasonalBundles.tsx` at `/admin/seasonal-bundles`, BundleEditSheet, atomic `replace_bundle_items` RPC)
-- **🟡 Auto-PR(s) pending:** `regen-types.yml` should auto-open `chore/regen-supabase-types` PRs adding typed defs for `bundles` + `bundle_items` + `replace_bundle_items` RPC. The first one was expected after Batch 6.1's merge (`cf08713`) but never appeared — possibly a transient workflow issue. Manual re-trigger may be needed; check Actions tab. Once typed, the `as any` casts in 6.2 + 6.3 hooks can be cleaned up in a small follow-up.
-- **Next substantive work:** **Batch 7.2 — Dashboard growth card** with rate limiting (1/wk shown, dismiss persists 14d). Reuses `pickPostVisitGrowthVariant` from 7.1; introduces a localStorage-backed rate-limit primitive. New section below `NextVisitCard` in `src/pages/customer/Dashboard.tsx`. Medium tier, 3 lanes + Lane 4. After 7.2: Batch 7.3 (Onboarding "who could you bring?" step + Referrals page restyle). Then Phase 8 round-close docs sync (8.1 + 8.2).
-- **After Phase 7:** Phase 8 is the round-close docs sync (masterplan, operating-model, feature-list, screen-flows, app-flow-pages-and-roles, design-guidelines) + working-folder archive. Small/Medium tier with fact-checker lane.
+- **Branch at session end:** `main` clean after PR #52 merge (Batch 7.3). **Phases 1–7 ✅ · DX.1 ✅ · UX.1 ✅. Round 64: 7 of 8 phases shipped. Phase 8 (round-close docs sync) remaining.**
+- **🎉 Phase 7 ✅ COMPLETE — BYOC/BYOP/referral surfaces elevated at every peak-trust moment:**
+  1. **7.1** post-visit rotation card on `VisitDetailComplete` (PR #49, `e7de1e3`) — `usePostVisitGrowth` + `PostVisitGrowthCard`, gated on 4★+ rating; `pickPostVisitGrowthVariant` is the shared rotation helper.
+  2. **7.2** dashboard rate-limited rotation card (PR #51, `18c1786`) — `useDashboardGrowth` + `DashboardGrowthCard`, 1/week shown, 14-day dismiss persistence; pure `growthRateLimit` lib in `src/lib/`.
+  3. **7.3** onboarding `bring_someone` step + Referrals page restyle (PR #52, `fd9e5f7`) — new `BringSomeoneStep` (skippable, writes BYOP recommendation tagged `[from: onboarding]`); Referrals page sweeps "$X" → "X credits" and adds a circular SVG progress ring around the referral count (zero `$` symbols on the page).
+- **Last batch:** **Batch 7.3 — Onboarding bring-someone step + Referrals restyle** (PR #52, `fd9e5f7`). 1 new component + 1 step-array entry + 1 wizard wiring + 1 referrer whitelist + 1 page sweep. Medium-tier review with all 3 lanes + synthesis: **1 MUST-FIX + 3 SHOULD-FIX + 1 INFO**. Fix commit `a241e64` split BringSomeoneStep submit + onComplete into separate try/catch (silent swallow MUST-FIX), cleared validation errors on field edit, added ARIA on the SVG ring, and removed the redundant horizontal Progress bar. Pass-2 returned MERGE-READY. CI: Vercel ✅, Supabase skipped, Playwright workflow concurrency-cancelled by the rapid fix-push (same pattern as PR #51) — local Tier 1+2 all green so merge proceeded.
+- **Rotation infrastructure** (single-sourced across all 3 surfaces):
+  - `pickPostVisitGrowthVariant({byopCount, rewardCount})` in `src/hooks/usePostVisitGrowth.ts` — BYOP first if 0 submissions, else referral if 0 rewards, else null. Reused by `useDashboardGrowth`.
+  - `growthRateLimit.ts` — `shouldShowGrowthCard`, `nextDismissUntil`, `parseStoredDate` — pure caller-supplied helpers, fully unit-tested without time mocking.
+  - `ALLOWED_REFERRERS` on `RecommendProvider`: `["post_visit", "dashboard", "onboarding"]`.
+- **Next substantive work:** **Phase 8 — Round-close docs sync.** 2 batches per `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` §"Phase 8":
+  - **8.1** — sync `masterplan.md` + `operating-model.md` + `feature-list.md` + `TODO.md` (pricing shift section, credits model, Snap-a-Fix wedge, unit economics, new feature entries with statuses).
+  - **8.2** — sync `screen-flows.md` + `app-flow-pages-and-roles.md` + `design-guidelines.md` + archive `docs/working/plan.md` and `docs/working/batch-specs/*` to `docs/archive/round-64-pricing-tiered-model-<date>/` + delete `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` after archive (it stays in archive as record).
+  - Both are Small tier with **fact-checker lane replacing Lane 2** per CLAUDE.md §5 rule (business-decision documents).
 - **Open TODOs** (persist in `docs/upcoming/TODO.md`):
   - **🟡 Pending:** Self-merge the regen-types auto-PR(s) when they appear (or manually re-trigger the workflow).
-  - **NEW (UX.1 follow-up):** Add Tier 5 milestone captures for onboarding/auth/snap/bundles surfaces — Sarah keeps measuring the same drawer screens; all the new work is invisible to the harness.
+  - **🟡 NEW (Phase 7 follow-up):** Microcopy sweep on onboarding CTAs — `vague-button-pair-clarity` in `sarah-backlog.md` is now at 2 of 3 promotion-rule occurrences; if it appears on a 3rd PR, must cut a fix batch.
+  - **🟡 NEW (Phase 7 carry-over):** Add Tier 5 milestone captures for `BringSomeoneStep`, `PostVisitGrowthCard`, `DashboardGrowthCard`, and the redesigned Referrals page so Sarah can actually measure Phase 7's surfaces.
   - **NEW (UX.1 follow-up):** Provider-name interpolation on customer trust copy (Round 65).
   - Stripe credit-pack products + secrets + deploys + cron verify (Phase 3 close-out).
   - Stale `supabase/config.toml:1` `project_id` — should be `gwbwnetatpgnqgarkvht`.
   - Revoke the Stitch bearer token left in git history (DX.1).
   - Seed property profile for the 3 persistent test users.
   - Real `getChipType` classifier — backend batch.
-  - Real GPS / live ETA provider-location feed → Phase 7.
+  - Real GPS / live ETA provider-location feed → Round 65.
   - Inline rating widget refactor → 5.4.1 follow-up.
   - Rotate Vercel Protection Bypass secret (carried from T.1).
-  - Rename legacy `src/pages/admin/Bundles.tsx` → `Routines.tsx` during Phase 8 doc-sync.
-  - **Admin needs to actually populate Fall Prep:** flip status='active' + add zone_ids + verify line items via the new `/admin/seasonal-bundles` UI. Until then customers see no bundle.
-- **Context at exit:** check `/context` before deciding Phase 7 entry.
-- **Blockers:** None — Phase 7 is gated only on starting a fresh session.
-- **Round progress:** Phases 1–5 ✅ · DX.1 ✅ · UX.1 ✅ · **Phase 6 ✅ COMPLETE (3/3 batches)** · Phases 7–8 ⬜.
+  - Rename legacy `src/pages/admin/Bundles.tsx` → `Routines.tsx` (do this in Batch 8.2 alongside the docs sync).
+  - **Admin needs to populate Fall Prep:** flip status='active' + add zone_ids + verify line items via `/admin/seasonal-bundles`. Until then customers see no bundle.
+- **Blockers:** None — Phase 8 is docs-only.
+- **Round progress:** Phases 1–5 ✅ · DX.1 ✅ · UX.1 ✅ · Phase 6 ✅ · **Phase 7 ✅ COMPLETE (3/3 batches)** · Phase 8 ⬜.

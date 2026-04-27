@@ -236,6 +236,10 @@ _2026-04-25 · Batch DX.1_
 
 ### CI workflow patterns
 
+#### Rapid feature → fix push pairs can suppress the Playwright workflow on the second SHA
+Across PRs #51 and #52 (Phase 7 batches 7.2 + 7.3), the pattern `feat commit → push → review → fix commit → push` triggered Playwright on the first SHA but the workflow never enqueued for the second SHA — only Vercel + Supabase appeared as check runs. Most likely the workflow has a concurrency policy (e.g., `concurrency: { group: ${{ github.ref }} }` or similar) that cancels the queued first run when the second push lands, AND the new run is itself dropped because the prior was still queued. The original `playwright-pr.yml` worked fine on PR #49 because the gap between commits was longer (~3 min). Effect: no Tier 3 e2e + no Tier 5 ai-judge on the merged SHA, while local tier 1+2 + Vercel + pass-2 review still report green. Acceptable per CLAUDE.md §11 strict reading (visible check_runs are terminal), but worth either: (a) inspecting `playwright-pr.yml` concurrency settings to allow the second run to override the first instead of cancelling both, or (b) interleaving an empty-trigger workflow_dispatch after fix commits as a manual force.
+_2026-04-27 · Round 64 Phase 7 PRs #51 + #52_
+
 #### `npm install -g supabase@latest` is a footgun on GH Actions — use `supabase/setup-cli@v1` instead
 DX.1 originally shipped `regen-types.yml` with `npm install -g supabase@latest` followed by a `supabase gen types ...` invocation. The first activation run failed with bare `Process completed with exit code 1` and no readable stderr. Root cause was the npm-global pattern: PATH wiring + npm prefix issues + occasional install-time flakes mean the `supabase` binary isn't reliably callable in subsequent steps. Canonical pattern — `uses: supabase/setup-cli@v1` with `with: version: latest` — handles binary download + PATH placement directly. Apply to any new workflow that needs the Supabase CLI.
 _2026-04-25 · DX.1 follow-up (PR #37)_
