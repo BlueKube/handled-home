@@ -96,7 +96,7 @@ const navGroups: NavGroup[] = [
       { title: "SKU Calibration", url: "/admin/sku-calibration", icon: Scale },
       { title: "Level Analytics", url: "/admin/ops/levels", icon: SlidersHorizontal },
       { title: "Plans", url: "/admin/plans", icon: CreditCard },
-      { title: "Bundles", url: "/admin/bundles", icon: Layers },
+      { title: "Routines", url: "/admin/routines", icon: Layers },
       { title: "Seasonal Bundles", url: "/admin/seasonal-bundles", icon: Layers },
     ],
   },

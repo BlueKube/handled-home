@@ -281,3 +281,31 @@ Admin Exception Triage:
 2. Review exception type + entity context
 3. Take action (retry payment, release hold, void invoice, apply credit)
 4. Exception resolved + audit logged
+
+---
+
+## Round 64 Route Changes (2026-04-20 → 2026-04-27)
+
+> Added by Batch 8.2 doc-sync.
+
+### New customer routes
+- `/customer/services` — Services tab on the new BottomTabBar (Phase 5.3)
+- `/customer/visits` — Visits tab on the new BottomTabBar (Phase 5.3)
+- `/customer/snap` — opened via center FAB; sheet renders on top of any customer screen (Phase 4)
+- `/customer/credits` — Credits page (Phase 3)
+- `/customer/bundles/:slug` — BundleDetail page for in-season seasonal bundles (Phase 6.2)
+- `/customer/onboarding/byoc/:token` — token-required BYOC wizard (Round 64.5 self-host migration)
+
+### New admin routes
+- `/admin/seasonal-bundles` — admin curation of seasonal bundles (Phase 6.3)
+- `/admin/routines` — formerly `/admin/bundles`; renamed in Batch 8.2 to free the "bundles" name for the new seasonal feature
+
+### Legacy redirects (Phase 5.1)
+`/customer/more`, `/customer/routine`, `/customer/activity` redirect to their new homes; query params (including `?drawer=true` for AvatarDrawer auto-open) are preserved through `?redirect=…` on `ProtectedRoute`.
+
+### Onboarding step count
+The onboarding wizard now has **9 steps** (was 8) — `bring_someone` was inserted between `service_day` and `routine` in Phase 7.3. Stored as plain `string` in `customer_onboarding_progress.current_step` (no DB enum constraint; safe for in-flight customers — skippable).
+
+### New nav structure
+- **Customer BottomTabBar (4 tabs + center FAB):** Home / Services / Snap (FAB) / Visits / Help.
+- **Customer AvatarDrawer (top-right header on every customer page):** Plan / Billing / Credits / Account / Referrals / Help / Sign out.

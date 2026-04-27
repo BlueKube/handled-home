@@ -600,3 +600,46 @@ WCAG AA compliance required — 4.5:1 contrast for body text, 3:1 for large text
 - Tab order: follows visual top-to-bottom flow; skip-nav link at `z-[100]` for keyboard users
 - Reduced motion: respect `prefers-reduced-motion` — see Motion System section for details
 
+
+---
+
+## Round 64 Component Patterns (2026-04-20 → 2026-04-27)
+
+> Added by Batch 8.2 doc-sync.
+
+### Type chip color tokens (visit type chips)
+
+VisitDetail's three-mode rewrite (Phase 5.4) introduced type chips that label the dominant visit-type at a glance. Use the existing semantic tokens — never raw Tailwind hues:
+
+| Type | Use case | Token foreground | Token background |
+|---|---|---|---|
+| **Included** | Visit covered by routine credits | `text-foreground` | `bg-secondary` |
+| **Snap** | Photo-driven Snap-a-Fix request | `text-primary` | `bg-primary/10` border `border-primary/20` |
+| **Bundle** | Bundle line item rolled into the visit | `text-accent` | `bg-accent/10` border `border-accent/20` |
+| **Credits-paid** | Paid-out-of-cycle credits (top-up applied) | `text-warning` | `bg-warning/10` border `border-warning/30` |
+
+Always use these mappings — the dark-mode color audit (lessons-learned § "Dark-mode colors need explicit audit") flags any raw `text-green-*` / `bg-amber-100` style usage.
+
+### CreditsRing component (Phase 3 → reused in Phase 7.3)
+
+Compact circular progress visual used on Dashboard for cycle credits and on Referrals for milestone progress. Pattern:
+
+- **SVG ring**, `width = height = 96px` default; stroke 8px; `radius = (size - stroke) / 2`.
+- Background ring: `stroke-muted fill-none`.
+- Foreground ring: `stroke-accent fill-none`, dasharray = circumference, dashoffset computed from progress 0–100.
+- Centered count + sub-label inside the ring (use absolute positioning).
+- ARIA: wrap in `role="img"` div with `aria-label="N of M …"`; mark inner svg + text `aria-hidden="true"` to prevent fragmented screen-reader reads.
+
+### LowCreditsBanner pattern (Phase 3)
+
+Inline banner above the cycle stats when `handle_balance` falls below the configured low-credits threshold (default 3 credits). Yellow-warning aesthetic (`bg-warning/10` border `border-warning/30`, icon `text-warning`). Includes a "Top up" CTA linking to `/customer/credits`. Dismiss is session-only — re-renders on next data refresh if the threshold is still tripped.
+
+### Trust-copy patterns A/B/C (UX.1, 2026-04-25)
+
+Three locked patterns for trust-building copy across customer surfaces:
+
+- **Pattern A — "Why we ask"** — micro-copy under every data-collection field explaining the purpose. Voice: warm, plain, never apologetic. Position: directly under the field's `<Label>`.
+- **Pattern B — Transition reassurance** — destination copy at the top of every step that has a non-trivial side-effect (e.g., "Your information is saved", "Your provider stays the same").
+- **Pattern C — Origin framing** — top-of-flow framing on entry surfaces (`OnboardingWizard`, `AuthPage` BYOC banner) explaining what world the user just entered.
+
+Voice rubric is locked in `docs/archive/round-64-pricing-tiered-model-2026-04-27/batch-specs/batch-ux-1-trust-copy-sweep.md`.
