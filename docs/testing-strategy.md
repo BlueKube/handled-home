@@ -391,6 +391,33 @@ Once a Sarah/persona finding is unfiltered (Layer 1 fired and Layer 2 didn't dis
 
 The hybrid only outperforms either if it's *consistently applied*. That requires the rule to live in this doc — not in conversation transcripts that vanish at session end.
 
+### 5.10 Scoping the AI judge to changed surfaces
+
+> **Added 2026-04-27 (UX-loop closure batch).** Closes the measurement end of the Sarah loop so scores reflect the surfaces a PR actually changes.
+
+By default the ai-judge would re-score every milestone capture on every PR — wasteful spend, noisy scores, and the 3-PR promotion rule fires on stale captures (a finding repeats because Sarah keeps re-measuring the same drawer screens, not because the same code is failing). The fix:
+
+1. **Each milestone capture declares its source files.** `MilestoneMetadata.sourceFiles` (`e2e/milestone.ts`) is a `string[]` listing the production files this screenshot exercises. Conservative on purpose: include only files that *directly render* in the screenshot, not transitive helpers.
+
+2. **PR runs pass the diff to the judge.** `playwright-pr.yml`'s `ai-judge` job computes `git diff origin/main...HEAD --name-only` and exports it as `UX_CHANGED_FILES` (newline-separated). The report generator filters captures to those whose `sourceFiles` overlap the diff.
+
+3. **Manual catalog runs still score everything.** `playwright.yml` (the workflow_dispatch catalog runner) doesn't set `UX_CHANGED_FILES`, so the score-everything behavior is preserved for full-catalog audits.
+
+4. **Coverage gap is surfaced explicitly.** When a PR has changes but zero captures match the diff, the report generator writes a `ux-review-coverage-gap-*.json` marker. The PR comment renders an actionable advisory: *"PR diff touches files that have no milestone-capture coverage — add Playwright captures with `sourceFiles` metadata."* That's the prompt to add coverage rather than letting the gap be silent.
+
+5. **Captures without `sourceFiles` are excluded in scoped mode.** Untagged legacy captures don't match any diff, so they're skipped — encourages backfill.
+
+#### What this enables (the loop)
+
+- A PR that touches `src/components/customer/PostVisitGrowthCard.tsx` only fires Sarah on captures tagged with that file. Scores reflect the change, not noise.
+- A finding that fixed in batch N gets re-measured on the same captures in subsequent PRs against the same surface — score-delta proves whether the fix moved the needle.
+- The 3-PR promotion rule fires on real signal — a finding repeating across 3 PRs means the same surface has been modified 3 times without resolving the friction, not "Sarah saw the drawer 3 times."
+- Coverage gaps are visible. New surface shipping without a capture? Sarah's comment says so explicitly, and the team can prioritize adding the capture.
+
+#### Operational note
+
+The scoping is **opt-in via env var**. Setting `UX_CHANGED_FILES=""` (empty) or unsetting it falls back to score-everything. So local dev runs (`npm run ux-report`) and the manual catalog workflow keep working unchanged.
+
 ---
 
 ## 6. Retroactive application — testing older PRs with the new strategy
