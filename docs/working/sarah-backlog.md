@@ -63,6 +63,19 @@
 - **pr_history:** PR #49 (`e7de1e3`)
 - **notes:** First occurrence. Batch 7.2 (Dashboard growth card) touches Dashboard.tsx but not its loading skeletons; opportunistic catch is possible if the diff is in the same file. Otherwise wait for accumulation per the 8-entry / 3-PR rule.
 
+### measurement-coverage-gap — 2026-04-27 — meta (process)
+
+- **status:** open
+- **theme:** measurement-coverage
+- **role:** N/A (process)
+- **screen / file:** `e2e/avatar-drawer.spec.ts` is the only Tier 5 milestone-capture spec; it covers 7 avatar-drawer screens and was authored in Batch T.4
+- **metric:** N/A
+- **score:** N/A
+- **finding (verbatim):** N/A — process observation
+- **first seen:** PR #40 (UX.1 trust-copy)
+- **pr_history:** PR #40 (`d1fa15b`) · PR #49 (`e7de1e3`) — ai-judge measured the same 7 drawer screens twice in a row, neither time covering the surfaces the batch actually changed. PRs #51 + #52 didn't run ai-judge at all (Playwright workflow was suppressed by concurrency cancellation on rapid fix-pushes — see lessons-learned).
+- **notes:** Closes the loop on the existing `transition-trust-copy` measurement caveat. Until Tier 5 milestone captures land for `BringSomeoneStep`, `PostVisitGrowthCard`, `DashboardGrowthCard`, the new Referrals page restyle, and the onboarding screens (Property/HomeSetup/Plan/Subscribe/ServiceDay), Sarah's avgClarity / avgTrust / avgFriction scores cannot move in response to the actual batches. Tracked as "Add Tier 5 milestone captures…" in `docs/upcoming/TODO.md`. Promotion-rule does NOT fire on this entry — it's a tooling gap, not a code finding.
+
 ### transition-trust-copy — 2026-04-24 — Sarah (customer) — ✅ FIXED in PR #40 (`d1fa15b`)
 
 - **status:** **fixed** — Batch UX.1 (PR #40, merged 2026-04-25 at `d1fa15b`)
