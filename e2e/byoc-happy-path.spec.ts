@@ -86,6 +86,7 @@ test.describe("BYOC Onboarding — Happy Path", () => {
       route: page.url(),
       userGoal: "Understand what this page is and decide whether to sign up",
       screenType: "landing",
+      sourceFiles: ["src/pages/ByocActivate.tsx"],
     });
 
     // If invite is expired/inactive, fail with a clear message
@@ -156,6 +157,10 @@ test.describe("BYOC Onboarding — Happy Path", () => {
       route: page.url(),
       userGoal: "Recognize their existing provider and feel confident continuing",
       screenType: "wizard-step",
+      sourceFiles: [
+        "src/pages/customer/ByocOnboardingWizard.tsx",
+        "src/pages/customer/byoc-onboarding/ConfirmServiceStep.tsx",
+      ],
     });
     await page.getByRole("button", { name: /continue/i }).first().click();
 
@@ -172,6 +177,10 @@ test.describe("BYOC Onboarding — Happy Path", () => {
       route: page.url(),
       userGoal: "Confirm the service details are correct before proceeding",
       screenType: "wizard-step",
+      sourceFiles: [
+        "src/pages/customer/ByocOnboardingWizard.tsx",
+        "src/pages/customer/byoc-onboarding/ConfirmServiceStep.tsx",
+      ],
     });
     await page.getByRole("button", { name: /yes|looks right|continue/i }).first().click();
 
@@ -194,6 +203,10 @@ test.describe("BYOC Onboarding — Happy Path", () => {
       route: page.url(),
       userGoal: "Enter home address quickly without confusion",
       screenType: "wizard-step",
+      sourceFiles: [
+        "src/pages/customer/ByocOnboardingWizard.tsx",
+        "src/pages/customer/onboarding/PropertyStep.tsx",
+      ],
     });
 
     const street = uniqueStreet();
@@ -238,6 +251,10 @@ test.describe("BYOC Onboarding — Happy Path", () => {
           route: page.url(),
           userGoal: "Answer home details questions or skip to proceed quickly",
           screenType: "wizard-step",
+          sourceFiles: [
+            "src/pages/customer/ByocOnboardingWizard.tsx",
+            "src/pages/customer/onboarding/HomeSetupStep.tsx",
+          ],
         });
       }
 
@@ -295,6 +312,10 @@ test.describe("BYOC Onboarding — Happy Path", () => {
         route: page.url(),
         userGoal: "Understand additional service options without feeling upsold",
         screenType: "wizard-step",
+        sourceFiles: [
+          "src/pages/customer/ByocOnboardingWizard.tsx",
+          "src/pages/customer/byoc-onboarding/SmallSteps.tsx",
+        ],
       });
       const skipServices = page.getByRole("button", { name: /skip|continue|next|done/i }).first();
       if (await skipServices.isVisible()) await skipServices.click();
@@ -312,6 +333,10 @@ test.describe("BYOC Onboarding — Happy Path", () => {
         route: page.url(),
         userGoal: "Review pricing and feel confident about cost before committing",
         screenType: "wizard-step",
+        sourceFiles: [
+          "src/pages/customer/ByocOnboardingWizard.tsx",
+          "src/pages/customer/byoc-onboarding/PlanActivateStep.tsx",
+        ],
       });
       const planContinue = page.getByRole("button", { name: /continue|skip|next|done|looks good/i }).first();
       if (await planContinue.isVisible()) await planContinue.click();
@@ -330,6 +355,10 @@ test.describe("BYOC Onboarding — Happy Path", () => {
       route: page.url(),
       userGoal: "Feel reassured that setup is complete and know what to do next",
       screenType: "success",
+      sourceFiles: [
+        "src/pages/customer/ByocOnboardingWizard.tsx",
+        "src/pages/customer/byoc-onboarding/SmallSteps.tsx",
+      ],
     });
 
     const dashBtn = page.getByRole("button", { name: /dashboard|go to dashboard|get started/i }).first();
@@ -348,6 +377,11 @@ test.describe("BYOC Onboarding — Happy Path", () => {
       route: page.url(),
       userGoal: "See their home team and understand what the app offers going forward",
       screenType: "dashboard",
+      sourceFiles: [
+        "src/pages/customer/Dashboard.tsx",
+        "src/components/customer/HomeTeamCard.tsx",
+        "src/components/customer/NextVisitCard.tsx",
+      ],
     });
 
     tracker.writeManifest();

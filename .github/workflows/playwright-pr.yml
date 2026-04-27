@@ -359,11 +359,40 @@ jobs:
           name: t6-diagnostic-aijudge-${{ matrix.role }}
           path: t6-diagnostic/
 
+      - name: Compute changed-files list for ai-judge scoping
+        # Passes the PR's diff to the report generator so Sarah only
+        # measures captures whose `sourceFiles` overlap with the changes.
+        # Captures without `sourceFiles` are excluded in scoped mode —
+        # they're treated as legacy until backfilled. The manual
+        # `playwright.yml` workflow doesn't set this, so it preserves
+        # the score-everything catalog behavior.
+        id: ux-scope
+        run: |
+          set -euo pipefail
+          # actions/checkout@v4 above used the default fetch-depth=1, which
+          # gives us the tip of HEAD but no shared history with origin/main.
+          # `git diff origin/main...HEAD` (three-dot syntax) needs the
+          # merge-base, so we must unshallow before the diff. The fallback
+          # path covers the case where the clone was already deep.
+          git fetch --no-tags --unshallow origin main 2>/dev/null \
+            || git fetch --no-tags --depth=100 origin main \
+            || git fetch --no-tags origin main
+          # Random delimiter avoids any collision risk if a filename ever
+          # contained the literal heredoc terminator (vanishingly unlikely
+          # but the GitHub-recommended pattern).
+          DELIM="UX_CHANGED_EOF_$(openssl rand -hex 8)"
+          {
+            echo "files<<$DELIM"
+            git diff --name-only origin/main...HEAD
+            echo "$DELIM"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Generate Sarah-persona UX report (${{ matrix.role }})
         if: env.ANTHROPIC_API_KEY != ''
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           UX_ROLE_FILTER: ${{ matrix.filter }}
+          UX_CHANGED_FILES: ${{ steps.ux-scope.outputs.files }}
         run: npm run ux-report
 
       - name: Skip AI judge (no ANTHROPIC_API_KEY)
@@ -381,6 +410,7 @@ jobs:
             test-results/ux-review-report-*.md
             test-results/ux-review-scores-*.json
             test-results/ux-review-report-*-error.json
+            test-results/ux-review-coverage-gap-*.json
 
   comment:
     needs: [wait-for-preview, e2e, ai-judge]
@@ -472,14 +502,28 @@ jobs:
 
             ADVISORY_LINES=""
             FRICTION_BLOCKS=""
+            COVERAGE_GAP_LINES=""
             ANY_SCORES_PARSED=false
 
             for role in customer provider admin; do
               SCORES_FILE=""
               REPORT_FILE=""
+              GAP_FILE=""
               if [ -d "ai-reports/ai-report-${role}" ]; then
                 SCORES_FILE=$(find "ai-reports/ai-report-${role}" -name 'ux-review-scores-*.json' -print -quit 2>/dev/null || true)
                 REPORT_FILE=$(find "ai-reports/ai-report-${role}" -name 'ux-review-report-*.md' -print -quit 2>/dev/null || true)
+                GAP_FILE=$(find "ai-reports/ai-report-${role}" -name 'ux-review-coverage-gap-*.json' -print -quit 2>/dev/null || true)
+              fi
+
+              # Coverage-gap marker takes precedence: when set, the role's
+              # captures were filtered out by UX_CHANGED_FILES. Show that
+              # explicitly instead of an empty "—" row that looks like a
+              # harness failure.
+              if [ -n "$GAP_FILE" ] && [ -f "$GAP_FILE" ]; then
+                role_cap="${role^}"
+                TIER5_BLOCK+="| ${role_cap} | — | — | — | 0 (no captures match diff) |"$'\n'
+                COVERAGE_GAP_LINES+=$'\n- ⚠️ **'"${role_cap}"$'**: PR diff touches files that have no milestone-capture coverage. Add Playwright captures with `sourceFiles` metadata, or run `playwright.yml` manually for a full-catalog audit.'
+                continue
               fi
 
               if [ -n "$SCORES_FILE" ] && [ -f "$SCORES_FILE" ]; then
@@ -547,11 +591,19 @@ jobs:
               TIER5_BLOCK+=$'\n<sub>Dismissible findings live in `docs/testing-acceptable-findings.md`. Filter logic is Layer 2 (deferred to T.4).</sub>\n'
             fi
 
-            if [ "$ANY_SCORES_PARSED" = "false" ]; then
-              # All rows "—". The AI judge ran but produced scaffold-mode output
-              # (no milestone screenshots to evaluate). This is a harness gap,
-              # not a failure — see docs/upcoming/TODO.md "Tier 5 milestone
-              # capture" for the follow-up that makes Sarah actually see screens.
+            if [ -n "$COVERAGE_GAP_LINES" ]; then
+              TIER5_BLOCK+=$'\n**Coverage gap (no captures match this PR\'s diff):**'"${COVERAGE_GAP_LINES}"$'\n'
+            fi
+
+            if [ "$ANY_SCORES_PARSED" = "false" ] && [ -z "$COVERAGE_GAP_LINES" ]; then
+              # All rows "—" AND no coverage-gap markers. The AI judge ran but
+              # produced scaffold-mode output (no milestone screenshots to
+              # evaluate). This is a harness gap, not a failure — see
+              # docs/upcoming/TODO.md "Tier 5 milestone capture" for the
+              # follow-up that makes Sarah actually see screens.
+              # When COVERAGE_GAP_LINES is set, the coverage-gap block above
+              # already explains why scores are absent, so suppress this
+              # generic scaffold notice.
               TIER5_BLOCK+=$'\n<sub>⚠️ All scores are `—` because no milestone screenshots were captured by the Playwright run. The AI judge ran in scaffold mode (no input to evaluate). See `docs/upcoming/TODO.md` → "Tier 5 milestone capture" for the follow-up.</sub>\n'
             fi
 

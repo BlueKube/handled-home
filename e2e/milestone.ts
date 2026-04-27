@@ -27,6 +27,13 @@ export interface MilestoneMetadata {
     | "dashboard"
     | "error"
     | "debug";
+  /**
+   * Source files this capture exercises. Used by the ai-judge scoping
+   * logic in `scripts/generate-synthetic-ux-report.ts` to filter captures
+   * to those relevant to a PR's diff. Optional for backwards-compat with
+   * legacy captures; new captures should always set this.
+   */
+  sourceFiles?: string[];
 }
 
 export function ensureMilestonesDir() {

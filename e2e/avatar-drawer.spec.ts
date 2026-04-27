@@ -22,6 +22,16 @@ import { ensureMilestonesDir, milestonePath, MilestoneTracker } from "./mileston
 
 const FLOW = "customer-avatar-drawer";
 
+// Source files this flow exercises. The ai-judge scoping logic uses
+// this list to decide whether a PR's diff touches captures' surfaces.
+// Conservative on purpose: only files that DIRECTLY render in these
+// screenshots, not transitive helpers.
+const AVATAR_DRAWER_SOURCES = [
+  "src/components/customer/AvatarDrawer.tsx",
+  "src/components/customer/AppHeader.tsx",
+  "src/pages/customer/Dashboard.tsx",
+];
+
 test.describe("Avatar drawer (Batch 5.2)", () => {
   test.beforeAll(() => {
     ensureMilestonesDir();
@@ -40,6 +50,7 @@ test.describe("Avatar drawer (Batch 5.2)", () => {
       route: "/customer",
       userGoal: "See my home at a glance and access account controls",
       screenType: "dashboard",
+      sourceFiles: AVATAR_DRAWER_SOURCES,
     });
 
     const avatar = page.getByRole("button", { name: /account menu/i });
@@ -69,6 +80,7 @@ test.describe("Avatar drawer (Batch 5.2)", () => {
       route: "/customer",
       userGoal: "Find plan, billing, credits, account, referrals, and help in one place",
       screenType: "wizard-step",
+      sourceFiles: AVATAR_DRAWER_SOURCES,
     });
 
     tracker.writeManifest();
@@ -99,6 +111,11 @@ test.describe("Avatar drawer (Batch 5.2)", () => {
       route: page.url(),
       userGoal: "See my credit balance after tapping Credits from the drawer",
       screenType: "dashboard",
+      sourceFiles: [
+        ...AVATAR_DRAWER_SOURCES,
+        "src/pages/customer/Credits.tsx",
+        "src/components/customer/CustomerPropertyGate.tsx",
+      ],
     });
 
     tracker.writeManifest();
@@ -126,6 +143,7 @@ test.describe("Avatar drawer (Batch 5.2)", () => {
       route: page.url(),
       userGoal: "Jump straight into the account menu via a shared or deep-linked URL",
       screenType: "wizard-step",
+      sourceFiles: AVATAR_DRAWER_SOURCES,
     });
 
     tracker.writeManifest();
@@ -151,6 +169,7 @@ test.describe("Avatar drawer (Batch 5.2)", () => {
       route: page.url(),
       userGoal: "Reach the account menu via the legacy URL a bookmark or external link points to",
       screenType: "dashboard",
+      sourceFiles: [...AVATAR_DRAWER_SOURCES, "src/App.tsx"],
     });
 
     tracker.writeManifest();
@@ -179,6 +198,7 @@ test.describe("Avatar drawer (Batch 5.2)", () => {
       route: "/customer",
       userGoal: "Avoid accidentally signing out by confirming intent",
       screenType: "wizard-step",
+      sourceFiles: AVATAR_DRAWER_SOURCES,
     });
 
     await confirm.getByRole("button", { name: /^cancel$/i }).click();

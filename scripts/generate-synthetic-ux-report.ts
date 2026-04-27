@@ -44,6 +44,18 @@ const REQUEST_DELAY_MS = parseInt(process.env.UX_REQUEST_DELAY_MS ?? "15000", 10
 /** Comma-separated prefixes to include, e.g. "customer,byoc" or "admin". Empty = all. */
 const ROLE_FILTER = process.env.UX_ROLE_FILTER ?? "";
 
+/**
+ * Newline-separated list of files changed in the PR (typically from
+ * `git diff origin/main...HEAD --name-only`). When set, only milestone
+ * captures whose `sourceFiles` overlap with this list are scored. When
+ * unset or empty, all captures are scored (current behavior — preserves
+ * the manual `playwright.yml` catalog runner).
+ */
+const CHANGED_FILES = (process.env.UX_CHANGED_FILES ?? "")
+  .split(/\r?\n/)
+  .map((f) => f.trim())
+  .filter(Boolean);
+
 // ── Types ──
 
 interface MilestoneMetadata {
@@ -54,6 +66,7 @@ interface MilestoneMetadata {
   route: string;
   userGoal: string;
   screenType: string;
+  sourceFiles?: string[];
 }
 
 interface ScreenInfo {
@@ -66,6 +79,7 @@ interface ScreenInfo {
   route?: string;
   userGoal?: string;
   screenType?: string;
+  sourceFiles?: string[];
 }
 
 interface PersonaInfo {
@@ -147,29 +161,59 @@ function getScreenshots(): ScreenInfo[] {
     ? ROLE_FILTER.split(",").map((p) => p.trim().toLowerCase())
     : [];
 
-  return fs
+  // Pre-pass: build the candidate set after the role-filter, before the
+  // changed-files filter. Logging counts at each stage helps debug
+  // coverage gaps.
+  const allFiles = fs
     .readdirSync(MILESTONES_DIR)
     .filter((f) => f.endsWith(".png"))
     .filter((f) => prefixes.length === 0 || prefixes.some((p) => f.startsWith(p)))
-    .sort()
-    .map((f) => {
-      const meta = manifest.get(f);
-      return {
-        filename: f,
-        filepath: path.join(MILESTONES_DIR, f),
-        label: f
-          .replace(".png", "")
-          .replace(/^byoc-\d+-/, "")
-          .replace(/-/g, " ")
-          .replace(/\b\w/g, (c) => c.toUpperCase()),
-        flow: meta?.flow,
-        step: meta?.step,
-        stepNumber: meta?.stepNumber,
-        route: meta?.route,
-        userGoal: meta?.userGoal,
-        screenType: meta?.screenType,
-      };
-    });
+    .sort();
+
+  const screens = allFiles.map((f) => {
+    const meta = manifest.get(f);
+    return {
+      filename: f,
+      filepath: path.join(MILESTONES_DIR, f),
+      label: f
+        .replace(".png", "")
+        .replace(/^byoc-\d+-/, "")
+        .replace(/-/g, " ")
+        .replace(/\b\w/g, (c) => c.toUpperCase()),
+      flow: meta?.flow,
+      step: meta?.step,
+      stepNumber: meta?.stepNumber,
+      route: meta?.route,
+      userGoal: meta?.userGoal,
+      screenType: meta?.screenType,
+      sourceFiles: meta?.sourceFiles,
+    };
+  });
+
+  if (CHANGED_FILES.length === 0) {
+    return screens;
+  }
+
+  // Scoping: keep only screens whose sourceFiles overlap the diff. Screens
+  // without sourceFiles are EXCLUDED in scoped mode — they're untagged
+  // legacy captures and we can't decide their relevance to the PR.
+  const changedSet = new Set(CHANGED_FILES);
+  const kept = screens.filter((s) =>
+    (s.sourceFiles ?? []).some((sf) => changedSet.has(sf))
+  );
+
+  console.log(
+    `Scoping screens by ${CHANGED_FILES.length} changed file(s): ` +
+      `${kept.length} of ${screens.length} captures match.`
+  );
+  if (kept.length === 0 && screens.length > 0) {
+    console.log(
+      "::notice title=ai-judge coverage gap::No milestone captures match this PR's diff. " +
+        "Add Playwright captures with sourceFiles metadata for the changed surfaces, " +
+        "or run the manual playwright.yml workflow for a full-catalog audit."
+    );
+  }
+  return kept;
 }
 
 function getPersonas(): PersonaInfo[] {
@@ -835,7 +879,31 @@ async function main() {
   const hasManifest = fs.existsSync(MANIFEST_FILE);
   console.log(`Manifest: ${hasManifest ? "loaded" : "not found (using filenames only)"}`);
 
-  if (screenshots.length === 0) {
+  // Coverage-gap marker. Written when CHANGED_FILES is set and the
+  // changed-files filter excluded every capture. The comment job reads
+  // this to render a clear advisory rather than the generic
+  // no-screenshots message.
+  if (screenshots.length === 0 && CHANGED_FILES.length > 0) {
+    const markerPath = path.resolve(
+      `test-results/ux-review-coverage-gap${ROLE_SUFFIX}.json`
+    );
+    fs.mkdirSync(path.dirname(markerPath), { recursive: true });
+    fs.writeFileSync(
+      markerPath,
+      JSON.stringify(
+        {
+          reason: "scoped-no-match",
+          changedFiles: CHANGED_FILES,
+          role: ROLE_FILTER || "all",
+          timestamp: new Date().toISOString(),
+        },
+        null,
+        2
+      ),
+      "utf-8"
+    );
+    console.log(`Coverage gap marker written to ${markerPath}`);
+  } else if (screenshots.length === 0) {
     console.log("\nNo screenshots yet. Run Playwright tests first:");
     console.log("   npm run test:e2e");
   }

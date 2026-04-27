@@ -62,6 +62,11 @@ test.describe("BYOC Invalid Invite", () => {
       route: page.url(),
       userGoal: "Understand why the invite failed and find a safe way to continue",
       screenType: "error",
+      sourceFiles: [
+        "src/pages/ByocActivate.tsx",
+        "src/pages/customer/ByocOnboardingWizard.tsx",
+        "src/pages/customer/byoc-onboarding/InviteFallbackScreen.tsx",
+      ],
     });
 
     tracker.writeManifest();
