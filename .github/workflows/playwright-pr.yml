@@ -368,13 +368,23 @@ jobs:
         # the score-everything catalog behavior.
         id: ux-scope
         run: |
-          # actions/checkout@v4 fetches a shallow clone — we need full
-          # history to compute the diff against origin/main.
-          git fetch --no-tags --depth=1 origin main || git fetch --no-tags origin main
+          set -euo pipefail
+          # actions/checkout@v4 above used the default fetch-depth=1, which
+          # gives us the tip of HEAD but no shared history with origin/main.
+          # `git diff origin/main...HEAD` (three-dot syntax) needs the
+          # merge-base, so we must unshallow before the diff. The fallback
+          # path covers the case where the clone was already deep.
+          git fetch --no-tags --unshallow origin main 2>/dev/null \
+            || git fetch --no-tags --depth=100 origin main \
+            || git fetch --no-tags origin main
+          # Random delimiter avoids any collision risk if a filename ever
+          # contained the literal heredoc terminator (vanishingly unlikely
+          # but the GitHub-recommended pattern).
+          DELIM="UX_CHANGED_EOF_$(openssl rand -hex 8)"
           {
-            echo "files<<UX_CHANGED_EOF"
-            git diff --name-only origin/main...HEAD || true
-            echo "UX_CHANGED_EOF"
+            echo "files<<$DELIM"
+            git diff --name-only origin/main...HEAD
+            echo "$DELIM"
           } >> "$GITHUB_OUTPUT"
 
       - name: Generate Sarah-persona UX report (${{ matrix.role }})
