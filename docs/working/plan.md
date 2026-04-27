@@ -1,3 +1,48 @@
+# Round 64 Phase 7 — BYOC / BYOP / referral elevation
+
+> **Round:** 64 · **Phase:** 7 of 8 · **Started:** 2026-04-27
+> **PRD:** `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md` §"Phase 7 — BYOC / BYOP / referral elevation"
+> **Execution mode:** Quality (cross-surface customer growth surfaces; no schema)
+> **Branch root:** Each batch ships as its own PR against `main`.
+
+---
+
+## Why this phase
+
+BYOC / BYOP / referral surfaces all exist today but are buried in menus. Phase 7 surfaces them at the peak-trust moments: post-visit completion (7.1), dashboard rotation (7.2), and the final onboarding step + Referrals page restyle (7.3). Same rotation logic across surfaces — pick the highest-leverage CTA the customer hasn't yet engaged with.
+
+## Batch table
+
+| Batch | Title | Size | Status | Context |
+|-------|-------|------|--------|---------|
+| 7.1 | Post-visit growth rotation card on `VisitDetailComplete` | M | ✅ | |
+| 7.2 | Dashboard growth card with rate limiting (1/wk, dismiss persists 14d) | M | ⬜ | |
+| 7.3 | Onboarding "who could you bring?" step + Referrals page restyle | M | ⬜ | |
+
+### Review sizing per batch
+
+| Batch | Tier | Agents | Rationale |
+|-------|------|--------|-----------|
+| 7.1 | Medium | 2 lanes + Lane 4 synthesis (Lane 3 skipped — first batch) | Cross-cutting CTA on a high-traffic page; pure-helper rotation logic |
+| 7.2 | Medium | 3 lanes + Lane 4 synthesis (sub-agent) | Dashboard surface + persisted dismiss state + rate-limit primitive |
+| 7.3 | Medium | 3 lanes + Lane 4 synthesis (sub-agent) | Onboarding step + Referrals page restyle (visual + copy sweep) |
+
+### Testing tier per batch
+
+| Batch | T1 | T2 | T3 | T4 | T5 |
+|-------|----|----|----|----|----|
+| 7.1 | ✅ | ✅ (rotation helper) | ✅ (smoke: 5★ → card; 3★ → no card) | — | optional |
+| 7.2 | ✅ | ✅ (rate-limit logic) | ✅ | — | optional |
+| 7.3 | ✅ | ✅ (form validation) | ✅ | optional | — |
+
+## Blast radius / escalation triggers
+
+- Any new migration (none planned this phase)
+- Any change that affects authenticated session state (none planned)
+- Any change to `referral_rewards` / `byop_recommendations` schema (none planned — read-only consumers)
+
+---
+
 # Round 64 Phase 6 — Seasonal bundles as the ARR loop
 
 > **Round:** 64 · **Phase:** 6 of 8 · **Started:** 2026-04-26
@@ -149,14 +194,15 @@ Each batch ships as its own PR against `main`, following `BlueKube/handled-home`
 
 ## Session Handoff
 
-- **Branch at session end:** `main` clean, synced at `d293569` (PR #46 — Batch 6.3 admin SeasonalBundles CRUD + atomic RPC merged). **Phases 1–6 ✅ COMPLETE · DX.1 ✅ · UX.1 ✅. Round 64: 6 of 8 phases shipped. Phases 7–8 remaining.**
-- **Last completed:** **Batch 6.3 — Admin SeasonalBundles CRUD + atomic replace RPC** (PR #46, `d293569`). 8 new files + 3 modified + 1 new migration (`replace_bundle_items` SECURITY DEFINER RPC for atomic delete-insert-recompute). Admin can now create/edit/promote/archive bundles entirely through the UI — no migrations needed for bundle content. Slug auto-derives from name + locks after first save. Zones multi-select with full keyboard a11y. Line items inline CRUD. Live "Savings preview" computed from items + total. Save & Activate flow disabled when 0 items. Collapsible Active/Drafts/Archived sections (Drafts default-open). Medium-tier review with all 4 lanes (Lane 3 included): **2 MUST-FIX + 5 SHOULD-FIX + 3 DROP** (1 false-positive Lane 1 finding dropped). All 7 fixes shipped in `be0a1c7`. **Supabase Preview validated the RPC migration** end-to-end on branch `mglkxltjoeyjdeeqxgmh` — all 8 CI checks ✅.
+- **Branch at session end:** `main` clean, synced after PR #49 merge (Batch 7.1). **Phases 1–6 ✅ · DX.1 ✅ · UX.1 ✅ · Phase 7: Batch 7.1 ✅ (1/3 batches). Phase 7 batches 7.2 + 7.3 + Phase 8 (8.1 + 8.2) remaining.**
+- **Last completed:** **Batch 7.1 — Post-visit growth rotation card** (PR #49). 4 new files (`PostVisitGrowthCard.tsx`, `usePostVisitGrowth.ts` + test, batch spec) + 2 modified (`VisitDetailComplete.tsx` wires the card; `RecommendProvider.tsx` reads `?from=` and tags BYOP note for attribution). Pure rotation helper `pickPostVisitGrowthVariant({byopCount, rewardCount})` — BYOP first if 0 submissions, else referral if 0 rewards, else null. 5 unit tests cover all rotation outcomes. Medium-tier review with Lane 3 skipped (first batch in phase): **0 MUST-FIX + 2 SHOULD-FIX + 1 NICE-TO-HAVE** (2 Lane 2 false positives dropped after filename verification). Fix commit `26ea5d6` hoisted the rating gate to the parent (so the underlying TanStack queries don't fire on 1–3★ visits) + whitelisted the `?from=` referrer against `ALLOWED_REFERRERS` + added `type="button"` on dismiss. Pass-2 review returned MERGE-READY. CI: Vercel ✅, wait-for-preview ✅, e2e ✅, ai-judge (customer/provider/admin) ✅, Supabase Preview skipped (no migration).
+- **Previous batch (last session):** **Batch 6.3 — Admin SeasonalBundles CRUD + atomic replace RPC** (PR #46, `d293569`). 8 new files + 3 modified + 1 new migration (`replace_bundle_items` SECURITY DEFINER RPC for atomic delete-insert-recompute). Admin can now create/edit/promote/archive bundles entirely through the UI — no migrations needed for bundle content. Slug auto-derives from name + locks after first save. Zones multi-select with full keyboard a11y. Line items inline CRUD. Live "Savings preview" computed from items + total. Save & Activate flow disabled when 0 items. Collapsible Active/Drafts/Archived sections (Drafts default-open). Medium-tier review with all 4 lanes (Lane 3 included): **2 MUST-FIX + 5 SHOULD-FIX + 3 DROP** (1 false-positive Lane 1 finding dropped). All 7 fixes shipped in `be0a1c7`. **Supabase Preview validated the RPC migration** end-to-end on branch `mglkxltjoeyjdeeqxgmh` — all 8 CI checks ✅.
 - **🎉 Phase 6 ✅ COMPLETE — bundles ARR loop is live end-to-end:**
   1. **6.1** schema (`bundles` + `bundle_items` tables + RLS + Fall Prep strawman seed in draft)
   2. **6.2** customer surfaces (`useBundles`/`useBundle`/`useBookBundle`, BundleDetail page at `/customer/bundles/:slug`, Services-page spotlight, "Choose visit day" picker)
   3. **6.3** admin curation (`SeasonalBundles.tsx` at `/admin/seasonal-bundles`, BundleEditSheet, atomic `replace_bundle_items` RPC)
 - **🟡 Auto-PR(s) pending:** `regen-types.yml` should auto-open `chore/regen-supabase-types` PRs adding typed defs for `bundles` + `bundle_items` + `replace_bundle_items` RPC. The first one was expected after Batch 6.1's merge (`cf08713`) but never appeared — possibly a transient workflow issue. Manual re-trigger may be needed; check Actions tab. Once typed, the `as any` casts in 6.2 + 6.3 hooks can be cleaned up in a small follow-up.
-- **Next substantive work:** **Phase 7 — BYOC / BYOP / referral elevation** per `docs/upcoming/FULL-IMPLEMENTATION-PLAN.md`. **Fresh-session boundary recommended** — Round 64 is closing in (Phases 7–8 left). Phase 7 is 3 batches: post-visit ReceiptSuggestions rotation, dashboard growth card, onboarding "who could you bring?" step + Referrals page restyle. No new schema. Medium review tier each.
+- **Next substantive work:** **Batch 7.2 — Dashboard growth card** with rate limiting (1/wk shown, dismiss persists 14d). Reuses `pickPostVisitGrowthVariant` from 7.1; introduces a localStorage-backed rate-limit primitive. New section below `NextVisitCard` in `src/pages/customer/Dashboard.tsx`. Medium tier, 3 lanes + Lane 4. After 7.2: Batch 7.3 (Onboarding "who could you bring?" step + Referrals page restyle). Then Phase 8 round-close docs sync (8.1 + 8.2).
 - **After Phase 7:** Phase 8 is the round-close docs sync (masterplan, operating-model, feature-list, screen-flows, app-flow-pages-and-roles, design-guidelines) + working-folder archive. Small/Medium tier with fact-checker lane.
 - **Open TODOs** (persist in `docs/upcoming/TODO.md`):
   - **🟡 Pending:** Self-merge the regen-types auto-PR(s) when they appear (or manually re-trigger the workflow).
