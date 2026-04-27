@@ -44,11 +44,24 @@
 - **role:** customer
 - **screen / file:** onboarding wizard + invite-recovery flow (specific screens TBD on real fixture data)
 - **metric:** clarity
-- **score:** customer avgClarity 4.7 (advisory threshold < 5.0)
-- **finding (verbatim):** "Eliminate vague button pairs and clarify single-step forward paths — replace two-button ambiguity ('Continue to Dashboard' vs 'Set up your home'; 'Request New Invite' vs standalone setup) with a single primary action that clearly states the next step. Add supporting text explaining what happens after selection."
+- **score:** customer avgClarity 4.7 → 4.3 (PR #49 lowered the score; advisory threshold < 5.0)
+- **finding (verbatim):** "Eliminate vague button pairs and clarify single-step forward paths — replace two-button ambiguity ('Continue to Dashboard' vs 'Set up your home'; 'Request New Invite' vs standalone setup) with a single primary action that clearly states the next step. Add supporting text explaining what happens after selection." On PR #49 the same theme reappeared as "Replace all vague button labels and jargon with outcome-driven, benefit-focused copy" with concrete rewrites: "Continue to Dashboard" → "Go to my account"; "Set up your home" → "Request a new invite link"; "Confirms which zone serves your home" → "We'll find the best service team in your area."
 - **first seen:** PR #28 (`76846df`)
-- **pr_history:** PR #28 (`76846df`)
-- **notes:** Triaged as queue (not fix-in-batch) because the finding spans the onboarding wizard AND the BYOC invite-recovery flow — multi-surface pattern. Wait until 8+ button-pair instances accumulate, or the finding repeats on 3+ PRs, before cutting a batch. May fold naturally into Phase 5 5.4/5.5 if those batches touch the same screens.
+- **pr_history:** PR #28 (`76846df`) · PR #49 (`e7de1e3`)
+- **notes:** Triaged as queue (not fix-in-batch) because the finding spans the onboarding wizard AND the BYOC invite-recovery flow — multi-surface pattern. Now at 2 of 3 promotion-rule occurrences. Phase 7.3 will modify onboarding (adds the "who could you bring?" step) — strong candidate to bundle this microcopy sweep into 7.3 scope. If 7.3 doesn't absorb it and it appears on a 3rd PR, the §5.9 promotion rule fires and a focused fix batch must run.
+
+### loading-state-copy — 2026-04-27 — Sarah (customer)
+
+- **status:** open
+- **theme:** loading-copy
+- **role:** customer
+- **screen / file:** Customer 01 (`src/pages/customer/Dashboard.tsx`) + Customer 04 (an onboarding screen — exact route TBD on fixture data; likely `OnboardingWizard.tsx` or a step within)
+- **metric:** friction
+- **score:** customer avgFriction 7.4 (advisory threshold > 6.0)
+- **finding (verbatim):** "Add explicit loading states with reassuring messaging across Customer 01 and Customer 04 screens — replace bare 'Loading...' text and skeleton placeholders with animated spinners, contextual messages ('Loading your home dashboard...'), and estimated completion time. Keep all loading states under 2 seconds or skip them entirely by pre-loading content."
+- **first seen:** PR #49 (`e7de1e3`)
+- **pr_history:** PR #49 (`e7de1e3`)
+- **notes:** First occurrence. Batch 7.2 (Dashboard growth card) touches Dashboard.tsx but not its loading skeletons; opportunistic catch is possible if the diff is in the same file. Otherwise wait for accumulation per the 8-entry / 3-PR rule.
 
 ### transition-trust-copy — 2026-04-24 — Sarah (customer) — ✅ FIXED in PR #40 (`d1fa15b`)
 
