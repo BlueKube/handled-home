@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Copy, Check, Users, Gift, Clock, ChevronRight, ChevronLeft, Target, Star, Trophy, AlertTriangle } from "lucide-react";
 import { CustomerEmptyState } from "@/components/customer/CustomerEmptyState";
-import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -155,8 +154,13 @@ export default function CustomerReferrals() {
             return (
               <>
                 <div className="flex flex-col items-center gap-3">
-                  <div className="relative" style={{ width: ringSize, height: ringSize }}>
-                    <svg width={ringSize} height={ringSize} className="-rotate-90">
+                  <div
+                    className="relative"
+                    style={{ width: ringSize, height: ringSize }}
+                    role="img"
+                    aria-label={`${referralCount} of ${current.target} referrals toward ${current.reward}`}
+                  >
+                    <svg width={ringSize} height={ringSize} className="-rotate-90" aria-hidden="true">
                       <circle
                         cx={ringSize / 2}
                         cy={ringSize / 2}
@@ -175,7 +179,7 @@ export default function CustomerReferrals() {
                         className="stroke-accent fill-none transition-[stroke-dashoffset] duration-500"
                       />
                     </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center" aria-hidden="true">
                       <span className="text-xl font-bold leading-none">{referralCount}</span>
                       <span className="text-[10px] text-muted-foreground">of {current.target}</span>
                     </div>
@@ -185,7 +189,6 @@ export default function CustomerReferrals() {
                       ? `${remaining} more referral${remaining !== 1 ? "s" : ""} to unlock: ${current.reward}`
                       : "All milestones unlocked!"}
                   </p>
-                  <Progress value={progress} className="h-2 w-full" />
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   {milestones.map((m) => {

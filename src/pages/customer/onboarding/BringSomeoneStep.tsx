@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Heart, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { CATEGORY_ORDER, CATEGORY_LABELS } from "@/lib/serviceCategories";
 import { useByopRecommendations } from "@/hooks/useByopRecommendation";
 import { stripNonDigits } from "./shared";
@@ -27,10 +28,21 @@ export function BringSomeoneStep({ onComplete }: Props) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [completing, setCompleting] = useState(false);
 
+  const clearError = (key: string) => {
+    setErrors((prev) => {
+      if (!(key in prev)) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
+
   const handleSkip = async () => {
     setCompleting(true);
     try {
       await onComplete();
+    } catch {
+      toast.error("Couldn't save your progress — try again.");
     } finally {
       setCompleting(false);
     }
@@ -51,9 +63,15 @@ export function BringSomeoneStep({ onComplete }: Props) {
         phone: phone.trim() || undefined,
         note: "[from: onboarding]",
       });
+    } catch {
+      // submit.mutateAsync surfaces its own error toast — bail without advancing
+      setCompleting(false);
+      return;
+    }
+    try {
       await onComplete();
     } catch {
-      // Submit mutation surfaces its own error toast
+      toast.error("Recommendation saved, but couldn't advance — try again.");
     } finally {
       setCompleting(false);
     }
@@ -78,7 +96,10 @@ export function BringSomeoneStep({ onComplete }: Props) {
             <Input
               id="bring-name"
               value={providerName}
-              onChange={(e) => setProviderName(e.target.value)}
+              onChange={(e) => {
+                setProviderName(e.target.value);
+                clearError("providerName");
+              }}
               placeholder="e.g., Tomás Rivera"
               autoComplete="off"
             />
@@ -89,7 +110,13 @@ export function BringSomeoneStep({ onComplete }: Props) {
 
           <div className="space-y-1.5">
             <Label htmlFor="bring-category">What do they do?</Label>
-            <Select value={category} onValueChange={setCategory}>
+            <Select
+              value={category}
+              onValueChange={(v) => {
+                setCategory(v);
+                clearError("category");
+              }}
+            >
               <SelectTrigger id="bring-category">
                 <SelectValue placeholder="Pick a service" />
               </SelectTrigger>
