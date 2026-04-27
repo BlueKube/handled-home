@@ -15,6 +15,7 @@ import {
   SubscribeStep,
   ServiceDayStep,
   HomeSetupStep,
+  BringSomeoneStep,
   RoutineStep,
   CompleteStep,
 } from "./onboarding";
@@ -26,6 +27,7 @@ const STEP_LABELS: Record<OnboardingStep, string> = {
   plan: "Plan",
   subscribe: "Pay",
   service_day: "Day",
+  bring_someone: "Friend",
   routine: "Routine",
   complete: "Done",
 };
@@ -197,6 +199,7 @@ export default function OnboardingWizard() {
           />
         )}
         {effectiveStep === "service_day" && <ServiceDayStep onComplete={async () => { await completeStep("service_day"); }} />}
+        {effectiveStep === "bring_someone" && <BringSomeoneStep onComplete={async () => { await completeStep("bring_someone"); }} />}
         {effectiveStep === "routine" && <RoutineStep onComplete={async () => { await completeStep("routine"); }} />}
         {effectiveStep === "complete" && <CompleteStep />}
       </div>

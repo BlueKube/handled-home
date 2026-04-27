@@ -22,7 +22,7 @@ import { HelpTip } from "@/components/ui/help-tip";
 
 type ViewState = "form" | "confirmed";
 
-const ALLOWED_REFERRERS = new Set(["post_visit", "dashboard"]);
+const ALLOWED_REFERRERS = new Set(["post_visit", "dashboard", "onboarding"]);
 
 export default function RecommendProvider() {
   const navigate = useNavigate();

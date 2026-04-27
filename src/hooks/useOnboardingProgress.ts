@@ -10,6 +10,7 @@ export const ONBOARDING_STEPS = [
   "plan",
   "subscribe",
   "service_day",
+  "bring_someone",
   "routine",
   "complete",
 ] as const;
