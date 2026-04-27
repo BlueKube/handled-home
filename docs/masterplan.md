@@ -95,9 +95,9 @@ It allows customers to:
 - set up their home and preferences once
 - see what services are active and what is coming next
 - receive reminders, updates, and proof of completion
-- add services quickly without restarting the process
-- view service history, photos, and records in one place
-- manage an evolving maintenance plan with much less effort
+- add services quickly without restarting the process — including a photo-first **Snap-a-Fix** sheet anchored to a center FAB on the bottom tab bar that classifies the issue with AI in ~5 seconds and routes it either to the next visit or to an urgent dispatch queue
+- view service history, photos, and records in one place via a three-mode VisitDetail (preview / live / complete)
+- manage an evolving maintenance plan with much less effort, with a 4-tab nav (Home / Services / Snap / Visits / Help) and an avatar drawer that consolidates plan, billing, credits, account, and referrals so utility lives one tap away from any screen
 
 ### For providers, the app becomes the operating layer for field work
 It allows providers to:
@@ -254,6 +254,8 @@ Handled Home's customer promise is:
 - Clear proof of work after visits
 - Simple changes when needs shift
 - Easier add-ons when new needs come up
+- **Credits as the unified currency** — every plan grants a cycle credit budget; recurring services consume credits transparently and the customer can top up on demand or autopay-replenish without thinking about per-service prices
+- **Snap-a-Fix as the wedge for the unplanned** — when something breaks unexpectedly, the customer takes a photo, the system classifies it, and the work either folds into the next visit or routes to an urgent dispatch within minutes
 
 ### Emotional value
 - Peace of mind
@@ -390,6 +392,20 @@ Instead of trying to create supply and demand entirely from zero, Handled Home c
 Handled Home should launch with focus, not breadth.
 
 Trying to start with every service in every neighborhood would create complexity before the company has density, standards, or strong operational muscle.
+
+### Round 64 build (2026-04, structural foundation for launch)
+
+Round 64 shipped the launch-ready structural foundation in 7 phases:
+
+1. **Plan variants (Phase 1)** — replaced flat Essential / Plus / Premium with a `plan_family` × `size_tier` matrix (basic / full / premier × 10 / 20 / 30 / 40 = 12 variants). `pick_plan_variant` RPC self-selects the right variant from the customer's home profile.
+2. **Variant rollout in onboarding (Phase 2)** — wizard threads the variant decision into `customer_plan_selections`; admin override flag captured in `customer_onboarding_progress.metadata` for review.
+3. **Credits-currency rebrand (Phase 3)** — UI sweep replaced "$X handles" with "X credits" across every customer touchpoint; introduced credit top-up packs (Starter / Homeowner / Year-round) backed by Stripe products + autopay cron. Internal identifiers preserved.
+4. **Snap-a-Fix (Phase 4)** — photo-first capture sheet, AI classification (Haiku 4.5 with tool-use), and atomic routing RPCs — the wedge that turns one-off home problems into Handled-Home transactions instead of marketplace shopping.
+5. **Customer surface restructure (Phase 5)** — 4-tab BottomTabBar with center Snap FAB, AvatarDrawer for utility links, three-mode VisitDetail, and a 4-category ReportIssueSheet.
+6. **Seasonal bundles (Phase 6)** — `bundles` + `bundle_items` schema with atomic `replace_bundle_items` RPC, customer BundleDetail page with visit-day picker, and an admin curation UI. The ARR loop that turns a Basic-30 customer into a Basic-30 + 2-bundle customer worth ~$2,800/yr.
+7. **Growth surfaces (Phase 7)** — single-source rotation logic surfaces BYOP / referral CTAs at the three peak-trust moments: post-visit (gated on 4★+ review), dashboard (rate-limited to 1/week with 14-day dismiss persistence), and onboarding (skippable "who could you bring?" step).
+
+Plus DX.1 (workflow tooling: `/pre-pr`, migration-chain checks, `/closeout`, types-regen workflow) and UX.1 (trust-copy patterns A/B/C across onboarding + auth + snap + payment surfaces).
 
 ### Launch principles
 - Start with one metro or tightly defined region

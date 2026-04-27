@@ -57,10 +57,11 @@ Handled Home monetizes through the **subscription spread** — the delta between
 ### Revenue streams (priority order)
 
 1. **Subscription spread** — primary margin engine (plan price minus blended provider payout cost)
-2. **Bundle expansion** — near-zero incremental CAC per added service; margin grows with attach rate
-3. **Tier upgrades** — Plus and Premium tiers have higher absolute margins
-4. **Add-on handles** — one-time seasonal/add-on purchases at immediate charge
-5. **Zone pricing multipliers** — high-cost markets command higher customer prices with independent provider payouts
+2. **Bundle expansion** — near-zero incremental CAC per added service; margin grows with attach rate. Round 64 introduced explicit **seasonal bundles** (`bundles` + `bundle_items` schema) that attach to an existing visit day with itemized credit savings — a Basic-30 customer at ~$189/mo becomes a ~$2,800/yr customer once they adopt 2 seasonal bundles per year.
+3. **Tier upgrades** — full and premier families have higher absolute margins than basic; the size-tier dimension (10/20/30/40) lets households self-select usage capacity without forcing tier change.
+4. **Credit top-up packs** — Round 64 Phase 3 introduced three Stripe products: Starter ($149 / 300 credits), Homeowner ($269 / 600 credits, recommended), Year-round ($479 / 1,200 credits). Used both as on-demand top-ups when a customer drains their cycle balance and as Snap-a-Fix payment when no cycle credits remain. Autopay opt-in (`process-credit-pack-autopay` cron, daily 07:00 UTC) keeps habitual top-up customers in flow.
+5. **Snap-a-Fix dispatch fees** — ad-hoc routing of urgent issues with a 1.2× credit-hold premium covering scope drift; partial refund on completion when actual < held.
+6. **Zone pricing multipliers** — high-cost markets command higher customer prices with independent provider payouts.
 
 ---
 
@@ -115,46 +116,30 @@ These items increase the perceived completeness and value of a plan without crea
 
 Plans should feel **outcome-based**, not line-item-based. The customer is buying a level of coverage, not counting individual services.
 
-### Essential
+Round 64 Phase 1 replaced the legacy flat Essential / Plus / Premium SKUs with a two-dimensional `plan_family` × `size_tier` matrix. Family captures coverage breadth; size tier captures usage capacity (credits per cycle). The customer self-selects both via `pick_plan_variant` during onboarding (or the admin-curated variant rules).
 
-Core recurring maintenance for the most common needs.
+### Plan families
 
-Typical inclusions:
-- 1 anchor recurring service (e.g., lawn or pest)
-- plan management and reminders
-- 1–2 low-frequency annual or semiannual services
-- proof-of-work receipts for all visits
+| Family | Positioning | Typical inclusions |
+|---|---|---|
+| **basic** | *"The basics, handled."* | 1 anchor recurring service (lawn or pest), plan management + reminders, 1–2 low-frequency annual/semiannual services, proof-of-work receipts. |
+| **full** | *"More covered, less to think about."* | 2 anchor recurring services, more preventive/seasonal items, stronger annual/semiannual inclusions, easier bundled add-ons at plan pricing. |
+| **premier** | *"Your home, fully handled."* | Multiple recurring services, more annual/semiannual items, higher-touch coordination, priority scheduling/support, the fullest "everything handled" feel. |
 
-Positioning: *"The basics, handled."*
+### Size tiers (credits per billing cycle)
 
-### Plus
+| Size | Credits | Best fit |
+|---|---|---|
+| 10 | 10 / cycle | Light usage / small homes |
+| 20 | 20 / cycle | Average suburban household |
+| 30 | 30 / cycle | Larger property or higher-frequency needs |
+| 40 | 40 / cycle | Premium / multi-zone households |
 
-Broader recurring care for busy households.
-
-Typical inclusions:
-- 2 anchor recurring services
-- more preventive/seasonal items
-- stronger annual/semiannual inclusions
-- easier bundled add-ons at plan pricing
-
-Positioning: *"More covered, less to think about."*
-
-### Premium
-
-A more complete "take it off my plate" plan.
-
-Typical inclusions:
-- multiple recurring services
-- more annual/semiannual items
-- higher-touch coordination
-- priority scheduling/support
-- the fullest feeling of "everything handled"
-
-Positioning: *"Your home, fully handled."*
+12 variants total = 3 families × 4 size tiers. The legacy Essential / Plus / Premium plans remain in the database as `legacy` for grandfathered subscribers but are excluded from the new variant rule form (Phase 1 Batch 1.3 decision).
 
 ### Tier design principle
 
-Higher tiers can include 8–12 items that feel important without every item creating proportionally higher monthly labor cost. The perceived jump in value should exceed the actual jump in fulfillment cost.
+Higher tiers can include 8–12 items that feel important without every item creating proportionally higher monthly labor cost. The perceived jump in value should exceed the actual jump in fulfillment cost. The same principle applies across the size dimension: stepping from 20 → 30 credits adds ~50% capacity but should not add 50% perceived complexity to the customer experience.
 
 ---
 

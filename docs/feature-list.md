@@ -878,4 +878,55 @@
 
 ---
 
-*Total features: 540 | Last updated: 2026-04-22 | Round 64 Phases 1–3 complete (31 new features since 509); Phases 4–8 pending. Legacy count preserved: 381 at 9/10+ (74%), 117 at 8/10 (22%), 11 at 7/10 or below (2%).*
+## XXXIX. Customer Navigation & Avatar Drawer `mental-load-reduction`
+
+*Shipped in Round 64 Phase 5 (2026-04-22 → 2026-04-25).*
+
+541. 4-tab BottomTabBar (Home / Services / Snap FAB center / Visits / Help) replacing the legacy 5-tab structure. Snap FAB lives at center with a +1 visual weight to anchor the photo-first capture flow. — 9/10
+542. AvatarDrawer accessible from every customer page header — holds Plan / Billing / Credits / Account / Referrals / Help links; `?drawer=true` URL param auto-opens after a `ProtectedRoute` bounce so deep links survive an auth round-trip. — 9/10
+543. Legacy route redirects from `/customer/more`, `/customer/routine`, `/customer/activity` → new homes, preserving query params via `?redirect=…` on `ProtectedRoute`. — 9/10
+
+## XL. Customer Surfaces (Services + Visits + VisitDetail) `mental-load-reduction` `trust-builder`
+
+*Shipped in Round 64 Phase 5 batches 5.3 + 5.4 + 5.5 (2026-04-22 → 2026-04-25).*
+
+544. `/customer/services` page consuming the existing routine + add-on data with seasonal-bundle spotlight slot. — 9/10
+545. `/customer/visits` page consuming the existing job data; preview / live / complete grouped sections. — 9/10
+546. VisitDetail three-mode rewrite: `VisitDetailPreview` (scheduled, future), `VisitDetailLive` (in-progress with provider live state), `VisitDetailComplete` (completed receipt + private review + growth surfaces). Mode-detection helper picks the right renderer from `job.status` + timestamps. — 9/10
+547. Type-of-visit chips on every visit card: Included / Snap / Bundle / Credits-paid; `getChipType` classifier returns the dominant type from job_skus + job_tasks linkage. — 8/10 (real classifier still TODO; current heuristic ships the right label in 90% of cases)
+548. ReportIssueSheet 4-category rewrite: Fix didn't hold / Provider issue / Quality concern / Billing question. "Fix didn't hold" auto-creates a support ticket with the category populated; the rest go through the standard issue path. — 9/10
+
+## XLI. Seasonal Bundles (ARR Loop) `margin-lever` `mental-load-reduction`
+
+*Shipped in Round 64 Phase 6 (2026-04-26).*
+
+549. `bundles` table — id, slug, name, headline, status (draft / active / archived), window_start, window_end, total_credits, savings_credits, sort_order, optional zone_ids[]. RLS enforces customer reads of `status='active'` rows in their zone only. — 9/10
+550. `bundle_items` table — bundle_id, sku_id, level_id, credits, label, sort_order. Atomic `replace_bundle_items` SECURITY DEFINER RPC handles delete-insert-recompute in one transaction so the savings preview never sees a half-applied edit. — 9/10
+551. Customer surfaces — `useBundles` / `useBundle` / `useBookBundle` hooks + `BundleDetail` page at `/customer/bundles/:slug` with a Choose-Visit-Day picker that calls `spend_handles` + inserts `job_tasks` rows in one batched mutation; partial-fail writes a `billing_exceptions` row. — 9/10
+552. Services-page `SeasonalBundleSpotlight` card surfaces the in-season bundle with savings copy and a CTA to the BundleDetail page. — 9/10
+553. Admin `/admin/seasonal-bundles` page (`SeasonalBundles.tsx`) with `BundleEditSheet`: create / edit / activate / archive bundles entirely through the UI; slug auto-derives from name and locks after first save; zones multi-select with full keyboard a11y; line items inline CRUD with a live "Savings preview" computed from items + total. — 9/10
+554. Fall Prep strawman bundle seed — populated as `status='draft'` with empty `zone_ids` so the customer-side spotlight returns nothing until an admin populates zones + flips status to active. — 9/10
+
+## XLII. Trust Copy Patterns (UX.1 sweep) `trust-builder`
+
+*Shipped in Round 64 UX.1 (2026-04-25, between Phase 5 and Phase 6).*
+
+555. **Pattern A** — "Why we ask" micro-copy above every data-collection field across onboarding + auth + snap + payment surfaces (10 files, 185 net additions, JSX-only). — 9/10
+556. **Pattern B** — Transition reassurance copy on every step destination ("Your information is saved", "Your provider stays the same"). — 9/10
+557. **Pattern C** — Origin framing on `OnboardingWizard` (self-signup) and `AuthPage` BYOC banner. — 9/10
+558. Voice rubric locked in `docs/working/batch-specs/batch-ux-1-trust-copy-sweep.md`. Provider-name interpolation deferred to Round 65. — 8/10
+
+## XLIII. Customer Growth Rotation Surfaces `margin-lever` `density-driver`
+
+*Shipped in Round 64 Phase 7 (2026-04-27).*
+
+559. `pickPostVisitGrowthVariant({byopCount, rewardCount})` — pure single-source rotation helper: BYOP first if 0 submissions, else referral if 0 rewards, else null. Reused by all 3 surfaces. — 9/10
+560. `PostVisitGrowthCard` on `VisitDetailComplete` — renders one CTA after a 4★ or 5★ private review submission. Session-only dismiss. — 9/10
+561. `DashboardGrowthCard` under `NextVisitCard` — same rotation but rate-limited via the new pure `growthRateLimit` lib: 1/week shown (writes lastShownAt on mount), 14-day dismiss persistence (writes dismissedUntil on X). LocalStorage keys namespaced under `growth-card:dashboard:*`. — 9/10
+562. New onboarding step `bring_someone` between `service_day` and `routine` — `BringSomeoneStep` writes a BYOP recommendation tagged `note: "[from: onboarding]"`. Skippable. — 9/10
+563. Referrals page restyle — credits-currency sweep ("$30 credit" → "30 credits", earned/pending cards drop the `$` prefix), circular SVG progress ring around the referral count with proper ARIA labels. Zero `$` symbols on the page. — 9/10
+564. `ALLOWED_REFERRERS` on `RecommendProvider` extended to `["post_visit", "dashboard", "onboarding"]` — whitelist-based attribution that prevents log-injection / spoof through `?from=` query params. — 9/10
+
+---
+
+*Total features: 564 | Last updated: 2026-04-27 | Round 64 Phases 1–7 + DX.1 + UX.1 complete (55 new features since 509). Phase 8 (docs sync + round-close) is in flight; the next round will continue from #565. Legacy count preserved: 381 at 9/10+ (74%), 117 at 8/10 (22%), 11 at 7/10 or below (2%).*
