@@ -2,6 +2,14 @@
 
 Items that require API keys, backend changes, or design decisions beyond frontend gap closure. These are left for the owner to complete after the automated batch work.
 
+### 2026-04-27 — Sarah's PR #49 findings (Batch 7.1 ai-judge run)
+
+PR #49's Tier 5 ai-judge measured the same 7 avatar-drawer screens that Batch T.4 captured (Customer 01–07) — none of the surfaces 7.1 actually touched (`VisitDetailComplete`, `PostVisitGrowthCard`, `RecommendProvider`). Scores: avgClarity 4.3 / avgTrust 3.5 / avgFriction 7.4 — all advisory-flagged. The findings are real but apply to pre-existing surfaces, not Batch 7.1's scope. Captured here so they're not lost; some will be absorbed by Phase 7.3 (onboarding step + Referrals restyle).
+
+- [ ] **Loading state copy on Customer dashboard + onboarding** — Sarah friction #1: replace bare "Loading…" with contextual messages (e.g., "Loading your home dashboard…"), animated spinners, and ≤ 2 s targets. Affects Customer 01 (dashboard) + Customer 04 (an onboarding screen). Phase 7.2 touches Dashboard so we may catch this opportunistically.
+- [ ] **Outcome-driven microcopy sweep on onboarding CTAs** — Sarah friction #2: "Continue to Dashboard" → "Go to my account"; "Set up your home" → "Request a new invite link"; "Confirms which zone serves your home" → "We'll find the best service team in your area." Phase 7.3 modifies onboarding (adds the "who could you bring?" step) — bundle this microcopy sweep into 7.3 if scope permits, otherwise log as Round 65.
+- [ ] **Provider-name trust banner on BYOC fallback + Customer 02–05** — Sarah friction #3: "Your [Provider Name] relationship stays the same…" — duplicate of the existing "Provider-name interpolation on customer trust copy (Round 65)" TODO entry below. No additional action; cross-reference only.
+
 ### 2026-04-25 — Activate `regen-types.yml` (Batch DX.1 follow-up) — 🟡 SECRET SET, RE-RUN PENDING (post-PR #37 fix)
 
 - [x] **Add `SUPABASE_ACCESS_TOKEN` to GitHub Secrets.** ✅ Done 2026-04-25. The first activation run failed with bare `Process completed with exit code 1` (no readable stderr) — root-caused as the `npm install -g supabase@latest` install pattern. PR #37 (`4e7f58b`) replaces it with `supabase/setup-cli@v1` and adds stderr capture.
