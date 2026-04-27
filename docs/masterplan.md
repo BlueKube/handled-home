@@ -97,7 +97,7 @@ It allows customers to:
 - receive reminders, updates, and proof of completion
 - add services quickly without restarting the process — including a photo-first **Snap-a-Fix** sheet anchored to a center FAB on the bottom tab bar that classifies the issue with AI in ~5 seconds and routes it either to the next visit or to an urgent dispatch queue
 - view service history, photos, and records in one place via a three-mode VisitDetail (preview / live / complete)
-- manage an evolving maintenance plan with much less effort, with a 4-tab nav (Home / Services / Snap / Visits / Help) and an avatar drawer that consolidates plan, billing, credits, account, and referrals so utility lives one tap away from any screen
+- manage an evolving maintenance plan with much less effort, with a 4-tab nav (Home / Services / Visits / Help) anchored by a center Snap FAB and an avatar drawer that consolidates plan, billing, credits, account, and referrals so utility lives one tap away from any screen
 
 ### For providers, the app becomes the operating layer for field work
 It allows providers to:
