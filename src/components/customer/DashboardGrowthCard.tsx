@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,10 +15,15 @@ import { useDashboardGrowth } from "@/hooks/useDashboardGrowth";
 export function DashboardGrowthCard() {
   const navigate = useNavigate();
   const { variant, isLoading, recordShown, dismiss } = useDashboardGrowth();
+  const recordedRef = useRef(false);
 
-  // Mark the card as shown once per mount when it's actually rendering.
+  // Mark the card as shown the first time it's actually visible this
+  // mount. The ref guard prevents duplicate writes when variant flips
+  // identity mid-mount (e.g., a query refetch) — recordShown is
+  // idempotent but extra writes burn localStorage churn for nothing.
   useEffect(() => {
-    if (!isLoading && variant !== null) {
+    if (!isLoading && variant !== null && !recordedRef.current) {
+      recordedRef.current = true;
       recordShown();
     }
   }, [isLoading, variant, recordShown]);

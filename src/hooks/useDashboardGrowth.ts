@@ -40,7 +40,10 @@ interface DashboardGrowthState {
 export function useDashboardGrowth(): DashboardGrowthState {
   const { recommendations } = useByopRecommendations();
   const referralRewards = useReferralRewards();
-  // Bump this to force a re-read of localStorage after a write.
+  // bump() is the only re-render trigger for localStorage writes. Reads
+  // happen during render (not useMemo) so the next pass sees fresh values.
+  // If you ever move readStoredDate into useMemo, you must add the storage
+  // key to the dep array or this contract breaks and stale values stick.
   const [, bump] = useState(0);
 
   const isLoading = recommendations.isLoading || referralRewards.isLoading;
