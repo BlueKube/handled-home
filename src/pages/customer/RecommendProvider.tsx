@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ChevronLeft, Heart, Gift, ArrowRight,
 } from "lucide-react";
@@ -22,8 +22,13 @@ import { HelpTip } from "@/components/ui/help-tip";
 
 type ViewState = "form" | "confirmed";
 
+const ALLOWED_REFERRERS = new Set(["post_visit"]);
+
 export default function RecommendProvider() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const rawReferrer = searchParams.get("from");
+  const referrer = rawReferrer && ALLOWED_REFERRERS.has(rawReferrer) ? rawReferrer : null;
   const { submit } = useByopRecommendations();
 
   const [view, setView] = useState<ViewState>("form");
@@ -44,13 +49,17 @@ export default function RecommendProvider() {
 
   const handleSubmit = () => {
     if (!validate()) return;
+    const trimmedNote = note.trim();
+    const noteWithReferrer = referrer
+      ? `[from: ${referrer}]${trimmedNote ? `\n${trimmedNote}` : ""}`
+      : trimmedNote || undefined;
     submit.mutate(
       {
         provider_name: providerName.trim(),
         category,
         phone: phone.trim() || undefined,
         email: email.trim() || undefined,
-        note: note.trim() || undefined,
+        note: noteWithReferrer || undefined,
       },
       {
         onSuccess: () => setView("confirmed"),
