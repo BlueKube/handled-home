@@ -1,14 +1,16 @@
 name: Playwright E2E (PR)
 
-# Runs Tier 3 (E2E) + optional Tier 5 (AI-as-judge with Sarah persona)
-# against the Vercel Preview URL for each PR. Companion to the manual-only
-# `playwright.yml`, which is retained for full-catalog / deep-audit runs
-# initiated by hand.
+# Runs Tier 3 (Playwright E2E) against the Vercel Preview URL for each PR.
+# Companion to the manual-only `playwright.yml`, retained for full-catalog
+# / deep-audit runs initiated by hand.
 #
-# Budget note: with ANTHROPIC_API_KEY set + 3-role matrix on ui-affecting
-# PRs, a full run costs ~$0.30-$0.50 in Anthropic usage per PR. Remove the
-# ANTHROPIC_API_KEY secret to kill the Tier 5 spend while keeping Tier 3
-# Playwright running for every PR.
+# 2026-04-28: Tier 5 (Sarah ai-judge persona-rubric scoring) retired in
+# favor of agent-driven Chrome DevTools MCP verification per
+# `CLAUDE.md` §12 + `docs/testing-strategy.md` §5.0. The `ai-judge` job
+# below is disabled (`if: false`) but preserved as dead code for easy
+# re-enable. Tier 5 cost: now ~0 in CI; instead burns main-thread agent
+# tokens during the post-push wait window, which were already being
+# spent reasoning about the deploy.
 
 on:
   pull_request:
@@ -273,7 +275,17 @@ jobs:
 
   ai-judge:
     needs: [wait-for-preview, e2e]
-    if: always() && needs.e2e.result == 'success'
+    # ── DISABLED 2026-04-28 — Sarah ai-judge loop retired in favor of
+    # agent-driven Chrome DevTools MCP verification. See:
+    #   - CLAUDE.md §12 "Chrome DevTools MCP — agent-driven runtime verification"
+    #   - docs/testing-strategy.md §5.0 "Tier 5 today (post-2026-04-28)"
+    #   - lessons-learned.md "Sarah ai-judge loop retired in favor of Chrome DevTools MCP"
+    # The job body below is preserved as dead code so re-enabling is a one-line
+    # change (drop the `if: false`) if the agent-driven approach proves
+    # insufficient. Persona prompts + scripts archived under:
+    #   scripts/archive/sarah-loop-2026-04-28/
+    #   e2e/archive/sarah-loop-2026-04-28/
+    if: false
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -413,6 +425,11 @@ jobs:
             test-results/ux-review-coverage-gap-*.json
 
   comment:
+    # Note: `ai-judge` is disabled (`if: false`) as of 2026-04-28 — Sarah
+    # loop retired. `needs: ai-judge` still resolves to a "skipped" result;
+    # the Tier 5 rendering inside this job becomes dead code (no artifacts
+    # to download → graceful "—" fallback). When the dead code is stripped
+    # in a follow-up cleanup PR, this needs: array can drop ai-judge.
     needs: [wait-for-preview, e2e, ai-judge]
     if: always() && github.event.pull_request.draft == false
     runs-on: ubuntu-latest

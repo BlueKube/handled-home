@@ -685,20 +685,11 @@ npm test
 # Vercel preview). Requires test-user credentials + Vercel bypass secret in
 # env; see docs/testing-strategy.md Appendix D for the full secrets list.
 npm run test:e2e
-
-# AI-as-judge audits (Tier 5). Each script reads screenshots from
-# test-results/walkthrough/ and sends them to Claude with a rubric.
-# All three require ANTHROPIC_API_KEY; the :dry variants produce a
-# scaffolded report without billing.
-npm run ux-report          # Sarah-persona UX review across a role's screens
-npm run ux-report:dry
-npm run creative-audit     # Creative-Director flow-level critique
-npm run creative-audit:dry
-npm run growth-report      # Business-model growth audit
-npm run growth-report:dry
 ```
 
-Both `npm run build` and `npx tsc --noEmit` must pass before a batch is considered complete. The AI-audit scripts run automatically per-PR via `.github/workflows/playwright-pr.yml` — invoke them locally only when iterating on rubrics or debugging a specific failing flow.
+Both `npm run build` and `npx tsc --noEmit` must pass before a batch is considered complete.
+
+**Tier 5 (experiential / "is the deployed surface OK?")** is handled by the **Chrome DevTools MCP** (see "Chrome DevTools MCP" subsection below). The agent navigates to the deploy preview URL, screenshots, runs Lighthouse, inspects the console — all interactively per-batch via `mcp__chrome-devtools__*` tools. This replaces the previous Sarah ai-judge / persona-rubric pipeline (`generate-synthetic-ux-report.ts`, `generate-creative-director-audit.ts`, `generate-growth-audit.ts`) — those scripts and persona prompts are archived under `scripts/archive/sarah-loop-2026-04-28/` and `e2e/archive/sarah-loop-2026-04-28/` for recoverable reference.
 
 ### Infrastructure access (from Claude Code)
 
@@ -726,6 +717,28 @@ When the sandbox can't reach a service, escalate to the human for a dashboard ac
 
 CLI is the escape hatch for ops the MCP doesn't expose (multi-file function uploads via `--use-api`, one-off shell piping).
 
+### Chrome DevTools MCP — agent-driven runtime verification
+
+Project-scoped MCP server registered in `.mcp.json` alongside Supabase. Provides browser automation, screenshots, console / network inspection, Lighthouse audits, and memory snapshots via the Chrome DevTools Protocol. Tools prefixed `mcp__chrome-devtools__*` (33 tools total: `take_screenshot`, `evaluate_script`, `lighthouse_audit`, `list_console_messages`, `list_network_requests`, `take_memory_snapshot`, `navigate_page`, `click`, `fill`, `resize_page`, `emulate`, etc.).
+
+**This is the canonical Tier 5 verification mechanism.** Static gates (`tsc`, `npm run build`, `vitest`) catch syntax + unit logic; the 4-lane review catches diff-visible bugs and regressions; CDP MCP catches the rest — does the deploy actually render, are there console errors, does Lighthouse flag accessibility violations, does the user flow work end-to-end against the Vercel preview. The agent uses it during the wait window after pushing a feature PR to verify the surface that PR changed before merging.
+
+**Wired via:** `scripts/start-chrome-devtools-mcp.sh` — wrapper that probes for chromium across cloud-sandbox + system + macOS install paths, then execs `chrome-devtools-mcp@latest` with sandbox-appropriate flags (`--no-sandbox`, `--acceptInsecureCerts`, `--no-performance-crux`, `--isolated`, etc.).
+
+**Per-environment override:** set `CHROME_EXECUTABLE_PATH` to point at a specific chromium binary; that takes precedence over the launcher's path probe.
+
+**One-time setup per fresh sandbox container:** `bash scripts/setup-chrome-devtools-mcp.sh` — verifies chromium is reachable, smoke-tests headless launch against `example.com`, pre-warms the npm package cache. Doesn't INSTALL chromium; assumes Playwright's bundle is present at `/opt/pw-browsers/`.
+
+**Use cases:**
+- **UI batches (anything under `src/pages/`, `src/components/`):** while waiting for Vercel Preview to terminal, navigate to the preview URL and check the changed surface. `take_screenshot` at desktop + mobile viewports, `list_console_messages` (flag any error-level), `lighthouse_audit` (especially accessibility — Tier 5 frontier item from `docs/testing-strategy.md` §5.5).
+- **Edge Function batches:** if the function is invoked from the UI, navigate the preview URL and exercise the flow; check `list_network_requests` for the function call response.
+- **Per-round memory-leak checks:** `take_memory_snapshot` against production (or a long-running preview), compare to the prior round's baseline.
+- **Ad-hoc production debugging:** when production reports an issue, `navigate_page` to the affected route, inspect network/console, surface findings before patching.
+
+**Browser version note:** the cloud sandbox runs Chromium 141 (Playwright bundle). The MCP's `--autoConnect` mode wants Chrome 144+; we don't use it. Standard navigation / screenshot / console / network / Lighthouse / memory snapshot all work on 141.
+
+**Replaces the Sarah ai-judge loop.** The previous Tier 5 pipeline (`scripts/generate-synthetic-ux-report.ts` + 7 persona prompts under `e2e/prompts/personas/` + the `ai-judge` and `comment` jobs in `.github/workflows/playwright-pr.yml` + the `sarah-backlog.md` triage log) ran AI-as-judge in CI on every PR with persona-rubric scoring. That whole stack is archived under `scripts/archive/sarah-loop-2026-04-28/`, `e2e/archive/sarah-loop-2026-04-28/`, and `docs/archive/sarah-loop-2026-04-28/` — recoverable reference, not invoked by CI today. CDP MCP gives the agent direct sensory access to the deployed surface per-batch instead of CI-batched persona scoring; richer, in-session, and zero token cost beyond what the agent already burns reasoning. See `docs/testing-strategy.md` §5 for the Tier 5 protocol update.
+
 ### Credential tiers
 
 Three tiers, matched to risk:
@@ -745,6 +758,7 @@ Three tiers, matched to risk:
 3. Verify Supabase CLI exists at `/usr/local/bin/supabase` — if missing, `npm install -g supabase`.
 4. Read `docs/working/plan.md` → Session Handoff section.
 5. If a tier-3 secret is needed ephemerally (one-time rotation, smoke test), source a scratch file and delete after use. Never add tier-3 secrets to `.claude/settings.local.json`.
+6. **Confirm Chrome DevTools MCP loaded** — run `/mcp` and look for `chrome-devtools` in the server list. If absent on a fresh sandbox container, run `bash scripts/setup-chrome-devtools-mcp.sh` once to verify chromium + pre-warm the npm cache, then restart the session. The `.mcp.json` registration auto-loads otherwise. See "Chrome DevTools MCP — agent-driven runtime verification" above.
 
 ### Slash Commands (`.claude/commands/`)
 

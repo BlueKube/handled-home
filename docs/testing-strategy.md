@@ -217,11 +217,29 @@ New tools ship constantly. Track via:
 
 ## 5. Experiential testing — walking through the app like a human
 
-This is the thing you (the human) do that nothing else in the pipeline does: you open the feature, click through it, and form a judgment — "confusing," "frictionless," "delightful," "I'd drop off here." Most of our Test Plan checkboxes implicitly depend on that judgment.
+> **2026-04-28 pivot:** Tier 5 is now agent-driven via Chrome DevTools MCP, not the Sarah ai-judge CI loop described in §§5.1–5.10 below. **See "Chrome DevTools MCP — agent-driven runtime verification" in `CLAUDE.md` §12 for the canonical Tier 5 protocol.** The §§5.1–5.10 content below is preserved as historical reference for the previous CI-batched persona-rubric pipeline; the scripts and persona prompts that implemented it are archived under `scripts/archive/sarah-loop-2026-04-28/`, `e2e/archive/sarah-loop-2026-04-28/`, and `docs/archive/sarah-loop-2026-04-28/`. The npm scripts `ux-report`, `creative-audit`, `growth-report` and their `:dry` variants have been removed from `package.json`. The `ai-judge` and Tier-5-specific portions of `.github/workflows/playwright-pr.yml` have been removed; Tier 3 (Playwright e2e) still runs autonomously per PR.
 
-LLMs with vision can now do a credible version of this for a meaningful subset of UX questions. Not perfectly. Not for every feature. But enough to make every PR's checklist auditable instead of aspirational.
+### 5.0 Tier 5 today (post-2026-04-28)
 
-### 5.1 The pattern
+**Tier 5 = Chrome DevTools MCP, invoked by the agent during the post-push wait window.** For every UI batch, the agent:
+
+1. Resolves the Vercel preview URL (the existing `playwright-pr.yml` `wait-for-preview` job is unchanged; the URL is also surfaced in the PR's deployment status).
+2. Calls `mcp__chrome-devtools__navigate_page` to the changed surface.
+3. `mcp__chrome-devtools__take_screenshot` at desktop (1280×800) and mobile (375×812) viewports — uses `mcp__chrome-devtools__resize_page` or `emulate` to switch.
+4. `mcp__chrome-devtools__list_console_messages` — flag any `error`-level message.
+5. `mcp__chrome-devtools__lighthouse_audit` (especially accessibility, which we hadn't been auditing systematically).
+6. For interactive flows: `click` / `fill` / `wait_for` to drive the user journey; `take_snapshot` of the rendered DOM at key states.
+7. Reasons against the captured artifacts using whatever persona framing is appropriate for the batch (the agent IS the AI; no separate persona script needed).
+
+**Per-round:** `mcp__chrome-devtools__take_memory_snapshot` against production. Compare to prior round's baseline; surface >20% growth as a finding.
+
+**Why this replaced the Sarah loop:** richer per-batch (the agent can iterate based on what it sees, not just score against a fixed rubric), zero CI infrastructure to maintain, no CI-side Anthropic token spend, in-session, and the Lighthouse audit covers accessibility / performance / SEO that the Sarah loop didn't. The cost is per-session main-thread tokens during the verification — track via `/context` after rounds and see if it accumulates problematically.
+
+**What §§5.1–5.10 below is for:** historical reference. The persona prompts (Sarah-the-busy-mom, etc.) are still in the archive — if a future round wants to revive autonomous CI scoring (e.g. for batches where the agent isn't in a session), the artifacts are recoverable.
+
+---
+
+### 5.1 The pattern (HISTORICAL — Sarah ai-judge CI loop)
 
 Three components:
 
