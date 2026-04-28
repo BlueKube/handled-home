@@ -10,6 +10,10 @@
       "env": {
         "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}"
       }
+    },
+    "chrome-devtools": {
+      "command": "bash",
+      "args": ["scripts/start-chrome-devtools-mcp.sh"]
     }
   }
 }

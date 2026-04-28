@@ -523,6 +523,10 @@ The spread between subscription price and provider payout determines everything.
 _2026-03-29 · Session 1 Market Simulation_
 
 
+#### Sarah ai-judge loop retired in favor of Chrome DevTools MCP (2026-04-28)
+
+The Tier 5 pipeline (`generate-synthetic-ux-report.ts`, `generate-creative-director-audit.ts`, `generate-growth-audit.ts`, 7 persona prompts under `e2e/prompts/personas/`, the `ai-judge` and Tier-5-rendering portions of `.github/workflows/playwright-pr.yml`, and `docs/working/sarah-backlog.md`) retired today. **Replacement:** Chrome DevTools MCP (`mcp__chrome-devtools__*`), now the canonical Tier 5 mechanism per CLAUDE.md §12 + `docs/testing-strategy.md` §5.0. The replacement is agent-driven (per-batch, in-session, agent reasons against captured artifacts directly) rather than CI-batched persona rubric scoring; it adds Lighthouse audits + memory snapshots that the Sarah loop didn't have, removes ~$0.30–0.50/PR Anthropic token spend in CI, and shifts that budget to the agent's main-thread context where it's already being used. **What was kept:** Tier 3 Playwright e2e in CI is unchanged; Vercel Preview resolution is unchanged; the `wait-for-preview`/`e2e`/`comment` jobs still run (with Tier 5 sections stripped from the comment job). **Recoverable archives:** `scripts/archive/sarah-loop-2026-04-28/`, `e2e/archive/sarah-loop-2026-04-28/`, `docs/archive/sarah-loop-2026-04-28/`. **What to watch:** per-session main-thread token cost from CDP MCP usage. Track `/context` after the first few rounds; if it accumulates problematically, consider a hybrid (CDP MCP per-batch + a thinner CI ai-judge for nightly regression sweeps). _2026-04-28 · Tooling consolidation · See PR #(this PR)_
+_Type:_ Workflow · _Impact:_ Eliminates a parallel verification track + per-PR CI spend; consolidates Tier 5 onto a single agent-side mechanism · _Effort:_ Single PR (this one) — additive `.mcp.json` entry + setup scripts + archive moves + doc updates.
 
 ---
 
